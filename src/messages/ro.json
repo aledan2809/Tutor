@@ -1,0 +1,57 @@
+{
+  "common": {
+    "appName": "Tutor",
+    "loading": "Se încarcă...",
+    "error": "A apărut o eroare",
+    "save": "Salvează",
+    "cancel": "Anulează",
+    "delete": "Șterge",
+    "edit": "Editează",
+    "back": "Înapoi",
+    "next": "Următorul",
+    "submit": "Trimite",
+    "search": "Caută",
+    "noResults": "Nu au fost găsite rezultate"
+  },
+  "auth": {
+    "signIn": "Autentificare",
+    "signOut": "Deconectare",
+    "signInTitle": "Autentifică-te în Tutor",
+    "signInDescription": "Accesează platforma ta de învățare adaptivă",
+    "emailLabel": "Adresă de email",
+    "emailPlaceholder": "tu@exemplu.com",
+    "continueWithGoogle": "Continuă cu Google",
+    "continueWithEmail": "Continuă cu Email",
+    "orContinueWith": "Sau continuă cu",
+    "checkEmail": "Verifică-ți email-ul",
+    "checkEmailDescription": "Un link de autentificare a fost trimis pe adresa ta de email.",
+    "magicLinkSent": "Link magic trimis!"
+  },
+  "nav": {
+    "dashboard": "Panou de control",
+    "practice": "Practică",
+    "exams": "Examene",
+    "progress": "Progres",
+    "settings": "Setări",
+    "admin": "Administrare"
+  },
+  "dashboard": {
+    "welcome": "Bine ai revenit, {name}!",
+    "yourDomains": "Domeniile tale",
+    "recentActivity": "Activitate recentă",
+    "quickStart": "Start rapid",
+    "noDomains": "Nu ești înscris în niciun domeniu încă."
+  },
+  "landing": {
+    "hero": "Învățare Adaptivă Bazată pe AI",
+    "subtitle": "Stăpânește orice materie cu trasee de învățare personalizate, repetiție spațiată și sesiuni de practică inteligente.",
+    "getStarted": "Începe acum",
+    "features": "Funcționalități",
+    "adaptiveLearning": "Învățare Adaptivă",
+    "adaptiveDesc": "Repetiția spațiată bazată pe AI se adaptează ritmului tău de învățare.",
+    "examSimulator": "Simulator de Examen",
+    "examDesc": "Practică cu simulări de examen realiste configurate pentru domeniul tău.",
+    "multiDomain": "Multi-Domeniu",
+    "multiDomainDesc": "Învață pe mai multe materii cu urmărire unificată a progresului."
+  }
+}

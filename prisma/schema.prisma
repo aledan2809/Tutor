@@ -1,0 +1,257 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth models (NextAuth) ───
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Core models ───
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  isSuperAdmin  Boolean   @default(false)
+  locale        String    @default("en")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  enrollments   Enrollment[]
+  sessions      Session[]
+  attempts      Attempt[]
+  progress      Progress[]
+  weakAreas     WeakArea[]
+  notifications Notification[]
+  settings      Setting[]
+}
+
+model Domain {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?  @db.Text
+  icon        String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  enrollments     Enrollment[]
+  questions       Question[]
+  contentSources  ContentSource[]
+  examSimulations ExamSimulation[]
+}
+
+enum EnrollmentRole {
+  STUDENT
+  WATCHER
+  INSTRUCTOR
+  ADMIN
+}
+
+model Enrollment {
+  id        String           @id @default(cuid())
+  userId    String
+  domainId  String
+  roles     EnrollmentRole[]
+  isActive  Boolean          @default(true)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, domainId])
+}
+
+enum QuestionSource {
+  MANUAL
+  AI_GENERATED
+}
+
+enum QuestionStatus {
+  DRAFT
+  APPROVED
+  PUBLISHED
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+  EXPERT
+}
+
+model Question {
+  id            String         @id @default(cuid())
+  domainId      String
+  subject       String
+  topic         String
+  difficulty    Difficulty     @default(MEDIUM)
+  content       String         @db.Text
+  correctAnswer String         @db.Text
+  explanation   String?        @db.Text
+  source        QuestionSource @default(MANUAL)
+  status        QuestionStatus @default(DRAFT)
+  examFormat    Json?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  domain   Domain    @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  attempts Attempt[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   @default("practice")
+  domainId  String?
+  subject   String?
+  startedAt DateTime @default(now())
+  endedAt   DateTime?
+  score     Float?
+  metadata  Json?
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attempts Attempt[]
+}
+
+model Attempt {
+  id         String   @id @default(cuid())
+  sessionId  String
+  questionId String
+  userId     String
+  answer     String   @db.Text
+  isCorrect  Boolean
+  timeSpent  Int?
+  createdAt  DateTime @default(now())
+
+  session  Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Progress {
+  id              String   @id @default(cuid())
+  userId          String
+  subject         String
+  topic           String
+  masteryLevel    Float    @default(0)
+  totalAttempts   Int      @default(0)
+  correctAttempts Int      @default(0)
+  lastPracticed   DateTime @default(now())
+  nextReview      DateTime?
+  easeFactor      Float    @default(2.5)
+  interval        Int      @default(1)
+  repetitions     Int      @default(0)
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, subject, topic])
+}
+
+model WeakArea {
+  id         String   @id @default(cuid())
+  userId     String
+  subject    String
+  topic      String
+  errorRate  Float
+  suggestion String?  @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, subject, topic])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ContentSource {
+  id        String   @id @default(cuid())
+  domainId  String
+  name      String
+  type      String
+  url       String?
+  filePath  String?
+  metadata  Json?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+}
+
+model ExamSimulation {
+  id             String   @id @default(cuid())
+  domainId       String
+  name           String
+  description    String?  @db.Text
+  timeLimit      Int?
+  questionCount  Int      @default(20)
+  passingScore   Float    @default(75)
+  format         Json
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  userId    String?
+  key       String
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+}

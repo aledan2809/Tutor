@@ -1,0 +1,57 @@
+{
+  "common": {
+    "appName": "Tutor",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "search": "Search",
+    "noResults": "No results found"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "signInTitle": "Sign in to Tutor",
+    "signInDescription": "Access your adaptive learning platform",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@example.com",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithEmail": "Continue with Email",
+    "orContinueWith": "Or continue with",
+    "checkEmail": "Check your email",
+    "checkEmailDescription": "A sign-in link has been sent to your email address.",
+    "magicLinkSent": "Magic link sent!"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "practice": "Practice",
+    "exams": "Exams",
+    "progress": "Progress",
+    "settings": "Settings",
+    "admin": "Admin"
+  },
+  "dashboard": {
+    "welcome": "Welcome back, {name}!",
+    "yourDomains": "Your Domains",
+    "recentActivity": "Recent Activity",
+    "quickStart": "Quick Start",
+    "noDomains": "You are not enrolled in any domains yet."
+  },
+  "landing": {
+    "hero": "AI-Powered Adaptive Learning",
+    "subtitle": "Master any subject with personalized learning paths, spaced repetition, and intelligent practice sessions.",
+    "getStarted": "Get Started",
+    "features": "Features",
+    "adaptiveLearning": "Adaptive Learning",
+    "adaptiveDesc": "AI-driven spaced repetition adjusts to your learning pace.",
+    "examSimulator": "Exam Simulator",
+    "examDesc": "Practice with realistic exam simulations configured for your domain.",
+    "multiDomain": "Multi-Domain",
+    "multiDomainDesc": "Learn across multiple subjects with unified progress tracking."
+  }
+}
