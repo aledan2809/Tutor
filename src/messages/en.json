@@ -28,7 +28,12 @@
     "magicLinkSent": "Magic link sent!",
     "termsOfService": "Terms of Service",
     "privacyPolicy": "Privacy Policy",
-    "agreePrefix": "By signing in, you agree to our"
+    "agreePrefix": "By signing in, you agree to our",
+    "passwordLabel": "Password",
+    "signInButton": "Sign In",
+    "useMagicLink": "Use magic link instead",
+    "usePassword": "Use password instead",
+    "invalidCredentials": "Invalid email or password"
   },
   "nav": {
     "dashboard": "Dashboard",

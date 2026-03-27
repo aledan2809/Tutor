@@ -28,7 +28,12 @@
     "magicLinkSent": "Link magic trimis!",
     "termsOfService": "Termeni și condiții",
     "privacyPolicy": "Politica de confidențialitate",
-    "agreePrefix": "Prin autentificare, ești de acord cu"
+    "agreePrefix": "Prin autentificare, ești de acord cu",
+    "passwordLabel": "Parola",
+    "signInButton": "Autentificare",
+    "useMagicLink": "Folosește magic link",
+    "usePassword": "Folosește parola",
+    "invalidCredentials": "Email sau parolă incorectă"
   },
   "nav": {
     "dashboard": "Panou de control",
