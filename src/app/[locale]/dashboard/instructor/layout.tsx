@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { InstructorNav } from "@/components/instructor/instructor-nav";
+
+export const metadata: Metadata = {
+  title: "Instructor - Tutor",
+  description:
+    "Instructor dashboard: monitor student progress, manage groups, set goals, and review analytics.",
+};
 
 export default async function InstructorLayout({
   children,

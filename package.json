@@ -26,7 +26,7 @@
     "@tailwindcss/postcss": "^4.1.4",
     "@types/stripe": "^8.0.416",
     "ai-router": "file:../AIRouter",
-    "bcryptjs": "^3.0.2",
+    "bcryptjs": "^3.0.3",
     "csv-parse": "^6.2.1",
     "mammoth": "^1.12.0",
     "next": "15.3.3",

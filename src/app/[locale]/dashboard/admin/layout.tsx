@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AdminNav } from "@/components/admin/admin-nav";
+
+export const metadata: Metadata = {
+  title: "Admin - Tutor",
+  description:
+    "Manage domains, questions, users, and platform settings. Admin control panel for Tutor adaptive learning platform.",
+};
 
 export default async function AdminLayout({
   children,

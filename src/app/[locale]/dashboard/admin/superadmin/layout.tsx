@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { SuperAdminNav } from "@/components/admin/superadmin-nav";
+
+export const metadata: Metadata = {
+  title: "SuperAdmin - Tutor",
+  description:
+    "Platform-wide administration: users, plans, vouchers, revenue, ads, and audit logs.",
+};
 
 export default async function SuperAdminLayout({
   children,

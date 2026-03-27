@@ -4,11 +4,31 @@ import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
+import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
   const t = useTranslations("auth");
+  const router = useRouter();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [emailSent, setEmailSent] = useState(false);
+  const [mode, setMode] = useState<"credentials" | "magic">("credentials");
+
+  const handleCredentialsSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    const res = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+    if (res?.error) {
+      setError(t("invalidCredentials") || "Invalid email or password");
+    } else {
+      router.push("/dashboard");
+    }
+  };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,31 +89,94 @@ export default function SignInPage() {
           <div className="h-px flex-1 bg-gray-700" />
         </div>
 
-        {/* Email Magic Link */}
-        <form onSubmit={handleEmailSignIn}>
-          <label
-            htmlFor="email"
-            className="mb-1.5 block text-sm font-medium text-gray-300"
-          >
-            {t("emailLabel")}
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            title="Enter your email address"
-            required
-            className="mb-4 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
-          >
-            {t("continueWithEmail")}
-          </button>
-        </form>
+        {mode === "credentials" ? (
+          <>
+            {/* Email + Password */}
+            <form onSubmit={handleCredentialsSignIn}>
+              <label
+                htmlFor="email"
+                className="mb-1.5 block text-sm font-medium text-gray-300"
+              >
+                {t("emailLabel")}
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                title="Enter your email address"
+                required
+                className="mb-3 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <label
+                htmlFor="password"
+                className="mb-1.5 block text-sm font-medium text-gray-300"
+              >
+                {t("passwordLabel") || "Password"}
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                title="Enter your password"
+                required
+                className="mb-4 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              {error && (
+                <p className="mb-3 text-sm text-red-400">{error}</p>
+              )}
+              <button
+                type="submit"
+                className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              >
+                {t("signInButton") || "Sign In"}
+              </button>
+            </form>
+            <button
+              onClick={() => setMode("magic")}
+              className="mt-3 w-full text-center text-xs text-gray-500 hover:text-gray-400"
+            >
+              {t("useMagicLink") || "Use magic link instead"}
+            </button>
+          </>
+        ) : (
+          <>
+            {/* Magic Link */}
+            <form onSubmit={handleEmailSignIn}>
+              <label
+                htmlFor="email-magic"
+                className="mb-1.5 block text-sm font-medium text-gray-300"
+              >
+                {t("emailLabel")}
+              </label>
+              <input
+                id="email-magic"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                title="Enter your email address"
+                required
+                className="mb-4 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <button
+                type="submit"
+                className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              >
+                {t("continueWithEmail")}
+              </button>
+            </form>
+            <button
+              onClick={() => setMode("credentials")}
+              className="mt-3 w-full text-center text-xs text-gray-500 hover:text-gray-400"
+            >
+              {t("usePassword") || "Use password instead"}
+            </button>
+          </>
+        )}
 
         <p className="mt-6 text-center text-xs text-gray-500">
           {t("agreePrefix")}{" "}
