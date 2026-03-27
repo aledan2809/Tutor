@@ -56,7 +56,41 @@ model User {
   progress      Progress[]
   weakAreas     WeakArea[]
   notifications Notification[]
+  escalationEvents EscalationEvent[]
+  notificationPreference NotificationPreference?
   settings      Setting[]
+  questions     Question[]
+  gamification  UserGamification[]
+  leaderboards  LeaderboardEntry[]
+  dailyChallengeAttempts DailyChallengeAttempt[]
+  calendars        UserCalendar[]
+  studySessions    StudySession[]
+  examSessions     ExamSession[]
+  examCertificates ExamCertificate[]
+  // Phase 4: Student Dashboard & Learning UX
+  lessonProgress   LessonProgress[]
+  assessments      Assessment[]
+  // Phase 9: Watcher & Instructor relations
+  createdGroups       Group[]              @relation("GroupCreator")
+  groupMemberships    GroupMember[]
+  goalsAsInstructor   InstructorGoal[]     @relation("GoalInstructor")
+  goalsAsStudent      InstructorGoal[]     @relation("GoalStudent")
+  sentMessages        InstructorMessage[]  @relation("MessageSender")
+  receivedMessages    InstructorMessage[]  @relation("MessageRecipient")
+  thresholdsSet       EscalationThreshold[] @relation("ThresholdInstructor")
+  thresholdsFor       EscalationThreshold[] @relation("ThresholdStudent")
+  dashboardAnalytics  DashboardAnalytics[]
+  // Phase 10: Monetization & SuperAdmin
+  subscriptionPlanId  String?
+  subscriptionStatus  String?   // "trialing", "active", "canceled", "past_due"
+  subscriptionEndsAt  DateTime?
+  stripeCustomerId    String?   @unique
+  isBanned            Boolean   @default(false)
+  bannedReason        String?
+  subscriptionPlan    SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
+  vouchersCreated     Voucher[]
+  auditLogs           AdminAuditLog[]  @relation("AuditPerformer")
+  payments            Payment[]
 }
 
 model Domain {
@@ -73,6 +107,25 @@ model Domain {
   questions       Question[]
   contentSources  ContentSource[]
   examSimulations ExamSimulation[]
+  examConfig      ExamConfig?
+  gamification    UserGamification[]
+  leaderboards    LeaderboardEntry[]
+  dailyChallenges DailyChallenge[]
+  levelConfig     LevelConfig[]
+  calendars       UserCalendar[]
+  studySessions   StudySession[]
+  // Phase 4: Student Dashboard & Learning UX
+  lessons         Lesson[]
+  assessments     Assessment[]
+  // Phase 3: Learning Engine
+  progress        Progress[]
+  weakAreas       WeakArea[]
+  // Phase 9: Watcher & Instructor relations
+  groups               Group[]
+  instructorGoals      InstructorGoal[]
+  instructorMessages   InstructorMessage[]
+  escalationThresholds EscalationThreshold[]
+  dashboardAnalytics   DashboardAnalytics[]
 }
 
 enum EnrollmentRole {
@@ -108,11 +161,9 @@ enum QuestionStatus {
   PUBLISHED
 }
 
-enum Difficulty {
-  EASY
-  MEDIUM
-  HARD
-  EXPERT
+enum QuestionType {
+  MULTIPLE_CHOICE
+  OPEN
 }
 
 model Question {
@@ -120,18 +171,48 @@ model Question {
   domainId      String
   subject       String
   topic         String
-  difficulty    Difficulty     @default(MEDIUM)
+  difficulty    Int            @default(3) // 1-5 scale
+  type          QuestionType   @default(MULTIPLE_CHOICE)
   content       String         @db.Text
+  options       Json?          // Array of answer options for multiple choice
   correctAnswer String         @db.Text
   explanation   String?        @db.Text
   source        QuestionSource @default(MANUAL)
   status        QuestionStatus @default(DRAFT)
-  examFormat    Json?
+  createdById   String?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
-  domain   Domain    @relation(fields: [domainId], references: [id], onDelete: Cascade)
-  attempts Attempt[]
+  domain          Domain           @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  createdBy       User?            @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  attempts        Attempt[]
+  tags            Tag[]            @relation("QuestionTags")
+  dailyChallenges DailyChallenge[]
+}
+
+model Tag {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  category  String     @default("general") // domain, subject, topic, custom
+  createdAt DateTime   @default(now())
+
+  questions Question[] @relation("QuestionTags")
+}
+
+model ExamConfig {
+  id              String   @id @default(cuid())
+  domainId        String   @unique
+  questionTypes   Json     // e.g. ["MULTIPLE_CHOICE", "OPEN"]
+  timeLimit       Int?     // minutes
+  questionCount   Int      @default(20)
+  passingScore    Float    @default(75)
+  shuffleQuestions Boolean  @default(true)
+  shuffleOptions  Boolean  @default(true)
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
 }
 
 model Session {
@@ -167,6 +248,7 @@ model Attempt {
 model Progress {
   id              String   @id @default(cuid())
   userId          String
+  domainId        String
   subject         String
   topic           String
   masteryLevel    Float    @default(0)
@@ -179,14 +261,17 @@ model Progress {
   repetitions     Int      @default(0)
   updatedAt       DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, subject, topic])
+  @@unique([userId, domainId, subject, topic])
+  @@index([userId, domainId])
 }
 
 model WeakArea {
   id         String   @id @default(cuid())
   userId     String
+  domainId   String
   subject    String
   topic      String
   errorRate  Float
@@ -194,9 +279,11 @@ model WeakArea {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, subject, topic])
+  @@unique([userId, domainId, subject, topic])
+  @@index([userId, domainId])
 }
 
 model Notification {
@@ -208,6 +295,58 @@ model Notification {
   isRead    Boolean  @default(false)
   metadata  Json?
   createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Escalation models ───
+
+enum EscalationStatus {
+  PENDING
+  ESCALATING
+  COMPLETED
+}
+
+enum EscalationChannel {
+  PUSH
+  WHATSAPP
+  SMS
+  EMAIL
+  CALL
+}
+
+model EscalationEvent {
+  id          String           @id @default(cuid())
+  userId      String
+  sessionId   String?
+  level       Int              // 1-6
+  status      EscalationStatus @default(PENDING)
+  channel     EscalationChannel
+  templateId  String?
+  metadata    Json?
+  sentAt      DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+}
+
+model NotificationPreference {
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  push            Boolean @default(true)
+  whatsapp        Boolean @default(true)
+  sms             Boolean @default(true)
+  email           Boolean @default(true)
+  call            Boolean @default(true)
+  quietHoursStart String  @default("22:00")
+  quietHoursEnd   String  @default("07:00")
+  timezone        String  @default("Europe/Bucharest")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -235,12 +374,56 @@ model ExamSimulation {
   timeLimit      Int?
   questionCount  Int      @default(20)
   passingScore   Float    @default(75)
-  format         Json
+  format         Json     // { questionTypes: { MCQ: 70, OPEN: 30 }, sections: [{ name, weight }] }
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  domain       Domain        @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  examSessions ExamSession[]
+}
+
+// ─── Exam Simulator models ───
+
+model ExamSession {
+  id            String    @id @default(cuid())
+  userId        String
+  domainId      String
+  formatId      String    // Links to ExamSimulation
+  mode          String    @default("PRACTICE") // "PRACTICE" | "REAL"
+  startedAt     DateTime  @default(now())
+  submittedAt   DateTime?
+  timeLimit     Int?      // Snapshot of time limit in minutes at start
+  score         Float?
+  passed        Boolean?
+  status        String    @default("IN_PROGRESS") // "IN_PROGRESS" | "COMPLETED" | "TIMED_OUT"
+  questionIds   Json      // Array of question IDs served
+  answers       Json?     // Array of { questionId, answer }
+  results       Json?     // { correct, incorrect, topics: { [topic]: { correct, total } }, timeTaken }
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  format       ExamSimulation  @relation(fields: [formatId], references: [id], onDelete: Cascade)
+  certificates ExamCertificate[]
+
+  @@index([userId, domainId])
+  @@index([status])
+}
+
+model ExamCertificate {
+  id          String   @id @default(cuid())
+  sessionId   String
+  userId      String
+  domainId    String
+  score       Float
+  generatedAt DateTime @default(now())
+  filePath    String   // e.g. "certificates/{userId}/{domainId}/{sessionId}.pdf"
+
+  session ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, domainId])
 }
 
 model Setting {
@@ -254,4 +437,389 @@ model Setting {
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, key])
+}
+
+// ─── Gamification models ───
+
+model UserGamification {
+  id               String   @id @default(cuid())
+  userId           String
+  domainId         String
+  xp               Int      @default(0)
+  level            String   @default("Cadet")
+  streak           Int      @default(0)
+  longestStreak    Int      @default(0)
+  lastActivityDate DateTime? // Date of last session completion (for streak calc)
+  achievements     Json     @default("[]") // Array of { slug, unlockedAt }
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, domainId])
+}
+
+model LeaderboardEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  domainId  String
+  groupId   String   // Enrollment group or class identifier
+  xp        Int      @default(0)
+  week      Int      // ISO week number
+  year      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, domainId, groupId, week, year])
+}
+
+model DailyChallenge {
+  id         String   @id @default(cuid())
+  domainId   String
+  questionId String
+  date       DateTime @db.Date // One per domain per day
+  createdAt  DateTime @default(now())
+
+  domain   Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  attempts DailyChallengeAttempt[]
+
+  @@unique([domainId, date])
+}
+
+model DailyChallengeAttempt {
+  id               String   @id @default(cuid())
+  dailyChallengeId String
+  userId           String
+  answer           String   @db.Text
+  isCorrect        Boolean
+  xpAwarded        Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  dailyChallenge DailyChallenge @relation(fields: [dailyChallengeId], references: [id], onDelete: Cascade)
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([dailyChallengeId, userId])
+}
+
+model LevelConfig {
+  id       String @id @default(cuid())
+  domainId String
+  name     String // e.g. "Cadet", "Co-pilot", "Captain", "Instructor"
+  minXp    Int
+  rank     Int    // ordering (1=lowest)
+
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@unique([domainId, name])
+  @@unique([domainId, rank])
+}
+
+// ─── Calendar integration models ───
+
+model UserCalendar {
+  id           String   @id @default(cuid())
+  userId       String
+  domainId     String
+  googleId     String
+  accessToken  String   @db.Text
+  refreshToken String   @db.Text
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  studySessions StudySession[]
+
+  @@unique([userId, domainId])
+}
+
+model StudySession {
+  id              String   @id @default(cuid())
+  userCalendarId  String
+  userId          String
+  domainId        String
+  title           String
+  description     String?  @db.Text
+  startTime       DateTime
+  endTime         DateTime
+  googleEventId   String?
+  calendarLink    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  userCalendar UserCalendar @relation(fields: [userCalendarId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domain       Domain       @relation(fields: [domainId], references: [id], onDelete: Cascade)
+}
+
+// ─── Phase 9: Watcher & Instructor Dashboard models ───
+
+model Group {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  domainId    String
+  createdById String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  domain    Domain        @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  createdBy User          @relation("GroupCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  members   GroupMember[]
+
+  @@index([domainId])
+}
+
+model GroupMember {
+  id        String   @id @default(cuid())
+  groupId   String
+  userId    String
+  createdAt DateTime @default(now())
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+}
+
+model InstructorGoal {
+  id          String   @id @default(cuid())
+  instructorId String
+  studentId   String
+  domainId    String
+  title       String
+  description String?  @db.Text
+  targetDate  DateTime?
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  instructor User   @relation("GoalInstructor", fields: [instructorId], references: [id], onDelete: Cascade)
+  student    User   @relation("GoalStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  domain     Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, domainId])
+}
+
+model InstructorMessage {
+  id          String   @id @default(cuid())
+  senderId    String
+  recipientId String
+  domainId    String?
+  channel     String   @default("in_app") // in_app, whatsapp, sms, email
+  subject     String?
+  content     String   @db.Text
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  sender    User    @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient User    @relation("MessageRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  domain    Domain? @relation(fields: [domainId], references: [id], onDelete: SetNull)
+
+  @@index([recipientId, isRead])
+}
+
+model EscalationThreshold {
+  id           String @id @default(cuid())
+  instructorId String
+  studentId    String
+  domainId     String
+  metric       String // streak, score, session_missed
+  operator     String @default("lt") // lt, gt, eq
+  value        Int
+  action       String @default("notify_instructor") // notify_instructor, notify_watcher
+  isActive     Boolean @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  instructor User   @relation("ThresholdInstructor", fields: [instructorId], references: [id], onDelete: Cascade)
+  student    User   @relation("ThresholdStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  domain     Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, domainId])
+}
+
+model DashboardAnalytics {
+  id          String   @id @default(cuid())
+  studentId   String
+  domainId    String
+  metric      String   // progress, weak_areas, predictive_failure
+  value       Json
+  generatedAt DateTime @default(now())
+
+  student User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  domain  Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, domainId, metric])
+}
+
+// ─── Phase 10: SuperAdmin & Monetization models ───
+
+enum PlanInterval {
+  MONTH
+  YEAR
+  ONE_TIME
+}
+
+model SubscriptionPlan {
+  id          String       @id @default(cuid())
+  name        String
+  stripeId    String       @unique
+  price       Int          // Cents (e.g., 999 = $9.99)
+  interval    PlanInterval
+  trialDays   Int?
+  features    Json?        // Array of feature strings
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  users    User[]
+  payments Payment[]
+}
+
+model Voucher {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  discountPercent Int       // 0-100
+  maxUses         Int?      // Null = unlimited
+  usedCount       Int       @default(0)
+  expiresAt       DateTime?
+  createdById     String
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+
+  createdBy User @relation(fields: [createdById], references: [id], onDelete: Cascade)
+}
+
+model AdPlacement {
+  id        String   @id @default(cuid())
+  name      String
+  slot      String   // "homepage_banner", "exam_sidebar", "dashboard_top"
+  imageUrl  String?
+  clickUrl  String?
+  priority  Int      @default(0)
+  isActive  Boolean  @default(true)
+  impressions Int    @default(0)
+  clicks    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdminAuditLog {
+  id             String   @id @default(cuid())
+  action         String   // "IMPERSONATE", "BAN_USER", "UNBAN_USER", "GENERATE_VOUCHER", "ROLE_CHANGE"
+  targetUserId   String?
+  targetType     String?  // "User", "Voucher", "Ad", "Plan"
+  metadata       Json?
+  performedById  String
+  createdAt      DateTime @default(now())
+
+  performedBy User @relation("AuditPerformer", fields: [performedById], references: [id], onDelete: Cascade)
+
+  @@index([performedById])
+  @@index([action, createdAt])
+}
+
+model Payment {
+  id               String   @id @default(cuid())
+  userId           String
+  planId           String?
+  stripeSessionId  String?  @unique
+  stripeInvoiceId  String?
+  amount           Int      // Cents
+  currency         String   @default("usd")
+  status           String   // "pending", "succeeded", "failed", "refunded"
+  type             String   // "subscription", "one_time"
+  metadata         Json?
+  createdAt        DateTime @default(now())
+
+  user User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan SubscriptionPlan? @relation(fields: [planId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+// ─── Phase 11: Escalation Templates ───
+
+model EscalationTemplate {
+  id          String   @id @default(cuid())
+  language    String   @default("ro") // ISO 639-1
+  channel     String   // "whatsapp", "sms", "push", "email"
+  triggerType String   // "missed_session", "low_score", "inactivity", "streak_lost"
+  templateId  String   @unique // Matches escalation config templateId
+  content     String   @db.Text
+  variables   Json?    // Array of variable names: ["userName", "streakDays", ...]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ─── Phase 4: Student Dashboard & Learning UX ───
+
+model Lesson {
+  id          String   @id @default(cuid())
+  domainId    String
+  subject     String
+  topic       String
+  title       String
+  slug        String   @unique
+  content     String   @db.Text // Markdown content
+  summary     String?  @db.Text
+  difficulty  Int      @default(1) // 1-5 scale
+  order       Int      @default(0) // Sort order within topic
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  domain   Domain           @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  progress LessonProgress[]
+
+  @@index([domainId, subject, topic])
+  @@index([isPublished])
+}
+
+model LessonProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  lessonId    String
+  status      String    @default("NOT_STARTED") // NOT_STARTED, IN_PROGRESS, COMPLETED
+  progress    Float     @default(0) // 0-100 percentage
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+}
+
+enum AssessmentLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model Assessment {
+  id        String          @id @default(cuid())
+  userId    String
+  domainId  String
+  score     Int             // Number of correct answers out of total
+  total     Int             @default(10) // Number of questions
+  level     AssessmentLevel @default(BEGINNER)
+  answers   Json?           // Array of { questionId, answer, isCorrect }
+  takenAt   DateTime        @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([userId, domainId])
 }

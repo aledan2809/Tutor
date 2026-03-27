@@ -1,4 +1,5 @@
-import { PrismaClient, EnrollmentRole, Difficulty, QuestionSource, QuestionStatus } from "@prisma/client";
+import { PrismaClient, EnrollmentRole, QuestionSource, QuestionStatus } from "@prisma/client";
+import { AVIATION_QUESTIONS, WIZZAIR_EXAM_FORMATS, ESCALATION_TEMPLATES, DEMO_STUDENTS } from "./aviation-questions";
 
 const prisma = new PrismaClient();
 
@@ -111,7 +112,7 @@ async function main() {
       domainId: aviationDomain.id,
       subject: "Air Law",
       topic: "ICAO Regulations",
-      difficulty: Difficulty.MEDIUM,
+      difficulty: 3,
       content: "What organization is responsible for establishing international standards for civil aviation?",
       correctAnswer: "ICAO (International Civil Aviation Organization)",
       explanation: "ICAO, established in 1944 by the Chicago Convention, is the UN specialized agency responsible for international civil aviation standards and recommended practices.",
@@ -122,7 +123,7 @@ async function main() {
       domainId: aviationDomain.id,
       subject: "Meteorology",
       topic: "Cloud Types",
-      difficulty: Difficulty.EASY,
+      difficulty: 2,
       content: "Which type of cloud is typically associated with thunderstorms?",
       correctAnswer: "Cumulonimbus (Cb)",
       explanation: "Cumulonimbus clouds are massive, towering clouds associated with heavy rain, lightning, and turbulence. They can extend from near the surface to the tropopause.",
@@ -133,7 +134,7 @@ async function main() {
       domainId: aviationDomain.id,
       subject: "Navigation",
       topic: "VOR Navigation",
-      difficulty: Difficulty.HARD,
+      difficulty: 4,
       content: "What is the maximum usable range of a standard VOR at FL350?",
       correctAnswer: "Approximately 200 NM",
       explanation: "VOR range depends on altitude. Using the formula: range (NM) ≈ 1.23 × √(altitude in feet), at FL350 (35,000 ft): 1.23 × √35000 ≈ 230 NM theoretical, ~200 NM practical.",
@@ -144,7 +145,7 @@ async function main() {
       domainId: aviationDomain.id,
       subject: "Aircraft Systems",
       topic: "Hydraulic Systems",
-      difficulty: Difficulty.MEDIUM,
+      difficulty: 3,
       content: "What is the typical hydraulic fluid pressure in a modern commercial aircraft?",
       correctAnswer: "3000 PSI",
       explanation: "Most modern commercial aircraft hydraulic systems operate at 3000 PSI (approximately 207 bar). The A380 uses a higher 5000 PSI system for weight savings.",
@@ -155,7 +156,7 @@ async function main() {
       domainId: aviationDomain.id,
       subject: "Flight Principles",
       topic: "Aerodynamics",
-      difficulty: Difficulty.EASY,
+      difficulty: 2,
       content: "According to Bernoulli's principle, what happens to pressure as airflow velocity increases?",
       correctAnswer: "Pressure decreases",
       explanation: "Bernoulli's principle states that an increase in the speed of a fluid occurs simultaneously with a decrease in static pressure. This is fundamental to understanding lift generation over an airfoil.",
@@ -207,7 +208,121 @@ async function main() {
   });
 
   console.log("Created content source");
-  console.log("Seeding complete!");
+
+  // ─── Phase 11: WizzAir Aviation Content ───
+
+  // Seed aviation questions (250+)
+  console.log("Seeding aviation questions...");
+  const aviationQData = AVIATION_QUESTIONS.map((q) => ({
+    domainId: aviationDomain.id,
+    subject: q.subject,
+    topic: q.topic,
+    difficulty: q.difficulty,
+    type: "MULTIPLE_CHOICE" as const,
+    content: q.content,
+    options: q.options,
+    correctAnswer: q.correctAnswer,
+    explanation: q.explanation,
+    source: QuestionSource.MANUAL,
+    status: QuestionStatus.PUBLISHED,
+    createdById: adminUser.id,
+  }));
+
+  const createdQuestions = await prisma.question.createMany({
+    data: aviationQData,
+    skipDuplicates: true,
+  });
+  console.log(`Created ${createdQuestions.count} aviation questions`);
+
+  // Seed WizzAir exam formats
+  console.log("Seeding WizzAir exam formats...");
+  for (const fmt of WIZZAIR_EXAM_FORMATS) {
+    const exists = await prisma.examSimulation.findFirst({
+      where: { domainId: aviationDomain.id, name: fmt.name },
+    });
+    if (!exists) {
+      await prisma.examSimulation.create({
+        data: {
+          domainId: aviationDomain.id,
+          name: fmt.name,
+          description: fmt.description,
+          timeLimit: fmt.timeLimit,
+          questionCount: fmt.questionCount,
+          passingScore: fmt.passingScore,
+          format: fmt.format,
+        },
+      });
+    }
+  }
+  console.log(`Created ${WIZZAIR_EXAM_FORMATS.length} exam formats`);
+
+  // Seed escalation templates (Romanian)
+  console.log("Seeding escalation templates...");
+  for (const tpl of ESCALATION_TEMPLATES) {
+    const exists = await prisma.escalationTemplate.findUnique({
+      where: { templateId: tpl.templateId },
+    });
+    if (!exists) {
+      await prisma.escalationTemplate.create({ data: tpl });
+    }
+  }
+  console.log(`Created ${ESCALATION_TEMPLATES.length} escalation templates`);
+
+  // Seed demo students
+  console.log("Seeding demo students...");
+  for (const student of DEMO_STUDENTS) {
+    const user = await prisma.user.upsert({
+      where: { email: student.email },
+      update: {},
+      create: {
+        name: student.name,
+        email: student.email,
+        locale: student.locale,
+      },
+    });
+
+    await prisma.enrollment.upsert({
+      where: {
+        userId_domainId: { userId: user.id, domainId: aviationDomain.id },
+      },
+      update: {},
+      create: {
+        userId: user.id,
+        domainId: aviationDomain.id,
+        roles: [EnrollmentRole.STUDENT],
+      },
+    });
+
+    await prisma.userGamification.upsert({
+      where: {
+        userId_domainId: { userId: user.id, domainId: aviationDomain.id },
+      },
+      update: {},
+      create: {
+        userId: user.id,
+        domainId: aviationDomain.id,
+        xp: Math.floor(Math.random() * 2000) + 100,
+        level: "Cadet",
+        streak: Math.floor(Math.random() * 14),
+        longestStreak: Math.floor(Math.random() * 30) + 5,
+        lastActivityDate: new Date(),
+        achievements: [{ slug: "first_session", unlockedAt: new Date().toISOString() }],
+      },
+    });
+  }
+  console.log(`Created ${DEMO_STUDENTS.length} demo students`);
+
+  // Verification
+  const totalQ = await prisma.question.count({ where: { domainId: aviationDomain.id } });
+  const bySubject = await prisma.question.groupBy({
+    by: ["subject"],
+    where: { domainId: aviationDomain.id },
+    _count: true,
+  });
+  console.log(`\nVerification - Total questions: ${totalQ}`);
+  bySubject.forEach((g) => console.log(`  ${g.subject}: ${g._count}`));
+
+  console.log("\nSeeding complete!");
 }
 
 main()

@@ -1,5 +1,12 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Tutor - AI-Powered Adaptive Learning Platform",
+  description:
+    "Master any subject with personalized AI-driven learning paths, spaced repetition, and intelligent practice sessions. Start learning smarter today.",
+};
 
 export default function LandingPage() {
   const t = useTranslations("landing");

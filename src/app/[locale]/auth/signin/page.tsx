@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { Link } from "@/i18n/navigation";
 
 export default function SignInPage() {
   const t = useTranslations("auth");
@@ -93,6 +94,17 @@ export default function SignInPage() {
             {t("continueWithEmail")}
           </button>
         </form>
+
+        <p className="mt-6 text-center text-xs text-gray-500">
+          {t("agreePrefix")}{" "}
+          <Link href="/terms" className="text-blue-400 hover:text-blue-300 underline">
+            {t("termsOfService")}
+          </Link>{" "}
+          &amp;{" "}
+          <Link href="/privacy" className="text-blue-400 hover:text-blue-300 underline">
+            {t("privacyPolicy")}
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ interface SidebarProps {
     email?: string | null;
     image?: string | null;
     isSuperAdmin: boolean;
+    enrollments?: { domainId: string; domainSlug: string; roles: string[] }[];
   };
 }
 
@@ -22,13 +23,37 @@ export function Sidebar({ user }: SidebarProps) {
 
   const navItems = [
     { href: "/dashboard", label: t("dashboard") },
+    { href: "/dashboard/lessons", label: t("lessons") },
     { href: "/dashboard/practice", label: t("practice") },
+    { href: "/dashboard/assessment", label: t("assessment") },
     { href: "/dashboard/exams", label: t("exams") },
     { href: "/dashboard/progress", label: t("progress") },
+    { href: "/dashboard/calendar", label: t("calendar") },
+    { href: "/dashboard/notifications", label: t("notifications") },
     { href: "/dashboard/settings", label: t("settings") },
   ];
 
-  if (user.isSuperAdmin) {
+  const isWatcher =
+    user.isSuperAdmin ||
+    user.enrollments?.some((e) => e.roles.includes("WATCHER"));
+
+  const isInstructor =
+    user.isSuperAdmin ||
+    user.enrollments?.some(
+      (e) => e.roles.includes("INSTRUCTOR") || e.roles.includes("ADMIN")
+    );
+
+  const isAdmin =
+    user.isSuperAdmin ||
+    user.enrollments?.some((e) => e.roles.includes("ADMIN"));
+
+  if (isWatcher) {
+    navItems.push({ href: "/dashboard/watcher", label: t("watcher") });
+  }
+  if (isInstructor) {
+    navItems.push({ href: "/dashboard/instructor", label: t("instructor") });
+  }
+  if (isAdmin) {
     navItems.push({ href: "/dashboard/admin", label: t("admin") });
   }
 
