@@ -15,46 +15,86 @@ interface PlanRow {
   subscriberCount: number;
 }
 
+type FormData = {
+  name: string;
+  price: number;
+  interval: "MONTH" | "YEAR" | "ONE_TIME";
+  trialDays: string;
+  features: string;
+};
+
+const emptyForm: FormData = { name: "", price: 0, interval: "MONTH", trialDays: "", features: "" };
+
 export function PlanManager() {
   const t = useTranslations("admin");
   const [plans, setPlans] = useState<PlanRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({
-    name: "",
-    price: 0,
-    interval: "MONTH" as "MONTH" | "YEAR" | "ONE_TIME",
-    trialDays: "",
-    features: "",
-  });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState<FormData>(emptyForm);
+  const [error, setError] = useState("");
 
   const fetchPlans = async () => {
     setLoading(true);
     const res = await fetch("/api/admin/plans");
-    const data = await res.json();
-    setPlans(data);
+    if (res.ok) {
+      const data = await res.json();
+      setPlans(data);
+    }
     setLoading(false);
   };
 
   useEffect(() => { fetchPlans(); }, []);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const res = await fetch("/api/admin/plans", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: form.name,
-        price: Math.round(form.price * 100), // dollars to cents
-        interval: form.interval,
-        trialDays: form.trialDays ? parseInt(form.trialDays) : null,
-        features: form.features ? form.features.split("\n").filter(Boolean) : [],
-      }),
+  const openCreate = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setError("");
+    setShowForm(true);
+  };
+
+  const openEdit = (plan: PlanRow) => {
+    setEditingId(plan.id);
+    setForm({
+      name: plan.name,
+      price: plan.price,
+      interval: plan.interval as FormData["interval"],
+      trialDays: plan.trialDays?.toString() || "",
+      features: plan.features?.join("\n") || "",
     });
+    setError("");
+    setShowForm(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    const payload = {
+      name: form.name,
+      price: Math.round(form.price * 100),
+      interval: form.interval,
+      trialDays: form.trialDays ? parseInt(form.trialDays) : null,
+      features: form.features ? form.features.split("\n").filter(Boolean) : [],
+    };
+
+    const url = editingId ? `/api/admin/plans/${editingId}` : "/api/admin/plans";
+    const method = editingId ? "PATCH" : "POST";
+
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
     if (res.ok) {
       setShowForm(false);
-      setForm({ name: "", price: 0, interval: "MONTH", trialDays: "", features: "" });
+      setEditingId(null);
+      setForm(emptyForm);
       fetchPlans();
+    } else {
+      const data = await res.json();
+      setError(data.error || "Failed to save plan");
     }
   };
 
@@ -67,20 +107,44 @@ export function PlanManager() {
     fetchPlans();
   };
 
+  const handleDelete = async (plan: PlanRow) => {
+    if (!confirm(`Delete plan "${plan.name}"? This cannot be undone.`)) return;
+
+    const res = await fetch(`/api/admin/plans/${plan.id}`, { method: "DELETE" });
+    if (res.ok) {
+      fetchPlans();
+    } else {
+      const data = await res.json();
+      alert(data.error || "Failed to delete plan");
+    }
+  };
+
+  const cancelForm = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setForm(emptyForm);
+    setError("");
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold text-white">{t("saPlans")}</h2>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
-        >
-          {showForm ? t("cancel") : t("createPlan")}
-        </button>
+        {!showForm && (
+          <button
+            onClick={openCreate}
+            className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
+          >
+            + {t("createPlan")}
+          </button>
+        )}
       </div>
 
       {showForm && (
-        <form onSubmit={handleCreate} className="rounded-lg border border-gray-800 bg-gray-900 p-4 space-y-3">
+        <form onSubmit={handleSubmit} className="rounded-lg border border-gray-800 bg-gray-900 p-4 space-y-3">
+          <h3 className="text-sm font-medium text-gray-300">
+            {editingId ? "Edit Plan" : "Create New Plan"}
+          </h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm text-gray-400 mb-1">{t("planName")}</label>
@@ -98,7 +162,7 @@ export function PlanManager() {
               <input
                 type="number"
                 value={form.price}
-                onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) })}
+                onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
                 min={0}
                 step={0.01}
                 required
@@ -109,7 +173,7 @@ export function PlanManager() {
               <label className="block text-sm text-gray-400 mb-1">{t("planInterval")}</label>
               <select
                 value={form.interval}
-                onChange={(e) => setForm({ ...form, interval: e.target.value as "MONTH" | "YEAR" | "ONE_TIME" })}
+                onChange={(e) => setForm({ ...form, interval: e.target.value as FormData["interval"] })}
                 className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-purple-500 focus:outline-none"
               >
                 <option value="MONTH">Monthly</option>
@@ -139,12 +203,22 @@ export function PlanManager() {
               className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none"
             />
           </div>
-          <button
-            type="submit"
-            className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
-          >
-            {t("createPlan")}
-          </button>
+          {error && <p className="text-sm text-red-400">{error}</p>}
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
+            >
+              {editingId ? "Save Changes" : t("createPlan")}
+            </button>
+            <button
+              type="button"
+              onClick={cancelForm}
+              className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800"
+            >
+              {t("cancel")}
+            </button>
+          </div>
         </form>
       )}
 
@@ -193,6 +267,20 @@ export function PlanManager() {
                   ))}
                 </ul>
               )}
+              <div className="mt-3 flex gap-2 border-t border-gray-800 pt-3">
+                <button
+                  onClick={() => openEdit(plan)}
+                  className="rounded bg-blue-600/20 px-3 py-1 text-xs text-blue-400 hover:bg-blue-600/30"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(plan)}
+                  className="rounded bg-red-600/20 px-3 py-1 text-xs text-red-400 hover:bg-red-600/30"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
           {plans.length === 0 && (
