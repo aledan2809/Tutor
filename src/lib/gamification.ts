@@ -234,7 +234,8 @@ export async function awardXpDirect(
   userId: string,
   domainId: string,
   xpAmount: number,
-  _reason: string
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  reason: string
 ): Promise<{ xpAwarded: number; newXp: number; level: string; levelUp: boolean }> {
   const gam = await getOrCreateGamification(userId, domainId);
   const levels = await getLevelThresholds(domainId);
