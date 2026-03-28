@@ -11,6 +11,7 @@ interface Props {
     description: string | null;
     icon: string | null;
     isActive: boolean;
+    instructorEnabled: boolean;
   };
 }
 
@@ -24,6 +25,7 @@ export function DomainForm({ domain }: Props) {
     description: domain?.description || "",
     icon: domain?.icon || "",
     isActive: domain?.isActive ?? true,
+    instructorEnabled: domain?.instructorEnabled ?? false,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -128,17 +130,35 @@ export function DomainForm({ domain }: Props) {
         />
       </div>
 
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          id="isActive"
-          checked={form.isActive}
-          onChange={(e) => updateField("isActive", e.target.checked)}
-          className="rounded border-gray-700 bg-gray-800"
-        />
-        <label htmlFor="isActive" className="text-sm text-gray-400">
-          Active
-        </label>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="isActive"
+            checked={form.isActive}
+            onChange={(e) => updateField("isActive", e.target.checked)}
+            className="rounded border-gray-700 bg-gray-800"
+          />
+          <label htmlFor="isActive" className="text-sm text-gray-400">
+            Active
+          </label>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="instructorEnabled"
+            checked={form.instructorEnabled}
+            onChange={(e) => updateField("instructorEnabled", e.target.checked)}
+            className="rounded border-gray-700 bg-gray-800"
+          />
+          <label htmlFor="instructorEnabled" className="text-sm text-gray-400">
+            Enable Instructor Mode
+          </label>
+          <span className="text-xs text-gray-600">
+            (allows instructor dashboards and student management for this domain)
+          </span>
+        </div>
       </div>
 
       <div className="flex items-center gap-3">

@@ -3,19 +3,13 @@
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 
-export function InstructorNav() {
-  const t = useTranslations("instructor");
+export function WatcherNav() {
+  const t = useTranslations("watcher");
   const pathname = usePathname();
 
   const links = [
-    { href: "/dashboard/instructor", label: t("overview") },
-    { href: "/dashboard/instructor/students", label: t("students") },
-    { href: "/dashboard/instructor/groups", label: t("groups") },
-    { href: "/dashboard/instructor/goals", label: t("goals") },
-    { href: "/dashboard/instructor/messages", label: t("messages") },
-    { href: "/dashboard/instructor/analytics", label: t("analytics") },
-    { href: "/dashboard/instructor/reports", label: t("reports") },
-    { href: "/dashboard/instructor/settings", label: t("settings") },
+    { href: "/dashboard/watcher", label: t("title") },
+    { href: "/dashboard/watcher/notifications", label: t("notifications") },
   ];
 
   return (
@@ -23,7 +17,7 @@ export function InstructorNav() {
       {links.map((link) => {
         const isActive =
           pathname === link.href ||
-          (link.href !== "/dashboard/instructor" &&
+          (link.href !== "/dashboard/watcher" &&
             pathname.startsWith(link.href));
         return (
           <Link

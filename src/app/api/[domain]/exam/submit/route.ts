@@ -3,7 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { scoreExam } from "@/lib/exam-engine";
 import { generateCertificate } from "@/lib/certificate";
-import { awardSessionCompleteXp } from "@/lib/gamification";
+import { awardExamCompleteXp } from "@/lib/gamification";
 import type { Prisma } from "@prisma/client";
 
 export async function POST(
@@ -105,11 +105,13 @@ export async function POST(
   }
 
   // Award XP for exam completion
-  await awardSessionCompleteXp(
+  const xpResult = await awardExamCompleteXp(
     session.user.id,
     examSession.domainId,
     results.score,
-    results.total
+    results.total,
+    timedOut ? false : results.passed,
+    examSession.mode
   );
 
   return NextResponse.json({
@@ -126,5 +128,12 @@ export async function POST(
     },
     passingScore: examSession.format.passingScore,
     certificateUrl,
+    gamification: {
+      xpAwarded: xpResult.xpAwarded,
+      totalXp: xpResult.newXp,
+      level: xpResult.level,
+      levelUp: xpResult.levelUp,
+      newAchievements: xpResult.newAchievements,
+    },
   });
 }

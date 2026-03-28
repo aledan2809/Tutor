@@ -45,11 +45,30 @@ export function StudentDetail({ studentId }: StudentDetailProps) {
   const [data, setData] = useState<StudentData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  // Study plan / session assignment form
+  const [showAssignSession, setShowAssignSession] = useState(false);
+  const [assignDomainId, setAssignDomainId] = useState("");
+  const [assignType, setAssignType] = useState("practice");
+  const [assignSubject, setAssignSubject] = useState("");
+  const [assigning, setAssigning] = useState(false);
+
+  // Goal form
+  const [showGoalForm, setShowGoalForm] = useState(false);
+  const [goalDomainId, setGoalDomainId] = useState("");
+  const [goalTitle, setGoalTitle] = useState("");
+  const [goalDesc, setGoalDesc] = useState("");
+  const [goalDate, setGoalDate] = useState("");
+  const [savingGoal, setSavingGoal] = useState(false);
+
+  const fetchData = () => {
     fetch(`/api/dashboard/instructor/students/${studentId}`)
       .then((r) => r.json())
       .then(setData)
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [studentId]);
 
   if (loading) {
@@ -195,6 +214,151 @@ export function StudentDetail({ studentId }: StudentDetailProps) {
           )}
         </div>
       ))}
+
+      {/* Study Plan Actions */}
+      <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-white">{t("studyPlan")}</h3>
+          <div className="flex gap-2">
+            <button
+              onClick={() => { setShowAssignSession(!showAssignSession); setShowGoalForm(false); }}
+              className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-800"
+            >
+              {t("assignSession")}
+            </button>
+            <button
+              onClick={() => { setShowGoalForm(!showGoalForm); setShowAssignSession(false); }}
+              className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-800"
+            >
+              {t("setGoal")}
+            </button>
+          </div>
+        </div>
+
+        {/* Assign session form */}
+        {showAssignSession && (
+          <div className="mb-4 rounded-lg bg-gray-800 p-4 space-y-3">
+            <div className="grid grid-cols-3 gap-3">
+              <select
+                value={assignDomainId}
+                onChange={(e) => setAssignDomainId(e.target.value)}
+                className="rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white focus:outline-none"
+              >
+                <option value="">{t("selectDomain")}</option>
+                {student.domains.map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
+              <select
+                value={assignType}
+                onChange={(e) => setAssignType(e.target.value)}
+                className="rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white focus:outline-none"
+              >
+                <option value="practice">Practice</option>
+                <option value="repair">Repair</option>
+                <option value="recovery">Recovery</option>
+                <option value="intensive">Intensive</option>
+                <option value="deep">Deep</option>
+              </select>
+              <input
+                type="text"
+                value={assignSubject}
+                onChange={(e) => setAssignSubject(e.target.value)}
+                placeholder={t("subjectOptional")}
+                className="rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none"
+              />
+            </div>
+            <button
+              onClick={async () => {
+                if (!assignDomainId) return;
+                setAssigning(true);
+                await fetch("/api/dashboard/instructor/sessions", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    studentIds: [studentId],
+                    domainId: assignDomainId,
+                    type: assignType,
+                    subject: assignSubject || undefined,
+                  }),
+                });
+                setAssigning(false);
+                setShowAssignSession(false);
+                setAssignSubject("");
+              }}
+              disabled={assigning || !assignDomainId}
+              className="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {assigning ? t("assigning") : t("assignSession")}
+            </button>
+          </div>
+        )}
+
+        {/* Set goal form */}
+        {showGoalForm && (
+          <div className="mb-4 rounded-lg bg-gray-800 p-4 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <select
+                value={goalDomainId}
+                onChange={(e) => setGoalDomainId(e.target.value)}
+                className="rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white focus:outline-none"
+              >
+                <option value="">{t("selectDomain")}</option>
+                {student.domains.map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
+              <input
+                type="date"
+                value={goalDate}
+                onChange={(e) => setGoalDate(e.target.value)}
+                className="rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white focus:outline-none"
+              />
+            </div>
+            <input
+              type="text"
+              value={goalTitle}
+              onChange={(e) => setGoalTitle(e.target.value)}
+              placeholder={t("goalTitlePlaceholder")}
+              className="w-full rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none"
+            />
+            <textarea
+              value={goalDesc}
+              onChange={(e) => setGoalDesc(e.target.value)}
+              placeholder={t("descriptionOptional")}
+              rows={2}
+              className="w-full rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none resize-none"
+            />
+            <button
+              onClick={async () => {
+                if (!goalDomainId || !goalTitle.trim()) return;
+                setSavingGoal(true);
+                await fetch("/api/dashboard/instructor/goals", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    studentId,
+                    domainId: goalDomainId,
+                    title: goalTitle,
+                    description: goalDesc || undefined,
+                    targetDate: goalDate || undefined,
+                  }),
+                });
+                setSavingGoal(false);
+                setShowGoalForm(false);
+                setGoalTitle("");
+                setGoalDesc("");
+                setGoalDate("");
+                fetchData();
+              }}
+              disabled={savingGoal || !goalDomainId || !goalTitle.trim()}
+              className="rounded bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
+            >
+              {savingGoal ? t("saving") : t("setGoal")}
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Goals */}
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">

@@ -8,6 +8,7 @@ const updateSchema = z.object({
   description: z.string().optional(),
   icon: z.string().optional(),
   isActive: z.boolean().optional(),
+  instructorEnabled: z.boolean().optional(),
 });
 
 export async function GET(

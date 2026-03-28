@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 
 interface UserRow {
@@ -17,6 +17,14 @@ interface UserRow {
   subscriptionPlan: { name: string } | null;
 }
 
+interface DomainOption {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+const ROLES = ["STUDENT", "WATCHER", "INSTRUCTOR", "ADMIN"] as const;
+
 export function UserManagement() {
   const t = useTranslations("admin");
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -30,6 +38,14 @@ export function UserManagement() {
   const [createForm, setCreateForm] = useState({ name: "", email: "", password: "", role: "user" });
   const [createError, setCreateError] = useState("");
 
+  // Enroll modal state
+  const [enrollModal, setEnrollModal] = useState<{ userId: string; userName: string | null } | null>(null);
+  const [domains, setDomains] = useState<DomainOption[]>([]);
+  const [enrollDomainId, setEnrollDomainId] = useState("");
+  const [enrollRoles, setEnrollRoles] = useState<string[]>(["STUDENT"]);
+  const [enrollError, setEnrollError] = useState("");
+  const [enrollLoading, setEnrollLoading] = useState(false);
+
   const fetchUsers = async (p = page, s = search) => {
     setLoading(true);
     const res = await fetch(`/api/admin/users?page=${p}&search=${encodeURIComponent(s)}`);
@@ -37,6 +53,14 @@ export function UserManagement() {
     setUsers(data.users);
     setTotalPages(data.totalPages);
     setLoading(false);
+  };
+
+  const fetchDomains = async () => {
+    const res = await fetch("/api/admin/domains");
+    if (res.ok) {
+      const data = await res.json();
+      setDomains(data.map((d: DomainOption & Record<string, unknown>) => ({ id: d.id, name: d.name, slug: d.slug })));
+    }
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -82,8 +106,67 @@ export function UserManagement() {
     }
   };
 
+  const openEnrollModal = (userId: string, userName: string | null) => {
+    setEnrollModal({ userId, userName });
+    setEnrollDomainId("");
+    setEnrollRoles(["STUDENT"]);
+    setEnrollError("");
+    fetchDomains();
+  };
+
+  const handleEnroll = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!enrollModal || !enrollDomainId) return;
+    setEnrollLoading(true);
+    setEnrollError("");
+
+    const res = await fetch(`/api/admin/users/${enrollModal.userId}/enroll`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ domainId: enrollDomainId, roles: enrollRoles }),
+    });
+
+    if (res.ok) {
+      setEnrollModal(null);
+      fetchUsers();
+    } else {
+      const data = await res.json();
+      setEnrollError(data.error || "Failed to enroll user");
+    }
+    setEnrollLoading(false);
+  };
+
+  const handleUnenroll = async (userId: string, domainName: string, domainSlug: string) => {
+    if (!confirm(`Remove enrollment for ${domainName}?`)) return;
+    // Find domain ID from slug
+    const domain = domains.length > 0
+      ? domains.find(d => d.slug === domainSlug)
+      : null;
+    if (!domain) {
+      // Fetch domains first
+      const res = await fetch("/api/admin/domains");
+      if (res.ok) {
+        const allDomains = await res.json();
+        const found = allDomains.find((d: DomainOption) => d.slug === domainSlug);
+        if (found) {
+          await fetch(`/api/admin/users/${userId}/enroll?domainId=${found.id}`, { method: "DELETE" });
+          fetchUsers();
+        }
+      }
+    } else {
+      await fetch(`/api/admin/users/${userId}/enroll?domainId=${domain.id}`, { method: "DELETE" });
+      fetchUsers();
+    }
+  };
+
+  const toggleEnrollRole = (role: string) => {
+    setEnrollRoles(prev =>
+      prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
+    );
+  };
+
   // Initial load
-  useState(() => { fetchUsers(); });
+  useEffect(() => { fetchUsers(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="space-y-4">
@@ -178,7 +261,7 @@ export function UserManagement() {
               <tr>
                 <th className="px-4 py-3">{t("userName")}</th>
                 <th className="px-4 py-3">{t("userEmail")}</th>
-                <th className="px-4 py-3">{t("userRoles")}</th>
+                <th className="px-4 py-3">Domains & Roles</th>
                 <th className="px-4 py-3">{t("userSubscription")}</th>
                 <th className="px-4 py-3">{t("userStatus")}</th>
                 <th className="px-4 py-3">{t("userActions")}</th>
@@ -197,11 +280,27 @@ export function UserManagement() {
                   </td>
                   <td className="px-4 py-3 text-gray-300">{user.email}</td>
                   <td className="px-4 py-3">
-                    {user.enrollments.map((e, i) => (
-                      <span key={i} className="mr-1 rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-300">
-                        {e.domain.name}: {e.roles.join(", ")}
-                      </span>
-                    ))}
+                    {user.enrollments.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {user.enrollments.map((e, i) => (
+                          <span
+                            key={i}
+                            className="group inline-flex items-center gap-1 rounded bg-blue-600/20 px-2 py-0.5 text-xs text-blue-300"
+                          >
+                            <strong>{e.domain.name}</strong>: {e.roles.join(", ")}
+                            <button
+                              onClick={() => handleUnenroll(user.id, e.domain.name, e.domain.slug)}
+                              className="ml-1 hidden group-hover:inline text-red-400 hover:text-red-300"
+                              title="Remove enrollment"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-gray-600 text-xs">No enrollments</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-gray-300">
                     {user.subscriptionPlan?.name || "Free"}
@@ -227,7 +326,13 @@ export function UserManagement() {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex gap-1">
+                    <div className="flex flex-wrap gap-1">
+                      <button
+                        onClick={() => openEnrollModal(user.id, user.name)}
+                        className="rounded bg-blue-600/20 px-2 py-1 text-xs text-blue-400 hover:bg-blue-600/30"
+                      >
+                        Enroll
+                      </button>
                       {user.isBanned ? (
                         <button
                           onClick={() => handleBan(user.id, false)}
@@ -280,6 +385,7 @@ export function UserManagement() {
         </div>
       )}
 
+      {/* Ban Modal */}
       {banModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md rounded-lg bg-gray-900 p-6 border border-gray-700">
@@ -307,6 +413,81 @@ export function UserManagement() {
                 Confirm Ban
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Enroll Modal */}
+      {enrollModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg bg-gray-900 p-6 border border-gray-700">
+            <h3 className="text-lg font-semibold text-white">
+              Enroll {enrollModal.userName || "User"} in Domain
+            </h3>
+
+            <form onSubmit={handleEnroll} className="mt-4 space-y-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Domain</label>
+                {domains.length === 0 ? (
+                  <p className="text-sm text-yellow-400">
+                    No domains created yet. Go to Admin → Domains to create one first.
+                  </p>
+                ) : (
+                  <select
+                    value={enrollDomainId}
+                    onChange={(e) => setEnrollDomainId(e.target.value)}
+                    required
+                    className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="">Select a domain...</option>
+                    {domains.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name} ({d.slug})
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Roles</label>
+                <div className="flex flex-wrap gap-2">
+                  {ROLES.map((role) => (
+                    <button
+                      key={role}
+                      type="button"
+                      onClick={() => toggleEnrollRole(role)}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                        enrollRoles.includes(role)
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-800 text-gray-400 border border-gray-700 hover:border-gray-600"
+                      }`}
+                    >
+                      {role}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {enrollError && <p className="text-sm text-red-400">{enrollError}</p>}
+
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEnrollModal(null)}
+                  className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!enrollDomainId || enrollRoles.length === 0 || enrollLoading}
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {enrollLoading ? "Enrolling..." : "Enroll User"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

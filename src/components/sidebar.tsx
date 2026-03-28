@@ -53,6 +53,7 @@ export function Sidebar({ user }: SidebarProps) {
 
   if (isWatcher) {
     navItems.push({ href: "/dashboard/watcher", label: t("watcher") });
+    navItems.push({ href: "/dashboard/watcher/notifications", label: t("watcherNotifications") });
   }
   if (isInstructor) {
     navItems.push({ href: "/dashboard/instructor", label: t("instructor") });

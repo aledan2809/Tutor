@@ -9,6 +9,9 @@ export const XP_REWARDS = {
   SESSION_COMPLETE: 50,
   PERFECT_SCORE: 100,
   DAILY_CHALLENGE_MULTIPLIER: 2,
+  EXAM_COMPLETE: 75,
+  EXAM_PASS_BONUS: 150,
+  EXAM_ACE_BONUS: 250, // 95%+
 } as const;
 
 const FAST_ANSWER_THRESHOLD_MS = 5000;
@@ -39,6 +42,9 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { slug: "milestone_10", name: "10 Lessons", description: "Complete 10 sessions" },
   { slug: "milestone_50", name: "50 Lessons", description: "Complete 50 sessions" },
   { slug: "milestone_100", name: "100 Lessons", description: "Complete 100 sessions" },
+  { slug: "exam_passed", name: "Certified", description: "Pass a real exam simulation" },
+  { slug: "exam_ace", name: "Exam Ace", description: "Score 95%+ on a real exam" },
+  { slug: "exam_streak_3", name: "Exam Streak", description: "Pass 3 real exams in a row" },
 ];
 
 // ─── Types ───
@@ -218,6 +224,103 @@ export async function awardSessionCompleteXp(
 
   // Exam Ready (90%+ all topics)
   await checkExamReady(userId, domainId, newAchievements);
+
+  return {
+    xpAwarded: xp,
+    newXp,
+    level: newLevel,
+    levelUp: newLevel !== oldLevel,
+    newAchievements,
+  };
+}
+
+// ─── Award XP on exam complete ───
+
+export async function awardExamCompleteXp(
+  userId: string,
+  domainId: string,
+  score: number,
+  totalQuestions: number,
+  passed: boolean,
+  mode: string
+): Promise<XpEventResult> {
+  const gam = await getOrCreateGamification(userId, domainId);
+  const levels = await getLevelThresholds(domainId);
+  const oldLevel = gam.level;
+
+  let xp = XP_REWARDS.EXAM_COMPLETE;
+  if (passed) xp += XP_REWARDS.EXAM_PASS_BONUS;
+  if (score >= 95 && totalQuestions > 0) xp += XP_REWARDS.EXAM_ACE_BONUS;
+  if (score === 100 && totalQuestions > 0) xp += XP_REWARDS.PERFECT_SCORE;
+
+  const newXp = gam.xp + xp;
+  const newLevel = calculateLevel(newXp, levels);
+
+  // Update streak
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let newStreak = gam.streak;
+  let longestStreak = gam.longestStreak;
+
+  if (gam.lastActivityDate) {
+    const lastDate = new Date(gam.lastActivityDate);
+    const lastDay = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
+    const diffDays = Math.floor((today.getTime() - lastDay.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays === 1) newStreak = gam.streak + 1;
+    else if (diffDays > 1) newStreak = 1;
+  } else {
+    newStreak = 1;
+  }
+  if (newStreak > longestStreak) longestStreak = newStreak;
+
+  await prisma.userGamification.update({
+    where: { id: gam.id },
+    data: { xp: newXp, level: newLevel, streak: newStreak, longestStreak, lastActivityDate: now },
+  });
+
+  await updateLeaderboard(userId, domainId, xp);
+
+  const newAchievements: string[] = [];
+
+  // Exam-specific achievements (only for REAL mode)
+  if (mode === "REAL" && passed) {
+    if (await tryUnlockAchievement(userId, domainId, "exam_passed")) {
+      newAchievements.push("exam_passed");
+    }
+
+    if (score >= 95) {
+      if (await tryUnlockAchievement(userId, domainId, "exam_ace")) {
+        newAchievements.push("exam_ace");
+      }
+    }
+
+    // Check exam streak: 3 real exams passed in a row
+    const recentExams = await prisma.examSession.findMany({
+      where: { userId, domainId, mode: "REAL", status: { not: "IN_PROGRESS" } },
+      orderBy: { startedAt: "desc" },
+      take: 3,
+      select: { passed: true },
+    });
+    if (recentExams.length >= 3 && recentExams.every((e) => e.passed)) {
+      if (await tryUnlockAchievement(userId, domainId, "exam_streak_3")) {
+        newAchievements.push("exam_streak_3");
+      }
+    }
+  }
+
+  // Perfect score
+  if (score === 100 && totalQuestions > 0) {
+    if (await tryUnlockAchievement(userId, domainId, "perfect_score")) {
+      newAchievements.push("perfect_score");
+    }
+  }
+
+  // Streak achievements
+  if (newStreak >= 7) {
+    if (await tryUnlockAchievement(userId, domainId, "marathon_7")) {
+      newAchievements.push("marathon_7");
+    }
+  }
 
   return {
     xpAwarded: xp,

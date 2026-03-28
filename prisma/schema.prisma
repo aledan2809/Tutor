@@ -100,9 +100,10 @@ model Domain {
   slug        String   @unique
   description String?  @db.Text
   icon        String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isActive           Boolean  @default(true)
+  instructorEnabled  Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   enrollments     Enrollment[]
   questions       Question[]

@@ -3,6 +3,8 @@
  * Handles quiet hours, timezone awareness, and study pattern detection.
  */
 
+import { prisma } from "@/lib/prisma";
+
 export function isQuietHours(
   timezone: string,
   quietStart: string,
@@ -61,4 +63,95 @@ export function getUserLocalHour(timezone: string): number {
     hour12: false,
   });
   return parseInt(timeStr, 10);
+}
+
+export interface StudyPattern {
+  preferredHours: number[]; // Hours (0-23) when user typically studies
+  avgSessionsPerWeek: number;
+  mostActiveDay: number; // 0=Sunday, 6=Saturday
+  isOptimalTime: boolean; // Whether now is a good time to notify
+}
+
+/**
+ * Detect study patterns from session history.
+ * Analyzes the last 30 days of sessions to find preferred study times.
+ */
+export async function detectStudyPatterns(
+  userId: string,
+  timezone: string
+): Promise<StudyPattern> {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  const sessions = await prisma.session.findMany({
+    where: {
+      userId,
+      startedAt: { gte: thirtyDaysAgo },
+      endedAt: { not: null },
+    },
+    select: { startedAt: true },
+    orderBy: { startedAt: "desc" },
+  });
+
+  // Count sessions by hour and day-of-week in user's timezone
+  const hourCounts = new Array(24).fill(0);
+  const dayCounts = new Array(7).fill(0);
+
+  for (const session of sessions) {
+    const hourStr = session.startedAt.toLocaleTimeString("en-GB", {
+      timeZone: timezone,
+      hour: "2-digit",
+      hour12: false,
+    });
+    const hour = parseInt(hourStr, 10);
+    hourCounts[hour]++;
+
+    const dayStr = session.startedAt.toLocaleDateString("en-US", {
+      timeZone: timezone,
+      weekday: "short",
+    });
+    const dayMap: Record<string, number> = {
+      Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+    };
+    dayCounts[dayMap[dayStr] ?? 0]++;
+  }
+
+  // Find top 3 preferred hours (hours with most sessions)
+  const preferredHours = hourCounts
+    .map((count, hour) => ({ hour, count }))
+    .filter((h) => h.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3)
+    .map((h) => h.hour);
+
+  // Most active day
+  const mostActiveDay = dayCounts.indexOf(Math.max(...dayCounts));
+
+  // Average sessions per week
+  const weeks = Math.max(1, Math.ceil((Date.now() - thirtyDaysAgo.getTime()) / (7 * 24 * 60 * 60 * 1000)));
+  const avgSessionsPerWeek = Math.round((sessions.length / weeks) * 10) / 10;
+
+  // Check if current hour is within ±1 of a preferred study time
+  const currentHour = getUserLocalHour(timezone);
+  const isOptimalTime = preferredHours.some(
+    (h) => Math.abs(h - currentHour) <= 1 || Math.abs(h - currentHour) >= 23
+  );
+
+  return {
+    preferredHours: preferredHours.length > 0 ? preferredHours : [9, 14, 19], // defaults
+    avgSessionsPerWeek,
+    mostActiveDay,
+    isOptimalTime,
+  };
+}
+
+/**
+ * Check if now is a good time to send a notification based on study patterns.
+ * Returns true if the user is likely to be available to study.
+ */
+export async function isOptimalNotificationTime(
+  userId: string,
+  timezone: string
+): Promise<boolean> {
+  const pattern = await detectStudyPatterns(userId, timezone);
+  return pattern.isOptimalTime;
 }
