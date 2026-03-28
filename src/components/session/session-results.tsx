@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { Link } from "@/i18n/navigation";
+import { showGamificationToast } from "@/components/gamification/gamification-toast";
 
 interface GamificationData {
   xpAwarded: number;
@@ -29,6 +31,35 @@ export function SessionResults({
 }: SessionResultsProps) {
   const minutes = Math.floor(duration / 60);
   const seconds = duration % 60;
+
+  // Show visual reward toasts
+  useEffect(() => {
+    if (!gamification) return;
+
+    if (gamification.levelUp) {
+      showGamificationToast({
+        type: "level_up",
+        title: "Level Up!",
+        description: `You reached ${gamification.level}`,
+      });
+    }
+
+    for (const achievement of gamification.newAchievements) {
+      showGamificationToast({
+        type: "achievement",
+        title: "Achievement Unlocked!",
+        description: achievement.replace(/_/g, " "),
+      });
+    }
+
+    if (gamification.xpAwarded > 0 && !gamification.levelUp) {
+      showGamificationToast({
+        type: "xp",
+        title: `+${gamification.xpAwarded} XP`,
+        description: `Total: ${gamification.totalXp.toLocaleString()} XP`,
+      });
+    }
+  }, [gamification]);
 
   const getScoreColor = () => {
     if (score >= 80) return "text-green-400";

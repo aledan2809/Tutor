@@ -11,11 +11,13 @@ export default async function QuestionsPage({
   const status = params.status;
   const domainId = params.domainId;
   const search = params.search;
+  const source = params.source;
   const limit = 20;
 
   const where: Record<string, unknown> = {};
   if (status) where.status = status;
   if (domainId) where.domainId = domainId;
+  if (source) where.source = source;
   if (search) {
     where.OR = [
       { content: { contains: search, mode: "insensitive" } },
@@ -47,7 +49,7 @@ export default async function QuestionsPage({
       total={total}
       page={page}
       limit={limit}
-      filters={{ status, domainId, search }}
+      filters={{ status, domainId, search, source }}
     />
   );
 }

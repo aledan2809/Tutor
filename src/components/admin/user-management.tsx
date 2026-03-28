@@ -26,6 +26,9 @@ export function UserManagement() {
   const [loading, setLoading] = useState(false);
   const [banModal, setBanModal] = useState<{ id: string; name: string | null } | null>(null);
   const [banReason, setBanReason] = useState("");
+  const [showCreate, setShowCreate] = useState(false);
+  const [createForm, setCreateForm] = useState({ name: "", email: "", password: "", role: "user" });
+  const [createError, setCreateError] = useState("");
 
   const fetchUsers = async (p = page, s = search) => {
     setLoading(true);
@@ -61,11 +64,95 @@ export function UserManagement() {
     }
   };
 
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreateError("");
+    const res = await fetch("/api/admin/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(createForm),
+    });
+    if (res.ok) {
+      setShowCreate(false);
+      setCreateForm({ name: "", email: "", password: "", role: "user" });
+      fetchUsers();
+    } else {
+      const data = await res.json();
+      setCreateError(data.error || "Failed to create user");
+    }
+  };
+
   // Initial load
   useState(() => { fetchUsers(); });
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <button
+          onClick={() => setShowCreate(!showCreate)}
+          className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
+        >
+          {showCreate ? "Cancel" : "+ Create User"}
+        </button>
+      </div>
+
+      {showCreate && (
+        <form onSubmit={handleCreateUser} className="rounded-lg border border-gray-800 bg-gray-900 p-4 space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Name</label>
+              <input
+                type="text"
+                value={createForm.name}
+                onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                required
+                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-purple-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Email</label>
+              <input
+                type="email"
+                value={createForm.email}
+                onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                required
+                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-purple-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Password</label>
+              <input
+                type="password"
+                value={createForm.password}
+                onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                required
+                minLength={6}
+                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-purple-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Role</label>
+              <select
+                value={createForm.role}
+                onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}
+                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-purple-500 focus:outline-none"
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+                <option value="superadmin">SuperAdmin</option>
+              </select>
+            </div>
+          </div>
+          {createError && <p className="text-sm text-red-400">{createError}</p>}
+          <button
+            type="submit"
+            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+          >
+            Create User
+          </button>
+        </form>
+      )}
+
       <form onSubmit={handleSearch} className="flex gap-2">
         <input
           type="text"

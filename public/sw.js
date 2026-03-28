@@ -1,5 +1,6 @@
-const CACHE_NAME = "tutor-cache-v2";
-const API_CACHE_NAME = "tutor-api-cache-v1";
+const CACHE_NAME = "tutor-cache-v3";
+const API_CACHE_NAME = "tutor-api-cache-v2";
+const LESSON_CACHE_NAME = "tutor-lessons-cache-v1";
 
 const PRECACHE_URLS = ["/", "/offline"];
 
@@ -9,9 +10,19 @@ const CACHEABLE_API_PATTERNS = [
   /\/api\/student\/domains/,
   /\/api\/student\/lessons/,
   /\/api\/student\/assessment\?/,
+  /\/api\/student\/progress/,
   /\/api\/[^/]+\/progress/,
   /\/api\/[^/]+\/achievements/,
   /\/api\/[^/]+\/streak/,
+  /\/api\/[^/]+\/xp/,
+  /\/api\/[^/]+\/session\/next/,
+  /\/api\/[^/]+\/exam\/history/,
+];
+
+// Patterns for lesson/question content that should be cached more aggressively
+const LESSON_CONTENT_PATTERNS = [
+  /\/api\/student\/lessons\/[^?]+$/,  // Individual lesson detail
+  /\/api\/[^/]+\/daily-challenge/,
 ];
 
 self.addEventListener("install", (event) => {
@@ -22,11 +33,12 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("activate", (event) => {
+  const currentCaches = [CACHE_NAME, API_CACHE_NAME, LESSON_CACHE_NAME];
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((key) => key !== CACHE_NAME && key !== API_CACHE_NAME)
+          .filter((key) => !currentCaches.includes(key))
           .map((key) => caches.delete(key))
       )
     )
@@ -38,28 +50,57 @@ function isCacheableApi(url) {
   return CACHEABLE_API_PATTERNS.some((pattern) => pattern.test(url));
 }
 
+function isLessonContent(url) {
+  return LESSON_CONTENT_PATTERNS.some((pattern) => pattern.test(url));
+}
+
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
   const url = event.request.url;
 
-  // API requests: network-first with cache fallback
+  // API requests
   if (url.includes("/api/")) {
-    if (!isCacheableApi(url)) return;
+    // Lesson content: cache-first with network update (for offline reading)
+    if (isLessonContent(url)) {
+      event.respondWith(
+        caches.open(LESSON_CACHE_NAME).then((cache) =>
+          cache.match(event.request).then((cached) => {
+            const fetchPromise = fetch(event.request)
+              .then((response) => {
+                if (response.ok) {
+                  cache.put(event.request, response.clone());
+                }
+                return response;
+              })
+              .catch(() => cached);
 
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(API_CACHE_NAME).then((cache) => {
-              cache.put(event.request, clone);
-            });
-          }
-          return response;
-        })
-        .catch(() => caches.match(event.request))
-    );
+            return cached || fetchPromise;
+          })
+        )
+      );
+      return;
+    }
+
+    // Other cacheable APIs: network-first with cache fallback
+    if (isCacheableApi(url)) {
+      event.respondWith(
+        fetch(event.request)
+          .then((response) => {
+            if (response.ok) {
+              const clone = response.clone();
+              caches.open(API_CACHE_NAME).then((cache) => {
+                cache.put(event.request, clone);
+              });
+            }
+            return response;
+          })
+          .catch(() => caches.match(event.request))
+      );
+      return;
+    }
+
+    // Non-cacheable API: pass through
     return;
   }
 
@@ -81,4 +122,22 @@ self.addEventListener("fetch", (event) => {
       return cached || fetchPromise;
     })
   );
+});
+
+// Listen for messages from the app to pre-cache lesson content
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "CACHE_LESSONS") {
+    const urls = event.data.urls || [];
+    caches.open(LESSON_CACHE_NAME).then((cache) => {
+      urls.forEach((url) => {
+        fetch(url)
+          .then((response) => {
+            if (response.ok) {
+              cache.put(url, response);
+            }
+          })
+          .catch(() => {});
+      });
+    });
+  }
 });

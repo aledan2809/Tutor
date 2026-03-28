@@ -6,6 +6,8 @@ import { useRouter } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface LessonDetail {
   id: string;
@@ -218,8 +220,33 @@ export default function LessonDetailPage() {
 
       {/* Lesson content (markdown) */}
       {lesson.content && (
-        <div className="prose prose-invert max-w-none rounded-xl border border-gray-800 bg-gray-900 p-6 prose-headings:text-white prose-p:text-gray-300 prose-a:text-blue-400 prose-strong:text-white prose-code:rounded prose-code:bg-gray-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:text-green-400 prose-pre:bg-gray-950 prose-pre:border prose-pre:border-gray-800">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        <div className="prose prose-invert max-w-none rounded-xl border border-gray-800 bg-gray-900 p-6 prose-headings:text-white prose-p:text-gray-300 prose-a:text-blue-400 prose-strong:text-white prose-code:rounded prose-code:bg-gray-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:text-green-400 prose-pre:bg-transparent prose-pre:p-0">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              code({ className, children, ...props }) {
+                const match = /language-(\w+)/.exec(className || "");
+                const inline = !match && !className;
+                if (inline) {
+                  return (
+                    <code className="rounded bg-gray-800 px-1.5 py-0.5 text-sm text-green-400" {...props}>
+                      {children}
+                    </code>
+                  );
+                }
+                return (
+                  <SyntaxHighlighter
+                    style={oneDark}
+                    language={match ? match[1] : "text"}
+                    PreTag="div"
+                    className="rounded-lg !bg-gray-950 text-sm"
+                  >
+                    {String(children).replace(/\n$/, "")}
+                  </SyntaxHighlighter>
+                );
+              },
+            }}
+          >
             {lesson.content}
           </ReactMarkdown>
         </div>

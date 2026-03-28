@@ -42,8 +42,22 @@ export async function POST(req: NextRequest) {
   }
 
   const domain = await prisma.domain.create({
-    data: parsed.data,
-    include: { _count: { select: { questions: true, enrollments: true } } },
+    data: {
+      ...parsed.data,
+      examConfig: {
+        create: {
+          questionTypes: ["MULTIPLE_CHOICE"],
+          questionCount: 20,
+          passingScore: 75,
+          shuffleQuestions: true,
+          shuffleOptions: true,
+        },
+      },
+    },
+    include: {
+      _count: { select: { questions: true, enrollments: true } },
+      examConfig: true,
+    },
   });
 
   return NextResponse.json(domain, { status: 201 });

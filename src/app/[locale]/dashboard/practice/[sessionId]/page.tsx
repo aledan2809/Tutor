@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
+import { Link } from "@/i18n/navigation";
 import { SessionTimer } from "@/components/session/session-timer";
 import { QuestionRenderer } from "@/components/session/question-renderer";
 import { FeedbackDisplay } from "@/components/session/feedback-display";
@@ -50,7 +51,7 @@ interface CompletionResult {
   gamification?: GamificationData | null;
 }
 
-type Phase = "loading" | "answering" | "feedback" | "completed";
+type Phase = "loading" | "answering" | "feedback" | "completed" | "not_found";
 
 export default function ActiveSessionPage() {
   const params = useParams<{ sessionId: string }>();
@@ -63,6 +64,7 @@ export default function ActiveSessionPage() {
   const [feedback, setFeedback] = useState<AnswerResult | null>(null);
   const [results, setResults] = useState<CompletionResult | null>(null);
   const [answeredCount, setAnsweredCount] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
   const questionStartTime = useRef<number>(Date.now());
 
   // Load session from localStorage (saved during start)
@@ -86,12 +88,15 @@ export default function ActiveSessionPage() {
           .catch(() => {});
       }
       setPhase("answering");
+    } else {
+      setPhase("not_found");
     }
   }, [sessionId]);
 
   const handleAnswer = useCallback(
     async (answer: string) => {
-      if (!sessionData) return;
+      if (!sessionData || submitting) return;
+      setSubmitting(true);
       const responseTime = Date.now() - questionStartTime.current;
       const question = sessionData.questions[currentIndex];
 
@@ -112,9 +117,11 @@ export default function ActiveSessionPage() {
         setAnsweredCount((c) => c + 1);
       } catch {
         // Allow retry on error
+      } finally {
+        setSubmitting(false);
       }
     },
-    [sessionData, currentIndex, sessionId, domainSlug]
+    [sessionData, currentIndex, sessionId, domainSlug, submitting]
   );
 
   const completeSession = useCallback(async () => {
@@ -156,6 +163,20 @@ export default function ActiveSessionPage() {
     );
   }
 
+  if (phase === "not_found") {
+    return (
+      <div className="mx-auto max-w-md py-12 text-center">
+        <p className="mb-4 text-gray-400">Session not found or expired.</p>
+        <Link
+          href="/dashboard/practice"
+          className="inline-block rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          Start New Session
+        </Link>
+      </div>
+    );
+  }
+
   if (phase === "completed" && results) {
     return (
       <SessionResults
@@ -194,7 +215,12 @@ export default function ActiveSessionPage() {
 
       {/* Question or Feedback */}
       {phase === "answering" && currentQuestion && (
-        <QuestionRenderer question={currentQuestion} onAnswer={handleAnswer} />
+        <QuestionRenderer
+          key={currentQuestion.id}
+          question={currentQuestion}
+          onAnswer={handleAnswer}
+          disabled={submitting}
+        />
       )}
 
       {phase === "feedback" && feedback && (

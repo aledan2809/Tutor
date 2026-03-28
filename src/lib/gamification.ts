@@ -228,8 +228,160 @@ export async function awardSessionCompleteXp(
   };
 }
 
+// ─── Award XP directly (admin/system) ───
+
+export async function awardXpDirect(
+  userId: string,
+  domainId: string,
+  xpAmount: number,
+  reason: string
+): Promise<{ xpAwarded: number; newXp: number; level: string; levelUp: boolean }> {
+  const gam = await getOrCreateGamification(userId, domainId);
+  const levels = await getLevelThresholds(domainId);
+  const oldLevel = gam.level;
+  const newXp = gam.xp + xpAmount;
+  const newLevel = calculateLevel(newXp, levels);
+
+  await prisma.userGamification.update({
+    where: { id: gam.id },
+    data: { xp: newXp, level: newLevel },
+  });
+
+  await updateLeaderboard(userId, domainId, xpAmount);
+
+  return {
+    xpAwarded: xpAmount,
+    newXp,
+    level: newLevel,
+    levelUp: newLevel !== oldLevel,
+  };
+}
+
 // ─── Streak recovery session ───
 
+// Start a recovery session: returns questions to answer within 2 minutes
+export async function startRecoverySession(
+  userId: string,
+  domainId: string
+): Promise<{
+  canRecover: boolean;
+  questions: { id: string; content: string; type: string; options: unknown; difficulty: number }[];
+  timeLimitMs: number;
+  requiredCorrect: number;
+} | { canRecover: false; reason: string }> {
+  const gam = await getOrCreateGamification(userId, domainId);
+
+  if (!gam.lastActivityDate) {
+    return { canRecover: false, reason: "No previous activity" };
+  }
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const lastDate = new Date(gam.lastActivityDate);
+  const lastDay = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
+  const diffDays = Math.floor((today.getTime() - lastDay.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diffDays <= 1) {
+    return { canRecover: false, reason: "Streak is active, no recovery needed" };
+  }
+  if (diffDays > 3) {
+    return { canRecover: false, reason: "Too many days missed (max 3)" };
+  }
+
+  // Pick 5 random published questions from this domain
+  const questions = await prisma.question.findMany({
+    where: { domainId, status: "PUBLISHED" },
+    select: { id: true, content: true, type: true, options: true, difficulty: true },
+    take: 20,
+  });
+
+  // Shuffle and take 5
+  const shuffled = questions.sort(() => Math.random() - 0.5).slice(0, 5);
+
+  return {
+    canRecover: true,
+    questions: shuffled,
+    timeLimitMs: 120000, // 2 minutes
+    requiredCorrect: 3,  // Need 3/5 correct
+  };
+}
+
+// Complete a recovery session: validate answers and restore streak
+export async function completeRecoverySession(
+  userId: string,
+  domainId: string,
+  answers: { questionId: string; answer: string }[],
+  startedAtMs: number
+): Promise<{ success: boolean; streak: number; correctCount: number; totalCount: number }> {
+  const now = Date.now();
+  const elapsed = now - startedAtMs;
+
+  // Verify time limit (2 minutes + 5s buffer for network)
+  if (elapsed > 125000) {
+    return { success: false, streak: 0, correctCount: 0, totalCount: answers.length };
+  }
+
+  const gam = await getOrCreateGamification(userId, domainId);
+
+  if (!gam.lastActivityDate) {
+    return { success: false, streak: 0, correctCount: 0, totalCount: answers.length };
+  }
+
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const lastDate = new Date(gam.lastActivityDate);
+  const lastDay = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
+  const diffDays = Math.floor((today.getTime() - lastDay.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diffDays <= 1 || diffDays > 3) {
+    return { success: false, streak: gam.streak, correctCount: 0, totalCount: answers.length };
+  }
+
+  // Check answers
+  const questionIds = answers.map((a) => a.questionId);
+  const questions = await prisma.question.findMany({
+    where: { id: { in: questionIds } },
+    select: { id: true, type: true, correctAnswer: true },
+  });
+
+  let correctCount = 0;
+  for (const ans of answers) {
+    const q = questions.find((q) => q.id === ans.questionId);
+    if (!q) continue;
+    if (q.type === "MULTIPLE_CHOICE") {
+      if (ans.answer.trim().toLowerCase() === q.correctAnswer.trim().toLowerCase()) {
+        correctCount++;
+      }
+    } else {
+      const normalize = (s: string) =>
+        s.trim().toLowerCase().replace(/[^\w\s]/g, "").replace(/\s+/g, " ");
+      if (normalize(ans.answer) === normalize(q.correctAnswer)) {
+        correctCount++;
+      }
+    }
+  }
+
+  const requiredCorrect = 3;
+  if (correctCount < requiredCorrect) {
+    return { success: false, streak: 0, correctCount, totalCount: answers.length };
+  }
+
+  // Restore streak (minus 1 per missed day as penalty)
+  const penalty = diffDays - 1;
+  const restoredStreak = Math.max(gam.streak - penalty, 1);
+
+  await prisma.userGamification.update({
+    where: { id: gam.id },
+    data: {
+      streak: restoredStreak,
+      lastActivityDate: new Date(),
+    },
+  });
+
+  return { success: true, streak: restoredStreak, correctCount, totalCount: answers.length };
+}
+
+// Legacy simple recovery (kept for backward compat)
 export async function recoverStreak(
   userId: string,
   domainId: string
@@ -246,12 +398,10 @@ export async function recoverStreak(
   const lastDay = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
   const diffDays = Math.floor((today.getTime() - lastDay.getTime()) / (1000 * 60 * 60 * 24));
 
-  // Only allow recovery if streak decayed (missed 1-3 days)
   if (diffDays <= 1 || diffDays > 3) {
     return { success: false, streak: gam.streak };
   }
 
-  // Restore streak (minus 1 as penalty)
   const restoredStreak = Math.max(gam.streak - 1, 1);
 
   await prisma.userGamification.update({

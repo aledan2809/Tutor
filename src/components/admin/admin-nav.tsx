@@ -9,6 +9,7 @@ const adminLinks = [
   { href: "/dashboard/admin/questions", labelKey: "questions", superAdminOnly: false },
   { href: "/dashboard/admin/questions/review", labelKey: "reviewQueue", superAdminOnly: false },
   { href: "/dashboard/admin/domains", labelKey: "domains", superAdminOnly: false },
+  { href: "/dashboard/admin/tags", labelKey: "tags", superAdminOnly: false },
   { href: "/dashboard/admin/questions/import", labelKey: "import", superAdminOnly: false },
   { href: "/dashboard/admin/questions/generate", labelKey: "aiGenerate", superAdminOnly: false },
   { href: "/dashboard/admin/aviation/exam-formats", labelKey: "aviationExams", superAdminOnly: false },

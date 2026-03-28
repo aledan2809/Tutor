@@ -40,30 +40,38 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  // Create Stripe product + price
-  const stripeProduct = await getStripe().products.create({
-    name: parsed.data.name,
-    metadata: { source: "tutor" },
-  });
+  // Create Stripe product + price if Stripe is configured
+  let stripeId = `local_${Date.now()}`;
+  if (process.env.STRIPE_SECRET_KEY) {
+    try {
+      const stripeProduct = await getStripe().products.create({
+        name: parsed.data.name,
+        metadata: { source: "tutor" },
+      });
 
-  const stripePriceParams: Stripe.PriceCreateParams = {
-    product: stripeProduct.id,
-    currency: "usd",
-    unit_amount: parsed.data.price,
-  };
+      const stripePriceParams: Stripe.PriceCreateParams = {
+        product: stripeProduct.id,
+        currency: "usd",
+        unit_amount: parsed.data.price,
+      };
 
-  if (parsed.data.interval !== "ONE_TIME") {
-    stripePriceParams.recurring = {
-      interval: parsed.data.interval === "MONTH" ? "month" : "year",
-    };
+      if (parsed.data.interval !== "ONE_TIME") {
+        stripePriceParams.recurring = {
+          interval: parsed.data.interval === "MONTH" ? "month" : "year",
+        };
+      }
+
+      const stripePrice = await getStripe().prices.create(stripePriceParams);
+      stripeId = stripePrice.id;
+    } catch {
+      // Stripe not configured — save locally
+    }
   }
-
-  const stripePrice = await getStripe().prices.create(stripePriceParams);
 
   const plan = await prisma.subscriptionPlan.create({
     data: {
       name: parsed.data.name,
-      stripeId: stripePrice.id,
+      stripeId,
       price: parsed.data.price,
       interval: parsed.data.interval,
       trialDays: parsed.data.trialDays ?? null,

@@ -48,7 +48,8 @@
     "assessment": "Evaluare",
     "domains": "Domenii",
     "watcher": "Monitorizare",
-    "instructor": "Instructor"
+    "instructor": "Instructor",
+    "gamification": "Gamificare"
   },
   "dashboard": {
     "welcome": "Bine ai revenit, {name}!",
@@ -63,6 +64,7 @@
     "reviewQueue": "Coadă de revizuire",
     "domains": "Domenii",
     "import": "Import",
+    "tags": "Etichete",
     "aiGenerate": "Generare AI",
     "aviationExams": "Examene Aviație",
     "aviationTemplates": "Șabloane Escaladare",

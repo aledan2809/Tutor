@@ -48,7 +48,8 @@
     "assessment": "Assessment",
     "domains": "Domains",
     "watcher": "Watcher",
-    "instructor": "Instructor"
+    "instructor": "Instructor",
+    "gamification": "Gamification"
   },
   "dashboard": {
     "welcome": "Welcome back, {name}!",
@@ -63,6 +64,7 @@
     "reviewQueue": "Review Queue",
     "domains": "Domains",
     "import": "Import",
+    "tags": "Tags",
     "aiGenerate": "AI Generate",
     "aviationExams": "Aviation Exams",
     "aviationTemplates": "Escalation Templates",
