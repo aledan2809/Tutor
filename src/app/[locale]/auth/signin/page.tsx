@@ -1,13 +1,14 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
   const t = useTranslations("auth");
+  const locale = useLocale();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,7 +27,7 @@ export default function SignInPage() {
     if (res?.error) {
       setError(t("invalidCredentials") || "Invalid email or password");
     } else {
-      router.push("/dashboard");
+      router.push(`/${locale}/dashboard`);
     }
   };
 
@@ -59,7 +60,7 @@ export default function SignInPage() {
 
         {/* Google OAuth */}
         <button
-          onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+          onClick={() => signIn("google", { callbackUrl: `/${locale}/dashboard` })}
           className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-700 transition-colors"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24">
