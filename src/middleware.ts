@@ -15,11 +15,71 @@ function isPublicPath(pathname: string): boolean {
   );
 }
 
+// ─── Rate limiting state (in-memory, edge-compatible) ───
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(ip: string, path: string): { allowed: boolean; remaining: number } {
+  let maxRequests = 60;
+  const windowMs = 60_000;
+
+  if (path.startsWith("/api/auth")) {
+    maxRequests = 5;
+  } else if (path.startsWith("/api/admin/stripe") || path.startsWith("/api/stripe")) {
+    maxRequests = 3;
+  }
+
+  const key = `${ip}:${path.split("/").slice(0, 3).join("/")}`;
+  const now = Date.now();
+  const entry = rateLimitStore.get(key);
+
+  if (!entry || now > entry.resetAt) {
+    rateLimitStore.set(key, { count: 1, resetAt: now + windowMs });
+    return { allowed: true, remaining: maxRequests - 1 };
+  }
+
+  entry.count++;
+  if (entry.count > maxRequests) {
+    return { allowed: false, remaining: 0 };
+  }
+  return { allowed: true, remaining: maxRequests - entry.count };
+}
+
+// Cleanup stale entries periodically (limit map growth)
+if (typeof globalThis !== "undefined") {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, entry] of rateLimitStore) {
+      if (now > entry.resetAt) rateLimitStore.delete(key);
+    }
+  }, 60_000);
+}
+
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip API auth routes entirely
-  if (pathname.startsWith("/api/auth")) {
+  // Rate limiting for API routes
+  if (pathname.startsWith("/api/")) {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const { allowed, remaining } = checkRateLimit(ip, pathname);
+
+    if (!allowed) {
+      return new NextResponse(JSON.stringify({ error: "Too many requests" }), {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          "Retry-After": "60",
+          "X-RateLimit-Remaining": "0",
+        },
+      });
+    }
+
+    // Skip auth routes for intl middleware
+    if (pathname.startsWith("/api/auth")) {
+      const response = NextResponse.next();
+      response.headers.set("X-RateLimit-Remaining", String(remaining));
+      return response;
+    }
+
     return NextResponse.next();
   }
 
@@ -45,5 +105,5 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/(en|ro)/:path*"],
+  matcher: ["/", "/(en|ro)/:path*", "/api/:path*"],
 };

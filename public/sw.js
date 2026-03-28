@@ -1,6 +1,7 @@
-const CACHE_NAME = "tutor-cache-v3";
-const API_CACHE_NAME = "tutor-api-cache-v2";
-const LESSON_CACHE_NAME = "tutor-lessons-cache-v1";
+const CACHE_NAME = "tutor-cache-v4";
+const API_CACHE_NAME = "tutor-api-cache-v3";
+const LESSON_CACHE_NAME = "tutor-lessons-cache-v2";
+const SYNC_QUEUE_NAME = "tutor-sync-queue";
 
 const PRECACHE_URLS = ["/", "/offline"];
 
@@ -54,7 +55,83 @@ function isLessonContent(url) {
   return LESSON_CONTENT_PATTERNS.some((pattern) => pattern.test(url));
 }
 
+// ─── Offline sync queue for POST/PUT requests ───
+const DB_NAME = "tutor-offline-db";
+const DB_VERSION = 1;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains("sync-queue")) {
+        db.createObjectStore("sync-queue", { keyPath: "id", autoIncrement: true });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function queueRequest(url, method, body, headers) {
+  const db = await openDB();
+  const tx = db.transaction("sync-queue", "readwrite");
+  tx.objectStore("sync-queue").add({
+    url,
+    method,
+    body,
+    headers: Object.fromEntries(headers.entries()),
+    timestamp: Date.now(),
+  });
+  return new Promise((resolve) => { tx.oncomplete = resolve; });
+}
+
+async function replayQueue() {
+  const db = await openDB();
+  const tx = db.transaction("sync-queue", "readonly");
+  const store = tx.objectStore("sync-queue");
+  const items = await new Promise((resolve) => {
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result);
+  });
+
+  for (const item of items) {
+    try {
+      await fetch(item.url, {
+        method: item.method,
+        body: item.body,
+        headers: item.headers,
+      });
+      // Remove from queue on success
+      const deleteTx = db.transaction("sync-queue", "readwrite");
+      deleteTx.objectStore("sync-queue").delete(item.id);
+    } catch {
+      // Still offline, stop trying
+      break;
+    }
+  }
+}
+
 self.addEventListener("fetch", (event) => {
+  // Queue failed POST/PUT for offline sync
+  if (event.request.method === "POST" || event.request.method === "PUT") {
+    const url = event.request.url;
+    // Only queue quiz/session submissions
+    if (url.includes("/api/") && (url.includes("/session/") || url.includes("/exam/"))) {
+      event.respondWith(
+        fetch(event.request.clone()).catch(async () => {
+          const body = await event.request.text();
+          await queueRequest(url, event.request.method, body, event.request.headers);
+          return new Response(JSON.stringify({ queued: true, offline: true }), {
+            status: 202,
+            headers: { "Content-Type": "application/json" },
+          });
+        })
+      );
+      return;
+    }
+  }
+
   if (event.request.method !== "GET") return;
 
   const url = event.request.url;
@@ -124,7 +201,7 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
-// Listen for messages from the app to pre-cache lesson content
+// Listen for messages from the app
 self.addEventListener("message", (event) => {
   if (event.data?.type === "CACHE_LESSONS") {
     const urls = event.data.urls || [];
@@ -140,4 +217,13 @@ self.addEventListener("message", (event) => {
       });
     });
   }
+
+  if (event.data?.type === "REPLAY_QUEUE") {
+    replayQueue();
+  }
+});
+
+// Replay queued requests when back online
+self.addEventListener("online", () => {
+  replayQueue();
 });

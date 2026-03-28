@@ -149,6 +149,7 @@ model Enrollment {
   domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
 
   @@unique([userId, domainId])
+  @@index([domainId, isActive])
 }
 
 enum QuestionSource {
@@ -189,6 +190,11 @@ model Question {
   attempts        Attempt[]
   tags            Tag[]            @relation("QuestionTags")
   dailyChallenges DailyChallenge[]
+
+  @@index([domainId, status])
+  @@index([domainId, subject, topic])
+  @@index([domainId, status, type])
+  @@index([domainId, status, difficulty])
 }
 
 model Tag {
@@ -229,6 +235,9 @@ model Session {
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   attempts Attempt[]
+
+  @@index([userId, domainId])
+  @@index([userId, startedAt])
 }
 
 model Attempt {
@@ -244,6 +253,9 @@ model Attempt {
   session  Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([userId, questionId])
 }
 
 model Progress {
@@ -298,6 +310,9 @@ model Notification {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
 }
 
 // ─── Escalation models ───
@@ -459,6 +474,8 @@ model UserGamification {
   domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
 
   @@unique([userId, domainId])
+  @@index([domainId, level])
+  @@index([userId, lastActivityDate])
 }
 
 model LeaderboardEntry {
@@ -476,6 +493,7 @@ model LeaderboardEntry {
   domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
 
   @@unique([userId, domainId, groupId, week, year])
+  @@index([domainId, groupId, week, year])
 }
 
 model DailyChallenge {
