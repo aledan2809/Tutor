@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
+import { withErrorHandling, ApiErrors } from "@/lib/api-error-handler";
 import { z } from "zod";
 
 const updateSchema = z.object({
@@ -15,57 +16,63 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireAdmin();
-  if (error) return error;
+  return withErrorHandling(async () => {
+    const { error } = await requireAdmin();
+    if (error) return error;
 
-  const { id } = await params;
-  const domain = await prisma.domain.findUnique({
-    where: { id },
-    include: {
-      _count: { select: { questions: true, enrollments: true } },
-      examConfig: true,
-    },
+    const { id } = await params;
+    const domain = await prisma.domain.findUnique({
+      where: { id },
+      include: {
+        _count: { select: { questions: true, enrollments: true } },
+        examConfig: true,
+      },
+    });
+
+    if (!domain) {
+      return ApiErrors.notFound();
+    }
+
+    return NextResponse.json(domain);
   });
-
-  if (!domain) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
-
-  return NextResponse.json(domain);
 }
 
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireAdmin();
-  if (error) return error;
+  return withErrorHandling(async () => {
+    const { error } = await requireAdmin();
+    if (error) return error;
 
-  const { id } = await params;
-  const body = await req.json();
-  const parsed = updateSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-  }
+    const { id } = await params;
+    const body = await req.json();
+    const parsed = updateSchema.safeParse(body);
+    if (!parsed.success) {
+      return ApiErrors.badRequest("Invalid request body");
+    }
 
-  const domain = await prisma.domain.update({
-    where: { id },
-    data: parsed.data,
-    include: { _count: { select: { questions: true, enrollments: true } } },
+    const domain = await prisma.domain.update({
+      where: { id },
+      data: parsed.data,
+      include: { _count: { select: { questions: true, enrollments: true } } },
+    });
+
+    return NextResponse.json(domain);
   });
-
-  return NextResponse.json(domain);
 }
 
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireAdmin();
-  if (error) return error;
+  return withErrorHandling(async () => {
+    const { error } = await requireAdmin();
+    if (error) return error;
 
-  const { id } = await params;
-  await prisma.domain.delete({ where: { id } });
+    const { id } = await params;
+    await prisma.domain.delete({ where: { id } });
 
-  return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true });
+  });
 }

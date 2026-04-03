@@ -98,16 +98,24 @@ Last Updated: 2026-03-28
 - [x] Deployed to tutor.knowbest.ro via PM2 on VPS (72.62.155.74)
 
 ## TODO
-- [x] Phase 1: Project scaffold, auth, database, i18n
-- [x] Phase 2: Admin Dashboard & Content Management
-- [x] Phase 3: Learning Engine & Session System
-- [x] Phase 8: Exam Simulator
+- [x] Phase 0-11: All 12 Big Pipeline phases complete
 - [x] Phase 12: Testing, Security, PWA, SEO, CI/CD & Deploy
-- [ ] Remaining phases implementation (4-7, 9-11 per big pipeline)
-- [ ] Configure Resend API key for email magic links
-- [ ] Add Google OAuth redirect URI for production domain
-- [ ] Replace placeholder PWA icons with real ones
-- [ ] Configure Stripe keys for payment integration
+- [x] Credentials auth (email+password login)
+- [x] SuperAdmin user created (alexdanciulescu@gmail.com)
+- [x] Plans CRUD (create/edit/delete/toggle)
+- [x] Users CRUD (create with password, ban/unban, impersonate)
+- [x] Enroll User in Domain with role selection
+- [x] Deploy pe VPS2 tutor.knowbest.ro cu SSL
+- [ ] Google OAuth — lipsesc AUTH_GOOGLE_ID + AUTH_GOOGLE_SECRET in .env VPS
+- [ ] Resend email (magic link) — de configurat
+- [ ] Stripe payments — STRIPE_SECRET_KEY gol in .env VPS
+- [ ] WhatsApp/SMS escalation — credentials neconfigurate
+- [ ] Mobile responsive sidebar (hamburger menu)
+- [ ] i18n incomplete — unele stringuri hardcodate
+- [ ] Error boundaries (error.tsx) lipsesc
+- [ ] Rate limiting pe toate API endpoints
+- [ ] Seed aviation demo data
+- [ ] Replace placeholder PWA icons
 
 ## Recent Changes
 - 2026-03-28: Phase 12 complete - Testing, Security, PWA, SEO, CI/CD & Deploy (103 tests, rate limiting, offline sync, sitemap, GitHub Actions, deployed to tutor.knowbest.ro)
