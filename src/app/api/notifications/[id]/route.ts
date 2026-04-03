@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { withErrorHandler } from "@/lib/api-handler";
 
 /**
  * PATCH /api/notifications/[id] — Mark single notification as read
  */
-export async function PATCH(
+async function _PATCH(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -35,7 +36,7 @@ export async function PATCH(
 /**
  * DELETE /api/notifications/[id] — Delete a notification
  */
-export async function DELETE(
+async function _DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -58,3 +59,6 @@ export async function DELETE(
 
   return NextResponse.json({ success: true });
 }
+
+export const PATCH = withErrorHandler(_PATCH);
+export const DELETE = withErrorHandler(_DELETE);

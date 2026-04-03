@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import { logAudit } from "@/lib/audit";
+import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 
 const createVoucherSchema = z.object({
@@ -11,7 +12,7 @@ const createVoucherSchema = z.object({
   expiresAt: z.string().datetime().nullable().optional(),
 });
 
-export async function GET(req: NextRequest) {
+async function _GET(req: NextRequest) {
   const { error } = await requireSuperAdmin();
   if (error) return error;
 
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ vouchers, total, page, totalPages: Math.ceil(total / limit) });
 }
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const { error, session } = await requireSuperAdmin();
   if (error) return error;
 
@@ -67,3 +68,6 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json(voucher, { status: 201 });
 }
+
+export const GET = withErrorHandler(_GET);
+export const POST = withErrorHandler(_POST);

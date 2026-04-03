@@ -6,6 +6,7 @@ import {
   recommendSessionType,
   SESSION_TYPES,
 } from "@/lib/session-engine";
+import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 
 const quickSessionSchema = z.object({
@@ -13,7 +14,7 @@ const quickSessionSchema = z.object({
   topicId: z.string().min(1).optional(),
 });
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -36,7 +37,6 @@ export async function POST(req: NextRequest) {
 
   const { domainId, topicId } = parsed.data;
 
-  try {
   // Verify enrollment
   const enrollment = await prisma.enrollment.findUnique({
     where: {
@@ -109,11 +109,6 @@ export async function POST(req: NextRequest) {
     })),
     totalQuestions: filteredQuestions.length,
   });
-  } catch (error) {
-    console.error("Quick session API error:", error);
-    return NextResponse.json(
-      { error: "Failed to create quick session" },
-      { status: 500 }
-    );
-  }
 }
+
+export const POST = withErrorHandler(_POST);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { z } from "zod";
+import { withErrorHandler } from "@/lib/api-handler";
 
 const examConfigSchema = z.object({
   questionTypes: z.array(z.enum(["MULTIPLE_CHOICE", "OPEN"])),
@@ -13,7 +14,7 @@ const examConfigSchema = z.object({
   metadata: z.record(z.unknown()).optional(),
 });
 
-export async function GET(
+async function _GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -42,7 +43,7 @@ export async function GET(
   return NextResponse.json(config);
 }
 
-export async function PUT(
+async function _PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -70,3 +71,6 @@ export async function PUT(
 
   return NextResponse.json(config);
 }
+
+export const GET = withErrorHandler(_GET);
+export const PUT = withErrorHandler(_PUT);

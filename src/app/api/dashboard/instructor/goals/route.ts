@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { withErrorHandler } from "@/lib/api-handler";
 
 const createGoalSchema = z.object({
   studentId: z.string().min(1),
@@ -19,7 +20,7 @@ const updateGoalSchema = z.object({
   targetDate: z.string().optional(),
 });
 
-export async function GET(req: NextRequest) {
+async function _GET(req: NextRequest) {
   const { error, session } = await requireInstructor();
   if (error) return error;
 
@@ -43,7 +44,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ goals });
 }
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const { error, session } = await requireInstructor();
   if (error) return error;
 
@@ -80,7 +81,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(goal, { status: 201 });
 }
 
-export async function PATCH(req: NextRequest) {
+async function _PATCH(req: NextRequest) {
   const { error, session } = await requireInstructor();
   if (error) return error;
 
@@ -104,3 +105,7 @@ export async function PATCH(req: NextRequest) {
 
   return NextResponse.json(goal);
 }
+
+export const GET = withErrorHandler(_GET);
+export const POST = withErrorHandler(_POST);
+export const PATCH = withErrorHandler(_PATCH);

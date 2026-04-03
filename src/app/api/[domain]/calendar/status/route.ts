@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { withErrorHandler } from "@/lib/api-handler";
 
 /**
  * GET /api/[domain]/calendar/status
  * Check if user has Google Calendar connected for this domain.
  */
-export async function GET(
+async function _GET(
   _req: NextRequest,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -32,3 +33,5 @@ export async function GET(
     connectedAt: userCalendar?.createdAt || null,
   });
 }
+
+export const GET = withErrorHandler(_GET);

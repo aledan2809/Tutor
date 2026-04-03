@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { getStudentProgressSummary, predictFailureRisk } from "@/lib/predictive-analytics";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function GET(
+async function _GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -92,3 +93,5 @@ export async function GET(
     groups: groupMemberships.map((gm) => gm.group),
   });
 }
+
+export const GET = withErrorHandler(_GET);

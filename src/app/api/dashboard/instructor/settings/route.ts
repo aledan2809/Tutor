@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { withErrorHandler } from "@/lib/api-handler";
 
 const settingsSchema = z.object({
   notifyOnStudentInactivity: z.boolean().optional(),
@@ -13,7 +14,7 @@ const settingsSchema = z.object({
   dashboardRefreshInterval: z.number().int().min(30).max(3600).optional(),
 });
 
-export async function GET() {
+async function _GET() {
   const { error, session } = await requireInstructor();
   if (error) return error;
 
@@ -42,7 +43,7 @@ export async function GET() {
   });
 }
 
-export async function PUT(req: NextRequest) {
+async function _PUT(req: NextRequest) {
   const { error, session } = await requireInstructor();
   if (error) return error;
 
@@ -71,3 +72,6 @@ export async function PUT(req: NextRequest) {
 
   return NextResponse.json({ success: true });
 }
+
+export const GET = withErrorHandler(_GET);
+export const PUT = withErrorHandler(_PUT);

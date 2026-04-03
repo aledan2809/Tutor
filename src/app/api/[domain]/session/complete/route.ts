@@ -3,8 +3,9 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { updateWeakAreas } from "@/lib/session-engine";
 import { awardSessionCompleteXp } from "@/lib/gamification";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function POST(
+async function _POST(
   req: NextRequest,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -105,3 +106,5 @@ export async function POST(
       : {}),
   });
 }
+
+export const POST = withErrorHandler(_POST);

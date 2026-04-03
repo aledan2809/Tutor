@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { cancelEscalation } from "@/lib/escalation/engine";
+import { withErrorHandler } from "@/lib/api-handler";
 
 /**
  * GET /api/escalation/[userId] — Get escalation history for a user
  * Admin/Instructor only
  */
-export async function GET(
+async function _GET(
   req: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
@@ -46,7 +47,7 @@ export async function GET(
  * DELETE /api/escalation/[userId] — Cancel active escalation for a user
  * Admin/Instructor only
  */
-export async function DELETE(
+async function _DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
@@ -71,3 +72,6 @@ export async function DELETE(
 
   return NextResponse.json({ success: true, cancelledCount: cancelled });
 }
+
+export const GET = withErrorHandler(_GET);
+export const DELETE = withErrorHandler(_DELETE);

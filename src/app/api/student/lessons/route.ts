@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 
 const lessonsQuerySchema = z.object({
@@ -11,7 +12,7 @@ const lessonsQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
 });
 
-export async function GET(req: NextRequest) {
+async function _GET(req: NextRequest) {
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -35,7 +36,6 @@ export async function GET(req: NextRequest) {
 
   const { domainId, subject, topic, page, limit } = parsed.data;
 
-  try {
   // Verify enrollment
   const enrollment = await prisma.enrollment.findUnique({
     where: {
@@ -127,11 +127,6 @@ export async function GET(req: NextRequest) {
       topics: Array.from(topics).sort(),
     },
   });
-  } catch (error) {
-    console.error("Lessons API error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch lessons" },
-      { status: 500 }
-    );
-  }
 }
+
+export const GET = withErrorHandler(_GET);

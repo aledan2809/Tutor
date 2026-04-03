@@ -6,8 +6,9 @@ import {
   SESSION_TYPES,
   type SessionType,
 } from "@/lib/session-engine";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function POST(
+async function _POST(
   req: NextRequest,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -81,3 +82,5 @@ export async function POST(
     totalQuestions: questions.length,
   });
 }
+
+export const POST = withErrorHandler(_POST);

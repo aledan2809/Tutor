@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { getLeaderboard } from "@/lib/gamification";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function GET(
+async function _GET(
   _req: Request,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -24,3 +25,5 @@ export async function GET(
   const leaderboard = await getLeaderboard(session.user.id, domain.id);
   return NextResponse.json(leaderboard);
 }
+
+export const GET = withErrorHandler(_GET);

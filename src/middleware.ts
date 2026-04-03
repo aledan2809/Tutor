@@ -16,7 +16,15 @@ function isPublicPath(pathname: string): boolean {
 }
 
 // ─── Rate limiting state (in-memory, edge-compatible) ───
+const MAX_STORE_SIZE = 10_000;
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+function purgeExpiredEntries() {
+  const now = Date.now();
+  for (const [key, entry] of rateLimitStore) {
+    if (now > entry.resetAt) rateLimitStore.delete(key);
+  }
+}
 
 function checkRateLimit(ip: string, path: string): { allowed: boolean; remaining: number } {
   let maxRequests = 60;
@@ -33,6 +41,10 @@ function checkRateLimit(ip: string, path: string): { allowed: boolean; remaining
   const entry = rateLimitStore.get(key);
 
   if (!entry || now > entry.resetAt) {
+    // Prevent unbounded growth: purge expired entries when store is too large
+    if (rateLimitStore.size >= MAX_STORE_SIZE) {
+      purgeExpiredEntries();
+    }
     rateLimitStore.set(key, { count: 1, resetAt: now + windowMs });
     return { allowed: true, remaining: maxRequests - 1 };
   }
@@ -47,10 +59,7 @@ function checkRateLimit(ip: string, path: string): { allowed: boolean; remaining
 // Cleanup stale entries periodically (limit map growth)
 if (typeof globalThis !== "undefined") {
   setInterval(() => {
-    const now = Date.now();
-    for (const [key, entry] of rateLimitStore) {
-      if (now > entry.resetAt) rateLimitStore.delete(key);
-    }
+    purgeExpiredEntries();
   }, 60_000);
 }
 

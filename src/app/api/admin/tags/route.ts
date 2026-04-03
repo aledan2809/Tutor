@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
+import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 
-export async function GET() {
+async function _GET() {
   const { error } = await requireAdmin();
   if (error) return error;
 
@@ -20,7 +21,7 @@ const tagSchema = z.object({
   category: z.enum(["domain", "subject", "topic", "general"]).default("general"),
 });
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const { error } = await requireAdmin();
   if (error) return error;
 
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(tag, { status: 201 });
 }
 
-export async function DELETE(req: NextRequest) {
+async function _DELETE(req: NextRequest) {
   const { error } = await requireAdmin();
   if (error) return error;
 
@@ -56,3 +57,7 @@ export async function DELETE(req: NextRequest) {
   await prisma.tag.delete({ where: { id } });
   return NextResponse.json({ success: true });
 }
+
+export const GET = withErrorHandler(_GET);
+export const POST = withErrorHandler(_POST);
+export const DELETE = withErrorHandler(_DELETE);

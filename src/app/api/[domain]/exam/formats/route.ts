@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession, hasAnyRole } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function GET(
+async function _GET(
   req: NextRequest,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -40,3 +41,5 @@ export async function GET(
 
   return NextResponse.json({ formats });
 }
+
+export const GET = withErrorHandler(_GET);

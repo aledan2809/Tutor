@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import { logAudit } from "@/lib/audit";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function POST(
+async function _POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -36,3 +37,5 @@ export async function POST(
     targetUser,
   });
 }
+
+export const POST = withErrorHandler(_POST);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { withErrorHandler } from "@/lib/api-handler";
 
 const assignSessionSchema = z.object({
   studentIds: z.array(z.string()).min(1),
@@ -10,7 +11,7 @@ const assignSessionSchema = z.object({
   subject: z.string().optional(),
 });
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const { error, session } = await requireInstructor();
   if (error) return error;
 
@@ -53,3 +54,5 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ sessions, count: sessions.length }, { status: 201 });
 }
+
+export const POST = withErrorHandler(_POST);

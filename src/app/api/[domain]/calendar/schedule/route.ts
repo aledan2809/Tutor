@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession, hasRole } from "@/lib/authorization";
 import { getValidAccessToken, getCalendarClient } from "@/lib/calendar";
 import { prisma } from "@/lib/prisma";
+import { withErrorHandler } from "@/lib/api-handler";
 
 /**
  * POST /api/[domain]/calendar/schedule
  * Create a study session and corresponding Google Calendar event.
  */
-export async function POST(
+async function _POST(
   req: NextRequest,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -146,3 +147,5 @@ export async function POST(
     sessionsCreated: created.length,
   });
 }
+
+export const POST = withErrorHandler(_POST);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { withErrorHandler } from "@/lib/api-handler";
 
 const thresholdSchema = z.object({
   studentId: z.string().min(1),
@@ -12,7 +13,7 @@ const thresholdSchema = z.object({
   action: z.enum(["notify_instructor", "notify_watcher"]).default("notify_instructor"),
 });
 
-export async function GET(req: NextRequest) {
+async function _GET(req: NextRequest) {
   const { error, session } = await requireInstructor();
   if (error) return error;
 
@@ -35,7 +36,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ thresholds });
 }
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const { error, session } = await requireInstructor();
   if (error) return error;
 
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(threshold, { status: 201 });
 }
 
-export async function DELETE(req: NextRequest) {
+async function _DELETE(req: NextRequest) {
   const { error, session } = await requireInstructor();
   if (error) return error;
 
@@ -72,3 +73,7 @@ export async function DELETE(req: NextRequest) {
 
   return NextResponse.json({ success: true });
 }
+
+export const GET = withErrorHandler(_GET);
+export const POST = withErrorHandler(_POST);
+export const DELETE = withErrorHandler(_DELETE);

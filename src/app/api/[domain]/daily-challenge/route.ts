@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { getDailyChallenge, submitDailyChallenge } from "@/lib/gamification";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function GET(
+async function _GET(
   _req: Request,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -62,7 +63,7 @@ export async function GET(
   });
 }
 
-export async function POST(
+async function _POST(
   req: NextRequest,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -104,3 +105,6 @@ export async function POST(
     xpAwarded: result.xpAwarded,
   });
 }
+
+export const GET = withErrorHandler(_GET);
+export const POST = withErrorHandler(_POST);

@@ -3,9 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getStripe } from "@/lib/stripe";
+import { withErrorHandler } from "@/lib/api-handler";
 import type Stripe from "stripe";
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -92,3 +93,5 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ url: checkoutSession.url });
 }
+
+export const POST = withErrorHandler(_POST);

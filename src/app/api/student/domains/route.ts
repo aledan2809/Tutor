@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function GET() {
+async function _GET() {
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  try {
   const enrollments = await prisma.enrollment.findMany({
     where: { userId: session.user.id, isActive: true },
     include: {
@@ -116,11 +116,6 @@ export async function GET() {
       totalStudents: d._count.enrollments,
     })),
   });
-  } catch (error) {
-    console.error("Domains API error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch domains" },
-      { status: 500 }
-    );
-  }
 }
+
+export const GET = withErrorHandler(_GET);

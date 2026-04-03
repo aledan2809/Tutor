@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { z } from "zod";
+import { withErrorHandler } from "@/lib/api-handler";
 
 const domainSchema = z.object({
   name: z.string().min(1),
@@ -11,7 +12,7 @@ const domainSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
-export async function GET() {
+async function _GET() {
   const { error } = await requireAdmin();
   if (error) return error;
 
@@ -26,7 +27,7 @@ export async function GET() {
   return NextResponse.json(domains);
 }
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const { error } = await requireAdmin();
   if (error) return error;
 
@@ -62,3 +63,6 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json(domain, { status: 201 });
 }
+
+export const GET = withErrorHandler(_GET);
+export const POST = withErrorHandler(_POST);

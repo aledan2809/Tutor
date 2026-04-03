@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
+import { withErrorHandler } from "@/lib/api-handler";
 import {
   AVIATION_QUESTIONS,
   WIZZAIR_EXAM_FORMATS,
@@ -9,7 +10,7 @@ import {
 } from "@/../prisma/aviation-questions";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function POST(_req: NextRequest) {
+async function _POST(_req: NextRequest) {
   const { error, session } = await requireAdmin();
   if (error) return error;
 
@@ -213,3 +214,5 @@ export async function POST(_req: NextRequest) {
     },
   });
 }
+
+export const POST = withErrorHandler(_POST);

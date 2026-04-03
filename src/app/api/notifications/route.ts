@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { withErrorHandler } from "@/lib/api-handler";
 
 /**
  * GET /api/notifications — Get current user's notifications
  * Query params: ?unread=true&limit=50&offset=0
  */
-export async function GET(req: NextRequest) {
+async function _GET(req: NextRequest) {
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -47,7 +48,7 @@ export async function GET(req: NextRequest) {
 /**
  * PATCH /api/notifications — Mark all as read
  */
-export async function PATCH() {
+async function _PATCH() {
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -60,3 +61,6 @@ export async function PATCH() {
 
   return NextResponse.json({ success: true });
 }
+
+export const GET = withErrorHandler(_GET);
+export const PATCH = withErrorHandler(_PATCH);

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { requireInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function GET() {
+async function _GET() {
   const { error, session } = await requireInstructor();
   if (error) return error;
 
@@ -67,3 +68,5 @@ export async function GET() {
     domains: instructorDomainIds,
   });
 }
+
+export const GET = withErrorHandler(_GET);

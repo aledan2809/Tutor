@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 
 const assessmentSchema = z.object({
@@ -13,7 +14,7 @@ const assessmentSchema = z.object({
   ).min(1).max(10),
 });
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -36,7 +37,6 @@ export async function POST(req: NextRequest) {
 
   const { domainId, answers } = parsed.data;
 
-  try {
   // Verify enrollment
   const enrollment = await prisma.enrollment.findUnique({
     where: {
@@ -153,17 +153,10 @@ export async function POST(req: NextRequest) {
     results,
     weakAreas,
   });
-  } catch (error) {
-    console.error("Assessment submission error:", error);
-    return NextResponse.json(
-      { error: "Failed to process assessment" },
-      { status: 500 }
-    );
-  }
 }
 
 // GET: Fetch 10 assessment questions for a domain
-export async function GET(req: NextRequest) {
+async function _GET(req: NextRequest) {
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -176,7 +169,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "domainId is required" }, { status: 400 });
   }
 
-  try {
   // Verify enrollment
   const enrollment = await prisma.enrollment.findUnique({
     where: {
@@ -245,11 +237,7 @@ export async function GET(req: NextRequest) {
     })),
     totalQuestions: questions.length,
   });
-  } catch (error) {
-    console.error("Assessment questions error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch assessment questions" },
-      { status: 500 }
-    );
-  }
 }
+
+export const POST = withErrorHandler(_POST);
+export const GET = withErrorHandler(_GET);

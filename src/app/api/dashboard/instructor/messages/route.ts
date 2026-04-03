@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { withErrorHandler } from "@/lib/api-handler";
 
 const sendMessageSchema = z.object({
   recipientIds: z.array(z.string()).min(1),
@@ -11,7 +12,7 @@ const sendMessageSchema = z.object({
   content: z.string().min(1),
 });
 
-export async function GET(req: NextRequest) {
+async function _GET(req: NextRequest) {
   const { error, session } = await requireInstructor();
   if (error) return error;
 
@@ -44,7 +45,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ messages });
 }
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const { error, session } = await requireInstructor();
   if (error) return error;
 
@@ -85,3 +86,6 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ messages, count: messages.length }, { status: 201 });
 }
+
+export const GET = withErrorHandler(_GET);
+export const POST = withErrorHandler(_POST);

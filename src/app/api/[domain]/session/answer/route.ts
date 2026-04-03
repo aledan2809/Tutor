@@ -3,8 +3,9 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { sm2, gradeResponse } from "@/lib/sm2";
 import { awardAnswerXp } from "@/lib/gamification";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function POST(
+async function _POST(
   req: NextRequest,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -178,3 +179,5 @@ function checkAnswer(
       .replace(/\s+/g, " ");
   return normalize(answer) === normalize(question.correctAnswer);
 }
+
+export const POST = withErrorHandler(_POST);

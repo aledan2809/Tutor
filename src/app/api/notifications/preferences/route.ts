@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { withErrorHandler } from "@/lib/api-handler";
 
 /**
  * GET /api/notifications/preferences — Get user's notification preferences
  */
-export async function GET() {
+async function _GET() {
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -27,7 +28,7 @@ export async function GET() {
 /**
  * PUT /api/notifications/preferences — Update notification preferences
  */
-export async function PUT(req: NextRequest) {
+async function _PUT(req: NextRequest) {
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -54,3 +55,6 @@ export async function PUT(req: NextRequest) {
 
   return NextResponse.json(prefs);
 }
+
+export const GET = withErrorHandler(_GET);
+export const PUT = withErrorHandler(_PUT);

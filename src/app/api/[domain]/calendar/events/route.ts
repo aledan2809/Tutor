@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { getValidAccessToken, getCalendarClient } from "@/lib/calendar";
 import { prisma } from "@/lib/prisma";
+import { withErrorHandler } from "@/lib/api-handler";
 
 /**
  * GET /api/[domain]/calendar/events
  * Query params: startDate, endDate
  * Returns merged Google Calendar events + local study sessions.
  */
-export async function GET(
+async function _GET(
   req: NextRequest,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -108,3 +109,5 @@ export async function GET(
 
   return NextResponse.json({ events });
 }
+
+export const GET = withErrorHandler(_GET);

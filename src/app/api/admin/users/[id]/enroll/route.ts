@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import { z } from "zod";
+import { withErrorHandler } from "@/lib/api-handler";
 
 const enrollSchema = z.object({
   domainId: z.string().min(1),
   roles: z.array(z.enum(["STUDENT", "WATCHER", "INSTRUCTOR", "ADMIN"])).min(1),
 });
 
-export async function POST(
+async function _POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -56,7 +57,7 @@ export async function POST(
   return NextResponse.json(enrollment, { status: 201 });
 }
 
-export async function DELETE(
+async function _DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -78,3 +79,6 @@ export async function DELETE(
 
   return NextResponse.json({ success: true });
 }
+
+export const POST = withErrorHandler(_POST);
+export const DELETE = withErrorHandler(_DELETE);

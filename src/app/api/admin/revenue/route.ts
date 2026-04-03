@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function GET(req: NextRequest) {
+async function _GET(req: NextRequest) {
   const { error } = await requireSuperAdmin();
   if (error) return error;
 
@@ -81,3 +82,5 @@ export async function GET(req: NextRequest) {
     })),
   });
 }
+
+export const GET = withErrorHandler(_GET);

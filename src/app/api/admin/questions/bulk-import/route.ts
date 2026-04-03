@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
+import { withErrorHandler } from "@/lib/api-handler";
 
 async function parsePDF(buffer: Buffer): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -43,7 +44,7 @@ function extractQuestionsFromText(text: string): Array<{ content: string; correc
   });
 }
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const { error, session } = await requireAdmin();
   if (error) return error;
 
@@ -62,51 +63,48 @@ export async function POST(req: NextRequest) {
   const fileName = file.name.toLowerCase();
   let questions: Array<{ content: string; correctAnswer: string; options?: string[] }> = [];
 
-  try {
-    if (fileName.endsWith(".pdf")) {
-      const text = await parsePDF(buffer);
-      questions = extractQuestionsFromText(text);
-    } else if (fileName.endsWith(".docx")) {
-      const text = await parseDOCX(buffer);
-      questions = extractQuestionsFromText(text);
-    } else if (fileName.endsWith(".csv")) {
-      const text = buffer.toString("utf-8");
-      const rows = parseCSV(text);
-      questions = rows
-        .filter((r) => r.content || r.question)
-        .map((r) => ({
-          content: r.content || r.question || "",
-          correctAnswer: r.correctAnswer || r.answer || "",
-          options: r.options ? r.options.split("|") : undefined,
-        }));
-    } else {
-      return NextResponse.json({ error: "Unsupported file type. Use PDF, DOCX, or CSV." }, { status: 400 });
-    }
-
-    if (questions.length === 0) {
-      return NextResponse.json({ error: "No questions could be extracted from the file." }, { status: 400 });
-    }
-
-    // Bulk create - manual content gets approved directly
-    const created = await prisma.question.createMany({
-      data: questions.map((q) => ({
-        domainId,
-        subject,
-        topic,
-        difficulty,
-        type: q.options ? "MULTIPLE_CHOICE" as const : "OPEN" as const,
-        content: q.content,
-        options: q.options ? (q.options as string[]) : undefined,
-        correctAnswer: q.correctAnswer,
-        source: "MANUAL" as const,
-        status: "APPROVED" as const,
-        createdById: session!.user.id,
-      })),
-    });
-
-    return NextResponse.json({ imported: created.count, total: questions.length });
-  } catch (err) {
-    console.error("Bulk import error:", err);
-    return NextResponse.json({ error: "Failed to parse file" }, { status: 500 });
+  if (fileName.endsWith(".pdf")) {
+    const text = await parsePDF(buffer);
+    questions = extractQuestionsFromText(text);
+  } else if (fileName.endsWith(".docx")) {
+    const text = await parseDOCX(buffer);
+    questions = extractQuestionsFromText(text);
+  } else if (fileName.endsWith(".csv")) {
+    const text = buffer.toString("utf-8");
+    const rows = parseCSV(text);
+    questions = rows
+      .filter((r) => r.content || r.question)
+      .map((r) => ({
+        content: r.content || r.question || "",
+        correctAnswer: r.correctAnswer || r.answer || "",
+        options: r.options ? r.options.split("|") : undefined,
+      }));
+  } else {
+    return NextResponse.json({ error: "Unsupported file type. Use PDF, DOCX, or CSV." }, { status: 400 });
   }
+
+  if (questions.length === 0) {
+    return NextResponse.json({ error: "No questions could be extracted from the file." }, { status: 400 });
+  }
+
+  // Bulk create - manual content gets approved directly
+  const created = await prisma.question.createMany({
+    data: questions.map((q) => ({
+      domainId,
+      subject,
+      topic,
+      difficulty,
+      type: q.options ? "MULTIPLE_CHOICE" as const : "OPEN" as const,
+      content: q.content,
+      options: q.options ? (q.options as string[]) : undefined,
+      correctAnswer: q.correctAnswer,
+      source: "MANUAL" as const,
+      status: "APPROVED" as const,
+      createdById: session!.user.id,
+    })),
+  });
+
+  return NextResponse.json({ imported: created.count, total: questions.length });
 }
+
+export const POST = withErrorHandler(_POST);

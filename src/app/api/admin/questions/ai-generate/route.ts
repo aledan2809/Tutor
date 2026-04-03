@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { generateQuestions } from "@/lib/ai-tutor";
+import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 
 const generateSchema = z.object({
@@ -14,7 +15,7 @@ const generateSchema = z.object({
   language: z.enum(["en", "ro"]).default("en"),
 });
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const { error, session } = await requireAdmin();
   if (error) return error;
 
@@ -32,63 +33,60 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Domain not found" }, { status: 404 });
   }
 
+  const response = await generateQuestions({
+    domain: domain.name,
+    subject,
+    topic,
+    count,
+    difficulty,
+    type,
+    language,
+  });
+
+  let generated: Array<{
+    content: string;
+    options?: string[];
+    correctAnswer: string;
+    explanation?: string;
+  }>;
+
   try {
-    const response = await generateQuestions({
-      domain: domain.name,
+    const content = response.content.trim();
+    generated = JSON.parse(content);
+  } catch {
+    return NextResponse.json(
+      { error: "AI returned invalid JSON", raw: response.content },
+      { status: 500 }
+    );
+  }
+
+  if (!Array.isArray(generated) || generated.length === 0) {
+    return NextResponse.json({ error: "AI returned empty results" }, { status: 500 });
+  }
+
+  // AI-generated content → DRAFT status
+  const created = await prisma.question.createMany({
+    data: generated.map((q) => ({
+      domainId,
       subject,
       topic,
-      count,
       difficulty,
       type,
-      language,
-    });
+      content: q.content,
+      options: q.options ? (q.options as string[]) : undefined,
+      correctAnswer: q.correctAnswer,
+      explanation: q.explanation || null,
+      source: "AI_GENERATED" as const,
+      status: "DRAFT" as const,
+      createdById: session!.user.id,
+    })),
+  });
 
-    let generated: Array<{
-      content: string;
-      options?: string[];
-      correctAnswer: string;
-      explanation?: string;
-    }>;
-
-    try {
-      const content = response.content.trim();
-      generated = JSON.parse(content);
-    } catch {
-      return NextResponse.json(
-        { error: "AI returned invalid JSON", raw: response.content },
-        { status: 500 }
-      );
-    }
-
-    if (!Array.isArray(generated) || generated.length === 0) {
-      return NextResponse.json({ error: "AI returned empty results" }, { status: 500 });
-    }
-
-    // AI-generated content → DRAFT status
-    const created = await prisma.question.createMany({
-      data: generated.map((q) => ({
-        domainId,
-        subject,
-        topic,
-        difficulty,
-        type,
-        content: q.content,
-        options: q.options ? (q.options as string[]) : undefined,
-        correctAnswer: q.correctAnswer,
-        explanation: q.explanation || null,
-        source: "AI_GENERATED" as const,
-        status: "DRAFT" as const,
-        createdById: session!.user.id,
-      })),
-    });
-
-    return NextResponse.json({
-      generated: created.count,
-      provider: response.provider,
-      model: response.model,
-    });
-  } catch (err) {
-    console.error("AI generation error:", err);
-    return NextResponse.json({ error: "AI generation failed" }, { status: 500 });
-  }
+  return NextResponse.json({
+    generated: created.count,
+    provider: response.provider,
+    model: response.model,
+  });
 }
+
+export const POST = withErrorHandler(_POST);

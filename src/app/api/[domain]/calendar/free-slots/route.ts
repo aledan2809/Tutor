@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { getValidAccessToken, findFreeSlots, getCalendarClient } from "@/lib/calendar";
 import { prisma } from "@/lib/prisma";
+import { withErrorHandler } from "@/lib/api-handler";
 
 /**
  * GET /api/[domain]/calendar/free-slots
  * Query params: startDate, endDate, durationMins, bufferMins?
  */
-export async function GET(
+async function _GET(
   req: NextRequest,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -83,3 +84,5 @@ export async function GET(
 
   return NextResponse.json({ slots });
 }
+
+export const GET = withErrorHandler(_GET);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
+import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 
 const createAdSchema = z.object({
@@ -11,7 +12,7 @@ const createAdSchema = z.object({
   priority: z.number().int().min(0).optional(),
 });
 
-export async function GET() {
+async function _GET() {
   const { error } = await requireSuperAdmin();
   if (error) return error;
 
@@ -22,7 +23,7 @@ export async function GET() {
   return NextResponse.json(ads);
 }
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const { error } = await requireSuperAdmin();
   if (error) return error;
 
@@ -44,3 +45,6 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json(ad, { status: 201 });
 }
+
+export const GET = withErrorHandler(_GET);
+export const POST = withErrorHandler(_POST);

@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession, hasAnyRole } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { selectExamQuestions, sanitizeQuestions } from "@/lib/exam-engine";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function POST(
+async function _POST(
   req: NextRequest,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -107,3 +108,5 @@ export async function POST(
     passingScore: format.passingScore,
   });
 }
+
+export const POST = withErrorHandler(_POST);

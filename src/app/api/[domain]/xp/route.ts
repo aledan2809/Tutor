@@ -3,8 +3,9 @@ import { getSession, hasAnyRole } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { getXpInfo, awardXpDirect } from "@/lib/gamification";
 import { z } from "zod";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function GET(
+async function _GET(
   _req: Request,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -32,7 +33,7 @@ const addXpSchema = z.object({
   reason: z.string().min(1).max(200),
 });
 
-export async function POST(
+async function _POST(
   req: NextRequest,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -63,3 +64,6 @@ export async function POST(
   const result = await awardXpDirect(parsed.data.userId, domain.id, parsed.data.xp, parsed.data.reason);
   return NextResponse.json(result);
 }
+
+export const GET = withErrorHandler(_GET);
+export const POST = withErrorHandler(_POST);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
+import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 
 const templateSchema = z.object({
@@ -13,7 +14,7 @@ const templateSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
-export async function GET(req: NextRequest) {
+async function _GET(req: NextRequest) {
   const { error } = await requireAdmin();
   if (error) return error;
 
@@ -35,7 +36,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ templates });
 }
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const { error } = await requireAdmin();
   if (error) return error;
 
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(template, { status: 201 });
 }
 
-export async function PUT(req: NextRequest) {
+async function _PUT(req: NextRequest) {
   const { error } = await requireAdmin();
   if (error) return error;
 
@@ -84,7 +85,7 @@ export async function PUT(req: NextRequest) {
   return NextResponse.json(template);
 }
 
-export async function DELETE(req: NextRequest) {
+async function _DELETE(req: NextRequest) {
   const { error } = await requireAdmin();
   if (error) return error;
 
@@ -99,3 +100,8 @@ export async function DELETE(req: NextRequest) {
 
   return NextResponse.json({ success: true });
 }
+
+export const GET = withErrorHandler(_GET);
+export const POST = withErrorHandler(_POST);
+export const PUT = withErrorHandler(_PUT);
+export const DELETE = withErrorHandler(_DELETE);

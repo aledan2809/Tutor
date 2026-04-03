@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { getCalendarClient } from "@/lib/calendar";
 import { prisma } from "@/lib/prisma";
+import { withErrorHandler } from "@/lib/api-handler";
 
 /**
  * POST /api/[domain]/calendar/connect
  * Returns the Google OAuth URL for calendar authorization.
  */
-export async function POST(
+async function _POST(
   _req: NextRequest,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -51,7 +52,7 @@ export async function POST(
  * DELETE /api/[domain]/calendar/connect
  * Disconnects the user's Google Calendar for this domain.
  */
-export async function DELETE(
+async function _DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -74,3 +75,6 @@ export async function DELETE(
 
   return NextResponse.json({ success: true });
 }
+
+export const POST = withErrorHandler(_POST);
+export const DELETE = withErrorHandler(_DELETE);

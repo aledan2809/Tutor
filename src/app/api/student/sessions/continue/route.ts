@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function POST() {
+async function _POST() {
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  try {
   // Find last incomplete session
   const lastSession = await prisma.session.findFirst({
     where: {
@@ -72,11 +72,6 @@ export async function POST() {
     answeredQuestions: answeredIds.size,
     remainingQuestions: remainingQuestionIds.length,
   });
-  } catch (error) {
-    console.error("Continue session API error:", error);
-    return NextResponse.json(
-      { error: "Failed to continue session" },
-      { status: 500 }
-    );
-  }
 }
+
+export const POST = withErrorHandler(_POST);

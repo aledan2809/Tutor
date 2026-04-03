@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { generateQuestions } from "@/lib/ai-tutor";
+import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 import { SUBJECT_TOPICS } from "@/../prisma/aviation-questions";
 
@@ -16,7 +17,7 @@ const bulkGenerateSchema = z.object({
  * Bulk AI generation for aviation domain — generates questions across
  * multiple subjects/topics in a single request.
  */
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const { error, session } = await requireAdmin();
   if (error) return error;
 
@@ -114,3 +115,5 @@ export async function POST(req: NextRequest) {
     note: "All AI-generated questions are in DRAFT status and require admin review before publishing.",
   });
 }
+
+export const POST = withErrorHandler(_POST);

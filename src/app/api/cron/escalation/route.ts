@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { detectMissedSessions, advancePendingEscalations } from "@/lib/escalation/engine";
+import { withErrorHandler } from "@/lib/api-handler";
 
 /**
  * POST /api/cron/escalation — Cron job endpoint for escalation processing
@@ -11,7 +12,7 @@ import { detectMissedSessions, advancePendingEscalations } from "@/lib/escalatio
  * 1. Detect users with missed sessions → start escalation
  * 2. Advance pending escalation chains (check delays, send next level)
  */
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
   const authHeader = req.headers.get("authorization");
 
@@ -19,23 +20,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  try {
-    const [missedUserIds, advancedCount] = await Promise.all([
-      detectMissedSessions(),
-      advancePendingEscalations(),
-    ]);
+  const [missedUserIds, advancedCount] = await Promise.all([
+    detectMissedSessions(),
+    advancePendingEscalations(),
+  ]);
 
-    return NextResponse.json({
-      success: true,
-      missedSessions: missedUserIds.length,
-      escalationsAdvanced: advancedCount,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error("Cron escalation error:", error);
-    return NextResponse.json(
-      { error: "Escalation processing failed" },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json({
+    success: true,
+    missedSessions: missedUserIds.length,
+    escalationsAdvanced: advancedCount,
+    timestamp: new Date().toISOString(),
+  });
 }
+
+export const POST = withErrorHandler(_POST);

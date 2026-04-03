@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { z } from "zod";
+import { withErrorHandler } from "@/lib/api-handler";
 
 const updateSchema = z.object({
   subject: z.string().min(1).optional(),
@@ -16,7 +17,7 @@ const updateSchema = z.object({
   tags: z.array(z.string()).optional(),
 });
 
-export async function GET(
+async function _GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -36,7 +37,7 @@ export async function GET(
   return NextResponse.json(question);
 }
 
-export async function PUT(
+async function _PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -73,7 +74,7 @@ export async function PUT(
   return NextResponse.json(question);
 }
 
-export async function DELETE(
+async function _DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -85,3 +86,7 @@ export async function DELETE(
 
   return NextResponse.json({ success: true });
 }
+
+export const GET = withErrorHandler(_GET);
+export const PUT = withErrorHandler(_PUT);
+export const DELETE = withErrorHandler(_DELETE);

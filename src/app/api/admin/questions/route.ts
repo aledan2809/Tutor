@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { z } from "zod";
+import { withErrorHandler } from "@/lib/api-handler";
 
 const questionSchema = z.object({
   domainId: z.string().min(1),
@@ -18,7 +19,7 @@ const questionSchema = z.object({
   tags: z.array(z.string()).optional(),
 });
 
-export async function GET(req: NextRequest) {
+async function _GET(req: NextRequest) {
   const { error } = await requireAdmin();
   if (error) return error;
 
@@ -60,7 +61,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ questions, total, page, limit, totalPages: Math.ceil(total / limit) });
 }
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const { error, session } = await requireAdmin();
   if (error) return error;
 
@@ -95,3 +96,6 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json(question, { status: 201 });
 }
+
+export const GET = withErrorHandler(_GET);
+export const POST = withErrorHandler(_POST);

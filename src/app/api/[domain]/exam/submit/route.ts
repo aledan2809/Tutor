@@ -5,8 +5,9 @@ import { scoreExam } from "@/lib/exam-engine";
 import { generateCertificate } from "@/lib/certificate";
 import { awardExamCompleteXp } from "@/lib/gamification";
 import type { Prisma } from "@prisma/client";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function POST(
+async function _POST(
   req: NextRequest,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -137,3 +138,5 @@ export async function POST(
     },
   });
 }
+
+export const POST = withErrorHandler(_POST);

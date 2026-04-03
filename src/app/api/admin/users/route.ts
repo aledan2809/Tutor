@@ -3,8 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function GET(req: NextRequest) {
+async function _GET(req: NextRequest) {
   const { error } = await requireSuperAdmin();
   if (error) return error;
 
@@ -62,7 +63,7 @@ const createUserSchema = z.object({
   role: z.enum(["user", "admin", "superadmin"]).default("user"),
 });
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const { error } = await requireSuperAdmin();
   if (error) return error;
 
@@ -91,3 +92,6 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ id: user.id, name: user.name, email: user.email }, { status: 201 });
 }
+
+export const GET = withErrorHandler(_GET);
+export const POST = withErrorHandler(_POST);

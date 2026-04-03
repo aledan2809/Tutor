@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 
 const paramsSchema = z.object({
   id: z.string().uuid("Invalid domain ID format"),
 });
 
-export async function POST(
+async function _POST(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -27,7 +28,6 @@ export async function POST(
 
   const domainId = parsed.data.id;
 
-  try {
   const domain = await prisma.domain.findUnique({
     where: { id: domainId },
   });
@@ -87,11 +87,6 @@ export async function POST(
     roles: enrollment.roles,
     enrolledAt: enrollment.createdAt,
   }, { status: 201 });
-  } catch (error) {
-    console.error("Domain enrollment error:", error);
-    return NextResponse.json(
-      { error: "Failed to process enrollment" },
-      { status: 500 }
-    );
-  }
 }
+
+export const POST = withErrorHandler(_POST);

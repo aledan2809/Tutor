@@ -3,13 +3,14 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { recommendSessionType } from "@/lib/session-engine";
 import { getXpInfo, getStreakInfo } from "@/lib/gamification";
+import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 
 const dashboardQuerySchema = z.object({
   domainId: z.string().uuid().optional(),
 });
 
-export async function GET(req: NextRequest) {
+async function _GET(req: NextRequest) {
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -30,7 +31,6 @@ export async function GET(req: NextRequest) {
   const userId = session.user.id;
   const domainId = parsed.data.domainId;
 
-  try {
   // Get enrollments with domain info
   const enrollments = await prisma.enrollment.findMany({
     where: { userId, isActive: true },
@@ -168,11 +168,6 @@ export async function GET(req: NextRequest) {
     })),
     recommendation,
   });
-  } catch (error) {
-    console.error("Dashboard API error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch dashboard data" },
-      { status: 500 }
-    );
-  }
 }
+
+export const GET = withErrorHandler(_GET);

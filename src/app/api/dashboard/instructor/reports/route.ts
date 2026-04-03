@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { getStudentProgressSummary, predictFailureRisk } from "@/lib/predictive-analytics";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function GET(req: NextRequest) {
+async function _GET(req: NextRequest) {
   const { error, session } = await requireInstructor();
   if (error) return error;
 
@@ -114,6 +115,8 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ error: "Invalid report type or missing id" }, { status: 400 });
 }
+
+export const GET = withErrorHandler(_GET);
 
 function generateCSV(data: Record<string, unknown>[], filename: string) {
   if (data.length === 0) {

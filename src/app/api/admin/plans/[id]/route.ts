@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function GET(
+async function _GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -22,7 +23,7 @@ export async function GET(
   return NextResponse.json({ ...plan, price: plan.price / 100, subscriberCount: plan._count.users });
 }
 
-export async function PATCH(
+async function _PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -49,7 +50,7 @@ export async function PATCH(
   return NextResponse.json({ ...plan, price: plan.price / 100 });
 }
 
-export async function DELETE(
+async function _DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -73,3 +74,7 @@ export async function DELETE(
   await prisma.subscriptionPlan.delete({ where: { id } });
   return NextResponse.json({ success: true });
 }
+
+export const GET = withErrorHandler(_GET);
+export const PATCH = withErrorHandler(_PATCH);
+export const DELETE = withErrorHandler(_DELETE);

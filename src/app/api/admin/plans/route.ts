@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import { getStripe } from "@/lib/stripe";
+import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 import type Stripe from "stripe";
 
@@ -14,7 +15,7 @@ const createPlanSchema = z.object({
   features: z.array(z.string()).optional(),
 });
 
-export async function GET() {
+async function _GET() {
   const { error } = await requireSuperAdmin();
   if (error) return error;
 
@@ -30,7 +31,7 @@ export async function GET() {
   })));
 }
 
-export async function POST(req: NextRequest) {
+async function _POST(req: NextRequest) {
   const { error } = await requireSuperAdmin();
   if (error) return error;
 
@@ -81,3 +82,6 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ...plan, price: plan.price / 100 }, { status: 201 });
 }
+
+export const GET = withErrorHandler(_GET);
+export const POST = withErrorHandler(_POST);

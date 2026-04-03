@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireWatcherOrInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { getStudentProgressSummary } from "@/lib/predictive-analytics";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function GET(
+async function _GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -66,3 +67,5 @@ export async function GET(
     domainSummaries,
   });
 }
+
+export const GET = withErrorHandler(_GET);

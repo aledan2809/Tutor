@@ -3,6 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { awardSessionCompleteXp } from "@/lib/gamification";
 import { updateWeakAreas } from "@/lib/session-engine";
+import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 
 const progressSchema = z.object({
@@ -13,7 +14,7 @@ const progressSchema = z.object({
   xpOverride: z.number().int().min(0).optional(),
 });
 
-export async function PATCH(req: NextRequest) {
+async function _PATCH(req: NextRequest) {
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -37,7 +38,6 @@ export async function PATCH(req: NextRequest) {
   const { domainId, sessionId, score, totalQuestions, xpOverride } = parsed.data;
   const userId = session.user.id;
 
-  try {
   // Verify enrollment
   const enrollment = await prisma.enrollment.findUnique({
     where: { userId_domainId: { userId, domainId } },
@@ -106,11 +106,6 @@ export async function PATCH(req: NextRequest) {
       errorRate: w.errorRate,
     })),
   });
-  } catch (error) {
-    console.error("Progress update error:", error);
-    return NextResponse.json(
-      { error: "Failed to update progress" },
-      { status: 500 }
-    );
-  }
 }
+
+export const PATCH = withErrorHandler(_PATCH);

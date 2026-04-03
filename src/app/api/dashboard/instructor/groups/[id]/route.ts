@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { withErrorHandler } from "@/lib/api-handler";
 
 const updateGroupSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -10,7 +11,7 @@ const updateGroupSchema = z.object({
   removeStudentIds: z.array(z.string()).optional(),
 });
 
-export async function GET(
+async function _GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -39,7 +40,7 @@ export async function GET(
   return NextResponse.json(group);
 }
 
-export async function PATCH(
+async function _PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -82,7 +83,7 @@ export async function PATCH(
   return NextResponse.json(group);
 }
 
-export async function DELETE(
+async function _DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -98,3 +99,7 @@ export async function DELETE(
 
   return NextResponse.json({ success: true });
 }
+
+export const GET = withErrorHandler(_GET);
+export const PATCH = withErrorHandler(_PATCH);
+export const DELETE = withErrorHandler(_DELETE);

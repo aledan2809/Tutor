@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { getAchievements, ACHIEVEMENTS } from "@/lib/gamification";
+import { withErrorHandler } from "@/lib/api-handler";
 
-export async function GET(
+async function _GET(
   _req: Request,
   { params }: { params: Promise<{ domain: string }> }
 ) {
@@ -33,3 +34,5 @@ export async function GET(
     })),
   });
 }
+
+export const GET = withErrorHandler(_GET);
