@@ -23,7 +23,7 @@ echo "[2/7] Pulling latest changes..."
 git pull origin master
 
 echo "[3/7] Installing dependencies..."
-npm install --production
+npm install --legacy-peer-deps
 
 echo "[4/7] Generating Prisma client..."
 npx prisma generate
