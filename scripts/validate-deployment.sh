@@ -72,7 +72,7 @@ check "Instructor messages (unauth)" "$BASE_URL/api/dashboard/instructor/message
 check "Thresholds (unauth)" "$BASE_URL/api/dashboard/instructor/thresholds" "401"
 
 # H04: CRON escalation (no secret)
-check "CRON escalation (no secret)" "$BASE_URL/api/cron/escalation" "401"
+check "CRON escalation (no secret)" "$BASE_URL/api/cron/escalation" "401" "POST"
 
 echo ""
 echo "--- Security Headers ---"
