@@ -19,13 +19,25 @@ export async function requireWatcher() {
   return { error: null, session };
 }
 
-export async function requireInstructor() {
+export async function requireInstructor(domainSlug?: string) {
   const session = await auth();
   if (!session?.user) {
     return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }), session: null };
   }
 
   const user = session.user;
+
+  // H09: If domainSlug provided, enforce domain boundary
+  if (domainSlug && !user.isSuperAdmin) {
+    const enrollment = user.enrollments?.find(
+      (e) => e.domainSlug === domainSlug && (e.roles.includes("INSTRUCTOR" as never) || e.roles.includes("ADMIN" as never))
+    );
+    if (!enrollment) {
+      return { error: NextResponse.json({ error: "Forbidden" }, { status: 403 }), session: null };
+    }
+    return { error: null, session };
+  }
+
   const isInstructor =
     user.isSuperAdmin ||
     user.enrollments?.some((e) =>

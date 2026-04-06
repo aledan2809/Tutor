@@ -16,7 +16,7 @@ async function _POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  await params;
+  const { domain: domainSlug } = await params;
 
   const body = await req.json();
   const { sessionId, answers } = body;
@@ -45,6 +45,17 @@ async function _POST(
       { error: "Exam already submitted" },
       { status: 400 }
     );
+  }
+
+  // C04: Validate exam session belongs to this domain
+  const domain = await prisma.domain.findUnique({
+    where: { slug: domainSlug },
+  });
+  if (!domain) {
+    return NextResponse.json({ error: "Domain not found" }, { status: 404 });
+  }
+  if (examSession.domainId !== domain.id) {
+    return NextResponse.json({ error: "Domain mismatch" }, { status: 403 });
   }
 
   // Check time limit

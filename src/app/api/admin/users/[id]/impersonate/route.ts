@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import { logAudit } from "@/lib/audit";
 import { withErrorHandler } from "@/lib/api-handler";
+import { signImpersonationToken, IMPERSONATION_TTL_MS } from "@/lib/impersonation";
 
 async function _POST(
   req: NextRequest,
@@ -30,11 +31,18 @@ async function _POST(
     metadata: { targetEmail: targetUser.email },
   });
 
-  // Return target user info for client-side session override
-  // In production, this would generate a temporary token
+  // C06: Generate temporary signed JWT with TTL
+  const token = signImpersonationToken({
+    adminId: session!.user.id,
+    impersonatedUserId: id,
+    exp: Date.now() + IMPERSONATION_TTL_MS,
+  });
+
   return NextResponse.json({
     message: "Impersonation logged",
     targetUser,
+    token,
+    expiresIn: IMPERSONATION_TTL_MS,
   });
 }
 

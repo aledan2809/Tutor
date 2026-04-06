@@ -48,6 +48,11 @@ async function _POST(
     return NextResponse.json({ error: "Domain not found" }, { status: 404 });
   }
 
+  // C03: Validate session belongs to this domain
+  if (learningSession.domainId && learningSession.domainId !== domain.id) {
+    return NextResponse.json({ error: "Domain mismatch" }, { status: 403 });
+  }
+
   // Get question with correct answer
   const question = await prisma.question.findUnique({
     where: { id: questionId },
