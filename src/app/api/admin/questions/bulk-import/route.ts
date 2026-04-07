@@ -23,7 +23,7 @@ async function processImageOCR(buffer: Buffer, fileName: string): Promise<string
 
 async function extractQuestionsWithAI(
   ocrText: string
-): Promise<Array<{ content: string; options?: string[]; correctAnswer: string; explanation?: string }>> {
+): Promise<Array<{ content: string; options?: string[]; correctAnswer: string; explanation?: string; subject?: string; topic?: string; difficulty?: number }>> {
   // Use OpenAI or Anthropic via environment
   const apiKey = process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("No AI API key configured (OPENAI_API_KEY or ANTHROPIC_API_KEY)");
