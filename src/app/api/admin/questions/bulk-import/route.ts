@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { withErrorHandler } from "@/lib/api-handler";
 
 const OCR_SERVICE_URL = process.env.OCR_SERVICE_URL || "http://localhost:8000";
-const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg"];
+const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".jfif", ".webp", ".bmp", ".tiff", ".tif"];
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 
 async function processImageOCR(buffer: Buffer, fileName: string): Promise<string> {
@@ -226,7 +226,7 @@ async function _POST(req: NextRequest) {
 
     return NextResponse.json({ imported: created.count, total: aiQuestions.length, fromImage: true });
   } else {
-    return NextResponse.json({ error: "Unsupported file type. Use PDF, DOCX, CSV, or Image (PNG/JPEG)." }, { status: 400 });
+    return NextResponse.json({ error: "Unsupported file type. Use PDF, DOCX, CSV, or Image (PNG/JPEG/JFIF/WebP)." }, { status: 400 });
   }
 
   if (questions.length === 0) {

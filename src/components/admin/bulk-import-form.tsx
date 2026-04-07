@@ -29,9 +29,9 @@ export function BulkImportForm({ domains }: Props) {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("domainId", domainId);
-    formData.append("subject", subject);
-    formData.append("topic", topic);
-    formData.append("difficulty", difficulty.toString());
+    formData.append("subject", subject || "General");
+    formData.append("topic", topic || "General");
+    formData.append("difficulty", (difficulty || 3).toString());
 
     try {
       const res = await fetch("/api/admin/questions/bulk-import", {
@@ -73,13 +73,13 @@ export function BulkImportForm({ domains }: Props) {
         <label className="mb-1 block text-sm text-gray-400">File (PDF, DOCX, CSV, or Image)</label>
         <input
           type="file"
-          accept=".pdf,.docx,.csv,.png,.jpg,.jpeg"
+          accept=".pdf,.docx,.csv,.png,.jpg,.jpeg,.jfif,.webp,.bmp,.tiff,.tif"
           onChange={(e) => setFile(e.target.files?.[0] || null)}
           className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white file:mr-4 file:rounded file:border-0 file:bg-blue-600 file:px-3 file:py-1 file:text-sm file:text-white"
           required
         />
         <p className="mt-1 text-xs text-gray-500">
-          CSV format: content,correctAnswer,options (pipe-separated). PDF/DOCX: numbered questions. Images: OCR + AI extraction.
+          CSV: content,correctAnswer,options. PDF/DOCX: numbered questions. Images (PNG/JPEG/JFIF/WebP): OCR + AI extraction.
         </p>
       </div>
 
@@ -99,37 +99,36 @@ export function BulkImportForm({ domains }: Props) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm text-gray-400">Difficulty (1-5)</label>
+          <label className="mb-1 block text-sm text-gray-400">Difficulty (1-5) <span className="text-gray-600">— optional</span></label>
           <input
             type="number"
             min={1}
             max={5}
             value={difficulty}
-            onChange={(e) => setDifficulty(parseInt(e.target.value))}
+            onChange={(e) => setDifficulty(parseInt(e.target.value) || 3)}
             className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
           />
-          <p className="mt-1 text-xs text-gray-600">Optional for images — AI detects per question</p>
         </div>
 
         <div>
-          <label className="mb-1 block text-sm text-gray-400">Subject</label>
+          <label className="mb-1 block text-sm text-gray-400">Subject <span className="text-gray-600">— optional, AI detects</span></label>
           <input
             type="text"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
-            placeholder="e.g. Aviation Safety (optional for images)"
+            placeholder="Leave empty for AI detection"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm text-gray-400">Topic</label>
+          <label className="mb-1 block text-sm text-gray-400">Topic <span className="text-gray-600">— optional, AI detects</span></label>
           <input
             type="text"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
-            placeholder="e.g. Emergency Procedures (optional for images)"
+            placeholder="Leave empty for AI detection"
           />
         </div>
       </div>
