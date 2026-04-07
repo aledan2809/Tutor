@@ -8,17 +8,59 @@ const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".jfif", ".webp", ".bmp", ".t
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 
 async function processImageOCR(buffer: Buffer, fileName: string): Promise<string> {
-  const formData = new FormData();
-  const blob = new Blob([new Uint8Array(buffer)]);
-  formData.append("file", blob, fileName);
+  const apiKey = process.env.OCR_API_KEY || "default-ocr-key-change-this";
+  const headers: Record<string, string> = { "X-API-Key": apiKey };
 
-  const res = await fetch(`${OCR_SERVICE_URL}/ocr`, {
+  // Step 1: Create session
+  const sessionRes = await fetch(`${OCR_SERVICE_URL}/api/session/create`, {
     method: "POST",
-    body: formData,
+    headers,
   });
-  if (!res.ok) throw new Error(`OCR service error: ${res.status}`);
-  const data = await res.json();
-  return data.text || data.result || "";
+  if (!sessionRes.ok) throw new Error(`OCR session failed: ${sessionRes.status}`);
+  const { session_id } = await sessionRes.json();
+
+  try {
+    // Step 2: Upload image
+    const formData = new FormData();
+    formData.append("files", new Blob([new Uint8Array(buffer)]), fileName);
+    const uploadRes = await fetch(`${OCR_SERVICE_URL}/api/upload?session_id=${session_id}`, {
+      method: "POST",
+      headers: { "X-API-Key": apiKey },
+      body: formData,
+    });
+    if (!uploadRes.ok) throw new Error(`OCR upload failed: ${uploadRes.status}`);
+
+    // Step 3: Process
+    const processRes = await fetch(`${OCR_SERVICE_URL}/api/process`, {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id }),
+    });
+    if (!processRes.ok) throw new Error(`OCR process failed: ${processRes.status}`);
+
+    // Step 4: Get results
+    const resultsRes = await fetch(`${OCR_SERVICE_URL}/api/results/${session_id}`, { headers });
+    if (!resultsRes.ok) throw new Error(`OCR results failed: ${resultsRes.status}`);
+    const data = await resultsRes.json();
+
+    // Extract best text from results
+    const results = data.results || {};
+    let bestText = "";
+    for (const key of Object.keys(results)) {
+      const texts = results[key]?.texts;
+      if (Array.isArray(texts)) {
+        const joined = texts.join("\n");
+        if (joined.length > bestText.length) bestText = joined;
+      }
+    }
+    if (!bestText.trim()) throw new Error("OCR returned empty text");
+    return bestText;
+  } finally {
+    fetch(`${OCR_SERVICE_URL}/api/session/${session_id}`, {
+      method: "DELETE",
+      headers,
+    }).catch(() => {});
+  }
 }
 
 async function extractQuestionsWithAI(
