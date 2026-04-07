@@ -178,6 +178,7 @@ async function _POST(req: NextRequest) {
       ocrText = await processImageOCR(buffer, file.name);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "OCR processing failed";
+      console.error("[bulk-import] OCR failed:", msg);
       return NextResponse.json({ error: `Failed to process image: ${msg}` }, { status: 500 });
     }
 
@@ -188,9 +189,15 @@ async function _POST(req: NextRequest) {
     let aiQuestions;
     try {
       aiQuestions = await extractQuestionsWithAI(ocrText);
+      aiQuestions = aiQuestions.filter((q) => q.content?.trim());
     } catch (err) {
       const msg = err instanceof Error ? err.message : "AI extraction failed";
+      console.error("[bulk-import] AI extraction failed:", msg);
       return NextResponse.json({ error: `Failed to extract questions: ${msg}` }, { status: 500 });
+    }
+
+    if (aiQuestions.length === 0) {
+      return NextResponse.json({ error: "No valid questions could be extracted from the image." }, { status: 400 });
     }
 
     const created = await prisma.question.createMany({
