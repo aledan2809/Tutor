@@ -15,7 +15,7 @@ export function BulkImportForm({ domains }: Props) {
   const [topic, setTopic] = useState("");
   const [difficulty, setDifficulty] = useState(3);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ imported: number; total: number } | null>(null);
+  const [result, setResult] = useState<{ imported: number; total: number; fromImage?: boolean } | null>(null);
   const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
@@ -63,21 +63,23 @@ export function BulkImportForm({ domains }: Props) {
       )}
       {result && (
         <div className="rounded-lg border border-green-800 bg-green-900/20 p-3 text-sm text-green-400">
-          Successfully imported {result.imported} of {result.total} questions.
+          {result.fromImage
+            ? `${result.imported} questions extracted from image, saved as DRAFT for review.`
+            : `Successfully imported ${result.imported} of ${result.total} questions.`}
         </div>
       )}
 
       <div>
-        <label className="mb-1 block text-sm text-gray-400">File (PDF, DOCX, or CSV)</label>
+        <label className="mb-1 block text-sm text-gray-400">File (PDF, DOCX, CSV, or Image)</label>
         <input
           type="file"
-          accept=".pdf,.docx,.csv"
+          accept=".pdf,.docx,.csv,.png,.jpg,.jpeg"
           onChange={(e) => setFile(e.target.files?.[0] || null)}
           className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white file:mr-4 file:rounded file:border-0 file:bg-blue-600 file:px-3 file:py-1 file:text-sm file:text-white"
           required
         />
         <p className="mt-1 text-xs text-gray-500">
-          CSV format: content,correctAnswer,options (pipe-separated). PDF/DOCX: numbered questions.
+          CSV format: content,correctAnswer,options (pipe-separated). PDF/DOCX: numbered questions. Images: OCR + AI extraction.
         </p>
       </div>
 
