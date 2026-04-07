@@ -108,6 +108,7 @@ export function BulkImportForm({ domains }: Props) {
             onChange={(e) => setDifficulty(parseInt(e.target.value))}
             className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
           />
+          <p className="mt-1 text-xs text-gray-600">Optional for images — AI detects per question</p>
         </div>
 
         <div>
@@ -117,8 +118,7 @@ export function BulkImportForm({ domains }: Props) {
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
-            placeholder="e.g. Aviation Safety"
-            required
+            placeholder="e.g. Aviation Safety (optional for images)"
           />
         </div>
 
@@ -129,8 +129,7 @@ export function BulkImportForm({ domains }: Props) {
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
-            placeholder="e.g. Emergency Procedures"
-            required
+            placeholder="e.g. Emergency Procedures (optional for images)"
           />
         </div>
       </div>

@@ -32,8 +32,12 @@ async function extractQuestionsWithAI(
 
   const systemPrompt = `You are an expert at extracting exam questions from OCR text.
 Extract each separate question from the provided text. Return ONLY valid JSON array.
-Each element: {content, options (array if multiple choice), correctAnswer, explanation}.
-If you cannot determine the correct answer, use "To be determined".`;
+Each element: {content, options (array if multiple choice), correctAnswer, explanation, subject, topic, difficulty}.
+- subject: the broad subject area (e.g. "Mathematics", "Aviation Safety", "Physics")
+- topic: the specific topic within the subject (e.g. "Algebra", "Emergency Procedures", "Thermodynamics")
+- difficulty: 1-5 (1=very easy, 3=medium, 5=very hard)
+If you cannot determine the correct answer, use "To be determined".
+Detect subject/topic/difficulty from the question content and context.`;
 
   let text: string;
 
@@ -89,6 +93,9 @@ If you cannot determine the correct answer, use "To be determined".`;
     options: Array.isArray(q.options) ? q.options.map(String) : undefined,
     correctAnswer: String(q.correctAnswer || "To be determined"),
     explanation: q.explanation ? String(q.explanation) : undefined,
+    subject: q.subject ? String(q.subject) : undefined,
+    topic: q.topic ? String(q.topic) : undefined,
+    difficulty: typeof q.difficulty === "number" ? Math.min(5, Math.max(1, q.difficulty)) : undefined,
   }));
 }
 
@@ -140,12 +147,16 @@ async function _POST(req: NextRequest) {
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
   const domainId = formData.get("domainId") as string;
-  const subject = formData.get("subject") as string;
-  const topic = formData.get("topic") as string;
-  const difficulty = parseInt((formData.get("difficulty") as string) || "3");
+  const subject = (formData.get("subject") as string) || "";
+  const topic = (formData.get("topic") as string) || "";
+  const difficulty = parseInt((formData.get("difficulty") as string) || "0");
+  const isImage = file && IMAGE_EXTENSIONS.some((ext) => file.name.toLowerCase().endsWith(ext));
 
-  if (!file || !domainId || !subject || !topic) {
-    return NextResponse.json({ error: "Missing required fields: file, domainId, subject, topic" }, { status: 400 });
+  if (!file || !domainId) {
+    return NextResponse.json({ error: "Missing required fields: file, domainId" }, { status: 400 });
+  }
+  if (!isImage && (!subject || !topic)) {
+    return NextResponse.json({ error: "Subject and topic are required for PDF/DOCX/CSV imports" }, { status: 400 });
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -203,9 +214,9 @@ async function _POST(req: NextRequest) {
     const created = await prisma.question.createMany({
       data: aiQuestions.map((q) => ({
         domainId,
-        subject,
-        topic,
-        difficulty,
+        subject: q.subject || subject || "General",
+        topic: q.topic || topic || "General",
+        difficulty: q.difficulty || difficulty || 3,
         type: q.options ? "MULTIPLE_CHOICE" as const : "OPEN" as const,
         content: q.content,
         options: q.options ? (q.options as string[]) : undefined,
