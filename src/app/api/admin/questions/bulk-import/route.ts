@@ -155,9 +155,6 @@ async function _POST(req: NextRequest) {
   if (!file || !domainId) {
     return NextResponse.json({ error: "Missing required fields: file, domainId" }, { status: 400 });
   }
-  if (!isImage && (!subject || !topic)) {
-    return NextResponse.json({ error: "Subject and topic are required for PDF/DOCX/CSV imports" }, { status: 400 });
-  }
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const fileName = file.name.toLowerCase();
@@ -241,9 +238,9 @@ async function _POST(req: NextRequest) {
   const created = await prisma.question.createMany({
     data: questions.map((q) => ({
       domainId,
-      subject,
-      topic,
-      difficulty,
+      subject: subject || "General",
+      topic: topic || "General",
+      difficulty: difficulty || 3,
       type: q.options ? "MULTIPLE_CHOICE" as const : "OPEN" as const,
       content: q.content,
       options: q.options ? (q.options as string[]) : undefined,
