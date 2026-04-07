@@ -150,7 +150,6 @@ async function _POST(req: NextRequest) {
   const subject = (formData.get("subject") as string) || "";
   const topic = (formData.get("topic") as string) || "";
   const difficulty = parseInt((formData.get("difficulty") as string) || "0");
-  const isImage = file && IMAGE_EXTENSIONS.some((ext) => file.name.toLowerCase().endsWith(ext));
 
   if (!file || !domainId) {
     return NextResponse.json({ error: "Missing required fields: file, domainId" }, { status: 400 });
