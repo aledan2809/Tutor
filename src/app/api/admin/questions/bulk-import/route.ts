@@ -72,14 +72,20 @@ async function extractQuestionsWithAI(
 
   const isAnthropic = !process.env.OPENAI_API_KEY && !!process.env.ANTHROPIC_API_KEY;
 
-  const systemPrompt = `You are an expert at extracting exam questions from OCR text.
-Extract each separate question from the provided text. Return ONLY valid JSON array.
-Each element: {content, options (array if multiple choice), correctAnswer, explanation, subject, topic, difficulty}.
-- subject: the broad subject area (e.g. "Mathematics", "Aviation Safety", "Physics")
-- topic: the specific topic within the subject (e.g. "Algebra", "Emergency Procedures", "Thermodynamics")
-- difficulty: 1-5 (1=very easy, 3=medium, 5=very hard)
-If you cannot determine the correct answer, use "To be determined".
-Detect subject/topic/difficulty from the question content and context.`;
+  const systemPrompt = `You are an expert at extracting exam questions from OCR text (which may have OCR errors).
+Return a JSON object with a "questions" array. Each question has:
+- content (string): the question text, corrected for OCR errors
+- options (array of strings, optional): answer choices if multiple choice
+- correctAnswer (string): the correct answer, or "To be determined" if unclear
+- explanation (string, optional): brief explanation
+- subject (string): broad subject area (e.g. "Mathematics", "Aviation", "Physics")
+- topic (string): specific topic (e.g. "Algebra", "Emergency Procedures")
+- difficulty (number): 1-5 scale (1=easy, 3=medium, 5=hard)
+
+Example response:
+{"questions": [{"content": "What is 2+2?", "options": ["3", "4", "5"], "correctAnswer": "4", "subject": "Mathematics", "topic": "Arithmetic", "difficulty": 1}]}
+
+Return ONLY the JSON object, no markdown wrapping, no explanations.`;
 
   let text: string;
 
@@ -118,17 +124,34 @@ Detect subject/topic/difficulty from the question content and context.`;
     text = data.choices?.[0]?.message?.content || "";
   }
 
+  // Strip markdown code fences if present
+  let cleanText = text.trim();
+  cleanText = cleanText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+
   let parsed;
   try {
-    parsed = JSON.parse(text);
+    parsed = JSON.parse(cleanText);
   } catch {
-    const match = text.match(/\[[\s\S]*\]/);
-    if (match) parsed = JSON.parse(match[0]);
-    else throw new Error("AI did not return valid JSON");
+    // Try to find JSON array or object in the text
+    const arrayMatch = cleanText.match(/\[[\s\S]*\]/);
+    const objectMatch = cleanText.match(/\{[\s\S]*\}/);
+    if (arrayMatch) {
+      try { parsed = JSON.parse(arrayMatch[0]); } catch { /* fall through */ }
+    }
+    if (!parsed && objectMatch) {
+      try { parsed = JSON.parse(objectMatch[0]); } catch { /* fall through */ }
+    }
+    if (!parsed) {
+      console.error("[bulk-import] AI raw response:", text.substring(0, 500));
+      throw new Error("AI did not return valid JSON");
+    }
   }
 
-  const arr = Array.isArray(parsed) ? parsed : parsed.questions || [];
-  if (!Array.isArray(arr) || arr.length === 0) throw new Error("No questions extracted");
+  const arr = Array.isArray(parsed) ? parsed : parsed.questions || parsed.items || [];
+  if (!Array.isArray(arr) || arr.length === 0) {
+    console.error("[bulk-import] AI parsed but no questions array:", JSON.stringify(parsed).substring(0, 300));
+    throw new Error("No questions extracted");
+  }
 
   return arr.map((q: Record<string, unknown>) => ({
     content: String(q.content || ""),
