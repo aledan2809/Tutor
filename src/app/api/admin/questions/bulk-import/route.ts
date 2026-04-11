@@ -48,14 +48,50 @@ async function extractQuestionsFromImage(buffer: Buffer): Promise<ExtractedQuest
     } catch (e) { console.error("[bulk-import] Gemini Vision error:", (e as Error).message); }
   }
 
-  // 2. Mistral Vision (pixtral) — fallback
+  // 2. Mistral Vision (pixtral) — with retry on rate limit
   if (!text && mistralKey) {
+    for (let attempt = 0; attempt < 3 && !text; attempt++) {
+      if (attempt > 0) await new Promise(r => setTimeout(r, 5000 * attempt));
+      try {
+        const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${mistralKey}` },
+          body: JSON.stringify({
+            model: "pixtral-12b-2409",
+            messages: [{
+              role: "user",
+              content: [
+                { type: "text", text: VISION_PROMPT },
+                { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64}` } },
+              ],
+            }],
+            temperature: 0.2,
+            response_format: { type: "json_object" },
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          text = data.choices?.[0]?.message?.content || "";
+          if (text) console.log("[bulk-import] Mistral Vision OK (attempt " + (attempt+1) + ")");
+        } else if (res.status === 429 && attempt < 2) {
+          console.log("[bulk-import] Mistral Vision 429, retrying in " + (5*(attempt+1)) + "s...");
+        } else {
+          const errBody = await res.text().catch(() => "");
+          console.error("[bulk-import] Mistral Vision failed:", res.status, errBody.substring(0, 300));
+        }
+      } catch (e) { console.error("[bulk-import] Mistral Vision error:", (e as Error).message); }
+    }
+  }
+
+  // 3. Groq Vision (llama) — last resort
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!text && groqKey) {
     try {
-      const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${mistralKey}` },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${groqKey}` },
         body: JSON.stringify({
-          model: "pixtral-12b-2409",
+          model: "llama-3.2-90b-vision-preview",
           messages: [{
             role: "user",
             content: [
@@ -70,15 +106,15 @@ async function extractQuestionsFromImage(buffer: Buffer): Promise<ExtractedQuest
       if (res.ok) {
         const data = await res.json();
         text = data.choices?.[0]?.message?.content || "";
-        if (text) console.log("[bulk-import] Mistral Vision OK, response length:", text.length);
+        if (text) console.log("[bulk-import] Groq Vision OK");
       } else {
         const errBody = await res.text().catch(() => "");
-        console.error("[bulk-import] Mistral Vision failed:", res.status, errBody.substring(0, 300));
+        console.error("[bulk-import] Groq Vision failed:", res.status, errBody.substring(0, 300));
       }
-    } catch (e) { console.error("[bulk-import] Mistral Vision error:", (e as Error).message); }
+    } catch (e) { console.error("[bulk-import] Groq Vision error:", (e as Error).message); }
   }
 
-  if (!text) throw new Error("Vision AI failed — no provider returned results");
+  if (!text) throw new Error("Vision AI failed — all providers returned errors. Try again in a minute.");
 
   // Parse JSON response
   const cleanText = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
