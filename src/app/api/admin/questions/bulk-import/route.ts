@@ -66,9 +66,14 @@ async function processImageOCR(buffer: Buffer, fileName: string): Promise<string
 async function extractQuestionsWithAI(
   ocrText: string
 ): Promise<Array<{ content: string; options?: string[]; correctAnswer: string; explanation?: string; subject?: string; topic?: string; difficulty?: number }>> {
+  const geminiKey = process.env.GEMINI_API_KEY;
+  const mistralKey = process.env.MISTRAL_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   const openaiKey = process.env.OPENAI_API_KEY;
-  if (!anthropicKey && !openaiKey) throw new Error("No AI API key configured (ANTHROPIC_API_KEY or OPENAI_API_KEY)");
+
+  if (!geminiKey && !mistralKey && !anthropicKey && !openaiKey) {
+    throw new Error("No AI API key configured (GEMINI_API_KEY, MISTRAL_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY)");
+  }
 
   const systemPrompt = `You are an expert at extracting exam questions from OCR text (which may have OCR errors).
 Return a JSON object with a "questions" array. Each question has:
@@ -85,55 +90,97 @@ Example response:
 
 Return ONLY the JSON object, no markdown, no explanations.`;
 
+  const userMsg = `Extract all questions from this OCR text:\n\n${ocrText}`;
   let text = "";
 
-  // Try Anthropic first, then OpenAI as fallback
-  if (anthropicKey) {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": anthropicKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 4000,
-        system: systemPrompt,
-        messages: [{ role: "user", content: `Extract all questions from this OCR text:\n\n${ocrText}` }],
-      }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      text = data.content?.[0]?.text || "";
-    } else {
-      console.error("[bulk-import] Anthropic failed:", res.status, await res.text().catch(() => ""));
-    }
+  // 1. Try Gemini (FREE)
+  if (!text && geminiKey) {
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          contents: [{ parts: [{ text: userMsg }] }],
+          generationConfig: { temperature: 0.3, responseMimeType: "application/json" },
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      } else {
+        console.error("[bulk-import] Gemini failed:", res.status);
+      }
+    } catch (e) { console.error("[bulk-import] Gemini error:", (e as Error).message); }
   }
 
+  // 2. Try Mistral (FREE)
+  if (!text && mistralKey) {
+    try {
+      const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${mistralKey}` },
+        body: JSON.stringify({
+          model: "mistral-small-latest",
+          messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userMsg }],
+          temperature: 0.3,
+          response_format: { type: "json_object" },
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        text = data.choices?.[0]?.message?.content || "";
+      } else {
+        console.error("[bulk-import] Mistral failed:", res.status);
+      }
+    } catch (e) { console.error("[bulk-import] Mistral error:", (e as Error).message); }
+  }
+
+  // 3. Try Anthropic
+  if (!text && anthropicKey) {
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": anthropicKey, "anthropic-version": "2023-06-01" },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 4000,
+          system: systemPrompt,
+          messages: [{ role: "user", content: userMsg }],
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        text = data.content?.[0]?.text || "";
+      } else {
+        console.error("[bulk-import] Anthropic failed:", res.status);
+      }
+    } catch (e) { console.error("[bulk-import] Anthropic error:", (e as Error).message); }
+  }
+
+  // 4. Try OpenAI
   if (!text && openaiKey) {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${openaiKey}` },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `Extract all questions from this OCR text:\n\n${ocrText}` },
-        ],
-        temperature: 0.3,
-        response_format: { type: "json_object" },
-      }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      text = data.choices?.[0]?.message?.content || "";
-    } else {
-      console.error("[bulk-import] OpenAI failed:", res.status, await res.text().catch(() => ""));
-    }
+    try {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${openaiKey}` },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userMsg }],
+          temperature: 0.3,
+          response_format: { type: "json_object" },
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        text = data.choices?.[0]?.message?.content || "";
+      } else {
+        console.error("[bulk-import] OpenAI failed:", res.status);
+      }
+    } catch (e) { console.error("[bulk-import] OpenAI error:", (e as Error).message); }
   }
 
-  if (!text) throw new Error("All AI providers failed");
+  if (!text) throw new Error("All AI providers failed (Gemini, Mistral, Anthropic, OpenAI)");
 
   // Strip markdown code fences if present
   let cleanText = text.trim();
