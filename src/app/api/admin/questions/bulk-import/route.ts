@@ -42,7 +42,8 @@ async function extractQuestionsFromImage(buffer: Buffer): Promise<ExtractedQuest
         text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
         if (text) console.log("[bulk-import] Gemini Vision OK, response length:", text.length);
       } else {
-        console.error("[bulk-import] Gemini Vision failed:", res.status);
+        const errBody = await res.text().catch(() => "");
+        console.error("[bulk-import] Gemini Vision failed:", res.status, errBody.substring(0, 300));
       }
     } catch (e) { console.error("[bulk-import] Gemini Vision error:", (e as Error).message); }
   }
@@ -71,7 +72,8 @@ async function extractQuestionsFromImage(buffer: Buffer): Promise<ExtractedQuest
         text = data.choices?.[0]?.message?.content || "";
         if (text) console.log("[bulk-import] Mistral Vision OK, response length:", text.length);
       } else {
-        console.error("[bulk-import] Mistral Vision failed:", res.status);
+        const errBody = await res.text().catch(() => "");
+        console.error("[bulk-import] Mistral Vision failed:", res.status, errBody.substring(0, 300));
       }
     } catch (e) { console.error("[bulk-import] Mistral Vision error:", (e as Error).message); }
   }
