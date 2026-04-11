@@ -6,175 +6,99 @@ import { withErrorHandler } from "@/lib/api-handler";
 const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".jfif", ".webp", ".bmp", ".tiff", ".tif"];
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 
-async function processImageOCR(buffer: Buffer, fileName: string): Promise<string> {
-  const fs = await import("fs");
-  const path = await import("path");
-  const os = await import("os");
-  const { execSync } = await import("child_process");
+type ExtractedQuestion = { content: string; options?: string[]; correctAnswer: string; explanation?: string; subject?: string; topic?: string; difficulty?: number };
 
-  // Save buffer to temp file
-  const tmpDir = os.tmpdir();
-  const tmpFile = path.join(tmpDir, `ocr_${Date.now()}_${fileName}`);
-  const tmpOut = path.join(tmpDir, `ocr_${Date.now()}_out`);
+const VISION_PROMPT = `You are an expert at extracting exam/test questions from images.
+Look at this image carefully. It contains exam questions (possibly in Romanian or English).
+Extract EVERY question you can see. Return a JSON object with a "questions" array.
+Each question: {content, options (array if multiple choice), correctAnswer (or "To be determined"), subject, topic, difficulty (1-5)}.
+Return ONLY valid JSON, no markdown wrapping.`;
 
-  try {
-    fs.writeFileSync(tmpFile, buffer);
-    // Run tesseract directly
-    execSync(`tesseract "${tmpFile}" "${tmpOut}" -l eng+ron 2>/dev/null`, { timeout: 30000 });
-    const text = fs.readFileSync(tmpOut + ".txt", "utf-8");
-    return text.trim();
-  } finally {
-    try { fs.unlinkSync(tmpFile); } catch { /* ignore */ }
-    try { fs.unlinkSync(tmpOut + ".txt"); } catch { /* ignore */ }
-  }
-}
-
-async function extractQuestionsWithAI(
-  ocrText: string
-): Promise<Array<{ content: string; options?: string[]; correctAnswer: string; explanation?: string; subject?: string; topic?: string; difficulty?: number }>> {
+async function extractQuestionsFromImage(buffer: Buffer): Promise<ExtractedQuestion[]> {
+  const base64 = buffer.toString("base64");
   const geminiKey = process.env.GEMINI_API_KEY;
   const mistralKey = process.env.MISTRAL_API_KEY;
-  const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  const openaiKey = process.env.OPENAI_API_KEY;
 
-  if (!geminiKey && !mistralKey && !anthropicKey && !openaiKey) {
-    throw new Error("No AI API key configured (GEMINI_API_KEY, MISTRAL_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY)");
-  }
-
-  const systemPrompt = `You are an expert at extracting exam questions from OCR text (which may have OCR errors).
-Return a JSON object with a "questions" array. Each question has:
-- content (string): the question text, corrected for OCR errors
-- options (array of strings, optional): answer choices if multiple choice
-- correctAnswer (string): the correct answer, or "To be determined" if unclear
-- explanation (string, optional): brief explanation
-- subject (string): broad subject area (e.g. "Mathematics", "Aviation", "Physics")
-- topic (string): specific topic (e.g. "Algebra", "Emergency Procedures")
-- difficulty (number): 1-5 scale (1=easy, 3=medium, 5=hard)
-
-Example response:
-{"questions": [{"content": "What is 2+2?", "options": ["3", "4", "5"], "correctAnswer": "4", "subject": "Mathematics", "topic": "Arithmetic", "difficulty": 1}]}
-
-Return ONLY the JSON object, no markdown, no explanations.`;
-
-  const userMsg = `Extract all questions from this OCR text:\n\n${ocrText}`;
   let text = "";
 
-  // 1. Try Gemini (FREE)
+  // 1. Gemini Vision (FREE) — best for image understanding
   if (!text && geminiKey) {
     try {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          contents: [{ parts: [{ text: userMsg }] }],
-          generationConfig: { temperature: 0.3, responseMimeType: "application/json" },
+          contents: [{
+            parts: [
+              { text: VISION_PROMPT },
+              { inline_data: { mime_type: "image/jpeg", data: base64 } },
+            ],
+          }],
+          generationConfig: { temperature: 0.2, responseMimeType: "application/json" },
         }),
       });
       if (res.ok) {
         const data = await res.json();
         text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        if (text) console.log("[bulk-import] Gemini Vision OK, response length:", text.length);
       } else {
-        console.error("[bulk-import] Gemini failed:", res.status);
+        console.error("[bulk-import] Gemini Vision failed:", res.status);
       }
-    } catch (e) { console.error("[bulk-import] Gemini error:", (e as Error).message); }
+    } catch (e) { console.error("[bulk-import] Gemini Vision error:", (e as Error).message); }
   }
 
-  // 2. Try Mistral (FREE)
+  // 2. Mistral Vision (pixtral) — fallback
   if (!text && mistralKey) {
     try {
       const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${mistralKey}` },
         body: JSON.stringify({
-          model: "mistral-small-latest",
-          messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userMsg }],
-          temperature: 0.3,
+          model: "pixtral-12b-2409",
+          messages: [{
+            role: "user",
+            content: [
+              { type: "text", text: VISION_PROMPT },
+              { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64}` } },
+            ],
+          }],
+          temperature: 0.2,
           response_format: { type: "json_object" },
         }),
       });
       if (res.ok) {
         const data = await res.json();
         text = data.choices?.[0]?.message?.content || "";
+        if (text) console.log("[bulk-import] Mistral Vision OK, response length:", text.length);
       } else {
-        console.error("[bulk-import] Mistral failed:", res.status);
+        console.error("[bulk-import] Mistral Vision failed:", res.status);
       }
-    } catch (e) { console.error("[bulk-import] Mistral error:", (e as Error).message); }
+    } catch (e) { console.error("[bulk-import] Mistral Vision error:", (e as Error).message); }
   }
 
-  // 3. Try Anthropic
-  if (!text && anthropicKey) {
-    try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": anthropicKey, "anthropic-version": "2023-06-01" },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 4000,
-          system: systemPrompt,
-          messages: [{ role: "user", content: userMsg }],
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        text = data.content?.[0]?.text || "";
-      } else {
-        console.error("[bulk-import] Anthropic failed:", res.status);
-      }
-    } catch (e) { console.error("[bulk-import] Anthropic error:", (e as Error).message); }
-  }
+  if (!text) throw new Error("Vision AI failed — no provider returned results");
 
-  // 4. Try OpenAI
-  if (!text && openaiKey) {
-    try {
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${openaiKey}` },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userMsg }],
-          temperature: 0.3,
-          response_format: { type: "json_object" },
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        text = data.choices?.[0]?.message?.content || "";
-      } else {
-        console.error("[bulk-import] OpenAI failed:", res.status);
-      }
-    } catch (e) { console.error("[bulk-import] OpenAI error:", (e as Error).message); }
-  }
-
-  if (!text) throw new Error("All AI providers failed (Gemini, Mistral, Anthropic, OpenAI)");
-
-  // Strip markdown code fences if present
-  let cleanText = text.trim();
-  cleanText = cleanText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
-
+  // Parse JSON response
+  const cleanText = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
   let parsed;
   try {
     parsed = JSON.parse(cleanText);
   } catch {
-    // Try to find JSON array or object in the text
-    const arrayMatch = cleanText.match(/\[[\s\S]*\]/);
-    const objectMatch = cleanText.match(/\{[\s\S]*\}/);
-    if (arrayMatch) {
-      try { parsed = JSON.parse(arrayMatch[0]); } catch { /* fall through */ }
-    }
-    if (!parsed && objectMatch) {
-      try { parsed = JSON.parse(objectMatch[0]); } catch { /* fall through */ }
+    const objMatch = cleanText.match(/\{[\s\S]*\}/);
+    if (objMatch) {
+      try { parsed = JSON.parse(objMatch[0]); } catch { /* fall through */ }
     }
     if (!parsed) {
-      console.error("[bulk-import] AI raw response:", text.substring(0, 500));
+      console.error("[bulk-import] Vision raw:", text.substring(0, 500));
       throw new Error("AI did not return valid JSON");
     }
   }
 
-  const arr = Array.isArray(parsed) ? parsed : parsed.questions || parsed.items || [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const arr: any[] = Array.isArray(parsed) ? parsed : parsed.questions || parsed.items || [];
   if (!Array.isArray(arr) || arr.length === 0) {
-    console.error("[bulk-import] AI parsed but no questions array:", JSON.stringify(parsed).substring(0, 300));
-    throw new Error("No questions extracted");
+    console.error("[bulk-import] Vision parsed but empty:", JSON.stringify(parsed).substring(0, 300));
+    throw new Error("No questions found in image");
   }
 
   return arr.map((q: Record<string, unknown>) => ({
@@ -185,7 +109,7 @@ Return ONLY the JSON object, no markdown, no explanations.`;
     subject: q.subject ? String(q.subject) : undefined,
     topic: q.topic ? String(q.topic) : undefined,
     difficulty: typeof q.difficulty === "number" ? Math.min(5, Math.max(1, q.difficulty)) : undefined,
-  }));
+  })).filter((q) => q.content.trim());
 }
 
 async function parsePDF(buffer: Buffer): Promise<string> {
@@ -269,31 +193,17 @@ async function _POST(req: NextRequest) {
       return NextResponse.json({ error: "Image too large. Maximum size is 10MB." }, { status: 400 });
     }
 
-    let ocrText: string;
+    let aiQuestions: ExtractedQuestion[];
     try {
-      ocrText = await processImageOCR(buffer, file.name);
+      aiQuestions = await extractQuestionsFromImage(buffer);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "OCR processing failed";
-      console.error("[bulk-import] OCR failed:", msg);
-      return NextResponse.json({ error: `Failed to process image: ${msg}` }, { status: 500 });
-    }
-
-    if (!ocrText || ocrText.trim().length < 10) {
-      return NextResponse.json({ error: "Could not extract readable text from image. Try a clearer image." }, { status: 400 });
-    }
-
-    let aiQuestions;
-    try {
-      aiQuestions = await extractQuestionsWithAI(ocrText);
-      aiQuestions = aiQuestions.filter((q) => q.content?.trim());
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "AI extraction failed";
-      console.error("[bulk-import] AI extraction failed:", msg);
+      const msg = err instanceof Error ? err.message : "Image processing failed";
+      console.error("[bulk-import] Vision extraction failed:", msg);
       return NextResponse.json({ error: `Failed to extract questions: ${msg}` }, { status: 500 });
     }
 
     if (aiQuestions.length === 0) {
-      return NextResponse.json({ error: "No valid questions could be extracted from the image." }, { status: 400 });
+      return NextResponse.json({ error: "No questions could be found in the image. Try a clearer image with visible text." }, { status: 400 });
     }
 
     const created = await prisma.question.createMany({
