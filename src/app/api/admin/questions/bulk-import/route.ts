@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { withErrorHandler } from "@/lib/api-handler";
 
-const OCR_SERVICE_URL = process.env.OCR_SERVICE_URL || "http://localhost:8000";
 const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".jfif", ".webp", ".bmp", ".tiff", ".tif"];
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 
