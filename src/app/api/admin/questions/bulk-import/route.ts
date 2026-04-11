@@ -8,13 +8,23 @@ const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 
 type ExtractedQuestion = { content: string; options?: string[]; correctAnswer: string; explanation?: string; subject?: string; topic?: string; difficulty?: number };
 
-const VISION_PROMPT = `You are an expert at extracting exam/test questions from images.
-Look at this image carefully. It contains exam questions (possibly in Romanian or English).
-Extract EVERY question you can see. Return a JSON object with a "questions" array.
-Each question: {content, options (array if multiple choice), correctAnswer (or "To be determined"), subject, topic, difficulty (1-5)}.
-Return ONLY valid JSON, no markdown wrapping.`;
+const VISION_PROMPT = `You are an expert at extracting exam/test questions from scanned documents and photos.
+The image may be low quality, blurry, rotated, or contain handwritten text. Do your best to read it.
+
+INSTRUCTIONS:
+1. Read ALL text in the image very carefully, even if blurry or partially obscured
+2. Identify each separate question (numbered or separated by spacing)
+3. For each question, extract the question text, answer options (if multiple choice), and the correct answer
+4. Fix obvious OCR/scanning errors (e.g. "Bucure5ti" → "București", "MatematicA" → "Matematică")
+5. If text is in Romanian, keep it in Romanian but fix diacritics (ă, î, â, ș, ț)
+6. If you cannot read a word clearly, make your best guess based on context
+7. Determine subject, topic, and difficulty (1-5) from the content
+
+Return a JSON object: {"questions": [{content, options, correctAnswer, explanation, subject, topic, difficulty}]}
+Return ONLY valid JSON, no markdown.`;
 
 async function extractQuestionsFromImage(buffer: Buffer): Promise<ExtractedQuestion[]> {
+  // Pre-process: convert to JPEG for consistent format
   const base64 = buffer.toString("base64");
   const geminiKey = process.env.GEMINI_API_KEY;
   const mistralKey = process.env.MISTRAL_API_KEY;
