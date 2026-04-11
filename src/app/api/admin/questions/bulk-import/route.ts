@@ -66,11 +66,9 @@ async function processImageOCR(buffer: Buffer, fileName: string): Promise<string
 async function extractQuestionsWithAI(
   ocrText: string
 ): Promise<Array<{ content: string; options?: string[]; correctAnswer: string; explanation?: string; subject?: string; topic?: string; difficulty?: number }>> {
-  // Use OpenAI or Anthropic via environment
-  const apiKey = process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error("No AI API key configured (OPENAI_API_KEY or ANTHROPIC_API_KEY)");
-
-  const isAnthropic = !process.env.OPENAI_API_KEY && !!process.env.ANTHROPIC_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+  if (!anthropicKey && !openaiKey) throw new Error("No AI API key configured (ANTHROPIC_API_KEY or OPENAI_API_KEY)");
 
   const systemPrompt = `You are an expert at extracting exam questions from OCR text (which may have OCR errors).
 Return a JSON object with a "questions" array. Each question has:
@@ -85,16 +83,17 @@ Return a JSON object with a "questions" array. Each question has:
 Example response:
 {"questions": [{"content": "What is 2+2?", "options": ["3", "4", "5"], "correctAnswer": "4", "subject": "Mathematics", "topic": "Arithmetic", "difficulty": 1}]}
 
-Return ONLY the JSON object, no markdown wrapping, no explanations.`;
+Return ONLY the JSON object, no markdown, no explanations.`;
 
-  let text: string;
+  let text = "";
 
-  if (isAnthropic) {
+  // Try Anthropic first, then OpenAI as fallback
+  if (anthropicKey) {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": apiKey,
+        "x-api-key": anthropicKey,
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
@@ -104,12 +103,18 @@ Return ONLY the JSON object, no markdown wrapping, no explanations.`;
         messages: [{ role: "user", content: `Extract all questions from this OCR text:\n\n${ocrText}` }],
       }),
     });
-    const data = await res.json();
-    text = data.content?.[0]?.text || "";
-  } else {
+    if (res.ok) {
+      const data = await res.json();
+      text = data.content?.[0]?.text || "";
+    } else {
+      console.error("[bulk-import] Anthropic failed:", res.status, await res.text().catch(() => ""));
+    }
+  }
+
+  if (!text && openaiKey) {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${openaiKey}` },
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
@@ -120,9 +125,15 @@ Return ONLY the JSON object, no markdown wrapping, no explanations.`;
         response_format: { type: "json_object" },
       }),
     });
-    const data = await res.json();
-    text = data.choices?.[0]?.message?.content || "";
+    if (res.ok) {
+      const data = await res.json();
+      text = data.choices?.[0]?.message?.content || "";
+    } else {
+      console.error("[bulk-import] OpenAI failed:", res.status, await res.text().catch(() => ""));
+    }
   }
+
+  if (!text) throw new Error("All AI providers failed");
 
   // Strip markdown code fences if present
   let cleanText = text.trim();
