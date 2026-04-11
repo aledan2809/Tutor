@@ -51,7 +51,7 @@ async function extractQuestionsFromImage(buffer: Buffer): Promise<ExtractedQuest
   // 2. Mistral Vision (pixtral) — with retry on rate limit
   if (!text && mistralKey) {
     for (let attempt = 0; attempt < 3 && !text; attempt++) {
-      if (attempt > 0) await new Promise(r => setTimeout(r, 5000 * attempt));
+      if (attempt > 0) await new Promise(r => setTimeout(r, 10000 * attempt));
       try {
         const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
           method: "POST",
@@ -91,7 +91,7 @@ async function extractQuestionsFromImage(buffer: Buffer): Promise<ExtractedQuest
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${groqKey}` },
         body: JSON.stringify({
-          model: "llama-3.2-90b-vision-preview",
+          model: "meta-llama/llama-4-scout-17b-16e-instruct",
           messages: [{
             role: "user",
             content: [
