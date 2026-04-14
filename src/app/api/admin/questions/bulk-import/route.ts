@@ -8,137 +8,170 @@ const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 
 type ExtractedQuestion = { content: string; options?: string[]; correctAnswer: string; explanation?: string; subject?: string; topic?: string; difficulty?: number };
 
-const VISION_PROMPT = `You are an expert at reading handwritten and printed documents, including notes, exercises, and exam questions.
+// ─── Step 1: Vision AI reads image → plain text transcription ───
+const STEP1_PROMPT = `You are a handwriting recognition expert. Read this image of a handwritten/printed page.
+TRANSCRIBE every line of text EXACTLY as written. Include all numbers, symbols, equations, diagrams described in words.
+Do NOT interpret, summarize, or invent text. Only write what you can actually see.
+If a word is unclear, write [unclear] instead of guessing.
+Keep the original language (Romanian/English). Fix obvious letter recognition only.
+Output plain text, preserving the structure of the page.`;
 
-The image is a PHOTO of a handwritten or printed page. It may contain:
-- Exam questions with multiple choice answers (A/B/C/D)
-- Math exercises or problems with worked solutions
-- Study notes describing methods, techniques, or procedures
-- Mixed content: some questions, some notes
+// ─── Step 2: Text AI transforms transcription → structured questions ───
+const STEP2_PROMPT = `You are an expert at creating exam questions from study notes, exercises, and handwritten pages.
+Below is a TRANSCRIPTION of a handwritten page. Transform it into structured exam questions.
 
-YOUR TASK:
-1. Read the ENTIRE page carefully — every line, every number, every symbol
-2. First, TRANSCRIBE the full text exactly as written (handwritten text may be messy)
-3. Then, TRANSFORM the content into structured questions:
-   - If it's already a question → extract as-is
-   - If it's a math exercise → formulate as "Solve: ..." or "Calculate: ..." question
-   - If it's study notes describing a method → create a question about that method
-   - If it's an example with solution → create a question asking to solve a similar problem
-4. Fix handwriting recognition errors based on context
-5. Keep original language (Romanian/English), fix diacritics (ă, î, â, ș, ț)
-6. For math: preserve all numbers, operations, and notation correctly
+Rules:
+- If it's already a question with options → extract as-is with correct answer
+- If it's a math/physics problem → formulate clearly, COMPUTE the correct answer
+- If it's study notes about a method → create "Ce este...?" or "Descrieți..." question with options
+- If it's an exercise with numbers → create "Calculați: ..." question
+- For physics: use correct formulas (F=ma, P=UI, V=IR, etc.) to compute answers
+- Generate 4 multiple choice options (a, b, c, d) for each question where possible
+- Keep Romanian, fix diacritics (ă, î, â, ș, ț)
+- difficulty: 1=trivial, 2=easy, 3=medium, 4=hard, 5=very hard
 
-IMPORTANT: Each piece of content on the page should become at least one question.
-If the page has 5 distinct items, return at least 5 questions.
+Return JSON: {"questions": [{"content": "...", "options": ["a","b","c","d"], "correctAnswer": "...", "explanation": "...", "subject": "...", "topic": "...", "difficulty": 3}]}
+Return ONLY valid JSON, no markdown.
 
-Return JSON: {"questions": [{content, options (if applicable), correctAnswer, explanation, subject, topic, difficulty (1-5)}]}
-Return ONLY valid JSON, no markdown.`;
+TRANSCRIPTION:
+`;
 
-async function extractQuestionsFromImage(buffer: Buffer): Promise<ExtractedQuestion[]> {
-  // Pre-process: convert to JPEG for consistent format
-  const base64 = buffer.toString("base64");
+async function callVisionAI(base64: string, prompt: string): Promise<string> {
   const geminiKey = process.env.GEMINI_API_KEY;
   const mistralKey = process.env.MISTRAL_API_KEY;
+  const groqKey = process.env.GROQ_API_KEY;
 
-  let text = "";
-
-  // 1. Gemini Vision (FREE) — best for image understanding
-  if (!text && geminiKey) {
+  // 1. Gemini
+  if (geminiKey) {
     try {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: VISION_PROMPT },
-              { inline_data: { mime_type: "image/jpeg", data: base64 } },
-            ],
-          }],
-          generationConfig: { temperature: 0.2, responseMimeType: "application/json" },
+          contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }],
+          generationConfig: { temperature: 0.1 },
         }),
       });
       if (res.ok) {
         const data = await res.json();
-        text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        if (text) console.log("[bulk-import] Gemini Vision OK, response length:", text.length);
-      } else {
-        const errBody = await res.text().catch(() => "");
-        console.error("[bulk-import] Gemini Vision failed:", res.status, errBody.substring(0, 300));
-      }
-    } catch (e) { console.error("[bulk-import] Gemini Vision error:", (e as Error).message); }
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        if (text) { console.log("[bulk-import] Gemini Vision OK"); return text; }
+      } else { console.error("[bulk-import] Gemini:", res.status); }
+    } catch (e) { console.error("[bulk-import] Gemini error:", (e as Error).message); }
   }
 
-  // 2. Mistral Vision (pixtral) — with retry on rate limit
-  if (!text && mistralKey) {
-    for (let attempt = 0; attempt < 3 && !text; attempt++) {
-      if (attempt > 0) await new Promise(r => setTimeout(r, 10000 * attempt));
-      try {
-        const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${mistralKey}` },
-          body: JSON.stringify({
-            model: "pixtral-12b-2409",
-            messages: [{
-              role: "user",
-              content: [
-                { type: "text", text: VISION_PROMPT },
-                { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64}` } },
-              ],
-            }],
-            temperature: 0.2,
-            response_format: { type: "json_object" },
-          }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          text = data.choices?.[0]?.message?.content || "";
-          if (text) console.log("[bulk-import] Mistral Vision OK (attempt " + (attempt+1) + ")");
-        } else if (res.status === 429 && attempt < 2) {
-          console.log("[bulk-import] Mistral Vision 429, retrying in " + (5*(attempt+1)) + "s...");
-        } else {
-          const errBody = await res.text().catch(() => "");
-          console.error("[bulk-import] Mistral Vision failed:", res.status, errBody.substring(0, 300));
-        }
-      } catch (e) { console.error("[bulk-import] Mistral Vision error:", (e as Error).message); }
-    }
-  }
-
-  // 3. Groq Vision (llama) — last resort
-  const groqKey = process.env.GROQ_API_KEY;
-  if (!text && groqKey) {
+  // 2. Groq (fast, free, reliable)
+  if (groqKey) {
     try {
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${groqKey}` },
         body: JSON.stringify({
           model: "meta-llama/llama-4-scout-17b-16e-instruct",
-          messages: [{
-            role: "user",
-            content: [
-              { type: "text", text: VISION_PROMPT },
-              { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64}` } },
-            ],
-          }],
-          temperature: 0.2,
-          response_format: { type: "json_object" },
+          messages: [{ role: "user", content: [{ type: "text", text: prompt }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64}` } }] }],
+          temperature: 0.1,
         }),
       });
       if (res.ok) {
         const data = await res.json();
-        text = data.choices?.[0]?.message?.content || "";
-        if (text) console.log("[bulk-import] Groq Vision OK");
-      } else {
-        const errBody = await res.text().catch(() => "");
-        console.error("[bulk-import] Groq Vision failed:", res.status, errBody.substring(0, 300));
-      }
-    } catch (e) { console.error("[bulk-import] Groq Vision error:", (e as Error).message); }
+        const text = data.choices?.[0]?.message?.content || "";
+        if (text) { console.log("[bulk-import] Groq Vision OK"); return text; }
+      } else { console.error("[bulk-import] Groq:", res.status); }
+    } catch (e) { console.error("[bulk-import] Groq error:", (e as Error).message); }
   }
 
-  if (!text) throw new Error("Vision AI failed — all providers returned errors. Try again in a minute.");
+  // 3. Mistral Pixtral with retry
+  if (mistralKey) {
+    for (let i = 0; i < 3; i++) {
+      if (i > 0) await new Promise(r => setTimeout(r, 10000 * i));
+      try {
+        const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${mistralKey}` },
+          body: JSON.stringify({
+            model: "pixtral-12b-2409",
+            messages: [{ role: "user", content: [{ type: "text", text: prompt }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64}` } }] }],
+            temperature: 0.1,
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const text = data.choices?.[0]?.message?.content || "";
+          if (text) { console.log("[bulk-import] Mistral Vision OK"); return text; }
+        } else if (res.status === 429 && i < 2) {
+          console.log("[bulk-import] Mistral 429, retry...");
+        } else { console.error("[bulk-import] Mistral:", res.status); break; }
+      } catch (e) { console.error("[bulk-import] Mistral error:", (e as Error).message); }
+    }
+  }
 
-  // Parse JSON response
-  const cleanText = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+  throw new Error("All vision providers failed. Try again in a minute.");
+}
+
+async function callTextAI(prompt: string): Promise<string> {
+  const mistralKey = process.env.MISTRAL_API_KEY;
+  const groqKey = process.env.GROQ_API_KEY;
+
+  // Mistral text (separate from vision, different rate limit)
+  if (mistralKey) {
+    try {
+      const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${mistralKey}` },
+        body: JSON.stringify({
+          model: "mistral-small-latest",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.2, response_format: { type: "json_object" },
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.choices?.[0]?.message?.content || "";
+        if (text) { console.log("[bulk-import] Mistral Text OK"); return text; }
+      }
+    } catch { /* fall through */ }
+  }
+
+  // Groq text
+  if (groqKey) {
+    try {
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${groqKey}` },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.2, response_format: { type: "json_object" },
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.choices?.[0]?.message?.content || "";
+        if (text) { console.log("[bulk-import] Groq Text OK"); return text; }
+      }
+    } catch { /* fall through */ }
+  }
+
+  throw new Error("Text AI failed");
+}
+
+async function extractQuestionsFromImage(buffer: Buffer): Promise<ExtractedQuestion[]> {
+  const base64 = buffer.toString("base64");
+
+  // STEP 1: Transcribe image → plain text
+  console.log("[bulk-import] Step 1: Transcribing...");
+  const transcription = await callVisionAI(base64, STEP1_PROMPT);
+  console.log("[bulk-import] Transcription:", transcription.length, "chars");
+  console.log("[bulk-import] Preview:", transcription.substring(0, 200));
+
+  if (transcription.length < 20) throw new Error("Could not read text from image");
+
+  // STEP 2: Transform transcription → structured questions
+  console.log("[bulk-import] Step 2: Structuring questions...");
+  const questionsJson = await callTextAI(STEP2_PROMPT + transcription);
+  if (!questionsJson) throw new Error("Failed to create questions from transcription");
+
+  // Parse
+  const cleanText = questionsJson.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
   let parsed;
   try {
     parsed = JSON.parse(cleanText);
@@ -148,15 +181,15 @@ async function extractQuestionsFromImage(buffer: Buffer): Promise<ExtractedQuest
       try { parsed = JSON.parse(objMatch[0]); } catch { /* fall through */ }
     }
     if (!parsed) {
-      console.error("[bulk-import] Vision raw:", text.substring(0, 500));
+      console.error("[bulk-import] Parse failed:", cleanText.substring(0, 300));
       throw new Error("AI did not return valid JSON");
     }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const arr: any[] = Array.isArray(parsed) ? parsed : parsed.questions || parsed.items || [];
-  if (!Array.isArray(arr) || arr.length === 0) {
-    console.error("[bulk-import] Vision parsed but empty:", JSON.stringify(parsed).substring(0, 300));
+  if (arr.length === 0) {
+    console.error("[bulk-import] Empty questions from:", JSON.stringify(parsed).substring(0, 300));
     throw new Error("No questions found in image");
   }
 
@@ -170,6 +203,8 @@ async function extractQuestionsFromImage(buffer: Buffer): Promise<ExtractedQuest
     difficulty: typeof q.difficulty === "number" ? Math.min(5, Math.max(1, q.difficulty)) : undefined,
   })).filter((q) => q.content.trim());
 }
+
+// ─── Document parsers ───
 
 async function parsePDF(buffer: Buffer): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -187,22 +222,17 @@ async function parseDOCX(buffer: Buffer): Promise<string> {
 function parseCSV(text: string): Array<Record<string, string>> {
   const lines = text.split("\n").filter((l) => l.trim());
   if (lines.length < 2) return [];
-
   const headers = lines[0].split(",").map((h) => h.trim().replace(/^"|"$/g, ""));
   return lines.slice(1).map((line) => {
     const values = line.split(",").map((v) => v.trim().replace(/^"|"$/g, ""));
     const row: Record<string, string> = {};
-    headers.forEach((h, i) => {
-      row[h] = values[i] || "";
-    });
+    headers.forEach((h, i) => { row[h] = values[i] || ""; });
     return row;
   });
 }
 
 function extractQuestionsFromText(text: string): Array<{ content: string; correctAnswer: string }> {
-  // Split by common question patterns (numbered questions)
   const blocks = text.split(/(?=\d+[\.\)]\s)/).filter((b) => b.trim().length > 20);
-
   return blocks.map((block) => {
     const lines = block.trim().split("\n");
     return {
@@ -211,6 +241,8 @@ function extractQuestionsFromText(text: string): Array<{ content: string; correc
     };
   });
 }
+
+// ─── Main handler ───
 
 async function _POST(req: NextRequest) {
   const { error, session } = await requireAdmin();
@@ -254,10 +286,9 @@ async function _POST(req: NextRequest) {
       const path = await import("path");
       const uploadDir = path.join(process.cwd(), "uploads");
       if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-      const savedPath = path.join(uploadDir, `${Date.now()}_${file.name}`);
-      fs.writeFileSync(savedPath, buffer);
-      console.log("[bulk-import] Image saved:", savedPath, "size:", buffer.length);
-    } catch (e) { console.error("[bulk-import] Failed to save image:", (e as Error).message); }
+      fs.writeFileSync(path.join(uploadDir, `${Date.now()}_${file.name}`), buffer);
+    } catch { /* ignore save errors */ }
+
     if (buffer.length > MAX_IMAGE_SIZE) {
       return NextResponse.json({ error: "Image too large. Maximum size is 10MB." }, { status: 400 });
     }
@@ -267,12 +298,12 @@ async function _POST(req: NextRequest) {
       aiQuestions = await extractQuestionsFromImage(buffer);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Image processing failed";
-      console.error("[bulk-import] Vision extraction failed:", msg);
+      console.error("[bulk-import] Failed:", msg);
       return NextResponse.json({ error: `Failed to extract questions: ${msg}` }, { status: 500 });
     }
 
     if (aiQuestions.length === 0) {
-      return NextResponse.json({ error: "No questions could be found in the image. Try a clearer image with visible text." }, { status: 400 });
+      return NextResponse.json({ error: "No questions found in image." }, { status: 400 });
     }
 
     const created = await prisma.question.createMany({
@@ -301,7 +332,6 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: "No questions could be extracted from the file." }, { status: 400 });
   }
 
-  // Bulk create - manual content gets approved directly
   const created = await prisma.question.createMany({
     data: questions.map((q) => ({
       domainId,
