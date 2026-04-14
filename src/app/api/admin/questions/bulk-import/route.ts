@@ -237,6 +237,16 @@ async function _POST(req: NextRequest) {
         options: r.options ? r.options.split("|") : undefined,
       }));
   } else if (IMAGE_EXTENSIONS.some((ext) => fileName.endsWith(ext))) {
+    // Save uploaded image for debugging/reprocessing
+    try {
+      const fs = await import("fs");
+      const path = await import("path");
+      const uploadDir = path.join(process.cwd(), "uploads");
+      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+      const savedPath = path.join(uploadDir, `${Date.now()}_${file.name}`);
+      fs.writeFileSync(savedPath, buffer);
+      console.log("[bulk-import] Image saved:", savedPath, "size:", buffer.length);
+    } catch (e) { console.error("[bulk-import] Failed to save image:", (e as Error).message); }
     if (buffer.length > MAX_IMAGE_SIZE) {
       return NextResponse.json({ error: "Image too large. Maximum size is 10MB." }, { status: 400 });
     }
