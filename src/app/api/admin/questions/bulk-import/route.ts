@@ -8,19 +8,30 @@ const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 
 type ExtractedQuestion = { content: string; options?: string[]; correctAnswer: string; explanation?: string; subject?: string; topic?: string; difficulty?: number };
 
-const VISION_PROMPT = `You are an expert at extracting exam/test questions from scanned documents and photos.
-The image may be low quality, blurry, rotated, or contain handwritten text. Do your best to read it.
+const VISION_PROMPT = `You are an expert at reading handwritten and printed documents, including notes, exercises, and exam questions.
 
-INSTRUCTIONS:
-1. Read ALL text in the image very carefully, even if blurry or partially obscured
-2. Identify each separate question (numbered or separated by spacing)
-3. For each question, extract the question text, answer options (if multiple choice), and the correct answer
-4. Fix obvious OCR/scanning errors (e.g. "Bucure5ti" → "București", "MatematicA" → "Matematică")
-5. If text is in Romanian, keep it in Romanian but fix diacritics (ă, î, â, ș, ț)
-6. If you cannot read a word clearly, make your best guess based on context
-7. Determine subject, topic, and difficulty (1-5) from the content
+The image is a PHOTO of a handwritten or printed page. It may contain:
+- Exam questions with multiple choice answers (A/B/C/D)
+- Math exercises or problems with worked solutions
+- Study notes describing methods, techniques, or procedures
+- Mixed content: some questions, some notes
 
-Return a JSON object: {"questions": [{content, options, correctAnswer, explanation, subject, topic, difficulty}]}
+YOUR TASK:
+1. Read the ENTIRE page carefully — every line, every number, every symbol
+2. First, TRANSCRIBE the full text exactly as written (handwritten text may be messy)
+3. Then, TRANSFORM the content into structured questions:
+   - If it's already a question → extract as-is
+   - If it's a math exercise → formulate as "Solve: ..." or "Calculate: ..." question
+   - If it's study notes describing a method → create a question about that method
+   - If it's an example with solution → create a question asking to solve a similar problem
+4. Fix handwriting recognition errors based on context
+5. Keep original language (Romanian/English), fix diacritics (ă, î, â, ș, ț)
+6. For math: preserve all numbers, operations, and notation correctly
+
+IMPORTANT: Each piece of content on the page should become at least one question.
+If the page has 5 distinct items, return at least 5 questions.
+
+Return JSON: {"questions": [{content, options (if applicable), correctAnswer, explanation, subject, topic, difficulty (1-5)}]}
 Return ONLY valid JSON, no markdown.`;
 
 async function extractQuestionsFromImage(buffer: Buffer): Promise<ExtractedQuestion[]> {

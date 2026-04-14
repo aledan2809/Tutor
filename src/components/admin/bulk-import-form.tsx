@@ -9,7 +9,7 @@ interface Props {
 
 export function BulkImportForm({ domains }: Props) {
   const router = useRouter();
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [domainId, setDomainId] = useState(domains[0]?.id || "");
   const [subject, setSubject] = useState("");
   const [topic, setTopic] = useState("");
@@ -20,38 +20,48 @@ export function BulkImportForm({ domains }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!file) return;
+    if (files.length === 0) return;
 
     setLoading(true);
     setError("");
     setResult(null);
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("domainId", domainId);
-    formData.append("subject", subject || "General");
-    formData.append("topic", topic || "General");
-    formData.append("difficulty", (difficulty || 3).toString());
+    let totalImported = 0;
+    let totalQuestions = 0;
+    let hasImage = false;
+    const errors: string[] = [];
 
-    try {
-      const res = await fetch("/api/admin/questions/bulk-import", {
-        method: "POST",
-        body: formData,
-      });
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("domainId", domainId);
+      formData.append("subject", subject || "General");
+      formData.append("topic", topic || "General");
+      formData.append("difficulty", (difficulty || 3).toString());
 
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Import failed");
-        return;
+      try {
+        const res = await fetch("/api/admin/questions/bulk-import", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          errors.push(`${file.name}: ${data.error || "Import failed"}`);
+        } else {
+          totalImported += data.imported || 0;
+          totalQuestions += data.total || 0;
+          if (data.fromImage) hasImage = true;
+        }
+      } catch {
+        errors.push(`${file.name}: Network error`);
       }
-
-      setResult(data);
-      router.refresh();
-    } catch {
-      setError("Network error");
-    } finally {
-      setLoading(false);
     }
+
+    if (errors.length > 0) setError(errors.join("\n"));
+    if (totalImported > 0) setResult({ imported: totalImported, total: totalQuestions, fromImage: hasImage });
+    router.refresh();
+    setLoading(false);
   }
 
   return (
@@ -74,10 +84,14 @@ export function BulkImportForm({ domains }: Props) {
         <input
           type="file"
           accept=".pdf,.docx,.csv,.png,.jpg,.jpeg,.jfif,.webp,.bmp,.tiff,.tif"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
+          multiple
+          onChange={(e) => setFiles(Array.from(e.target.files || []))}
           className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white file:mr-4 file:rounded file:border-0 file:bg-blue-600 file:px-3 file:py-1 file:text-sm file:text-white"
           required
         />
+        {files.length > 1 && (
+          <p className="mt-1 text-xs text-blue-400">{files.length} files selected</p>
+        )}
         <p className="mt-1 text-xs text-gray-500">
           CSV: content,correctAnswer,options. PDF/DOCX: numbered questions. Images (PNG/JPEG/JFIF/WebP): OCR + AI extraction.
         </p>
@@ -135,7 +149,7 @@ export function BulkImportForm({ domains }: Props) {
 
       <button
         type="submit"
-        disabled={loading || !file}
+        disabled={loading || files.length === 0}
         className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
       >
         {loading ? "Importing..." : "Import Questions"}
