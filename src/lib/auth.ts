@@ -67,8 +67,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+      }
+      // Refresh roles from DB on every token refresh (not just login)
+      if (token.id) {
         const dbUser = await prisma.user.findUnique({
-          where: { id: user.id },
+          where: { id: token.id as string },
           include: {
             enrollments: {
               where: { isActive: true },
