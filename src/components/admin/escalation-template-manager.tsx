@@ -35,7 +35,7 @@ export function EscalationTemplateManager({
   });
 
   async function handleSave(id: string) {
-    const res = await fetch("/api/admin/domain/aviation/templates", {
+    const res = await fetch("/api/admin/templates", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, content: editContent }),
@@ -48,7 +48,7 @@ export function EscalationTemplateManager({
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    const res = await fetch("/api/admin/domain/aviation/templates", {
+    const res = await fetch("/api/admin/templates", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -65,7 +65,7 @@ export function EscalationTemplateManager({
   }
 
   async function handleToggle(id: string, isActive: boolean) {
-    const res = await fetch("/api/admin/domain/aviation/templates", {
+    const res = await fetch("/api/admin/templates", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, isActive: !isActive }),
