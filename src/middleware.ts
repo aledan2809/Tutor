@@ -119,7 +119,9 @@ export default function middleware(request: NextRequest) {
       const locale =
         pathname.match(/^\/(en|ro)/)?.[1] || routing.defaultLocale;
       const signInUrl = new URL(`/${locale}/auth/signin`, request.url);
-      signInUrl.searchParams.set("callbackUrl", pathname);
+      // Strip locale prefix from callbackUrl to prevent double-locale (/en/en/...)
+      const callbackPath = pathname.replace(/^\/(en|ro)/, "") || "/dashboard";
+      signInUrl.searchParams.set("callbackUrl", callbackPath);
       return NextResponse.redirect(signInUrl);
     }
   }
