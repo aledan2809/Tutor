@@ -18,7 +18,12 @@ async function _POST(
   }
 
   const { domain: domainSlug } = await params;
-  const body = await req.json();
+  let body: Record<string, unknown> = {};
+  try {
+    body = await req.json();
+  } catch {
+    // empty body defaults to quick session
+  }
   const sessionType = (body.type || "quick") as SessionType;
 
   if (!SESSION_TYPES[sessionType]) {

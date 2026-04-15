@@ -658,11 +658,18 @@ export async function getDailyChallenge(domainId: string) {
   });
 
   if (!challenge) {
-    // Pick a hard question (difficulty >= 4)
-    const question = await prisma.question.findFirst({
-      where: { domainId, status: "PUBLISHED", difficulty: { gte: 4 } },
+    // Pick a challenging question (difficulty >= 3, fallback to any)
+    let question = await prisma.question.findFirst({
+      where: { domainId, status: "PUBLISHED", difficulty: { gte: 3 } },
       orderBy: { createdAt: "desc" },
     });
+
+    if (!question) {
+      question = await prisma.question.findFirst({
+        where: { domainId, status: "PUBLISHED" },
+        orderBy: { createdAt: "desc" },
+      });
+    }
 
     if (!question) return null;
 

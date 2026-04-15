@@ -5,7 +5,7 @@ import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 
 const lessonsQuerySchema = z.object({
-  domainId: z.string().uuid("Invalid domainId format"),
+  domainId: z.string().min(1, "domainId is required"),
   subject: z.string().max(200).optional(),
   topic: z.string().max(200).optional(),
   page: z.coerce.number().int().min(1).default(1),

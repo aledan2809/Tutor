@@ -19,8 +19,16 @@ async function _POST(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const body = await req.json();
-  const { formatId, mode = "PRACTICE" } = body;
+  let body: Record<string, unknown> = {};
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid or missing request body" },
+      { status: 400 }
+    );
+  }
+  const { formatId, mode = "PRACTICE" } = body as { formatId?: string; mode?: string };
 
   if (!formatId) {
     return NextResponse.json(
