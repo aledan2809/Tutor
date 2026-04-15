@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MarkdownPreview } from "./markdown-preview";
+// MarkdownPreview removed — showing plain text for faster review
 
 interface Question {
   id: string;
@@ -14,6 +14,7 @@ interface Question {
   options: string[] | null;
   correctAnswer: string;
   explanation: string | null;
+  sourceReference: string | null;
   source: string;
   domain: { name: string };
   createdBy: { name: string } | null;
@@ -162,169 +163,148 @@ export function ReviewQueue({ questions }: { questions: Question[] }) {
         )}
       </div>
 
-      {questions.map((q) => (
+      {questions.map((q) => {
+        const isExpanded = expanded === q.id;
+        const isEditing = editing === q.id;
+        // Match correctAnswer to option: correctAnswer has "a) text", options are just "text"
+        const correctLetter = q.correctAnswer?.match(/^([abcd])\)/)?.[1] || null;
+        const correctIndex = correctLetter ? correctLetter.charCodeAt(0) - 97 : -1;
+
+        return (
         <div
           key={q.id}
-          className={`rounded-xl border bg-gray-900 p-4 ${
+          className={`rounded-xl border bg-gray-900 ${
             selected.has(q.id) ? "border-blue-600" : "border-gray-800"
           }`}
         >
-          <div className="flex items-start gap-3">
-            {/* Checkbox */}
+          {/* Header row: checkbox + tags + select */}
+          <div className="flex items-center gap-2 border-b border-gray-800/50 px-4 py-2">
             <input
               type="checkbox"
               checked={selected.has(q.id)}
               onChange={() => toggleSelect(q.id)}
-              className="mt-1.5 rounded border-gray-600 bg-gray-800"
+              className="rounded border-gray-600 bg-gray-800"
             />
-
-            <div className="flex-1">
-              <div className="mb-2 flex flex-wrap gap-2 text-xs">
-                <span className="rounded bg-gray-800 px-2 py-0.5 text-gray-400">
-                  {q.domain.name}
-                </span>
-                <span className="rounded bg-gray-800 px-2 py-0.5 text-gray-400">
-                  {q.subject} / {q.topic}
-                </span>
-                <span className="rounded bg-gray-800 px-2 py-0.5 text-gray-400">
-                  Diff: {q.difficulty}/5
-                </span>
-                <span className="rounded bg-purple-900/50 px-2 py-0.5 text-purple-400">
-                  {q.source === "AI_GENERATED" ? "AI Generated" : "Manual"}
-                </span>
-                {q.createdBy && (
-                  <span className="rounded bg-gray-800 px-2 py-0.5 text-gray-500">
-                    by {q.createdBy.name}
-                  </span>
-                )}
-              </div>
-
-              <button
-                onClick={() => setExpanded(expanded === q.id ? null : q.id)}
-                className="text-left w-full"
-              >
-                {editing === q.id ? null : (
-                  <div className="text-white">
-                    {expanded === q.id ? (
-                      <MarkdownPreview content={q.content} />
-                    ) : (
-                      <p className="line-clamp-2">{q.content}</p>
-                    )}
-                  </div>
-                )}
-              </button>
-
-              {/* Inline Edit Mode */}
-              {editing === q.id && (
-                <div className="space-y-3">
-                  <div>
-                    <label className="mb-1 block text-xs text-gray-500">Content (Markdown)</label>
-                    <textarea
-                      value={editForm.content}
-                      onChange={(e) => setEditForm((p) => ({ ...p, content: e.target.value }))}
-                      rows={4}
-                      className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 font-mono text-sm text-white focus:border-blue-500 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs text-gray-500">Correct Answer</label>
-                    <textarea
-                      value={editForm.correctAnswer}
-                      onChange={(e) => setEditForm((p) => ({ ...p, correctAnswer: e.target.value }))}
-                      rows={2}
-                      className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs text-gray-500">Explanation</label>
-                    <textarea
-                      value={editForm.explanation}
-                      onChange={(e) => setEditForm((p) => ({ ...p, explanation: e.target.value }))}
-                      rows={2}
-                      className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => saveEdit(q.id)}
-                      disabled={processing === q.id}
-                      className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-                    >
-                      Save Changes
-                    </button>
-                    <button
-                      onClick={() => setEditing(null)}
-                      className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-800"
-                    >
-                      Cancel Edit
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {expanded === q.id && editing !== q.id && (
-                <div className="mt-3 space-y-2 border-t border-gray-800 pt-3">
-                  {q.type === "MULTIPLE_CHOICE" && q.options && (
-                    <div>
-                      <p className="text-xs text-gray-500">Options:</p>
-                      <ul className="mt-1 space-y-1">
-                        {(q.options as string[]).map((opt, i) => (
-                          <li
-                            key={i}
-                            className={`text-sm ${
-                              opt === q.correctAnswer
-                                ? "font-medium text-green-400"
-                                : "text-gray-300"
-                            }`}
-                          >
-                            {String.fromCharCode(65 + i)}. {opt}
-                            {opt === q.correctAnswer && " \u2713"}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-xs text-gray-500">Correct Answer:</p>
-                    <p className="text-sm text-green-400">{q.correctAnswer}</p>
-                  </div>
-                  {q.explanation && (
-                    <div>
-                      <p className="text-xs text-gray-500">Explanation:</p>
-                      <p className="text-sm text-gray-300">{q.explanation}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="ml-2 flex flex-col gap-2">
-              <button
-                onClick={() => handleAction(q.id, "approve")}
-                disabled={processing === q.id}
-                className="rounded-lg bg-green-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-600 disabled:opacity-50"
-              >
-                Approve
-              </button>
-              <button
-                onClick={() => startEdit(q)}
-                disabled={processing === q.id}
-                className="rounded-lg border border-blue-700 px-3 py-1.5 text-center text-xs text-blue-400 hover:bg-blue-900/20 disabled:opacity-50"
-              >
-                {editing === q.id ? "Editing..." : "Edit"}
-              </button>
-              <button
-                onClick={() => handleAction(q.id, "delete")}
-                disabled={processing === q.id}
-                className="rounded-lg border border-red-800 px-3 py-1.5 text-xs text-red-400 hover:bg-red-900/20 disabled:opacity-50"
-              >
-                Delete
-              </button>
+            <div className="flex flex-1 flex-wrap gap-1.5 text-xs">
+              <span className="rounded bg-gray-800 px-1.5 py-0.5 text-gray-400">{q.subject} / {q.topic}</span>
+              <span className="rounded bg-gray-800 px-1.5 py-0.5 text-gray-500">Diff: {q.difficulty}/5</span>
             </div>
           </div>
+
+          {/* Content — always show full question + options */}
+          <div className="px-4 py-3">
+            {!isEditing && (
+              <>
+                <p className="text-sm text-white">{q.content}</p>
+
+                {/* Options — always visible */}
+                {q.type === "MULTIPLE_CHOICE" && q.options && (
+                  <ul className="mt-2 space-y-1">
+                    {(q.options as string[]).map((opt, i) => {
+                      const isCorrect = i === correctIndex;
+                      return (
+                        <li key={i} className={`rounded px-2 py-1 text-sm ${
+                          isCorrect
+                            ? "bg-green-900/20 font-medium text-green-400"
+                            : "text-gray-300"
+                        }`}>
+                          {String.fromCharCode(97 + i)}) {opt}
+                          {isCorrect && " \u2713"}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+
+                {/* Correct answer if no options match */}
+                {correctIndex === -1 && q.correctAnswer && q.correctAnswer !== "To be determined" && (
+                  <p className="mt-2 text-sm text-green-400">Answer: {q.correctAnswer}</p>
+                )}
+                {q.correctAnswer === "To be determined" && (
+                  <p className="mt-2 text-xs text-amber-400">Answer not yet mapped</p>
+                )}
+
+                {/* Source Reference */}
+                {q.sourceReference && (
+                  <p className="mt-2 text-xs text-amber-500/70">{q.sourceReference}</p>
+                )}
+
+                {/* Explanation (collapsible) */}
+                {q.explanation && isExpanded && (
+                  <div className="mt-2 border-t border-gray-800 pt-2">
+                    <p className="text-xs text-gray-500">Explanation:</p>
+                    <p className="text-sm text-gray-300">{q.explanation}</p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Inline Edit Mode */}
+            {isEditing && (
+              <div className="space-y-3">
+                <div>
+                  <label className="mb-1 block text-xs text-gray-500">Content</label>
+                  <textarea
+                    value={editForm.content}
+                    onChange={(e) => setEditForm((p) => ({ ...p, content: e.target.value }))}
+                    rows={4}
+                    className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-gray-500">Correct Answer</label>
+                  <textarea
+                    value={editForm.correctAnswer}
+                    onChange={(e) => setEditForm((p) => ({ ...p, correctAnswer: e.target.value }))}
+                    rows={2}
+                    className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-gray-500">Explanation</label>
+                  <textarea
+                    value={editForm.explanation}
+                    onChange={(e) => setEditForm((p) => ({ ...p, explanation: e.target.value }))}
+                    rows={2}
+                    className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => saveEdit(q.id)} disabled={processing === q.id}
+                    className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+                    Save
+                  </button>
+                  <button onClick={() => setEditing(null)}
+                    className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-800">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Action buttons — bottom bar, full width on mobile */}
+          <div className="flex items-center gap-2 border-t border-gray-800/50 px-4 py-2">
+            <button onClick={() => handleAction(q.id, "approve")} disabled={processing === q.id}
+              className="flex-1 rounded-lg bg-green-700 py-1.5 text-center text-xs font-medium text-white hover:bg-green-600 disabled:opacity-50 sm:flex-none sm:px-4">
+              Approve
+            </button>
+            <button onClick={() => handleAction(q.id, "publish")} disabled={processing === q.id}
+              className="flex-1 rounded-lg bg-blue-700 py-1.5 text-center text-xs font-medium text-white hover:bg-blue-600 disabled:opacity-50 sm:flex-none sm:px-4">
+              Publish
+            </button>
+            <button onClick={() => startEdit(q)} disabled={processing === q.id}
+              className="flex-1 rounded-lg border border-gray-700 py-1.5 text-center text-xs text-gray-400 hover:bg-gray-800 disabled:opacity-50 sm:flex-none sm:px-4">
+              Edit
+            </button>
+            <button onClick={() => handleAction(q.id, "delete")} disabled={processing === q.id}
+              className="rounded-lg border border-red-800 px-3 py-1.5 text-xs text-red-400 hover:bg-red-900/20 disabled:opacity-50">
+              Del
+            </button>
+          </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
