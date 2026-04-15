@@ -13,7 +13,7 @@ interface UserRow {
   bannedReason: string | null;
   subscriptionStatus: string | null;
   createdAt: string;
-  enrollments: { roles: string[]; domain: { name: string; slug: string } }[];
+  enrollments: { roles: string[]; domain: { id: string; name: string; slug: string } }[];
   subscriptionPlan: { name: string } | null;
 }
 
@@ -435,7 +435,14 @@ export function UserManagement() {
                 ) : (
                   <select
                     value={enrollDomainId}
-                    onChange={(e) => setEnrollDomainId(e.target.value)}
+                    onChange={(e) => {
+                      const domId = e.target.value;
+                      setEnrollDomainId(domId);
+                      // Pre-populate roles if user already enrolled on this domain
+                      const user = users.find((u) => u.id === enrollModal?.userId);
+                      const existing = user?.enrollments.find((en) => en.domain.id === domId);
+                      setEnrollRoles(existing ? [...existing.roles] : ["STUDENT"]);
+                    }}
                     required
                     className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
                   >

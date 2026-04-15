@@ -44,7 +44,7 @@ async function _GET(req: NextRequest) {
         enrollments: {
           select: {
             roles: true,
-            domain: { select: { name: true, slug: true } },
+            domain: { select: { id: true, name: true, slug: true } },
           },
         },
         subscriptionPlan: { select: { name: true } },
