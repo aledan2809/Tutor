@@ -69,8 +69,8 @@ export default function middleware(request: NextRequest) {
   // Redirect routes without locale prefix to default locale
   if (
     !pathname.startsWith("/api/") &&
-    !pathname.startsWith("/en/") &&
-    !pathname.startsWith("/ro/") &&
+    !pathname.startsWith("/en") &&
+    !pathname.startsWith("/ro") &&
     !pathname.startsWith("/_next/") &&
     pathname !== "/" &&
     !pathname.match(/\.\w+$/)
