@@ -136,12 +136,20 @@ export default function SignInPage() {
                 {t("signInButton") || "Sign In"}
               </button>
             </form>
-            <button
-              onClick={() => setMode("magic")}
-              className="mt-3 w-full text-center text-xs text-gray-500 hover:text-gray-400"
-            >
-              {t("useMagicLink") || "Use magic link instead"}
-            </button>
+            <div className="mt-3 flex items-center justify-between">
+              <Link
+                href="/auth/forgot-password"
+                className="text-xs text-blue-400 hover:text-blue-300"
+              >
+                Forgot password?
+              </Link>
+              <button
+                onClick={() => setMode("magic")}
+                className="text-xs text-gray-500 hover:text-gray-400"
+              >
+                {t("useMagicLink") || "Use magic link instead"}
+              </button>
+            </div>
           </>
         ) : (
           <>
@@ -179,7 +187,14 @@ export default function SignInPage() {
           </>
         )}
 
-        <p className="mt-6 text-center text-xs text-gray-500">
+        <p className="mt-4 text-center text-sm text-gray-500">
+          Don&apos;t have an account?{" "}
+          <Link href="/auth/register" className="text-blue-400 hover:text-blue-300">
+            Create one
+          </Link>
+        </p>
+
+        <p className="mt-4 text-center text-xs text-gray-500">
           {t("agreePrefix")}{" "}
           <Link href="/terms" className="text-blue-400 hover:text-blue-300 underline">
             {t("termsOfService")}
