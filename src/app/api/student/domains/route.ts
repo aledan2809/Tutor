@@ -16,7 +16,7 @@ async function _GET() {
         include: {
           _count: {
             select: {
-              questions: { where: { status: "PUBLISHED" } },
+              questions: true,
               enrollments: true,
             },
           },
@@ -25,12 +25,19 @@ async function _GET() {
     },
   });
 
+  // Check if user has admin/instructor role on any domain
+  const isContentEditor = enrollments.some((e) =>
+    e.roles.some((r) => ["ADMIN", "INSTRUCTOR"].includes(r))
+  );
+
   // Get progress for each domain
   const domains = await Promise.all(
     enrollments.map(async (enrollment) => {
       // Get domain-specific topics to scope progress
       const domainQuestions = await prisma.question.findMany({
-        where: { domainId: enrollment.domainId, status: "PUBLISHED" },
+        where: isContentEditor
+          ? { domainId: enrollment.domainId }
+          : { domainId: enrollment.domainId, status: "PUBLISHED" },
         select: { subject: true, topic: true },
       });
       const domainTopicKeys = new Set(
@@ -97,7 +104,7 @@ async function _GET() {
     include: {
       _count: {
         select: {
-          questions: { where: { status: "PUBLISHED" } },
+          questions: isContentEditor ? true : { where: { status: "PUBLISHED" as const } },
           enrollments: true,
         },
       },
