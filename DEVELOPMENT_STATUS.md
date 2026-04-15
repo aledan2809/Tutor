@@ -26,12 +26,11 @@ Last Updated: 2026-04-15 13:00
 - Test users: test_admin@test.com, test_instructor@test.com, test_student@test.com, test_watcher@test.com (TestPass123!)
 
 ### In Progress
-- Content hierarchy: subjects/topics are free-text, no CRUD for subjects/topics
-- Lesson CRUD: Model exists in Prisma but no admin UI/API
+- (none currently)
 
 ### Not Started
-- Subject/Topic as Prisma models (currently free-text on questions)
-- Lesson management admin UI
+- Forgot Password: email delivery needs SMTP config on VPS (logic done, email skipped if no SMTP)
+- Web Push: VAPID keys set, needs real browser testing with user opt-in
 
 ## Recent Changes (2026-04-11 — 2026-04-15)
 
