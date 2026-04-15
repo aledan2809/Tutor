@@ -54,17 +54,58 @@ export async function sendNotification(
 async function sendPushNotification(
   payload: NotificationPayload
 ): Promise<boolean> {
+  const title = (payload.metadata.title as string) ?? "Study Reminder";
+  const message = (payload.metadata.message as string) ?? "You have a session waiting!";
+
+  // Save in-app notification
   await prisma.notification.create({
     data: {
       userId: payload.userId,
       type: "push",
-      title: (payload.metadata.title as string) ?? "Study Reminder",
-      message:
-        (payload.metadata.message as string) ??
-        "You have a session waiting!",
+      title,
+      message,
       metadata: { templateId: payload.templateId },
     },
   });
+
+  // Send real web push if VAPID configured
+  const vapidPublic = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
+  if (vapidPublic && vapidPrivate) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const webpush = require("web-push");
+      webpush.setVapidDetails(
+        `mailto:${process.env.EMAIL_FROM || "noreply@tutor.app"}`,
+        vapidPublic,
+        vapidPrivate
+      );
+
+      const subscriptions = await prisma.pushSubscription.findMany({
+        where: { userId: payload.userId },
+      });
+
+      const pushPayload = JSON.stringify({ title, body: message, icon: "/icon-192.png" });
+
+      for (const sub of subscriptions) {
+        try {
+          await webpush.sendNotification(
+            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+            pushPayload
+          );
+        } catch (err) {
+          const statusCode = (err as { statusCode?: number }).statusCode;
+          if (statusCode === 410 || statusCode === 404) {
+            // Subscription expired — clean up
+            await prisma.pushSubscription.delete({ where: { id: sub.id } });
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Web push error:", err);
+    }
+  }
+
   return true;
 }
 

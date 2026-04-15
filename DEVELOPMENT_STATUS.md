@@ -30,12 +30,17 @@ Last Updated: 2026-04-15 13:00
 - Lesson CRUD: Model exists in Prisma but no admin UI/API
 
 ### Not Started
-- Forgot Password flow
-- Self-registration page
 - Subject/Topic as Prisma models (currently free-text on questions)
 - Lesson management admin UI
 
 ## Recent Changes (2026-04-11 — 2026-04-15)
+
+### 2026-04-15 (Auth features)
+- feat: Forgot Password flow — email with reset link, token validation, password update
+- feat: Self-registration page — name, email, password, optional domain enrollment
+- feat: Public domains API (/api/domains/public) for registration domain picker
+- feat: "Forgot password?" and "Create account" links on signin page
+- fix: Added /auth/register, /auth/forgot-password, /auth/reset-password as public routes
 
 ### 2026-04-15 (Tester audit)
 - fix: Lessons page crash — domainId validated with .uuid() but Prisma uses CUID

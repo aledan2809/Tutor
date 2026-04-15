@@ -81,6 +81,7 @@ model User {
   thresholdsSet       EscalationThreshold[] @relation("ThresholdInstructor")
   thresholdsFor       EscalationThreshold[] @relation("ThresholdStudent")
   dashboardAnalytics  DashboardAnalytics[]
+  pushSubscriptions   PushSubscription[]
   // Phase 10: Monetization & SuperAdmin
   subscriptionPlanId  String?
   subscriptionStatus  String?   // "trialing", "active", "canceled", "past_due"
@@ -862,4 +863,19 @@ model Assessment {
   domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
 
   @@index([userId, domainId])
+}
+
+// ─── Web Push Subscriptions ───
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
