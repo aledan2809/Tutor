@@ -68,7 +68,7 @@ async function _POST(
     },
   });
 
-  // Return questions without correct answers
+  // Return questions without correct answers, ensure options exist for MC
   const sanitizedQuestions = questions.map((q) => ({
     id: q.id,
     subject: q.subject,
@@ -76,7 +76,7 @@ async function _POST(
     difficulty: q.difficulty,
     type: q.type,
     content: q.content,
-    options: q.options,
+    options: q.type === "MULTIPLE_CHOICE" && !q.options ? ["a)", "b)", "c)", "d)"] : q.options,
   }));
 
   return NextResponse.json({

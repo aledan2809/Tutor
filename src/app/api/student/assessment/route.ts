@@ -183,17 +183,18 @@ async function _GET(req: NextRequest) {
     return NextResponse.json({ error: "Not enrolled in this domain" }, { status: 403 });
   }
 
-  // Select 10 questions across difficulties for assessment
+  // Select 10 MULTIPLE_CHOICE questions with valid options across difficulties
+  const baseWhere = { domainId, status: "PUBLISHED" as const, type: "MULTIPLE_CHOICE" as const, options: { not: null as unknown as undefined } };
+
   const easyQuestions = await prisma.question.findMany({
-    where: { domainId, status: "PUBLISHED", difficulty: { lte: 2 } },
+    where: { ...baseWhere, difficulty: { lte: 2 } },
     take: 3,
     orderBy: { createdAt: "desc" },
   });
 
   const mediumQuestions = await prisma.question.findMany({
     where: {
-      domainId,
-      status: "PUBLISHED",
+      ...baseWhere,
       difficulty: 3,
       id: { notIn: easyQuestions.map((q) => q.id) },
     },
@@ -203,8 +204,7 @@ async function _GET(req: NextRequest) {
 
   const hardQuestions = await prisma.question.findMany({
     where: {
-      domainId,
-      status: "PUBLISHED",
+      ...baseWhere,
       difficulty: { gte: 4 },
       id: {
         notIn: [
@@ -217,7 +217,26 @@ async function _GET(req: NextRequest) {
     orderBy: { createdAt: "desc" },
   });
 
-  const questions = [...easyQuestions, ...mediumQuestions, ...hardQuestions];
+  let questions = [...easyQuestions, ...mediumQuestions, ...hardQuestions];
+
+  // If we don't have enough, fill with any published MC questions
+  if (questions.length < 10) {
+    const fill = await prisma.question.findMany({
+      where: {
+        ...baseWhere,
+        id: { notIn: questions.map((q) => q.id) },
+      },
+      take: 10 - questions.length,
+      orderBy: { createdAt: "desc" },
+    });
+    questions = [...questions, ...fill];
+  }
+
+  // Filter out any questions with null/empty options (extra safety)
+  questions = questions.filter((q) => {
+    const opts = q.options as unknown[];
+    return Array.isArray(opts) && opts.length >= 2;
+  });
 
   // Shuffle
   for (let i = questions.length - 1; i > 0; i--) {
