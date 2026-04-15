@@ -326,6 +326,7 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ imported: created.count, total: aiQuestions.length, fromImage: true });
   } else {
     return NextResponse.json({ error: "Unsupported file type. Use PDF, DOCX, CSV, or Image (PNG/JPEG/JFIF/WebP)." }, { status: 400 });
+
   }
 
   if (questions.length === 0) {
