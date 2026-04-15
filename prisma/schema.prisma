@@ -182,6 +182,9 @@ model Question {
   options       Json?          // Array of answer options for multiple choice
   correctAnswer String         @db.Text
   explanation   String?        @db.Text
+  sourceReference String?      // "Udroiu 2023, p.10, Q11" — visible only to Instructor/Admin
+  imageUrl      String?        // Image attached to question
+  explanationVideoUrl String?  // Video explanation URL
   source        QuestionSource @default(MANUAL)
   status        QuestionStatus @default(DRAFT)
   createdById   String?
