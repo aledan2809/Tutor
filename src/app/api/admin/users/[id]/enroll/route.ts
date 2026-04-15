@@ -35,13 +35,20 @@ async function _POST(
     return NextResponse.json({ error: "Domain not found" }, { status: 404 });
   }
 
-  // Upsert enrollment
+  // Upsert enrollment — merge roles instead of overwriting
+  const existing = await prisma.enrollment.findUnique({
+    where: { userId_domainId: { userId, domainId: parsed.data.domainId } },
+  });
+  const mergedRoles = existing
+    ? [...new Set([...existing.roles, ...parsed.data.roles])]
+    : parsed.data.roles;
+
   const enrollment = await prisma.enrollment.upsert({
     where: {
       userId_domainId: { userId, domainId: parsed.data.domainId },
     },
     update: {
-      roles: parsed.data.roles,
+      roles: mergedRoles,
       isActive: true,
     },
     create: {
