@@ -263,6 +263,15 @@ async function _POST(req: NextRequest) {
   const fileName = file.name.toLowerCase();
   let questions: Array<{ content: string; correctAnswer: string; options?: string[] }> = [];
 
+  // Save all uploaded files for reprocessing
+  try {
+    const fs = await import("fs");
+    const path = await import("path");
+    const uploadDir = path.join(process.cwd(), "uploads");
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    fs.writeFileSync(path.join(uploadDir, `${Date.now()}_${file.name}`), buffer);
+  } catch { /* ignore save errors */ }
+
   if (fileName.endsWith(".pdf")) {
     const text = await parsePDF(buffer);
     questions = extractQuestionsFromText(text);
@@ -280,15 +289,6 @@ async function _POST(req: NextRequest) {
         options: r.options ? r.options.split("|") : undefined,
       }));
   } else if (IMAGE_EXTENSIONS.some((ext) => fileName.endsWith(ext))) {
-    // Save uploaded image for debugging/reprocessing
-    try {
-      const fs = await import("fs");
-      const path = await import("path");
-      const uploadDir = path.join(process.cwd(), "uploads");
-      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-      fs.writeFileSync(path.join(uploadDir, `${Date.now()}_${file.name}`), buffer);
-    } catch { /* ignore save errors */ }
-
     if (buffer.length > MAX_IMAGE_SIZE) {
       return NextResponse.json({ error: "Image too large. Maximum size is 10MB." }, { status: 400 });
     }
