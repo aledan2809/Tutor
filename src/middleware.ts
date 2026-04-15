@@ -31,7 +31,7 @@ function checkRateLimit(ip: string, path: string): { allowed: boolean; remaining
   const windowMs = 60_000;
 
   if (path.startsWith("/api/auth")) {
-    maxRequests = 5;
+    maxRequests = 20;
   } else if (path.startsWith("/api/admin/stripe") || path.startsWith("/api/stripe")) {
     maxRequests = 3;
   }
