@@ -10,7 +10,9 @@ export async function requireAdmin() {
   const user = session.user;
   const isAdmin =
     user.isSuperAdmin ||
-    user.enrollments?.some((e) => e.roles.includes("ADMIN" as never));
+    user.enrollments?.some((e) =>
+      e.roles.includes("ADMIN" as never) || e.roles.includes("INSTRUCTOR" as never)
+    );
 
   if (!isAdmin) {
     return { error: NextResponse.json({ error: "Forbidden" }, { status: 403 }), session: null };
