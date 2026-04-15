@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { withErrorHandler } from "@/lib/api-handler";
-import { AIRouter, getProjectPreset } from "ai-router";
-import type { AIRequest } from "ai-router";
 
 const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".jfif", ".webp", ".bmp", ".tiff", ".tif"];
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
