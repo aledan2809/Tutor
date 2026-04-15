@@ -36,6 +36,7 @@ const statusColors: Record<string, string> = {
   PUBLISHED: "bg-blue-900/50 text-blue-400",
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const difficultyLabels = ["", "Very Easy", "Easy", "Medium", "Hard", "Expert"];
 
 export function QuestionList({ questions, domains, total, page, limit, filters }: Props) {
@@ -199,102 +200,52 @@ export function QuestionList({ questions, domains, total, page, limit, filters }
         </div>
       )}
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-gray-800">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-800 bg-gray-900/50">
-            <tr>
-              <th className="px-3 py-3">
-                <input
-                  type="checkbox"
-                  checked={selected.size === questions.length && questions.length > 0}
-                  onChange={toggleSelectAll}
-                  className="rounded border-gray-600 bg-gray-800"
-                />
-              </th>
-              <th className="px-4 py-3 text-gray-400">Content</th>
-              <th className="px-4 py-3 text-gray-400">Domain</th>
-              <th className="px-4 py-3 text-gray-400">Subject / Topic</th>
-              <th className="px-4 py-3 text-gray-400">Diff.</th>
-              <th className="px-4 py-3 text-gray-400">Type</th>
-              <th className="px-4 py-3 text-gray-400">Source</th>
-              <th className="px-4 py-3 text-gray-400">Status</th>
-              <th className="px-4 py-3 text-gray-400">Tags</th>
-              <th className="px-4 py-3 text-gray-400">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-800">
-            {questions.map((q) => (
-              <tr key={q.id} className={`hover:bg-gray-900/50 ${selected.has(q.id) ? "bg-blue-900/10" : ""}`}>
-                <td className="px-3 py-3">
-                  <input
-                    type="checkbox"
-                    checked={selected.has(q.id)}
-                    onChange={() => toggleSelect(q.id)}
-                    className="rounded border-gray-600 bg-gray-800"
-                  />
-                </td>
-                <td className="max-w-xs px-4 py-3">
-                  <div className="truncate text-white">{q.content.substring(0, 80)}{q.content.length > 80 ? "..." : ""}</div>
-                  {q.sourceReference && (
-                    <div className="mt-0.5 truncate text-xs text-amber-500/70">{q.sourceReference}</div>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-gray-300">{q.domain.name}</td>
-                <td className="px-4 py-3 text-gray-300">
-                  <span className="text-white">{q.subject}</span>
-                  <br />
-                  <span className="text-xs text-gray-500">{q.topic}</span>
-                </td>
-                <td className="px-4 py-3 text-gray-300" title={difficultyLabels[q.difficulty]}>
-                  {q.difficulty}/5
-                </td>
-                <td className="px-4 py-3 text-gray-300 text-xs">
-                  {q.type === "MULTIPLE_CHOICE" ? "MC" : "Open"}
-                </td>
-                <td className="px-4 py-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs ${
-                    q.source === "AI_GENERATED" ? "bg-purple-900/50 text-purple-400" : "bg-gray-700 text-gray-400"
-                  }`}>
-                    {q.source === "AI_GENERATED" ? "AI" : "Manual"}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[q.status]}`}>
-                    {q.status}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex flex-wrap gap-1">
-                    {q.tags.slice(0, 3).map((t) => (
-                      <span key={t.id} className="rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-400">
-                        {t.name}
-                      </span>
-                    ))}
-                    {q.tags.length > 3 && (
-                      <span className="text-xs text-gray-600">+{q.tags.length - 3}</span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <Link
-                    href={`/dashboard/admin/questions/${q.id}/edit`}
-                    className="text-blue-400 hover:text-blue-300"
-                  >
-                    Edit
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {questions.length === 0 && (
-              <tr>
-                <td colSpan={10} className="px-4 py-8 text-center text-gray-500">
-                  No questions found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      {/* Select All + Batch */}
+      <div className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-900/50 px-3 py-2">
+        <div className="flex items-center gap-2">
+          <button onClick={toggleSelectAll} className="rounded border border-gray-600 px-2 py-1 text-xs text-gray-400 hover:bg-gray-800">
+            {selected.size === questions.length && questions.length > 0 ? "Deselect All" : "Select All"}
+          </button>
+          {selected.size > 0 && <span className="text-xs text-gray-500">{selected.size} selected</span>}
+        </div>
+      </div>
+
+      {/* Question Cards (mobile-friendly) */}
+      <div className="space-y-2">
+        {questions.length === 0 && (
+          <div className="rounded-xl border border-gray-800 bg-gray-900 px-4 py-8 text-center text-gray-500">
+            No questions found.
+          </div>
+        )}
+        {questions.map((q) => (
+          <div key={q.id} className={`rounded-xl border bg-gray-900 ${selected.has(q.id) ? "border-blue-600" : "border-gray-800"}`}>
+            {/* Top: checkbox + content + edit link */}
+            <div className="flex items-start gap-2 px-3 py-3">
+              <input
+                type="checkbox"
+                checked={selected.has(q.id)}
+                onChange={() => toggleSelect(q.id)}
+                className="mt-1 shrink-0 rounded border-gray-600 bg-gray-800"
+              />
+              <Link href={`/dashboard/admin/questions/${q.id}/edit`} className="flex-1 min-w-0 group">
+                <p className="text-sm text-white group-hover:text-blue-400">{q.content}</p>
+                {q.sourceReference && (
+                  <p className="mt-0.5 truncate text-xs text-amber-500/70">{q.sourceReference}</p>
+                )}
+              </Link>
+            </div>
+            {/* Bottom: tags row */}
+            <div className="flex flex-wrap items-center gap-1.5 border-t border-gray-800/50 px-3 py-2">
+              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[q.status]}`}>{q.status}</span>
+              <span className="rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-400">{q.subject}</span>
+              <span className="rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-500">{q.topic}</span>
+              <span className="rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-500">{q.difficulty}/5</span>
+              <span className={`rounded-full px-1.5 py-0.5 text-xs ${q.source === "AI_GENERATED" ? "bg-purple-900/50 text-purple-400" : "bg-gray-700 text-gray-400"}`}>
+                {q.source === "AI_GENERATED" ? "AI" : "Manual"}
+              </span>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Pagination */}
