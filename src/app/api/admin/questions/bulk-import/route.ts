@@ -273,7 +273,83 @@ async function _POST(req: NextRequest) {
   } catch { /* ignore save errors */ }
 
   if (fileName.endsWith(".pdf")) {
-    const text = await parsePDF(buffer);
+    let text = await parsePDF(buffer);
+
+    // If PDF is scanned (very little text extracted), use AI Vision
+    if (text.trim().length < 200 && buffer.length > 10000) {
+      console.log("[bulk-import] Scanned PDF detected — using AI Vision on PDF");
+      const base64 = buffer.toString("base64");
+      const geminiKey = process.env.GEMINI_API_KEY;
+
+      if (!geminiKey) {
+        return NextResponse.json({ error: "Scanned PDF detected but no AI Vision provider configured (GEMINI_API_KEY needed)" }, { status: 400 });
+      }
+
+      // Gemini supports PDF natively — send full document, extract questions in batches
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [
+              { text: STEP2_PROMPT + "\n[This is a scanned PDF with exam questions. Extract ALL questions you can find.]" },
+              { inline_data: { mime_type: "application/pdf", data: base64 } }
+            ] }],
+            generationConfig: { temperature: 0.2, maxOutputTokens: 8192 },
+          }),
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error("[bulk-import] Gemini PDF error:", res.status, errText.substring(0, 200));
+          return NextResponse.json({ error: `AI Vision failed (${res.status}). PDF may be too large — try splitting into smaller files.` }, { status: 500 });
+        }
+
+        const data = await res.json();
+        const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        const cleanText = aiText.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+
+        let parsed;
+        try {
+          parsed = JSON.parse(cleanText);
+        } catch {
+          const match = cleanText.match(/\{[\s\S]*\}/);
+          if (match) try { parsed = JSON.parse(match[0]); } catch { /* */ }
+        }
+
+        if (!parsed) {
+          return NextResponse.json({ error: "AI could not extract questions from scanned PDF", raw: cleanText.substring(0, 300) }, { status: 500 });
+        }
+
+        const arr = Array.isArray(parsed) ? parsed : parsed.questions || parsed.items || [];
+        if (arr.length === 0) {
+          return NextResponse.json({ error: "No questions found in scanned PDF" }, { status: 400 });
+        }
+
+        const created = await prisma.question.createMany({
+          data: arr.map((q: Record<string, unknown>) => ({
+            domainId,
+            subject: (q.subject as string) || subject || "General",
+            topic: (q.topic as string) || topic || "General",
+            difficulty: (typeof q.difficulty === "number" ? Math.min(5, Math.max(1, q.difficulty as number)) : difficulty) || 3,
+            type: (Array.isArray(q.options) ? "MULTIPLE_CHOICE" : "OPEN") as "MULTIPLE_CHOICE" | "OPEN",
+            content: String(q.content || ""),
+            options: Array.isArray(q.options) ? (q.options as string[]) : undefined,
+            correctAnswer: String(q.correctAnswer || "To be determined"),
+            explanation: q.explanation ? String(q.explanation) : undefined,
+            source: "MANUAL" as const,
+            status: "DRAFT" as const,
+            createdById: session!.user.id,
+          })).filter((q: { content: string }) => q.content.trim()),
+        });
+
+        return NextResponse.json({ imported: created.count, total: arr.length, fromScannedPDF: true });
+      } catch (err) {
+        console.error("[bulk-import] Scanned PDF processing failed:", err);
+        return NextResponse.json({ error: "Failed to process scanned PDF: " + (err instanceof Error ? err.message : "Unknown error") }, { status: 500 });
+      }
+    }
+
     questions = extractQuestionsFromText(text);
   } else if (fileName.endsWith(".docx")) {
     const text = await parseDOCX(buffer);
