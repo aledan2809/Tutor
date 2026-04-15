@@ -11,7 +11,7 @@ interface QuestionData {
   id: string;
   content: string;
   type: "MULTIPLE_CHOICE" | "OPEN";
-  options?: QuestionOption[] | null;
+  options?: (QuestionOption | string)[] | null;
   subject: string;
   topic: string;
   difficulty: number;
@@ -39,7 +39,15 @@ export function QuestionRenderer({
     }
   };
 
-  const options = question.options as QuestionOption[] | null;
+  // Options can be string[] or {label, value}[] — normalize to {label, value}[]
+  const rawOptions = question.options;
+  const options: QuestionOption[] | null = rawOptions
+    ? rawOptions.map((opt) =>
+        typeof opt === "string"
+          ? { label: opt, value: opt }
+          : opt
+      )
+    : null;
 
   return (
     <div className="space-y-6">
