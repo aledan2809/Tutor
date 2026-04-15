@@ -273,80 +273,88 @@ async function _POST(req: NextRequest) {
   } catch { /* ignore save errors */ }
 
   if (fileName.endsWith(".pdf")) {
-    let text = await parsePDF(buffer);
+    const text = await parsePDF(buffer);
 
-    // If PDF is scanned (very little text extracted), use AI Vision
+    // If PDF is scanned (very little text extracted), use OCR service (4uPDF on localhost:3099)
     if (text.trim().length < 200 && buffer.length > 10000) {
-      console.log("[bulk-import] Scanned PDF detected — using AI Vision on PDF");
-      const base64 = buffer.toString("base64");
-      const geminiKey = process.env.GEMINI_API_KEY;
+      console.log("[bulk-import] Scanned PDF detected — using OCR service (4uPDF)");
 
-      if (!geminiKey) {
-        return NextResponse.json({ error: "Scanned PDF detected but no AI Vision provider configured (GEMINI_API_KEY needed)" }, { status: 400 });
-      }
+      const ocrBaseUrl = process.env.OCR_SERVICE_URL || "http://localhost:3099";
 
-      // Gemini supports PDF natively — send full document, extract questions in batches
       try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
+        // Step 1: Extract text via OCR service
+        const ocrForm = new FormData();
+        ocrForm.append("file", new Blob([buffer], { type: "application/pdf" }), file.name);
+
+        const ocrRes = await fetch(`${ocrBaseUrl}/api/extract-text-ocr`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [
-              { text: STEP2_PROMPT + "\n[This is a scanned PDF with exam questions. Extract ALL questions you can find.]" },
-              { inline_data: { mime_type: "application/pdf", data: base64 } }
-            ] }],
-            generationConfig: { temperature: 0.2, maxOutputTokens: 8192 },
-          }),
+          body: ocrForm,
         });
 
-        if (!res.ok) {
-          const errText = await res.text();
-          console.error("[bulk-import] Gemini PDF error:", res.status, errText.substring(0, 200));
-          return NextResponse.json({ error: `AI Vision failed (${res.status}). PDF may be too large — try splitting into smaller files.` }, { status: 500 });
+        if (!ocrRes.ok) {
+          return NextResponse.json({ error: `OCR service returned ${ocrRes.status}` }, { status: 500 });
         }
 
-        const data = await res.json();
-        const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        const cleanText = aiText.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+        const ocrData = await ocrRes.json() as { download_url?: string; text?: string; pages_processed?: number };
+        let ocrText = ocrData.text || "";
+
+        // If OCR returns a download URL, fetch the text
+        if (ocrData.download_url && !ocrText) {
+          const dlRes = await fetch(`${ocrBaseUrl}${ocrData.download_url}`);
+          if (dlRes.ok) ocrText = await dlRes.text();
+        }
+
+        if (!ocrText || ocrText.trim().length < 50) {
+          return NextResponse.json({ error: "OCR could not extract text from scanned PDF" }, { status: 400 });
+        }
+
+        console.log(`[bulk-import] OCR extracted ${ocrText.length} chars from ${ocrData.pages_processed || "?"} pages`);
+
+        // Step 2: Send OCR text to AI to structure as questions
+        const aiText = await callTextAI(STEP2_PROMPT + ocrText.substring(0, 30000));
+        const cleanAiText = aiText.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
 
         let parsed;
         try {
-          parsed = JSON.parse(cleanText);
+          parsed = JSON.parse(cleanAiText);
         } catch {
-          const match = cleanText.match(/\{[\s\S]*\}/);
+          const match = cleanAiText.match(/\{[\s\S]*\}/);
           if (match) try { parsed = JSON.parse(match[0]); } catch { /* */ }
         }
 
         if (!parsed) {
-          return NextResponse.json({ error: "AI could not extract questions from scanned PDF", raw: cleanText.substring(0, 300) }, { status: 500 });
+          // Fallback: treat OCR text as raw questions (numbered format)
+          questions = extractQuestionsFromText(ocrText);
+          if (questions.length === 0) {
+            return NextResponse.json({ error: "Could not structure questions from scanned PDF", ocrChars: ocrText.length }, { status: 500 });
+          }
+        } else {
+          const arr = Array.isArray(parsed) ? parsed : parsed.questions || parsed.items || [];
+
+          if (arr.length > 0) {
+            const created = await prisma.question.createMany({
+              data: arr.map((q: Record<string, unknown>) => ({
+                domainId,
+                subject: (q.subject as string) || subject || "General",
+                topic: (q.topic as string) || topic || "General",
+                difficulty: (typeof q.difficulty === "number" ? Math.min(5, Math.max(1, q.difficulty as number)) : difficulty) || 3,
+                type: (Array.isArray(q.options) ? "MULTIPLE_CHOICE" : "OPEN") as "MULTIPLE_CHOICE" | "OPEN",
+                content: String(q.content || ""),
+                options: Array.isArray(q.options) ? (q.options as string[]) : undefined,
+                correctAnswer: String(q.correctAnswer || "To be determined"),
+                explanation: q.explanation ? String(q.explanation) : undefined,
+                source: "MANUAL" as const,
+                status: "DRAFT" as const,
+                createdById: session!.user.id,
+              })).filter((q: { content: string }) => q.content.trim()),
+            });
+
+            return NextResponse.json({ imported: created.count, total: arr.length, fromScannedPDF: true, ocrPages: ocrData.pages_processed });
+          }
         }
-
-        const arr = Array.isArray(parsed) ? parsed : parsed.questions || parsed.items || [];
-        if (arr.length === 0) {
-          return NextResponse.json({ error: "No questions found in scanned PDF" }, { status: 400 });
-        }
-
-        const created = await prisma.question.createMany({
-          data: arr.map((q: Record<string, unknown>) => ({
-            domainId,
-            subject: (q.subject as string) || subject || "General",
-            topic: (q.topic as string) || topic || "General",
-            difficulty: (typeof q.difficulty === "number" ? Math.min(5, Math.max(1, q.difficulty as number)) : difficulty) || 3,
-            type: (Array.isArray(q.options) ? "MULTIPLE_CHOICE" : "OPEN") as "MULTIPLE_CHOICE" | "OPEN",
-            content: String(q.content || ""),
-            options: Array.isArray(q.options) ? (q.options as string[]) : undefined,
-            correctAnswer: String(q.correctAnswer || "To be determined"),
-            explanation: q.explanation ? String(q.explanation) : undefined,
-            source: "MANUAL" as const,
-            status: "DRAFT" as const,
-            createdById: session!.user.id,
-          })).filter((q: { content: string }) => q.content.trim()),
-        });
-
-        return NextResponse.json({ imported: created.count, total: arr.length, fromScannedPDF: true });
       } catch (err) {
-        console.error("[bulk-import] Scanned PDF processing failed:", err);
-        return NextResponse.json({ error: "Failed to process scanned PDF: " + (err instanceof Error ? err.message : "Unknown error") }, { status: 500 });
+        console.error("[bulk-import] OCR processing failed:", err);
+        return NextResponse.json({ error: "OCR processing failed: " + (err instanceof Error ? err.message : "Unknown error") }, { status: 500 });
       }
     }
 
