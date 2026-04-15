@@ -12,8 +12,8 @@ const adminLinks = [
   { href: "/dashboard/admin/tags", labelKey: "tags", superAdminOnly: false },
   { href: "/dashboard/admin/questions/import", labelKey: "import", superAdminOnly: false },
   { href: "/dashboard/admin/questions/generate", labelKey: "aiGenerate", superAdminOnly: false },
-  { href: "/dashboard/admin/aviation/exam-formats", labelKey: "aviationExams", superAdminOnly: false },
-  { href: "/dashboard/admin/aviation/templates", labelKey: "aviationTemplates", superAdminOnly: false },
+  { href: "/dashboard/admin/exam-formats", labelKey: "examFormats", superAdminOnly: false },
+  { href: "/dashboard/admin/templates", labelKey: "escalationTemplates", superAdminOnly: false },
   { href: "/dashboard/admin/aviation/seed-demo", labelKey: "aviationSeed", superAdminOnly: true },
   { href: "/dashboard/admin/superadmin", labelKey: "superAdmin", superAdminOnly: true },
 ];

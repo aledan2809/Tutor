@@ -37,7 +37,7 @@ export function ExamFormatManager({
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch("/api/admin/domain/aviation/exam-format", {
+      const res = await fetch("/api/admin/exam-formats", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -70,7 +70,7 @@ export function ExamFormatManager({
   }
 
   async function toggleActive(id: string, isActive: boolean) {
-    await fetch("/api/admin/domain/aviation/exam-format", {
+    await fetch("/api/admin/exam-formats", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, isActive: !isActive }),

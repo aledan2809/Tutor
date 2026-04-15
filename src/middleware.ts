@@ -66,6 +66,20 @@ if (typeof globalThis !== "undefined") {
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Redirect routes without locale prefix to default locale
+  if (
+    !pathname.startsWith("/api/") &&
+    !pathname.startsWith("/en/") &&
+    !pathname.startsWith("/ro/") &&
+    !pathname.startsWith("/_next/") &&
+    pathname !== "/" &&
+    !pathname.match(/\.\w+$/)
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/${routing.defaultLocale}${pathname}`;
+    return NextResponse.redirect(url);
+  }
+
   // Rate limiting for API routes
   if (pathname.startsWith("/api/")) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
@@ -114,5 +128,5 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/(en|ro)/:path*", "/api/:path*"],
+  matcher: ["/", "/(en|ro)/:path*", "/api/:path*", "/dashboard/:path*", "/auth/:path*"],
 };
