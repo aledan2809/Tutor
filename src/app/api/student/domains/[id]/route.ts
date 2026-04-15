@@ -5,7 +5,7 @@ import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 
 const paramsSchema = z.object({
-  id: z.string().uuid("Invalid domain ID format"),
+  id: z.string().min(1, "Domain ID required"),
 });
 
 async function _POST(

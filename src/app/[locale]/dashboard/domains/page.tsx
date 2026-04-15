@@ -48,15 +48,21 @@ export default function DomainsPage() {
 
   useEffect(() => { fetchDomains(); }, []);
 
+  const [enrollError, setEnrollError] = useState("");
+
   const handleEnroll = async (domainId: string) => {
     setEnrolling(domainId);
+    setEnrollError("");
     try {
       const res = await fetch(`/api/student/domains/${domainId}`, { method: "POST" });
       if (res.ok) {
         fetchDomains();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setEnrollError(data.error || "Enrollment failed");
       }
     } catch {
-      // ignore
+      setEnrollError("Network error");
     } finally {
       setEnrolling(null);
     }
@@ -69,6 +75,9 @@ export default function DomainsPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       <h1 className="text-2xl font-bold text-white">Domains</h1>
+      {enrollError && (
+        <div className="rounded-lg border border-red-800 bg-red-900/20 p-3 text-sm text-red-400">{enrollError}</div>
+      )}
 
       {/* Enrolled */}
       {enrolled.length > 0 && (
