@@ -18,6 +18,7 @@ interface Question {
   domain: { name: string; slug: string };
   tags: { id: string; name: string }[];
   createdBy: { name: string } | null;
+  sourceReference: string | null;
 }
 
 interface Props {
@@ -233,8 +234,11 @@ export function QuestionList({ questions, domains, total, page, limit, filters }
                     className="rounded border-gray-600 bg-gray-800"
                   />
                 </td>
-                <td className="max-w-xs truncate px-4 py-3 text-white">
-                  {q.content.substring(0, 80)}{q.content.length > 80 ? "..." : ""}
+                <td className="max-w-xs px-4 py-3">
+                  <div className="truncate text-white">{q.content.substring(0, 80)}{q.content.length > 80 ? "..." : ""}</div>
+                  {q.sourceReference && (
+                    <div className="mt-0.5 truncate text-xs text-amber-500/70">{q.sourceReference}</div>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-gray-300">{q.domain.name}</td>
                 <td className="px-4 py-3 text-gray-300">

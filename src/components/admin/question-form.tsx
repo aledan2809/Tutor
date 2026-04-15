@@ -17,6 +17,7 @@ interface Props {
     options: string[] | null;
     correctAnswer: string;
     explanation: string | null;
+    sourceReference: string | null;
     status: string;
     tags: { id: string; name: string }[];
   };
@@ -270,6 +271,14 @@ export function QuestionForm({ domains, question }: Props) {
           placeholder="Explain why this is the correct answer"
         />
       </div>
+
+      {/* Source Reference — read-only, visible only on edit */}
+      {isEdit && question?.sourceReference && (
+        <div className="rounded-lg border border-amber-800/50 bg-amber-900/10 px-4 py-3">
+          <span className="text-xs font-medium text-amber-400">Source Reference: </span>
+          <span className="text-xs text-amber-300">{question.sourceReference}</span>
+        </div>
+      )}
 
       <div className="flex items-center gap-3">
         <button
