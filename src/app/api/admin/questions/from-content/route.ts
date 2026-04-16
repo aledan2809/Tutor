@@ -208,8 +208,14 @@ async function _POST(req: NextRequest) {
   }
 
   // Save as DRAFT
+  const maxOrder = await prisma.question.aggregate({
+    where: { domainId },
+    _max: { bookOrder: true },
+  });
+  const baseOrder = (maxOrder._max.bookOrder ?? -1) + 1;
+
   const created = await prisma.question.createMany({
-    data: questions.map((q) => ({
+    data: questions.map((q, idx) => ({
       domainId,
       subject,
       topic,
@@ -221,6 +227,8 @@ async function _POST(req: NextRequest) {
       explanation: q.explanation || null,
       source: "AI_GENERATED" as const,
       status: "DRAFT" as const,
+      bookOrder: baseOrder + idx,
+      qNumberInBook: idx + 1,
       createdById: session!.user.id,
     })),
   });

@@ -332,21 +332,37 @@ async function _POST(req: NextRequest) {
           const arr = Array.isArray(parsed) ? parsed : parsed.questions || parsed.items || [];
 
           if (arr.length > 0) {
+            // Get starting bookOrder
+            const maxOrder = await prisma.question.aggregate({
+              where: { domainId },
+              _max: { bookOrder: true },
+            });
+            const baseOrder = (maxOrder._max.bookOrder ?? -1) + 1;
+
             const created = await prisma.question.createMany({
-              data: arr.map((q: Record<string, unknown>) => ({
-                domainId,
-                subject: (q.subject as string) || subject || "General",
-                topic: (q.topic as string) || topic || "General",
-                difficulty: (typeof q.difficulty === "number" ? Math.min(5, Math.max(1, q.difficulty as number)) : difficulty) || 3,
-                type: (Array.isArray(q.options) ? "MULTIPLE_CHOICE" : "OPEN") as "MULTIPLE_CHOICE" | "OPEN",
-                content: String(q.content || ""),
-                options: Array.isArray(q.options) ? (q.options as string[]) : undefined,
-                correctAnswer: String(q.correctAnswer || "To be determined"),
-                explanation: q.explanation ? String(q.explanation) : undefined,
-                source: "MANUAL" as const,
-                status: "DRAFT" as const,
-                createdById: session!.user.id,
-              })).filter((q: { content: string }) => q.content.trim()),
+              data: arr.map((q: Record<string, unknown>, idx: number) => {
+                const qNumInBook = typeof q.number === "number" ? q.number : (typeof q.qNumber === "number" ? q.qNumber : idx + 1);
+                const bookPg = typeof q.page === "number" ? q.page : (typeof q.bookPage === "number" ? q.bookPage : null);
+                const pdfPg = bookPg ? Math.round((bookPg + 18) / 2) : null;
+                return {
+                  domainId,
+                  subject: (q.subject as string) || subject || "General",
+                  topic: (q.topic as string) || topic || "General",
+                  difficulty: (typeof q.difficulty === "number" ? Math.min(5, Math.max(1, q.difficulty as number)) : difficulty) || 3,
+                  type: (Array.isArray(q.options) ? "MULTIPLE_CHOICE" : "OPEN") as "MULTIPLE_CHOICE" | "OPEN",
+                  content: String(q.content || ""),
+                  options: Array.isArray(q.options) ? (q.options as string[]) : undefined,
+                  correctAnswer: String(q.correctAnswer || "To be determined"),
+                  explanation: q.explanation ? String(q.explanation) : undefined,
+                  source: "MANUAL" as const,
+                  status: "DRAFT" as const,
+                  bookOrder: baseOrder + idx,
+                  pdfPage: pdfPg,
+                  bookPage: bookPg,
+                  qNumberInBook: qNumInBook,
+                  createdById: session!.user.id,
+                };
+              }).filter((q: { content: string }) => q.content.trim()),
             });
 
             return NextResponse.json({ imported: created.count, total: arr.length, fromScannedPDF: true, ocrPages: ocrData.pages_processed });
@@ -390,8 +406,14 @@ async function _POST(req: NextRequest) {
       return NextResponse.json({ error: "No questions found in image." }, { status: 400 });
     }
 
+    const maxOrder = await prisma.question.aggregate({
+      where: { domainId },
+      _max: { bookOrder: true },
+    });
+    const baseOrder = (maxOrder._max.bookOrder ?? -1) + 1;
+
     const created = await prisma.question.createMany({
-      data: aiQuestions.map((q) => ({
+      data: aiQuestions.map((q, idx) => ({
         domainId,
         subject: q.subject || subject || "General",
         topic: q.topic || topic || "General",
@@ -403,6 +425,8 @@ async function _POST(req: NextRequest) {
         explanation: q.explanation || undefined,
         source: "MANUAL" as const,
         status: "DRAFT" as const,
+        bookOrder: baseOrder + idx,
+        qNumberInBook: idx + 1,
         createdById: session!.user.id,
       })),
     });
@@ -417,8 +441,15 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: "No questions could be extracted from the file." }, { status: 400 });
   }
 
+  // Get max existing bookOrder for this domain to append new imports
+  const maxOrder = await prisma.question.aggregate({
+    where: { domainId },
+    _max: { bookOrder: true },
+  });
+  const baseOrder = (maxOrder._max.bookOrder ?? -1) + 1;
+
   const created = await prisma.question.createMany({
-    data: questions.map((q) => ({
+    data: questions.map((q, i) => ({
       domainId,
       subject: subject || "General",
       topic: topic || "General",
@@ -429,6 +460,8 @@ async function _POST(req: NextRequest) {
       correctAnswer: q.correctAnswer,
       source: "MANUAL" as const,
       status: "APPROVED" as const,
+      bookOrder: baseOrder + i,
+      qNumberInBook: i + 1,
       createdById: session!.user.id,
     })),
   });

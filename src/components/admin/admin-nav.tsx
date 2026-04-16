@@ -12,6 +12,7 @@ const adminLinks = [
   { href: "/dashboard/admin/tags", labelKey: "tags", superAdminOnly: false },
   { href: "/dashboard/admin/subjects", labelKey: "subjectsTopics", superAdminOnly: false },
   { href: "/dashboard/admin/questions/import", labelKey: "import", superAdminOnly: false },
+  { href: "/dashboard/admin/questions/import-book", labelKey: "importBook", superAdminOnly: false },
   { href: "/dashboard/admin/questions/generate", labelKey: "aiGenerate", superAdminOnly: false },
   { href: "/dashboard/admin/questions/from-content", labelKey: "fromContent", superAdminOnly: false },
   { href: "/dashboard/admin/lessons", labelKey: "lessons", superAdminOnly: false },
