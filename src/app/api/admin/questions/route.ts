@@ -52,7 +52,7 @@ async function _GET(req: NextRequest) {
     prisma.question.findMany({
       where,
       include: { domain: { select: { name: true, slug: true } }, tags: true, createdBy: { select: { name: true } } },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ bookOrder: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }],
       skip: (page - 1) * limit,
       take: limit,
     }),

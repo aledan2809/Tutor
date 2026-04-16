@@ -34,7 +34,7 @@ export default async function QuestionsPage({
         tags: true,
         createdBy: { select: { name: true } },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ bookOrder: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }],
       skip: (page - 1) * limit,
       take: limit,
     }),
