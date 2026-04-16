@@ -117,6 +117,12 @@ export default function DomainsPage() {
                     >
                       Exams
                     </button>
+                    <button
+                      onClick={() => router.push(`/en/dashboard/bibliography?domain=${d.slug}`)}
+                      className="rounded-lg bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700"
+                    >
+                      Bibliography
+                    </button>
                     {(isAdmin || isInstructor) && (
                       <button
                         onClick={() => router.push(`/en/dashboard/admin/questions?domain=${d.slug}`)}
