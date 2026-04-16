@@ -161,3 +161,32 @@ Last Updated: 2026-04-16 15:30
 19. **Pipeline CI checks ALL pre-existing errors**, not just new code — blocks progress on unrelated issues.
 20. **Codex dev agent sometimes doesn't commit changes** — verify with `git status` after pipeline completes.
 21. **Pipeline clarification questions repeat** — deploy question appears on every phase, automate answering.
+
+### Book Import & OCR (2026-04-16 session)
+22. **Preserve book order at extraction time** — save `bookOrder`, `pdfPage`, `bookPage`, `qNumberInBook`, `chapterIndex` as the pipeline processes. Chunk-by-chunk AI output is not in book order; `createdAt` is useless. Retrospective recomputation from sourceReference is messy.
+23. **pdf-parse v2 broke API** — exports PDFParse class, not function. Downgrade to v1.1.1 AND import from `/lib/pdf-parse.js` subpath to bypass the test-file lookup bug at initialization.
+24. **Scanned PDF detection is trivial** — if `pdf-parse` extracts < 200 chars from a > 10KB file, it's scanned (image-only). Route to OCR service.
+25. **Always save uploaded files to `uploads/`** BEFORE processing. Import can fail at any step; without the file you have to ask the user to re-upload (bad UX).
+26. **OCR + fuzzy content match caps at ~74%** — AI-corrected text doesn't match garbled OCR. For 100%, use Vision AI directly on each page.
+27. **Vision AI per-page is the only way to get book page numbers reliably** — header OCR on corners is too noisy. Anthropic Haiku 4.5 on 281 pages ≈ $0.50 with 93% inliers via RANSAC linear fit.
+28. **Page number formula emerges from Vision data** — `book_left = 2*pdf - 18` for this specific book (2 pages per PDF scan). Linear regression with RANSAC finds it automatically from anchor data.
+29. **OpenRouter has free vision models** — gemma-3-12b-it, nvidia/nemotron-nano-12b-v2-vl, gemma-4-26b-a4b-it. Rate-limited (50/day free) but good fallback when Mistral/Gemini/OpenAI are blocked.
+30. **Q numbers reset per chapter** — "Q1" appears in every chapter. Need chapter scoping OR sequential index (bookOrder) to avoid ambiguity.
+31. **Answer key pages detectable by heuristic** — short average line length (< 40 chars) + many `N.a/b/c` patterns (> 10). Works reliably.
+32. **Letter-verified answer matching** — cross-reference AI-structured `correctAnswer` letter with answer key text `QNum.letter`. 540/1385 (39%) letter-verified on Udroiu.
+33. **Question-to-page mapping needs 2 anchors + interpolation** — LNDS on high-confidence content matches gives monotonic anchors; linear interpolation fills gaps between them.
+34. **Don't trust single data source for page numbers** — OCR text numbers, PDF corners, Vision readings all have errors. Use triangulation + sanity checks (monotonicity, diff between adjacent pages should be 2).
+
+### UI/UX (2026-04-16 session)
+35. **Wide tables don't work on mobile** — 10 columns force horizontal scroll, right-side action buttons become unreachable. Rewrite as card layout.
+36. **Review Queue cards must show ALL options by default** — expand-to-see-options requires 2 clicks per question, unusable on 1385 items.
+37. **Answer comparison must be format-agnostic** — DB stores "a) text", UI sends "text". Strip letter prefix on both sides before comparing.
+38. **Option letter must be preserved in correctAnswer** for instructor clarity — "a) text" is unambiguous, just "text" requires matching against options array to know which letter is correct.
+39. **double-locale /en/en bug** — `/en` without trailing slash doesn't match `startsWith('/en/')`. Use `startsWith('/en')` OR strip locale from callbackUrl before redirect.
+40. **JWT role cache needs refresh-on-every-request** — not just login — for role changes to take effect without forcing logout. Move DB lookup outside `if (user)` block.
+
+### Pricing & Strategy
+41. **Per-subject pricing beats flat tiers** for education market — users want to pay only for what they study. Seasonal prices (BAC prep, summer voucher) drive conversion.
+42. **Referral with perpetual commission** builds viral growth. 2-level tier + anti-fraud (30-day activity + same-household detection) is industry standard.
+43. **Bibliography is legally required** for educational content in Romania — must be per-domain, approved before student sees, with full citation details (author, title, edition, publisher, year, ISBN, notes).
+44. **Instructor context beats Q number collision** — adding `[Topic]` to sourceReference solves ambiguity when same Q number appears in multiple chapters.
