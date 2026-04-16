@@ -56,6 +56,15 @@ export function QuestionList({ questions, domains, total, page, limit, filters }
     router.push(`${pathname}?${params.toString()}`);
   }
 
+  async function quickAction(id: string, status: string) {
+    await fetch(`/api/admin/questions/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    router.refresh();
+  }
+
   function toggleSelect(id: string) {
     setSelected((prev) => {
       const next = new Set(prev);
@@ -243,6 +252,23 @@ export function QuestionList({ questions, domains, total, page, limit, filters }
               <span className={`rounded-full px-1.5 py-0.5 text-xs ${q.source === "AI_GENERATED" ? "bg-purple-900/50 text-purple-400" : "bg-gray-700 text-gray-400"}`}>
                 {q.source === "AI_GENERATED" ? "AI" : "Manual"}
               </span>
+              <span className="flex-1" />
+              {q.status !== "PUBLISHED" && (
+                <button
+                  onClick={(e) => { e.preventDefault(); quickAction(q.id, "PUBLISHED"); }}
+                  className="rounded bg-blue-700 px-2 py-0.5 text-xs text-white hover:bg-blue-600"
+                >
+                  Publish
+                </button>
+              )}
+              {q.status === "DRAFT" && (
+                <button
+                  onClick={(e) => { e.preventDefault(); quickAction(q.id, "APPROVED"); }}
+                  className="rounded bg-green-700 px-2 py-0.5 text-xs text-white hover:bg-green-600"
+                >
+                  Approve
+                </button>
+              )}
             </div>
           </div>
         ))}
