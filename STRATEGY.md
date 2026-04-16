@@ -3,6 +3,7 @@
 **Versiune:** 1.0
 
 ## Changelog
+- [2026-04-16] v1.2: Lesson learned — la import grile, păstrează ÎNTOTDEAUNA ordinea fizică din carte: save bookOrder (index sequential 0,1,2,3...), pdfPage, bookPage, qNumberInBook, chapterIndex la extragere. Fără ele, sortarea în admin e haotică și instructorii nu pot urmări cartea.
 - [2026-04-15] v1.1: Adăugat Referral Engine (comision perpetuu, 2 nivele, anti-fraud), Content Sourcing (surse gratuite, plan 2 săpt), IVP (Instructor Verification Program cu incentive stacking)
 - [2026-04-15] v1.0: Document inițial — viziune, piață, features actuale, roadmap pe faze
 
