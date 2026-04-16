@@ -184,7 +184,11 @@ model Question {
   correctAnswer String         @db.Text
   explanation   String?        @db.Text
   sourceReference String?      // "Udroiu 2023, p.10, Q11" — visible only to Instructor/Admin
-  bookOrder     Int?           // Sort key: page * 10000 + qNum (order as in book)
+  bookOrder     Int?           // Sort key: sequential extraction index (0,1,2...)
+  pdfPage       Int?           // PDF page number where question appears
+  bookPage      Int?           // Printed book page (left side of spread)
+  qNumberInBook Int?           // Original question number in book (e.g., 11 for "Q11")
+  chapterIndex  Int?           // Chapter order (1=Cap I, 2=Cap II, ...)
   imageUrl      String?        // Image attached to question
   explanationVideoUrl String?  // Video explanation URL
   source        QuestionSource @default(MANUAL)
