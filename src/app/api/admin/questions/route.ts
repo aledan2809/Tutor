@@ -14,6 +14,7 @@ const questionSchema = z.object({
   options: z.array(z.string()).optional(),
   correctAnswer: z.string().min(1),
   explanation: z.string().optional(),
+  sourceReference: z.string().nullable().optional(),
   source: z.enum(["MANUAL", "AI_GENERATED"]).default("MANUAL"),
   status: z.enum(["DRAFT", "APPROVED", "PUBLISHED"]).optional(),
   tags: z.array(z.string()).optional(),

@@ -13,6 +13,7 @@ const updateSchema = z.object({
   options: z.array(z.string()).optional(),
   correctAnswer: z.string().min(1).optional(),
   explanation: z.string().optional(),
+  sourceReference: z.string().nullable().optional(),
   status: z.enum(["DRAFT", "APPROVED", "PUBLISHED"]).optional(),
   tags: z.array(z.string()).optional(),
 });

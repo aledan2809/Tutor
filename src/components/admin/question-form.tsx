@@ -37,6 +37,7 @@ export function QuestionForm({ domains, question }: Props) {
     options: question?.options || ["", "", "", ""],
     correctAnswer: question?.correctAnswer || "",
     explanation: question?.explanation || "",
+    sourceReference: question?.sourceReference || "",
     tags: question?.tags?.map((t) => t.name).join(", ") || "",
   });
 
@@ -272,11 +273,19 @@ export function QuestionForm({ domains, question }: Props) {
         />
       </div>
 
-      {/* Source Reference — read-only, visible only on edit */}
-      {isEdit && question?.sourceReference && (
-        <div className="rounded-lg border border-amber-800/50 bg-amber-900/10 px-4 py-3">
-          <span className="text-xs font-medium text-amber-400">Source Reference: </span>
-          <span className="text-xs text-amber-300">{question.sourceReference}</span>
+      {/* Source Reference — editable, visible only on edit */}
+      {isEdit && (
+        <div>
+          <label className="mb-1 block text-xs text-amber-400">
+            Source Reference (book page, Q number, answer page — visible only to Admin/Instructor)
+          </label>
+          <input
+            type="text"
+            value={form.sourceReference}
+            onChange={(e) => updateField("sourceReference", e.target.value)}
+            placeholder="e.g., Udroiu, Teste grila Drept Penal ed.4, 2023, p.3-4, Q11 / Answers p.8-9"
+            className="w-full rounded-lg border border-amber-800/50 bg-amber-900/10 px-3 py-2 text-sm text-amber-200 placeholder-amber-700 focus:border-amber-500 focus:outline-none"
+          />
         </div>
       )}
 
