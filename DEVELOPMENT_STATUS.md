@@ -1,38 +1,64 @@
 # Project Status - Tutor
-Last Updated: 2026-04-15 13:00
+Last Updated: 2026-04-16 15:30
 
 ## Current State
 
 ### Working
-- Auth: Login via Google OAuth, Magic Link, Credentials (NextAuth)
-- Admin Dashboard: Full nav with Overview, Questions, Review Queue, Domains, Tags, Import, AI Generate, Exam Formats, Escalation Templates, SuperAdmin
-- Domain CRUD: Create/Edit/Delete domains, Aviation domain active with 57 published questions
-- Question Import: PDF/DOCX/CSV + **Image import (JFIF/PNG/JPG/WebP)** via 2-step AI Vision (Groq transcribe → Mistral structure)
-- Question Edit: Prev/Next navigation between questions
-- Exam Formats: Generic per-domain (replaced hardcoded Aviation Exams)
-- User Management: Create users, Enroll on domains with role upgrade/downgrade
-- Role-based access: ADMIN sees admin+questions, INSTRUCTOR sees instructor panel, STUDENT sees practice/exams
-- Domain cards: Clickable with role-based action buttons (Practice, Exams, Questions, Edit Domain)
-- Practice: Sessions with spaced repetition (SM-2), options render correctly (string[] normalized)
-- Exams: Exam simulator with timer
-- Student self-enroll: Fixed CUID vs UUID validation
-- Rate limiting: 20 req/min auth, 60 req/min API
+- Auth: Google OAuth, Magic Link, Credentials, Forgot Password, Self-Registration
+- JWT role refresh on every token refresh (no logout/login needed after role change)
+- Admin: Overview, Questions (card list, sorted by bookOrder), Review Queue (mobile-friendly), Domains, Tags, Subjects/Topics, Import, Import Book (scanned PDF OCR), AI Generate, From Content, Lessons, Bibliography, Exam Formats, Templates, SuperAdmin
+- Question flow: DRAFT → APPROVED → PUBLISHED, quick-action buttons (Approve/Publish) on cards
+- Source references with [Topic] + book page + Q number + answer page (editable by admin)
+- Bibliography per-domain (DRAFT→APPROVED→PUBLISHED), student sees only approved, button on domain card
+- Import Book pipeline with full fallback chain (text PDF → scanned PDF → 4uPDF OCR → AI structure → preserve bookOrder)
+- Web Push (VAPID configured), Bulk import, AI Generate, From-Content (upload theory → AI generates questions)
+- Domain CRUD, 2 active domains: Aviation (57 Q), Drept Penal și Procedura Penală (1385 Q from Udroiu 2023)
+- Students: Practice (SM-2), Exams, Bibliography, Progress, Gamification (XP, streaks, leaderboard)
+- Role-based + mobile-first UI + bottom nav
 - Deployed: tutor.knowbest.ro (VPS2, port 3013, PM2 + ecosystem.config.cjs)
 
 ### Users Created
 - Alex Danciulescu (alexdanciulescu@gmail.com) — SuperAdmin
-- Anto (vladalionescumariaantonia@gmail.com) — ADMIN+INSTRUCTOR+STUDENT on Aviation
+- Anto (vladalionescumariaantonia@gmail.com) — ADMIN+INSTRUCTOR+STUDENT on Aviation & Drept Penal
+- Alina (student) — tested Drept Penal successfully after answer-prefix fix
 - Rares (rares.danciulescu2004@gmail.com) — STUDENT on Aviation
-- Test users: test_admin@test.com, test_instructor@test.com, test_student@test.com, test_watcher@test.com (TestPass123!)
+- Test users: test_admin / test_instructor / test_student / test_watcher (TestPass123!)
 
 ### In Progress
-- (none currently)
+- (none)
 
 ### Not Started
 - Forgot Password: email delivery needs SMTP config on VPS (logic done, email skipped if no SMTP)
-- Web Push: VAPID keys set, needs real browser testing with user opt-in
+- Web Push: VAPID keys set, needs real browser user opt-in testing
+- Content for other domains (EN, BAC subjects — ready to import with new Import Book pipeline)
 
-## Recent Changes (2026-04-11 — 2026-04-15)
+## Recent Changes (2026-04-11 — 2026-04-16)
+
+### 2026-04-16 (Book Import Pipeline + Bibliography + Answer Fix)
+- feat: STRATEGY.md v1.2 — full product strategy with 8 phases, Referral Engine (perpetual commission 2 levels), Content Sourcing plan, IVP, per-subject pricing with seasonal vouchers
+- feat: Question schema with bookOrder, pdfPage, bookPage, qNumberInBook, chapterIndex for preserving book order on import
+- feat: All import pipelines (bulk-import, from-content, ai-generate) auto-populate bookOrder using aggregate max
+- feat: New /admin/questions/import-book page — specialized UI for scanned PDFs with pipeline details
+- feat: Question list + Review Queue sorted by bookOrder — instructors see questions in exact book order
+- feat: Bibliography CRUD with DRAFT→APPROVED→PUBLISHED workflow, per-domain
+- feat: Student Bibliography view + button on each enrolled domain card
+- feat: Udroiu 2023 seeded as initial bibliography entry for Drept Penal (APPROVED)
+- feat: Editable sourceReference field in question edit form (amber input, Admin/Instructor only)
+- feat: Source references now include [Topic] — "Udroiu..., p.3-4 [Principiile aplicării legii penale], Q1 / Answers p.8-9"
+- feat: 1385 Drept Penal questions imported from Udroiu (OCR + AI + letter-verified answers)
+- feat: Vision-verified page formula (book = pdf*2 - 18) via Anthropic Claude Haiku 4.5 Vision on 281 PDF pages
+- fix: Session answer check — strip letter prefix (a)/b)/c) from both answer and correctAnswer before comparison
+- fix: Options stripped of "a. ", "b. " prefixes; correctAnswer re-prefixed with letter for instructor clarity
+- fix: pdf-parse downgraded to v1.1.1 (v2 broke API); use pdf-parse/lib/pdf-parse.js to bypass test file lookup
+- fix: Scanned PDF auto-detected (< 200 chars extracted) → routed through 4uPDF OCR service
+- fix: All uploaded files (PDF/DOCX/CSV/images) saved to uploads/ for reprocessing safety
+
+### 2026-04-16 (Mobile UX + Admin flow)
+- feat: Question List redesigned as cards (was 10-col table) — clickable, mobile-friendly, Approve/Publish buttons
+- feat: Review Queue shows all options immediately (no expand), correct answer highlighted by letter index
+- feat: Instructor can edit questions regardless of status (removed ADMIN-only restriction from requireAdmin)
+- fix: Double-locale /en/en redirect — stripped locale from callbackUrl in middleware
+- feat: Added sourceReference to PUT/POST schemas + editable input in edit form
 
 ### 2026-04-15 (Auth features)
 - feat: Forgot Password flow — email with reset link, token validation, password update
