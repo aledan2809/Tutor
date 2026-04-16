@@ -184,6 +184,7 @@ model Question {
   correctAnswer String         @db.Text
   explanation   String?        @db.Text
   sourceReference String?      // "Udroiu 2023, p.10, Q11" — visible only to Instructor/Admin
+  bookOrder     Int?           // Sort key: page * 10000 + qNum (order as in book)
   imageUrl      String?        // Image attached to question
   explanationVideoUrl String?  // Video explanation URL
   source        QuestionSource @default(MANUAL)
