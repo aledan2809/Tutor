@@ -15,6 +15,7 @@ const adminLinks = [
   { href: "/dashboard/admin/questions/generate", labelKey: "aiGenerate", superAdminOnly: false },
   { href: "/dashboard/admin/questions/from-content", labelKey: "fromContent", superAdminOnly: false },
   { href: "/dashboard/admin/lessons", labelKey: "lessons", superAdminOnly: false },
+  { href: "/dashboard/admin/bibliography", labelKey: "bibliography", superAdminOnly: false },
   { href: "/dashboard/admin/exam-formats", labelKey: "examFormats", superAdminOnly: false },
   { href: "/dashboard/admin/templates", labelKey: "escalationTemplates", superAdminOnly: false },
   { href: "/dashboard/admin/aviation/seed-demo", labelKey: "aviationSeed", superAdminOnly: true },

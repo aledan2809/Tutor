@@ -130,6 +130,7 @@ model Domain {
   instructorMessages   InstructorMessage[]
   escalationThresholds EscalationThreshold[]
   dashboardAnalytics   DashboardAnalytics[]
+  bibliography         Bibliography[]
 }
 
 enum EnrollmentRole {
@@ -866,6 +867,31 @@ model Assessment {
   domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
 
   @@index([userId, domainId])
+}
+
+// ─── Bibliography (required by law) ───
+
+model Bibliography {
+  id          String   @id @default(cuid())
+  domainId    String
+  title       String   // Title of the work
+  authors     String   // Comma-separated author names
+  publisher   String?  // Editura
+  year        Int?     // Year of publication
+  edition     String?  // e.g., "Ediția 4, revizuită și adăugită"
+  city        String?  // Place of publication
+  isbn        String?
+  url         String?  // For online sources
+  notes       String?  @db.Text // Additional info (pages, chapters covered, etc.)
+  order       Int      @default(0) // Display order
+  status      String   @default("DRAFT") // DRAFT, APPROVED, PUBLISHED
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([domainId, status])
 }
 
 // ─── Web Push Subscriptions ───
