@@ -169,10 +169,21 @@ function checkAnswer(
   question: { type: string; correctAnswer: string; options: unknown },
   answer: string
 ): boolean {
+  // Strip letter prefix (e.g., "a) ", "b. ", "c-") from both sides for comparison
+  const stripPrefix = (s: string) =>
+    s.trim().replace(/^[abcd][\.\)\-\s]+\s*/i, "").trim().toLowerCase();
+
   if (question.type === "MULTIPLE_CHOICE") {
-    return (
-      answer.trim().toLowerCase() === question.correctAnswer.trim().toLowerCase()
-    );
+    const cleanAnswer = stripPrefix(answer);
+    const cleanCorrect = stripPrefix(question.correctAnswer);
+    if (cleanAnswer === cleanCorrect) return true;
+
+    // Also accept if user sent just the letter ("a", "b", etc.)
+    const answerLetter = answer.trim().toLowerCase().match(/^([abcd])[\.\)\-\s]*$/)?.[1];
+    const correctLetter = question.correctAnswer.trim().toLowerCase().match(/^([abcd])[\.\)\-]/)?.[1];
+    if (answerLetter && correctLetter && answerLetter === correctLetter) return true;
+
+    return false;
   }
 
   // OPEN type: normalize and compare
