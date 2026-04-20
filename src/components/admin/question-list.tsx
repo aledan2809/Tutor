@@ -1,8 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { useRouter, useSearchParams } from "next/navigation";
-import { usePathname } from "@/i18n/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useState } from "react";
 
 interface Question {
@@ -28,6 +27,7 @@ interface Props {
   page: number;
   limit: number;
   filters: { status?: string; domainId?: string; search?: string; source?: string };
+  readOnly?: boolean;
 }
 
 const statusColors: Record<string, string> = {
@@ -39,7 +39,7 @@ const statusColors: Record<string, string> = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const difficultyLabels = ["", "Very Easy", "Easy", "Medium", "Hard", "Expert"];
 
-export function QuestionList({ questions, domains, total, page, limit, filters }: Props) {
+export function QuestionList({ questions, domains, total, page, limit, filters, readOnly = false }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -52,7 +52,7 @@ export function QuestionList({ questions, domains, total, page, limit, filters }
     const params = new URLSearchParams(searchParams?.toString() || "");
     if (value) params.set(key, value);
     else params.delete(key);
-    params.set("page", "1");
+    if (key !== "page") params.set("page", "1");
     router.push(`${pathname}?${params.toString()}`);
   }
 
@@ -112,26 +112,28 @@ export function QuestionList({ questions, domains, total, page, limit, filters }
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-white">Questions ({total})</h2>
-        <div className="flex gap-2">
-          <Link
-            href="/dashboard/admin/questions/import"
-            className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800"
-          >
-            Import
-          </Link>
-          <Link
-            href="/dashboard/admin/questions/generate"
-            className="rounded-lg border border-purple-700 px-4 py-2 text-sm text-purple-400 hover:bg-purple-900/20"
-          >
-            AI Generate
-          </Link>
-          <Link
-            href="/dashboard/admin/questions/new"
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            + New Question
-          </Link>
-        </div>
+        {!readOnly && (
+          <div className="flex gap-2">
+            <Link
+              href="/dashboard/admin/questions/import"
+              className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800"
+            >
+              Import
+            </Link>
+            <Link
+              href="/dashboard/admin/questions/generate"
+              className="rounded-lg border border-purple-700 px-4 py-2 text-sm text-purple-400 hover:bg-purple-900/20"
+            >
+              AI Generate
+            </Link>
+            <Link
+              href="/dashboard/admin/questions/new"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              + New Question
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Filters */}
@@ -176,7 +178,7 @@ export function QuestionList({ questions, domains, total, page, limit, filters }
       </div>
 
       {/* Bulk Actions */}
-      {selected.size > 0 && (
+      {!readOnly && selected.size > 0 && (
         <div className="flex items-center gap-3 rounded-lg border border-blue-800/50 bg-blue-900/10 px-4 py-2.5">
           <span className="text-sm text-blue-300">{selected.size} selected</span>
           <button
@@ -210,14 +212,16 @@ export function QuestionList({ questions, domains, total, page, limit, filters }
       )}
 
       {/* Select All + Batch */}
-      <div className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-900/50 px-3 py-2">
-        <div className="flex items-center gap-2">
-          <button onClick={toggleSelectAll} className="rounded border border-gray-600 px-2 py-1 text-xs text-gray-400 hover:bg-gray-800">
-            {selected.size === questions.length && questions.length > 0 ? "Deselect All" : "Select All"}
-          </button>
-          {selected.size > 0 && <span className="text-xs text-gray-500">{selected.size} selected</span>}
+      {!readOnly && (
+        <div className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-900/50 px-3 py-2">
+          <div className="flex items-center gap-2">
+            <button onClick={toggleSelectAll} className="rounded border border-gray-600 px-2 py-1 text-xs text-gray-400 hover:bg-gray-800">
+              {selected.size === questions.length && questions.length > 0 ? "Deselect All" : "Select All"}
+            </button>
+            {selected.size > 0 && <span className="text-xs text-gray-500">{selected.size} selected</span>}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Question Cards (mobile-friendly) */}
       <div className="space-y-2">
@@ -230,18 +234,29 @@ export function QuestionList({ questions, domains, total, page, limit, filters }
           <div key={q.id} className={`rounded-xl border bg-gray-900 ${selected.has(q.id) ? "border-blue-600" : "border-gray-800"}`}>
             {/* Top: checkbox + content + edit link */}
             <div className="flex items-start gap-2 px-3 py-3">
-              <input
-                type="checkbox"
-                checked={selected.has(q.id)}
-                onChange={() => toggleSelect(q.id)}
-                className="mt-1 shrink-0 rounded border-gray-600 bg-gray-800"
-              />
-              <Link href={`/dashboard/admin/questions/${q.id}/edit`} className="flex-1 min-w-0 group">
-                <p className="text-sm text-white group-hover:text-blue-400">{q.content}</p>
-                {q.sourceReference && (
-                  <p className="mt-0.5 truncate text-xs text-amber-500/70">{q.sourceReference}</p>
-                )}
-              </Link>
+              {!readOnly && (
+                <input
+                  type="checkbox"
+                  checked={selected.has(q.id)}
+                  onChange={() => toggleSelect(q.id)}
+                  className="mt-1 shrink-0 rounded border-gray-600 bg-gray-800"
+                />
+              )}
+              {readOnly ? (
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-white">{q.content}</p>
+                  {q.sourceReference && (
+                    <p className="mt-0.5 truncate text-xs text-amber-500/70">{q.sourceReference}</p>
+                  )}
+                </div>
+              ) : (
+                <Link href={`/dashboard/admin/questions/${q.id}/edit`} className="flex-1 min-w-0 group">
+                  <p className="text-sm text-white group-hover:text-blue-400">{q.content}</p>
+                  {q.sourceReference && (
+                    <p className="mt-0.5 truncate text-xs text-amber-500/70">{q.sourceReference}</p>
+                  )}
+                </Link>
+              )}
             </div>
             {/* Bottom: tags row */}
             <div className="flex flex-wrap items-center gap-1.5 border-t border-gray-800/50 px-3 py-2">
@@ -253,7 +268,7 @@ export function QuestionList({ questions, domains, total, page, limit, filters }
                 {q.source === "AI_GENERATED" ? "AI" : "Manual"}
               </span>
               <span className="flex-1" />
-              {q.status !== "PUBLISHED" && (
+              {!readOnly && q.status !== "PUBLISHED" && (
                 <button
                   onClick={(e) => { e.preventDefault(); quickAction(q.id, "PUBLISHED"); }}
                   className="rounded bg-blue-700 px-2 py-0.5 text-xs text-white hover:bg-blue-600"
@@ -261,7 +276,7 @@ export function QuestionList({ questions, domains, total, page, limit, filters }
                   Publish
                 </button>
               )}
-              {q.status === "DRAFT" && (
+              {!readOnly && q.status === "DRAFT" && (
                 <button
                   onClick={(e) => { e.preventDefault(); quickAction(q.id, "APPROVED"); }}
                   className="rounded bg-green-700 px-2 py-0.5 text-xs text-white hover:bg-green-600"

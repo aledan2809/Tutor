@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/admin-auth";
+import { requireAdmin, requireAdminOrInstructor } from "@/lib/admin-auth";
 import { z } from "zod";
 import { withErrorHandler } from "@/lib/api-handler";
 
@@ -21,7 +21,7 @@ const questionSchema = z.object({
 });
 
 async function _GET(req: NextRequest) {
-  const { error } = await requireAdmin();
+  const { error, allowedDomainIds } = await requireAdminOrInstructor();
   if (error) return error;
 
   const { searchParams } = new URL(req.url);
@@ -32,10 +32,16 @@ async function _GET(req: NextRequest) {
   const difficulty = searchParams.get("difficulty");
   const search = searchParams.get("search");
   const page = parseInt(searchParams.get("page") || "1");
-  const limit = parseInt(searchParams.get("limit") || "20");
+  const limit = Math.min(Math.max(parseInt(searchParams.get("limit") || "20") || 20, 1), 100);
 
   const where: Record<string, unknown> = {};
-  if (domainId) where.domainId = domainId;
+  if (allowedDomainIds) where.domainId = { in: allowedDomainIds };
+  if (domainId) {
+    where.domainId =
+      allowedDomainIds && !allowedDomainIds.includes(domainId)
+        ? { in: [] }
+        : domainId;
+  }
   if (status) where.status = status;
   if (source) where.source = source;
   if (subject) where.subject = subject;
@@ -73,6 +79,21 @@ async function _POST(req: NextRequest) {
   }
 
   const { tags, ...data } = parsed.data;
+
+  // Verify user has ADMIN/INSTRUCTOR role in the target domain (superadmins bypass)
+  if (!session!.user.isSuperAdmin) {
+    const hasRole = session!.user.enrollments?.some(
+      (e: { domainId: string; roles: string[] }) =>
+        e.domainId === data.domainId &&
+        (e.roles.includes("ADMIN") || e.roles.includes("INSTRUCTOR"))
+    );
+    if (!hasRole) {
+      return NextResponse.json(
+        { error: "You do not have permission to create questions in this domain" },
+        { status: 403 }
+      );
+    }
+  }
 
   // Manual content gets approved directly
   const status = data.status || (data.source === "MANUAL" ? "APPROVED" : "DRAFT");

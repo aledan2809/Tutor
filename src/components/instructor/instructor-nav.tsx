@@ -10,6 +10,7 @@ export function InstructorNav() {
   const links = [
     { href: "/dashboard/instructor", label: t("overview") },
     { href: "/dashboard/instructor/students", label: t("students") },
+    { href: "/dashboard/instructor/questions", label: t("questions") },
     { href: "/dashboard/instructor/groups", label: t("groups") },
     { href: "/dashboard/instructor/goals", label: t("goals") },
     { href: "/dashboard/instructor/messages", label: t("messages") },
