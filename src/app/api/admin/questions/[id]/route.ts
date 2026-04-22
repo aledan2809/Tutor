@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/admin-auth";
+import { requireAdmin, requireDomainAdmin } from "@/lib/admin-auth";
 import { z } from "zod";
 import { withErrorHandler } from "@/lib/api-handler";
 
@@ -42,10 +42,17 @@ async function _PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireAdmin();
+  const { id } = await params;
+  const existing = await prisma.question.findUnique({
+    where: { id },
+    select: { domainId: true },
+  });
+  if (!existing) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  const { error } = await requireDomainAdmin(existing.domainId);
   if (error) return error;
 
-  const { id } = await params;
   const body = await req.json();
   const parsed = updateSchema.safeParse(body);
   if (!parsed.success) {
@@ -79,10 +86,17 @@ async function _DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireAdmin();
+  const { id } = await params;
+  const existing = await prisma.question.findUnique({
+    where: { id },
+    select: { domainId: true },
+  });
+  if (!existing) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  const { error } = await requireDomainAdmin(existing.domainId);
   if (error) return error;
 
-  const { id } = await params;
   await prisma.question.delete({ where: { id } });
 
   return NextResponse.json({ success: true });
