@@ -74,7 +74,6 @@ export default async function InstructorQuestionsPage({
       page={page}
       limit={limit}
       filters={{ status, domainId, search, source }}
-      readOnly
     />
   );
 }
