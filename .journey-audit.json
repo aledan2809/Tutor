@@ -1,0 +1,37 @@
+{
+  "name": "Tutor",
+  "baseUrl": "https://tutor.knowbest.ro",
+  "login": {
+    "path": "/en/auth/signin",
+    "emailSelector": "input[type=email]",
+    "passwordSelector": "input[type=password]",
+    "submitSelector": "button[type=submit]",
+    "successUrlPattern": "/(dashboard|en/dashboard|ro/dashboard|$)"
+  },
+  "credentials": {
+    "emailEnv": "JOURNEY_EMAIL",
+    "passwordEnv": "JOURNEY_PASSWORD"
+  },
+  "navLinks": [
+    { "name": "Dashboard", "href": "/en/dashboard" },
+    { "name": "Lessons", "href": "/en/dashboard/lessons" },
+    { "name": "Bibliography", "href": "/en/dashboard/bibliography" },
+    { "name": "Practice", "href": "/en/dashboard/practice" },
+    { "name": "Assessment", "href": "/en/dashboard/assessment" },
+    { "name": "Exams", "href": "/en/dashboard/exams" },
+    { "name": "Progress", "href": "/en/dashboard/progress" },
+    { "name": "Domains", "href": "/en/dashboard/domains" },
+    { "name": "Calendar", "href": "/en/dashboard/calendar" },
+    { "name": "Notifications", "href": "/en/dashboard/notifications" },
+    { "name": "Gamification", "href": "/en/dashboard/gamification" },
+    { "name": "Settings", "href": "/en/dashboard/settings" },
+    { "name": "Instructor Questions", "href": "/en/dashboard/instructor/questions" },
+    { "name": "Admin Questions", "href": "/en/dashboard/admin/questions" }
+  ],
+  "onboardingMarkers": "onboarding|setup wizard|getting started",
+  "emptyStateMarkers": "No .*yet|No .*found|empty|Niciun|Nu exista",
+  "errorMarkers": "error|failed|eroare|forbidden|unauthorized",
+  "viewport": { "width": 1440, "height": 900 },
+  "pageTimeout": 20000,
+  "settleDelay": 2000
+}

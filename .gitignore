@@ -38,3 +38,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# journey-audit generated output (keep .journey-audit.json, ignore results)
+/journey-audit-results/
