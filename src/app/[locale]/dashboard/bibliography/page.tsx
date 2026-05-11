@@ -47,16 +47,15 @@ export default function StudentBibliographyPage() {
       .finally(() => setLoading(false));
   }, [domain]);
 
-  const formatCitation = (item: BibItem) => {
-    const parts: string[] = [];
-    parts.push(item.authors);
-    parts.push(`<em>${item.title}</em>`);
-    if (item.edition) parts.push(item.edition);
-    if (item.publisher) parts.push(item.publisher);
-    if (item.city) parts.push(item.city);
-    if (item.year) parts.push(String(item.year));
-    return parts.join(", ");
-  };
+  const CitationText = ({ item }: { item: BibItem }) => (
+    <p className="text-sm text-white">
+      {item.authors}, <em>{item.title}</em>
+      {item.edition ? `, ${item.edition}` : ""}
+      {item.publisher ? `, ${item.publisher}` : ""}
+      {item.city ? `, ${item.city}` : ""}
+      {item.year ? `, ${item.year}` : ""}
+    </p>
+  );
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -86,11 +85,11 @@ export default function StudentBibliographyPage() {
               <div className="flex items-start gap-3">
                 <span className="mt-0.5 text-sm font-semibold text-gray-500">{idx + 1}.</span>
                 <div className="flex-1">
-                  <p className="text-sm text-white" dangerouslySetInnerHTML={{ __html: formatCitation(item) }} />
+                  <CitationText item={item} />
                   {item.isbn && <p className="mt-1 text-xs text-gray-500">ISBN: {item.isbn}</p>}
                   {item.url && (
                     <p className="mt-1 text-xs">
-                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 break-all">
+                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 break-all underline">
                         {item.url}
                       </a>
                     </p>

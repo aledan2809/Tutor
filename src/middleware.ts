@@ -109,6 +109,19 @@ export default function middleware(request: NextRequest) {
   // Run intl middleware for locale handling
   const response = intlMiddleware(request);
 
+  // Add Secure flag to NEXT_LOCALE cookie on HTTPS
+  if (request.nextUrl.protocol === "https:") {
+    const localeCookie = response.cookies.get("NEXT_LOCALE");
+    if (localeCookie) {
+      response.cookies.set("NEXT_LOCALE", localeCookie.value, {
+        path: "/",
+        sameSite: "lax",
+        secure: true,
+        maxAge: 60 * 60 * 24 * 365,
+      });
+    }
+  }
+
   // Check auth for protected routes
   if (!isPublicPath(pathname)) {
     const token =

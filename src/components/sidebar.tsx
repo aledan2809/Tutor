@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -22,6 +22,24 @@ export function Sidebar({ user }: SidebarProps) {
   const tAuth = useTranslations("auth");
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileAsideRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!mobileAsideRef.current) return;
+    if (mobileOpen) {
+      mobileAsideRef.current.removeAttribute("inert");
+    } else {
+      mobileAsideRef.current.setAttribute("inert", "");
+    }
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && mobileOpen) setMobileOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
 
   const navItems = [
     { href: "/dashboard", label: t("dashboard") },
@@ -89,7 +107,7 @@ export function Sidebar({ user }: SidebarProps) {
               key={item.href}
               href={item.href}
               onClick={() => setMobileOpen(false)}
-              className={`block rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              className={`flex min-h-[44px] items-center rounded-lg px-3 text-sm font-medium transition-colors ${
                 isActive
                   ? "bg-blue-600/10 text-blue-500"
                   : "text-gray-400 hover:bg-gray-800 hover:text-white"
@@ -117,12 +135,12 @@ export function Sidebar({ user }: SidebarProps) {
             <p className="truncate text-sm font-medium text-white">
               {user.name}
             </p>
-            <p className="truncate text-xs text-gray-500">{user.email}</p>
+            <p className="truncate text-xs text-gray-400">{user.email}</p>
           </div>
         </div>
         <button
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="mt-3 w-full rounded-lg border border-gray-700 px-3 py-1.5 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+          className="mt-3 w-full min-h-[44px] rounded-lg border border-gray-700 px-3 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
         >
           {tAuth("signOut")}
         </button>
@@ -153,6 +171,10 @@ export function Sidebar({ user }: SidebarProps) {
 
       {/* Mobile sidebar */}
       <aside
+        ref={mobileAsideRef}
+        role="dialog"
+        aria-modal={mobileOpen}
+        aria-label="Navigation menu"
         className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-gray-800 bg-gray-950 transition-transform duration-200 lg:hidden ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
