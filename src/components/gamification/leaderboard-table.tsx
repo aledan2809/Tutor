@@ -25,7 +25,7 @@ export function LeaderboardTable({
 }) {
   if (data.top10.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-800 bg-gray-900 p-6 text-center text-sm text-gray-500">
+      <div className="rounded-xl border border-gray-800 bg-gray-900 p-6 text-center text-sm text-gray-400">
         No leaderboard data this week. Start earning XP!
       </div>
     );
@@ -35,7 +35,7 @@ export function LeaderboardTable({
     <div className="rounded-xl border border-gray-800 bg-gray-900">
       <div className="flex items-center justify-between border-b border-gray-800 px-5 py-3">
         <h2 className="text-lg font-semibold text-white">Weekly Leaderboard</h2>
-        <span className="text-xs text-gray-500">Week {data.week}</span>
+        <span className="text-xs text-gray-400">Week {data.week}</span>
       </div>
 
       <div className="divide-y divide-gray-800">
@@ -77,7 +77,7 @@ export function LeaderboardTable({
       </div>
 
       {data.rank && data.rank > 10 && (
-        <div className="border-t border-gray-800 px-5 py-3 text-center text-sm text-gray-500">
+        <div className="border-t border-gray-800 px-5 py-3 text-center text-sm text-gray-400">
           Your rank: <span className="font-semibold text-white">#{data.rank}</span> with{" "}
           <span className="text-purple-400">{data.userXp.toLocaleString()} XP</span>
         </div>

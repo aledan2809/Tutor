@@ -146,25 +146,25 @@ export default function ExamsPage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
             <p className="text-2xl font-bold text-white">{trends.totalAttempts}</p>
-            <p className="text-xs text-gray-500">Total Attempts</p>
+            <p className="text-xs text-gray-400">Total Attempts</p>
           </div>
           <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
             <p className="text-2xl font-bold text-blue-400">
               {trends.averageScore !== null ? `${Math.round(trends.averageScore)}%` : "-"}
             </p>
-            <p className="text-xs text-gray-500">Average Score</p>
+            <p className="text-xs text-gray-400">Average Score</p>
           </div>
           <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
             <p className="text-2xl font-bold text-green-400">
               {trends.passRate !== null ? `${Math.round(trends.passRate)}%` : "-"}
             </p>
-            <p className="text-xs text-gray-500">Pass Rate</p>
+            <p className="text-xs text-gray-400">Pass Rate</p>
           </div>
           <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
             <p className="text-2xl font-bold text-yellow-400">
               {trends.bestScore !== null ? `${Math.round(trends.bestScore)}%` : "-"}
             </p>
-            <p className="text-xs text-gray-500">Best Score</p>
+            <p className="text-xs text-gray-400">Best Score</p>
           </div>
         </div>
       )}
@@ -226,7 +226,7 @@ export default function ExamsPage() {
                   {fmt.description && (
                     <p className="mb-3 text-sm text-gray-400">{fmt.description}</p>
                   )}
-                  <div className="mb-4 flex flex-wrap gap-3 text-xs text-gray-500">
+                  <div className="mb-4 flex flex-wrap gap-3 text-xs text-gray-400">
                     <span>{fmt.questionCount} questions</span>
                     {fmt.timeLimit && <span>{fmt.timeLimit} min</span>}
                     <span>Pass: {fmt.passingScore}%</span>
@@ -333,7 +333,7 @@ export default function ExamsPage() {
                       {entry.mode}
                     </span>
                   </div>
-                  <div className="flex gap-3 text-xs text-gray-500">
+                  <div className="flex gap-3 text-xs text-gray-400">
                     <span>{new Date(entry.startedAt).toLocaleDateString()}</span>
                     {entry.timeTaken !== null && (
                       <span>{Math.round(entry.timeTaken)} min</span>
@@ -364,7 +364,7 @@ export default function ExamsPage() {
                       </span>
                     </>
                   ) : (
-                    <span className="text-xs text-gray-500">{entry.status}</span>
+                    <span className="text-xs text-gray-400">{entry.status}</span>
                   )}
                   {entry.certificateUrl && (
                     <a
@@ -380,7 +380,7 @@ export default function ExamsPage() {
               </div>
             ))}
             {filteredHistory.length === 0 && (
-              <p className="py-4 text-center text-sm text-gray-500">
+              <p className="py-4 text-center text-sm text-gray-400">
                 No {historyTab === "all" ? "" : historyTab} exams found.
               </p>
             )}

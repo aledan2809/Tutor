@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 export default function SettingsPage() {
   const t = useTranslations("settings");
   const tCal = useTranslations("calendar");
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [selectedDomain, setSelectedDomain] = useState("");
   const [connected, setConnected] = useState(false);
   const [connectedAt, setConnectedAt] = useState<string | null>(null);
@@ -34,6 +34,10 @@ export default function SettingsPage() {
       })
       .catch(() => setConnected(false));
   }, [selectedDomain, refreshKey]);
+
+  if (status === "loading") {
+    return <div className="py-12 text-center text-gray-500">{t("loading")}</div>;
+  }
 
   if (!session) return null;
 

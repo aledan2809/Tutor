@@ -35,7 +35,7 @@ export function AchievementCard({ achievement }: { achievement: AchievementInfo 
       )}
       <div className="mb-2 text-3xl">{icon}</div>
       <p className="text-sm font-semibold text-white">{achievement.name}</p>
-      <p className="mt-1 text-xs text-gray-400">{achievement.description}</p>
+      <p className="mt-1 text-xs text-gray-300">{achievement.description}</p>
       {achievement.unlocked && achievement.unlockedAt && (
         <p className="mt-2 text-[10px] text-yellow-500">
           {new Date(achievement.unlockedAt).toLocaleDateString()}
@@ -53,7 +53,7 @@ export function AchievementGrid({ achievements }: { achievements: AchievementInf
     <div>
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-white">Achievements</h2>
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-gray-400">
           {unlocked.length}/{achievements.length}
         </span>
       </div>

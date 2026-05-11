@@ -11,7 +11,7 @@ import { CalendarGrid } from "@/components/calendar/calendar-grid";
 
 export default function CalendarPage() {
   const t = useTranslations("calendar");
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [selectedDomain, setSelectedDomain] = useState<string>("");
   const [connected, setConnected] = useState(false);
   const [connectedAt, setConnectedAt] = useState<string | null>(null);
@@ -70,6 +70,10 @@ export default function CalendarPage() {
     // Scroll to schedule form
     document.getElementById("schedule-form-section")?.scrollIntoView({ behavior: "smooth" });
   }, []);
+
+  if (status === "loading") {
+    return <div className="py-12 text-center text-gray-500">{t("loading")}</div>;
+  }
 
   if (!session) {
     return null;

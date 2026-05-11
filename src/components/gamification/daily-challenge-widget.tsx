@@ -44,7 +44,7 @@ export function DailyChallengeWidget({
   if (!data.available) {
     return (
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-6 text-center">
-        <p className="text-sm text-gray-500">No daily challenge available today.</p>
+        <p className="text-sm text-gray-400">No daily challenge available today.</p>
       </div>
     );
   }
@@ -110,7 +110,7 @@ export function DailyChallengeWidget({
         </span>
       </div>
 
-      <div className="mb-1 text-[10px] text-gray-500">
+      <div className="mb-1 text-xs text-gray-400">
         {question.subject} &middot; {question.topic}
       </div>
       <p className="mb-4 text-sm text-gray-200">{question.content}</p>

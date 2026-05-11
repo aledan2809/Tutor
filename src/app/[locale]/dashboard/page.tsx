@@ -86,11 +86,11 @@ export default function DashboardPage() {
   };
 
   if (loading && !data) {
-    return <div className="py-12 text-center text-gray-500">Loading...</div>;
+    return <div className="py-12 text-center text-gray-400">Loading...</div>;
   }
 
   if (!data) {
-    return <div className="py-12 text-center text-gray-500">Could not load dashboard.</div>;
+    return <div className="py-12 text-center text-gray-400">Could not load dashboard.</div>;
   }
 
   const activeDomain = data.domains.find((d) => d.domainId === activeDomainId) || data.domains[0];
@@ -170,7 +170,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-white">Quick Session</p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-400">
                   {data.recommendation ? data.recommendation.label : "Start practicing"}
                 </p>
               </div>
@@ -196,7 +196,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-white">Continue</p>
-                <p className="text-xs text-gray-500">Resume where you left off</p>
+                <p className="text-xs text-gray-400">Resume where you left off</p>
               </div>
             </button>
             <button
@@ -208,7 +208,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-white">Assessment</p>
-                <p className="text-xs text-gray-500">Determine your level</p>
+                <p className="text-xs text-gray-400">Determine your level</p>
               </div>
             </button>
           </div>
@@ -234,15 +234,15 @@ export default function DashboardPage() {
                     <div className="grid grid-cols-3 gap-2 text-center text-xs">
                       <div>
                         <p className="font-bold text-white">{d.xp}</p>
-                        <p className="text-gray-500">XP</p>
+                        <p className="text-gray-400">XP</p>
                       </div>
                       <div>
                         <p className="font-bold text-white">{d.level}</p>
-                        <p className="text-gray-500">Level</p>
+                        <p className="text-gray-400">Level</p>
                       </div>
                       <div>
                         <p className="font-bold text-white">{d.accuracy}%</p>
-                        <p className="text-gray-500">Accuracy</p>
+                        <p className="text-gray-400">Accuracy</p>
                       </div>
                     </div>
                     <div className="mt-3 h-1.5 rounded-full bg-gray-700">
@@ -263,7 +263,7 @@ export default function DashboardPage() {
             <section>
               <h2 className="mb-3 text-lg font-semibold text-white">Weak Areas</h2>
               {data.weakAreas.length === 0 ? (
-                <div className="rounded-xl border border-gray-800 bg-gray-900 p-6 text-center text-sm text-gray-500">
+                <div className="rounded-xl border border-gray-800 bg-gray-900 p-6 text-center text-sm text-gray-400">
                   No weak areas detected yet.
                 </div>
               ) : (
@@ -275,7 +275,7 @@ export default function DashboardPage() {
                     >
                       <div>
                         <p className="text-sm font-medium text-white">{w.topic}</p>
-                        <p className="text-xs text-gray-500">{w.subject}</p>
+                        <p className="text-xs text-gray-400">{w.subject}</p>
                       </div>
                       <span className="text-sm font-semibold text-red-400">{w.errorRate}%</span>
                     </div>
@@ -288,7 +288,7 @@ export default function DashboardPage() {
             <section>
               <h2 className="mb-3 text-lg font-semibold text-white">Recent Sessions</h2>
               {data.recentSessions.length === 0 ? (
-                <div className="rounded-xl border border-gray-800 bg-gray-900 p-6 text-center text-sm text-gray-500">
+                <div className="rounded-xl border border-gray-800 bg-gray-900 p-6 text-center text-sm text-gray-400">
                   No sessions yet. Start practicing!
                 </div>
               ) : (
@@ -300,7 +300,7 @@ export default function DashboardPage() {
                     >
                       <div>
                         <p className="text-sm font-medium capitalize text-white">{s.type}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-400">
                           {new Date(s.startedAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -370,9 +370,9 @@ function StatCard({
 
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
-      <p className="text-xs text-gray-500">{label}</p>
+      <p className="text-xs text-gray-400">{label}</p>
       <p className={`mt-1 text-2xl font-bold ${colors[accent]}`}>{value}</p>
-      {sub && <div className="mt-1 text-xs text-gray-500">{sub}</div>}
+      {sub && <div className="mt-1 text-xs text-gray-400">{sub}</div>}
     </div>
   );
 }
