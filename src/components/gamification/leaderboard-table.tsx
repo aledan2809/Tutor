@@ -34,7 +34,7 @@ export function LeaderboardTable({
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900">
       <div className="flex items-center justify-between border-b border-gray-800 px-5 py-3">
-        <h3 className="text-lg font-semibold text-white">Weekly Leaderboard</h3>
+        <h2 className="text-lg font-semibold text-white">Weekly Leaderboard</h2>
         <span className="text-xs text-gray-500">Week {data.week}</span>
       </div>
 

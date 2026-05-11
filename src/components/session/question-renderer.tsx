@@ -76,7 +76,7 @@ export function QuestionRenderer({
               key={idx}
               onClick={() => !disabled && setSelectedOption(opt.value)}
               disabled={disabled}
-              className={`w-full rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
+              className={`w-full rounded-lg border px-4 py-3 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 ${
                 selectedOption === opt.value
                   ? "border-blue-500 bg-blue-600/10 text-blue-400"
                   : "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"

@@ -221,7 +221,7 @@ export default function AssessmentPage() {
               }
             }}
             disabled={currentIndex === 0}
-            className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-400 hover:bg-gray-800 disabled:opacity-50"
+            className="rounded-lg border border-gray-700 px-4 py-2.5 text-sm text-gray-400 hover:bg-gray-800 disabled:opacity-50 min-h-[44px]"
           >
             Previous
           </button>
@@ -231,7 +231,7 @@ export default function AssessmentPage() {
               <button
                 onClick={handleAnswer}
                 disabled={!currentAnswer}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 min-h-[44px]"
               >
                 Next
               </button>
@@ -241,7 +241,7 @@ export default function AssessmentPage() {
                   if (currentAnswer) handleAnswer();
                 }}
                 disabled={!currentAnswer && !answers.has(q.id)}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 min-h-[44px]"
               >
                 Save Answer
               </button>

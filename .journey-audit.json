@@ -13,6 +13,9 @@
     "passwordEnv": "JOURNEY_PASSWORD"
   },
   "navLinks": [
+    { "name": "Public: Home", "href": "/" },
+    { "name": "Public: Privacy", "href": "/en/privacy" },
+    { "name": "Public: Terms", "href": "/en/terms" },
     { "name": "Dashboard", "href": "/en/dashboard" },
     { "name": "Lessons", "href": "/en/dashboard/lessons" },
     { "name": "Bibliography", "href": "/en/dashboard/bibliography" },

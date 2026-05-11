@@ -75,7 +75,7 @@ export function SessionSelector({
         <button
           onClick={() => onSelect(recommended.type)}
           disabled={loading}
-          className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+          className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50 min-h-[44px]"
         >
           {loading ? "Starting..." : "Start Session"}
         </button>

@@ -104,4 +104,5 @@ async function _DELETE(
 
 export const GET = withErrorHandler(_GET);
 export const PUT = withErrorHandler(_PUT);
+export const PATCH = withErrorHandler(_PUT);
 export const DELETE = withErrorHandler(_DELETE);

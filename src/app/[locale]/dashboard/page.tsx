@@ -109,7 +109,7 @@ export default function DashboardPage() {
           <p className="mb-4 text-gray-400">You are not enrolled in any domains yet.</p>
           <button
             onClick={() => router.push("/dashboard/domains")}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 min-h-[44px]"
           >
             Browse Domains
           </button>
