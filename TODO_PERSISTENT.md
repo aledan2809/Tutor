@@ -4,6 +4,14 @@
 
 ---
 
+## [ ] 🎯 Creator program (revenue-share perpetuu) — DEFERRED until domain (creat 2026-05-26)
+
+Plan complet în `knowledge/creator-program-plan.md`. Recrutăm creatori de conținut (profesori) care adaugă material pe materii și câștigă **comision perpetuu** (~40% pro-rata pe consum, plăți Stripe Connect). Promovare **idee-întâi** (fără URL platformă) → pagină dedicată creatorilor + waitlist.
+**Blocant (user 2026-05-26):** așteptăm domeniul nou (încearcă `tutor.com`) înainte de a construi pagina creatorilor + a porni teaser-ul. CTA teaser = pagina creatorilor + waitlist. NU marketăm nimic până la domeniu.
+**Build amânat:** (1) pagina creatorilor pe domeniul final, (2) sistem comisioane + Stripe Connect, (3) campanie recrutare pe materii.
+
+---
+
 ## 🎯 TRUE FULL E2E — multi-role business workflows
 
 **Invocare**: [10] True Full E2E Audit — scope complet per CLAUDE.md §10.
