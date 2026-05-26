@@ -913,3 +913,20 @@ model PushSubscription {
 
   @@index([userId])
 }
+
+// ─── Creator Program waitlist (public /creatori recruitment, lead capture) ───
+// Educators apply to add content + earn perpetual commissions. NOT a payment
+// record — pure lead. The commission/Stripe-Connect product is a later phase.
+model CreatorWaitlist {
+  id         String   @id @default(cuid())
+  name       String
+  email      String   @unique
+  subject    String   // materia/verticala (Drept, Medicină, Bac, Permis auto, IT…)
+  experience String?  @db.Text
+  locale     String   @default("ro")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([subject])
+  @@index([createdAt])
+}
