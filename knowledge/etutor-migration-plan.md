@@ -1,4 +1,4 @@
-# Tutor — `etutor.ro` domain migration plan (Cloudflare DNS → VPS2)
+# Tutor — `etutor.ro` domain migration plan (Hostico DNS → VPS2; Cloudflare optional)
 
 > Created 2026-05-27. Domain `etutor.ro` acquired on **Hostico**. Target: serve Tutor on
 > `etutor.ro` (currently `tutor.knowbest.ro`, VPS2 `72.62.155.74`, PM2 `tutor` :3013, local PG).
@@ -12,18 +12,21 @@
 
 ---
 
-## Phase 1 — Cloudflare DNS (👤 USER)
+## Phase 1 — DNS A-records via Hostico (👤 USER) — Cloudflare NOT required
 
-1. **Add site to Cloudflare** (free plan): dashboard → Add a site → `etutor.ro`.
-2. Cloudflare gives you **2 nameservers** (e.g. `xxx.ns.cloudflare.com`).
-3. **At Hostico** (registrar): replace the current nameservers with Cloudflare's two. Propagation 5 min–24h.
-4. **In Cloudflare → DNS**, add:
-   - `A` · `etutor.ro` · `72.62.155.74` · **Proxy status: DNS only (grey cloud)** ← important for Let's Encrypt
-   - `A` · `www` · `72.62.155.74` · **DNS only (grey cloud)**
-5. Verify propagation: `dig +short etutor.ro` → must return `72.62.155.74`.
+Cloudflare is **not needed** to point a domain at a VPS — just two A-records. This is exactly how
+every other `*.knowbest.ro` (tutor, legal, hh, contakt, seap) already resolves to VPS2.
 
-> Keep grey-cloud (DNS only) until the SSL cert is issued (Phase 3). You may switch to orange-cloud
-> (proxied) afterwards **only with SSL/TLS mode = Full (strict)** — otherwise you get redirect loops.
+1. **Hostico → panou DNS** (zona DNS a lui `etutor.ro`). Make sure the domain uses Hostico's own
+   nameservers (the default after purchase). Add:
+   - `A` · `@` (or `etutor.ro`) → `72.62.155.74`
+   - `A` · `www` → `72.62.155.74`
+2. Verify propagation (5 min–a few h): `dig +short etutor.ro` → must return `72.62.155.74`.
+
+> **Optional — Cloudflare (only if you later want CDN / DDoS / hidden origin):** add the site to
+> Cloudflare, switch Hostico nameservers to Cloudflare's, recreate the A-records there as **DNS only
+> (grey cloud)** for cert issuance; you may enable the proxy (orange cloud) afterwards **only with
+> SSL/TLS = Full (strict)**. Overkill for a single VPS app — skip unless you have a reason.
 
 ## Phase 2 — nginx vhost on VPS2 (🤖 once `dig` returns the VPS IP)
 
@@ -86,8 +89,8 @@ return 301 https://etutor.ro$request_uri;
 - L41-style spot check: `tutor.knowbest.ro` still 200 (or 301 to etutor) per Phase 5 choice.
 
 ## Gotchas
-- **Let's Encrypt + Cloudflare proxy**: cert issuance fails behind orange-cloud unless you use DNS-01
-  or Cloudflare origin certs. Use grey-cloud for HTTP-01 (Phase 1.4), then optionally proxy.
+- **Hostico DNS direct** = simplest; certbot HTTP-01 works out of the box (no proxy in front).
+  Only relevant if you opt into Cloudflare: cert issuance fails behind orange-cloud — use grey-cloud.
 - **NextAuth `AUTH_URL` mismatch** → "callback URL mismatch" / login bounce. AUTH_URL must equal the
   canonical public origin exactly (`https://etutor.ro`, no trailing slash).
 - **OAuth redirect URIs** are the #1 cause of post-migration login failure — add them BEFORE flipping AUTH_URL.
@@ -95,4 +98,4 @@ return 301 https://etutor.ro$request_uri;
 
 ## What's done already (2026-05-27)
 - `/creatori` creator-recruitment page + waitlist LIVE on tutor.knowbest.ro (works on etutor.ro after DNS).
-- This plan persisted. Phases 2-6 are ~30-45 min once 👤 Phase 1 (Cloudflare + Hostico nameservers) is done.
+- This plan persisted. Phases 2-6 are ~30-45 min once 👤 Phase 1 (two A-records in Hostico DNS) is done.
