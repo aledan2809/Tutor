@@ -5,6 +5,9 @@
 > Created 2026-05-26.
 
 ## Changelog
+- [2026-05-27] v1.1: **Domain decided = `etutor.ro`** (Hostico). Creator page `/creatori` + waitlist
+  BUILT + LIVE (tutor.knowbest.ro; etutor.ro after DNS) — commit `af05335`. Migration plan in
+  `etutor-migration-plan.md`. Remaining: Stripe-Connect commission product + recruitment campaign.
 - [2026-05-26] v1.0: Initial plan (program model + subjects + idea-first recruitment + creator page).
 
 ---

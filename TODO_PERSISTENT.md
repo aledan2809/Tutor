@@ -4,11 +4,18 @@
 
 ---
 
-## [ ] 🎯 Creator program (revenue-share perpetuu) — DEFERRED until domain (creat 2026-05-26)
+## [~] 🎯 Creator program (revenue-share perpetuu) — pagina LIVE; comisioane + teaser de făcut (creat 2026-05-26, pagina DONE 2026-05-27 commit `af05335`)
 
 Plan complet în `knowledge/creator-program-plan.md`. Recrutăm creatori de conținut (profesori) care adaugă material pe materii și câștigă **comision perpetuu** (~40% pro-rata pe consum, plăți Stripe Connect). Promovare **idee-întâi** (fără URL platformă) → pagină dedicată creatorilor + waitlist.
-**Blocant (user 2026-05-26):** așteptăm domeniul nou (încearcă `tutor.com`) înainte de a construi pagina creatorilor + a porni teaser-ul. CTA teaser = pagina creatorilor + waitlist. NU marketăm nimic până la domeniu.
-**Build amânat:** (1) pagina creatorilor pe domeniul final, (2) sistem comisioane + Stripe Connect, (3) campanie recrutare pe materii.
+
+**Domeniu DECIS 2026-05-27:** `etutor.ro` (achiziționat pe Hostico). Plan migrare Cloudflare DNS → VPS2 în `knowledge/etutor-migration-plan.md` (Faza 1 = acțiune user: Cloudflare + nameservers Hostico; Fazele 2-6 = eu, ~30-45min după ce DNS rezolvă).
+
+**DONE 2026-05-27** (build #1 — pagina creatorilor): `/creatori` LIVE pe tutor.knowbest.ro (RO+EN, idee-întâi, fără URL platformă) — hero, cum funcționează, model comision transparent, materii deschise, FAQ + formular waitlist. Model `CreatorWaitlist` (migrare 0010) + `/api/creatori-waitlist` (zod, upsert-idempotent, public). Verificat end-to-end (POST salvează lead, validare, cleanup). Va rula pe `etutor.ro/creatori` automat după DNS.
+
+**Build rămas:**
+- [ ] (2) **sistem comisioane + Stripe Connect** (faza 4 din plan — atribuire conținut→creator, tracking consum, calcul lunar, payouts). Sesiune dedicată mare.
+- [ ] (3) **campanie recrutare pe materii** (idee-întâi, 1 materie/săptămână, CTA = `/creatori`) — build în MA ca celelalte; start ~început iulie (după campaniile curente).
+- [ ] migrare `etutor.ro` (vezi plan) — Faza 1 user, restul eu.
 
 ---
 
