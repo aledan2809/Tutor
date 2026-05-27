@@ -3,4 +3,4 @@ Allow: /
 Disallow: /api/
 Disallow: /dashboard/
 
-Sitemap: https://tutor.knowbest.ro/sitemap.xml
+Sitemap: https://etutor.ro/sitemap.xml

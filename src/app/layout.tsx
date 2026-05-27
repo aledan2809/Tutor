@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   keywords: ["learning", "education", "adaptive learning", "spaced repetition", "aviation", "exam preparation", "tutoring"],
   authors: [{ name: "Tutor Platform" }],
   creator: "Tutor Platform",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://tutor.knowbest.ro"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://etutor.ro"),
   openGraph: {
     type: "website",
     title: "Tutor - Adaptive Learning Platform",

@@ -53,7 +53,7 @@ async function _POST(req: NextRequest) {
   });
 
   // Send email
-  const baseUrl = process.env.AUTH_URL || "https://tutor.knowbest.ro";
+  const baseUrl = process.env.AUTH_URL || "https://etutor.ro";
   const resetUrl = `${baseUrl}/auth/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
 
   try {
@@ -81,7 +81,7 @@ async function _POST(req: NextRequest) {
           <p><a href="${resetUrl}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:white;text-decoration:none;border-radius:8px;">Reset Password</a></p>
           <p>If you didn't request this, you can safely ignore this email.</p>
           <hr>
-          <p style="color:#888;font-size:12px;">Tutor — tutor.knowbest.ro</p>
+          <p style="color:#888;font-size:12px;">Tutor — etutor.ro</p>
         `,
       });
     } else {
