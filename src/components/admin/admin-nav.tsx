@@ -20,6 +20,7 @@ const adminLinks = [
   { href: "/dashboard/admin/exam-formats", labelKey: "examFormats", superAdminOnly: false },
   { href: "/dashboard/admin/templates", labelKey: "escalationTemplates", superAdminOnly: false },
   { href: "/dashboard/admin/aviation/seed-demo", labelKey: "aviationSeed", superAdminOnly: true },
+  { href: "/dashboard/admin/creatori", labelKey: "creatorWaitlist", superAdminOnly: true },
   { href: "/dashboard/admin/superadmin", labelKey: "superAdmin", superAdminOnly: true },
 ];
 

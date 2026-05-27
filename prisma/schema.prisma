@@ -925,6 +925,7 @@ model CreatorWaitlist {
   subject    String   // materia concretă (ex: Limba și literatura română, Matematică)
   experience String?  @db.Text
   cvPath     String?  // fișier CV încărcat (cale pe server)
+  needsTaxHelp Boolean @default(false) // a bifat „am nevoie de sprijin în fiscalitate”
   locale     String   @default("ro")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

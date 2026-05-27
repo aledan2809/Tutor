@@ -44,6 +44,7 @@ async function _POST(req: NextRequest) {
     );
   }
   const { name, email, track, subject, experience, locale } = parsed.data;
+  const needsTaxHelp = formData.get("needsTaxHelp") === "true";
 
   // Optional CV file.
   let cvPath: string | null = null;
@@ -72,8 +73,8 @@ async function _POST(req: NextRequest) {
 
   await prisma.creatorWaitlist.upsert({
     where: { email },
-    update: { name, track, subject, experience: experience ?? null, locale: locale ?? "ro", ...(cvPath ? { cvPath } : {}) },
-    create: { name, email, track, subject, experience: experience ?? null, locale: locale ?? "ro", cvPath },
+    update: { name, track, subject, experience: experience ?? null, locale: locale ?? "ro", needsTaxHelp, ...(cvPath ? { cvPath } : {}) },
+    create: { name, email, track, subject, experience: experience ?? null, locale: locale ?? "ro", needsTaxHelp, cvPath },
   });
 
   return NextResponse.json(

@@ -24,7 +24,7 @@ type Copy = {
   labels: {
     name: string; email: string; track: string; trackPlaceholder: string;
     subject: string; subjectPlaceholder: string; experience: string; experiencePlaceholder: string;
-    cv: string; cvHint: string; submit: string; submitting: string;
+    cv: string; cvHint: string; taxHelp: string; submit: string; submitting: string;
     successTitle: string; successBody: string; error: string;
   };
 };
@@ -45,7 +45,7 @@ const RO: Copy = {
     "~50% din venitul atribuibil conținutului tău (sumă brută)",
     "Perpetuu — câștigi cât timp materialul e folosit, nu o singură dată",
     "Calcul pro-rata lunar, după consum real (grile rezolvate / lecții parcurse)",
-    "Plăți lunare prin Stripe, peste un prag minim",
+    "Plăți lunare direct în propriul cont, peste pragul minim de 100 lei",
     "Plata este brută — taxele rămân în sarcina ta (vezi întrebarea despre taxe)",
     "Conținut validat înainte de publicare — calitatea contează",
   ],
@@ -62,7 +62,7 @@ const RO: Copy = {
   faq: [
     { q: "Cum se calculează comisionul?", a: "Lunar, pro-rata: venitul fiecărui abonat se împarte între creatori proporțional cu cât din conținutul fiecăruia a folosit în acea lună." },
     { q: "Comisionul de ~50% e brut sau net?", a: "Este brut — adică suma pe care ți-o plătim înainte de taxele tale. Tu decizi forma de impozitare (vezi mai jos)." },
-    { q: "Ce taxe plătesc și ce e cel mai avantajos?", a: "Fiscalitatea îți revine. Pentru conținut educațional, cele mai eficiente variante în România sunt: drepturi de autor (impozit ~10% pe venitul net, CASS doar peste plafoane, de regulă fără CAS), PFA (10% + contribuții la plafoane) sau, pentru sume mari, micro-SRL (1-3% + 8% dividende). Îți recomandăm să consulți un contabil." },
+    { q: "Ce taxe plătesc?", a: "Fiscalitatea îți revine. Pentru conținut educațional, acceptăm toate variantele legale în România: drepturi de autor, PFA, micro-SRL, SRL etc. Îți recomandăm să consulți un contabil. Dacă nu ai unul, bifează «Am nevoie de sprijin în fiscalitate» în formular și discutăm la telefon." },
     { q: "Când și cum sunt plătit?", a: "Lunar prin Stripe, peste un prag minim. Îți conectezi contul la onboarding." },
     { q: "E exclusiv?", a: "Nu. Îți păstrezi materialele; ne dai dreptul să le folosim pe platformă și câștigi din utilizare." },
     { q: "Cine poate aplica?", a: "Profesori și experți pe pregătirile și materiile de mai sus. Conținutul trece printr-o validare de calitate înainte de publicare." },
@@ -77,6 +77,7 @@ const RO: Copy = {
     experiencePlaceholder: "Ex: 8 ani pregătire BAC la română, autor culegere de grile…",
     cv: "CV (PDF / DOC — opțional, dar recomandat pentru selecție)",
     cvHint: "Ne ajută să-ți evaluăm experiența mai repede. Max 5 MB.",
+    taxHelp: "Am nevoie de sprijin în fiscalitate",
     submit: "Vreau să fiu creator", submitting: "Se trimite…",
     successTitle: "Te-ai înscris!", successBody: "Ești pe lista creatorilor. Te contactăm cât putem de repede.",
     error: "A apărut o eroare. Încearcă din nou.",
@@ -99,7 +100,7 @@ const EN: Copy = {
     "~50% of the revenue attributable to your content (gross)",
     "Perpetual — you earn while the material is used, not once",
     "Monthly pro-rata calculation based on real consumption",
-    "Monthly payouts via Stripe, above a minimum threshold",
+    "Monthly payouts directly to your own account, above the 100 RON minimum",
     "Payout is gross — your own taxes are your responsibility (see the tax FAQ)",
     "Content reviewed before publishing — quality matters",
   ],
@@ -116,7 +117,7 @@ const EN: Copy = {
   faq: [
     { q: "How is the commission computed?", a: "Monthly, pro-rata: each subscriber's revenue is split among creators in proportion to how much of each one's content they used that month." },
     { q: "Is the ~50% gross or net?", a: "It's gross — the amount we pay you before your own taxes. You choose how you're taxed." },
-    { q: "What taxes do I pay?", a: "Taxation is your responsibility. In Romania the most efficient routes for educational content are copyright income, sole proprietorship (PFA) or, for larger amounts, a micro-company. Consult an accountant." },
+    { q: "What taxes do I pay?", a: "Taxation is your responsibility. For educational content we accept any legal form in Romania: copyright income, PFA (sole trader), micro-company, LLC, etc. We recommend consulting an accountant. If you don't have one, tick «I need help with taxation» in the form and we'll talk on the phone." },
     { q: "When and how am I paid?", a: "Monthly via Stripe, above a minimum threshold. You connect your account at onboarding." },
     { q: "Is it exclusive?", a: "No. You keep your materials; you grant us the right to use them on the platform and earn from usage." },
     { q: "Who can apply?", a: "Teachers and experts in the tracks and subjects above. Content goes through a quality review before publishing." },
@@ -131,6 +132,7 @@ const EN: Copy = {
     experiencePlaceholder: "E.g. 8 years prepping students for the Bar, author of a question book…",
     cv: "CV (PDF / DOC — optional, recommended for selection)",
     cvHint: "Helps us evaluate your experience faster. Max 5 MB.",
+    taxHelp: "I need help with taxation",
     submit: "I want to be a creator", submitting: "Sending…",
     successTitle: "You're in!", successBody: "You're on the creator waitlist. We'll contact you as fast as we can.",
     error: "Something went wrong. Please try again.",

@@ -13,6 +13,7 @@ interface Labels {
   experiencePlaceholder: string;
   cv: string;
   cvHint: string;
+  taxHelp: string;
   submit: string;
   submitting: string;
   successTitle: string;
@@ -31,6 +32,7 @@ export function CreatorWaitlistForm({
 }) {
   const [form, setForm] = useState({ name: "", email: "", track: "", subject: "", experience: "" });
   const [cv, setCv] = useState<File | null>(null);
+  const [needsTaxHelp, setNeedsTaxHelp] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
@@ -53,6 +55,7 @@ export function CreatorWaitlistForm({
       fd.append("subject", form.subject);
       fd.append("experience", form.experience);
       fd.append("locale", locale);
+      fd.append("needsTaxHelp", needsTaxHelp ? "true" : "false");
       if (cv) fd.append("cv", cv);
       const res = await fetch("/api/creatori-waitlist", { method: "POST", body: fd });
       if (!res.ok) {
@@ -119,6 +122,15 @@ export function CreatorWaitlistForm({
         />
         <p className="mt-1 text-xs text-gray-500">{labels.cvHint}</p>
       </div>
+      <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={needsTaxHelp}
+          onChange={(e) => setNeedsTaxHelp(e.target.checked)}
+          className="h-4 w-4 rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500"
+        />
+        {labels.taxHelp}
+      </label>
       {error && <p className="text-sm text-red-400">{error}</p>}
       <button
         type="submit"
