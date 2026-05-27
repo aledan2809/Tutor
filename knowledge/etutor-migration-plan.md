@@ -97,5 +97,18 @@ return 301 https://etutor.ro$request_uri;
 - Tutor is **not** standalone (`next start`), so no `.next/standalone` static copy needed.
 
 ## What's done already (2026-05-27)
-- `/creatori` creator-recruitment page + waitlist LIVE on tutor.knowbest.ro (works on etutor.ro after DNS).
-- This plan persisted. Phases 2-6 are ~30-45 min once 👤 Phase 1 (two A-records in Hostico DNS) is done.
+- `/creatori` creator-recruitment page + waitlist LIVE — now on **https://etutor.ro/ro/creatori** ✅.
+- This plan persisted.
+
+## MIGRATION COMPLETE (2026-05-27)
+- **DNS apex** `etutor.ro` → `72.62.155.74` (VPS2) ✅. nginx vhost `etutor` → `:3013`, SSL cert valid to 2026-08-25 ✅. `AUTH_URL`/`NEXTAUTH_URL` = `https://etutor.ro` ✅ (set during VPS-side setup).
+- **Phase 5 redirect** ✅: `tutor.knowbest.ro` → 301 → `etutor.ro$request_uri` (vhost rewritten; backup `tutor-knowbest.bak-2026-05-27-pre-redirect`). Verified 301.
+- Apex verified: `/ro` 200, `/ro/creatori` 200, `/api/auth/session` 200.
+
+### Still open (👤 USER)
+- **`www.etutor.ro` typo**: resolves to `72.61.155.74` (should be `72.62.155.74` — `61`→`62`). Fix the `www` A-record at Hostico.
+- **OAuth redirect URIs**: since `AUTH_URL` = etutor.ro, add in Google/GitHub consoles:
+  `https://etutor.ro/api/auth/callback/google` + `https://etutor.ro/api/auth/callback/github` (+ JS origin `https://etutor.ro`). Until then Google/GitHub login fails; credentials (email/parolă) login works.
+
+### Still open (🤖 — deferred, Master docs)
+- Phase 6 registries: add `etutor.ro` row to `Master/DEPLOY_REGISTRY.md` + `ECOSYSTEM_REGISTRY.md` (NOT committed this session — Master tree has unrelated drift from a parallel knowbest session; capture in ST).
