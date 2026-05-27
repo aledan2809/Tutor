@@ -16,14 +16,15 @@ type Copy = {
   commTitle: string;
   commPoints: string[];
   subjectsTitle: string;
-  subjects: string[];
+  tracks: Record<string, string[]>;
   faqTitle: string;
   faq: { q: string; a: string }[];
   formTitle: string;
   formLead: string;
   labels: {
-    name: string; email: string; subject: string; subjectPlaceholder: string;
-    experience: string; experiencePlaceholder: string; submit: string; submitting: string;
+    name: string; email: string; track: string; trackPlaceholder: string;
+    subject: string; subjectPlaceholder: string; experience: string; experiencePlaceholder: string;
+    cv: string; cvHint: string; submit: string; submitting: string;
     successTitle: string; successBody: string; error: string;
   };
 };
@@ -41,35 +42,43 @@ const RO: Copy = {
   ],
   commTitle: "Modelul de comision (transparent)",
   commPoints: [
-    "~40% din venitul atribuibil conținutului tău",
+    "~50% din venitul atribuibil conținutului tău (sumă brută)",
     "Perpetuu — câștigi cât timp materialul e folosit, nu o singură dată",
     "Calcul pro-rata lunar, după consum real (grile rezolvate / lecții parcurse)",
-    "Plăți lunare (Stripe), peste un prag minim",
+    "Plăți lunare prin Stripe, peste un prag minim",
+    "Plata este brută — taxele rămân în sarcina ta (vezi întrebarea despre taxe)",
     "Conținut validat înainte de publicare — calitatea contează",
   ],
-  subjectsTitle: "Materii deschise acum",
-  subjects: [
-    "Drept — INM / Barou / Admitere",
-    "Medicină — Rezidențiat / Admitere UMF",
-    "Bacalaureat (Mate, Română, Istorie, Bio, Info)",
-    "Permis auto — legislație",
-    "Certificări IT / Limbi străine",
-  ],
+  subjectsTitle: "Pregătiri și materii deschise acum",
+  tracks: {
+    "Bacalaureat": ["Limba și literatura română", "Matematică", "Istorie", "Biologie", "Informatică", "Fizică", "Chimie", "Geografie", "Logică"],
+    "Admitere Medicină (Rezidențiat / UMF)": ["Biologie", "Chimie organică", "Chimie anorganică", "Fizică"],
+    "Drept (INM / Barou / Admitere)": ["Drept civil", "Drept penal", "Drept procesual civil", "Drept procesual penal", "Organizare judiciară"],
+    "Permis auto": ["Legislație rutieră", "Prim ajutor", "Mecanică"],
+    "Certificări IT": ["Cisco / CCNA", "AWS", "Microsoft / Azure", "Programare"],
+    "Limbi străine": ["Engleză (Cambridge / IELTS)", "Germană", "Franceză", "Italiană", "Spaniolă"],
+  },
   faqTitle: "Întrebări frecvente",
   faq: [
     { q: "Cum se calculează comisionul?", a: "Lunar, pro-rata: venitul fiecărui abonat se împarte între creatori proporțional cu cât din conținutul fiecăruia a folosit în acea lună." },
+    { q: "Comisionul de ~50% e brut sau net?", a: "Este brut — adică suma pe care ți-o plătim înainte de taxele tale. Tu decizi forma de impozitare (vezi mai jos)." },
+    { q: "Ce taxe plătesc și ce e cel mai avantajos?", a: "Fiscalitatea îți revine. Pentru conținut educațional, cele mai eficiente variante în România sunt: drepturi de autor (impozit ~10% pe venitul net, CASS doar peste plafoane, de regulă fără CAS), PFA (10% + contribuții la plafoane) sau, pentru sume mari, micro-SRL (1-3% + 8% dividende). Îți recomandăm să consulți un contabil." },
     { q: "Când și cum sunt plătit?", a: "Lunar prin Stripe, peste un prag minim. Îți conectezi contul la onboarding." },
     { q: "E exclusiv?", a: "Nu. Îți păstrezi materialele; ne dai dreptul să le folosim pe platformă și câștigi din utilizare." },
-    { q: "Cine poate aplica?", a: "Profesori și experți pe materiile de mai sus. Conținutul trece printr-o validare de calitate înainte de publicare." },
+    { q: "Cine poate aplica?", a: "Profesori și experți pe pregătirile și materiile de mai sus. Conținutul trece printr-o validare de calitate înainte de publicare." },
   ],
   formTitle: "Înscrie-te pe lista creatorilor",
-  formLead: "Locuri limitate per materie la lansare. Te contactăm pe rând.",
+  formLead: "Locuri limitate per materie la lansare. Te contactăm cât putem de repede.",
   labels: {
-    name: "Nume și prenume", email: "Email", subject: "Materia ta",
-    subjectPlaceholder: "Alege materia", experience: "Experiență (opțional)",
-    experiencePlaceholder: "Ex: 8 ani pregătire INM, autor culegere de grile…",
+    name: "Nume și prenume", email: "Email",
+    track: "Pregătire pentru", trackPlaceholder: "Alege ce pregătire predai",
+    subject: "Materia", subjectPlaceholder: "Alege materia",
+    experience: "Experiență (opțional)",
+    experiencePlaceholder: "Ex: 8 ani pregătire BAC la română, autor culegere de grile…",
+    cv: "CV (PDF / DOC — opțional, dar recomandat pentru selecție)",
+    cvHint: "Ne ajută să-ți evaluăm experiența mai repede. Max 5 MB.",
     submit: "Vreau să fiu creator", submitting: "Se trimite…",
-    successTitle: "Te-ai înscris!", successBody: "Ești pe lista creatorilor. Te contactăm când deschidem materia ta.",
+    successTitle: "Te-ai înscris!", successBody: "Ești pe lista creatorilor. Te contactăm cât putem de repede.",
     error: "A apărut o eroare. Încearcă din nou.",
   },
 };
@@ -87,35 +96,43 @@ const EN: Copy = {
   ],
   commTitle: "Commission model (transparent)",
   commPoints: [
-    "~40% of the revenue attributable to your content",
+    "~50% of the revenue attributable to your content (gross)",
     "Perpetual — you earn while the material is used, not once",
     "Monthly pro-rata calculation based on real consumption",
-    "Monthly payouts (Stripe), above a minimum threshold",
+    "Monthly payouts via Stripe, above a minimum threshold",
+    "Payout is gross — your own taxes are your responsibility (see the tax FAQ)",
     "Content reviewed before publishing — quality matters",
   ],
-  subjectsTitle: "Subjects open now",
-  subjects: [
-    "Law — INM / Bar / Admission",
-    "Medicine — Residency / Med-school admission",
-    "Baccalaureate (Math, Romanian, History, Bio, CS)",
-    "Driving licence — legislation",
-    "IT certifications / Languages",
-  ],
+  subjectsTitle: "Tracks & subjects open now",
+  tracks: {
+    "Baccalaureate": ["Romanian language & literature", "Mathematics", "History", "Biology", "Computer Science", "Physics", "Chemistry", "Geography", "Logic"],
+    "Medicine admission (Residency / Med-school)": ["Biology", "Organic chemistry", "Inorganic chemistry", "Physics"],
+    "Law (Bar / Magistracy / Admission)": ["Civil law", "Criminal law", "Civil procedure", "Criminal procedure", "Judicial organization"],
+    "Driving licence": ["Road legislation", "First aid", "Mechanics"],
+    "IT certifications": ["Cisco / CCNA", "AWS", "Microsoft / Azure", "Programming"],
+    "Languages": ["English (Cambridge / IELTS)", "German", "French", "Italian", "Spanish"],
+  },
   faqTitle: "FAQ",
   faq: [
     { q: "How is the commission computed?", a: "Monthly, pro-rata: each subscriber's revenue is split among creators in proportion to how much of each one's content they used that month." },
+    { q: "Is the ~50% gross or net?", a: "It's gross — the amount we pay you before your own taxes. You choose how you're taxed." },
+    { q: "What taxes do I pay?", a: "Taxation is your responsibility. In Romania the most efficient routes for educational content are copyright income, sole proprietorship (PFA) or, for larger amounts, a micro-company. Consult an accountant." },
     { q: "When and how am I paid?", a: "Monthly via Stripe, above a minimum threshold. You connect your account at onboarding." },
     { q: "Is it exclusive?", a: "No. You keep your materials; you grant us the right to use them on the platform and earn from usage." },
-    { q: "Who can apply?", a: "Teachers and experts in the subjects above. Content goes through a quality review before publishing." },
+    { q: "Who can apply?", a: "Teachers and experts in the tracks and subjects above. Content goes through a quality review before publishing." },
   ],
   formTitle: "Join the creator waitlist",
-  formLead: "Limited spots per subject at launch. We reach out one by one.",
+  formLead: "Limited spots per subject at launch. We reach out as fast as we can.",
   labels: {
-    name: "Full name", email: "Email", subject: "Your subject",
-    subjectPlaceholder: "Choose a subject", experience: "Experience (optional)",
-    experiencePlaceholder: "E.g. 8 years prepping for the Bar, author of a question book…",
+    name: "Full name", email: "Email",
+    track: "Preparing for", trackPlaceholder: "Choose what you teach",
+    subject: "Subject", subjectPlaceholder: "Choose the subject",
+    experience: "Experience (optional)",
+    experiencePlaceholder: "E.g. 8 years prepping students for the Bar, author of a question book…",
+    cv: "CV (PDF / DOC — optional, recommended for selection)",
+    cvHint: "Helps us evaluate your experience faster. Max 5 MB.",
     submit: "I want to be a creator", submitting: "Sending…",
-    successTitle: "You're in!", successBody: "You're on the creator waitlist. We'll contact you when your subject opens.",
+    successTitle: "You're in!", successBody: "You're on the creator waitlist. We'll contact you as fast as we can.",
     error: "Something went wrong. Please try again.",
   },
 };
@@ -149,7 +166,7 @@ export default async function CreatoriPage({ params }: { params: Promise<{ local
           </div>
         </section>
 
-        {/* Commission + subjects */}
+        {/* Commission + tracks */}
         <section className="mt-16 grid gap-10 md:grid-cols-2">
           <div>
             <h2 className="text-2xl font-semibold">{c.commTitle}</h2>
@@ -164,15 +181,22 @@ export default async function CreatoriPage({ params }: { params: Promise<{ local
           </div>
           <div>
             <h2 className="text-2xl font-semibold">{c.subjectsTitle}</h2>
-            <ul className="mt-4 space-y-2">
-              {c.subjects.map((s) => (
-                <li key={s} className="rounded-lg border border-gray-800 bg-gray-900 px-4 py-2 text-gray-300">{s}</li>
+            <div className="mt-4 space-y-3">
+              {Object.entries(c.tracks).map(([track, subjects]) => (
+                <div key={track} className="rounded-lg border border-gray-800 bg-gray-900 px-4 py-3">
+                  <p className="text-sm font-semibold text-gray-100">{track}</p>
+                  <div className="mt-1 flex flex-wrap gap-1.5">
+                    {subjects.map((s) => (
+                      <span key={s} className="rounded bg-gray-800 px-2 py-0.5 text-xs text-gray-400">{s}</span>
+                    ))}
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         </section>
 
-        {/* Form */}
+        {/* Form + FAQ */}
         <section className="mt-16 grid gap-10 md:grid-cols-2 md:items-start">
           <div>
             <h2 className="text-2xl font-semibold">{c.formTitle}</h2>
@@ -189,7 +213,7 @@ export default async function CreatoriPage({ params }: { params: Promise<{ local
               </dl>
             </div>
           </div>
-          <CreatorWaitlistForm locale={locale === "en" ? "en" : "ro"} subjects={c.subjects} labels={c.labels} />
+          <CreatorWaitlistForm locale={locale === "en" ? "en" : "ro"} tracks={c.tracks} labels={c.labels} />
         </section>
       </main>
     </div>

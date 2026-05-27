@@ -5,10 +5,14 @@ import { useState } from "react";
 interface Labels {
   name: string;
   email: string;
+  track: string;
+  trackPlaceholder: string;
   subject: string;
   subjectPlaceholder: string;
   experience: string;
   experiencePlaceholder: string;
+  cv: string;
+  cvHint: string;
   submit: string;
   submitting: string;
   successTitle: string;
@@ -18,31 +22,39 @@ interface Labels {
 
 export function CreatorWaitlistForm({
   locale,
-  subjects,
+  tracks,
   labels,
 }: {
   locale: string;
-  subjects: string[];
+  tracks: Record<string, string[]>;
   labels: Labels;
 }) {
-  const [form, setForm] = useState({ name: "", email: "", subject: "", experience: "" });
+  const [form, setForm] = useState({ name: "", email: "", track: "", subject: "", experience: "" });
+  const [cv, setCv] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
 
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-    setForm((f) => ({ ...f, [k]: e.target.value }));
+  const trackNames = Object.keys(tracks);
+  const subjects = form.track ? tracks[form.track] ?? [] : [];
+
+  const setField = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+    setForm((f) => ({ ...f, [k]: e.target.value, ...(k === "track" ? { subject: "" } : {}) }));
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     setError("");
     try {
-      const res = await fetch("/api/creatori-waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, locale }),
-      });
+      const fd = new FormData();
+      fd.append("name", form.name);
+      fd.append("email", form.email);
+      fd.append("track", form.track);
+      fd.append("subject", form.subject);
+      fd.append("experience", form.experience);
+      fd.append("locale", locale);
+      if (cv) fd.append("cv", cv);
+      const res = await fetch("/api/creatori-waitlist", { method: "POST", body: fd });
       if (!res.ok) {
         const d = await res.json().catch(() => ({}));
         setError(d.error || labels.error);
@@ -73,24 +85,39 @@ export function CreatorWaitlistForm({
     <form onSubmit={submit} className="space-y-4 rounded-2xl border border-gray-800 bg-gray-900 p-6">
       <div>
         <label className="mb-1 block text-sm font-medium text-gray-300">{labels.name}</label>
-        <input className={inputCls} value={form.name} onChange={set("name")} required minLength={2} />
+        <input className={inputCls} value={form.name} onChange={setField("name")} required minLength={2} />
       </div>
       <div>
         <label className="mb-1 block text-sm font-medium text-gray-300">{labels.email}</label>
-        <input className={inputCls} type="email" value={form.email} onChange={set("email")} required />
+        <input className={inputCls} type="email" value={form.email} onChange={setField("email")} required />
+      </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-300">{labels.track}</label>
+        <select className={inputCls} value={form.track} onChange={setField("track")} required>
+          <option value="" disabled>{labels.trackPlaceholder}</option>
+          {trackNames.map((t) => (<option key={t} value={t}>{t}</option>))}
+        </select>
       </div>
       <div>
         <label className="mb-1 block text-sm font-medium text-gray-300">{labels.subject}</label>
-        <select className={inputCls} value={form.subject} onChange={set("subject")} required>
+        <select className={inputCls} value={form.subject} onChange={setField("subject")} required disabled={!form.track}>
           <option value="" disabled>{labels.subjectPlaceholder}</option>
-          {subjects.map((s) => (
-            <option key={s} value={s}>{s}</option>
-          ))}
+          {subjects.map((s) => (<option key={s} value={s}>{s}</option>))}
         </select>
       </div>
       <div>
         <label className="mb-1 block text-sm font-medium text-gray-300">{labels.experience}</label>
-        <textarea className={inputCls} rows={3} value={form.experience} onChange={set("experience")} placeholder={labels.experiencePlaceholder} maxLength={2000} />
+        <textarea className={inputCls} rows={3} value={form.experience} onChange={setField("experience")} placeholder={labels.experiencePlaceholder} maxLength={2000} />
+      </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-300">{labels.cv}</label>
+        <input
+          type="file"
+          accept=".pdf,.doc,.docx"
+          onChange={(e) => setCv(e.target.files?.[0] ?? null)}
+          className="w-full text-sm text-gray-400 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-blue-700"
+        />
+        <p className="mt-1 text-xs text-gray-500">{labels.cvHint}</p>
       </div>
       {error && <p className="text-sm text-red-400">{error}</p>}
       <button

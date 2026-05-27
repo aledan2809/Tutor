@@ -921,12 +921,15 @@ model CreatorWaitlist {
   id         String   @id @default(cuid())
   name       String
   email      String   @unique
-  subject    String   // materia/verticala (Drept, Medicină, Bac, Permis auto, IT…)
+  track      String   @default("") // "Pregătire pentru" (ex: Bacalaureat, Drept INM/Barou)
+  subject    String   // materia concretă (ex: Limba și literatura română, Matematică)
   experience String?  @db.Text
+  cvPath     String?  // fișier CV încărcat (cale pe server)
   locale     String   @default("ro")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  @@index([track, subject])
   @@index([subject])
   @@index([createdAt])
 }
