@@ -6,7 +6,7 @@ const TOKEN_LENGTH = 32;
 const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
 
 /**
- * GET /api/auth/csrf
+ * GET /api/csrf
  * Generates a CSRF token, sets it as an httpOnly cookie, and returns it.
  * The client stores this token and sends it back via X-CSRF-Token header
  * on all state-changing requests (POST, PUT, PATCH, DELETE).
