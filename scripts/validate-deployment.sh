@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-BASE_URL="${1:-https://tutor.knowbest.ro}"
+BASE_URL="${1:-https://etutor.ro}"
 PASS=0
 FAIL=0
 

@@ -1,6 +1,6 @@
 {
   "name": "Tutor",
-  "baseUrl": "https://tutor.knowbest.ro",
+  "baseUrl": "https://etutor.ro",
   "login": {
     "path": "/en/auth/signin",
     "emailSelector": "input[type=email]",
