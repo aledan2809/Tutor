@@ -6,10 +6,7 @@
 
 ## Open Gaps
 
-| Gap ID | Description | Severity | Status | Date |
-|--------|-------------|----------|--------|------|
-| AGT-010 | Signin-page a11y/mobile polish — footer links (Forgot password / magic link / Create one / ToS / Privacy) below 44×44px touch target + muted-text contrast (`Use magic link instead`, `By signing in…`). Surfaced by [7] CODE via unauth `/dashboard`→`/en/auth/signin` redirect (NOT an authenticated-dashboard regression). | P2/P3 | OPEN | 2026-05-30 |
-| AGT-CSRF | `/api/csrf` system dormant — httpOnly cookie + no server-side validation middleware. Decide: re-implement (non-httpOnly cookie + middleware validate on state-changing non-`/api/auth/*` routes) OR delete route+interceptor+lib. Harmless as-is. Ref L178. | P3 | OPEN | 2026-05-30 |
+*(no open gaps as of 2026-05-30)*
 
 > Re-audit 2026-05-30 (TRUE-E2E-FULL after etutor.ro cutover): 0 real P0/P1. Login (L178 fix) + creatori page + admin CRUD role-gating + domain 301s all verified live. TRWG-GW "2 P0 + 2 P1" were 429 rate-limit artifacts (proven via clean cooldown login → 302). See `Reports/TRUE-E2E-FULL-2026-05-30.md`.
 
@@ -30,6 +27,8 @@
 | AGT-009 | Mobile-tester low score — text sizing + contrast on content pages | Eliminated | 07b791e | 2026-05-11 |
 | AGT-004 | Aviation bibliography not seeded | Eliminated | direct DB (VPS2 Prisma script) | 2026-05-11 |
 | AGT-005 | admin-test Puppeteer login blocked — dedicated account created | Eliminated | direct DB (VPS2 Prisma script) | 2026-05-11 |
+| AGT-010 | Signin-page a11y/mobile — muted text-gray-500 contrast (3.5:1) + sub-44px tap targets on Forgot/magic-link/Create/ToS/Privacy | Eliminated | b4d5b23 | 2026-05-30 |
+| AGT-CSRF | Dormant CSRF system removed (route + lib + interceptor) — httpOnly cookie unreadable by JS + zero server validation = dead code (caused L178) | Eliminated | b4d5b23 | 2026-05-30 |
 
 ---
 
