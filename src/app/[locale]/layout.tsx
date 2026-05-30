@@ -2,7 +2,6 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { SessionProvider } from "@/components/session-provider";
-import { CsrfInterceptor } from "@/components/csrf-interceptor";
 
 export default async function LocaleLayout({
   children,
@@ -21,7 +20,6 @@ export default async function LocaleLayout({
   return (
     <SessionProvider>
       <NextIntlClientProvider locale={locale} messages={messages}>
-        <CsrfInterceptor />
         {children}
       </NextIntlClientProvider>
     </SessionProvider>

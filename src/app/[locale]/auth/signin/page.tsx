@@ -87,7 +87,7 @@ export default function SignInPage() {
 
         <div className="my-6 flex items-center gap-3">
           <div className="h-px flex-1 bg-gray-700" />
-          <span className="text-xs text-gray-500">{t("orContinueWith")}</span>
+          <span className="text-xs text-gray-400">{t("orContinueWith")}</span>
           <div className="h-px flex-1 bg-gray-700" />
         </div>
 
@@ -158,16 +158,16 @@ export default function SignInPage() {
                 {t("signInButton") || "Sign In"}
               </button>
             </form>
-            <div className="mt-3 flex items-center justify-between">
+            <div className="mt-1 flex items-center justify-between">
               <Link
                 href="/auth/forgot-password"
-                className="text-xs text-blue-400 hover:text-blue-300"
+                className="inline-flex min-h-[44px] items-center text-xs text-blue-400 hover:text-blue-300"
               >
                 Forgot password?
               </Link>
               <button
                 onClick={() => setMode("magic")}
-                className="text-xs text-gray-500 hover:text-gray-400"
+                className="inline-flex min-h-[44px] items-center text-xs text-gray-400 hover:text-gray-200"
               >
                 {t("useMagicLink") || "Use magic link instead"}
               </button>
@@ -202,27 +202,27 @@ export default function SignInPage() {
             </form>
             <button
               onClick={() => setMode("credentials")}
-              className="mt-3 w-full text-center text-xs text-gray-500 hover:text-gray-400"
+              className="mt-2 flex min-h-[44px] w-full items-center justify-center text-center text-xs text-gray-400 hover:text-gray-200"
             >
               {t("usePassword") || "Use password instead"}
             </button>
           </>
         )}
 
-        <p className="mt-4 text-center text-sm text-gray-500">
+        <p className="mt-4 text-center text-sm text-gray-400">
           Don&apos;t have an account?{" "}
-          <Link href="/auth/register" className="text-blue-400 hover:text-blue-300">
+          <Link href="/auth/register" className="inline-block py-1 text-blue-400 hover:text-blue-300">
             Create one
           </Link>
         </p>
 
-        <p className="mt-4 text-center text-xs text-gray-500">
+        <p className="mt-4 text-center text-xs text-gray-400">
           {t("agreePrefix")}{" "}
-          <Link href="/terms" className="text-blue-400 hover:text-blue-300 underline">
+          <Link href="/terms" className="inline-block py-1 text-blue-400 hover:text-blue-300 underline">
             {t("termsOfService")}
           </Link>{" "}
           &amp;{" "}
-          <Link href="/privacy" className="text-blue-400 hover:text-blue-300 underline">
+          <Link href="/privacy" className="inline-block py-1 text-blue-400 hover:text-blue-300 underline">
             {t("privacyPolicy")}
           </Link>
         </p>
