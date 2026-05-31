@@ -152,10 +152,21 @@ function parseQuestions(raw: string): MagicQuestion[] {
     }
     if (correctIndex < 0 || correctIndex > 3) continue;
 
+    // Models (esp. Mistral) tend to put the correct answer first → always index 0,
+    // which makes the demo trivially gameable ("always pick A"). Shuffle option
+    // positions and remap the correct index so answers are spread across A-D.
+    const correctOption = options[correctIndex];
+    const shuffled = [...options];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    const shuffledCorrect = shuffled.indexOf(correctOption);
+
     out.push({
       content: o.content,
-      options,
-      correctIndex,
+      options: shuffled,
+      correctIndex: shuffledCorrect >= 0 ? shuffledCorrect : correctIndex,
       explanation: typeof o.explanation === "string" ? o.explanation : "",
     });
   }
