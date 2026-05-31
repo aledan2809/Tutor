@@ -1,4 +1,4 @@
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { Metadata } from "next";
 
@@ -11,6 +11,12 @@ export const metadata: Metadata = {
 export default function LandingPage() {
   const t = useTranslations("landing");
   const tAuth = useTranslations("auth");
+  const locale = useLocale();
+  const ro = locale === "ro";
+  const tryLabel = ro ? "Încearcă gratuit, fără cont ✨" : "Try free, no account ✨";
+  const tryHint = ro
+    ? "Lipește orice text → primești un test în 10 secunde"
+    : "Paste any text → get a quiz in 10 seconds";
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -35,12 +41,21 @@ export default function LandingPage() {
         <p className="mb-8 max-w-2xl text-lg text-gray-400">
           {t("subtitle")}
         </p>
-        <Link
-          href="/auth/signin"
-          className="rounded-lg bg-blue-600 px-8 py-3 text-lg font-medium text-white hover:bg-blue-700 transition-colors"
-        >
-          {t("getStarted")}
-        </Link>
+        <div className="flex flex-col items-center gap-3 sm:flex-row">
+          <Link
+            href="/try"
+            className="rounded-lg bg-blue-600 px-8 py-3 text-lg font-medium text-white hover:bg-blue-700 transition-colors"
+          >
+            {tryLabel}
+          </Link>
+          <Link
+            href="/auth/signin"
+            className="rounded-lg border border-gray-700 bg-gray-900 px-8 py-3 text-lg font-medium text-white hover:bg-gray-800 transition-colors"
+          >
+            {t("getStarted")}
+          </Link>
+        </div>
+        <p className="mt-3 text-sm text-gray-500">{tryHint}</p>
 
         {/* Features */}
         <div className="mt-20 grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-3">
