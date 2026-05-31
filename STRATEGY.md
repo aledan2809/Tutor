@@ -1,8 +1,9 @@
 # Tutor — Strategie & Roadmap
-**Ultima actualizare:** 2026-04-15
-**Versiune:** 1.0
+**Ultima actualizare:** 2026-05-30
+**Versiune:** 1.3
 
 ## Changelog
+- [2026-05-30] v1.3: **Analiză „WOW + viral" + Faza 0 — Viral Layer** adăugată în fața roadmap-ului. Constatare-cheie: motorul de retenție e ~75% gata, dar stratul de achiziție/viralitate e ~5% (referral=0, invite=0, share=0, social=0, og:image=0 în `src/`). Magia (any-document → quiz adaptiv) e ascunsă după login. Faza 0 inversează logica: expune magia public + bucle de share + mecanici RO (WhatsApp, BAC/EN, instructorul-își-aduce-elevii).
 - [2026-04-16] v1.2: Lesson learned — la import grile, păstrează ÎNTOTDEAUNA ordinea fizică din carte: save bookOrder (index sequential 0,1,2,3...), pdfPage, bookPage, qNumberInBook, chapterIndex la extragere. Fără ele, sortarea în admin e haotică și instructorii nu pot urmări cartea.
 - [2026-04-15] v1.1: Adăugat Referral Engine (comision perpetuu, 2 nivele, anti-fraud), Content Sourcing (surse gratuite, plan 2 săpt), IVP (Instructor Verification Program cu incentive stacking)
 - [2026-04-15] v1.0: Document inițial — viziune, piață, features actuale, roadmap pe faze
@@ -110,6 +111,56 @@
 ---
 
 ## 4. ROADMAP PE FAZE
+
+### FAZA 0 — VIRAL LAYER (prioritate maximă, în fața tuturor) ⚡
+
+**De ce înaintea tuturor:** Roadmap-ul actual (Faza 1-8) adâncește produsul — adaugă features în zona autentificată. Dar features adânci = **retenție**, nu **achiziție**. Tutor are deja ~75% din motorul de retenție și ~5% din cel de achiziție/viralitate. Faza 0 închide exact gap-ul care lipsește: transformă produsul dintr-unul „bun pe care trebuie să-l vinzi" într-unul „care se vinde singur".
+
+**Diagnostic sincer (măsurat în cod, 2026-05-30):**
+
+| Strat | Stare | Dovada |
+|---|---|---|
+| Motor core + retenție | ~75% | SM-2, sesiuni, XP/streaks (25 fișiere), achievements (16), leaderboard (6), escalation, AI content-gen, exam simulator |
+| WOW first-impression | ~15% | Homepage = template dark generic, 1 buton → login. Zero demo/screenshot/video/social-proof |
+| Viralitate / loops | **~5%** | `grep src/`: referral=0, invite=0, share=0, social=0, og:image=0. Referral Engine scris în strategie dar NEconstruit |
+| Suprafață publică | ~10% | Doar `/`, `/privacy`, `/terms`, `/creatori`. Tot ce are valoare e gated |
+
+**Cele 6 cauze pentru care NU e viral:**
+1. **Magia stă ascunsă după login** — „any-document → quiz adaptiv" (deja construit) e îngropat în admin/instructor. Vizitatorul nu-l vede niciodată.
+2. **Zero valoare publică partajabilă** — un ne-user nu poate simți valoarea fără cont, deci nu o poate trimite mai departe.
+3. **Niciun artefact viral** — nu există card de scor partajabil ca imagine (0 og:image). Examenul dă PDF, dar nu un obiect gândit pentru screenshot+share.
+4. **Homepage fără WOW** — text + buton, fără demo interactiv / proof / video.
+5. **Niciun K-factor** — streaks/leaderboard rețin userii existenți, nu aduc alții noi.
+6. **Tensiune de poziționare** — „abonament control parental" = achiziție rațională, considerată, prin definiție ne-virală. Produsele virale din edu (Duolingo/Photomath/Quizlet/Brainly) conduc cu o unealtă gratuită addictivă și monetizează *după*.
+
+**Decizia strategică de luat conștient:** rămâi „premium family SaaS" (revenue bun, viral mic, achiziție plătită) SAU adaugi un **strat-unealtă gratuit viral** deasupra pâlniei care hrănește produsul plătit. „WOW + viral" cere a doua variantă. Faza 0 = stratul viral.
+
+**Tier 0 — Expune magia public (cel mai mare levier, ~1 săpt):** ⬅️ *în implementare 2026-05-30*
+- [ ] **„Magic Quiz" public, fără cont** — lipești text / urci poză de manual → în ~10s primești quiz pe care-l dai chiar acolo. Refolosește AI content-gen existent, scos din spatele login-ului, pus ca **erou pe homepage**. Hook: *„Transformă orice pagină într-un test în 10 secunde."*
+- [ ] **Demo public pe materie populară** (BAC Mate / Evaluare Națională) — 5 grile fără cont → scor + explicație → CTA „fă-ți cont să salvezi progresul + streak" (lazy registration)
+- [ ] **Rate-limit + cap** pe endpoint-ul public (input max, ≤5 întrebări, throttle per IP) — e public + costă tokeni AI
+
+**Tier 1 — Artefacte virale + bucle (~1-2 săpt):**
+- [ ] **Card de scor branded ca imagine OG** după quiz/examen → „Am luat 92% la BAC Mate — bați?" cu share 1-tap pe **WhatsApp** (canalul #1 în RO)
+- [ ] **Duel cu un prieten** — link → prietenul dă același quiz → comparați scoruri (buclă de invitație nativă)
+- [ ] **Certificat partajabil** — PDF există; fă-l superb + link public de verificare + share social
+- [ ] **OG images** pe toate suprafețele partajabile (acum: 0)
+
+**Tier 2 — Referral engine (scris în strategie, neconstruit) (~1 săpt):**
+- [ ] **Two-sided**: părinte→părinte (ambii o lună gratis); elev→elev (ambii XP/streak-freeze)
+- [ ] **Hack-ul RO — instructorul își aduce elevii**: comision perpetuu (deja în Faza 5) → „adu-ți elevii, încasezi". Oferta brings demand — scalează mai repede decât ad-uri.
+
+**Tier 3 — Homepage WOW (~3-5 zile):**
+- [ ] Demo interactiv above-the-fold + screenshot-uri reale + video 15s + social proof (nr. întrebări generate, testimoniale)
+- [ ] **Landing-uri pe materie pentru SEO** („grile bac matematică", „evaluare națională română") → achiziție organică din Google
+- [ ] CTA WhatsApp-first
+
+**Tier 4 — Fricțiune zero la intrare:**
+- [ ] Try-before-signup peste tot + Google 1-tap (există, fixează OAuth console) + PWA install prompt + push UX (mutat din Faza 7)
+
+**Metrici de succes Faza 0:** K-factor > 1 (fiecare user aduce >1); % vizitatori care încearcă Magic Quiz fără cont; rată conversie demo→cont; share-uri/user; CAC organic vs plătit.
+
+---
 
 ### FAZA 1 — Rich Content & Media (1-2 săptămâni)
 **Obiectiv:** Lecțiile devin multimedia — nu doar text Markdown.
