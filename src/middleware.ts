@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const intlMiddleware = createMiddleware(routing);
 
-const publicPaths = ["/", "/try", "/auth/signin", "/auth/verify", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/terms", "/privacy", "/creatori"];
+const publicPaths = ["/", "/try", "/scor", "/auth/signin", "/auth/verify", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/terms", "/privacy", "/creatori"];
 
 function isPublicPath(pathname: string): boolean {
   const pathWithoutLocale = pathname.replace(/^\/(en|ro)/, "") || "/";
@@ -143,5 +143,5 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/try", "/(en|ro)/:path*", "/api/:path*", "/dashboard/:path*", "/auth/:path*"],
+  matcher: ["/", "/try", "/scor", "/(en|ro)/:path*", "/api/:path*", "/dashboard/:path*", "/auth/:path*"],
 };

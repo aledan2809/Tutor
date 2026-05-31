@@ -122,10 +122,13 @@ export default function TryPage() {
   const allAnswered = answers.length > 0 && answers.every((a) => a >= 0);
 
   function shareUrl() {
+    // Link to the OG-rich /scor page so the WhatsApp/social preview shows a
+    // branded score card (not a bare link). That card is the viral artifact.
+    const link = `https://etutor.ro/${ro ? "ro" : "en"}/scor?s=${score}&t=${questions.length}`;
     const msg = ro
       ? `Am luat ${score}/${questions.length} la un test generat de AI pe etutor.ro. Bați? 🎯`
       : `I scored ${score}/${questions.length} on an AI-generated quiz at etutor.ro. Can you beat me? 🎯`;
-    return `https://wa.me/?text=${encodeURIComponent(msg + " https://etutor.ro/try")}`;
+    return `https://wa.me/?text=${encodeURIComponent(msg + " " + link)}`;
   }
 
   return (
