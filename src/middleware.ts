@@ -143,5 +143,5 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/(en|ro)/:path*", "/api/:path*", "/dashboard/:path*", "/auth/:path*"],
+  matcher: ["/", "/try", "/(en|ro)/:path*", "/api/:path*", "/dashboard/:path*", "/auth/:path*"],
 };
