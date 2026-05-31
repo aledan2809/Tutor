@@ -141,11 +141,12 @@
 - [ ] **Demo public pe materie populară** (BAC Mate / Evaluare Națională) — momentan sample = fotosinteză; de adăugat sample-uri pe materii RO + landing-uri dedicate (se leagă de Tier 3 SEO). Follow-up.
 - [ ] **Lazy registration** — scor + explicații + CTA „fă-ți cont" e LIVE; de adăugat salvarea efectivă a quiz-ului demo în cont la signup (acum CTA duce la signin gol). Follow-up Tier 1.
 
-**Tier 1 — Artefacte virale + bucle (~1-2 săpt):**
-- [ ] **Card de scor branded ca imagine OG** după quiz/examen → „Am luat 92% la BAC Mate — bați?" cu share 1-tap pe **WhatsApp** (canalul #1 în RO)
-- [ ] **Duel cu un prieten** — link → prietenul dă același quiz → comparați scoruri (buclă de invitație nativă)
-- [ ] **Certificat partajabil** — PDF există; fă-l superb + link public de verificare + share social
-- [ ] **OG images** pe toate suprafețele partajabile (acum: 0)
+**Tier 1 — Artefacte virale + bucle:** ✅ **CORE LIVE 2026-05-30**
+- [x] **Card de scor branded ca imagine OG** — `/api/og/score` (next/og, 1200×630, color-coded după scor) + pagina `/[locale]/scor` cu `generateMetadata` (og:image + twitter card). Share-ul din `/try` linkează la `/scor?s=&t=` → preview WhatsApp arată cardul branded, nu link gol. Commit `85bfb1f`. Verificat live: imagine 200 image/png + meta tags corecte + loop full PASS în browser real. **Omoară `og:image=0`.**
+- [x] **OG images pe suprafețe partajabile** — `/scor` are OG complet (era 0 în tot proiectul).
+- [ ] **Duel cu un prieten** — link → prietenul dă ACELAȘI quiz → comparați scoruri. Necesită persistarea quiz-ului (DB anon sau payload semnat în URL). Follow-up.
+- [ ] **Certificat partajabil** — PDF examen există; de făcut superb + link public de verificare. Follow-up.
+- [ ] **Lazy-save** — quiz-ul demo salvat în cont la signup (acum CTA duce la signin gol). Follow-up.
 
 **Tier 2 — Referral engine (scris în strategie, neconstruit) (~1 săpt):**
 - [ ] **Two-sided**: părinte→părinte (ambii o lună gratis); elev→elev (ambii XP/streak-freeze)
