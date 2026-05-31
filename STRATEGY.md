@@ -135,10 +135,11 @@
 
 **Decizia strategică de luat conștient:** rămâi „premium family SaaS" (revenue bun, viral mic, achiziție plătită) SAU adaugi un **strat-unealtă gratuit viral** deasupra pâlniei care hrănește produsul plătit. „WOW + viral" cere a doua variantă. Faza 0 = stratul viral.
 
-**Tier 0 — Expune magia public (cel mai mare levier, ~1 săpt):** ⬅️ *în implementare 2026-05-30*
-- [ ] **„Magic Quiz" public, fără cont** — lipești text / urci poză de manual → în ~10s primești quiz pe care-l dai chiar acolo. Refolosește AI content-gen existent, scos din spatele login-ului, pus ca **erou pe homepage**. Hook: *„Transformă orice pagină într-un test în 10 secunde."*
-- [ ] **Demo public pe materie populară** (BAC Mate / Evaluare Națională) — 5 grile fără cont → scor + explicație → CTA „fă-ți cont să salvezi progresul + streak" (lazy registration)
-- [ ] **Rate-limit + cap** pe endpoint-ul public (input max, ≤5 întrebări, throttle per IP) — e public + costă tokeni AI
+**Tier 0 — Expune magia public (cel mai mare levier, ~1 săpt):** ✅ **LIVE 2026-05-30** (`etutor.ro/ro/try`)
+- [x] **„Magic Quiz" public, fără cont** — lipești text → în ~10s primești quiz pe care-l dai chiar acolo. Refolosește AI content-gen (`src/lib/magic-quiz.ts`, cascade Gemini→Mistral→Groq, grounded). Pus ca **erou pe homepage** („Încearcă gratuit, fără cont ✨"). Pagina `/[locale]/try` + API public `/api/magic-quiz`. Commits `8c1f025` + `b10147f`. Verificat live: Mistral generează 5 grile RO corecte cu explicații.
+- [x] **Rate-limit + cap** — endpoint public cu throttle two-tier per IP (5/min burst + 25/h) + input 50..6000 char + ≤5 întrebări. `src/app/api/magic-quiz/route.ts`.
+- [ ] **Demo public pe materie populară** (BAC Mate / Evaluare Națională) — momentan sample = fotosinteză; de adăugat sample-uri pe materii RO + landing-uri dedicate (se leagă de Tier 3 SEO). Follow-up.
+- [ ] **Lazy registration** — scor + explicații + CTA „fă-ți cont" e LIVE; de adăugat salvarea efectivă a quiz-ului demo în cont la signup (acum CTA duce la signin gol). Follow-up Tier 1.
 
 **Tier 1 — Artefacte virale + bucle (~1-2 săpt):**
 - [ ] **Card de scor branded ca imagine OG** după quiz/examen → „Am luat 92% la BAC Mate — bați?" cu share 1-tap pe **WhatsApp** (canalul #1 în RO)
