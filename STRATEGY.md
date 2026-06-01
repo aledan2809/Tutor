@@ -1,8 +1,9 @@
 # Tutor — Strategie & Roadmap
-**Ultima actualizare:** 2026-05-30
-**Versiune:** 1.3
+**Ultima actualizare:** 2026-06-01
+**Versiune:** 1.4
 
 ## Changelog
+- [2026-06-01] v1.4: **Tier 2 Referral engine — MVP LIVE** pe etutor.ro (commits `5e57bf2` + `2c86a7f`). Bucla K-factor end-to-end: `/r/<COD>` → cookie 90z → atribuire la signup → 50% comision perpetuu pe plăți confirmate (hold 30z) + two-sided welcome voucher -25% + dashboard `/dashboard/referrals`. Comision aliniat la promisiunea publică `/creatori` (50% flat single-level; ladder 15-30% + L2 abandonate). Schema: `Referral` + `ReferralEarning` (migration 0013). Verificat live E2E (attribution + voucher); accrual = unit-tested. Deferred: payout real (Stripe Connect), OAuth-signup attribution, L2.
 - [2026-05-30] v1.3: **Analiză „WOW + viral" + Faza 0 — Viral Layer** adăugată în fața roadmap-ului. Constatare-cheie: motorul de retenție e ~75% gata, dar stratul de achiziție/viralitate e ~5% (referral=0, invite=0, share=0, social=0, og:image=0 în `src/`). Magia (any-document → quiz adaptiv) e ascunsă după login. Faza 0 inversează logica: expune magia public + bucle de share + mecanici RO (WhatsApp, BAC/EN, instructorul-își-aduce-elevii).
 - [2026-04-16] v1.2: Lesson learned — la import grile, păstrează ÎNTOTDEAUNA ordinea fizică din carte: save bookOrder (index sequential 0,1,2,3...), pdfPage, bookPage, qNumberInBook, chapterIndex la extragere. Fără ele, sortarea în admin e haotică și instructorii nu pot urmări cartea.
 - [2026-04-15] v1.1: Adăugat Referral Engine (comision perpetuu, 2 nivele, anti-fraud), Content Sourcing (surse gratuite, plan 2 săpt), IVP (Instructor Verification Program cu incentive stacking)
@@ -148,9 +149,12 @@
 - [ ] **Certificat partajabil** — PDF examen există; de făcut superb + link public de verificare. Follow-up.
 - [ ] **Lazy-save** — quiz-ul demo salvat în cont la signup (acum CTA duce la signin gol). Follow-up.
 
-**Tier 2 — Referral engine (scris în strategie, neconstruit) (~1 săpt):**
-- [ ] **Two-sided**: părinte→părinte (ambii o lună gratis); elev→elev (ambii XP/streak-freeze)
-- [ ] **Hack-ul RO — instructorul își aduce elevii**: comision perpetuu (deja în Faza 5) → „adu-ți elevii, încasezi". Oferta brings demand — scalează mai repede decât ad-uri.
+**Tier 2 — Referral engine — MVP LIVE 2026-06-01 (commit `5e57bf2` + `2c86a7f`):**
+- [x] **Hack-ul RO — instructorul își aduce elevii** — `etutor.ro/r/<COD>` → cookie 90z → atribuire la signup → **50% comision PERPETUU** pe fiecare plată confirmată (hold 30z). Aliniat la promisiunea publică `/creatori` (single-level; ladder 15-30% + L2 abandonate). Verificat live E2E: signup via /r → Referral PENDING + referredById în DB.
+- [x] **Two-sided** (varianta MVP): cel adus primește voucher de bun-venit -25% (reuse infra Voucher → Stripe checkout); promoterul ia comision. Verificat live (voucher creat la signup).
+- [x] **Dashboard `/dashboard/referrals`** + `/api/referrals/me` — cod, link, share WhatsApp/FB/copy, stats (invitați/activi/câștiguri), nav „Invită & Câștigă" (RO/EN).
+- [ ] **Deferred**: transfer real de bani (Stripe Connect/payout) + UI admin aprobare; atribuire pe signup Google OAuth; same-household IP detection; L2 (al 2-lea nivel); părinte→părinte / elev→elev XP-streak variante.
+- _Nota:_ comision accrual = unit-tested + verificat prin cod; confirmare runtime end-to-end așteaptă prima plată reală a unui user adus (idempotent pe `(paymentId, level)`). **Deploy migration-bearing**: necesită `npx prisma migrate deploy` ÎNAINTE de build (comanda din DEPLOY_REGISTRY nu îl include).
 
 **Tier 3 — Homepage WOW (~3-5 zile):**
 - [ ] Demo interactiv above-the-fold + screenshot-uri reale + video 15s + social proof (nr. întrebări generate, testimoniale)
