@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { attributeReferral, grantWelcomeVoucher, REFERRAL_COOKIE } from "@/lib/referral";
+import { logger } from "@/lib/logger";
 
 const schema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -65,10 +67,29 @@ async function _POST(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({
+  // ─── Referral attribution (best-effort — never blocks signup) ───
+  const refCode = req.cookies.get(REFERRAL_COOKIE)?.value;
+  if (refCode) {
+    try {
+      const result = await attributeReferral({ referredUserId: user.id, code: refCode });
+      if (result.created && result.promoterId) {
+        await grantWelcomeVoucher({ referredUserId: user.id, promoterId: result.promoterId });
+      }
+    } catch (err) {
+      logger.error("Referral attribution failed", err, { userId: user.id });
+    }
+  }
+
+  const res = NextResponse.json({
     success: true,
     message: "Account created. You can now sign in.",
   }, { status: 201 });
+
+  // Consume the referral cookie regardless of outcome (one-shot attribution).
+  if (refCode) {
+    res.cookies.set(REFERRAL_COOKIE, "", { path: "/", maxAge: 0 });
+  }
+  return res;
 }
 
 export const POST = withErrorHandler(_POST);

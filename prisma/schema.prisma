@@ -94,6 +94,14 @@ model User {
   auditLogs           AdminAuditLog[]  @relation("AuditPerformer")
   payments            Payment[]
   notificationRetries NotificationRetry[]
+  // Phase 12: Referral / Growth engine (Tier 2)
+  referralCode        String?           @unique
+  referredById        String?
+  referredBy          User?             @relation("UserReferrals", fields: [referredById], references: [id])
+  referredUsers       User[]            @relation("UserReferrals")
+  referralsAsPromoter Referral[]        @relation("ReferralPromoter")
+  referralAsReferred  Referral?         @relation("ReferralReferred")
+  referralEarnings    ReferralEarning[] @relation("EarningPromoter")
 }
 
 model Domain {
@@ -933,4 +941,51 @@ model CreatorWaitlist {
   @@index([track, subject])
   @@index([subject])
   @@index([createdAt])
+}
+
+// ─── Phase 12: Referral / Growth engine (Tier 2 — instructorul-își-aduce-elevii) ───
+// A user is referred at most once (referredById on User + Referral.referredId unique).
+// Commission accrues PERPETUALLY on every confirmed payment of the referred user.
+// Public promise: 50% (see /creatori) — single level in MVP; L2 deferred.
+model Referral {
+  id            String    @id @default(cuid())
+  promoterId    String // user who referred
+  referredId    String    @unique // user who was referred (one referrer per user)
+  code          String // referral code used at attribution time
+  level         Int       @default(1) // 1 = direct (only level supported in MVP)
+  status        String    @default("PENDING") // PENDING | ACTIVE | CHURNED
+  commissionPct Float     @default(0.5) // fraction (0.5 = 50%)
+  totalEarned   Int       @default(0) // cents — denormalized sum of accrued earnings
+  activatedAt   DateTime? // first confirmed payment of the referred user
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  promoter User              @relation("ReferralPromoter", fields: [promoterId], references: [id], onDelete: Cascade)
+  referred User              @relation("ReferralReferred", fields: [referredId], references: [id], onDelete: Cascade)
+  earnings ReferralEarning[]
+
+  @@index([promoterId, status])
+  @@index([code])
+}
+
+// Per-payment commission ledger. Idempotent on (paymentId, level) so Stripe
+// webhook retries never double-accrue. 30-day hold before a payout is PAYABLE.
+model ReferralEarning {
+  id         String   @id @default(cuid())
+  referralId String
+  promoterId String
+  paymentId  String? // links to Payment.id (the confirmed payment that generated it)
+  level      Int      @default(1)
+  amount     Int // cents — commissionPct * payment amount
+  currency   String   @default("ron")
+  status     String   @default("PENDING") // PENDING (in hold) | PAYABLE | PAID | VOID
+  payableAt  DateTime // paymentDate + 30-day anti-fraud hold
+  createdAt  DateTime @default(now())
+
+  referral Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  promoter User     @relation("EarningPromoter", fields: [promoterId], references: [id], onDelete: Cascade)
+
+  @@unique([paymentId, level])
+  @@index([promoterId, status])
+  @@index([referralId])
 }

@@ -53,6 +53,7 @@ export function Sidebar({ user }: SidebarProps) {
     { href: "/dashboard/calendar", label: t("calendar") },
     { href: "/dashboard/notifications", label: t("notifications") },
     { href: "/dashboard/gamification", label: t("gamification") },
+    { href: "/dashboard/referrals", label: t("referrals") },
     { href: "/dashboard/settings", label: t("settings") },
   ];
 
