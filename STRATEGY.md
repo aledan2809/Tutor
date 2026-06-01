@@ -1,8 +1,9 @@
 # Tutor — Strategie & Roadmap
 **Ultima actualizare:** 2026-06-01
-**Versiune:** 1.5
+**Versiune:** 1.6
 
 ## Changelog
+- [2026-06-01] v1.6: **Tier 3 SEO landings + hardening** LIVE (commit `f1cce84`). `/grile` index + 7 landing-uri SSG per materie (Bac/EN/Drept) cu meta keyword-leading + FAQ JSON-LD + sample quiz static + CTA → `/try`, toate în sitemap. Hardening `/api/magic-quiz`: global daily cost cap (env `MAGIC_QUIZ_DAILY_CAP=1000`) + `maxLength=6000` pe textarea `/try`. Verificat live: pagini 200, JSON-LD + canonical prezente, sitemap include /grile, 404 pe slug invalid.
 - [2026-06-01] v1.5: **Tier 1 rest — COMPLET LIVE** pe etutor.ro (commit `2aad7bb`). Quiz-ul Magic e acum persistat (`MagicQuiz`, migration 0014), ceea ce închide bucla virală: (1) **Duel** — `/duel/<id>` servește ACELAȘI quiz (răspunsuri stripped + scoring server-side), buton „Provoacă un prieten" în `/try`, OG pe link; (2) **Lazy-save** — demo-ul e revendicat la cont la signup (cookie→`MagicQuiz.userId`), `/try` CTA → `/auth/register`, card pe dashboard; (3) **Certificat** — `/certificat/<id>` reutilizează cardul OG. Verificat live E2E complet (save→fetch→score→duel→certificate→lazy-save claim în DB).
 - [2026-06-01] v1.4: **Tier 2 Referral engine — MVP LIVE** pe etutor.ro (commits `5e57bf2` + `2c86a7f`). Bucla K-factor end-to-end: `/r/<COD>` → cookie 90z → atribuire la signup → 50% comision perpetuu pe plăți confirmate (hold 30z) + two-sided welcome voucher -25% + dashboard `/dashboard/referrals`. Comision aliniat la promisiunea publică `/creatori` (50% flat single-level; ladder 15-30% + L2 abandonate). Schema: `Referral` + `ReferralEarning` (migration 0013). Verificat live E2E (attribution + voucher); accrual = unit-tested. Deferred: payout real (Stripe Connect), OAuth-signup attribution, L2.
 - [2026-05-30] v1.3: **Analiză „WOW + viral" + Faza 0 — Viral Layer** adăugată în fața roadmap-ului. Constatare-cheie: motorul de retenție e ~75% gata, dar stratul de achiziție/viralitate e ~5% (referral=0, invite=0, share=0, social=0, og:image=0 în `src/`). Magia (any-document → quiz adaptiv) e ascunsă după login. Faza 0 inversează logica: expune magia public + bucle de share + mecanici RO (WhatsApp, BAC/EN, instructorul-își-aduce-elevii).
@@ -159,8 +160,10 @@
 
 **Tier 3 — Homepage WOW (~3-5 zile):**
 - [ ] Demo interactiv above-the-fold + screenshot-uri reale + video 15s + social proof (nr. întrebări generate, testimoniale)
-- [ ] **Landing-uri pe materie pentru SEO** („grile bac matematică", „evaluare națională română") → achiziție organică din Google
+- [x] **Landing-uri pe materie pentru SEO** — LIVE 2026-06-01 (commit `f1cce84`). `/[locale]/grile` index + `/[locale]/grile/<slug>` SSG pentru 7 materii (Bac mate/română/istorie/biologie, EN mate/română, Drept INM/Barou): titlu keyword-leading + meta + canonical + **FAQ JSON-LD** (rich results) + sample quiz static inline (zero-cost, indexabil) + CTA → `/try` + internal links. Toate în `sitemap.xml` (RO primary). Verificat live: pagini 200, JSON-LD prezent, 404 pe slug invalid.
 - [ ] CTA WhatsApp-first
+
+**Hardening (2026-06-01, commit `f1cce84`):** `/api/magic-quiz` are global daily cost cap (rolling 24h, toate IP-urile, env `MAGIC_QUIZ_DAILY_CAP` default 1000 → 429 când e atins) peste rate-limit-ul per-IP existent; `/try` textarea are `maxLength=6000` + contor live.
 
 **Tier 4 — Fricțiune zero la intrare:**
 - [ ] Try-before-signup peste tot + Google 1-tap (există, fixează OAuth console) + PWA install prompt + push UX (mutat din Faza 7)
