@@ -216,6 +216,13 @@ export default function SignInPage() {
           </Link>
         </p>
 
+        <p className="mt-2 text-center text-sm text-gray-400">
+          {locale === "ro" ? "Sau " : "Or "}
+          <Link href="/try" className="inline-block py-1 text-blue-400 hover:text-blue-300">
+            {locale === "ro" ? "încearcă fără cont ✨" : "try without an account ✨"}
+          </Link>
+        </p>
+
         <p className="mt-4 text-center text-xs text-gray-400">
           {t("agreePrefix")}{" "}
           <Link href="/terms" className="inline-block py-1 text-blue-400 hover:text-blue-300 underline">

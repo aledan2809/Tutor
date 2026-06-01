@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useRouter } from "@/i18n/navigation";
 
@@ -11,6 +12,7 @@ interface Domain {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const ro = useLocale() === "ro";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -203,6 +205,13 @@ export default function RegisterPage() {
           Already have an account?{" "}
           <Link href="/auth/signin" className="text-blue-400 hover:text-blue-300">
             Sign in
+          </Link>
+        </p>
+
+        <p className="mt-3 text-center text-sm text-gray-500">
+          {ro ? "Nehotărât? " : "Not sure yet? "}
+          <Link href="/try" className="text-blue-400 hover:text-blue-300">
+            {ro ? "Încearcă fără cont ✨" : "Try without an account ✨"}
           </Link>
         </p>
       </div>
