@@ -13,7 +13,10 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ code: strin
 
   // Land on the visitor's locale if known, else RO (the target market).
   const locale = req.cookies.get("NEXT_LOCALE")?.value === "en" ? "en" : "ro";
-  const dest = new URL(`/${locale}/try`, req.url);
+  // Behind nginx the backend Host is the internal address (localhost:3013), so
+  // req.url would leak it into the redirect. Use the canonical public origin.
+  const base = process.env.AUTH_URL || req.nextUrl.origin;
+  const dest = new URL(`/${locale}/try`, base);
   if (code) dest.searchParams.set("ref", code); // surfaced by /try for UX (optional)
 
   const res = NextResponse.redirect(dest);
