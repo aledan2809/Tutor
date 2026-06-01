@@ -102,6 +102,7 @@ model User {
   referralsAsPromoter Referral[]        @relation("ReferralPromoter")
   referralAsReferred  Referral?         @relation("ReferralReferred")
   referralEarnings    ReferralEarning[] @relation("EarningPromoter")
+  magicQuizzes        MagicQuiz[]       @relation("UserMagicQuizzes")
 }
 
 model Domain {
@@ -988,4 +989,27 @@ model ReferralEarning {
   @@unique([paymentId, level])
   @@index([promoterId, status])
   @@index([referralId])
+}
+
+// ─── Phase 13: Magic Quiz persistence (Tier 1 viral — duel + lazy-save + certificate) ───
+// A demo quiz the visitor generated, persisted so a friend can take the SAME quiz
+// (duel) and so it can be linked to the account on signup (lazy-save). Questions
+// include correctIndex but are only served stripped via the public fetch endpoint;
+// scoring is done server-side. TTL via expiresAt (cleaned lazily / by cron later).
+model MagicQuiz {
+  id          String    @id @default(cuid())
+  questions   Json // MagicQuestion[] (content, options, correctIndex, explanation)
+  language    String    @default("ro")
+  creatorName String? // optional display name of the sharer
+  sharerScore Int // the creator's own score
+  total       Int // number of questions
+  takenCount  Int       @default(0) // how many friends took the duel
+  userId      String? // set on lazy-save when the creator signs up
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime // soft TTL (e.g. createdAt + 90d)
+
+  user User? @relation("UserMagicQuizzes", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([expiresAt])
 }

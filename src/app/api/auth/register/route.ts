@@ -80,14 +80,31 @@ async function _POST(req: NextRequest) {
     }
   }
 
+  // ─── Lazy-save: claim the demo Magic Quiz into the new account (best-effort) ───
+  const demoQuizId = req.cookies.get("tutor_demo_quiz")?.value;
+  if (demoQuizId) {
+    try {
+      // Only claim an unclaimed, still-valid quiz.
+      await prisma.magicQuiz.updateMany({
+        where: { id: demoQuizId, userId: null },
+        data: { userId: user.id },
+      });
+    } catch (err) {
+      logger.error("Demo quiz claim failed", err, { userId: user.id });
+    }
+  }
+
   const res = NextResponse.json({
     success: true,
     message: "Account created. You can now sign in.",
   }, { status: 201 });
 
-  // Consume the referral cookie regardless of outcome (one-shot attribution).
+  // Consume the one-shot cookies regardless of outcome.
   if (refCode) {
     res.cookies.set(REFERRAL_COOKIE, "", { path: "/", maxAge: 0 });
+  }
+  if (demoQuizId) {
+    res.cookies.set("tutor_demo_quiz", "", { path: "/", maxAge: 0 });
   }
   return res;
 }

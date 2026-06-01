@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { DomainSwitcher } from "@/components/domain-switcher";
+import { DemoQuizCard } from "@/components/demo-quiz-card";
 
 interface DomainProgress {
   domainId: string;
@@ -102,6 +103,9 @@ export default function DashboardPage() {
         <h1 className="text-2xl font-bold text-white">Dashboard</h1>
         <DomainSwitcher activeDomainId={activeDomainId} onSwitch={handleDomainSwitch} />
       </div>
+
+      {/* Lazy-save: surface a demo quiz claimed at signup (renders nothing otherwise) */}
+      <DemoQuizCard />
 
       {/* No enrollments */}
       {data.domains.length === 0 && (

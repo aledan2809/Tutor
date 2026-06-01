@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useLocale } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 
 interface MagicQuestion {
   content: string;
@@ -39,6 +39,7 @@ export default function TryPage() {
         yourAnswer: "Răspunsul tău",
         again: "Generează alt test",
         share: "Distribuie pe WhatsApp",
+        challenge: "Provoacă un prieten 🎯",
         ctaTitle: "Ți-a plăcut? Asta e doar începutul.",
         ctaText:
           "Cu cont gratuit: salvezi progresul, primești streak-uri zilnice, 1400+ grile reale și învățare adaptivă care se mulează pe tine.",
@@ -64,6 +65,7 @@ export default function TryPage() {
         yourAnswer: "Your answer",
         again: "Generate another quiz",
         share: "Share on WhatsApp",
+        challenge: "Challenge a friend 🎯",
         ctaTitle: "Liked it? This is just the start.",
         ctaText:
           "With a free account: save your progress, daily streaks, 1400+ real questions and adaptive learning that fits you.",
@@ -79,6 +81,9 @@ export default function TryPage() {
   const [questions, setQuestions] = useState<MagicQuestion[]>([]);
   const [answers, setAnswers] = useState<number[]>([]);
   const [submitted, setSubmitted] = useState(false);
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const router = useRouter();
 
   const score = questions.reduce(
     (acc, q, i) => acc + (answers[i] === q.correctIndex ? 1 : 0),
@@ -129,6 +134,47 @@ export default function TryPage() {
       ? `Am luat ${score}/${questions.length} la un test generat de AI pe etutor.ro. Bați? 🎯`
       : `I scored ${score}/${questions.length} on an AI-generated quiz at etutor.ro. Can you beat me? 🎯`;
     return `https://wa.me/?text=${encodeURIComponent(msg + " " + link)}`;
+  }
+
+  // Persist the quiz once (idempotent per session). The save response also sets
+  // the lazy-save cookie so the quiz is claimed if the visitor signs up.
+  async function ensureSaved(): Promise<string | null> {
+    if (savedId) return savedId;
+    try {
+      const res = await fetch("/api/magic-quiz/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questions, language: ro ? "ro" : "en", score }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      setSavedId(data.id);
+      return data.id;
+    } catch {
+      return null;
+    }
+  }
+
+  async function challengeFriend() {
+    setBusy(true);
+    const id = await ensureSaved();
+    setBusy(false);
+    if (!id) {
+      window.open(shareUrl(), "_blank"); // graceful fallback to the score card
+      return;
+    }
+    const link = `https://etutor.ro/${ro ? "ro" : "en"}/duel/${id}`;
+    const msg = ro
+      ? `Te provoc la un quiz AI pe etutor.ro. Bați scorul meu de ${score}/${questions.length}? 🎯`
+      : `I challenge you to an AI quiz on etutor.ro. Beat my ${score}/${questions.length}? 🎯`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg + " " + link)}`, "_blank");
+  }
+
+  async function goSignup() {
+    setBusy(true);
+    await ensureSaved(); // sets the lazy-save cookie before leaving
+    setBusy(false);
+    router.push("/auth/register");
   }
 
   return (
@@ -258,24 +304,34 @@ export default function TryPage() {
                 <p className="text-3xl font-bold text-white">
                   {T.scorePrefix} {score} {T.of} {questions.length} 🎯
                 </p>
-                <a
-                  href={shareUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-green-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-green-700 transition-colors"
-                >
-                  📲 {T.share}
-                </a>
+                <div className="mt-4 flex flex-col items-center gap-2">
+                  <button
+                    onClick={challengeFriend}
+                    disabled={busy}
+                    className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-green-700 transition-colors disabled:opacity-50 sm:w-auto"
+                  >
+                    {T.challenge}
+                  </button>
+                  <a
+                    href={shareUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-gray-700 px-6 py-2.5 text-sm font-medium text-gray-200 hover:border-gray-500 transition-colors"
+                  >
+                    📲 {T.share}
+                  </a>
+                </div>
 
                 <div className="mt-6 border-t border-blue-500/30 pt-5">
                   <p className="text-lg font-semibold text-white">{T.ctaTitle}</p>
                   <p className="mt-1 text-sm text-gray-300">{T.ctaText}</p>
-                  <Link
-                    href="/auth/signin"
-                    className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-lg bg-blue-600 px-8 py-3 text-base font-medium text-white hover:bg-blue-700 transition-colors"
+                  <button
+                    onClick={goSignup}
+                    disabled={busy}
+                    className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-lg bg-blue-600 px-8 py-3 text-base font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
                   >
                     {T.ctaButton}
-                  </Link>
+                  </button>
                 </div>
               </div>
             )}

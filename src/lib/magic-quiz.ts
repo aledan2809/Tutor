@@ -7,6 +7,9 @@
  * model must derive questions ONLY from the provided text (no invented facts).
  */
 
+import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
+
 export interface MagicQuestion {
   content: string;
   options: string[];
@@ -17,6 +20,144 @@ export interface MagicQuestion {
 export const MAGIC_MAX_QUESTIONS = 5;
 export const MAGIC_MIN_CHARS = 50;
 export const MAGIC_MAX_CHARS = 6000;
+
+// ─── Tier 1: persistence (duel + lazy-save + certificate) ───
+
+export const MAGIC_QUIZ_TTL_DAYS = 90;
+
+/** A question as served publicly for the duel — correct answer stripped. */
+export interface MagicQuestionPublic {
+  content: string;
+  options: string[];
+}
+
+/**
+ * Validate + sanitize a quiz coming from the client before persisting.
+ * Returns a clean MagicQuestion[] (≤5) or null if the shape is invalid.
+ */
+export function sanitizeQuizForSave(raw: unknown): MagicQuestion[] | null {
+  if (!Array.isArray(raw) || raw.length === 0) return null;
+  const out: MagicQuestion[] = [];
+  for (const q of raw.slice(0, MAGIC_MAX_QUESTIONS)) {
+    if (!q || typeof q !== "object") return null;
+    const o = q as Record<string, unknown>;
+    const content = typeof o.content === "string" ? o.content.trim() : "";
+    const options = Array.isArray(o.options)
+      ? o.options.filter((x) => typeof x === "string").map((x) => (x as string).trim())
+      : [];
+    const correctIndex = typeof o.correctIndex === "number" ? o.correctIndex : -1;
+    const explanation = typeof o.explanation === "string" ? o.explanation.trim() : "";
+    if (!content || content.length > 1000) return null;
+    if (options.length !== 4 || options.some((x) => !x || x.length > 500)) return null;
+    if (correctIndex < 0 || correctIndex > 3) return null;
+    out.push({ content, options, correctIndex, explanation: explanation.slice(0, 1000) });
+  }
+  return out.length > 0 ? out : null;
+}
+
+/** Persist a generated quiz so a friend can take it / it can be claimed at signup. */
+export async function persistMagicQuiz(input: {
+  questions: MagicQuestion[];
+  language: string;
+  sharerScore: number;
+  creatorName?: string | null;
+  at?: Date;
+}): Promise<{ id: string }> {
+  const total = input.questions.length;
+  const at = input.at ?? new Date();
+  const expiresAt = new Date(at.getTime() + MAGIC_QUIZ_TTL_DAYS * 24 * 60 * 60 * 1000);
+  const name = (input.creatorName || "").trim().slice(0, 60) || null;
+  const score = Math.max(0, Math.min(total, Math.round(input.sharerScore)));
+
+  const row = await prisma.magicQuiz.create({
+    data: {
+      questions: input.questions as unknown as Prisma.InputJsonValue,
+      language: input.language === "en" ? "en" : "ro",
+      sharerScore: score,
+      total,
+      creatorName: name,
+      expiresAt,
+    },
+    select: { id: true },
+  });
+  return { id: row.id };
+}
+
+/** Public duel view — questions WITHOUT correct answers. Null if missing/expired. */
+export async function getMagicQuizPublic(id: string, now?: Date): Promise<{
+  id: string;
+  questions: MagicQuestionPublic[];
+  language: string;
+  creatorName: string | null;
+  sharerScore: number;
+  total: number;
+} | null> {
+  const row = await prisma.magicQuiz.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      questions: true,
+      language: true,
+      creatorName: true,
+      sharerScore: true,
+      total: true,
+      expiresAt: true,
+    },
+  });
+  if (!row) return null;
+  if (row.expiresAt.getTime() < (now ?? new Date()).getTime()) return null;
+
+  const full = (row.questions as unknown as MagicQuestion[]) || [];
+  return {
+    id: row.id,
+    questions: full.map((q) => ({ content: q.content, options: q.options })),
+    language: row.language,
+    creatorName: row.creatorName,
+    sharerScore: row.sharerScore,
+    total: row.total,
+  };
+}
+
+/** Score a duel attempt server-side (correct answers never reach the friend's browser). */
+export async function scoreMagicQuiz(
+  id: string,
+  answers: number[],
+  now?: Date
+): Promise<{
+  score: number;
+  total: number;
+  sharerScore: number;
+  creatorName: string | null;
+  results: { correctIndex: number; chosen: number; isCorrect: boolean; explanation: string }[];
+} | null> {
+  const row = await prisma.magicQuiz.findUnique({
+    where: { id },
+    select: { questions: true, total: true, sharerScore: true, creatorName: true, expiresAt: true },
+  });
+  if (!row) return null;
+  if (row.expiresAt.getTime() < (now ?? new Date()).getTime()) return null;
+
+  const full = (row.questions as unknown as MagicQuestion[]) || [];
+  const results = full.map((q, i) => {
+    const chosen = typeof answers[i] === "number" ? answers[i] : -1;
+    return {
+      correctIndex: q.correctIndex,
+      chosen,
+      isCorrect: chosen === q.correctIndex,
+      explanation: q.explanation,
+    };
+  });
+  const score = results.filter((r) => r.isCorrect).length;
+
+  // Count the take (best-effort; never block scoring on the counter).
+  try {
+    await prisma.magicQuiz.update({ where: { id }, data: { takenCount: { increment: 1 } } });
+  } catch {
+    /* ignore */
+  }
+
+  return { score, total: row.total, sharerScore: row.sharerScore, creatorName: row.creatorName, results };
+}
 
 function buildPrompt(text: string, count: number, language: "ro" | "en"): string {
   const langName = language === "ro" ? "Romanian" : "English";
