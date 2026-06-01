@@ -4,9 +4,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 const intlMiddleware = createMiddleware(routing);
 
-const publicPaths = ["/", "/try", "/scor", "/auth/signin", "/auth/verify", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/terms", "/privacy", "/creatori"];
-// Public sections that carry a dynamic segment (e.g. /duel/<id>, /certificat/<id>).
-const publicPrefixes = ["/duel/", "/certificat/"];
+const publicPaths = ["/", "/try", "/scor", "/grile", "/auth/signin", "/auth/verify", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/terms", "/privacy", "/creatori"];
+// Public sections that carry a dynamic segment (e.g. /duel/<id>, /certificat/<id>, /grile/<slug>).
+const publicPrefixes = ["/duel/", "/certificat/", "/grile/"];
 
 function isPublicPath(pathname: string): boolean {
   const pathWithoutLocale = pathname.replace(/^\/(en|ro)/, "") || "/";

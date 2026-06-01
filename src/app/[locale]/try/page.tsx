@@ -17,6 +17,10 @@ const SAMPLE_EN = `Photosynthesis is the process by which plants, algae and some
 
 type Phase = "input" | "quiz" | "result";
 
+// Mirrors MAGIC_MAX_CHARS in lib/magic-quiz (not imported — that lib pulls in
+// prisma/server code which must not land in this client bundle).
+const MAX_CHARS = 6000;
+
 export default function TryPage() {
   const locale = useLocale();
   const ro = locale === "ro";
@@ -206,11 +210,15 @@ export default function TryPage() {
 
             <textarea
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={(e) => setText(e.target.value.slice(0, MAX_CHARS))}
               placeholder={T.placeholder}
               rows={9}
+              maxLength={MAX_CHARS}
               className="mt-6 w-full rounded-xl border border-gray-700 bg-gray-900 p-4 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
+            <p className="mt-1 text-right text-xs text-gray-500">
+              {text.length}/{MAX_CHARS}
+            </p>
             <div className="mt-2 flex items-center justify-between">
               <button
                 onClick={() => setText(ro ? SAMPLE_RO : SAMPLE_EN)}

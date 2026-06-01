@@ -16,6 +16,10 @@ function clientIp(req: NextRequest): string {
   return req.headers.get("x-real-ip") || "unknown";
 }
 
+// Global daily cap across ALL IPs — bounds total AI cost if the demo goes viral.
+// Soft limit (in-memory rolling 24h, resets on restart); override via env.
+const DAILY_CAP = Math.max(1, parseInt(process.env.MAGIC_QUIZ_DAILY_CAP || "1000", 10) || 1000);
+
 async function _POST(req: NextRequest) {
   const ip = clientIp(req);
 
@@ -26,6 +30,19 @@ async function _POST(req: NextRequest) {
     return NextResponse.json(
       { error: "Prea multe cereri. Încearcă din nou în câteva minute." },
       { status: 429, headers: { "Retry-After": "60" } }
+    );
+  }
+
+  // Global daily cost cap (rolling 24h, all IPs). Protects the AI budget under viral load.
+  const global = checkRateLimit("magic-quiz:global:day", {
+    maxRequests: DAILY_CAP,
+    windowMs: 24 * 60 * 60_000,
+  });
+  if (!global.allowed) {
+    console.warn(`[magic-quiz] global daily cap (${DAILY_CAP}) reached — shedding load`);
+    return NextResponse.json(
+      { error: "Demo-ul e foarte căutat azi. Revino mai târziu sau creează un cont gratuit." },
+      { status: 429, headers: { "Retry-After": "3600" } }
     );
   }
 
