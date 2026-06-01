@@ -1,8 +1,9 @@
 # Tutor — Strategie & Roadmap
 **Ultima actualizare:** 2026-06-01
-**Versiune:** 1.4
+**Versiune:** 1.5
 
 ## Changelog
+- [2026-06-01] v1.5: **Tier 1 rest — COMPLET LIVE** pe etutor.ro (commit `2aad7bb`). Quiz-ul Magic e acum persistat (`MagicQuiz`, migration 0014), ceea ce închide bucla virală: (1) **Duel** — `/duel/<id>` servește ACELAȘI quiz (răspunsuri stripped + scoring server-side), buton „Provoacă un prieten" în `/try`, OG pe link; (2) **Lazy-save** — demo-ul e revendicat la cont la signup (cookie→`MagicQuiz.userId`), `/try` CTA → `/auth/register`, card pe dashboard; (3) **Certificat** — `/certificat/<id>` reutilizează cardul OG. Verificat live E2E complet (save→fetch→score→duel→certificate→lazy-save claim în DB).
 - [2026-06-01] v1.4: **Tier 2 Referral engine — MVP LIVE** pe etutor.ro (commits `5e57bf2` + `2c86a7f`). Bucla K-factor end-to-end: `/r/<COD>` → cookie 90z → atribuire la signup → 50% comision perpetuu pe plăți confirmate (hold 30z) + two-sided welcome voucher -25% + dashboard `/dashboard/referrals`. Comision aliniat la promisiunea publică `/creatori` (50% flat single-level; ladder 15-30% + L2 abandonate). Schema: `Referral` + `ReferralEarning` (migration 0013). Verificat live E2E (attribution + voucher); accrual = unit-tested. Deferred: payout real (Stripe Connect), OAuth-signup attribution, L2.
 - [2026-05-30] v1.3: **Analiză „WOW + viral" + Faza 0 — Viral Layer** adăugată în fața roadmap-ului. Constatare-cheie: motorul de retenție e ~75% gata, dar stratul de achiziție/viralitate e ~5% (referral=0, invite=0, share=0, social=0, og:image=0 în `src/`). Magia (any-document → quiz adaptiv) e ascunsă după login. Faza 0 inversează logica: expune magia public + bucle de share + mecanici RO (WhatsApp, BAC/EN, instructorul-își-aduce-elevii).
 - [2026-04-16] v1.2: Lesson learned — la import grile, păstrează ÎNTOTDEAUNA ordinea fizică din carte: save bookOrder (index sequential 0,1,2,3...), pdfPage, bookPage, qNumberInBook, chapterIndex la extragere. Fără ele, sortarea în admin e haotică și instructorii nu pot urmări cartea.
@@ -142,12 +143,12 @@
 - [ ] **Demo public pe materie populară** (BAC Mate / Evaluare Națională) — momentan sample = fotosinteză; de adăugat sample-uri pe materii RO + landing-uri dedicate (se leagă de Tier 3 SEO). Follow-up.
 - [ ] **Lazy registration** — scor + explicații + CTA „fă-ți cont" e LIVE; de adăugat salvarea efectivă a quiz-ului demo în cont la signup (acum CTA duce la signin gol). Follow-up Tier 1.
 
-**Tier 1 — Artefacte virale + bucle:** ✅ **CORE LIVE 2026-05-30**
+**Tier 1 — Artefacte virale + bucle:** ✅ **COMPLET LIVE** (core 2026-05-30, duel+lazy-save+certificat 2026-06-01)
 - [x] **Card de scor branded ca imagine OG** — `/api/og/score` (next/og, 1200×630, color-coded după scor) + pagina `/[locale]/scor` cu `generateMetadata` (og:image + twitter card). Share-ul din `/try` linkează la `/scor?s=&t=` → preview WhatsApp arată cardul branded, nu link gol. Commit `85bfb1f`. Verificat live: imagine 200 image/png + meta tags corecte + loop full PASS în browser real. **Omoară `og:image=0`.**
 - [x] **OG images pe suprafețe partajabile** — `/scor` are OG complet (era 0 în tot proiectul).
-- [ ] **Duel cu un prieten** — link → prietenul dă ACELAȘI quiz → comparați scoruri. Necesită persistarea quiz-ului (DB anon sau payload semnat în URL). Follow-up.
-- [ ] **Certificat partajabil** — PDF examen există; de făcut superb + link public de verificare. Follow-up.
-- [ ] **Lazy-save** — quiz-ul demo salvat în cont la signup (acum CTA duce la signin gol). Follow-up.
+- [x] **Duel cu un prieten** — LIVE 2026-06-01 (commit `2aad7bb`). `MagicQuiz` persistat (migration 0014) → `/[locale]/duel/<id>` servește ACELAȘI quiz (răspunsuri corecte stripped; scoring server-side, necheatabil) → comparație scor + share-back. Buton „Provoacă un prieten" în `/try`. OG card pe link-ul de duel. Verificat live E2E: save→fetch(stripped)→score 2/2→duel page 200→takenCount++.
+- [x] **Certificat partajabil** — LIVE 2026-06-01. `/[locale]/certificat/<id>` reutilizează `/api/og/score` ca artefact partajabil + download + share WhatsApp + CTA. Verificat live (200 + OG „Certificat: X/Y").
+- [x] **Lazy-save** — LIVE 2026-06-01. Finalizarea demo-ului pune quiz id în cookie; register route îl revendică la cont (`MagicQuiz.userId`); dashboard `<DemoQuizCard/>` îl afișează. CTA din `/try` acum → `/auth/register` (era `/auth/signin` gol). Verificat live: register cu cookie → userId setat în DB.
 
 **Tier 2 — Referral engine — MVP LIVE 2026-06-01 (commit `5e57bf2` + `2c86a7f`):**
 - [x] **Hack-ul RO — instructorul își aduce elevii** — `etutor.ro/r/<COD>` → cookie 90z → atribuire la signup → **50% comision PERPETUU** pe fiecare plată confirmată (hold 30z). Aliniat la promisiunea publică `/creatori` (single-level; ladder 15-30% + L2 abandonate). Verificat live E2E: signup via /r → Referral PENDING + referredById în DB.
