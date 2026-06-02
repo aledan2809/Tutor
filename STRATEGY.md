@@ -190,6 +190,7 @@
 **Arhitectura mesh (rolurile validate):** Author (grounded, `sourceQuote` verbatim obligatoriu + mix Bloom) → 3 lentile adversariale în paralel [grounding / single-correct / distractor+claritate] → buclă fix→re-verify (max 2 runde, apoi escaladare la om) → Orchestrator (scor + recomandări de prompt per agent).
 
 **De făcut în sesiunea dedicată:**
+0. **Agent de FETCH / ingestie automată a materialelor** (rolul „fetch" din designul user — DOVEDIT funcțional 2026-06-02): download manual de pe manuale.edu.ro (PDF) → extragere text cu `pdf-parse` (= librăria de import a Tutor; `from-content` o folosește deja) → **curățare artefacte OCR** (litere spațiate „Tr a i a n", soft-hyphen `­`, whitespace) → **segmentare în pasaje coerente** (lecții/secțiuni, nu recap-uri cu blank-uri). Output: listă de pasaje-sursă ancoră pentru Author. Notă: viewer-ul JS al manuale.edu.ro dă 403 + PDF-ul >10MB pt WebFetch → download direct via `curl` + parse local. **Garbage-in/garbage-out**: dacă ingestia lasă erori OCR, quiz-ul le moștenește → curățarea e parte din pipeline, nu opțională.
 1. **Integrare în Review Queue existentă** (`DRAFT → APPROVED → PUBLISHED`): mesh-ul devine pre-screen automat pe căile de generare `src/app/api/admin/questions/from-content/route.ts` + `bulk-import/route.ts`. Întrebări curate (0 flag) → DRAFT high-confidence (review prin sampling); flag → review prioritizat cu problema atașată.
 2. **Calibrările de precizie (din verdictul v2 — OBLIGATORII):**
    - Flag de la o singură lentilă (mai ales `single` pe „câte/când/cine") = **advisory**, nu auto-fail; NU penaliza recall verbatim pe întrebări de tip „câte".
@@ -202,7 +203,18 @@
 
 **Artefacte de referință (sesiunea 2026-06-02):** scripturile workflow la `~/.claude/projects/-Users-danciulescu/.../workflows/scripts/tutor-quiz-quality-mesh-*.js` + `tutor-quiz-mesh-negative-control-*.js`. Pasajele-sursă reale (Dacia/Traian, civilizații fluviale, Rosetta) + cele 8 defecte plantate sunt embeddate în scripturi.
 
-**Anti-pattern:** NU livra mesh-ul ca oracol autonom accept/reject (precizia nu permite încă); păstrează profesorul în buclă pe flagate. NU promite 97% fără calibrările de precizie de mai sus.
+**Două track-uri de livrare (onest despre „cu om" vs „fără om"):**
+
+- **Track A — GATED (cu factor uman pe flagate) — DOVEDIT fezabil 2026-06-02.** Fetch → generează → triază → **om revizuiește DOAR flagatele**. 97%+ teacher-quality realist; volum review mic și țintit (detecția e ~100%, deci ne-flagatele sunt high-confidence). **Ăsta e default-ul de livrat prima dată.**
+- **Track B — AUTONOM (97%+ FĂRĂ factor uman) — STRETCH, NEdovedit încă.** Ce voia user-ul. Validarea de azi NU îl susține încă: constrângerea e **precizia** (lentila supra-flaghează bune — 1/2 FP pe control) + defectele „thin-coverage" sunt acoperite de o singură lentilă (risc de false-negative netestat). **Precondiții OBLIGATORII înainte de a-l declara posibil** (nu sări peste niciuna):
+  1. **Precizie FP→0**: aplică toate calibrările de la pct. 2 + re-rulează negative-control până GOOD-urile trec 100% și detection rămâne ~100%.
+  2. **Judecător de etapa 2 high-precision**: peste cele 3 lentile (sensibile), un al doilea judecător care confirmă flag-urile → reduce respingerile false fără a scădea detecția.
+  3. **Margine de false-negative dovedită**: audit prin sampling pe întrebările PASS (injectează defecte subtile noi, mai ales accidentally-true + named-entity) ca să măsori câte SCAPĂ — autonom = doar dacă rata de scăpare e sub pragul acceptat (ex. <1%).
+  4. **Validare pe materie cu raționament greu** (mate cu rezolvări, gramatică RO, interpretare la literatură) — v1/v2 au fost DOAR pe factual; autonom nu se poate promite pe materii neînvalidate.
+  5. **Auto-discard, nu auto-publish, la incertitudine**: chiar autonom, o întrebare care nu trece confident toate gate-urile se ARUNCĂ (regenerează), nu se publică — „fără om" = zero review, NU zero standarde.
+  - **Verdict onest curent:** Track B e plauzibil pe **materie factuală curată** după precondițiile 1-3, dar rămâne **nedovedit** până le bifezi; pe materii cu raționament, om-în-buclă rămâne necesar până la o validare dedicată. NU promite „97% fără om" înainte de a măsura false-negative-ul.
+
+**Anti-pattern:** NU livra mesh-ul ca oracol autonom accept/reject înainte de a dovedi precizia FP→0 + marginea de false-negative (Track B precondiții); până atunci, păstrează profesorul în buclă pe flagate (Track A). NU promite „97% fără factor uman" pe baza unei rulări clean — un grader prea-strict respinge conținut bun, iar unul prea-permisiv lasă să treacă greșeli (L194).
 
 ---
 
