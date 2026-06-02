@@ -448,32 +448,61 @@ export function hasMissingContextRef(content: string): boolean {
 // ── Stage-2 high-precision judge (final gate before "ready without human") ──
 // Conservative by design: FAIL (→ demote to human review) on ANY doubt, and
 // fail-CLOSED on parse/network error. This protects the auto-keep bucket.
-const FINAL_JUDGE_SYSTEM = `You are a STRICT FINAL EXAMINER for a Romanian quiz question that already passed initial screening. You are the LAST gate before a question is marked "ready without human review" — be conservative: FAIL on ANY doubt.
+// Judge A — re-solves the question from the Source and verifies the marked
+// answer. Catches wrong-answer (marked option contradicts the Source) and
+// ungrounded / garbled-source questions.
+const JUDGE_A_SYSTEM = `You are a STRICT ANSWER-VERIFIER for a Romanian quiz question. SOLVE the question yourself using ONLY the Source text, then check the marked correct answer against your solution.
 
-Return PASS only if ALL hold:
-1. The question is fully answerable from the provided source text ALONE — the marked correct answer is explicitly supported by the source, not merely generally true.
-2. Exactly ONE option is correct; the marked correct answer IS that option; no other option is also defensibly correct.
-3. The question does NOT reference external/missing context (no "de mai jos/sus", "din exercițiul", "figura", "tabelul", "imaginea", an exercise/example/figure not included).
-4. No length cue: the correct option is not conspicuously longer/more detailed than the distractors in a way that leaks the answer (a naturally long proper noun is fine).
-5. Wording is clear and unambiguous; it is a real question, not an answer-key fragment.
+FAIL if ANY holds:
+- The marked correct option is NOT what the Source supports — re-read the Source: if it states a different answer or the marked option contradicts it → defect "wrong-answer".
+- The answer is not derivable from the Source ALONE (needs outside facts, or a computation whose inputs are not in the Source, or data referenced but not shown) → defect "grounding".
+- The Source quote is garbled, truncated or broken (nonsensical equalities like "3000 = 30 = 750", cut-off sentences, an answer-key fragment) so the answer cannot be verified → defect "grounding".
+- Another option is also defensibly correct → defect "multiple-correct".
 
-If ANY criterion is uncertain or violated → FAIL.
+Be conservative: if you cannot CONFIRM the marked answer from the Source, FAIL.
 
-Return JSON: {"verdict": "PASS"|"FAIL", "reason": "short reason", "defect": "grounding"|"multiple-correct"|"wrong-answer"|"missing-context"|"length-cue"|"ambiguous"|"not-a-question"|null}`;
+Return JSON: {"verdict":"PASS"|"FAIL","reason":"short","defect":"wrong-answer"|"grounding"|"multiple-correct"|null}`;
 
+// Judge B — usability for a student seeing the item with no extra context.
+const JUDGE_B_SYSTEM = `You are a STRICT USABILITY EXAMINER for a Romanian quiz question that a student will see with NO extra context.
+
+FAIL if ANY holds:
+- It references missing/external context (an exercise, figure, table, image, a list "de mai jos/sus", or undefined symbols such as a, b, c, n, d, e that are not defined within the question itself) → defect "missing-context".
+- It is not a real, self-contained question (an answer-key fragment, a heading, or a meta/administrative item) → defect "not-a-question".
+- Length cue: the correct option is conspicuously longer/more detailed than the distractors in a way that leaks it (a naturally long proper noun is fine) → defect "length-cue".
+- Wording is ambiguous or grammatically broken enough to confuse which option is intended → defect "ambiguous".
+
+Be conservative: any doubt → FAIL.
+
+Return JSON: {"verdict":"PASS"|"FAIL","reason":"short","defect":"missing-context"|"not-a-question"|"length-cue"|"ambiguous"|null}`;
+
+async function runJudge(
+  system: string,
+  question: QuestionForMesh
+): Promise<{ pass: boolean; reason: string; defect: string | null }> {
+  try {
+    const raw = await callGroqJSON(system, formatQuestionForLens(question));
+    const parsed = safeParseJSON(raw) as { verdict?: string; reason?: string; defect?: string } | null;
+    if (!parsed || !parsed.verdict) return { pass: false, reason: "judge parse failed", defect: null };
+    return { pass: String(parsed.verdict).toUpperCase() === "PASS", reason: parsed.reason || "", defect: (parsed.defect as string) || null };
+  } catch (err) {
+    return { pass: false, reason: `judge error: ${(err as Error).message}`, defect: null };
+  }
+}
+
+// Stage-2 ensemble: a question is "ready without human review" ONLY if BOTH
+// judges PASS. Fail-closed on doubt/error → demote to human review.
 export async function finalJudge(
   question: QuestionForMesh
 ): Promise<{ pass: boolean; reason: string; defect: string | null }> {
   if (hasMissingContextRef(question.content)) {
     return { pass: false, reason: "References external/missing context", defect: "missing-context" };
   }
-  try {
-    const raw = await callGroqJSON(FINAL_JUDGE_SYSTEM, formatQuestionForLens(question));
-    const parsed = safeParseJSON(raw) as { verdict?: string; reason?: string; defect?: string } | null;
-    if (!parsed || !parsed.verdict) return { pass: false, reason: "judge parse failed", defect: null };
-    const pass = String(parsed.verdict).toUpperCase() === "PASS";
-    return { pass, reason: parsed.reason || "", defect: (parsed.defect as string) || null };
-  } catch (err) {
-    return { pass: false, reason: `judge error: ${(err as Error).message}`, defect: null };
-  }
+  const [a, b] = await Promise.all([
+    runJudge(JUDGE_A_SYSTEM, question),
+    runJudge(JUDGE_B_SYSTEM, question),
+  ]);
+  if (!a.pass) return a;
+  if (!b.pass) return b;
+  return { pass: true, reason: "", defect: null };
 }
