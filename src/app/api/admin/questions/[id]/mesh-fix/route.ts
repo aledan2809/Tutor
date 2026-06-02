@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireDomainAdmin } from "@/lib/admin-auth";
+import { requireAdmin, requireDomainAdmin } from "@/lib/admin-auth";
 import { withErrorHandler } from "@/lib/api-handler";
 import { screenWithFixLoop, type QuestionForMesh } from "@/lib/content-quality-mesh";
 
@@ -16,6 +16,11 @@ async function _POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+
+  // Gate on admin BEFORE any DB work — avoids leaking question existence
+  // (404 vs 401) and running an unauthenticated query.
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
 
   const question = await prisma.question.findUnique({
     where: { id },

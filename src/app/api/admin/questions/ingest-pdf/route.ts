@@ -111,6 +111,22 @@ async function generateFromPassage(
   return arr.filter((q: Record<string, unknown>) => q.content);
 }
 
+const MAX_PDF_BYTES = 25 * 1024 * 1024; // 25 MB
+
+// Basic SSRF guard for the URL ingest path: public http(s) only, no internal
+// hosts. (Literal-host check — does not resolve DNS; admin-gated route.)
+function isSafeFetchUrl(raw: string): boolean {
+  let u: URL;
+  try { u = new URL(raw); } catch { return false; }
+  if (u.protocol !== "http:" && u.protocol !== "https:") return false;
+  const host = u.hostname.toLowerCase();
+  if (host === "localhost" || host.endsWith(".localhost")) return false;
+  if (host === "[::1]" || host === "metadata.google.internal") return false;
+  if (/^(127\.|10\.|169\.254\.|192\.168\.|0\.0\.0\.0$)/.test(host)) return false;
+  if (/^172\.(1[6-9]|2\d|3[01])\./.test(host)) return false;
+  return true;
+}
+
 async function _POST(req: NextRequest) {
   const { error, session } = await requireAdmin();
   if (error) return error;
@@ -129,6 +145,18 @@ async function _POST(req: NextRequest) {
   }
   if (!file && !url) {
     return NextResponse.json({ error: "Provide a PDF file or URL" }, { status: 400 });
+  }
+  if (file && file.size > MAX_PDF_BYTES) {
+    return NextResponse.json(
+      { error: `PDF too large (${Math.round(file.size / 1024 / 1024)} MB, max 25 MB)` },
+      { status: 413 }
+    );
+  }
+  if (url && !isSafeFetchUrl(url)) {
+    return NextResponse.json(
+      { error: "URL must be a public http(s) address" },
+      { status: 400 }
+    );
   }
 
   // 1. Ingest PDF
@@ -185,27 +213,36 @@ async function _POST(req: NextRequest) {
   });
   const baseOrder = (maxOrder._max.bookOrder ?? -1) + 1;
 
-  const created = await prisma.question.createMany({
-    data: allQuestions.map((q, idx) => ({
-      domainId,
-      subject,
-      topic,
-      difficulty: q.difficulty || difficulty,
-      type: "MULTIPLE_CHOICE" as const,
-      content: q.content,
-      options: q.options ? (q.options as string[]) : undefined,
-      correctAnswer: q.correctAnswer,
-      explanation: q.explanation || null,
-      sourceReference: q.sourceQuote ? `Source: "${q.sourceQuote.substring(0, 200)}"` : null,
-      source: "AI_GENERATED" as const,
-      status: "DRAFT" as const,
-      bookOrder: baseOrder + idx,
-      qNumberInBook: idx + 1,
-      createdById: session!.user.id,
-    })),
-  });
+  // Create rows individually so we keep each row's id and can correlate mesh
+  // results to the exact question — re-fetching by (domain, bookOrder) range
+  // could mis-attribute results under a concurrent same-domain ingest.
+  const createdIds: string[] = [];
+  for (let idx = 0; idx < allQuestions.length; idx++) {
+    const q = allQuestions[idx];
+    const row = await prisma.question.create({
+      data: {
+        domainId,
+        subject,
+        topic,
+        difficulty: q.difficulty || difficulty,
+        type: "MULTIPLE_CHOICE" as const,
+        content: q.content,
+        options: q.options ? (q.options as string[]) : undefined,
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation || null,
+        sourceReference: q.sourceQuote ? `Source: "${q.sourceQuote.substring(0, 200)}"` : null,
+        source: "AI_GENERATED" as const,
+        status: "DRAFT" as const,
+        bookOrder: baseOrder + idx,
+        qNumberInBook: idx + 1,
+        createdById: session!.user.id,
+      },
+      select: { id: true },
+    });
+    createdIds.push(row.id);
+  }
 
-  // 4. Mesh screening
+  // 4. Mesh screening — createdIds[i] aligns exactly with allQuestions[i].
   let meshScreened = 0;
   let meshFlagged = 0;
   try {
@@ -219,16 +256,10 @@ async function _POST(req: NextRequest) {
 
     const meshResults = await screenBatch(meshInput);
 
-    const createdRows = await prisma.question.findMany({
-      where: { domainId, createdById: session!.user.id, bookOrder: { gte: baseOrder } },
-      orderBy: { bookOrder: "asc" },
-      select: { id: true },
-    });
-
-    for (let i = 0; i < Math.min(createdRows.length, meshResults.length); i++) {
+    for (let i = 0; i < Math.min(createdIds.length, meshResults.length); i++) {
       const mesh = meshResults[i];
       await prisma.question.update({
-        where: { id: createdRows[i].id },
+        where: { id: createdIds[i] },
         data: {
           meshConfidence: mesh.confidence,
           meshFlags: mesh.flags.length > 0 ? JSON.parse(JSON.stringify(mesh.flags)) : undefined,
@@ -242,7 +273,7 @@ async function _POST(req: NextRequest) {
   }
 
   return NextResponse.json({
-    generated: created.count,
+    generated: createdIds.length,
     passages: ingestResult.passages.length,
     passagesProcessed: passagesToProcess.length,
     totalPages: ingestResult.totalPages,
