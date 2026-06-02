@@ -180,6 +180,32 @@
 
 ---
 
+### Tier 5 — Content Quality Mesh (productizare pipeline generare grile) — `[ ]` PLANIFICAT (sesiune dedicată)
+
+**Origine:** sesiunea 2026-06-02 a validat (cu 2 rulări de mesh multi-agent pe text REAL din manuale.edu.ro — Istorie clasa V, PDF extras cu `pdf-parse`, calea de import a Tutor) că generarea de grile *grounded* poate atinge **97%+ teacher-quality ca pipeline cu poartă (gated), NU autonom**. Rezultate măsurate:
+- **v1 (15 întrebări reale, 3 pasaje factuale):** 100% curat (trec toate 3 lentilele), 0 runde de fix. Răspunsuri 15/15 corecte, 0 halucinații (grounding-ul previne halucinarea).
+- **v2 (negative control — 8 întrebări deliberat greșite + 2 bune):** **detection 8/8 = 100%** (prinde dată halucinată, răspuns out-of-source, două-corecte, named-entity „Augustin"≠Augustus, length-cue, diacritice, pseudo-inferență) · **fals-pozitiv 1/2** (lentila `single` are „recall-phobia" + a făcut comparație cross-item ne-oarbă → a respins o întrebare de recall validă).
+- **Verdict judecător:** sensibilitatea e excelentă (nu scapă erori — direcția SIGURĂ); constrângerea e PRECIZIA (supra-flaghează câteva bune). Deci: **AI generează → mesh triază → review uman ȚINTIT doar pe flagate** = 97%+ cu volum mic de review.
+
+**Arhitectura mesh (rolurile validate):** Author (grounded, `sourceQuote` verbatim obligatoriu + mix Bloom) → 3 lentile adversariale în paralel [grounding / single-correct / distractor+claritate] → buclă fix→re-verify (max 2 runde, apoi escaladare la om) → Orchestrator (scor + recomandări de prompt per agent).
+
+**De făcut în sesiunea dedicată:**
+1. **Integrare în Review Queue existentă** (`DRAFT → APPROVED → PUBLISHED`): mesh-ul devine pre-screen automat pe căile de generare `src/app/api/admin/questions/from-content/route.ts` + `bulk-import/route.ts`. Întrebări curate (0 flag) → DRAFT high-confidence (review prin sampling); flag → review prioritizat cu problema atașată.
+2. **Calibrările de precizie (din verdictul v2 — OBLIGATORII):**
+   - Flag de la o singură lentilă (mai ales `single` pe „câte/când/cine") = **advisory**, nu auto-fail; NU penaliza recall verbatim pe întrebări de tip „câte".
+   - Forțează orbirea per-item (scoate raționamentul cross-item / mută dedup în etapă separată).
+   - Lentila trebuie să NUMEASCĂ clasa defectului; rutează „accidentally-true distractor" + „named-entity" (thin-coverage, o singură lentilă acoperă) la review uman obligatoriu.
+   - Ponderează grounding cel mai mult (cea mai bună precizie+recall); single/distractor = recall-boosters ale căror flag-uri cer confirmare.
+3. **Provider:** rulează lentilele prin AIRouter cascade (groq — fără credit Anthropic), la fel ca `/api/magic-quiz`.
+4. **Validare înainte de ship:** re-rulează negative-control pe lentilele calibrate → FP trebuie să scadă (GOOD2 să treacă), detection să rămână ~100%. **Testează și pe materie cu raționament greu** (mate/gramatică RO — NEvalidat încă; v1/v2 au fost doar pe factual).
+5. **UI:** afișează în Review Queue (operator) confidence + flag-urile per întrebare.
+
+**Artefacte de referință (sesiunea 2026-06-02):** scripturile workflow la `~/.claude/projects/-Users-danciulescu/.../workflows/scripts/tutor-quiz-quality-mesh-*.js` + `tutor-quiz-mesh-negative-control-*.js`. Pasajele-sursă reale (Dacia/Traian, civilizații fluviale, Rosetta) + cele 8 defecte plantate sunt embeddate în scripturi.
+
+**Anti-pattern:** NU livra mesh-ul ca oracol autonom accept/reject (precizia nu permite încă); păstrează profesorul în buclă pe flagate. NU promite 97% fără calibrările de precizie de mai sus.
+
+---
+
 ### FAZA 1 — Rich Content & Media (1-2 săptămâni)
 **Obiectiv:** Lecțiile devin multimedia — nu doar text Markdown.
 

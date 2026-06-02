@@ -4,6 +4,12 @@
 
 ---
 
+## [ ] 🤖 Content Quality Mesh — productizare pipeline generare grile (planificat 2026-06-02)
+
+Sesiune dedicată: integrează mesh-ul multi-agent de generare+verificare grile (Author → 3 lentile adversariale grounding/single/distractor → fix-loop → Orchestrator) în **Review Queue** existentă (`DRAFT→APPROVED→PUBLISHED`) ca pre-screen automat pe `from-content` + `bulk-import`. Validat 2026-06-02 pe text REAL manuale.edu.ro: v1 100% (15/15), v2 negative-control detection **8/8** dar **1/2 fals-pozitiv** → 97%+ fezabil ca **pipeline gated (om pe flagate), nu autonom**. **Plan complet + calibrările de precizie OBLIGATORII + artefacte** în `STRATEGY.md` secțiunea „Tier 5 — Content Quality Mesh".
+
+---
+
 ## [~] 🎯 Creator program (revenue-share perpetuu) — pagina LIVE; comisioane + teaser de făcut (creat 2026-05-26, pagina DONE 2026-05-27 commit `af05335`)
 
 Plan complet în `knowledge/creator-program-plan.md`. Recrutăm creatori de conținut (profesori) care adaugă material pe materii și câștigă **comision perpetuu** (~40% pro-rata pe consum, plăți Stripe Connect). Promovare **idee-întâi** (fără URL platformă) → pagină dedicată creatorilor + waitlist.
