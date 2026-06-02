@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { withErrorHandler } from "@/lib/api-handler";
 import { ingestPDF, ingestFromURL, type IngestPassage } from "@/lib/pdf-ingest";
-import { screenBatch, type QuestionForMesh } from "@/lib/content-quality-mesh";
+import { screenBatchWithFix, type QuestionForMesh } from "@/lib/content-quality-mesh";
 
 /**
  * POST /api/admin/questions/ingest-pdf
@@ -73,11 +73,13 @@ const GENERATE_PROMPT = `You are an expert exam question creator for Romanian ed
 Based on the PASSAGE below, generate exactly {COUNT} grounded multiple-choice questions.
 
 MANDATORY RULES:
-- Every question MUST be derivable from the passage text
-- Include a "sourceQuote" field with the VERBATIM excerpt from the passage that supports the question
-- Mix Bloom levels: remember, understand, apply, analyze
-- 4 options (a, b, c, d) — exactly one correct
-- Keep Romanian diacritics (ă, î, â, ș, ț)
+- Every question MUST be answerable using ONLY the passage text. Do NOT add facts, dates, names or numbers that are not present verbatim in the passage. If the passage doesn't support a clean question, generate fewer — never invent.
+- Include a "sourceQuote" field with the VERBATIM excerpt from the passage that supports the answer.
+- 4 options (a, b, c, d) — EXACTLY one correct; the other three must be plausible but clearly wrong per the passage (no "all of the above", no two-correct, no option that is also true).
+- Keep all four options roughly the SAME length and style — the correct answer must NOT be the longest or most detailed (no length cue that leaks the answer).
+- Avoid bare named-entity recall with no context (e.g. "Who/when X?" with nothing else); prefer questions whose answer is grounded by the quote.
+- Mix Bloom levels: remember, understand, apply, analyze.
+- Keep Romanian diacritics (ă, î, â, ș, ț).
 - Difficulty target: {DIFFICULTY}/5
 
 Return ONLY valid JSON:
@@ -140,6 +142,10 @@ async function _POST(req: NextRequest) {
   const topic = (formData.get("topic") as string) || "General";
   const count = parseInt((formData.get("count") as string) || "5");
   const difficulty = parseInt((formData.get("difficulty") as string) || "3");
+  // Coverage window: process the whole book by chunking calls across passage
+  // ranges (each call stays under the HTTP/nginx timeout). Default 10 passages.
+  const passageOffset = Math.max(0, parseInt((formData.get("passageOffset") as string) || "0") || 0);
+  const maxPassages = Math.min(60, Math.max(1, parseInt((formData.get("maxPassages") as string) || "10") || 10));
 
   if (!domainId) {
     return NextResponse.json({ error: "Missing domainId" }, { status: 400 });
@@ -180,8 +186,8 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: "No usable passages found in PDF" }, { status: 400 });
   }
 
-  // 2. Generate questions from passages (limit to first 10 passages to stay within budget)
-  const passagesToProcess = ingestResult.passages.slice(0, 10);
+  // 2. Generate questions from a passage window (chunked full-book coverage).
+  const passagesToProcess = ingestResult.passages.slice(passageOffset, passageOffset + maxPassages);
   const allQuestions: Array<{
     content: string; options?: string[]; correctAnswer: string;
     explanation?: string; sourceQuote?: string; difficulty?: number;
@@ -207,10 +213,61 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: "No questions generated from passages" }, { status: 500 });
   }
 
-  // 3. Save as DRAFT — allocate bookOrder + create rows in a single Serializable
-  // transaction so a concurrent same-domain ingest can't read the same max
-  // bookOrder and collide (TOCTOU). Rows are created individually so we keep
-  // each id and can correlate mesh results to the exact question.
+  // 3. Screen + fix BEFORE persisting, then gate on quality. screenBatchWithFix
+  // runs the 3-lens mesh, auto-repairs fixable flags (max 2 rounds), and marks
+  // unfixable / mandatory-defect questions as "escalate".
+  const meshInput: QuestionForMesh[] = allQuestions.map(q => ({
+    content: q.content,
+    options: q.options,
+    correctAnswer: q.correctAnswer,
+    explanation: q.explanation,
+    sourceText: q.sourceText,
+  }));
+  const screened = await screenBatchWithFix(meshInput, 2);
+
+  // Quality gate: keep high-confidence (clean) + review-prioritized (minor flags,
+  // human gate), but DISCARD "escalate" — unfixable hallucination / mandatory
+  // defect / very low score — so the kept set is the 97%+ candidate bucket.
+  // Apply any auto-fix to the kept content. Nothing is ever auto-published.
+  type Kept = (typeof allQuestions)[number] & { meshConfidence: number; meshFlags: unknown[] };
+  const kept: Kept[] = [];
+  let highConfidence = 0, reviewPrioritized = 0, discarded = 0, autoFixed = 0;
+
+  for (let i = 0; i < allQuestions.length; i++) {
+    const s = screened[i];
+    if (!s) { discarded++; continue; }
+    const { result, fixedQuestion, fixRounds } = s;
+
+    if (result.recommendation === "escalate") { discarded++; continue; }
+
+    const base = allQuestions[i];
+    const merged = fixedQuestion
+      ? {
+          ...base,
+          content: fixedQuestion.content ?? base.content,
+          options: fixedQuestion.options ?? base.options,
+          correctAnswer: fixedQuestion.correctAnswer ?? base.correctAnswer,
+          explanation: fixedQuestion.explanation ?? base.explanation,
+        }
+      : base;
+    if (fixRounds > 0) autoFixed++;
+
+    kept.push({ ...merged, meshConfidence: result.confidence, meshFlags: result.flags });
+    if (result.recommendation === "high-confidence") highConfidence++;
+    else reviewPrioritized++;
+  }
+
+  if (kept.length === 0) {
+    return NextResponse.json({
+      generated: allQuestions.length, kept: 0, highConfidence: 0,
+      reviewPrioritized: 0, discarded, autoFixed,
+      note: "All generated questions were discarded by the quality gate",
+    });
+  }
+
+  // 4. Persist kept questions as DRAFT — allocate bookOrder + create rows in a
+  // single Serializable transaction (TOCTOU-safe). Mesh confidence + flags are
+  // written at creation; createdIds[i] aligns with kept[i].
   let createdIds: string[];
   try {
     createdIds = await prisma.$transaction(
@@ -222,8 +279,8 @@ async function _POST(req: NextRequest) {
         const baseOrder = (maxOrder._max.bookOrder ?? -1) + 1;
 
         const ids: string[] = [];
-        for (let idx = 0; idx < allQuestions.length; idx++) {
-          const q = allQuestions[idx];
+        for (let idx = 0; idx < kept.length; idx++) {
+          const q = kept[idx];
           const row = await tx.question.create({
             data: {
               domainId,
@@ -240,6 +297,8 @@ async function _POST(req: NextRequest) {
               status: "DRAFT" as const,
               bookOrder: baseOrder + idx,
               qNumberInBook: idx + 1,
+              meshConfidence: q.meshConfidence,
+              meshFlags: q.meshFlags.length > 0 ? JSON.parse(JSON.stringify(q.meshFlags)) : undefined,
               createdById: session!.user.id,
             },
             select: { id: true },
@@ -248,10 +307,9 @@ async function _POST(req: NextRequest) {
         }
         return ids;
       },
-      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable, timeout: 30_000 }
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable, timeout: 60_000 }
     );
   } catch (err) {
-    // Serialization conflict = a concurrent same-domain ingest committed first.
     if ((err as { code?: string }).code === "P2034") {
       return NextResponse.json(
         { error: "Concurrent ingest on this domain — please retry" },
@@ -261,45 +319,19 @@ async function _POST(req: NextRequest) {
     throw err;
   }
 
-  // 4. Mesh screening — createdIds[i] aligns exactly with allQuestions[i].
-  let meshScreened = 0;
-  let meshFlagged = 0;
-  try {
-    const meshInput: QuestionForMesh[] = allQuestions.map(q => ({
-      content: q.content,
-      options: q.options,
-      correctAnswer: q.correctAnswer,
-      explanation: q.explanation,
-      sourceText: q.sourceText,
-    }));
-
-    const meshResults = await screenBatch(meshInput);
-
-    for (let i = 0; i < Math.min(createdIds.length, meshResults.length); i++) {
-      const mesh = meshResults[i];
-      await prisma.question.update({
-        where: { id: createdIds[i] },
-        data: {
-          meshConfidence: mesh.confidence,
-          meshFlags: mesh.flags.length > 0 ? JSON.parse(JSON.stringify(mesh.flags)) : undefined,
-        },
-      });
-      meshScreened++;
-      if (mesh.flags.length > 0) meshFlagged++;
-    }
-  } catch (err) {
-    console.error("[ingest-pdf] Mesh screening failed:", (err as Error).message);
-  }
-
   return NextResponse.json({
-    generated: createdIds.length,
-    passages: ingestResult.passages.length,
+    generated: allQuestions.length,
+    kept: createdIds.length,
+    highConfidence,
+    reviewPrioritized,
+    discarded,
+    autoFixed,
+    cleanRate: Math.round((highConfidence / createdIds.length) * 100),
+    passagesTotal: ingestResult.passages.length,
+    passageWindow: `${passageOffset}-${passageOffset + passagesToProcess.length}`,
     passagesProcessed: passagesToProcess.length,
     totalPages: ingestResult.totalPages,
-    rawChars: ingestResult.rawCharCount,
     cleanChars: ingestResult.cleanCharCount,
-    meshScreened,
-    meshFlagged,
   });
 }
 
