@@ -55,6 +55,75 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return { id: user.id, name: user.name, email: user.email, image: user.image };
       },
     }),
+    // Google One Tap: the GSI prompt returns an ID token (JWT), not an auth
+    // code, so the standard Google provider (code flow) can't consume it. We
+    // verify the ID token server-side via Google's official tokeninfo endpoint
+    // (no extra dependency) and converge on the SAME user as the button/email
+    // flows (find-or-create by verified email + link a Google Account row so a
+    // later button login doesn't hit OAuthAccountNotLinked).
+    Credentials({
+      id: "google-one-tap",
+      name: "Google One Tap",
+      credentials: { credential: { type: "text" } },
+      async authorize(credentials) {
+        const idToken = credentials?.credential as string | undefined;
+        const clientId = process.env.AUTH_GOOGLE_ID;
+        if (!idToken || !clientId) return null;
+
+        let payload: {
+          iss?: string; aud?: string; sub?: string; email?: string;
+          email_verified?: string | boolean; name?: string; picture?: string;
+          exp?: string | number;
+        };
+        try {
+          const res = await fetch(
+            `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`
+          );
+          if (!res.ok) return null;
+          payload = await res.json();
+        } catch {
+          return null;
+        }
+
+        const issOk =
+          payload.iss === "accounts.google.com" ||
+          payload.iss === "https://accounts.google.com";
+        const audOk = payload.aud === clientId;
+        const emailVerified =
+          payload.email_verified === true || payload.email_verified === "true";
+        const notExpired = !!payload.exp && Number(payload.exp) * 1000 > Date.now();
+        if (!issOk || !audOk || !emailVerified || !notExpired || !payload.email || !payload.sub) {
+          return null;
+        }
+
+        const email = payload.email;
+        const googleId = payload.sub;
+        let user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
+          user = await prisma.user.create({
+            data: {
+              email,
+              name: payload.name ?? null,
+              image: payload.picture ?? null,
+              emailVerified: new Date(),
+            },
+          });
+        }
+        await prisma.account.upsert({
+          where: {
+            provider_providerAccountId: { provider: "google", providerAccountId: googleId },
+          },
+          create: {
+            userId: user.id,
+            type: "oidc",
+            provider: "google",
+            providerAccountId: googleId,
+          },
+          update: {},
+        });
+        return { id: user.id, name: user.name, email: user.email, image: user.image };
+      },
+    }),
   ],
   session: {
     strategy: "jwt",
