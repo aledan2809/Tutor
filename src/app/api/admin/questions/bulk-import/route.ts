@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { withErrorHandler } from "@/lib/api-handler";
+import { screenBatch, type QuestionForMesh } from "@/lib/content-quality-mesh";
 
 const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".jfif", ".webp", ".bmp", ".tiff", ".tif"];
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -365,6 +366,33 @@ async function _POST(req: NextRequest) {
               }).filter((q: { content: string }) => q.content.trim()),
             });
 
+            // Run mesh screening on OCR-extracted questions
+            try {
+              const meshInput: QuestionForMesh[] = arr.map((q: Record<string, unknown>) => ({
+                content: String(q.content || ""),
+                options: Array.isArray(q.options) ? q.options.map(String) : undefined,
+                correctAnswer: String(q.correctAnswer || ""),
+              }));
+              const meshResults = await screenBatch(meshInput);
+              const createdRows = await prisma.question.findMany({
+                where: { domainId, createdById: session!.user.id, bookOrder: { gte: baseOrder } },
+                orderBy: { bookOrder: "asc" },
+                select: { id: true },
+              });
+              for (let i = 0; i < Math.min(createdRows.length, meshResults.length); i++) {
+                const mesh = meshResults[i];
+                await prisma.question.update({
+                  where: { id: createdRows[i].id },
+                  data: {
+                    meshConfidence: mesh.confidence,
+                    meshFlags: mesh.flags.length > 0 ? JSON.parse(JSON.stringify(mesh.flags)) : undefined,
+                  },
+                });
+              }
+            } catch (err) {
+              console.error("[bulk-import] Mesh screening failed:", (err as Error).message);
+            }
+
             return NextResponse.json({ imported: created.count, total: arr.length, fromScannedPDF: true, ocrPages: ocrData.pages_processed });
           }
         }
@@ -430,6 +458,34 @@ async function _POST(req: NextRequest) {
         createdById: session!.user.id,
       })),
     });
+
+    // Run mesh screening on image-extracted questions (DRAFT)
+    try {
+      const meshInput: QuestionForMesh[] = aiQuestions.map(q => ({
+        content: q.content,
+        options: q.options,
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+      }));
+      const meshResults = await screenBatch(meshInput);
+      const createdRows = await prisma.question.findMany({
+        where: { domainId, createdById: session!.user.id, bookOrder: { gte: baseOrder } },
+        orderBy: { bookOrder: "asc" },
+        select: { id: true },
+      });
+      for (let i = 0; i < Math.min(createdRows.length, meshResults.length); i++) {
+        const mesh = meshResults[i];
+        await prisma.question.update({
+          where: { id: createdRows[i].id },
+          data: {
+            meshConfidence: mesh.confidence,
+            meshFlags: mesh.flags.length > 0 ? JSON.parse(JSON.stringify(mesh.flags)) : undefined,
+          },
+        });
+      }
+    } catch (err) {
+      console.error("[bulk-import] Mesh screening failed:", (err as Error).message);
+    }
 
     return NextResponse.json({ imported: created.count, total: aiQuestions.length, fromImage: true });
   } else {

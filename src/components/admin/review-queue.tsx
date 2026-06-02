@@ -4,6 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 // MarkdownPreview removed — showing plain text for faster review
 
+interface MeshFlag {
+  lens: string;
+  defectClass: string;
+  confidence: number;
+  details: string;
+}
+
 interface Question {
   id: string;
   content: string;
@@ -16,6 +23,8 @@ interface Question {
   explanation: string | null;
   sourceReference: string | null;
   source: string;
+  meshConfidence: number | null;
+  meshFlags: MeshFlag[] | null;
   domain: { name: string };
   createdBy: { name: string } | null;
 }
@@ -177,7 +186,7 @@ export function ReviewQueue({ questions }: { questions: Question[] }) {
             selected.has(q.id) ? "border-blue-600" : "border-gray-800"
           }`}
         >
-          {/* Header row: checkbox + tags + select */}
+          {/* Header row: checkbox + tags + mesh confidence */}
           <div className="flex items-center gap-2 border-b border-gray-800/50 px-4 py-2">
             <input
               type="checkbox"
@@ -188,8 +197,40 @@ export function ReviewQueue({ questions }: { questions: Question[] }) {
             <div className="flex flex-1 flex-wrap gap-1.5 text-xs">
               <span className="rounded bg-gray-800 px-1.5 py-0.5 text-gray-400">{q.subject} / {q.topic}</span>
               <span className="rounded bg-gray-800 px-1.5 py-0.5 text-gray-500">Diff: {q.difficulty}/5</span>
+              {q.meshConfidence !== null && q.meshConfidence !== undefined && (
+                <span className={`rounded px-1.5 py-0.5 font-medium ${
+                  q.meshConfidence >= 0.85 ? "bg-green-900/30 text-green-400" :
+                  q.meshConfidence >= 0.5 ? "bg-yellow-900/30 text-yellow-400" :
+                  "bg-red-900/30 text-red-400"
+                }`}>
+                  Mesh: {Math.round(q.meshConfidence * 100)}%
+                </span>
+              )}
             </div>
           </div>
+
+          {/* Mesh flags (if any) */}
+          {q.meshFlags && (q.meshFlags as MeshFlag[]).length > 0 && (
+            <div className="border-b border-gray-800/50 px-4 py-2">
+              <div className="flex flex-wrap gap-1.5">
+                {(q.meshFlags as MeshFlag[]).map((flag, fi) => (
+                  <span
+                    key={fi}
+                    title={flag.details}
+                    className={`cursor-help rounded px-2 py-0.5 text-xs ${
+                      flag.defectClass === "grounding-hallucination" || flag.defectClass === "no-correct"
+                        ? "bg-red-900/30 text-red-300"
+                        : flag.defectClass === "accidentally-true-distractor" || flag.defectClass === "named-entity-thin"
+                        ? "bg-orange-900/30 text-orange-300"
+                        : "bg-yellow-900/30 text-yellow-300"
+                    }`}
+                  >
+                    {flag.lens}: {flag.defectClass} ({Math.round(flag.confidence * 100)}%)
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Content — always show full question + options */}
           <div className="px-4 py-3">

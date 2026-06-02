@@ -4,12 +4,32 @@ import { ReviewQueue } from "@/components/admin/review-queue";
 export default async function ReviewPage() {
   const draftQuestions = await prisma.question.findMany({
     where: { status: "DRAFT" },
-    include: {
+    select: {
+      id: true,
+      content: true,
+      subject: true,
+      topic: true,
+      difficulty: true,
+      type: true,
+      options: true,
+      correctAnswer: true,
+      explanation: true,
+      sourceReference: true,
+      source: true,
+      bookOrder: true,
+      meshConfidence: true,
+      meshFlags: true,
+      createdAt: true,
       domain: { select: { name: true, slug: true } },
       tags: true,
       createdBy: { select: { name: true } },
     },
-    orderBy: [{ bookOrder: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }],
+    orderBy: [
+      // Flagged questions first (lower confidence = higher priority)
+      { meshConfidence: { sort: "asc", nulls: "last" } },
+      { bookOrder: { sort: "asc", nulls: "last" } },
+      { createdAt: "desc" },
+    ],
   });
 
   return (

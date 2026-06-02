@@ -202,6 +202,8 @@ model Question {
   explanationVideoUrl String?  // Video explanation URL
   source        QuestionSource @default(MANUAL)
   status        QuestionStatus @default(DRAFT)
+  meshConfidence Float?        // 0-1 mesh quality score (null = not screened)
+  meshFlags     Json?          // Array of {lens, defectClass, confidence, details}
   createdById   String?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt

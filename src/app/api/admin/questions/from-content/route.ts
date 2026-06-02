@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
+import { screenBatch, type QuestionForMesh } from "@/lib/content-quality-mesh";
+import { cleanText as cleanText_pdf } from "@/lib/pdf-ingest";
 
 const schema = z.object({
   domainId: z.string().min(1),
@@ -207,12 +209,15 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: "AI returned empty results" }, { status: 500 });
   }
 
-  // Save as DRAFT
+  // Save as DRAFT first (without mesh — we need IDs)
   const maxOrder = await prisma.question.aggregate({
     where: { domainId },
     _max: { bookOrder: true },
   });
   const baseOrder = (maxOrder._max.bookOrder ?? -1) + 1;
+
+  // Clean source text for mesh grounding checks
+  const sourceForMesh = cleanText_pdf(content).substring(0, 5000);
 
   const created = await prisma.question.createMany({
     data: questions.map((q, idx) => ({
@@ -233,10 +238,50 @@ async function _POST(req: NextRequest) {
     })),
   });
 
+  // Run mesh pre-screening (non-blocking — questions already saved as DRAFT)
+  let meshScreened = 0;
+  let meshFlagged = 0;
+  try {
+    const questionsForMesh: QuestionForMesh[] = questions.map(q => ({
+      content: q.content,
+      options: q.options as string[] | undefined,
+      correctAnswer: q.correctAnswer,
+      explanation: q.explanation || undefined,
+      sourceText: sourceForMesh,
+    }));
+
+    const meshResults = await screenBatch(questionsForMesh);
+
+    // Fetch created questions to get IDs (ordered by bookOrder matching our insert)
+    const createdRows = await prisma.question.findMany({
+      where: { domainId, createdById: session!.user.id, bookOrder: { gte: baseOrder } },
+      orderBy: { bookOrder: "asc" },
+      select: { id: true },
+    });
+
+    // Update each question with mesh results
+    for (let i = 0; i < Math.min(createdRows.length, meshResults.length); i++) {
+      const mesh = meshResults[i];
+      await prisma.question.update({
+        where: { id: createdRows[i].id },
+        data: {
+          meshConfidence: mesh.confidence,
+          meshFlags: mesh.flags.length > 0 ? JSON.parse(JSON.stringify(mesh.flags)) : undefined,
+        },
+      });
+      meshScreened++;
+      if (mesh.flags.length > 0) meshFlagged++;
+    }
+  } catch (err) {
+    console.error("[from-content] Mesh screening failed (questions saved as DRAFT):", (err as Error).message);
+  }
+
   return NextResponse.json({
     generated: created.count,
     contentLength: content.length,
     truncated: content.length > 15000,
+    meshScreened,
+    meshFlagged,
   });
 }
 
