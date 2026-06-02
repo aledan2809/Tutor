@@ -33,6 +33,7 @@ export function ReviewQueue({ questions }: { questions: Question[] }) {
   const router = useRouter();
   const [processing, setProcessing] = useState<string | null>(null);
   const [batchProcessing, setBatchProcessing] = useState(false);
+  const [fixing, setFixing] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<{ content: string; correctAnswer: string; explanation: string }>({
@@ -100,6 +101,18 @@ export function ReviewQueue({ questions }: { questions: Question[] }) {
       router.refresh();
     } finally {
       setProcessing(null);
+    }
+  }
+
+  async function handleMeshFix(id: string) {
+    setFixing(id);
+    try {
+      const res = await fetch(`/api/admin/questions/${id}/mesh-fix`, { method: "POST" });
+      if (res.ok) {
+        router.refresh();
+      }
+    } finally {
+      setFixing(null);
     }
   }
 
@@ -209,10 +222,20 @@ export function ReviewQueue({ questions }: { questions: Question[] }) {
             </div>
           </div>
 
-          {/* Mesh flags (if any) */}
+          {/* Mesh flags + recommendation (if any) */}
           {q.meshFlags && (q.meshFlags as MeshFlag[]).length > 0 && (
             <div className="border-b border-gray-800/50 px-4 py-2">
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap items-center gap-1.5">
+                {q.meshConfidence !== null && q.meshConfidence < 0.5 && (
+                  <span className="rounded bg-red-900/40 px-2 py-0.5 text-xs font-medium text-red-300">
+                    ⚠ Escalate
+                  </span>
+                )}
+                {q.meshConfidence !== null && q.meshConfidence >= 0.5 && q.meshConfidence < 0.85 && (
+                  <span className="rounded bg-yellow-900/40 px-2 py-0.5 text-xs font-medium text-yellow-300">
+                    Review Prioritized
+                  </span>
+                )}
                 {(q.meshFlags as MeshFlag[]).map((flag, fi) => (
                   <span
                     key={fi}
@@ -338,6 +361,12 @@ export function ReviewQueue({ questions }: { questions: Question[] }) {
               className="flex-1 rounded-lg border border-gray-700 py-1.5 text-center text-xs text-gray-400 hover:bg-gray-800 disabled:opacity-50 sm:flex-none sm:px-4">
               Edit
             </button>
+            {q.meshFlags && (q.meshFlags as MeshFlag[]).length > 0 && q.meshConfidence !== null && q.meshConfidence < 0.85 && (
+              <button onClick={() => handleMeshFix(q.id)} disabled={fixing === q.id || processing === q.id}
+                className="flex-1 rounded-lg border border-purple-700 py-1.5 text-center text-xs text-purple-300 hover:bg-purple-900/20 disabled:opacity-50 sm:flex-none sm:px-4">
+                {fixing === q.id ? "Fixing..." : "Auto-Fix"}
+              </button>
+            )}
             <button onClick={() => handleAction(q.id, "delete")} disabled={processing === q.id}
               className="rounded-lg border border-red-800 px-3 py-1.5 text-xs text-red-400 hover:bg-red-900/20 disabled:opacity-50">
               Del

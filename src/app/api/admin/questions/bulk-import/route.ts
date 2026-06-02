@@ -515,14 +515,45 @@ async function _POST(req: NextRequest) {
       options: q.options ? (q.options as string[]) : undefined,
       correctAnswer: q.correctAnswer,
       source: "MANUAL" as const,
-      status: "APPROVED" as const,
+      status: "DRAFT" as const,
       bookOrder: baseOrder + i,
       qNumberInBook: i + 1,
       createdById: session!.user.id,
     })),
   });
 
-  return NextResponse.json({ imported: created.count, total: questions.length });
+  // Run mesh screening on text-extracted questions (Track A: pre-screen ALL imports)
+  let meshScreened = 0;
+  let meshFlagged = 0;
+  try {
+    const meshInput: QuestionForMesh[] = questions.map(q => ({
+      content: q.content,
+      options: q.options,
+      correctAnswer: q.correctAnswer,
+    }));
+    const meshResults = await screenBatch(meshInput);
+    const createdRows = await prisma.question.findMany({
+      where: { domainId, createdById: session!.user.id, bookOrder: { gte: baseOrder } },
+      orderBy: { bookOrder: "asc" },
+      select: { id: true },
+    });
+    for (let i = 0; i < Math.min(createdRows.length, meshResults.length); i++) {
+      const mesh = meshResults[i];
+      await prisma.question.update({
+        where: { id: createdRows[i].id },
+        data: {
+          meshConfidence: mesh.confidence,
+          meshFlags: mesh.flags.length > 0 ? JSON.parse(JSON.stringify(mesh.flags)) : undefined,
+        },
+      });
+      meshScreened++;
+      if (mesh.flags.length > 0) meshFlagged++;
+    }
+  } catch (err) {
+    console.error("[bulk-import] Mesh screening failed:", (err as Error).message);
+  }
+
+  return NextResponse.json({ imported: created.count, total: questions.length, meshScreened, meshFlagged });
 }
 
 export const POST = withErrorHandler(_POST);

@@ -290,6 +290,98 @@ export async function screenQuestion(question: QuestionForMesh): Promise<MeshRes
   return { confidence: Math.round(score * 100) / 100, flags, requiresHumanReview, recommendation };
 }
 
+// ── Fix Prompt ──────────────────────────────────────────────────────────
+
+const FIX_SYSTEM = `You are a quiz question FIXER for Romanian educational content.
+You receive a flagged question with specific defect descriptions and must fix it.
+
+Rules:
+- Fix ONLY the identified defect — do not rewrite the entire question
+- Keep the question grounded in the source text (sourceQuote must remain verbatim)
+- Maintain Romanian diacritics (ă, î, â, ș, ț)
+- Return the FULL fixed question as JSON
+
+Return JSON:
+{"content": "fixed question text", "options": ["a) ...", "b) ...", "c) ...", "d) ..."], "correctAnswer": "a) ...", "explanation": "...", "sourceQuote": "unchanged verbatim quote"}`;
+
+/**
+ * Attempt to auto-fix a flagged question based on defect details.
+ * Returns fixed question fields or null if fix fails.
+ */
+export async function attemptFix(
+  question: QuestionForMesh,
+  flags: LensFlag[]
+): Promise<Partial<QuestionForMesh> | null> {
+  if (flags.length === 0) return null;
+
+  const defectSummary = flags.map(f =>
+    `[${f.lens}] ${f.defectClass} (confidence ${Math.round(f.confidence * 100)}%): ${f.details}`
+  ).join("\n");
+
+  const userPrompt = `Fix this question based on the defects found:
+
+DEFECTS:
+${defectSummary}
+
+QUESTION:
+${formatQuestionForLens(question)}
+
+Return the fixed version as JSON.`;
+
+  try {
+    const raw = await callGroqJSON(FIX_SYSTEM, userPrompt);
+    const parsed = safeParseJSON(raw);
+    if (!parsed || !parsed.content) return null;
+
+    return {
+      content: parsed.content as string,
+      options: (parsed.options as string[]) || question.options,
+      correctAnswer: (parsed.correctAnswer as string) || question.correctAnswer,
+      explanation: (parsed.explanation as string) || question.explanation,
+      sourceText: question.sourceText, // preserve source context
+    };
+  } catch (err) {
+    console.error("[mesh] Fix attempt failed:", (err as Error).message);
+    return null;
+  }
+}
+
+/**
+ * Screen a question with fix→re-verify loop.
+ * Max 2 fix rounds; if still flagged after 2 rounds → escalate to human.
+ */
+export async function screenWithFixLoop(
+  question: QuestionForMesh,
+  maxRounds = 2
+): Promise<{ result: MeshResult; fixedQuestion: QuestionForMesh | null; fixRounds: number }> {
+  let current = question;
+  let result = await screenQuestion(current);
+  let fixRounds = 0;
+
+  // Only attempt fixes on non-mandatory-review defects with fixable flags
+  while (
+    result.flags.length > 0 &&
+    fixRounds < maxRounds &&
+    !result.flags.some(f => MANDATORY_HUMAN_DEFECTS.includes(f.defectClass))
+  ) {
+    const fixed = await attemptFix(current, result.flags);
+    if (!fixed || !fixed.content) break; // fix failed, stop
+
+    fixRounds++;
+    current = { ...current, ...fixed };
+    result = await screenQuestion(current);
+
+    // If score improved enough, stop
+    if (result.confidence >= 0.85 && result.flags.length === 0) break;
+  }
+
+  return {
+    result,
+    fixedQuestion: fixRounds > 0 ? current : null,
+    fixRounds,
+  };
+}
+
 /**
  * Run mesh on a batch of questions. Returns results in same order.
  * Processes sequentially to respect rate limits on free-tier providers.
@@ -310,6 +402,31 @@ export async function screenBatch(
         flags: [],
         requiresHumanReview: true,
         recommendation: "review-prioritized",
+      });
+    }
+  }
+  return results;
+}
+
+/**
+ * Screen batch WITH fix loop. Returns results + any fixed question data.
+ * Use this for ingest-pdf and from-content pipelines where auto-fix is desired.
+ */
+export async function screenBatchWithFix(
+  questions: QuestionForMesh[],
+  maxRounds = 2
+): Promise<Array<{ result: MeshResult; fixedQuestion: QuestionForMesh | null; fixRounds: number }>> {
+  const results: Array<{ result: MeshResult; fixedQuestion: QuestionForMesh | null; fixRounds: number }> = [];
+  for (const q of questions) {
+    try {
+      const r = await screenWithFixLoop(q, maxRounds);
+      results.push(r);
+    } catch (err) {
+      console.error("[mesh] Screen+fix failed for question:", (err as Error).message);
+      results.push({
+        result: { confidence: 0, flags: [], requiresHumanReview: true, recommendation: "review-prioritized" },
+        fixedQuestion: null,
+        fixRounds: 0,
       });
     }
   }

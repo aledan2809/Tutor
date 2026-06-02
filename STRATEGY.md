@@ -180,7 +180,7 @@
 
 ---
 
-### Tier 5 — Content Quality Mesh (productizare pipeline generare grile) — `[ ]` PLANIFICAT (sesiune dedicată)
+### Tier 5 — Content Quality Mesh (productizare pipeline generare grile) — `[x]` Track A DONE (2026-06-03)
 
 **Origine:** sesiunea 2026-06-02 a validat (cu 2 rulări de mesh multi-agent pe text REAL din manuale.edu.ro — Istorie clasa V, PDF extras cu `pdf-parse`, calea de import a Tutor) că generarea de grile *grounded* poate atinge **97%+ teacher-quality ca pipeline cu poartă (gated), NU autonom**. Rezultate măsurate:
 - **v1 (15 întrebări reale, 3 pasaje factuale):** 100% curat (trec toate 3 lentilele), 0 runde de fix. Răspunsuri 15/15 corecte, 0 halucinații (grounding-ul previne halucinarea).
@@ -215,6 +215,18 @@
   - **Verdict onest curent:** Track B e plauzibil pe **materie factuală curată** după precondițiile 1-3, dar rămâne **nedovedit** până le bifezi; pe materii cu raționament, om-în-buclă rămâne necesar până la o validare dedicată. NU promite „97% fără om" înainte de a măsura false-negative-ul.
 
 **Anti-pattern:** NU livra mesh-ul ca oracol autonom accept/reject înainte de a dovedi precizia FP→0 + marginea de false-negative (Track B precondiții); până atunci, păstrează profesorul în buclă pe flagate (Track A). NU promite „97% fără factor uman" pe baza unei rulări clean — un grader prea-strict respinge conținut bun, iar unul prea-permisiv lasă să treacă greșeli (L194).
+
+**Track A — LIVRAT 2026-06-03.** Componente livrate:
+- `src/lib/pdf-ingest.ts` — Agent FETCH/ingestie: fetch PDF (curl-style) → pdf-parse → clean OCR artifacts → segment passages
+- `src/lib/content-quality-mesh.ts` — 3 lentile adversariale paralel + fix→re-verify loop (max 2 runde) + orchestrator scoring + calibrations (advisory single-lens, verbatim recall protect, per-item blinding, mandatory human defects, grounding 2x weight)
+- `src/app/api/admin/questions/ingest-pdf/route.ts` — Full pipeline: PDF→passages→generate grounded questions→mesh screen→DRAFT
+- `src/app/api/admin/questions/from-content/route.ts` — Mesh pre-screening integrated
+- `src/app/api/admin/questions/bulk-import/route.ts` — Mesh pre-screening integrated (all paths: PDF/DOCX/CSV/Image/OCR)
+- `src/app/api/admin/questions/[id]/mesh-fix/route.ts` — Auto-fix endpoint (max 2 rounds, never auto-publish)
+- `src/app/api/admin/questions/mesh-validate/route.ts` — Negative-control validation (4 GOOD + 6 BAD, FP/detection metrics)
+- `src/components/admin/review-queue.tsx` — Confidence score + flag badges + recommendation labels + Auto-Fix button
+- Review page sorts flagged questions first (lowest confidence → top)
+- Provider: Groq cascade (free tier), no Anthropic credit used
 
 ---
 
