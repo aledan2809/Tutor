@@ -1,6 +1,6 @@
 # Tutor — Strategie & Roadmap
 **Ultima actualizare:** 2026-06-01
-**Versiune:** 1.8
+**Versiune:** 1.9
 
 ## Changelog
 - [2026-06-02] v1.8: **Tier 3 WhatsApp CTA + Tier 4 fricțiune-zero** LIVE pe etutor.ro (commit `93b26b5`). (1) `<WhatsAppCta>` floating site-wide, RO/EN, **env-gated `NEXT_PUBLIC_SUPPORT_WHATSAPP`** (zero număr fals — apare la setarea env de owner); (2) Tier 4: link „încearcă fără cont ✨" pe signin + register (try-before-signup la toate intrările), PWA install prompt localizat RO/EN (era english-only). **Deja prezent, verificat (nu reconstruit):** PWA install prompt (beforeinstallprompt + delay 30s) + push opt-in (VAPID, în settings). **Owner-blocked (NU construit, ar fi rupt):** Google 1-tap — necesită redirect URI + Origin etutor.ro în OAuth console. **/review + TWG** pe ambele loturi (WOW + Tier3/4): toate findings = false-positives (groq), 0 fix-uri reale în codul dezvoltat; verificat behavioral live (toate rutele 200, zero regresie). Layer Tester-Vision skip conștient (credit Anthropic blocat).
@@ -174,7 +174,7 @@
 - [x] **Try-before-signup peste tot** — demo public pe homepage (hero) + `/try` + link „încearcă fără cont ✨" pe signin + register. Toate căile de intrare duc la demo fără cont.
 - [x] **PWA install prompt** — DEJA PREZENT (`src/components/pwa-install-prompt.tsx`, `beforeinstallprompt` + delay 30s + dismiss memory în localStorage), wired în root layout. Localizat RO/EN 2026-06-02 (era doar engleză).
 - [x] **Push UX** — DEJA PREZENT (`push-subscribe.tsx` + `/api/notifications/push-subscribe` + VAPID gating) în `dashboard/settings/notifications`. Opt-in post-signup.
-- [ ] **Google 1-tap** — 🔴 **owner-blocked**: butonul `signIn("google")` există, dar 1-tap-ul + OAuth pe etutor.ro necesită owner să adauge `https://etutor.ro` ca redirect URI + Origin în Google OAuth console. NU construit (ar fi rupt până la fix-ul console). Email+parolă merge între timp.
+- [x] **Google OAuth + 1-tap** — LIVE 2026-06-02 (commit `a741696`). Console deblocat de owner (redirect URI `https://etutor.ro/api/auth/callback/google` + JS origin `https://etutor.ro` pe clientul partajat „PRO Session Tracker"; app In production). Verificat live: butonul Google predă corect către Google (client_id + redirect_uri OK, Google acceptă — 302 spre login, nu 400 mismatch). **Google One Tap** construit: provider NextAuth `google-one-tap` (verifică ID token via Google tokeninfo, find-or-create user by email + Account link anti-OAuthAccountNotLinked) + `<GoogleOneTap>` GSI/FedCM (nelogați, prompt o dată) wired în `[locale]/layout`. Provider înregistrat live + zero regresie pe butonul existent. _Prompt-ul flotant vizibil cere confirmare în browser real (Google session + FedCM)._
 
 **Metrici de succes Faza 0:** K-factor > 1 (fiecare user aduce >1); % vizitatori care încearcă Magic Quiz fără cont; rată conversie demo→cont; share-uri/user; CAC organic vs plătit.
 
