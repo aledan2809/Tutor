@@ -54,7 +54,7 @@ describe("Credentials Auth Security Patterns", () => {
     });
 
     it("should reject null credentials", () => {
-      const credentials = null;
+      const credentials = null as { email: string; password: string } | null;
       const result = !credentials?.email || !credentials?.password ? null : "ok";
       expect(result).toBeNull();
     });

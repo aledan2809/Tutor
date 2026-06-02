@@ -378,7 +378,7 @@ describe("H08: User enumeration timing fix", () => {
     const DUMMY_HASH = bcrypt.hashSync("dummy-placeholder", 10);
 
     // Simulate non-existent user flow
-    const user = null;
+    const user = null as { password: string } | null;
     const hash = user ? user.password : DUMMY_HASH;
     const result = bcrypt.compareSync("attacker-password", hash);
     expect(typeof result).toBe("boolean");
