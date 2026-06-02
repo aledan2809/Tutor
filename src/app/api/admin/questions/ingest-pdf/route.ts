@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { withErrorHandler } from "@/lib/api-handler";
@@ -206,40 +207,58 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: "No questions generated from passages" }, { status: 500 });
   }
 
-  // 3. Save as DRAFT
-  const maxOrder = await prisma.question.aggregate({
-    where: { domainId },
-    _max: { bookOrder: true },
-  });
-  const baseOrder = (maxOrder._max.bookOrder ?? -1) + 1;
+  // 3. Save as DRAFT — allocate bookOrder + create rows in a single Serializable
+  // transaction so a concurrent same-domain ingest can't read the same max
+  // bookOrder and collide (TOCTOU). Rows are created individually so we keep
+  // each id and can correlate mesh results to the exact question.
+  let createdIds: string[];
+  try {
+    createdIds = await prisma.$transaction(
+      async (tx) => {
+        const maxOrder = await tx.question.aggregate({
+          where: { domainId },
+          _max: { bookOrder: true },
+        });
+        const baseOrder = (maxOrder._max.bookOrder ?? -1) + 1;
 
-  // Create rows individually so we keep each row's id and can correlate mesh
-  // results to the exact question — re-fetching by (domain, bookOrder) range
-  // could mis-attribute results under a concurrent same-domain ingest.
-  const createdIds: string[] = [];
-  for (let idx = 0; idx < allQuestions.length; idx++) {
-    const q = allQuestions[idx];
-    const row = await prisma.question.create({
-      data: {
-        domainId,
-        subject,
-        topic,
-        difficulty: q.difficulty || difficulty,
-        type: "MULTIPLE_CHOICE" as const,
-        content: q.content,
-        options: q.options ? (q.options as string[]) : undefined,
-        correctAnswer: q.correctAnswer,
-        explanation: q.explanation || null,
-        sourceReference: q.sourceQuote ? `Source: "${q.sourceQuote.substring(0, 200)}"` : null,
-        source: "AI_GENERATED" as const,
-        status: "DRAFT" as const,
-        bookOrder: baseOrder + idx,
-        qNumberInBook: idx + 1,
-        createdById: session!.user.id,
+        const ids: string[] = [];
+        for (let idx = 0; idx < allQuestions.length; idx++) {
+          const q = allQuestions[idx];
+          const row = await tx.question.create({
+            data: {
+              domainId,
+              subject,
+              topic,
+              difficulty: q.difficulty || difficulty,
+              type: "MULTIPLE_CHOICE" as const,
+              content: q.content,
+              options: q.options ? (q.options as string[]) : undefined,
+              correctAnswer: q.correctAnswer,
+              explanation: q.explanation || null,
+              sourceReference: q.sourceQuote ? `Source: "${q.sourceQuote.substring(0, 200)}"` : null,
+              source: "AI_GENERATED" as const,
+              status: "DRAFT" as const,
+              bookOrder: baseOrder + idx,
+              qNumberInBook: idx + 1,
+              createdById: session!.user.id,
+            },
+            select: { id: true },
+          });
+          ids.push(row.id);
+        }
+        return ids;
       },
-      select: { id: true },
-    });
-    createdIds.push(row.id);
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable, timeout: 30_000 }
+    );
+  } catch (err) {
+    // Serialization conflict = a concurrent same-domain ingest committed first.
+    if ((err as { code?: string }).code === "P2034") {
+      return NextResponse.json(
+        { error: "Concurrent ingest on this domain — please retry" },
+        { status: 409 }
+      );
+    }
+    throw err;
   }
 
   // 4. Mesh screening — createdIds[i] aligns exactly with allQuestions[i].

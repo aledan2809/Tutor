@@ -178,7 +178,9 @@ Check for:
 1. Distractors too implausible (obviously wrong, no student would pick them) → "distractor-implausible"
 2. Named-entity questions with thin source coverage (e.g., "Who ruled in 1859?" with no context) → "named-entity-thin"
 3. Ambiguous wording that could confuse students → "clarity-ambiguous"
-4. Length cues (correct answer much longer/shorter than distractors) → "clarity-length-cue"
+4. Length cue → "clarity-length-cue". ALWAYS compare the length of the correct option against the distractors. A length cue exists when the correct option is noticeably longer (or shorter) than the distractors AND that length difference is what signals it as correct — a classic test-writing tell that lets a student guess by picking the longest/most-detailed option.
+   - DO flag: the correct answer is a fuller, more-qualified or more-detailed phrase while the distractors are short and terse, so length alone reveals the answer.
+   - DO NOT flag: the correct answer is simply a long proper noun or a technically required full term (e.g. a place name like "Ulpia Traiana Sarmizegetusa", a chemical/scientific name, a full law title) while distractors are short — that length is natural, not a cue.
 
 Evaluate THIS question ALONE — no cross-item reasoning.
 
