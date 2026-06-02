@@ -434,3 +434,46 @@ export async function screenBatchWithFix(
   }
   return results;
 }
+
+// ── Deterministic missing-context guard ──────────────────────────────────
+// Questions that reference an exercise/figure/table not included in the prompt
+// cannot be answered standalone — root cause of high-confidence false negatives.
+const MISSING_CONTEXT_RE =
+  /\b(?:de mai (?:jos|sus)|din (?:exerci[țt]iul|figura|imaginea|tabelul|textul de|exemplul de|schema)|în (?:figura|imaginea|tabelul|schema)|figura al[ăa]turat[ăa]|al[ăa]turat[ăa]|urm[ăa]torul exerci[țt]iu|exerci[țt]iul urm[ăa]tor|exemplul de mai)\b/i;
+
+export function hasMissingContextRef(content: string): boolean {
+  return MISSING_CONTEXT_RE.test(content);
+}
+
+// ── Stage-2 high-precision judge (final gate before "ready without human") ──
+// Conservative by design: FAIL (→ demote to human review) on ANY doubt, and
+// fail-CLOSED on parse/network error. This protects the auto-keep bucket.
+const FINAL_JUDGE_SYSTEM = `You are a STRICT FINAL EXAMINER for a Romanian quiz question that already passed initial screening. You are the LAST gate before a question is marked "ready without human review" — be conservative: FAIL on ANY doubt.
+
+Return PASS only if ALL hold:
+1. The question is fully answerable from the provided source text ALONE — the marked correct answer is explicitly supported by the source, not merely generally true.
+2. Exactly ONE option is correct; the marked correct answer IS that option; no other option is also defensibly correct.
+3. The question does NOT reference external/missing context (no "de mai jos/sus", "din exercițiul", "figura", "tabelul", "imaginea", an exercise/example/figure not included).
+4. No length cue: the correct option is not conspicuously longer/more detailed than the distractors in a way that leaks the answer (a naturally long proper noun is fine).
+5. Wording is clear and unambiguous; it is a real question, not an answer-key fragment.
+
+If ANY criterion is uncertain or violated → FAIL.
+
+Return JSON: {"verdict": "PASS"|"FAIL", "reason": "short reason", "defect": "grounding"|"multiple-correct"|"wrong-answer"|"missing-context"|"length-cue"|"ambiguous"|"not-a-question"|null}`;
+
+export async function finalJudge(
+  question: QuestionForMesh
+): Promise<{ pass: boolean; reason: string; defect: string | null }> {
+  if (hasMissingContextRef(question.content)) {
+    return { pass: false, reason: "References external/missing context", defect: "missing-context" };
+  }
+  try {
+    const raw = await callGroqJSON(FINAL_JUDGE_SYSTEM, formatQuestionForLens(question));
+    const parsed = safeParseJSON(raw) as { verdict?: string; reason?: string; defect?: string } | null;
+    if (!parsed || !parsed.verdict) return { pass: false, reason: "judge parse failed", defect: null };
+    const pass = String(parsed.verdict).toUpperCase() === "PASS";
+    return { pass, reason: parsed.reason || "", defect: (parsed.defect as string) || null };
+  } catch (err) {
+    return { pass: false, reason: `judge error: ${(err as Error).message}`, defect: null };
+  }
+}

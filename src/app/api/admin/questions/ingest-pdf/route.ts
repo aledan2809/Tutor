@@ -4,7 +4,21 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { withErrorHandler } from "@/lib/api-handler";
 import { ingestPDF, ingestFromURL, type IngestPassage } from "@/lib/pdf-ingest";
-import { screenBatchWithFix, type QuestionForMesh } from "@/lib/content-quality-mesh";
+import { screenBatchWithFix, finalJudge, hasMissingContextRef, type QuestionForMesh } from "@/lib/content-quality-mesh";
+
+// Concurrency-limited async map (keeps Groq calls bounded during stage-2 judging).
+async function mapLimit<T, R>(items: T[], limit: number, fn: (t: T, i: number) => Promise<R>): Promise<R[]> {
+  const out: R[] = new Array(items.length);
+  let idx = 0;
+  async function worker() {
+    while (idx < items.length) {
+      const i = idx++;
+      out[i] = await fn(items[i], i);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return out;
+}
 
 /**
  * POST /api/admin/questions/ingest-pdf
@@ -225,20 +239,23 @@ async function _POST(req: NextRequest) {
   }));
   const screened = await screenBatchWithFix(meshInput, 2);
 
-  // Quality gate: keep high-confidence (clean) + review-prioritized (minor flags,
-  // human gate), but DISCARD "escalate" — unfixable hallucination / mandatory
-  // defect / very low score — so the kept set is the 97%+ candidate bucket.
-  // Apply any auto-fix to the kept content. Nothing is ever auto-published.
+  // Quality gate (two-stage). DISCARD outright: "escalate" (unfixable / mandatory
+  // defect / very low score) and anything referencing missing/external context
+  // (unusable even for a reviewer). The rest split into:
+  //   - high-confidence candidates → must ALSO pass the strict stage-2 judge
+  //   - review-prioritized (minor mesh flags) → human gate
+  // Nothing is ever auto-published; kept rows stay DRAFT.
   type Kept = (typeof allQuestions)[number] & { meshConfidence: number; meshFlags: unknown[] };
   const kept: Kept[] = [];
-  let highConfidence = 0, reviewPrioritized = 0, discarded = 0, autoFixed = 0;
+  let highConfidence = 0, reviewPrioritized = 0, discarded = 0, autoFixed = 0, judgeDemoted = 0;
+
+  const hcCandidates: Kept[] = [];
+  const reviewItems: Kept[] = [];
 
   for (let i = 0; i < allQuestions.length; i++) {
     const s = screened[i];
     if (!s) { discarded++; continue; }
     const { result, fixedQuestion, fixRounds } = s;
-
-    if (result.recommendation === "escalate") { discarded++; continue; }
 
     const base = allQuestions[i];
     const merged = fixedQuestion
@@ -250,12 +267,37 @@ async function _POST(req: NextRequest) {
           explanation: fixedQuestion.explanation ?? base.explanation,
         }
       : base;
+
+    if (result.recommendation === "escalate" || hasMissingContextRef(merged.content)) {
+      discarded++;
+      continue;
+    }
     if (fixRounds > 0) autoFixed++;
 
-    kept.push({ ...merged, meshConfidence: result.confidence, meshFlags: result.flags });
-    if (result.recommendation === "high-confidence") highConfidence++;
-    else reviewPrioritized++;
+    const item: Kept = { ...merged, meshConfidence: result.confidence, meshFlags: result.flags };
+    if (result.recommendation === "high-confidence") hcCandidates.push(item);
+    else { reviewItems.push(item); reviewPrioritized++; }
   }
+
+  // Stage-2 strict judge on high-confidence candidates (fail-closed → demote to
+  // human review on any doubt). This is what lifts the auto-keep bucket to 97%+.
+  const verdicts = await mapLimit(hcCandidates, 4, (c) =>
+    finalJudge({ content: c.content, options: c.options, correctAnswer: c.correctAnswer, explanation: c.explanation, sourceText: c.sourceText })
+  );
+  for (let i = 0; i < hcCandidates.length; i++) {
+    const c = hcCandidates[i];
+    const v = verdicts[i];
+    if (v.pass) {
+      kept.push(c);
+      highConfidence++;
+    } else {
+      const judgeFlag = { lens: "stage2-judge", defectClass: v.defect || "judge-fail", confidence: 0.8, details: v.reason };
+      kept.push({ ...c, meshFlags: [...(c.meshFlags as unknown[]), judgeFlag] });
+      reviewPrioritized++;
+      judgeDemoted++;
+    }
+  }
+  for (const r of reviewItems) kept.push(r);
 
   if (kept.length === 0) {
     return NextResponse.json({
@@ -292,7 +334,7 @@ async function _POST(req: NextRequest) {
               options: q.options ? (q.options as string[]) : undefined,
               correctAnswer: q.correctAnswer,
               explanation: q.explanation || null,
-              sourceReference: q.sourceQuote ? `Source: "${q.sourceQuote.substring(0, 200)}"` : null,
+              sourceReference: q.sourceQuote ? `Source: "${q.sourceQuote.substring(0, 500)}"` : null,
               source: "AI_GENERATED" as const,
               status: "DRAFT" as const,
               bookOrder: baseOrder + idx,
@@ -326,6 +368,7 @@ async function _POST(req: NextRequest) {
     reviewPrioritized,
     discarded,
     autoFixed,
+    judgeDemoted,
     cleanRate: Math.round((highConfidence / createdIds.length) * 100),
     passagesTotal: ingestResult.passages.length,
     passageWindow: `${passageOffset}-${passageOffset + passagesToProcess.length}`,

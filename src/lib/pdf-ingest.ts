@@ -195,7 +195,36 @@ export function segmentPassages(text: string): IngestPassage[] {
     });
   }
 
-  return passages;
+  // Quality filter: keep only coherent EXPLANATORY prose. Drops answer-key
+  // fragments, exercise/option lists and stubs that yield ungrounded or
+  // context-dependent questions (root cause of high-confidence false negatives).
+  return passages.filter(p => isQualityPassage(p.text));
+}
+
+/**
+ * A usable source passage is coherent explanatory prose — not an answer key,
+ * exercise/option list, or short stub. These criteria drop the inputs that
+ * produced ungrounded / context-dependent high-confidence questions.
+ */
+function isQualityPassage(text: string): boolean {
+  const t = text.trim();
+  if (t.length < 250) return false;
+
+  const words = t.split(/\s+/).filter(w => /[a-zăâîșțA-ZĂÂÎȘȚ]/.test(w));
+  if (words.length < 45) return false;
+
+  // Answer-key / exercise density: lines that are bare option/answer markers.
+  const lines = t.split("\n").map(l => l.trim()).filter(Boolean);
+  if (lines.length >= 4) {
+    const markerLines = lines.filter(l => /^(?:[a-dA-D][).]|\d+[).])\s*/.test(l)).length;
+    if (markerLines / lines.length > 0.35) return false;
+  }
+
+  // Must read like sentences: enough sentence-ending punctuation across the text.
+  const sentenceEnders = (t.match(/[.!?:](?:\s|$)/g) || []).length;
+  if (sentenceEnders < 2) return false;
+
+  return true;
 }
 
 // ── Full Pipeline ────────────────────────────────────────────────────────
