@@ -34,9 +34,11 @@ Paginile sunt LIVE (200) și se leagă între ele, dar **nu-s în meniul de sus*
 
 ---
 
-## [ ] 🤖 Content Quality Mesh — productizare pipeline generare grile (planificat 2026-06-02)
+## [~] 🤖 Content Quality Mesh — productizare pipeline generare grile (planificat 2026-06-02; MARE PARTE FĂCUT 2026-06-03)
 
-Sesiune dedicată: integrează mesh-ul multi-agent de generare+verificare grile (Author → 3 lentile adversariale grounding/single/distractor → fix-loop → Orchestrator) în **Review Queue** existentă (`DRAFT→APPROVED→PUBLISHED`) ca pre-screen automat pe `from-content` + `bulk-import`. Validat 2026-06-02 pe text REAL manuale.edu.ro: v1 100% (15/15), v2 negative-control detection **8/8** dar **1/2 fals-pozitiv** → 97%+ fezabil ca **pipeline gated (om pe flagate), nu autonom**. **Plan complet + calibrările de precizie OBLIGATORII + artefacte** în `STRATEGY.md` secțiunea „Tier 5 — Content Quality Mesh".
+**DONE 2026-06-03** (commit-uri `81c3871`→`7d0c95f`): mesh-ul integrat în `ingest-pdf` (fetch manuale.edu.ro → curățare → segmentare strictă → generare → 3 lentile + fix-loop → **poartă de calitate**). Acoperire pe tot manualul (passage-range chunking). **Stage-3 judge = Claude CLI pe VPS** (`finalJudge`, subscription $0) — ridică bucket-ul auto-keep de la ~87% (Groq-only) la **≥97% verificat** (vezi L02). UI **bulk-publish pe materie+prag de confidence** live (`/dashboard/admin/questions/review` + API `bulk-publish`). 5 materii ingestate (Istorie/Mate/Geo/Bio/Chimie VII) — 280+ high-confidence Claude-verified, toate DRAFT.
+
+**RĂMÂNE:** aceeași poartă (Claude judge) și pe căile `from-content` + `bulk-import` (acum doar pe `ingest-pdf`); calibrare continuă pe materii cu raționament; vezi item-ul **Capacitate** de mai sus pentru consolidarea Română+Mate V-VIII. **Plan complet** în `STRATEGY.md` „Tier 5" + `knowledge/MONETIZATION-FAMILY-PLANS.md` (monetizare).
 
 ---
 
