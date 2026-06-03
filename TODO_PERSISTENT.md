@@ -167,6 +167,14 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 - **Playbook repetabil**: `knowledge/exam-bank-import-playbook.md` (9-step flow + figure tooling `scripts/exam-figures/{fig_inspect,extract}.py`). Memorie `project_tutor_exam_bank_import`.
 - **RĂMÂNE (next): Româna** (ulterior, după Mate — per cerere user) + restul materialelor pe care le încarcă user.
 
+**IMPORT serie 3 — MATEMATICĂ (din `~/Downloads/Temp/tutor eval nat/pro-matematica2/`) — ÎN CURS 2026-06-04** (user: „continui tot ca pentru MVP, regim instrucțiuni mesh"):
+- **Folder `pro-matematica2`**: 34 lucrări noi de importat (toate 2021–2023, zero overlap cu cele 18 deja live) = **14 oficiale LRO** (Subiect+Barem) + **20 teste de antrenament CNCE** (`Test_NN`, structură 18 itemi identică — confirmat: SI 6 MCQ / SII 6 MCQ geometrie / SIII 6 deschis).
+- **✅ DONE — anul 2021 COMPLET (6/6 oficiale)**: Model (`f2fba9c`), Model 2 (`01d6410`), Simulare (`f754350`), Examen v3 (`f1380ae`), Rezervă v2 (`8034a60`), Sesiune Specială v4 (`e82a6ce`). Fiecare: 18 itemi verbatim + chei ground-truth din barem + 9-10 figuri PyMuPDF vision-verified + `finalAnswer` (doar scalari curați, skip radicali/mulțimi/demonstrații) + deploy + **verificare autentificată SuperAdmin pe etutor.ro: figuri 200 + score API 60/60 + finalCheck pass**.
+- **Total exam-bank prod acum: 18 papers / 324 items** (12 anterioare + 6 din 2021).
+- **🔴 NEXT (paper 7)**: **2022 Mate Model** → apoi 2022 {Simulare, Examen v2, Rezervă v1} → 2023 {Model, Simulare, Examen v1, Rezervă v5} = restul de 8 oficiale → apoi 20 teste antrenament (`test-NN`, source „Test de antrenament").
+- **Variant slugs serie 3**: single-digit (`model`, `model-2`, `simulare`, `examen-3`, `rezerva-2`, `sesiune-speciala-4`); training tests vor folosi `test-01`..`test-15`.
+- **Rețetă identică** cu serie 2 (playbook). Importere: `scripts/import-exam-mate-2021-*.mjs` (6 modele de copiat). DB prod = VPS2 `127.0.0.1:5432/tutor`. Surse: `~/Downloads/Temp/tutor eval nat/pro-matematica2/`.
+
 ---
 
 **[archive] IMPORT serie 2+ — MATEMATICĂ (audit 2026-06-04; user încarcă fișiere)**:
