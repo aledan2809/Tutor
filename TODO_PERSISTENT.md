@@ -12,11 +12,57 @@ Probleme de reformulat în secțiunea de proof + restul homepage-ului (RO+EN, `s
 3. **„🔒 Date protejate (GDPR) · conform, transparent"** — **NU e punct forte**, e cerință legală. Scoate-l din „de ce ne aleg" (eventual mută-l discret în footer).
 4. **Explică simplu cât de ușor e** să faci totul + cum **vezi progresul / rămâi motivat** (concept de gamification, dar **FĂRĂ termenul „gamification"** — nu e înțeles; folosește limbaj simplu: „vezi cum crește pas cu pas", „te ține în priză", puncte/niveluri în cuvinte clare).
 
+## [ ] 🧠 Funnel psihologic Părinte — `/parinte` + CTA (creat 2026-06-03)
+
+**Principiu:** în zona Părinți și pe CTA, **factorul psihologic e determinant**. Părintele e pus **în centrul atenției** — pornim de la frica/întrebarea lui, nu de la features. Text **fluid, condensat, ca și cum i-am răspunde direct la toate temerile**. Ordine emoțional → dovadă → preț (ladder PAS: Problem → Agitate → Solution).
+
+**Cele 3 convingeri de indus la părinte (mesajul trebuie să le bifeze pe toate):**
+1. **„Aplicația chiar îl ajută pe copil să învețe și să sedimenteze, ușor, ca într-un joc."** — arată exemple concrete de **progres zilnic și săptămânal** (pas cu pas, niveluri, serii); **FĂRĂ cuvântul „gamification"**.
+2. **„Se extinde și la meditator."** — părintele vede meditatorul ca **validator suprem** al progresului copilului. Mesajul: Tutor îi dă meditatorului vedere pe greșelile copilului → meditatorul lucrează țintit, iar părintele vede că meditatorul confirmă progresul. (Meditatorul = aliat, nu concurent.)
+3. **„Prețul e minuscul față de ce primesc înapoi."** — ancorează prețul de valoare: **remindere WhatsApp** ca copilul să-și facă testele + **escaladare către părinte și/sau meditator** când ceva nu merge (teste neefectuate, lipsă de concentrare, subiecte neînțelese) + **rapoarte de progres săptămânale/zilnice** (zilnic dacă părintele cere). Compară discret cu costul orelor de meditații.
+
+**Întrebări-cârlig (profunde, psihologice) — funnel spre „uite ce face Tutor: …":**
+- „Tu știi dacă copilul tău chiar **învață** în orele alocate studiului — sau doar stă cu manualul deschis?"
+- „Copilul merge la meditații… dar de unde știi **exact** că și **progresează**?"
+- „Când a fost ultima dată când ai aflat **la timp** că nu a înțeles un capitol — nu abia la teză?"
+- Fiecare întrebare → micro-agitare → **„Uite ce face Tutor: …"** (răspunsul concret) → următoarea întrebare → CTA.
+
+**CTA final — două variante clare, cu avantaj net:**
+- **Trial** (risk-free): „Începe gratuit 7 zile — vezi în prima săptămână dacă copilul chiar progresează. Fără card." + **costul de a aștepta** („în fiecare zi fără feedback e o zi în care nu știi unde stă").
+- **Plată imediată**: avantajul concret (ex: acces complet din prima + [discount/bonus de decis] + linișea că remindere+rapoarte pornesc azi).
+
+**Întrebare de design (de decis la implementare):** întrebările părintelui ar putea fi o **animație în centru** (părintele în centrul atenției — întrebările apar pe rând, animat, cu răspunsul „uite ce face Tutor" dezvăluit la scroll/tap). De evaluat: pornim **direct cu părintele în centru** (hero = întrebarea lui, nu logo/feature) vs. secțiune dedicată mai jos. Recomandare: hero emoțional cu 1 întrebare + funnel animat dedesubt.
+
+**Best practices de aplicat (completare la ideile de mai sus):**
+- **PAS + loss-aversion**: miza reală = Capacitate/BAC; „o materie neînțeleasă la timp = puncte pierdute la examen". Frica de eșec mișcă părintele mai mult decât promisiunea de succes.
+- **Specificitate numerică**: „raport în fiecare duminică", „reminder la 24h și 2h", „vezi exact ce a greșit" — concretul convinge, generalul nu.
+- **Dovadă vizuală**: mockup de **mesaj WhatsApp real** (reminder + escaladare) + screenshot de progres săptămânal direct în pagină → face promisiunea tangibilă.
+- **Un singur CTA dominant** per secțiune (evită paralizia alegerii); trial = butonul principal, plata = secundar/altă culoare.
+- **Mobile-first**: părinții citesc pe telefon → text scurt, întrebări ca titluri mari, animație ușoară, butoane mari.
+- **Meditatorul ca autoritate** (reciprocity/authority): „meditatorul vede greșelile, tu vezi că meditatorul confirmă" — închide bucla de încredere.
+- **Zero jargon**: fără „AI", fără „gamification", fără „engagement" — limbaj de părinte.
+
+**Fișiere:** `src/app/[locale]/parinte/page.tsx` (+ hero/`page.tsx` dacă mutăm cârligul pe homepage). RO+EN. Coordonează cu item-ul 🏠 Homepage (proof-points) — același mesaj, fără contradicții.
+
 ## [ ] 🔗 Faza B finish — linkuri nav către „Pentru părinți" (/parinte) + „Pentru elevi" (/elev) (creat 2026-06-03)
 
 Paginile sunt LIVE (200) și se leagă între ele, dar **nu-s în meniul de sus** (nav are doar Demo / Grile pe materie / Pentru profesori / Autentificare). Adaugă în header „Pentru părinți" + „Pentru elevi". Un singur loc de editat (header/nav din `page.tsx` + eventual componenta de nav partajată).
 
 ---
+
+## [ ] 🐛 Opțiuni cu literă dublată („A. a) …") + normalizare date publicate (creat 2026-06-03)
+
+**Confirmat live** (cele 181 grile Matematica publicate azi). Opțiunile sunt stocate CU prefix de literă inclus — `["a) 10 exerciții", "b) 15 exerciții", …]` — iar AMBELE randere mai adaugă o literă:
+- elev: `src/components/session/question-renderer.tsx` → `A.` + `opt.label` = **„A. a) 10 exerciții"**
+- admin: `src/components/admin/review-queue.tsx` → `a)` + opt = **„a) a) …"**
+`correctAnswer` e și el cu prefix („c) 16.66 exerciții").
+
+**Fix (date + sursă):**
+1. Normalizare date: strip `^[a-dA-D][).]\s*` din fiecare `options[i]` ȘI din `correctAnswer`, consistent (ca să NU rupi matching-ul răspuns↔opțiune). Migrare one-shot pe toate publicate + drafts.
+2. Fix la sursă (generator/parser în pipeline) — grilele noi să NU mai stocheze prefixul; litera o pun randerele.
+3. Verifică după migrare: elev vede „A. 10 exerciții" (o literă), matching + barem corecte.
+
+**Igienă găsită (DEFERRED — domain-level, nu bundle în item 1):** cele două denumiri NU sunt duplicate — **„Matematica" (355)** e domeniul principal *Matematica*, iar **„Matematică" (9)** sunt în domeniul *Aviation* (mate de aviație, separat legitim). Singurul punct cosmetic: domeniul principal e scris fără diacritică („Matematica"). Redenumire corectă „Matematica"→„Matematică" = schimbare la nivel de **domeniu** (atinge `name` + `slug` + URL-uri) → sesiune separată, nu acum.
 
 ## [ ] 📚 Capacitate (clasa a VIII-a) — Română + Matematică consolidate V-VIII (pentru SESIUNEA URMĂTOARE, creat 2026-06-03)
 
@@ -30,7 +76,38 @@ Paginile sunt LIVE (200) și se leagă între ele, dar **nu-s în meniul de sus*
 
 **Apoi (discuție separată, ulterioară):** materiile de **BAC**.
 
+**Materiale gata făcute (surse de import + calibrare):**
+- **Simulări oficiale EN VIII 2026 (Capacitate)** — local în `~/Downloads/temp/tutor eval nat/`:
+  - `EN_VIII_2026_Matematica_model.zip` → `EN_VIII_2026_Matematica_var_model.pdf` (subiect) + `EN_VIII_2026_Matematica_bar_model.pdf` (barem)
+  - `EN_VIII_2026_Limba_romana_modele.zip` → `..._limba_si_literatura_romana_var_model.pdf` (subiect) + `..._bar_model.pdf` (barem) [+ variante pt. minoritatea maghiară]
+  - Fiecare are **subiect + barem** → ground-truth pentru calibrare (pasul 4 de mai sus) + șablon de format „Capacitate".
+- **pro-matematica.ro — DOAR pe matematică**: https://www.pro-matematica.ro/evaluare-nationala/ — aici iei din anii **2026... și te duci până la 2017, adică 10 ani** de teste/simulări EN de matematică, pentru calibrare + bancă de itemi.
+- **Subiecte și Bareme Evaluare Națională 2026**: https://share.google/VLFGuOzaI08uxqc2p
+- **Variante Oficiale și Simulări**: https://share.google/ChxSXNBjt6xWRO2D5
+- **Subiecte EN clasa a 8-a — Limba română — Hei Profu'**: https://share.google/1tfdJmXi4s23LOtyv
+
 **Depinde de:** pipeline-ul Tier 5 cu Claude judge (deja integrat — `content-quality-mesh.ts` finalJudge via Claude CLI) + UI bulk-publish pe materie+prag (deja live). Aici e mai ales **conținut + structurare pe ani/secțiuni + calibrare cu culegeri**, nu infra nouă majoră.
+
+---
+
+## [ ] 🏆 Simulări Capacitate — „exam-bank" tier (100% ground-truth) (creat 2026-06-03)
+
+**Tier nou, PESTE grilele generate.** Aici NU mai cauți întrebări + răspunsuri ≥97% — folosești **subiecte + bareme oficiale** (EN VIII + simulări/examene trecute) → răspunsuri **100% corecte**, zero halucinație, poarta mesh nu mai e necesară. Mixezi itemi din mai multe simulări/examene cu baremele lor, peste materialul didactic existent.
+
+**Viziunea userului (verbatim, 2026-06-03):**
+> Vezi in ce masura poti face si simulari pentru examenul de capacitate - in ideea in care sa combini din mai multe simulari si examene trecute cu baremuri si punctaje specifice pe care sa le poti mixa cum vrei tu, deja cu ceea ce ai existent ca material didactic. Aici nu mai trebuie sa cauti intrebari si sa gasesti raspunsurile care sa fie >97% - aici ai chiar 100% raspunsurile corecte.
+> Iar elevului sau/si parintelui / profesorului sa ii poti spune ceva de genul: ai/a facut 7/8 si fiecare cu baremul asta. Extrapoland ai/ar fi luat 9,45 daca ai fi dat examen doar de aici . Dar, problema nr 6 a fost gresita si exista un pattern ca ceva similar a mai gresit si in data de la problema asta (click aici)
+
+**Componente (de detaliat la implementare):**
+1. Model „examen/simulare" (sursă, an, materie, tip=EN/simulare) cu itemi structurați; fiecare item poartă **baremul oficial** (puncte/subpuncte) + răspuns 100% corect.
+2. **Import as-is** din sursele oficiale (EN VIII 2026 local + linkurile + pro-matematica 2017-2026) — vezi „Materiale gata făcute". Verifică parsarea (bug literă dublată de mai sus).
+3. **Mix engine**: asamblezi un test custom din itemi pe mai multe examene (după an/topic/dificultate), păstrând baremul fiecăruia.
+4. **Scoring pe barem**: nota brută (ex. 7/8 itemi, X/100p) → **notă extrapolată** pe scala 1-10 EN, marcat clar „estimare", nu predicție (honest-reporting).
+5. **Pattern de greșeli**: tag per item (topic/competență) → detectezi greșeli recurente în istoricul elevului → deep-link la itemul greșit + greșelile similare anterioare („click aici").
+
+**De decis la implementare (riscuri reale):**
+- Mate are **punctaj parțial** (baremul = rubrică, nu un singur răspuns). Auto-grading complet pe demonstrații/construcții e greu → faza 1 = doar itemi auto-gradabili (grilă/răspuns scurt); restul = „compară cu baremul" / self-score.
+- Drepturi sursă: subiecte/bareme edu.ro = publice; pro-matematica.ro / Hei Profu' = atenție la republicare verbatim (folosit ca referință/calibrare).
 
 ---
 

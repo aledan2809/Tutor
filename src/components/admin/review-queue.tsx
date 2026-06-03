@@ -286,9 +286,14 @@ export function ReviewQueue({ questions }: { questions: Question[] }) {
       {visibleList.map((q) => {
         const isExpanded = expanded === q.id;
         const isEditing = editing === q.id;
-        // Match correctAnswer to option: correctAnswer has "a) text", options are just "text"
-        const correctLetter = q.correctAnswer?.match(/^([abcd])\)/)?.[1] || null;
-        const correctIndex = correctLetter ? correctLetter.charCodeAt(0) - 97 : -1;
+        // Match correctAnswer to its option by text. Options + correctAnswer are
+        // now stored clean (letter prefix stripped); a tolerant normalize keeps
+        // this working on any legacy row that still carries an "a) " prefix.
+        const norm = (s: string | null | undefined) =>
+          (s ?? "").trim().replace(/^[a-d]\)\s*/i, "").toLowerCase();
+        const correctIndex = Array.isArray(q.options)
+          ? (q.options as string[]).findIndex((o) => norm(o) === norm(q.correctAnswer))
+          : -1;
 
         return (
         <div
