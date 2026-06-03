@@ -58,7 +58,7 @@ type Copy = {
 
 const RO: Copy = {
   kicker: "Hai să fim sinceri",
-  intro: "Hai să vorbim despre ce te frământă cu adevărat — nu despre funcții, despre copilul tău:",
+  intro: "Hai să vorbim despre ce te frământă cu adevărat — nu despre funcții, ci despre copilul tău:",
   answerPrefix: "Uite ce face Tutor: ",
   beats: [
     {
