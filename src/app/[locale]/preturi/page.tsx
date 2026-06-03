@@ -54,7 +54,7 @@ const RO: Copy = {
       price: "de la 19,90 lei / materie / lună",
       accent: "text-blue-400",
       points: [
-        "Pentru elevi și studenți responsabili, fără părinte",
+        "Pentru elevi și studenți responsabili, care pot plăti singuri online",
         "Îți urmărești singur progresul și streak-urile",
         "Acces complet la grile + simulări",
       ],
@@ -68,7 +68,7 @@ const RO: Copy = {
       points: [
         "Cont separat pentru copil + cont de părinte",
         "Vezi progresul, scorurile și unde greșește",
-        "Împingere pe WhatsApp + escaladare către tine",
+        "Remindere pe WhatsApp + escaladare către tine",
       ],
       cta: "Alege Family",
     },
@@ -140,7 +140,7 @@ const EN: Copy = {
       price: "from 19.90 lei / subject / month",
       accent: "text-blue-400",
       points: [
-        "For responsible students with no parent involved",
+        "For responsible students who can pay online themselves",
         "Track your own progress and streaks",
         "Full access to questions + simulations",
       ],
@@ -154,7 +154,7 @@ const EN: Copy = {
       points: [
         "Separate account for the child + a parent account",
         "See progress, scores and where they get it wrong",
-        "WhatsApp nudging + escalation to you",
+        "WhatsApp reminders + escalation to you",
       ],
       cta: "Choose Family",
     },
