@@ -154,7 +154,9 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 
 ---
 
-## [~] 🏆 Simulări Capacitate — „exam-bank" tier (100% ground-truth) (creat 2026-06-03; SLICE 1+2 DONE 2026-06-03)
+## [~] 🏆 Simulări Capacitate — „exam-bank" tier (100% ground-truth) (creat 2026-06-03; SLICE 1+2+3 DONE 2026-06-03)
+
+**SLICE 3 DONE 2026-06-03** (commit `4d42ca0`, LIVE + verificat autentificat pe etutor.ro): **figuri + ecran elev**. (A) 11 figuri Matematică extrase din PDF (PyMuPDF clip-rect; 4uPDF = același fitz dar doar pagini întregi), `ExamItem.figureUrl` (migrare `0017`), atașate 11/11, servite static din `public/exam-figures/`, afișate în admin + take. (B) Ecran elev `/dashboard/exam-bank` (listă + take), sidebar „Simulări" — itemi **sanitizați fără chei** (verificat: take HTML n-are `correctAnswer`-data, doar label i18n), `POST /api/exam-bank/[paperId]/score` corectează server-side + dezvăluie baremul, rezultate cu notă/10 + recalcul live + auto-notare deschise. **Stateless** (fără persistență). `/code-review` a prins un bug critic: label-urile se repetă 1-6 pe fiecare subiect la Mate → cheiat acum pe **id** (answerKey) peste tot + regression test 12/12; + 3 fix-uri (TF_GRID index, mesaj estimare, gard isActive).
 
 **SLICE 2 DONE 2026-06-03** (commit `fd650df`, LIVE + verificat autentificat pe etutor.ro): „calculatorul de notă" (motor scoring pe barem, `src/lib/exam-bank/score.ts` — `scoreExamPaper` obiective auto + deschise self-score + notă/10 + extrapolare „estimare", 11/11 smoke) + **pagină admin read-only** `/dashboard/admin/exam-bank` (listă + detaliu cu barem + defalcare puncte auto/manual/figură), link „Bancă examene" în meniu (RO hardcodat). Motorul NU e încă legat de un ecran de elev (slice 3). `/code-review` pass (3 fix-uri: Array.isArray guards pe Json, maxScore=0 guard).
 
@@ -165,7 +167,7 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 - Sursele rămân intacte local (`~/Downloads/Temp/tutor eval nat/*.zip`). Doc: `knowledge/exam-bank.md`.
 - Verificat: HEAD assert VPS==local, pg_dump backup `/root/backups/tutor-pre-exambank-2026-06-03.dump`, migrate deploy + generate, dry→apply, psql spot-check (Mate S-I.1=c/5p, RO B.1=c), idempotency dry re-run (0 changes), etutor.ro /api/auth/session 200.
 
-**RĂMÂNE (slice 3+)**: ecran ELEV „dă examenul" (renderer figură-aware + scoring live, folosind motorul gata) — **gated pe extracția figurilor**; extracție figuri (imagini) din PDF; mix-engine (asamblează test din mai multe examene); import pro-matematica 2017-2026 + linkuri oficiale; detectare greșeli recurente; republicare curată Matematică în demo. (✅ DONE slice 2: scoring-pe-barem + UI admin.)
+**RĂMÂNE (slice 4+)**: **persistența încercării** (salvare notă/răspunsuri → progres pentru părinte/profesor); mix-engine (asamblează test din mai multe examene); import pro-matematica 2017-2026 + linkuri oficiale; detectare greșeli recurente („ai mai greșit ceva similar"); gating free/premium pe simulări; republicare curată Matematică în demo public. (✅ DONE slice 2: scoring + UI admin · slice 3: figuri + ecran elev.)
 
 **Tier nou, PESTE grilele generate.** Aici NU mai cauți întrebări + răspunsuri ≥97% — folosești **subiecte + bareme oficiale** (EN VIII + simulări/examene trecute) → răspunsuri **100% corecte**, zero halucinație, poarta mesh nu mai e necesară. Mixezi itemi din mai multe simulări/examene cu baremele lor, peste materialul didactic existent.
 
