@@ -154,7 +154,9 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 
 ---
 
-## [~] 🏆 Simulări Capacitate — „exam-bank" tier (100% ground-truth) (creat 2026-06-03; SLICE 1 DONE 2026-06-03)
+## [~] 🏆 Simulări Capacitate — „exam-bank" tier (100% ground-truth) (creat 2026-06-03; SLICE 1+2 DONE 2026-06-03)
+
+**SLICE 2 DONE 2026-06-03** (commit `fd650df`, LIVE + verificat autentificat pe etutor.ro): „calculatorul de notă" (motor scoring pe barem, `src/lib/exam-bank/score.ts` — `scoreExamPaper` obiective auto + deschise self-score + notă/10 + extrapolare „estimare", 11/11 smoke) + **pagină admin read-only** `/dashboard/admin/exam-bank` (listă + detaliu cu barem + defalcare puncte auto/manual/figură), link „Bancă examene" în meniu (RO hardcodat). Motorul NU e încă legat de un ecran de elev (slice 3). `/code-review` pass (3 fix-uri: Array.isArray guards pe Json, maxScore=0 guard).
 
 **SLICE 1 DONE 2026-06-03** (commit `a6a1e98`, LIVE pe prod VPS2 `tutor`): model + import real al celor 2 simulări EN VIII 2026 Model.
 - Modele noi (migration `0016_exam_bank`, aditiv): `ExamPaper` / `ExamPassage` / `ExamItem` — izolate de banca `Question` (fără mesh gate, fără leak în `/try`). Item-ii poartă barem (puncte + sub-puncte a/b), secțiuni, rubrică, passages, figuri-flag.
@@ -163,7 +165,7 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 - Sursele rămân intacte local (`~/Downloads/Temp/tutor eval nat/*.zip`). Doc: `knowledge/exam-bank.md`.
 - Verificat: HEAD assert VPS==local, pg_dump backup `/root/backups/tutor-pre-exambank-2026-06-03.dump`, migrate deploy + generate, dry→apply, psql spot-check (Mate S-I.1=c/5p, RO B.1=c), idempotency dry re-run (0 changes), etutor.ro /api/auth/session 200.
 
-**RĂMÂNE (slice-uri următoare)**: scoring-pe-barem (notă extrapolată 1-10 „estimare"), mix-engine, extracție figuri (imagini), import pro-matematica 2017-2026 + linkuri oficiale, UI elev + admin (`/dashboard/admin/exam-bank/*`), republicare curată Matematică.
+**RĂMÂNE (slice 3+)**: ecran ELEV „dă examenul" (renderer figură-aware + scoring live, folosind motorul gata) — **gated pe extracția figurilor**; extracție figuri (imagini) din PDF; mix-engine (asamblează test din mai multe examene); import pro-matematica 2017-2026 + linkuri oficiale; detectare greșeli recurente; republicare curată Matematică în demo. (✅ DONE slice 2: scoring-pe-barem + UI admin.)
 
 **Tier nou, PESTE grilele generate.** Aici NU mai cauți întrebări + răspunsuri ≥97% — folosești **subiecte + bareme oficiale** (EN VIII + simulări/examene trecute) → răspunsuri **100% corecte**, zero halucinație, poarta mesh nu mai e necesară. Mixezi itemi din mai multe simulări/examene cu baremele lor, peste materialul didactic existent.
 
