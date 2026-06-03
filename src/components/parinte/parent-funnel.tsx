@@ -130,12 +130,7 @@ export function ParentFunnel({ lp }: { lp: "ro" | "en" }) {
           <Reveal key={i} delay={i * 80}>
             <div className="relative rounded-2xl border border-gray-800 bg-gray-900/60 p-6">
               {/* The parent's worry, in their own voice */}
-              <p className="text-lg font-semibold leading-snug text-white">
-                <span className="mr-1 text-blue-400" aria-hidden>
-                  “
-                </span>
-                {b.q}
-              </p>
+              <p className="text-lg font-semibold leading-snug text-white">{b.q}</p>
               {/* The answer — what Tutor does */}
               <div className="mt-4 flex gap-3 rounded-xl border border-blue-500/30 bg-blue-500/5 p-4">
                 <span className="text-lg" aria-hidden="true">
