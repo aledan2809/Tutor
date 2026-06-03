@@ -42,6 +42,43 @@ export function ReviewQueue({ questions }: { questions: Question[] }) {
     explanation: "",
   });
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  // Bulk-publish-by-threshold controls
+  const [filterDomain, setFilterDomain] = useState<string>("all");
+  const [minConfPct, setMinConfPct] = useState<number>(97);
+  const [noFlagsOnly, setNoFlagsOnly] = useState<boolean>(true);
+  const [showOnlyMatching, setShowOnlyMatching] = useState<boolean>(false);
+  const [publishing, setPublishing] = useState<boolean>(false);
+
+  const domains = Array.from(new Set(questions.map((q) => q.domain.name))).sort();
+  const matching = questions.filter(
+    (q) =>
+      (filterDomain === "all" || q.domain.name === filterDomain) &&
+      (q.meshConfidence ?? 0) >= minConfPct / 100 &&
+      (!noFlagsOnly || !(q.meshFlags && q.meshFlags.length > 0))
+  );
+  const visibleList = showOnlyMatching ? matching : questions;
+
+  async function bulkPublishMatching() {
+    if (matching.length === 0) return;
+    if (!confirm(`Publici ${matching.length} întrebări (${filterDomain === "all" ? "toate materiile" : filterDomain}) cu confidence ≥ ${minConfPct}%${noFlagsOnly ? ", fără flag-uri" : ""}? Devin vizibile elevilor.`)) return;
+    setPublishing(true);
+    try {
+      const res = await fetch(`/api/admin/questions/bulk-publish`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: matching.map((q) => q.id) }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        alert(`Publicate: ${data.published ?? matching.length} întrebări.`);
+        router.refresh();
+      } else {
+        alert(`Eroare la publicare: ${data.error ? JSON.stringify(data.error) : res.status}`);
+      }
+    } finally {
+      setPublishing(false);
+    }
+  }
 
   function toggleSelect(id: string) {
     setSelected((prev) => {
@@ -53,10 +90,10 @@ export function ReviewQueue({ questions }: { questions: Question[] }) {
   }
 
   function toggleSelectAll() {
-    if (selected.size === questions.length) {
+    if (selected.size === visibleList.length) {
       setSelected(new Set());
     } else {
-      setSelected(new Set(questions.map((q) => q.id)));
+      setSelected(new Set(visibleList.map((q) => q.id)));
     }
   }
 
@@ -159,7 +196,7 @@ export function ReviewQueue({ questions }: { questions: Question[] }) {
             onClick={toggleSelectAll}
             className="rounded border border-gray-600 px-2.5 py-1 text-xs text-gray-400 hover:bg-gray-800"
           >
-            {selected.size === questions.length ? "Deselect All" : "Select All"}
+            {selected.size === visibleList.length ? "Deselect All" : "Select All"}
           </button>
           {selected.size > 0 && (
             <span className="text-xs text-gray-500">{selected.size} selected</span>
@@ -185,7 +222,52 @@ export function ReviewQueue({ questions }: { questions: Question[] }) {
         )}
       </div>
 
-      {questions.map((q) => {
+      {/* Bulk publish by confidence threshold */}
+      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-800 bg-gray-900/50 px-4 py-3">
+        <span className="text-xs font-medium text-gray-400">Publicare în masă:</span>
+        <select
+          value={filterDomain}
+          onChange={(e) => setFilterDomain(e.target.value)}
+          className="rounded border border-gray-700 bg-gray-800 px-2 py-1 text-xs text-gray-200"
+        >
+          <option value="all">Toate materiile</option>
+          {domains.map((d) => (
+            <option key={d} value={d}>{d}</option>
+          ))}
+        </select>
+        <label className="flex items-center gap-1 text-xs text-gray-400">
+          confidence ≥
+          <input
+            type="number"
+            min={0}
+            max={100}
+            value={minConfPct}
+            onChange={(e) => setMinConfPct(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
+            className="w-16 rounded border border-gray-700 bg-gray-800 px-2 py-1 text-xs text-gray-200"
+          />
+          %
+        </label>
+        <label className="flex items-center gap-1 text-xs text-gray-400">
+          <input type="checkbox" checked={noFlagsOnly} onChange={(e) => setNoFlagsOnly(e.target.checked)} className="rounded border-gray-600 bg-gray-800" />
+          doar fără flag-uri
+        </label>
+        <label className="flex items-center gap-1 text-xs text-gray-400">
+          <input type="checkbox" checked={showOnlyMatching} onChange={(e) => setShowOnlyMatching(e.target.checked)} className="rounded border-gray-600 bg-gray-800" />
+          arată doar lotul filtrat
+        </label>
+        <span className="text-xs text-gray-300">
+          <span className="font-semibold text-green-400">{matching.length}</span> întrebări se potrivesc
+        </span>
+        <button
+          onClick={bulkPublishMatching}
+          disabled={publishing || matching.length === 0}
+          className="ml-auto rounded-lg bg-emerald-700 px-4 py-1.5 text-xs font-medium text-white hover:bg-emerald-600 disabled:opacity-50"
+        >
+          {publishing ? "Se publică..." : `Publică ${matching.length} întrebări ≥ ${minConfPct}%`}
+        </button>
+      </div>
+
+      {visibleList.map((q) => {
         const isExpanded = expanded === q.id;
         const isEditing = editing === q.id;
         // Match correctAnswer to option: correctAnswer has "a) text", options are just "text"
