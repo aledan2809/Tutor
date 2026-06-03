@@ -31,11 +31,27 @@ type FullItem = {
   rubric: { label?: string; points?: number; answer?: string }[] | null;
   hasFigure: boolean;
   figureUrl: string | null;
+  finalAnswer: string | null;
 };
 
-type ScoreResponse = { score: ScoreResult; items: FullItem[]; officeBonus: number; maxScore: number };
+type ScoreResponse = {
+  score: ScoreResult;
+  items: FullItem[];
+  officeBonus: number;
+  maxScore: number;
+  attemptId: string;
+  finalCheck: Record<string, boolean>;
+};
 
 const TF = ["Adevărat", "Fals"];
+const TYPE_LABEL: Record<string, string> = {
+  MCQ: "grilă",
+  TF_GRID: "adevărat/fals",
+  SHORT: "răspuns scurt",
+  FILL: "completare",
+  OPEN: "rezolvare / compunere",
+};
+const isAuto = (type: string) => type === "MCQ" || type === "TF_GRID";
 
 export function ExamBankTake({
   paperId,
@@ -60,10 +76,12 @@ export function ExamBankTake({
   const [mcq, setMcq] = useState<Record<string, string>>({});
   const [grid, setGrid] = useState<Record<string, string[]>>({});
   const [open, setOpen] = useState<Record<string, string>>({});
+  const [finalInput, setFinalInput] = useState<Record<string, string>>({}); // "rezultat final" tastat (Mate)
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ScoreResponse | null>(null);
   const [selfPts, setSelfPts] = useState<Record<string, number>>({}); // keyed by item id
+  const [saved, setSaved] = useState(false);
 
   const sections = useMemo(() => groupBySection(items), [items]);
 
@@ -85,15 +103,35 @@ export function ExamBankTake({
       const res = await fetch(`/api/exam-bank/${paperId}/score`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers: buildObjectiveAnswers() }),
+        body: JSON.stringify({ answers: buildObjectiveAnswers(), finalAnswers: finalInput }),
       });
       if (!res.ok) throw new Error(`Server ${res.status}`);
-      setResult((await res.json()) as ScoreResponse);
+      const data = (await res.json()) as ScoreResponse;
+      setResult(data);
+      // pre-sugerează self-score plin pentru itemii cu rezultat final corect (editabil)
+      const pre: Record<string, number> = {};
+      for (const it of data.items) if (data.finalCheck?.[it.id]) pre[it.id] = it.points;
+      setSelfPts(pre);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Eroare la trimitere");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function saveFinal() {
+    if (!result) return;
+    try {
+      const res = await fetch(`/api/exam-bank/attempt/${result.attemptId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selfScores: selfPts }),
+      });
+      if (!res.ok) throw new Error(`Server ${res.status}`);
+      setSaved(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Eroare la salvare");
     }
   }
 
@@ -125,6 +163,8 @@ export function ExamBankTake({
     const byId = new Map(result.items.map((i) => [i.id, i]));
     const scoredById = new Map(liveScore.items.map((s) => [s.id, s]));
     const ungraded = liveScore.items.filter((i) => i.graded === "ungraded").length;
+    const autoPts = liveScore.items.filter((i) => i.graded === "auto").reduce((a, s) => a + s.awarded, 0);
+    const selfP = liveScore.items.filter((i) => i.graded === "self").reduce((a, s) => a + s.awarded, 0);
     return (
       <div className="mx-auto max-w-3xl space-y-5 p-4">
         <div className="rounded-2xl border border-blue-500/40 bg-blue-500/5 p-6 text-center">
@@ -143,6 +183,17 @@ export function ExamBankTake({
           <p className="mt-2 text-xs text-gray-500">
             {liveScore.rawPoints} puncte + {liveScore.officeBonus} din oficiu
           </p>
+          <p className="mt-1 text-xs text-gray-500">
+            Grile (corectate automat): <span className="text-emerald-300">{autoPts}p</span> · Rezolvări /
+            compuneri (notate de tine): <span className="text-amber-300">{selfP}p</span>
+          </p>
+          <button
+            onClick={saveFinal}
+            disabled={saved}
+            className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50"
+          >
+            {saved ? "Salvat ✓" : "Salvează nota finală"}
+          </button>
         </div>
 
         {/* pe subiecte */}
@@ -257,18 +308,30 @@ export function ExamBankTake({
                           </ul>
                         </div>
                       )}
+                      {it.id in result.finalCheck ? (
+                        <p className={result.finalCheck[it.id] ? "text-sm text-emerald-400" : "text-sm text-rose-400"}>
+                          Rezultat final: {result.finalCheck[it.id] ? "✓ corect" : "✗ greșit"}
+                          {full?.finalAnswer ? ` (corect: ${full.finalAnswer})` : ""}
+                          {result.finalCheck[it.id] ? (
+                            <span className="block text-xs text-gray-500">
+                              punctaj sugerat: maxim — scade dacă rezolvarea n-a fost completă
+                            </span>
+                          ) : null}
+                        </p>
+                      ) : null}
                       <label className="flex items-center gap-2 text-xs text-gray-400">
                         Notează-te după barem:
                         <select
                           value={it.id in selfPts ? String(selfPts[it.id]) : ""}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            setSaved(false); // re-permite salvarea după ajustare
                             setSelfPts((s) => {
                               const next = { ...s };
                               if (e.target.value === "") delete next[it.id];
                               else next[it.id] = Number(e.target.value);
                               return next;
-                            })
-                          }
+                            });
+                          }}
                           className="rounded border border-gray-700 bg-gray-800 px-2 py-1 text-gray-200"
                         >
                           <option value="">— alege —</option>
@@ -328,9 +391,15 @@ export function ExamBankTake({
           <h2 className="text-lg font-semibold text-white">{sec.name}</h2>
           {sec.items.map((it) => (
             <div key={it.id} className="rounded-lg border border-gray-700 bg-gray-800 p-4">
-              <div className="flex items-center gap-2 text-xs">
+              <div className="flex flex-wrap items-center gap-2 text-xs">
                 <span className="rounded bg-blue-600/30 px-2 py-0.5 font-semibold text-blue-300">{it.label}</span>
                 <span className="rounded bg-gray-700 px-2 py-0.5 text-gray-400">{it.points}p</span>
+                <span className="rounded bg-gray-700 px-2 py-0.5 text-gray-500">{TYPE_LABEL[it.type] ?? it.type}</span>
+                {isAuto(it.type) ? (
+                  <span className="rounded bg-emerald-900/40 px-2 py-0.5 text-emerald-300">se corectează automat</span>
+                ) : (
+                  <span className="rounded bg-amber-900/40 px-2 py-0.5 text-amber-300">notare manuală</span>
+                )}
               </div>
               <p className="mt-2 whitespace-pre-line text-sm text-gray-200">{it.content}</p>
               {it.figureUrl ? (
@@ -384,13 +453,24 @@ export function ExamBankTake({
               )}
 
               {!["MCQ", "TF_GRID"].includes(it.type) && (
-                <textarea
-                  value={open[it.id] ?? ""}
-                  onChange={(e) => setOpen((o) => ({ ...o, [it.id]: e.target.value }))}
-                  placeholder="Scrie rezolvarea / răspunsul tău..."
-                  rows={4}
-                  className="mt-2 w-full rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-600"
-                />
+                <div className="mt-2 space-y-2">
+                  <textarea
+                    value={open[it.id] ?? ""}
+                    onChange={(e) => setOpen((o) => ({ ...o, [it.id]: e.target.value }))}
+                    placeholder="Scrie rezolvarea / răspunsul tău..."
+                    rows={4}
+                    className="w-full rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-600"
+                  />
+                  {it.hasFinalAnswer ? (
+                    <input
+                      type="text"
+                      value={finalInput[it.id] ?? ""}
+                      onChange={(e) => setFinalInput((f) => ({ ...f, [it.id]: e.target.value }))}
+                      placeholder="Rezultat final — doar numărul (ex: 14)"
+                      className="w-full max-w-sm rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-600"
+                    />
+                  ) : null}
+                </div>
               )}
             </div>
           ))}

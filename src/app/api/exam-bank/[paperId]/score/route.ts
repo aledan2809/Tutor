@@ -17,13 +17,14 @@ export async function POST(
   }
   const { paperId } = await params;
 
-  let body: { answers?: Record<string, AnswerInput> };
+  let body: { answers?: Record<string, AnswerInput>; finalAnswers?: Record<string, string> };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
   const answers = body?.answers ?? {};
+  const finalAnswers = body?.finalAnswers ?? {};
 
   const paper = await prisma.examPaper.findUnique({
     where: { id: paperId },
@@ -50,6 +51,16 @@ export async function POST(
     maxScore: paper.maxScore,
   });
 
+  // „rezultat final" — auto-check ieftin pe itemii deschiși de Mate care au finalAnswer
+  const norm = (s: string) =>
+    s.trim().toLowerCase().replace(/\s+/g, "").replace(/,/g, ".").replace(/−/g, "-").replace(/°/g, "");
+  const finalCheck: Record<string, boolean> = {};
+  for (const it of paper.items) {
+    if (it.finalAnswer && finalAnswers[it.id]) {
+      finalCheck[it.id] = norm(finalAnswers[it.id]) === norm(it.finalAnswer);
+    }
+  }
+
   // reveal keys + barem for client-side review + open-item self-scoring
   const items = paper.items.map((it) => ({
     id: it.id,
@@ -63,12 +74,28 @@ export async function POST(
     rubric: it.rubric,
     hasFigure: it.hasFigure,
     figureUrl: it.figureUrl,
+    finalAnswer: it.finalAnswer,
   }));
+
+  // persistă încercarea (progres pentru părinte/profesor/meditator)
+  const attempt = await prisma.examAttempt.create({
+    data: {
+      userId: session.user.id,
+      paperId: paper.id,
+      objectiveAnswers: answers as object,
+      rawPoints: Math.round(score.rawPoints),
+      note10: score.note10,
+      isEstimate: score.isEstimate,
+      status: "submitted",
+    },
+  });
 
   return NextResponse.json({
     score,
     items,
     officeBonus: paper.officeBonus,
     maxScore: paper.maxScore,
+    attemptId: attempt.id,
+    finalCheck,
   });
 }

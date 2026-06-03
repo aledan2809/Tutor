@@ -1079,6 +1079,7 @@ model ExamItem {
   hasFigure     Boolean  @default(false)
   figureNote    String? // descrierea figurii (pt extracție ulterioară); NU fabricăm imaginea
   figureUrl     String? // poza figurii extrasă din PDF (ex: "/exam-figures/...png"); null = încă neextrasă
+  finalAnswer   String? // răspunsul final curat pt itemii deschiși (ex: "14") — auto-check „rezultat final"
   autoGradable  Boolean  @default(false) // true doar MCQ/SHORT cu răspuns unic ȘI fără figură
   topic         String?
   createdAt     DateTime @default(now())
@@ -1086,4 +1087,23 @@ model ExamItem {
   paper ExamPaper @relation(fields: [paperId], references: [id], onDelete: Cascade)
 
   @@index([paperId, orderIndex])
+}
+
+// Încercarea unui elev la o simulare (slice 4). userId/paperId ca stringuri (fără FK —
+// nu atingem modelul User). Notă/răspunsuri salvate pt progres (părinte/profesor/meditator).
+model ExamAttempt {
+  id               String   @id @default(cuid())
+  userId           String
+  paperId          String
+  objectiveAnswers Json // răspunsurile obiective trimise {answerKey: AnswerInput}
+  selfScores       Json? // {itemId: puncte} — completat la finalizare (auto-notare deschise)
+  rawPoints        Int      @default(0)
+  note10           Float    @default(0)
+  isEstimate       Boolean  @default(true)
+  status           String   @default("submitted") // "submitted" | "finalized"
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([userId, paperId])
+  @@index([userId, createdAt])
 }

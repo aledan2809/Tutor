@@ -21,6 +21,7 @@ export interface TakeItem {
   passageRef: string | null;
   hasFigure: boolean;
   figureUrl: string | null;
+  hasFinalAnswer: boolean; // whether to show a "rezultat final" input (value NEVER sent)
 }
 
 interface RawItem extends ExamItemForScoring {
@@ -30,6 +31,7 @@ interface RawItem extends ExamItemForScoring {
   options?: unknown;
   passageRef?: string | null;
   figureUrl?: string | null;
+  finalAnswer?: string | null;
 }
 
 export function sanitizeForTake(items: RawItem[]): TakeItem[] {
@@ -53,6 +55,7 @@ export function sanitizeForTake(items: RawItem[]): TakeItem[] {
       passageRef: it.passageRef ?? null,
       hasFigure: !!it.hasFigure,
       figureUrl: it.figureUrl ?? null,
+      hasFinalAnswer: !!it.finalAnswer,
     };
   });
 }
