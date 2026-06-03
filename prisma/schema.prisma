@@ -1015,3 +1015,74 @@ model MagicQuiz {
   @@index([userId])
   @@index([expiresAt])
 }
+
+// ─── Exam-Bank models (official exam papers — ground-truth, no mesh gate) ───
+// First material: EN VIII 2026 Model (Matematică + Limba și literatura română), edu.ro public.
+// Distinct from the generated MCQ Question bank: items carry official barem (points + sub-points),
+// section grouping (Subiectul I/II/III), open-ended + figure-dependent items.
+
+model ExamPaper {
+  id          String   @id @default(cuid())
+  source      String // "EN VIII 2026 Model (edu.ro)"
+  examType    String // "EN_VIII"
+  year        Int // 2026
+  subjectKey  String // "matematica" | "limba_romana"
+  subjectName String // "Matematică" | "Limba și literatura română"
+  grade       Int      @default(8)
+  variant     String   @default("model")
+  maxScore    Int      @default(100)
+  officeBonus Int      @default(10) // puncte din oficiu
+  timeLimit   Int? // minutes (120)
+  language    String   @default("ro")
+  sourceUrl   String?
+  license     String? // "edu.ro public"
+  domainId    String? // optional link (Capacitate consolidation later)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items    ExamItem[]
+  passages ExamPassage[]
+
+  @@unique([examType, year, subjectKey, variant])
+}
+
+model ExamPassage {
+  id         String   @id @default(cuid())
+  paperId    String
+  ref        String // "Textul 1"
+  title      String?
+  author     String?
+  sourceNote String?
+  body       String   @db.Text
+  orderIndex Int
+  createdAt  DateTime @default(now())
+
+  paper ExamPaper @relation(fields: [paperId], references: [id], onDelete: Cascade)
+
+  @@index([paperId])
+}
+
+model ExamItem {
+  id            String   @id @default(cuid())
+  paperId       String
+  section       String // "Subiectul I" | "Subiectul al II-lea" | "Subiectul al III-lea" | "I.A" | "I.B"
+  label         String // "1", "A.2", "III.4"
+  orderIndex    Int
+  type          String // "MCQ" | "TF_GRID" | "SHORT" | "FILL" | "OPEN"
+  points        Int
+  content       String   @db.Text
+  options       Json? // pt MCQ
+  correctAnswer String?  @db.Text // pt MCQ/SHORT/TF_GRID; null pt OPEN (doar rubrică)
+  rubric        Json? // sub-puncte [{label:"a)", points:2, answer|criteria}]
+  passageRef    String? // -> ExamPassage.ref; comma-separated list for multi-text items (e.g. "Textul 1, Textul 2") — consumers must split on ","
+  hasFigure     Boolean  @default(false)
+  figureNote    String? // descrierea figurii (pt extracție ulterioară); NU fabricăm imaginea
+  autoGradable  Boolean  @default(false) // true doar MCQ/SHORT cu răspuns unic ȘI fără figură
+  topic         String?
+  createdAt     DateTime @default(now())
+
+  paper ExamPaper @relation(fields: [paperId], references: [id], onDelete: Cascade)
+
+  @@index([paperId, orderIndex])
+}

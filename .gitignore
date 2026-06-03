@@ -41,3 +41,6 @@ next-env.d.ts
 
 # journey-audit generated output (keep .journey-audit.json, ignore results)
 /journey-audit-results/
+
+# Exam-bank draft rollback lists (runtime artifacts, written on apply)
+scripts/_rollback/
