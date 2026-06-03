@@ -206,9 +206,18 @@ export function segmentPassages(text: string): IngestPassage[] {
  * exercise/option list, or short stub. These criteria drop the inputs that
  * produced ungrounded / context-dependent high-confidence questions.
  */
+// Front-matter / administrative pages (book-condition labels, transmission
+// period, copyright, ISBN, approval notices, name/year fill-ins) are not
+// curricular content — they leak off-topic questions into the wrong subject.
+const FRONT_MATTER_RE =
+  /(transmisibil|aspectul manualului|se va folosi unul dintre|numele elevului|anul (?:în care s-a folosit|școlar)|acest manual este proprietatea|inspectoratul școlar|ministerul educa|aprobat prin ordinul|avizat|ISBN|toate drepturile rezervate|©|tipărit la|editura .* 20\d\d|responsabil de proiect|referen[țt]i|descrierea cip)/i;
+
 function isQualityPassage(text: string): boolean {
   const t = text.trim();
   if (t.length < 250) return false;
+
+  // Drop non-curricular front-matter / administrative pages.
+  if (FRONT_MATTER_RE.test(t)) return false;
 
   const words = t.split(/\s+/).filter(w => /[a-zăâîșțA-ZĂÂÎȘȚ]/.test(w));
   if (words.length < 45) return false;
