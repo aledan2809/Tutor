@@ -4,6 +4,20 @@
 
 ---
 
+## [ ] 🏠 Homepage — secțiunea „De ce aleg etutor.ro" + nav links (creat 2026-06-03)
+
+Probleme de reformulat în secțiunea de proof + restul homepage-ului (RO+EN, `src/app/[locale]/page.tsx`):
+1. **„Gratuit, fără card"** induce că tot e gratis — de fapt e doar **free trial**. Clarifică: pune un **`*`** și explică imediat sub el ce înseamnă (ex: „* 7 zile gratuit, 2 materii/zi × 5 întrebări; apoi alegi un plan").
+2. **Focus pe progres controlat** — punctul forte real: progresul e **vizibil și controlat de elev, de părinte ȘI de meditator**. Reformulează proof-points în jurul ăstuia (nu „grile reale" seci).
+3. **„🔒 Date protejate (GDPR) · conform, transparent"** — **NU e punct forte**, e cerință legală. Scoate-l din „de ce ne aleg" (eventual mută-l discret în footer).
+4. **Explică simplu cât de ușor e** să faci totul + cum **vezi progresul / rămâi motivat** (concept de gamification, dar **FĂRĂ termenul „gamification"** — nu e înțeles; folosește limbaj simplu: „vezi cum crește pas cu pas", „te ține în priză", puncte/niveluri în cuvinte clare).
+
+## [ ] 🔗 Faza B finish — linkuri nav către „Pentru părinți" (/parinte) + „Pentru elevi" (/elev) (creat 2026-06-03)
+
+Paginile sunt LIVE (200) și se leagă între ele, dar **nu-s în meniul de sus** (nav are doar Demo / Grile pe materie / Pentru profesori / Autentificare). Adaugă în header „Pentru părinți" + „Pentru elevi". Un singur loc de editat (header/nav din `page.tsx` + eventual componenta de nav partajată).
+
+---
+
 ## [ ] 📚 Capacitate (clasa a VIII-a) — Română + Matematică consolidate V-VIII (pentru SESIUNEA URMĂTOARE, creat 2026-06-03)
 
 **Context:** se apropie examenul de Capacitate (clasa a VIII-a); focusul e pe **Română** și **Matematică** din materia claselor **V-VIII**.
