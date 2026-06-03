@@ -18,7 +18,7 @@ export default function TermsPage() {
         </p>
         <h2 className="text-xl font-semibold text-white">2. Use of Service</h2>
         <p>
-          Tutor provides AI-driven adaptive learning tools. You must be at least 16 years old
+          Tutor provides adaptive learning tools. You must be at least 16 years old
           to create an account. You are responsible for maintaining the security of your account.
         </p>
         <h2 className="text-xl font-semibold text-white">3. Intellectual Property</h2>

@@ -48,7 +48,7 @@ export default async function SubjectLandingPage({
         explore: "Alte materii",
         backHome: "← Acasă",
         ctaTitle: "Vrei grile din propriul material?",
-        ctaText: "Lipește o pagină de teorie și AI-ul generează grile în 10 secunde.",
+        ctaText: "Lipește o pagină de teorie și generăm grile în 10 secunde.",
         ctaBtn: "Încearcă demo-ul gratuit",
       }
     : {
@@ -58,7 +58,7 @@ export default async function SubjectLandingPage({
         explore: "Other subjects",
         backHome: "← Home",
         ctaTitle: "Want a quiz from your own material?",
-        ctaText: "Paste a page of theory and the AI generates a quiz in 10 seconds.",
+        ctaText: "Paste a page of theory and a quiz is generated in 10 seconds.",
         ctaBtn: "Try the free demo",
       };
 

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     default: "Tutor - Adaptive Learning Platform",
     template: "%s | Tutor",
   },
-  description: "AI-driven adaptive learning platform with spaced repetition, gamification, and exam simulation. Multi-domain education for aviation and more.",
+  description: "Adaptive learning platform with spaced repetition, gamification, and exam simulation. Multi-domain education for aviation and more.",
   keywords: ["learning", "education", "adaptive learning", "spaced repetition", "aviation", "exam preparation", "tutoring"],
   authors: [{ name: "Tutor Platform" }],
   creator: "Tutor Platform",
@@ -19,13 +19,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     title: "Tutor - Adaptive Learning Platform",
-    description: "AI-driven adaptive learning platform with spaced repetition and gamification",
+    description: "Adaptive learning platform with spaced repetition and gamification",
     siteName: "Tutor",
   },
   twitter: {
     card: "summary_large_image",
     title: "Tutor - Adaptive Learning Platform",
-    description: "AI-driven adaptive learning platform",
+    description: "Adaptive learning platform",
   },
   robots: {
     index: true,

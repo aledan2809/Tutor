@@ -33,7 +33,7 @@ export function GET(req: NextRequest) {
 
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
           <div style={{ display: "flex", fontSize: 36, color: "#9ca3af" }}>
-            Am luat la un test generat de AI
+            Am luat la un test grilă
           </div>
           <div style={{ display: "flex", alignItems: "baseline", marginTop: 8 }}>
             <span style={{ fontSize: 180, fontWeight: 800, color: accent, lineHeight: 1 }}>
@@ -51,7 +51,7 @@ export function GET(req: NextRequest) {
             Bati scorul meu?
           </div>
           <div style={{ display: "flex", fontSize: 30, color: "#9ca3af", marginTop: 6 }}>
-            Lipesti orice text, AI face testul in 10 secunde
+            Lipesti orice text, primesti testul in 10 secunde
           </div>
         </div>
       </div>

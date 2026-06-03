@@ -18,7 +18,7 @@ export async function generateMetadata({
   const { s, t } = parseScore(sp);
   const ogUrl = `${BASE}/api/og/score?s=${s}&t=${t}`;
   const title = `Am luat ${s}/${t} pe etutor.ro`;
-  const description = "Test generat de AI în 10 secunde. Bați scorul meu?";
+  const description = "Test generat în 10 secunde. Bați scorul meu?";
   return {
     title,
     description,
@@ -50,7 +50,7 @@ export default async function ScorPage({
         friend: "Cineva a luat",
         of: "din",
         beat: "Bați scorul?",
-        sub: "Lipești orice text — manual, curs, notițe — și AI-ul face un test pe care îl dai pe loc. Fără cont.",
+        sub: "Lipești orice text — manual, curs, notițe — și primești un test pe care îl dai pe loc. Fără cont.",
         cta: "Încearcă acum, gratuit ✨",
         home: "← etutor.ro",
       }
@@ -58,7 +58,7 @@ export default async function ScorPage({
         friend: "Someone scored",
         of: "of",
         beat: "Can you beat it?",
-        sub: "Paste any text — a textbook, notes, a course — and the AI builds a quiz you take right away. No account.",
+        sub: "Paste any text — a textbook, notes, a course — and a quiz is built for you to take right away. No account.",
         cta: "Try now, free ✨",
         home: "← etutor.ro",
       };

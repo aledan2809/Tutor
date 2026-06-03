@@ -16,10 +16,10 @@ export async function generateMetadata({
   const quiz = await getMagicQuizPublic(id);
   const s = quiz?.sharerScore ?? 0;
   const t = quiz?.total ?? 5;
-  const title = ro ? `Certificat: ${s}/${t} la un quiz AI 🎓` : `Certificate: ${s}/${t} on an AI quiz 🎓`;
+  const title = ro ? `Certificat: ${s}/${t} la un quiz 🎓` : `Certificate: ${s}/${t} on a quiz 🎓`;
   const description = ro
-    ? `Quiz generat de AI din propriile materiale pe etutor.ro.`
-    : `AI-generated quiz from your own materials on etutor.ro.`;
+    ? `Quiz generat din propriile materiale pe etutor.ro.`
+    : `Quiz generated from your own materials on etutor.ro.`;
   const ogUrl = `${BASE}/api/og/score?s=${s}&t=${t}`;
   return {
     title,
@@ -48,7 +48,7 @@ export default async function CertificatePage({
         scored: "Scor",
         share: "📲 Distribuie pe WhatsApp",
         download: "⬇️ Descarcă imaginea",
-        cta: "Învață cu un tutor AI — creează cont",
+        cta: "Învață cu un tutor — creează cont",
       }
     : {
         notFound: "Certificate not found or expired.",
@@ -59,7 +59,7 @@ export default async function CertificatePage({
         scored: "Score",
         share: "📲 Share on WhatsApp",
         download: "⬇️ Download image",
-        cta: "Learn with an AI tutor — sign up",
+        cta: "Learn with a tutor — sign up",
       };
 
   if (!quiz) {
@@ -81,8 +81,8 @@ export default async function CertificatePage({
   const ogUrl = `${BASE}/api/og/score?s=${quiz.sharerScore}&t=${quiz.total}`;
   const certUrl = `${BASE}/${ro ? "ro" : "en"}/certificat/${id}`;
   const msg = ro
-    ? `Am luat ${quiz.sharerScore}/${quiz.total} la un quiz AI pe etutor.ro 🎓`
-    : `I scored ${quiz.sharerScore}/${quiz.total} on an AI quiz at etutor.ro 🎓`;
+    ? `Am luat ${quiz.sharerScore}/${quiz.total} la un quiz pe etutor.ro 🎓`
+    : `I scored ${quiz.sharerScore}/${quiz.total} on a quiz at etutor.ro 🎓`;
   const waHref = `https://wa.me/?text=${encodeURIComponent(msg + " " + certUrl)}`;
 
   return (

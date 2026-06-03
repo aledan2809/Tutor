@@ -33,7 +33,7 @@ const COPY = {
     tie: "🤝 Egalitate!",
     lose: "😬 Aproape! Mai exersează.",
     shareBack: "📲 Provoacă pe altcineva",
-    cta: "Învață cu un tutor AI — creează cont",
+    cta: "Învață cu un tutor — creează cont",
     correct: "Corect",
     wrong: "Greșit",
   },
@@ -50,7 +50,7 @@ const COPY = {
     tie: "🤝 It's a tie!",
     lose: "😬 So close! Keep practicing.",
     shareBack: "📲 Challenge someone else",
-    cta: "Learn with an AI tutor — sign up",
+    cta: "Learn with a tutor — sign up",
     correct: "Correct",
     wrong: "Wrong",
   },
@@ -108,8 +108,8 @@ export function DuelClient({ quizId, locale }: { quizId: string; locale: string 
   function shareUrl(): string {
     const link = `https://etutor.ro/${ro ? "ro" : "en"}/duel/${quizId}`;
     const msg = ro
-      ? `Te provoc la un quiz AI pe etutor.ro. Bați scorul meu? 🎯`
-      : `I challenge you to an AI quiz on etutor.ro. Beat my score? 🎯`;
+      ? `Te provoc la un quiz pe etutor.ro. Bați scorul meu? 🎯`
+      : `I challenge you to a quiz on etutor.ro. Beat my score? 🎯`;
     return `https://wa.me/?text=${encodeURIComponent(msg + " " + link)}`;
   }
 

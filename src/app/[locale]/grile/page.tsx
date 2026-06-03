@@ -15,8 +15,8 @@ export async function generateMetadata({
     ? "Grile online — Bacalaureat, Evaluare Națională, Admitere | etutor.ro"
     : "Online quizzes — Bacalaureat, National Eval, Admissions | etutor.ro";
   const description = ro
-    ? "Teste grilă online gratuite pe materii: Bacalaureat, Evaluare Națională și admitere. Sau generează-ți propriul test din orice material cu AI."
-    : "Free online quizzes by subject: Bacalaureat, National Evaluation and admissions. Or generate your own quiz from any material with AI.";
+    ? "Teste grilă online gratuite pe materii: Bacalaureat, Evaluare Națională și admitere. Sau generează-ți propriul test din orice material."
+    : "Free online quizzes by subject: Bacalaureat, National Evaluation and admissions. Or generate your own quiz from any material.";
   return {
     title,
     description,

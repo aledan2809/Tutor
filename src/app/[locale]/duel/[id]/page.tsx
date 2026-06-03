@@ -21,8 +21,8 @@ export async function generateMetadata({
     ? `Provocare: bate scorul de ${s}/${t} 🎯`
     : `Challenge: beat ${s}/${t} 🎯`;
   const description = ro
-    ? `${who} te provoacă la un quiz generat de AI pe etutor.ro. Reușești?`
-    : `${who} challenges you to an AI-generated quiz on etutor.ro. Can you beat it?`;
+    ? `${who} te provoacă la un quiz generat pe etutor.ro. Reușești?`
+    : `${who} challenges you to a quiz on etutor.ro. Can you beat it?`;
   const ogUrl = `${BASE}/api/og/score?s=${s}&t=${t}`;
   return {
     title,

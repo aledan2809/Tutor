@@ -39,7 +39,7 @@ export default function MagicQuizDemo({
         badge: "Demo gratuit · fără cont",
         title: "Transformă orice text într-un test în 10 secunde",
         subtitle:
-          "Lipește o pagină din manual, un curs sau orice material. AI-ul generează grile pe care le dai chiar aici. Asta facem pentru elevii noștri, în fiecare zi.",
+          "Lipește o pagină din manual, un curs sau orice material. Generăm grile pe care le dai chiar aici. Asta facem pentru elevii noștri, în fiecare zi.",
         placeholder: "Lipește aici teoria din care vrei test (min. 50 de caractere)…",
         sample: "Încearcă cu un exemplu",
         generate: "Generează testul ✨",
@@ -65,7 +65,7 @@ export default function MagicQuizDemo({
         badge: "Free demo · no account",
         title: "Turn any text into a quiz in 10 seconds",
         subtitle:
-          "Paste a page from a textbook, lecture notes or any material. The AI generates a quiz you take right here. This is what we do for our students, every day.",
+          "Paste a page from a textbook, lecture notes or any material. We generate a quiz you take right here. This is what we do for our students, every day.",
         placeholder: "Paste the theory you want a quiz from (min. 50 characters)…",
         sample: "Try an example",
         generate: "Generate quiz ✨",
@@ -147,8 +147,8 @@ export default function MagicQuizDemo({
     // branded score card (not a bare link). That card is the viral artifact.
     const link = `https://etutor.ro/${ro ? "ro" : "en"}/scor?s=${score}&t=${questions.length}`;
     const msg = ro
-      ? `Am luat ${score}/${questions.length} la un test generat de AI pe etutor.ro. Bați? 🎯`
-      : `I scored ${score}/${questions.length} on an AI-generated quiz at etutor.ro. Can you beat me? 🎯`;
+      ? `Am luat ${score}/${questions.length} la un test generat pe etutor.ro. Bați? 🎯`
+      : `I scored ${score}/${questions.length} on a quiz at etutor.ro. Can you beat me? 🎯`;
     return `https://wa.me/?text=${encodeURIComponent(msg + " " + link)}`;
   }
 
@@ -181,8 +181,8 @@ export default function MagicQuizDemo({
     }
     const link = `https://etutor.ro/${ro ? "ro" : "en"}/duel/${id}`;
     const msg = ro
-      ? `Te provoc la un quiz AI pe etutor.ro. Bați scorul meu de ${score}/${questions.length}? 🎯`
-      : `I challenge you to an AI quiz on etutor.ro. Beat my ${score}/${questions.length}? 🎯`;
+      ? `Te provoc la un quiz pe etutor.ro. Bați scorul meu de ${score}/${questions.length}? 🎯`
+      : `I challenge you to a quiz on etutor.ro. Beat my ${score}/${questions.length}? 🎯`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg + " " + link)}`, "_blank");
   }
 

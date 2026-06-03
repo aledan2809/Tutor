@@ -6,7 +6,7 @@ import MagicQuizDemo from "@/components/MagicQuizDemo";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Tutor - Teste generate de AI din orice material | etutor.ro",
+  title: "Tutor - Teste generate instant din orice material | etutor.ro",
   description:
     "Lipești orice text → primești un test în 10 secunde, gratuit și fără cont. Apoi: 1.400+ grile reale (BAC, Evaluare Națională, INM/Barou), streak-uri și învățare adaptivă.",
 };
@@ -52,7 +52,7 @@ export default async function LandingPage() {
         navCreatori: "Pentru profesori",
         signIn: "Autentificare",
         badge: "Gratuit · fără cont · în 10 secunde",
-        headline: "Învață cu teste generate de AI din orice material",
+        headline: "Învață cu teste generate instant din orice material",
         sub: "Lipești o pagină de manual, un curs sau notițe → primești un test pe care-l dai pe loc. Apoi salvezi progresul, primești streak-uri zilnice și învățare adaptivă pe 1.400+ grile reale.",
         demoHeading: "Încearcă chiar acum 👇",
         ctaPrimary: "Fă-ți cont gratuit",
@@ -71,7 +71,7 @@ export default async function LandingPage() {
         stepsTitle: "Cum funcționează",
         step1Title: "1. Lipești materialul",
         step1Desc: "Orice text — o pagină din manual, un curs, notițe. Fără upload, fără cont.",
-        step2Title: "2. AI-ul generează testul",
+        step2Title: "2. Generăm testul automat",
         step2Desc: "În ~10 secunde primești grile cu variante și explicații, fix pe materialul tău.",
         step3Title: "3. Dai testul și partajezi",
         step3Desc: "Vezi scorul, provoci un prieten la duel sau îți faci cont ca să salvezi progresul.",
@@ -95,7 +95,7 @@ export default async function LandingPage() {
         navCreatori: "For teachers",
         signIn: "Sign in",
         badge: "Free · no account · in 10 seconds",
-        headline: "Learn with AI-generated quizzes from any material",
+        headline: "Learn with instantly generated quizzes from any material",
         sub: "Paste a textbook page, lecture notes or any material → get a quiz you take right away. Then save your progress, earn daily streaks and adaptive learning across 1,400+ real questions.",
         demoHeading: "Try it right now 👇",
         ctaPrimary: "Create a free account",
@@ -114,7 +114,7 @@ export default async function LandingPage() {
         stepsTitle: "How it works",
         step1Title: "1. Paste your material",
         step1Desc: "Any text — a textbook page, lecture notes. No upload, no account.",
-        step2Title: "2. AI generates the quiz",
+        step2Title: "2. The quiz is generated",
         step2Desc: "In ~10 seconds you get multiple-choice questions with explanations, on your exact material.",
         step3Title: "3. Take it and share",
         step3Desc: "See your score, challenge a friend to a duel, or create an account to save your progress.",
