@@ -160,7 +160,20 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 
 **PLAN verificare (agreat user 2026-06-03)** — 3 trepte legate de preț: **self-score** (gratuit, ✅ slice 4) → **verificare AI** (Family/Trio: Română scrisă pe ecran → AI text; Mate → poză rezolvare → AI vision; sugestie nu verdict) → **meditator confirmă** (Trio). Slice 5 = AI; slice 6 = meditator.
 
-**IMPORT serie 2+** (TODO user, pending inputs): importă/procesează TOATE materialele (pro-matematica 2017-2026, linkurile share.google, restul EN), la fel ca MVP. **Blocaje de lămurit cu user**: (1) fișierele — share.google/pro-matematica nu le pot descărca eu, am nevoie de PDF-uri într-un folder; (2) scara — manual nu scalează la 10 ani → pipeline semi-automat vs câțiva ani de mână; (3) drepturi — edu.ro public OK, pro-matematica/Hei Profu' = calibrare nu verbatim.
+**IMPORT serie 2+ — MATEMATICĂ (NEXT SESSION, audit done 2026-06-04; user încarcă fișiere)**:
+
+**Folder primit + auditat:** `~/Downloads/Temp/tutor eval nat/pro-matematica/` — **22 fișiere = 11 perechi Subiect+Barem, toate complete** (zero subiect fără barem / barem fără subiect), **zero duplicate** (nume + size toate distincte). Verificat 2026-06-04.
+- 2024 (4 perechi): `2024_EN_Matematica_{Examen_07, Model, Rezerva_Examen_02, Simulare}_{Subiect,Barem}_LRO.pdf`
+- 2025 (5 perechi): `2025_EN_Matematica_{Examen_07, Model, Rezerva_Examen_02, Sesiunea_Speciala_03, Simulare}_{Subiect,Barem}_LRO.pdf`
+- 2026 (2 perechi): `2026_EN_Matematica_{Model, Simulare}_{Subiect,Barem}_LRO.pdf`
+
+**⚠️ SKIP `2026_EN_Matematica_Model_*`** = ACELAȘI examen importat deja la MVP (seria 1, EN VIII 2026 Model). → **NOU de importat: 10 perechi** (2024 ×4 + 2025 ×5 + 2026 ×1 Simulare).
+
+**Proces (ca MVP, per pereche):** citește Subiect+Barem PDF → transcrie itemii verbatim + cheile din Barem (ground-truth, zero halucinație) → import (`ExamPaper`/`ExamItem`/`ExamPassage`; `examType`: `EN_VIII` pt Examen/Rezervă/Sesiune, `SIMULARE` pt Simulare, `MODEL` pt Model; `year` per fișier; `variant` distinct ex. `examen-07`/`rezerva-02`/`simulare`/`sesiune-speciala-03`) → extrage figuri (PyMuPDF clip-rect, ca slice 3) → `figureUrl` + `finalAnswer` unde rezultatul e curat → migrare deploy + atașare pe prod + verificare autentificată (ca slice 1+3).
+
+**Decizie scară (user must pick):** manual per-pereche (calitate sigură, dar 10 lucrări = efort mare) **vs** pipeline semi-automat (mai rapid; figurile tot cer verificare vizuală). **Recomandare:** începem manual cu **2026 Simulare + 2025 (Examen+Model+Simulare)** (cele mai relevante), apoi decidem pipeline pt restul.
+
+**Pending de la user:** restul materialelor (alte surse) + **Româna** (ulterior — focus Mate întâi). **Drepturi: NU mai e o problemă** — user 2026-06-04: „tot ce îți încarc eu, aia pui; momentan sunt doar informații oficiale". Deci import direct ca ground-truth tot ce e în folder, fără caveat de republicare.
 
 **SLICE 3 DONE 2026-06-03** (commit `4d42ca0`, LIVE + verificat autentificat pe etutor.ro): **figuri + ecran elev**. (A) 11 figuri Matematică extrase din PDF (PyMuPDF clip-rect; 4uPDF = același fitz dar doar pagini întregi), `ExamItem.figureUrl` (migrare `0017`), atașate 11/11, servite static din `public/exam-figures/`, afișate în admin + take. (B) Ecran elev `/dashboard/exam-bank` (listă + take), sidebar „Simulări" — itemi **sanitizați fără chei** (verificat: take HTML n-are `correctAnswer`-data, doar label i18n), `POST /api/exam-bank/[paperId]/score` corectează server-side + dezvăluie baremul, rezultate cu notă/10 + recalcul live + auto-notare deschise. **Stateless** (fără persistență). `/code-review` a prins un bug critic: label-urile se repetă 1-6 pe fiecare subiect la Mate → cheiat acum pe **id** (answerKey) peste tot + regression test 12/12; + 3 fix-uri (TF_GRID index, mesaj estimare, gard isActive).
 
