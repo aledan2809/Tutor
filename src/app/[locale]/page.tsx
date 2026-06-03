@@ -10,7 +10,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Tutor - Mii de grile reale pe materia ta | etutor.ro",
   description:
-    "Lipești orice text → primești un test în 10 secunde, gratuit și fără cont. Apoi: 1.400+ grile reale (BAC, Evaluare Națională, INM/Barou), streak-uri și învățare adaptivă.",
+    "Alege o materie și exersează pe grile reale, gratuit și fără cont — BAC, Evaluare Națională, admitere. Îți salvezi progresul, streak-uri zilnice și învățare adaptivă.",
 };
 
 // The page renders dynamically (locale/i18n config), so a page-level
@@ -56,7 +56,7 @@ export default async function LandingPage() {
         badge: "Mii de grile reale · pe materia ta · gratuit",
         bubbleParent: "Ești părinte? Vezi dacă cel mic chiar învață",
         headline: "Mii de grile reale, pe materia ta — gata de exersat",
-        sub: "Grile verificate pe BAC, Evaluare Națională și admitere — exersezi pe loc, îți salvezi progresul și primești streak-uri zilnice. Ai și material propriu? Îți faci instant un test din el.",
+        sub: "Grile verificate pe BAC, Evaluare Națională și admitere — exersezi pe loc, îți salvezi progresul și primești streak-uri zilnice.",
         demoHeading: "Încearcă chiar acum 👇",
         ctaPrimary: "Fă-ți cont gratuit",
         ctaSecondary: "Vezi demo-ul complet",
@@ -104,7 +104,7 @@ export default async function LandingPage() {
         badge: "Thousands of real questions · on your subject · free",
         bubbleParent: "A parent? See if your child is really learning",
         headline: "Thousands of real practice questions, on your subject",
-        sub: "Verified questions for Bac, National Exam and admissions — practice right away, save your progress and earn daily streaks. Got your own material? Turn it into a quiz instantly.",
+        sub: "Verified questions for Bac, National Exam and admissions — practice right away, save your progress and earn daily streaks.",
         demoHeading: "Try it right now 👇",
         ctaPrimary: "Create a free account",
         ctaSecondary: "See the full demo",

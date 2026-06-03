@@ -63,6 +63,10 @@ Probleme de reformulat în secțiunea de proof + restul homepage-ului (RO+EN, `s
 **Plan (a) — build, sesiuni dedicate** (agreat user 2026-06-03): model legătură 1:1 + onboarding self-service + plan Family/Trio + parent-branded watcher view + WhatsApp.
 **Plan (b) — onest până atunci** (agreat user 2026-06-03): `/parinte` să NU promită self-service inexistent — CTA spre pas clar / „în curând" / waitlist, ca părintele să nu rămână blocat după signup.
 
+## [ ] 🧩 MagicQuiz text-generator — orfan după ce `/try` a devenit demo real (creat 2026-06-03)
+
+`/try` (URL-ul canonic „fără cont", referit din ~10 locuri) e acum **subject-picker pe grile reale** (`SubjectQuizDemo`), nu generatorul „text→test". Componenta `MagicQuizDemo` + API `/api/magic-quiz` **rămân** dar n-au pagină. De decis: (a) repurpose ca feature logat „Creează-ți propriul test din material"; (b) pagină separată `/genereaza`; (c) drop. Homepage nu mai promite generatorul (copy ajustat).
+
 ## [ ] 🎨 Logo eTUTOR.ro (creat 2026-06-03)
 
 Brandul e acum wordmark text (`<Brand>`: **e** mic + **TUTOR** caps + **.ro** mic, albastru). De făcut un **logo grafic** dedicat (favicon + header). Nu acum — doar marcat ca să nu se uite. Culori audiență de reținut: ELEV/STUDENT=albastru, PĂRINTE=emerald, PROFESOR=ambră.
