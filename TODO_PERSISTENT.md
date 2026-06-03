@@ -4,6 +4,22 @@
 
 ---
 
+## [ ] 📚 Capacitate (clasa a VIII-a) — Română + Matematică consolidate V-VIII (pentru SESIUNEA URMĂTOARE, creat 2026-06-03)
+
+**Context:** se apropie examenul de Capacitate (clasa a VIII-a); focusul e pe **Română** și **Matematică** din materia claselor **V-VIII**.
+
+**De făcut:**
+1. **Continuă introducerea de materiale** pe cele 2 materii — **Română** și **Matematică** — pe **toți cei 4 ani fiecare** (clasele V, VI, VII, VIII), prin pipeline-ul cu Claude judge deja integrat.
+2. **Consolidare per materie:** ia materialele de **Română** din clasele V-VIII și unește-le într-**un singur material de testare** (Capacitate Română). Identic pentru **Matematică** → un singur material consolidat (probabil un domeniu „Capacitate Română" + „Capacitate Matematică" care agregă întrebările pe ani).
+3. **Atribuire în răspunsuri:** când mesh-ul corectează/explică, să spună și **din ce an (clasă) + secțiune** provine întrebarea — deci stochează `clasa` + `secțiune/capitol` pe fiecare întrebare și le afișează în corectare/explicație.
+4. **Calibrare cu culegeri:** găsește **culegeri cu teste specifice de Capacitate** (mai ales la **Matematică**) cu teste + bareme și calibrează întrebările generate + răspunsurile față de ele (ground-truth de calibrare, dincolo de manual).
+
+**Apoi (discuție separată, ulterioară):** materiile de **BAC**.
+
+**Depinde de:** pipeline-ul Tier 5 cu Claude judge (deja integrat — `content-quality-mesh.ts` finalJudge via Claude CLI) + UI bulk-publish pe materie+prag (deja live). Aici e mai ales **conținut + structurare pe ani/secțiuni + calibrare cu culegeri**, nu infra nouă majoră.
+
+---
+
 ## [ ] 🤖 Content Quality Mesh — productizare pipeline generare grile (planificat 2026-06-02)
 
 Sesiune dedicată: integrează mesh-ul multi-agent de generare+verificare grile (Author → 3 lentile adversariale grounding/single/distractor → fix-loop → Orchestrator) în **Review Queue** existentă (`DRAFT→APPROVED→PUBLISHED`) ca pre-screen automat pe `from-content` + `bulk-import`. Validat 2026-06-02 pe text REAL manuale.edu.ro: v1 100% (15/15), v2 negative-control detection **8/8** dar **1/2 fals-pozitiv** → 97%+ fezabil ca **pipeline gated (om pe flagate), nu autonom**. **Plan complet + calibrările de precizie OBLIGATORII + artefacte** în `STRATEGY.md` secțiunea „Tier 5 — Content Quality Mesh".
