@@ -455,11 +455,12 @@ const JUDGE_A_SYSTEM = `You are a STRICT ANSWER-VERIFIER for a Romanian quiz que
 
 FAIL if ANY holds:
 - The marked correct option is NOT what the Source supports — re-read the Source: if it states a different answer or the marked option contradicts it → defect "wrong-answer".
+- CHECK EACH OF THE FOUR OPTIONS INDEPENDENTLY against the question's criterion. If TWO OR MORE options satisfy it (e.g. "which fraction is subunitary?" where 3/4, 1/2 AND 2/3 are all subunitary), → defect "multiple-correct". Do not stop at the marked answer — test all four.
+- The question uses a symbol, variable or expression whose value comes from an unstated exercise and is NOT defined within the question itself (e.g. "x", "y", "numărul a = 1", "4xx", "5y", "fracția N/M") so it cannot be answered standalone → defect "missing-context".
 - The answer is not derivable from the Source ALONE (needs outside facts, or a computation whose inputs are not in the Source, or data referenced but not shown) → defect "grounding".
 - The Source quote is garbled, truncated or broken (nonsensical equalities like "3000 = 30 = 750", cut-off sentences, an answer-key fragment) so the answer cannot be verified → defect "grounding".
-- Another option is also defensibly correct → defect "multiple-correct".
 
-Be conservative: if you cannot CONFIRM the marked answer from the Source, FAIL.
+Be conservative: if you cannot CONFIRM the marked answer is the UNIQUE correct one, FAIL.
 
 Return JSON: {"verdict":"PASS"|"FAIL","reason":"short","defect":"wrong-answer"|"grounding"|"multiple-correct"|null}`;
 
@@ -467,7 +468,7 @@ Return JSON: {"verdict":"PASS"|"FAIL","reason":"short","defect":"wrong-answer"|"
 const JUDGE_B_SYSTEM = `You are a STRICT USABILITY EXAMINER for a Romanian quiz question that a student will see with NO extra context.
 
 FAIL if ANY holds:
-- It references missing/external context (an exercise, figure, table, image, a list "de mai jos/sus", or undefined symbols such as a, b, c, n, d, e that are not defined within the question itself) → defect "missing-context".
+- It references missing/external context (an exercise, figure, table, image, a list "de mai jos/sus") OR uses a symbol/variable/expression not defined in the question itself (e.g. x, y, "numărul a = 1", "4xx", "5y", "fracția N/M", "a/b" with a,b unspecified) so a student cannot answer it standalone → defect "missing-context".
 - It is not a real, self-contained question (an answer-key fragment, a heading, or a meta/administrative item) → defect "not-a-question".
 - Length cue: the correct option is conspicuously longer/more detailed than the distractors in a way that leaks it (a naturally long proper noun is fine) → defect "length-cue".
 - Wording is ambiguous or grammatically broken enough to confuse which option is intended → defect "ambiguous".
