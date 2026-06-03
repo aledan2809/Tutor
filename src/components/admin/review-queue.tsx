@@ -46,7 +46,9 @@ export function ReviewQueue({ questions }: { questions: Question[] }) {
   const [filterDomain, setFilterDomain] = useState<string>("all");
   const [minConfPct, setMinConfPct] = useState<number>(97);
   const [noFlagsOnly, setNoFlagsOnly] = useState<boolean>(true);
-  const [showOnlyMatching, setShowOnlyMatching] = useState<boolean>(false);
+  // Default ON: the queue should show exactly the lot that "Publică" will send,
+  // so review is WYSIWYG. Uncheck to see every draft (lowest-confidence first).
+  const [showOnlyMatching, setShowOnlyMatching] = useState<boolean>(true);
   const [publishing, setPublishing] = useState<boolean>(false);
 
   const domains = Array.from(new Set(questions.map((q) => q.domain.name))).sort();
@@ -253,7 +255,7 @@ export function ReviewQueue({ questions }: { questions: Question[] }) {
         </label>
         <label className="flex items-center gap-1 text-xs text-gray-400">
           <input type="checkbox" checked={showOnlyMatching} onChange={(e) => setShowOnlyMatching(e.target.checked)} className="rounded border-gray-600 bg-gray-800" />
-          arată doar lotul filtrat
+          arată doar lotul de publicat
         </label>
         <span className="text-xs text-gray-300">
           <span className="font-semibold text-green-400">{matching.length}</span> întrebări se potrivesc
@@ -266,6 +268,20 @@ export function ReviewQueue({ questions }: { questions: Question[] }) {
           {publishing ? "Se publică..." : `Publică ${matching.length} întrebări ≥ ${minConfPct}%`}
         </button>
       </div>
+
+      {/* What the list below is actually showing right now */}
+      <p className="px-1 text-xs text-gray-500">
+        Se afișează <span className="font-semibold text-gray-300">{visibleList.length}</span> din {questions.length} ciorne
+        {showOnlyMatching
+          ? " — exact lotul care se va publica."
+          : " — toate, cele mai slabe primele."}
+      </p>
+
+      {visibleList.length === 0 && (
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-8 text-center text-sm text-gray-500">
+          Nicio întrebare nu se potrivește filtrului curent. Relaxează pragul de confidence, schimbă materia sau debifează „arată doar lotul de publicat".
+        </div>
+      )}
 
       {visibleList.map((q) => {
         const isExpanded = expanded === q.id;
