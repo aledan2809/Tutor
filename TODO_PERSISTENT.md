@@ -81,6 +81,23 @@ Paginile sunt LIVE (200) și se leagă între ele, dar **nu-s în meniul de sus*
 
 ---
 
+## [ ] 💳 Flux de calculare a plății + checkout + GDPR (creat 2026-06-03)
+
+**Firma (controller):** **Class RDA Impex SRL** (vezi `Master` reference entities).
+
+**1. Engine de preț** — input: pachet ales (Elev/Student · Family · Family Duo · Trio · Family Trio) + **nr. materii** + **nr. copii** + **billing** (lunar vs anual). Prețuri de bază (lei/materie/lună): Elev **19,90** · Family **24,90** · Duo **29,90** · Trio **39,90** · Family Trio **49,90**.
+**2. Reguli de discount** (sursă: `/preturi`):
+   - Copii: al 2-lea copil **−20%**, începând cu al 3-lea **−30%**.
+   - Materii: a 2-a materie **−15%**, începând cu a 3-a **−25%**.
+   - Plată **anuală anticipată**: 2 luni gratis → plătești **10 luni**.
+   - **Promo −25%** suplimentar pe TOATE pachetele **până la 31.08.2026**; de la **1 sep 2026** prețuri pline (de scos/expirat automat promo-ul la dată).
+   - Ordinea de aplicare a reducerilor (cumulativ vs secvențial) = **de decis** (impact pe preț final).
+**3. Checkout** — **Stripe** (`@aledan/stripe`, deja folosit de Tutor → probabil cel mai ușor) SAU **Revolut** (`@aledan/revolut-integration`); alege ce e mai simplu de realizat. Sumar comandă + recurență (lunar/anual) + facturare.
+**4. GDPR** — integrare **Legal hub** la checkout: `ConsentRecord` + DSR proxy, controller = **Class RDA Impex SRL** (vezi matricea Legal din `Master/TODO_PERSISTENT.md` — Tutor de adăugat acolo). AppEntityMapping `tutor → Class RDA` în Legal (NO-TOUCH CRITIC, propose-confirm-apply).
+**5. Conturi multi-rol** — depinde de fluxul Părinte↔Copil↔Meditator (item 👪) — un plătitor, N conturi legate. Coordonează cu acela.
+
+**Note:** prețurile per-materie + multi-copil înseamnă engine real (nu preț fix). De clarificat: „materie" la nivel de copil sau de familie? Promo-ul are dată de expirare hard (31.08.2026) — pune-l data-driven, nu hardcodat în UI fără logică de expirare.
+
 ## [ ] 🎓 Banding domenii pe clase — roadmap (creat 2026-06-03)
 
 Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **Evaluare Națională**, apoi **Bacalaureat**.
