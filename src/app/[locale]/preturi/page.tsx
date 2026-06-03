@@ -28,7 +28,8 @@ type Copy = {
   freeCta: string;
   paidTitle: string;
   plans: Plan[];
-  discounts: string;
+  discountsTitle: string;
+  discountsList: string[];
   note: string;
 };
 
@@ -62,7 +63,7 @@ const RO: Copy = {
     {
       name: "Părinte + copil",
       tag: "Family",
-      price: "de la 19,90 lei / materie / lună",
+      price: "24,90 lei / materie / lună",
       accent: "text-emerald-400",
       points: [
         "Cont separat pentru copil + cont de părinte",
@@ -74,7 +75,7 @@ const RO: Copy = {
     {
       name: "Părinți + copil",
       tag: "Family Duo",
-      price: "+ mic supliment fix",
+      price: "29,90 lei / materie / lună",
       accent: "text-emerald-400",
       points: [
         "Tot ce e în Family",
@@ -86,7 +87,7 @@ const RO: Copy = {
     {
       name: "Părinte + copil + meditator",
       tag: "Trio",
-      price: "+ supliment premium",
+      price: "39,90 lei / materie / lună",
       accent: "text-emerald-400",
       featured: true,
       points: [
@@ -96,10 +97,26 @@ const RO: Copy = {
       ],
       cta: "Alege Trio",
     },
+    {
+      name: "Ambii părinți + copil + meditator",
+      tag: "Family Trio",
+      price: "49,90 lei / materie / lună",
+      accent: "text-emerald-400",
+      points: [
+        "Tot ce e în Trio",
+        "Ambii părinți au cont propriu, fiecare cu notificările lui",
+        "Meditatorul are cont propriu: vede progresul și greșelile copilului",
+      ],
+      cta: "Alege Family Trio",
+    },
   ],
-  discounts:
-    "Reduceri: al 2-lea copil −25%, al 3-lea+ −40%; a 2-a materie −15%; plată anuală ≈ −2 luni. Oferte sezoniere pe parcurs.",
-  note: "Prețurile sunt orientative și se setează în panou. O singură factură pe familie.",
+  discountsTitle: "Discounturi:",
+  discountsList: [
+    "Pentru copii: al 2-lea copil −20%, începând cu al 3-lea copil −30%;",
+    "Pentru materii: a 2-a materie −15%; începând cu a 3-a materie −25%;",
+    "Pentru plată anuală anticipată: 2 luni gratuite — plătești doar 10 luni pe an.",
+  ],
+  note: "O singură factură pe familie.",
 };
 
 const EN: Copy = {
@@ -132,7 +149,7 @@ const EN: Copy = {
     {
       name: "Parent + child",
       tag: "Family",
-      price: "from 19.90 lei / subject / month",
+      price: "24.90 lei / subject / month",
       accent: "text-emerald-400",
       points: [
         "Separate account for the child + a parent account",
@@ -144,7 +161,7 @@ const EN: Copy = {
     {
       name: "Parents + child",
       tag: "Family Duo",
-      price: "+ small flat add-on",
+      price: "29.90 lei / subject / month",
       accent: "text-emerald-400",
       points: [
         "Everything in Family",
@@ -156,7 +173,7 @@ const EN: Copy = {
     {
       name: "Parent + child + tutor",
       tag: "Trio",
-      price: "+ premium add-on",
+      price: "39.90 lei / subject / month",
       accent: "text-emerald-400",
       featured: true,
       points: [
@@ -166,10 +183,26 @@ const EN: Copy = {
       ],
       cta: "Choose Trio",
     },
+    {
+      name: "Both parents + child + tutor",
+      tag: "Family Trio",
+      price: "49.90 lei / subject / month",
+      accent: "text-emerald-400",
+      points: [
+        "Everything in Trio",
+        "Both parents get their own account, each with their own notifications",
+        "The tutor gets their own account: sees progress and the child's mistakes",
+      ],
+      cta: "Choose Family Trio",
+    },
   ],
-  discounts:
-    "Discounts: 2nd child −25%, 3rd+ −40%; 2nd subject −15%; annual ≈ −2 months. Seasonal offers along the way.",
-  note: "Prices are indicative and set in the panel. One bill per family.",
+  discountsTitle: "Discounts:",
+  discountsList: [
+    "Per child: 2nd child −20%, from the 3rd child −30%;",
+    "Per subject: 2nd subject −15%; from the 3rd subject −25%;",
+    "Annual upfront: 2 months free — you pay only 10 months a year.",
+  ],
+  note: "One bill per family.",
 };
 
 export default async function PreturiPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -252,8 +285,18 @@ export default async function PreturiPage({ params }: { params: Promise<{ locale
           </div>
         </div>
 
-        <p className="mx-auto mt-8 max-w-3xl text-center text-xs text-gray-500">{c.discounts}</p>
-        <p className="mx-auto mt-2 max-w-3xl text-center text-xs text-gray-600">{c.note}</p>
+        <div className="mx-auto mt-8 max-w-xl text-xs text-gray-500">
+          <p className="font-medium text-gray-400">{c.discountsTitle}</p>
+          <ul className="mt-1 space-y-1">
+            {c.discountsList.map((d) => (
+              <li key={d} className="flex gap-2">
+                <span className="text-gray-600">•</span>
+                {d}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <p className="mx-auto mt-3 max-w-xl text-center text-xs text-gray-600">{c.note}</p>
       </main>
     </div>
   );
