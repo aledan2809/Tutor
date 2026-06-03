@@ -31,6 +31,7 @@ type Copy = {
   discountsTitle: string;
   discountsList: string[];
   note: string;
+  promo: string;
 };
 
 const RO: Copy = {
@@ -117,6 +118,8 @@ const RO: Copy = {
     "Pentru plată anuală anticipată: 2 luni gratuite — plătești doar 10 luni pe an.",
   ],
   note: "O singură factură pe familie.",
+  promo:
+    "🎁 Prețuri promoționale până la 31.08.2026 — toate pachetele au o reducere suplimentară de 25%. De la 1 septembrie 2026, prețurile cresc în consecință.",
 };
 
 const EN: Copy = {
@@ -203,6 +206,8 @@ const EN: Copy = {
     "Annual upfront: 2 months free — you pay only 10 months a year.",
   ],
   note: "One bill per family.",
+  promo:
+    "🎁 Promotional prices until 31.08.2026 — all packages get an extra 25% off. From 1 September 2026, prices increase accordingly.",
 };
 
 export default async function PreturiPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -297,6 +302,10 @@ export default async function PreturiPage({ params }: { params: Promise<{ locale
           </ul>
         </div>
         <p className="mx-auto mt-3 max-w-xl text-center text-xs text-gray-600">{c.note}</p>
+
+        <div className="mx-auto mt-6 max-w-2xl rounded-xl border border-amber-500/40 bg-amber-500/5 p-4 text-center text-sm font-medium text-amber-200">
+          {c.promo}
+        </div>
       </main>
     </div>
   );
