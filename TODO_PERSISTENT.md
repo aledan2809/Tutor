@@ -4,6 +4,15 @@
 
 ---
 
+## [ ] 💸 Promo pricing — wording + preț tăiat în carduri (creat 2026-06-03)
+
+Pe `/parinte` ȘI `/preturi` (RO + EN), 2 ajustări la promo (−25% până la 30/31.08.2026):
+1. **Wording**: înlocuiește „De la 1 septembrie 2026, prețurile cresc în consecință." → „De la 1 septembrie 2026, prețurile vor reveni la normal." (RO) + echivalent EN („…prices return to normal.").
+2. **Preț tăiat în card**: din moment ce comunicăm −25% suplimentar acum, fiecare card de pachet să arate **prețul normal tăiat cu roșu** lângă prețul promoțional, până la **30.08.2026**. Ex: ~~33,20 lei~~ **24,90 lei / materie / lună**. (Prețuri normale = promo / 0,75: Elev 26,53 / Family 33,20 / Duo 39,87 / Trio 53,20 / Family Trio 66,53 — de confirmat rotunjirea cu user, sau invers: promo = normal × 0,75 cu „normal" fiind prețul afișat acum × 1/0,75.)
+   - **De clarificat cu user la implementare**: prețurile afișate ACUM (24,90 etc.) sunt deja cele promoționale (−25%) SAU sunt cele „normale" peste care se aplică −25% la checkout? Afectează ce număr tai cu roșu. Conform textului promo „toate pachetele au o reducere suplimentară de 25%", cele afișate par a fi promoționale → normalul tăiat = afișat / 0,75.
+
+---
+
 ## [x] 🏠 Homepage — secțiunea „De ce aleg etutor.ro" + nav links — DONE 2026-06-03 (`012f52b`+`b7228ed`): trial footnote (`*`), proofLead progres controlat (elev+părinte+meditator), GDPR mutat în footer, progres/motivație fără „gamification" + secțiune audiență. Brand „eTUTOR.ro" consecvent.
 
 Probleme de reformulat în secțiunea de proof + restul homepage-ului (RO+EN, `src/app/[locale]/page.tsx`):

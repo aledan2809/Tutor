@@ -4,7 +4,7 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 
-const adminLinks = [
+const adminLinks: { href: string; labelKey: string; superAdminOnly: boolean; label?: string }[] = [
   { href: "/dashboard/admin", labelKey: "overview", superAdminOnly: false },
   { href: "/dashboard/admin/questions", labelKey: "questions", superAdminOnly: false },
   { href: "/dashboard/admin/questions/review", labelKey: "reviewQueue", superAdminOnly: false },
@@ -18,6 +18,7 @@ const adminLinks = [
   { href: "/dashboard/admin/lessons", labelKey: "lessons", superAdminOnly: false },
   { href: "/dashboard/admin/bibliography", labelKey: "bibliography", superAdminOnly: false },
   { href: "/dashboard/admin/exam-formats", labelKey: "examFormats", superAdminOnly: false },
+  { href: "/dashboard/admin/exam-bank", labelKey: "examBank", label: "Bancă examene", superAdminOnly: false },
   { href: "/dashboard/admin/templates", labelKey: "escalationTemplates", superAdminOnly: false },
   { href: "/dashboard/admin/aviation/seed-demo", labelKey: "aviationSeed", superAdminOnly: true },
   { href: "/dashboard/admin/creatori", labelKey: "creatorWaitlist", superAdminOnly: true },
@@ -48,7 +49,7 @@ export function AdminNav() {
                 : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
             }`}
           >
-            {t(link.labelKey)}
+            {link.label ?? t(link.labelKey)}
           </Link>
         );
       })}

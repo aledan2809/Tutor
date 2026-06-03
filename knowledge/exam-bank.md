@@ -1,6 +1,7 @@
 # Exam-Bank tier — official exam papers (ground-truth)
 
 ## Changelog
+- [2026-06-03] v0.2: Slice 2 — barem scoring engine (`src/lib/exam-bank/score.ts`: `scoreExamPaper` + `classifyPaperPoints`, pur + 11/11 smoke) + admin read-only browser (`/dashboard/admin/exam-bank` listă + `[paperId]` detaliu, RO, nav link „Bancă examene"). Engine: obiective (MCQ/TF_GRID) auto-gradate; deschise = self-score; notă /10 + extrapolare „estimare" pe subset. NU e încă legat de un ecran de elev (slice 3, după figuri).
 - [2026-06-03] v0.1: Slice 1 — schema (ExamPaper/ExamPassage/ExamItem) + migration 0016 + import of EN VIII 2026 Model (Matematică + Limba și literatura română).
 
 ## Why a separate tier (not the `Question` MCQ bank)
