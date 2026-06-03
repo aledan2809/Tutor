@@ -63,6 +63,10 @@ Probleme de reformulat în secțiunea de proof + restul homepage-ului (RO+EN, `s
 **Plan (a) — build, sesiuni dedicate** (agreat user 2026-06-03): model legătură 1:1 + onboarding self-service + plan Family/Trio + parent-branded watcher view + WhatsApp.
 **Plan (b) — onest până atunci** (agreat user 2026-06-03): `/parinte` să NU promită self-service inexistent — CTA spre pas clar / „în curând" / waitlist, ca părintele să nu rămână blocat după signup.
 
+## [ ] 🎨 Logo eTUTOR.ro (creat 2026-06-03)
+
+Brandul e acum wordmark text (`<Brand>`: **e** mic + **TUTOR** caps + **.ro** mic, albastru). De făcut un **logo grafic** dedicat (favicon + header). Nu acum — doar marcat ca să nu se uite. Culori audiență de reținut: ELEV/STUDENT=albastru, PĂRINTE=emerald, PROFESOR=ambră.
+
 ## [ ] 🔢 Homepage cifre — revizuire când PUBLISHED trece de ~1900 (creat 2026-06-03)
 
 **Decizie user (A1, 2026-06-03):** lasă „Mii de grile reale" (hero/badge) + „1.400+" (SEO) + `getStats` (numără TOATE întrebările, inclusiv DRAFT) **așa cum sunt** — pe prod `getStats` arată deja ~1.900+, iar nivelul real de **1900+ publicate** se atinge curând, deci nu merită softuit acum. **Când publicatele trec real de ~1900** (azi: 195 published / 1925 total): (a) decide dacă `getStats` numără doar PUBLISHED (onest) sau rămâne pe total; (b) actualizează „1.400+" din SEO metadata la numărul real. Până atunci = OK conștient (overstatement temporar acceptat de user, publicarea e iminentă).

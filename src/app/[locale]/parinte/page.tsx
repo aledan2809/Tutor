@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ParentFunnel } from "@/components/parinte/parent-funnel";
 import SubjectQuizDemo from "@/components/SubjectQuizDemo";
+import { SiteHeader } from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "Pentru părinți — copilul tău învață constant, tu vezi progresul | etutor.ro",
@@ -184,10 +185,11 @@ export default async function ParintePage({ params }: { params: Promise<{ locale
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
+      <SiteHeader locale={lp} />
       <main className="mx-auto max-w-5xl px-4 py-16">
         {/* Hero */}
         <div className="text-center max-w-2xl mx-auto">
-          <span className="inline-block rounded-full bg-blue-500/15 px-3 py-1 text-sm font-medium text-blue-400">
+          <span className="inline-block rounded-full bg-emerald-500/15 px-3 py-1 text-sm font-medium text-emerald-400">
             {c.badge}
           </span>
           <h1 className="mt-5 text-4xl sm:text-5xl font-bold">{c.hero}</h1>

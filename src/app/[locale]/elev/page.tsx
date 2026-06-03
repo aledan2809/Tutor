@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SiteHeader } from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "Pentru elevi și studenți — ține-te de ritm, vezi-ți progresul | etutor.ro",
@@ -106,6 +107,7 @@ export default async function ElevPage({ params }: { params: Promise<{ locale: s
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
+      <SiteHeader locale={locale} />
       <main className="mx-auto max-w-5xl px-4 py-16">
         {/* Hero */}
         <div className="text-center max-w-2xl mx-auto">

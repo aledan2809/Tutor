@@ -65,7 +65,8 @@ export default function SubjectQuizDemo({ locale }: { locale?: string }) {
       .then((d) => {
         const s: Subject[] = d.subjects ?? [];
         setSubjects(s);
-        if (s.length) setSelected(s[0].subject);
+        // Carousel: pick a random subject each load so a refresh shows variety.
+        if (s.length) setSelected(s[Math.floor(Math.random() * s.length)].subject);
       })
       .catch(() => setSubjects([]));
   }, []);
@@ -187,6 +188,11 @@ export default function SubjectQuizDemo({ locale }: { locale?: string }) {
       <div className="max-h-80 space-y-4 overflow-y-auto pr-1">
         {questions.map((q, qi) => (
           <div key={qi} className="rounded-lg border border-gray-800 bg-gray-900 p-3">
+            {q.topic && (
+              <span className="mb-1 inline-block rounded bg-gray-800 px-1.5 py-0.5 text-[11px] text-gray-400">
+                {q.topic}
+              </span>
+            )}
             <p className="text-sm font-medium text-white">
               {qi + 1}. {q.content}
             </p>

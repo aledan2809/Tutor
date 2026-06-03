@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CreatorWaitlistForm } from "@/components/creator-waitlist-form";
+import { SiteHeader } from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "Program pentru creatori — venit recurent din predare",
@@ -145,10 +146,11 @@ export default async function CreatoriPage({ params }: { params: Promise<{ local
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
+      <SiteHeader locale={locale} />
       <main className="mx-auto max-w-5xl px-4 py-16">
         {/* Hero */}
         <div className="text-center max-w-2xl mx-auto">
-          <span className="inline-block rounded-full bg-blue-500/15 px-3 py-1 text-sm font-medium text-blue-400">
+          <span className="inline-block rounded-full bg-amber-500/15 px-3 py-1 text-sm font-medium text-amber-400">
             {c.badge}
           </span>
           <h1 className="mt-5 text-4xl sm:text-5xl font-bold">{c.hero}</h1>

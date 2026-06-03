@@ -3,6 +3,8 @@ import { unstable_cache } from "next/cache";
 import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import SubjectQuizDemo from "@/components/SubjectQuizDemo";
+import { SiteHeader } from "@/components/SiteHeader";
+import { Brand } from "@/components/Brand";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -84,7 +86,7 @@ export default async function LandingPage() {
         ownerNote: "",
         ctaBandTitle: "Gata să înveți mai deștept?",
         ctaBandSub: "Începe să exersezi acum — gratuit, în 10 secunde.",
-        ctaBandButton: "Încearcă gratuit ✨",
+        ctaBandButton: "Creează cont gratuit",
         footerProduct: "Produs",
         footerCompany: "Companie",
         footerTry: "Demo gratuit",
@@ -132,7 +134,7 @@ export default async function LandingPage() {
         ownerNote: "",
         ctaBandTitle: "Ready to learn smarter?",
         ctaBandSub: "Start practicing now — free, in 10 seconds.",
-        ctaBandButton: "Try it free ✨",
+        ctaBandButton: "Create a free account",
         footerProduct: "Product",
         footerCompany: "Company",
         footerTry: "Free demo",
@@ -146,28 +148,7 @@ export default async function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-950">
       {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-          <span className="text-xl font-bold text-blue-500">Tutor</span>
-          <nav className="flex items-center gap-2 sm:gap-4">
-            <Link href="/try" className="hidden text-sm text-gray-300 hover:text-white sm:inline">
-              {L.navDemo}
-            </Link>
-            <Link href="/grile" className="hidden text-sm text-gray-300 hover:text-white sm:inline">
-              {L.navGrile}
-            </Link>
-            <Link href="/creatori" className="hidden text-sm text-gray-300 hover:text-white sm:inline">
-              {L.navCreatori}
-            </Link>
-            <Link
-              href="/auth/signin"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
-            >
-              {L.signIn}
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader locale={locale} />
 
       <main className="flex-1">
         {/* Hero — interactive demo above the fold */}
@@ -280,6 +261,57 @@ export default async function LandingPage() {
           </div>
         </section>
 
+        {/* Audience — who eTUTOR.ro is for (colors reused in nav + pages) */}
+        <section className="border-t border-gray-800 bg-gray-950">
+          <div className="mx-auto max-w-5xl px-4 py-16">
+            <h2 className="text-center text-2xl font-bold text-white">
+              {ro ? "Pentru cine e eTUTOR.ro?" : "Who eTUTOR.ro is for"}
+            </h2>
+            <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
+              {[
+                {
+                  href: "/elev",
+                  label: ro ? "ELEV/STUDENT" : "STUDENT",
+                  desc: ro
+                    ? "Înveți pe cont propriu — îți vezi progresul și rămâi în priză."
+                    : "Learn on your own — track your progress and stay hooked.",
+                  border: "border-blue-500/40 hover:border-blue-500",
+                  text: "text-blue-400",
+                },
+                {
+                  href: "/parinte",
+                  label: ro ? "PĂRINTE" : "PARENT",
+                  desc: ro
+                    ? "Vezi dacă cel mic chiar învață; dacă nu, îl împingem noi de la spate."
+                    : "See if your child is really learning; if not, we nudge them.",
+                  border: "border-emerald-500/40 hover:border-emerald-500",
+                  text: "text-emerald-400",
+                },
+                {
+                  href: "/creatori",
+                  label: ro ? "PROFESOR" : "TEACHER",
+                  desc: ro
+                    ? "Adaugi materiale pe materia ta și câștigi comision perpetuu."
+                    : "Add materials on your subject and earn a perpetual commission.",
+                  border: "border-amber-500/40 hover:border-amber-500",
+                  text: "text-amber-400",
+                },
+              ].map((a) => (
+                <Link
+                  key={a.href}
+                  href={a.href}
+                  className={`rounded-xl border bg-gray-900 p-6 transition-colors ${a.border}`}
+                >
+                  <p className="text-xs text-gray-500">{ro ? "Ești" : "I'm a"}</p>
+                  <p className={`text-xl font-extrabold tracking-wide ${a.text}`}>{a.label}</p>
+                  <p className="mt-2 text-sm text-gray-400">{a.desc}</p>
+                  <span className={`mt-3 inline-block text-sm font-medium ${a.text}`}>→</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* What you get — product capabilities.
             OWNER: when real product screenshots / a 15s screen-capture video are
             available, drop them here (e.g. a <video> or <Image> per capability).
@@ -309,11 +341,19 @@ export default async function LandingPage() {
           <h2 className="text-3xl font-bold text-white">{L.ctaBandTitle}</h2>
           <p className="mt-3 text-lg text-gray-400">{L.ctaBandSub}</p>
           <Link
-            href="/try"
+            href="/auth/register"
             className="mt-8 inline-block rounded-lg bg-blue-600 px-10 py-4 text-lg font-medium text-white hover:bg-blue-700 transition-colors"
           >
             {L.ctaBandButton}
           </Link>
+          <p className="mt-4">
+            <Link
+              href="/preturi"
+              className="text-sm text-gray-400 underline-offset-4 hover:text-white hover:underline"
+            >
+              {ro ? "Vezi planurile și prețurile →" : "See plans and pricing →"}
+            </Link>
+          </p>
         </section>
       </main>
 
@@ -322,8 +362,7 @@ export default async function LandingPage() {
         <div className="mx-auto max-w-7xl px-4 py-10">
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
             <div>
-              <span className="text-lg font-bold text-blue-500">Tutor</span>
-              <p className="mt-2 text-sm text-gray-500">etutor.ro</p>
+              <Brand className="text-lg" />
             </div>
             <div>
               <h4 className="text-sm font-semibold text-white">{L.footerProduct}</h4>
@@ -342,7 +381,7 @@ export default async function LandingPage() {
             </div>
           </div>
           <p className="mt-10 border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
-            &copy; {new Date().getFullYear()} Tutor. {L.rights}
+            &copy; {new Date().getFullYear()} <Brand className="text-sm" />. {L.rights}
           </p>
           <p className="mt-2 text-center text-xs text-gray-600">🔒 {L.proofGdpr} · {L.proofGdprLabel}</p>
         </div>

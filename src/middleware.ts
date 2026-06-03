@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const intlMiddleware = createMiddleware(routing);
 
-const publicPaths = ["/", "/try", "/scor", "/grile", "/auth/signin", "/auth/verify", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/terms", "/privacy", "/creatori", "/parinte", "/elev"];
+const publicPaths = ["/", "/try", "/scor", "/grile", "/auth/signin", "/auth/verify", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/terms", "/privacy", "/creatori", "/parinte", "/elev", "/preturi"];
 // Public sections that carry a dynamic segment (e.g. /duel/<id>, /certificat/<id>, /grile/<slug>).
 const publicPrefixes = ["/duel/", "/certificat/", "/grile/"];
 
