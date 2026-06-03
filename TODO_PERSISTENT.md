@@ -160,7 +160,16 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 
 **PLAN verificare (agreat user 2026-06-03)** — 3 trepte legate de preț: **self-score** (gratuit, ✅ slice 4) → **verificare AI** (Family/Trio: Română scrisă pe ecran → AI text; Mate → poză rezolvare → AI vision; sugestie nu verdict) → **meditator confirmă** (Trio). Slice 5 = AI; slice 6 = meditator.
 
-**IMPORT serie 2+ — MATEMATICĂ (NEXT SESSION, audit done 2026-06-04; user încarcă fișiere)**:
+**IMPORT serie 2 — MATEMATICĂ — ✅ DONE 2026-06-04** (toate 10 perechile LIVE + verificate autentificat pe etutor.ro; commits `bbc82ff`→`254f214`):
+- **10/10 perechi importate**: 2025 {Simulare, Examen-07, Model, Rezerva-02, Sesiune-Specială-03}, 2026 {Simulare}, 2024 {Examen-07, Model, Rezerva-02, Simulare}. (2026 Model skip = MVP seria 1.)
+- Per pereche: 18 itemi (I:6 MCQ, II:6 MCQ figuri, III:6 deschis) + 9-11 figuri PyMuPDF clip-rect (montaj vision-verified) + chei/barem ground-truth din baremul oficial + `figureUrl` + `finalAnswer` (rezultate curate) baked în importer. `/review` pe slice 1 (no correctness issues). Per pereche deploy: HEAD assert VPS==local (L202), `node scripts/import-exam-mate-<year>-<variant>.mjs` pe prod DB, restart, **verificare autentificată SuperAdmin**: figuri 200 + DB integritate + score API round-trip **60/60 MCQ + finalCheck pass** pe toate.
+- **Total exam-bank prod: 12 papers / 216 items** (2 MVP seria-1 + 10 noi Mate). DB backup pre-import `/root/backups/tutor-pre-2025sim-import-2026-06-04.dump`.
+- **Playbook repetabil**: `knowledge/exam-bank-import-playbook.md` (9-step flow + figure tooling `scripts/exam-figures/{fig_inspect,extract}.py`). Memorie `project_tutor_exam_bank_import`.
+- **RĂMÂNE (next): Româna** (ulterior, după Mate — per cerere user) + restul materialelor pe care le încarcă user.
+
+---
+
+**[archive] IMPORT serie 2+ — MATEMATICĂ (audit 2026-06-04; user încarcă fișiere)**:
 
 **Folder primit + auditat:** `~/Downloads/Temp/tutor eval nat/pro-matematica/` — **22 fișiere = 11 perechi Subiect+Barem, toate complete** (zero subiect fără barem / barem fără subiect), **zero duplicate** (nume + size toate distincte). Verificat 2026-06-04.
 - 2024 (4 perechi): `2024_EN_Matematica_{Examen_07, Model, Rezerva_Examen_02, Simulare}_{Subiect,Barem}_LRO.pdf`

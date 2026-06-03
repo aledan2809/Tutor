@@ -134,3 +134,18 @@ Română is a later focus (after Mate).
 - **L204** key figure/answer wiring on item **id**, not (section,label) — labels repeat.
 - Figure clip rect is the #1 silent error → always montage-verify before wiring.
 - Variant MUST be in the figure filename for series 2 (same year, multiple papers).
+- **Transient 502 after `pm2 restart`**: figures served by `next start` return 502 for a few seconds
+  during the boot window after restart. Always `sleep ~6` before the figure-200 + authenticated verify,
+  or you get false failures. (Observed every deploy in the series-2 run.)
+- **Vector vs raster I.6 charts**: bar charts are sometimes embedded raster (get_image_info shows an
+  xref) and sometimes vector (no xref on the page). Vector charts get clipped by estimated bbox and
+  always need a tighten pass (drop item-text bleed + include all axis labels).
+- **finalAnswer policy**: set it only for clean scalar results a student types as-is (integers, simple
+  decimals `1,8`, clean fractions `1/3`, coordinate pairs `(7,0)`). SKIP for radicals (`9√3/2`, `2√5`),
+  multi-value answers (`n∈{−1,3}`), and proofs — the score-route `norm` (spaces stripped, `,`→`.`)
+  can't match those, so they'd only cause false-negative auto-checks.
+
+## 8. Series-2 Mate run (2026-06-04) — reference index
+10 papers imported + live-verified (`bbc82ff`→`254f214`), each `scripts/import-exam-mate-<year>-<variant>.mjs`:
+2025 simulare/examen-07/model/rezerva-02/sesiune-speciala-03 · 2026 simulare · 2024 examen-07/model/rezerva-02/simulare.
+Every pair verified authenticated: 12 MCQ → 60/60 rawPoints + finalCheck pass + figures-200. Prod total: 12 papers / 216 items.
