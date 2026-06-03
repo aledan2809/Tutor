@@ -5,7 +5,8 @@ import { prisma } from "@/lib/prisma";
 // correctIndex is computed server-side (options + correctAnswer are stored
 // clean) so the client can grade the demo without an account — same shape the
 // MagicQuiz demo already uses.
-const LIMIT = 8;
+// 5 questions to match the free tier (2 subjects/day × 5 questions).
+const LIMIT = 5;
 
 const strip = (s: string | null | undefined) =>
   (s ?? "").trim().replace(/^[a-d]\)\s*/i, "").toLowerCase();

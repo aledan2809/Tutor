@@ -4,9 +4,9 @@
 export function Brand({ className = "" }: { className?: string }) {
   return (
     <span className={`font-bold tracking-tight text-blue-500 ${className}`}>
-      <span className="align-top text-[0.55em] font-semibold">e</span>
+      <span className="align-top text-[0.72em] font-semibold">e</span>
       TUTOR
-      <span className="text-[0.55em] font-semibold text-blue-400">.ro</span>
+      <span className="text-[0.6em] font-semibold text-blue-400">.ro</span>
     </span>
   );
 }
