@@ -18,6 +18,8 @@
  *   - Grounding weighted 2x
  */
 
+import { spawn } from "child_process";
+
 // ── Types ────────────────────────────────────────────────────────────────
 
 export type DefectClass =
@@ -493,12 +495,73 @@ async function runJudge(
 
 // Stage-2 ensemble: a question is "ready without human review" ONLY if BOTH
 // judges PASS. Fail-closed on doubt/error → demote to human review.
+// Stage-3 strong judge via the Claude CLI subprocess (subscription auth, $0 API
+// credit). A much stronger reasoner than the free Groq lenses — catches the
+// subtle multiple-correct / non-unique-answer cases the free tier misses, which
+// is what lifts the auto-keep bucket from ~87% to ≥97%.
+const CLAUDE_JUDGE_PROMPT = (q: QuestionForMesh) =>
+  `You are a rigorous Romanian school-content examiner. Decide if this multiple-choice question is GOOD ENOUGH to publish to students WITHOUT human review. Check ALL:
+1) The marked answer is factually/mathematically CORRECT.
+2) It is the UNIQUE correct option — check EACH of the four; if two or more satisfy the question (e.g. two methods that both compute the same value, or two equivalent definitions), it is defective (multiple-correct). If no option is fully correct, defective.
+3) Self-contained: no undefined variable/expression from an unstated exercise (x, y, "a=1", "4xx/5y"), no "de mai jos/figura/tabelul", not an answer-key fragment, not a meta/administrative/project item.
+4) Clear, grammatical, no length cue.
+
+Question: ${q.content}
+Options: ${JSON.stringify(q.options || [])}
+Marked correct: ${q.correctAnswer}
+${q.sourceText ? `Source: ${q.sourceText.slice(0, 1200)}` : ""}
+
+Think briefly, then end with EXACTLY one final line:
+RESULT: KEEP
+— or —
+RESULT: DROP | <defect> | <short reason>`;
+
+function callClaudeCli(prompt: string, timeoutMs = 60_000): Promise<string | null> {
+  return new Promise((resolve) => {
+    const env = { ...process.env };
+    delete env.ANTHROPIC_API_KEY; // force subscription (keychain) auth, not metered API
+    let out = "";
+    let settled = false;
+    const done = (v: string | null) => { if (!settled) { settled = true; resolve(v); } };
+    try {
+      const child = spawn("claude", ["-p", prompt, "--output-format", "json", "--model", "sonnet"], { env });
+      const timer = setTimeout(() => { try { child.kill("SIGKILL"); } catch { /* */ } done(null); }, timeoutMs);
+      child.stdout.on("data", (d) => { out += d.toString(); });
+      child.on("error", () => { clearTimeout(timer); done(null); });
+      child.on("close", () => {
+        clearTimeout(timer);
+        try { done(JSON.parse(out).result ?? null); } catch { done(null); }
+      });
+    } catch { done(null); }
+  });
+}
+
+async function runClaudeJudge(
+  question: QuestionForMesh
+): Promise<{ pass: boolean; reason: string; defect: string | null } | null> {
+  const raw = await callClaudeCli(CLAUDE_JUDGE_PROMPT(question));
+  if (!raw) return null; // CLI unavailable / error → caller falls back to Groq
+  const m = String(raw).match(/RESULT:\s*(KEEP|DROP)\b([^\n]*)/i);
+  if (!m) return null;
+  if (m[1].toUpperCase() === "KEEP") return { pass: true, reason: "", defect: null };
+  const parts = (m[2] || "").split("|").map((s) => s.trim()).filter(Boolean);
+  return { pass: false, defect: (parts[0] || "unspecified").toLowerCase().slice(0, 40), reason: (parts[1] || "").slice(0, 200) };
+}
+
+// (B variable QSchema) Stage-2/3 ensemble. A question is "ready without human
+// review" only if it passes the stage-3 Claude judge (primary). If the Claude
+// CLI is unavailable, fall back to the Groq 2-judge AND-gated ensemble.
 export async function finalJudge(
   question: QuestionForMesh
 ): Promise<{ pass: boolean; reason: string; defect: string | null }> {
   if (hasMissingContextRef(question.content)) {
     return { pass: false, reason: "References external/missing context", defect: "missing-context" };
   }
+  if (process.env.MESH_CLAUDE_JUDGE !== "0") {
+    const claude = await runClaudeJudge(question);
+    if (claude) return claude; // Claude CLI verdict is authoritative when available
+  }
+  // Fallback: Groq 2-judge AND-gated ensemble.
   const [a, b] = await Promise.all([
     runJudge(JUDGE_A_SYSTEM, question),
     runJudge(JUDGE_B_SYSTEM, question),
