@@ -30,6 +30,9 @@ export function SiteHeader({ locale }: { locale?: string }) {
               <span className={`text-sm font-extrabold tracking-wide ${a.color}`}>{a.label}</span>
             </Link>
           ))}
+          <Link href="/preturi" className="hidden text-sm text-gray-300 hover:text-white sm:inline">
+            {ro ? "Prețuri" : "Pricing"}
+          </Link>
           <Link
             href="/auth/signin"
             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"

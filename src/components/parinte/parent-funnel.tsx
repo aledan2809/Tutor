@@ -59,31 +59,31 @@ type Copy = {
 const RO: Copy = {
   kicker: "Hai să fim sinceri",
   intro: "Hai să vorbim despre ce te frământă cu adevărat — nu despre funcții, ci despre copilul tău:",
-  answerPrefix: "Uite ce face Tutor: ",
+  answerPrefix: "Uite ce face TUTOR: ",
   beats: [
     {
-      q: "Copilul stă o oră „la învățat”. Dar tu știi dacă a învățat ceva — sau doar a stat cu manualul deschis?",
-      a: "Cu Tutor vezi negru pe alb: câte exerciții a făcut azi, la ce capitol și unde a greșit. Nu mai ghicești.",
+      q: "Copilul stă o oră „la învățat”. Dar tu știi dacă a învățat ceva sau doar a stat cu manualul deschis?",
+      a: "Vezi negru pe alb: câte exerciții a făcut azi, la ce capitol și unde a greșit. Nu mai presupui, nu mai ghicești.",
     },
     {
       q: "Plătești meditații lună de lună. Dar de unde știi că lecțiile chiar prind — că progresează, nu doar că „a fost prezent”?",
-      a: "La pachetul cu meditator, și meditatorul vede greșelile copilului și lucrează exact pe ele. Tu vezi progresul confirmat — meditatorul devine dovada, nu o speranță.",
+      a: "La pachetul cu meditator inclus, meditatorul vede greșelile copilului și poate să lucreze exact pe ele. Tu vezi progresul confirmat — meditatorul „repară”, tu nu trăiești doar cu o speranță.",
     },
     {
       q: "De obicei afli că n-a înțeles un capitol abia la teză — când e prea târziu. Cum ar fi să afli din prima zi?",
       a: "Dacă nu-și face testele sau se împotmolește, primești un semnal pe WhatsApp — la timp. Iar duminica ai un raport scurt cu ce a lucrat și unde stă.",
     },
   ],
-  ctaLead: "Iar toate astea, pe un preț mai mic decât o singură ședință de meditații în plus.",
-  ctaSub: "Începe gratuit 7 zile. În prima săptămână vezi cu ochii tăi dacă progresează — fără card. Fiecare zi în care nu știi unde stă e o zi pierdută.",
+  ctaLead: "Iar toate astea la prețul unei cafele.",
+  ctaSub: "Începe gratuit 7 zile, ca să te convingi. Vezi cu ochii tăi dacă progresează — fără card. Fiecare zi în care nu știi stadiul copilului tău este o zi pierdută.",
   ctaButton: "Începe proba gratuită",
-  ctaPayNote: "Sau alegi un plan PROMOȚIONAL acum și pornesc chiar azi reminderele + rapoartele.",
+  ctaPayNote: "Sau alegi un plan PROMOȚIONAL chiar acum și pornesc chiar imediat reminderele + rapoartele.",
 };
 
 const EN: Copy = {
   kicker: "Let's be honest",
   intro: "Let's talk about what actually keeps you up at night — not features, your child:",
-  answerPrefix: "Here's what Tutor does: ",
+  answerPrefix: "Here's what TUTOR does: ",
   beats: [
     {
       q: "Your child sits an hour „studying”. But do you know they learned anything — or just kept the book open?",
@@ -162,7 +162,12 @@ export function ParentFunnel({ lp }: { lp: "ro" | "en" }) {
           >
             {c.ctaButton}
           </Link>
-          <p className="mt-3 text-xs text-gray-500">{c.ctaPayNote}</p>
+          <Link
+            href={`/${lp}/preturi`}
+            className="mt-3 inline-block text-xs font-semibold text-emerald-400 underline-offset-4 hover:underline"
+          >
+            {c.ctaPayNote}
+          </Link>
         </div>
       </Reveal>
     </section>
