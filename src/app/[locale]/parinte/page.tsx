@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ParentFunnel } from "@/components/parinte/parent-funnel";
+import SubjectQuizDemo from "@/components/SubjectQuizDemo";
 
 export const metadata: Metadata = {
   title: "Pentru părinți — copilul tău învață constant, tu vezi progresul | etutor.ro",
   description:
-    "Plătești ca să ai liniște: copilul exersează zilnic pe grile reale, îl împingem noi pe WhatsApp dacă se lasă, iar tu vezi progresul și unde greșește. Începe gratuit, fără card.",
+    "Oare chiar învață? Aici vezi negru pe alb: copilul exersează zilnic pe grile reale, îl împingem noi pe WhatsApp dacă se lasă, iar tu vezi progresul și unde greșește. Începe gratuit, fără card.",
 };
 
 type Plan = { name: string; tag: string; price: string; points: string[]; featured?: boolean };
@@ -31,7 +33,7 @@ const RO: Copy = {
   badge: "Pentru părinți",
   hero: "Copilul tău învață constant. Tu vezi exact cum.",
   subtitle:
-    "Plătești ca să ai liniște: copilul exersează zilnic pe grile reale, tu vezi progresul real, iar dacă se lasă îl împingem noi — nu trebuie să-l bați tu la cap.",
+    "Cea mai mare grijă a ta nu e nota — e „oare chiar învață?”. Aici vezi negru pe alb: copilul exersează zilnic pe grile reale, tu vezi progresul real, iar dacă nu o (mai) face îl împingem noi de la spate — fără să-l mai cerți tu.",
   howTitle: "Cum funcționează",
   steps: [
     { t: "1. Copilul exersează", d: "Grile reale pe materia lui, în fiecare zi. Streak-uri și puncte care îl țin motivat." },
@@ -97,15 +99,15 @@ const RO: Copy = {
   trialNote: "Vrei mai mult de atât? Treci la Premium oricând, cu un click.",
   ctaTitle: "Gata să-i dai copilului un start în plus?",
   ctaSub: "Îți faci cont, adaugi copilul și pornești proba gratuită în câteva minute.",
-  ctaButton: "Înrolează-ți copilul",
-  ctaStudent: "Sunt elev și plătesc singur →",
+  ctaButton: "Înregistrează-ți copilul",
+  ctaStudent: "Sunt elev/student major",
 };
 
 const EN: Copy = {
   badge: "For parents",
   hero: "Your child learns consistently. You see exactly how.",
   subtitle:
-    "Pay for peace of mind: your child practices daily on real questions, you see real progress, and if they slack off we nudge them — you don't have to nag.",
+    "Your biggest worry isn't the grade — it's “is my child actually learning?”. Here you see it in black and white: your child practices daily on real questions, you see real progress, and if they slack off we nudge them — so you don't have to nag.",
   howTitle: "How it works",
   steps: [
     { t: "1. Your child practices", d: "Real questions on their subject, every day. Streaks and points keep them motivated." },
@@ -202,6 +204,24 @@ export default async function ParintePage({ params }: { params: Promise<{ locale
             </Link>
           </div>
         </div>
+
+        {/* Psychological funnel — parent's worries → what Tutor does → CTA */}
+        <ParentFunnel lp={lp} />
+
+        {/* Try the real thing now — honest, working, no account */}
+        <section className="mt-16">
+          <h2 className="text-2xl font-semibold text-center">
+            {lp === "en" ? "See exactly what your child practices" : "Vezi exact ce exersează copilul"}
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-400">
+            {lp === "en"
+              ? "Pick a subject and try a real quiz right now — no account."
+              : "Alege o materie și încearcă un test real chiar acum — fără cont."}
+          </p>
+          <div className="mx-auto mt-6 max-w-xl rounded-2xl border border-gray-800 bg-gray-900/60 p-5 shadow-xl sm:p-6">
+            <SubjectQuizDemo locale={lp} />
+          </div>
+        </section>
 
         {/* How it works */}
         <section className="mt-16">

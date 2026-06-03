@@ -44,6 +44,29 @@ Probleme de reformulat în secțiunea de proof + restul homepage-ului (RO+EN, `s
 
 **Fișiere:** `src/app/[locale]/parinte/page.tsx` (+ hero/`page.tsx` dacă mutăm cârligul pe homepage). RO+EN. Coordonează cu item-ul 🏠 Homepage (proof-points) — același mesaj, fără contradicții.
 
+## [ ] 👪 Flux Părinte↔Copil↔Meditator (Faza C/D/E) — specializare a infra Watcher (verificat 2026-06-03)
+
+**Esența proiectului.** Verificat în cod 2026-06-03 (corectează un „nu există" greșit anterior).
+
+**CE EXISTĂ deja (backbone ~50-60%):**
+- Rol **WATCHER** în `EnrollmentRole` (STUDENT/WATCHER/INSTRUCTOR/ADMIN).
+- **Dashboard Watcher** funcțional: `src/app/[locale]/dashboard/watcher/` + API `src/app/api/dashboard/watcher/` — monitorizează progres elevi (`getStudentProgressSummary`, `predictive-analytics`).
+- **Escaladare**: `EscalationThreshold` (metric streak/score/session_missed, action `notify_watcher`), `EscalationEvent`, `EscalationChannel`, `NotificationPreference`.
+- Dashboard **Instructor** (Group/GroupMember, InstructorGoal/Message, thresholds).
+
+**CE LIPSEȘTE (stratul self-service de părinte):**
+1. **Legătură 1:1 părinte↔copil.** Acum watcher-ul vede **toți elevii din domeniu** (`watcher/route.ts`: „students in same domain enrollments where watcher has WATCHER role") → **GDPR/privacy fail** pentru părinte. Necesită model de legătură specific (părinte → DOAR copilul lui). Probabil un model `Guardianship`/`ParentChild` (parentId, childId, relation, confirmedAt) + scoping pe watcher dashboard când rolul e „părinte".
+2. **Onboarding self-service**: părinte signup → creează/invită cont copil (magic-link / cod) → opțional leagă meditator. Acum legarea = doar admin enroll sau grupuri instructor.
+3. **Planuri Family/Duo/Trio**: zero wiring backend (doar marketing pe `/parinte`). Necesită „un plătitor, N conturi legate" peste `SubscriptionPlan` + Stripe.
+4. **Branding părinte** peste watcher dashboard + wiring nudge WhatsApp către părinte (canalul există; lipsește legătura părinte).
+
+**Plan (a) — build, sesiuni dedicate** (agreat user 2026-06-03): model legătură 1:1 + onboarding self-service + plan Family/Trio + parent-branded watcher view + WhatsApp.
+**Plan (b) — onest până atunci** (agreat user 2026-06-03): `/parinte` să NU promită self-service inexistent — CTA spre pas clar / „în curând" / waitlist, ca părintele să nu rămână blocat după signup.
+
+## [ ] 🔢 Homepage cifre — revizuire când PUBLISHED trece de ~1900 (creat 2026-06-03)
+
+**Decizie user (A1, 2026-06-03):** lasă „Mii de grile reale" (hero/badge) + „1.400+" (SEO) + `getStats` (numără TOATE întrebările, inclusiv DRAFT) **așa cum sunt** — pe prod `getStats` arată deja ~1.900+, iar nivelul real de **1900+ publicate** se atinge curând, deci nu merită softuit acum. **Când publicatele trec real de ~1900** (azi: 195 published / 1925 total): (a) decide dacă `getStats` numără doar PUBLISHED (onest) sau rămâne pe total; (b) actualizează „1.400+" din SEO metadata la numărul real. Până atunci = OK conștient (overstatement temporar acceptat de user, publicarea e iminentă).
+
 ## [ ] 🔗 Faza B finish — linkuri nav către „Pentru părinți" (/parinte) + „Pentru elevi" (/elev) (creat 2026-06-03)
 
 Paginile sunt LIVE (200) și se leagă între ele, dar **nu-s în meniul de sus** (nav are doar Demo / Grile pe materie / Pentru profesori / Autentificare). Adaugă în header „Pentru părinți" + „Pentru elevi". Un singur loc de editat (header/nav din `page.tsx` + eventual componenta de nav partajată).
