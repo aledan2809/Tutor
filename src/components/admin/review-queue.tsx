@@ -279,7 +279,7 @@ export function ReviewQueue({ questions }: { questions: Question[] }) {
 
       {visibleList.length === 0 && (
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-8 text-center text-sm text-gray-500">
-          Nicio întrebare nu se potrivește filtrului curent. Relaxează pragul de confidence, schimbă materia sau debifează „arată doar lotul de publicat".
+          Nicio întrebare nu se potrivește filtrului curent. Relaxează pragul de confidence, schimbă materia sau debifează „arată doar lotul de publicat”.
         </div>
       )}
 
