@@ -4,7 +4,7 @@
 
 ---
 
-## [ ] 🏠 Homepage — secțiunea „De ce aleg etutor.ro" + nav links (creat 2026-06-03)
+## [x] 🏠 Homepage — secțiunea „De ce aleg etutor.ro" + nav links — DONE 2026-06-03 (`012f52b`+`b7228ed`): trial footnote (`*`), proofLead progres controlat (elev+părinte+meditator), GDPR mutat în footer, progres/motivație fără „gamification" + secțiune audiență. Brand „eTUTOR.ro" consecvent.
 
 Probleme de reformulat în secțiunea de proof + restul homepage-ului (RO+EN, `src/app/[locale]/page.tsx`):
 1. **„Gratuit, fără card"** induce că tot e gratis — de fapt e doar **free trial**. Clarifică: pune un **`*`** și explică imediat sub el ce înseamnă (ex: „* 7 zile gratuit, 2 materii/zi × 5 întrebări; apoi alegi un plan").
@@ -75,7 +75,7 @@ Brandul e acum wordmark text (`<Brand>`: **e** mic + **TUTOR** caps + **.ro** mi
 
 **Decizie user (A1, 2026-06-03):** lasă „Mii de grile reale" (hero/badge) + „1.400+" (SEO) + `getStats` (numără TOATE întrebările, inclusiv DRAFT) **așa cum sunt** — pe prod `getStats` arată deja ~1.900+, iar nivelul real de **1900+ publicate** se atinge curând, deci nu merită softuit acum. **Când publicatele trec real de ~1900** (azi: 195 published / 1925 total): (a) decide dacă `getStats` numără doar PUBLISHED (onest) sau rămâne pe total; (b) actualizează „1.400+" din SEO metadata la numărul real. Până atunci = OK conștient (overstatement temporar acceptat de user, publicarea e iminentă).
 
-## [ ] 🔗 Faza B finish — linkuri nav către „Pentru părinți" (/parinte) + „Pentru elevi" (/elev) (creat 2026-06-03)
+## [x] 🔗 Faza B finish — nav „Pentru părinți"/„Pentru elevi" — DONE 2026-06-03 (`012f52b`): `<SiteHeader>` cu 3 audience links colorate (Ești ELEV/STUDENT→/elev · PĂRINTE→/parinte · PROFESOR→/creatori), pe toate paginile publice.
 
 Paginile sunt LIVE (200) și se leagă între ele, dar **nu-s în meniul de sus** (nav are doar Demo / Grile pe materie / Pentru profesori / Autentificare). Adaugă în header „Pentru părinți" + „Pentru elevi". Un singur loc de editat (header/nav din `page.tsx` + eventual componenta de nav partajată).
 
