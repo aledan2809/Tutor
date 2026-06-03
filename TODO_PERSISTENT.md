@@ -154,7 +154,13 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 
 ---
 
-## [~] 🏆 Simulări Capacitate — „exam-bank" tier (100% ground-truth) (creat 2026-06-03; SLICE 1+2+3 DONE 2026-06-03)
+## [~] 🏆 Simulări Capacitate — „exam-bank" tier (100% ground-truth) (creat 2026-06-03; SLICE 1-4 DONE 2026-06-03)
+
+**SLICE 4 DONE 2026-06-03** (commit `6f9cd26`, LIVE + verificat autentificat): **persistență + diferențiere + rezultat-final** (treapta 1 din planul de verificare în 3 trepte: self → AI → meditator). `ExamAttempt` (migrare `0018`, userId/paperId fără FK) — ruta /score salvează încercarea, `PATCH /api/exam-bank/attempt/[id]` recalculează cu self-scores → `finalized`. Diferențiere clară grilă (auto) vs rezolvare/compunere (manuală) + notă **split onest**. `ExamItem.finalAnswer` + „rezultat final" tastat la 2 itemi Mate (III.1=14, III.5=90) → auto-check ieftin gratuit. Verificat: attempt persistat+finalizat în DB, finalCheck True, badge-uri pe take. `/code-review`: 3 fix-uri (saved re-enable, norm comma/°/minus, hint over-scoring).
+
+**PLAN verificare (agreat user 2026-06-03)** — 3 trepte legate de preț: **self-score** (gratuit, ✅ slice 4) → **verificare AI** (Family/Trio: Română scrisă pe ecran → AI text; Mate → poză rezolvare → AI vision; sugestie nu verdict) → **meditator confirmă** (Trio). Slice 5 = AI; slice 6 = meditator.
+
+**IMPORT serie 2+** (TODO user, pending inputs): importă/procesează TOATE materialele (pro-matematica 2017-2026, linkurile share.google, restul EN), la fel ca MVP. **Blocaje de lămurit cu user**: (1) fișierele — share.google/pro-matematica nu le pot descărca eu, am nevoie de PDF-uri într-un folder; (2) scara — manual nu scalează la 10 ani → pipeline semi-automat vs câțiva ani de mână; (3) drepturi — edu.ro public OK, pro-matematica/Hei Profu' = calibrare nu verbatim.
 
 **SLICE 3 DONE 2026-06-03** (commit `4d42ca0`, LIVE + verificat autentificat pe etutor.ro): **figuri + ecran elev**. (A) 11 figuri Matematică extrase din PDF (PyMuPDF clip-rect; 4uPDF = același fitz dar doar pagini întregi), `ExamItem.figureUrl` (migrare `0017`), atașate 11/11, servite static din `public/exam-figures/`, afișate în admin + take. (B) Ecran elev `/dashboard/exam-bank` (listă + take), sidebar „Simulări" — itemi **sanitizați fără chei** (verificat: take HTML n-are `correctAnswer`-data, doar label i18n), `POST /api/exam-bank/[paperId]/score` corectează server-side + dezvăluie baremul, rezultate cu notă/10 + recalcul live + auto-notare deschise. **Stateless** (fără persistență). `/code-review` a prins un bug critic: label-urile se repetă 1-6 pe fiecare subiect la Mate → cheiat acum pe **id** (answerKey) peste tot + regression test 12/12; + 3 fix-uri (TF_GRID index, mesaj estimare, gard isActive).
 
