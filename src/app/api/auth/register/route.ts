@@ -10,7 +10,8 @@ const schema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  domainSlug: z.string().optional(),
+  domainSlug: z.string().optional(), // legacy single-select
+  domainSlugs: z.array(z.string()).optional(), // multi-select
 });
 
 async function _POST(req: NextRequest) {
@@ -29,7 +30,7 @@ async function _POST(req: NextRequest) {
     );
   }
 
-  const { name, email, password, domainSlug } = parsed.data;
+  const { name, email, password, domainSlug, domainSlugs } = parsed.data;
 
   // Check if user already exists
   const existing = await prisma.user.findUnique({ where: { email } });
@@ -51,18 +52,20 @@ async function _POST(req: NextRequest) {
     },
   });
 
-  // Auto-enroll in selected domain as STUDENT
-  if (domainSlug) {
-    const domain = await prisma.domain.findUnique({
-      where: { slug: domainSlug },
+  // Auto-enroll in selected domain(s) as STUDENT. Supports multi-select
+  // (domainSlugs[]) and the legacy single domainSlug.
+  const slugs = Array.from(
+    new Set([...(domainSlugs ?? []), ...(domainSlug ? [domainSlug] : [])])
+  );
+  if (slugs.length) {
+    const found = await prisma.domain.findMany({
+      where: { slug: { in: slugs } },
+      select: { id: true },
     });
-    if (domain) {
-      await prisma.enrollment.create({
-        data: {
-          userId: user.id,
-          domainId: domain.id,
-          roles: ["STUDENT"],
-        },
+    if (found.length) {
+      await prisma.enrollment.createMany({
+        data: found.map((d) => ({ userId: user.id, domainId: d.id, roles: ["STUDENT"] as const })),
+        skipDuplicates: true,
       });
     }
   }

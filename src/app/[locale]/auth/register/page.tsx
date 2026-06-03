@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useRouter } from "@/i18n/navigation";
+import { Brand } from "@/components/Brand";
 
 interface Domain {
   slug: string;
@@ -17,7 +18,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [domainSlug, setDomainSlug] = useState("");
+  const [domainSlugs, setDomainSlugs] = useState<string[]>([]);
   const [domains, setDomains] = useState<Domain[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -72,7 +73,7 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, domainSlug: domainSlug || undefined }),
+        body: JSON.stringify({ name, email, password, domainSlugs }),
       });
       const data = await res.json();
       if (data.success) {
@@ -118,7 +119,9 @@ export default function RegisterPage() {
           Create account
         </h2>
         <p className="mb-6 text-center text-sm text-gray-400">
-          Join Tutor and start learning
+          {ro ? "Intră în " : "Join "}
+          <Brand className="text-sm" />
+          {ro ? " și începe să înveți" : " and start learning"}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-3">
@@ -174,17 +177,32 @@ export default function RegisterPage() {
 
           {domains.length > 0 && (
             <div>
-              <label className="mb-1 block text-sm text-gray-400">Domain (optional)</label>
-              <select
-                value={domainSlug}
-                onChange={(e) => setDomainSlug(e.target.value)}
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
-              >
-                <option value="">Select a domain...</option>
-                {domains.map((d) => (
-                  <option key={d.slug} value={d.slug}>{d.name}</option>
-                ))}
-              </select>
+              <label className="mb-1 block text-sm text-gray-400">
+                {ro ? "Materii (poți alege mai multe, opțional)" : "Subjects (pick one or more, optional)"}
+              </label>
+              <div className="max-h-44 space-y-1 overflow-y-auto rounded-lg border border-gray-700 bg-gray-800 p-2">
+                {domains.map((d) => {
+                  const checked = domainSlugs.includes(d.slug);
+                  return (
+                    <label
+                      key={d.slug}
+                      className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm text-gray-200 hover:bg-gray-700"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(e) =>
+                          setDomainSlugs((prev) =>
+                            e.target.checked ? [...prev, d.slug] : prev.filter((s) => s !== d.slug)
+                          )
+                        }
+                        className="rounded border-gray-600 bg-gray-800"
+                      />
+                      {d.name}
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           )}
 
