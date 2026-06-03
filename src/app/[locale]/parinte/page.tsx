@@ -21,6 +21,7 @@ type Copy = {
   plansLead: string;
   plans: Plan[];
   priceNote: string;
+  promoNote: string;
   trialTitle: string;
   trialPoints: string[];
   trialNote: string;
@@ -48,7 +49,7 @@ const RO: Copy = {
     {
       name: "Family",
       tag: "1 părinte + copil",
-      price: "de la 19,90 lei / materie / lună",
+      price: "24,90 lei / materie / lună",
       points: [
         "Cont separat pentru copil + cont de părinte",
         "Vezi progresul, scorurile și unde greșește",
@@ -58,7 +59,7 @@ const RO: Copy = {
     {
       name: "Family Duo",
       tag: "2 părinți + copil",
-      price: "+ mic supliment fix",
+      price: "29,90 lei / materie / lună",
       points: [
         "Tot ce e în Family",
         "Al doilea părinte are cont propriu",
@@ -68,13 +69,23 @@ const RO: Copy = {
     {
       name: "Trio",
       tag: "Părinte + copil + meditator",
-      price: "+ supliment premium",
+      price: "39,90 lei / materie / lună",
       featured: true,
       points: [
         "Tot ce e în Family / Duo",
         "Meditatorul are cont propriu: vede progresul, testele și unde a greșit copilul",
         "Meditatorul își configurează notificările (escaladări, sumar de progres)",
         "Transparent: tu plătești inclusiv accesul meditatorului — meditatorul nu plătește nimic",
+      ],
+    },
+    {
+      name: "Family Trio",
+      tag: "Ambii părinți + copil + meditator",
+      price: "49,90 lei / materie / lună",
+      points: [
+        "Tot ce e în Trio",
+        "Ambii părinți au cont propriu, fiecare cu notificările lui",
+        "Meditatorul are cont propriu: vede progresul și greșelile copilului",
       ],
     },
     {
@@ -89,7 +100,9 @@ const RO: Copy = {
     },
   ],
   priceNote:
-    "Prețurile sunt orientative și se setează în panou. Reduceri: al 2-lea copil −25%, al 3-lea+ −40%; a 2-a materie −15%; plată anuală ≈ −2 luni. Oferte sezoniere pe parcurs.",
+    "O singură factură pe familie. Reduceri: al 2-lea copil −20%, al 3-lea+ −30%; a 2-a materie −15%, a 3-a+ −25%; plată anuală = 2 luni gratuite (plătești 10 luni).",
+  promoNote:
+    "🎁 Prețuri promoționale până la 31.08.2026 — toate pachetele au o reducere suplimentară de 25%. De la 1 septembrie 2026, prețurile cresc în consecință.",
   trialTitle: "Începe gratuit, fără card",
   trialPoints: [
     "7 zile gratuit",
@@ -122,7 +135,7 @@ const EN: Copy = {
     {
       name: "Family",
       tag: "1 parent + child",
-      price: "from 19.90 lei / subject / month",
+      price: "24.90 lei / subject / month",
       points: [
         "Separate account for the child + a parent account",
         "See progress, scores and where they get it wrong",
@@ -132,7 +145,7 @@ const EN: Copy = {
     {
       name: "Family Duo",
       tag: "2 parents + child",
-      price: "+ small flat add-on",
+      price: "29.90 lei / subject / month",
       points: [
         "Everything in Family",
         "The second parent gets their own account",
@@ -142,13 +155,23 @@ const EN: Copy = {
     {
       name: "Trio",
       tag: "Parent + child + tutor",
-      price: "+ premium add-on",
+      price: "39.90 lei / subject / month",
       featured: true,
       points: [
         "Everything in Family / Duo",
         "The tutor gets their own account: sees progress, the tests and where the child got it wrong",
         "The tutor configures their notifications (escalations, progress summary)",
         "Transparent: you pay for the tutor's access too — the tutor pays nothing",
+      ],
+    },
+    {
+      name: "Family Trio",
+      tag: "Both parents + child + tutor",
+      price: "49.90 lei / subject / month",
+      points: [
+        "Everything in Trio",
+        "Both parents get their own account, each with their own notifications",
+        "The tutor gets their own account: sees progress and the child's mistakes",
       ],
     },
     {
@@ -163,7 +186,9 @@ const EN: Copy = {
     },
   ],
   priceNote:
-    "Prices are indicative and set in the panel. Discounts: 2nd child −25%, 3rd+ −40%; 2nd subject −15%; annual ≈ −2 months. Seasonal offers along the way.",
+    "One bill per family. Discounts: 2nd child −20%, 3rd+ −30%; 2nd subject −15%, 3rd+ −25%; annual = 2 months free (you pay 10 months).",
+  promoNote:
+    "🎁 Promotional prices until 31.08.2026 — all packages get an extra 25% off. From 1 September 2026, prices increase accordingly.",
   trialTitle: "Start free, no card",
   trialPoints: [
     "7 days free",
@@ -272,6 +297,9 @@ export default async function ParintePage({ params }: { params: Promise<{ locale
             ))}
           </div>
           <p className="mt-4 text-center text-xs text-gray-500 max-w-2xl mx-auto">{c.priceNote}</p>
+          <div className="mt-4 mx-auto max-w-2xl rounded-xl border border-amber-500/40 bg-amber-500/5 p-3 text-center text-sm font-medium text-amber-200">
+            {c.promoNote}
+          </div>
         </section>
 
         {/* Free trial */}

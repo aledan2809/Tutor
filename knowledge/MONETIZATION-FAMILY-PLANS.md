@@ -1,7 +1,9 @@
 # etutor.ro — Monetizare & Planuri de familie (spec)
 
-> Sursa de adevăr pentru build-ul Părinte/Elev/Meditator. Prețurile de mai jos sunt
-> **placeholder-uri pe care le setează owner-ul** (config, nu hardcodate). Co-design 2026-06; build fazat.
+> Sursa de adevăr pentru build-ul Părinte/Elev/Meditator. Co-design 2026-06; build fazat.
+>
+> **Changelog**
+> - 2026-06-03: actualizat §2 + §3 cu pachetele LIVE (5 planuri: Elev de la 19,90 / Family 24,90 / Family Duo 29,90 / Trio 39,90 / Family Trio 49,90) + reducerile reale (copil #2 −20% / #3+ −30%; materie a 2-a −15% / a 3-a+ −25%; anual = 2 luni gratuite) + promo −25% până 31.08.2026. Aliniat cu `/preturi` (sursa canonică) + `/parinte` (corectat în aceeași sesiune). Prețurile sunt acum afișate hardcodat pe cele 2 pagini (config-driven la checkout = build viitor).
 
 ## 0. Poziționare (FĂCUT — Faza A, commit c0e1ae9)
 - Homepage-ul pune accent pe faptul că **testele EXISTĂ deja** (1.400+ grile verificate: BAC / Evaluare Națională / admitere / pe clase), NU pe „generează un test" (suna ad-hoc / a AI).
@@ -17,20 +19,23 @@
 DE CONSTRUIT (nou): **legătura Părinte↔Copil↔Meditator** + multi-părinte (nu există încă model Family/Guardian).
 
 ## 2. Planuri (cine + ce vede)
-| Plan | Conturi | Cine vede progresul | Uplift (exemplu — owner confirmă) |
+> **Prețuri LIVE 2026-06-03** — afișate pe `/preturi` + `/parinte` (RO+EN). Family confirmat 24,90.
+| Plan | Conturi | Cine vede progresul | Preț (RON / materie / lună) |
 |---|---|---|---|
-| **Self** | Elev | elevul | preț de bază pe materie |
-| **Family** | 1 Părinte + Copil | părinte + chasing/escaladare WhatsApp | cârlig (inclus) |
-| **Family Duo** | **2 Părinți** + Copil | ambii părinți, notificări configurate separat | mic flat (~+9 RON/lună) |
-| **Trio** | Părinte(i) + Copil + **Meditator** | + meditator (teste / greșeli / escaladări) | premium (~+29 RON/lună) |
+| **Self / Elev** | Elev | elevul | de la **19,90** |
+| **Family** | 1 Părinte + Copil | părinte + chasing/escaladare WhatsApp | **24,90** |
+| **Family Duo** | **2 Părinți** + Copil | ambii părinți, notificări configurate separat | **29,90** |
+| **Trio** | Părinte + Copil + **Meditator** | + meditator (teste / greșeli / escaladări) | **39,90** · *„Cel mai ales"* |
+| **Family Trio** | **2 Părinți** + Copil + **Meditator** | ambii părinți + meditator | **49,90** |
 
 Pagina Părinte TREBUIE să explice clar opțiunea **Trio** + faptul că **părintele plătește inclusiv pentru meditator** (transparent).
 
 ## 3. Axe de preț (best-practice „family" tip Spotify — atractiv, decizie ușoară)
-- **Unitate de bază**: materie/lună (placeholder 19.90 RON). Prețuri sezoniere deja în STRATEGY (sezon examene Feb–Iul, vacanță vară).
-- **Discount sibling** (o factură, mai mulți copii, mai ieftin/cap): copil #1 întreg · #2 −25% · #3+ −40%.
-- **Multi-materie / copil**: 1 întreg · a 2-a −15% · **All-inclusive** flat (placeholder 49 RON/copil/lună).
-- **Anual**: −2 luni (~−16%) + loialitate 15→30% ani consecutivi (STRATEGY).
+- **Unitate de bază**: materie/lună (de la 19,90 RON — vezi tabelul de planuri §2). Prețuri sezoniere deja în STRATEGY (sezon examene Feb–Iul, vacanță vară).
+- **Discount sibling** (o factură, mai mulți copii, mai ieftin/cap): copil #1 întreg · **#2 −20%** · **#3+ −30%**.
+- **Multi-materie / copil**: 1 întreg · **a 2-a −15%** · **a 3-a+ −25%**.
+- **Anual**: **2 luni gratuite** (plătești 10 luni) + loialitate 15→30% ani consecutivi (STRATEGY).
+- **Promo de lansare**: până la **31.08.2026**, toate pachetele au **−25% suplimentar**; de la 1 septembrie 2026 prețurile cresc în consecință.
 - **Psihologie**: evidențiat Family/Trio ca „Cel mai ales", preț/copil care scade vizibil, o singură factură, toggle Lunar/Anual cu economia afișată, charm pricing, free trial fără card.
 
 ## 4. Free + Trial → conversie
