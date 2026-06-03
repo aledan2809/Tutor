@@ -148,9 +148,17 @@ export default async function ExamPaperDetailPage({
                   </p>
                 ) : null}
 
+                {it.figureUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={it.figureUrl}
+                    alt={`Figură ${it.label}`}
+                    className="mt-2 max-h-72 rounded border border-gray-700 bg-white p-1"
+                  />
+                ) : null}
                 {it.hasFigure && it.figureNote ? (
                   <p className="mt-2 text-xs text-rose-300/80">
-                    <span className="text-gray-500">Figură: </span>
+                    <span className="text-gray-500">Figură{it.figureUrl ? " (descriere)" : ""}: </span>
                     {it.figureNote}
                   </p>
                 ) : null}

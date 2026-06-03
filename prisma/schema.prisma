@@ -1078,6 +1078,7 @@ model ExamItem {
   passageRef    String? // -> ExamPassage.ref; comma-separated list for multi-text items (e.g. "Textul 1, Textul 2") — consumers must split on ","
   hasFigure     Boolean  @default(false)
   figureNote    String? // descrierea figurii (pt extracție ulterioară); NU fabricăm imaginea
+  figureUrl     String? // poza figurii extrasă din PDF (ex: "/exam-figures/...png"); null = încă neextrasă
   autoGradable  Boolean  @default(false) // true doar MCQ/SHORT cu răspuns unic ȘI fără figură
   topic         String?
   createdAt     DateTime @default(now())

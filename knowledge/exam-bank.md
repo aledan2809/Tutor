@@ -1,6 +1,7 @@
 # Exam-Bank tier — official exam papers (ground-truth)
 
 ## Changelog
+- [2026-06-03] v0.3: Slice 3 — figuri + ecran elev. (a) Figuri: `ExamItem.figureUrl` (migrare `0017`), 11 figuri Matematică extrase din PDF cu PyMuPDF clip-rect (4uPDF folosește același fitz dar doar pagini întregi → extras direct local) în `public/exam-figures/`, atașate via `scripts/set-exam-figure-urls.mjs`, afișate în admin. (b) Ecran elev `/dashboard/exam-bank` (listă + `[paperId]` take) — itemi **sanitizați fără chei** (`sanitize.ts`), `<ExamBankTake>` (grilă/adevărat-fals/figură/deschis), `POST /api/exam-bank/[paperId]/score` corectează obiectivele server-side + dezvăluie baremul; rezultate cu notă/10 + recalcul live + auto-notare itemi deschiși. Sidebar „Simulări" (RO). **Stateless** (fără persistența încercării — slice 4).
 - [2026-06-03] v0.2: Slice 2 — barem scoring engine (`src/lib/exam-bank/score.ts`: `scoreExamPaper` + `classifyPaperPoints`, pur + 11/11 smoke) + admin read-only browser (`/dashboard/admin/exam-bank` listă + `[paperId]` detaliu, RO, nav link „Bancă examene"). Engine: obiective (MCQ/TF_GRID) auto-gradate; deschise = self-score; notă /10 + extrapolare „estimare" pe subset. NU e încă legat de un ecran de elev (slice 3, după figuri).
 - [2026-06-03] v0.1: Slice 1 — schema (ExamPaper/ExamPassage/ExamItem) + migration 0016 + import of EN VIII 2026 Model (Matematică + Limba și literatura română).
 

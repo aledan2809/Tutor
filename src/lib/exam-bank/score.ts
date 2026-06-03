@@ -14,6 +14,7 @@
  */
 
 export interface ExamItemForScoring {
+  id?: string; // unique id; answers are keyed by answerKey(item) = id ?? "section::label"
   label: string;
   section: string;
   type: string; // "MCQ" | "TF_GRID" | "SHORT" | "FILL" | "OPEN"
@@ -21,6 +22,12 @@ export interface ExamItemForScoring {
   correctAnswer?: string | null;
   rubric?: Array<{ label?: string; points?: number; answer?: string }> | null;
   hasFigure?: boolean | null;
+}
+
+/** The key under which an item's answer is stored. Unique per item even when `label`
+ *  repeats across sections (Math numbers 1..6 in each of Subiectul I/II/III). */
+export function answerKey(it: { id?: string | null; section: string; label: string }): string {
+  return it.id ?? `${it.section}::${it.label}`;
 }
 
 export type AnswerInput =
@@ -31,6 +38,7 @@ export type AnswerInput =
 export type GradedHow = "auto" | "self" | "ungraded";
 
 export interface ScoredItem {
+  id?: string;
   label: string;
   section: string;
   awarded: number;
@@ -108,8 +116,8 @@ export function scoreExamPaper(
   const itemPointCap = maxScore - officeBonus;
 
   const scored: ScoredItem[] = items.map((it) => {
-    const { awarded, graded } = gradeItem(it, answers[it.label]);
-    return { label: it.label, section: it.section, awarded, max: it.points, graded };
+    const { awarded, graded } = gradeItem(it, answers[answerKey(it)]);
+    return { id: it.id, label: it.label, section: it.section, awarded, max: it.points, graded };
   });
 
   const rawPoints = scored.reduce((a, s) => a + s.awarded, 0);
