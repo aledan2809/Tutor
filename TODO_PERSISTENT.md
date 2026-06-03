@@ -81,6 +81,13 @@ Paginile sunt LIVE (200) și se leagă între ele, dar **nu-s în meniul de sus*
 
 ---
 
+## [ ] 🎓 Banding domenii pe clase — roadmap (creat 2026-06-03)
+
+Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **Evaluare Națională**, apoi **Bacalaureat**.
+- [x] **Matematica** — DONE 2026-06-03 (`scripts/band-matematica.mjs`): domeniu „Matematica"→„Matematica V-VIII" (169 grile, clasa V) + creat „Matematica IX-XII" gol; subject aliniat. Backup `/root/backups/tutor-Domain-pre-band-2026-06-03.sql`.
+- [ ] **Română** — la fel ca Matematica (V-VIII + IX-XII).
+- [ ] Apoi: **Istorie / Geografie / Biologie / Chimie / Fizică de liceu (IX-XII)**.
+
 ## [ ] 🐛 Opțiuni cu literă dublată („A. a) …") + normalizare date publicate (creat 2026-06-03)
 
 **Confirmat live** (cele 181 grile Matematica publicate azi). Opțiunile sunt stocate CU prefix de literă inclus — `["a) 10 exerciții", "b) 15 exerciții", …]` — iar AMBELE randere mai adaugă o literă:
