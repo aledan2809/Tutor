@@ -72,7 +72,9 @@ Conditional render în `src/components/sidebar.tsx` (`HIDDEN_NAV` set + filtru `
 
 ---
 
-# 👪 ROL 2 — PĂRINTE  (mockup propus; feedback parțial)
+# 👪 ROL 2 — PĂRINTE  (✅ SIDEBAR DONE 2026-06-04 · feature-uri = sesiuni dedicate)
+
+> **✅ Sidebar restructure LIVE** (commit `e884255`): cont WATCHER pur vede doar Panou · Monitorizare · Alerte · Invită un prieten · Notificări · Setări (verificat autentificat etutor.ro — 6 items, fluxul de învățare ascuns). Feature-urile de mai jos (sinteză AI, baterie remedială, alerte configurabile, earnings) = 🔨 sesiuni dedicate, NU în restructurarea de sidebar.
 
 **Flux**: login → lista copiilor (sau direct copilul) → sinteză + zone de reparat + evoluție → primește alerte → (recomandă altor părinți).
 

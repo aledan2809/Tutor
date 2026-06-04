@@ -250,7 +250,10 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
   4. **Calendar + Domenii la elev = PĂSTRĂM** (vizibile).
   - Sidebar final ELEV: Panou · Practică · Simulări · Progresul meu · Domenii · Calendar · Invită un prieten · Notificări · Setări. (Lecții/Evaluare/Examene/Bibliografie deja ascunse global.)
 
-**PĂRINTE / MEDITATOR**: mockups detaliate în design doc; feedback parțial primit (Monitorizare = rapoarte/sinteze/exemple concrete zone-cu-probleme; mockup detaliat pe toate sub-funcțiile instructor). Decizii încă deschise: Recomandă-părinte (comision vs credit), Conținut-meditator (Practică vs Întrebări). Implementare DUPĂ ELEV.
+**🟢 PĂRINTE — SIDEBAR RESTRUCTURE DONE 2026-06-04** (commit `e884255`, rol-2): conditional render în `src/components/sidebar.tsx` — un cont **WATCHER pur** (`!superadmin && isWatcher && !isInstructor && !isStudent`) primește meniul focalizat **Panou · Monitorizare · Alerte · Invită un prieten · Notificări · Setări** (6 items, ordine per mockup). Fluxul de învățare al elevului (Practică/Simulări/Progresul meu/Domenii/Calendar) e ascuns din nav — **rutele rămân funcționale** (reversibil). SuperAdmin + instructor + elev păstrează meniul actual. **Verificat autentificat pe etutor.ro** (Playwright, 3 roluri): PĂRINTE=6 items exact ✅ · ELEV=9 items neschimbat (no regression) ✅ · SUPERADMIN=13 items meniu complet (no regression) ✅. Conturi test: `test_watcher@test.com` (WATCHER pur) + `test_student@test.com` (STUDENT pur), parole în `Master/credentials/tutor-test-users.env`.
+  - **NB feature-uri PĂRINTE rămase = sesiuni dedicate** (🔨 de construit, NU în rol-2 sidebar): Monitorizare-sinteză narativă AI + exemple concrete zone-cu-probleme · **baterie teste remediale AI** (flagship) · tag-uire la import · Alerte configurabile (oră / 6/12/24/48h) · Recomandă-părinte = motor earnings unificat (item §257). Vezi design doc + capabilități §188.
+
+**MEDITATOR (rol 3)**: mockup detaliat în design doc; feedback parțial (Mesaje doar in-app; câștiguri BANI explicate în pagina lui; Rapoarte narativ). Decizii deschise per design doc. **NEXT pe restructurare** (ordine elev✓→părinte✓→meditator). Implementare DUPĂ verificarea părinte (done).
 
 ---
 
