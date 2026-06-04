@@ -1,4 +1,25 @@
 # Project Status - Tutor
+Last Updated: 2026-06-04 (exam-bank 2021 batch Test_05..15 + Test_14 done)
+
+## Session 2026-06-04 — Exam-bank CNCE import: 2021 batch complete (Test_03..15)
+
+### Done
+- Imported EN VIII 2021 Mate training tests **Test_05..15** (11 papers) end-to-end via the proven playbook recipe. Test_03/04 done earlier same day; Test_02 the prior session.
+- Each paper: transcribe verbatim (barem = ground truth) → `scripts/import-exam-mate-2021-test-NN.mjs` (copy template) → `--validate` → fig_inspect bboxes → **figures via 4uPDF `/api/extract-region`** @ 300 DPI (tested 4uPDF backend functionality per user request) → montage-verify → commit+push → VPS2 pull + prod import + `pm2 restart tutor` → **authenticated score verify on etutor.ro** (all 60/60 + finalCheck) → **mesh `/review`** (2 agents: math re-derivation vs barem + logic/template) — all returned `[]`.
+- Commits: T05 `108963f`+`f64ddbe`, T06 `afb9f47`, T07 `4d65d52`, T08 `07050e1`, T09 `6def162`, T10 `8a81b94`, T11 `8c296e3`, T12 `8f11206`, T13 `469d677`, T14 `7ef02ee`, T15 `03f1b30`; TODO sync `317c4be`.
+- **Prod DB: 40 papers / 720 items** (2021 Test_02..15 complete). Backup pre-batch `/root/backups/tutor-exambank-pre-test14-2026-06-04.dump`.
+- Validated 4uPDF extract-region across figure types incl. **vector pie chart** (T15 s1-6) — renders fine, no raster xref needed.
+
+### Pending
+- **2022 Test_01..06** (6 papers) — user chose to stop here; same recipe. 4uPDF venv `/tmp/4updf-venv` + token `/tmp/figtoken.txt` + backend on :8099 left running for resume.
+- Bigger Tutor feature items + homepage demo restriction (unchanged in TODO_PERSISTENT).
+
+## Lessons Learned (sesiunea 2026-06-04)
+- **L03** — 4uPDF `/api/extract-region` `page` param = physical PDF page (= fig_inspect PAGE N, no offset); renders vector figures (pie chart) too; montage-verify is the cheap catch. (knowledge/lessons-learned.md)
+
+---
+
+# Project Status - Tutor
 Last Updated: 2026-04-22 (Anto Approve/Delete permissions fix)
 
 ## Session 2026-04-22 (late) — Bug fix: Anto couldn't Approve/Delete questions
