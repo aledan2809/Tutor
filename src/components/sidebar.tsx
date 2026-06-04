@@ -119,6 +119,28 @@ export function Sidebar({ user }: SidebarProps) {
     ];
   }
 
+  // §213 rol 3 — MEDITATOR: un cont INSTRUCTOR pur (nu admin/superadmin/elev/părinte) primește
+  // hub-ul Instructor + preview conținut (Practică/Simulări). Conceptele de elev (Progresul meu/
+  // Domenii/Calendar) sunt ascunse din nav — rutele rămân funcționale. Sub-funcțiile Studenți/
+  // Grupuri/Obiective/Mesaje/Analiză/Rapoarte trăiesc în pagina /dashboard/instructor. „Invită un
+  // prieten" rămâne vizibil (meditatorul câștigă din referral — decizie user 2026-06-04). Ordine
+  // per mockup design (knowledge/menu-restructure-mockups.md ROL 3).
+  const isInstructorRole =
+    user.enrollments?.some((e) => e.roles.includes("INSTRUCTOR"));
+  const isMeditatorView =
+    !user.isSuperAdmin && !isAdmin && isInstructorRole && !isStudent && !isWatcher;
+  if (isMeditatorView) {
+    visibleNavItems = [
+      { href: "/dashboard", label: t("dashboard") },
+      { href: "/dashboard/instructor", label: t("instructor") },
+      { href: "/dashboard/practice", label: t("practice") },
+      { href: "/dashboard/exam-bank", label: "Simulări" },
+      { href: "/dashboard/referrals", label: t("referrals") },
+      { href: "/dashboard/notifications", label: t("notifications") },
+      { href: "/dashboard/settings", label: t("settings") },
+    ];
+  }
+
   const sidebarContent = (
     <>
       <div className="flex h-16 items-center justify-between border-b border-gray-800 px-6">

@@ -81,7 +81,7 @@ export function StudentProgressCard({ student, linkBase }: StudentProgressCardPr
         </div>
         <div className="text-center">
           <p className="text-lg font-bold text-white">{student.gamification.totalXp}</p>
-          <p className="text-xs text-gray-500">XP</p>
+          <p className="text-xs text-gray-500">{t("points")}</p>
         </div>
         <div className="text-center">
           <p className="text-lg font-bold text-white">{student.progress.topicsStudied}</p>
