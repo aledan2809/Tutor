@@ -256,7 +256,9 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 
 ## [ ] 🎁 Referral — model CREDIT pentru ELEV (înlocuiește comisionul) — creat 2026-06-04
 
-**Decizie user 2026-06-04** (în restructurare meniuri): comisionul 50% perpetuu pare schemă piramidală → **doar Creatorii (§286) îl păstrează**; elevii primesc **credit lună-gratis**.
+**Decizie user 2026-06-04** (în restructurare meniuri): comisionul 50% perpetuu pare schemă piramidală → **doar Creatorii (§286) îl păstrează**; elevii/părinții primesc **credit**.
+
+**✅ MODEL FINAL UNIFICAT (user 2026-06-04)**: referral clienți (elev + părinte, indiferent cine invită) = **50% credit pe primele 3 luni** din abonamentul invitatului; se acumulează **la familie sau la copil**; creditul acoperă abonamentul până se epuizează (aritmetica confirmată: luna-2 = 30, user a recunoscut eroarea). Meditator/creator = același 50% dar **BANI** (payout), nu credit. Cele 2 întrebări de mai jos = REZOLVATE. (Reziduu minor: meditator pe abonament MINIM vs client pe abonament ACTUAL — de aliniat la implementare.) Matricea completă în `knowledge/menu-restructure-mockups.md`. Quote-urile verbatim de mai jos = trail al deciziei.
 
 **Cerință user (verbatim, NU reformulată)**:
 > e prea mult comision perpetuu - pare schema piramidala. Punem pentru invitat 1 luna gratis (pe a doua, ca pe prima sa si-o plateasca imediat) si 1 luna gratis pentru cel care a facut invitatia (cu conditia ca cel care a facut invitatia sa aiba macar o luna platita. La a doua invitatie care se concretizeaza se transforma iar in credit pe inca o luna si tot asa. Poate ajunge la un moment dat cu o luna platita sa aiba chiar si credite pentru un an intreg - va fi un ambasador pentru aplicatie

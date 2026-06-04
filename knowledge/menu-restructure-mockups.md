@@ -64,7 +64,9 @@ Conditional render în `src/components/sidebar.tsx` (`HIDDEN_NAV` set + filtru `
 - Acumulare: a 2-a invitație concretizată → +1 lună, ș.a.m.d. Plafon practic ~12 luni (un an) → user devine **ambasador**.
 - Comisionul 50% perpetuu **rămâne DOAR pentru programul Creatori** (§286), NU pentru elevi.
 
-**Status azi**: codul actual (`src/lib/referral.ts`) face comision 50% cash perpetuu + voucher −25% pentru invitat. Modelul de **credit/lună-gratis NU există** — e muncă nouă (mecanism de credit lună aplicat la subscription + landing page cu detalii). Vezi TODO item dedicat.
+> **⚠️ SUPERSEDAT 2026-06-04** — modelul „1 lună gratis" de mai sus a fost **unificat**: vezi „Matricea câștigurilor" — referral final = **50% credit pe primele 3 luni** din abonamentul invitatului, identic pentru elev și părinte. Textul de mai sus se păstrează ca trail al deciziei.
+
+**Status azi**: codul actual (`src/lib/referral.ts`) face comision 50% cash perpetuu + voucher −25% pentru invitat. Modelul de **credit NU există** — e muncă nouă (mecanism de credit aplicat la subscription + landing page cu detalii). Vezi TODO item dedicat.
 
 ### Decizie 3 — Notificări (elev) = doar istoric, rămâne. Dezvoltările → Setări → Notificări (vezi roadmap pachet/delegare mai jos).
 
@@ -100,9 +102,8 @@ Conditional render în `src/components/sidebar.tsx` (`HIDDEN_NAV` set + filtru `
 **Cerință user (verbatim, NU reformulată)**:
 > da, OK cu 50% castig din echivalentul primei luni, dar il facem tot sub forma de credite (ex. Invitatul a platit un abonament de 100 de lei/luna - chiar daca a platit in avans pe 1 an intreg, iar parintele care a invitat primeste credit de 50 de lei. Daca abonamentul sau pe luna este de 75 de lei, va mai plati doar 25 de lei in acea luna si trecem 50 de lei ca si discount. Daca face 3 invitatii de cate 80 de lei fiecare si aceia au platit, atunci i se cumuleaza un credit de 120 de lei pe care ii va folosi in 2 luni (in prima nu va plati nimic din cei 75 de lei, iar in a doua va plati doar 45 de lei).
 
-- Mecanică: credit = **50% din echivalentul PRIMEI luni** a invitatului (chiar dacă invitatul plătește în avans pe 1 an), acumulat și aplicat pe abonamentul propriu lunar până se epuizează.
-- ⚠️ **De confirmat — aritmetică**: cu regula „creditul acoperă integral abonamentul până se epuizează", exemplul 3×80→120 credit / 75 lei abonament dă: luna 1 = 0 (rămân 45), luna 2 = 75−45 = **30 lei** (user a scris 45). De fixat regula exactă.
-- ❓ **De confirmat — diferă de ELEV**: elev = **1 lună gratis** (≈100% din lună); părinte = **50% din prima lună** credit. Intenționat diferite pe persona sau unificăm pe 50%-credit pentru toți?
+- Mecanică (versiunea inițială, păstrată ca trail): credit = 50% din echivalentul PRIMEI luni a invitatului, acumulat și aplicat pe abonamentul propriu lunar până se epuizează.
+- ✅ **REZOLVAT 2026-06-04**: (1) **aritmetică confirmată** — regula = creditul acoperă abonamentul până se epuizează (luna 2 = 75−45 = **30**, nu 45; user a confirmat eroarea de calcul). (2) **UNIFICAT cu elev** → vezi „Matricea câștigurilor": referral final = **50% credit pe primele 3 luni** din abonamentul invitatului, identic elev și părinte, acumulat la familie sau copil. (Versiunea „50% din PRIMA lună" e înlocuită de „50% pe primele 3 luni".)
 
 ### Notificări (istoric) ✅ — **5 canale** = Push (web/browser) · WhatsApp · SMS · Email · Apel (telefonic); **fus** = fus orar (ca orele de liniște să se aplice corect). · Setări (generic azi) — vezi roadmap pachet/delegare.
 
@@ -148,16 +149,22 @@ Conditional render în `src/components/sidebar.tsx` (`HIDDEN_NAV` set + filtru `
 
 ---
 
-## 💰 Matricea câștigurilor pe roluri (sinteză 2026-06-04)
-| Rol | Mecanism | Reward | Tip | Durată |
-|---|---|---|---|---|
-| ELEV | invită prieten | 1 lună gratis (ambii) | **credit** | one-shot/invitație (≥1 lună plătită) |
-| PĂRINTE | invită părinte | 50% din prima lună a invitatului | **credit lei** | one-shot, acumulat pe abonament propriu |
-| MEDITATOR | invită elev/părinte | 50% din abonament minim/elev | **bani** | primele 3 luni |
-| MEDITATOR | conținut auxiliar (pachet) | 50% din plata elev/părinte | **bani** | **perpetuu** |
-| CREATOR (§286) | conținut | 50% | **bani** | **perpetuu** |
+## 💰 Matricea câștigurilor pe roluri (UNIFICAT 2026-06-04)
+**Cerință user (verbatim, NU reformulată)** — unificarea referral elev+părinte:
+> da, era deliberat - in functie de rol, era diferit. Insa, ce facem daca si elevul si parintele/parintii fac invitatii si ele se concretizeaza - ar fi mai bine sa se cumuleze ca si credite pe familie, dar ii confuzam pe oameni. Hai mai bine sa unificam la echivalentul a 50% credite pe primele 3 luni din abonamentul pe care il face invitatul, indiferent daca e parinte sau copil. Se cumuleaza la familie sau la copil. Si e in linie si cu castigul meditatorului (doar ca el nu plateste, ci incaseaza banii in cont)
 
-**Split cheie**: ELEV+PĂRINTE = **credit** (clienți, loialitate); MEDITATOR+CREATOR = **bani/payout** (profesioniști, monetizare). Toate au baza 50%, dar tip + durată diferă. → necesită **un motor unificat de earnings/credit** cu mai multe tipuri de reward (free-month, credit-lei, %-temporar, %-perpetuu).
+| Rol | Mecanism | Reward | Tip | Durată | Acumulare |
+|---|---|---|---|---|---|
+| **ELEV + PĂRINTE** (clienți) | invită (oricine) | 50% din abonamentul invitatului | **credit** | primele 3 luni | la familie SAU la copil |
+| MEDITATOR | invită elev/părinte | 50% din abonament minim | **bani** | primele 3 luni | cont meditator |
+| MEDITATOR | conținut auxiliar (pachet) | 50% din plata elev/părinte | **bani** | **perpetuu** | cont meditator |
+| CREATOR (§286) | conținut | 50% | **bani** | **perpetuu** | cont creator |
+
+- **Model referral UNIFICAT**: 50% × primele 3 luni din abonamentul invitatului, **indiferent de rolul invitatorului** (înlocuiește vechile „1-lună-gratis-elev" + „50%-prima-lună-părinte").
+- **Split clienți vs profesioniști**: elev/părinte = **CREDIT** (aplicat pe abonament, acumulat la familie sau copil); meditator/creator = **BANI** (payout în cont).
+- **Aritmetică confirmată (user 2026-06-04)**: creditul acoperă abonamentul până se epuizează (ex. 120 credit / 75 abonament → luna 1 = 0, luna 2 = 75−45 = **30**, nu 45).
+- ⚠️ **Reziduu minor de confirmat**: meditator = 50% din abonament **MINIM**; client = 50% din abonament **ACTUAL** al invitatului. Intenționat diferit (minim vs actual) sau aliniem?
+- → toate variantele cer **un motor unificat de earnings/credit** (credit-aplicat-pe-abonament vs payout-cash; durată 3-luni vs perpetuu).
 
 ---
 
@@ -167,7 +174,7 @@ Conditional render în `src/components/sidebar.tsx` (`HIDDEN_NAV` set + filtru `
 2. **🔨🏆 Baterie de teste remediale (AI) — PUNCTUL FORTE** — AI caută + creează teste exact pe punctele slabe ale copilului (vezi Monitorizare). Depinde de #4 (tag-uire fină).
 3. **🔨🏗️ Tag-uire la IMPORT** (decizie arhitecturală) — concept fin („cos 30°", „discriminant") generat de AI la ingest, nu post-hoc. Face #1 + #2 precise. Conectează Content Quality Mesh §278 + §188. **Premisă pentru sinteză + baterie remedială.**
 4. **🔨 Logica de escaladare/praguri** — pentru Alerte (nivel configurabil de părinte: oră / 6/12/24/48h; escaladarea NU după 4 zile = doar în sumar).
-5. **🔨 Motor unificat de earnings/credit** — multi-rol, multi-tip (vezi „Matricea câștigurilor"): elev=1 lună gratis (credit) · părinte=50% prima lună (credit lei) · meditator=50% abonament minim ×3 luni (bani) · creator=50% perpetuu (bani §286). Înlocuiește comisionul universal de azi.
+5. **🔨 Motor unificat de earnings/credit** — multi-rol, multi-tip (vezi „Matricea câștigurilor"): elev+părinte = **50% × primele 3 luni din abonamentul invitatului, ca CREDIT** (acumulat la familie sau copil) · meditator = 50% abonament minim ×3 luni (bani) · meditator conținut = 50% perpetuu (bani) · creator = 50% perpetuu (bani §286). Înlocuiește comisionul universal de azi.
 6. **🔨 Conținut auxiliar meditator (marketplace + revenue-share)** — meditatorul publică materiale auxiliare vândute prin pachet → 50% perpetuu (bani). Explicat clar în pagina lui. Conținut nou + abonare pe pachet + split la plată.
 7. **🔨 Setări → Notificări: pachet + delegare** (vezi roadmap mai jos).
 
