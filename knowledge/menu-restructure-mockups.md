@@ -143,8 +143,8 @@ Conditional render în `src/components/sidebar.tsx` (`HIDDEN_NAV` set + filtru `
 > continut - Practica - instructor questions - daca sunt anumite instructiuni pe care le face/selecteaza Meditatorul e OK. Daca insa discutam despre materiale auxiliare (continut pus direct de catre meditator) la care se aboneaza elevul/studentul sau aboneaza parintele printr-un pachet, atunci acela e un castig suplimentar perpetuu pentru meditator cu 50% din cat plateste elevul sau parintele. Trebuie explicat clar in pagina sa de meditator.
 
 - **Mesaje DOAR in-app** (fără email/WA/SMS).
-- **Câștig 1 — Invită și câștigă**: 50% din **abonamentul minim**, per elev, în **primele 3 luni** de plată ale elevului/părintelui (după caz). = **BANI**.
-- **Câștig 2 — Conținut auxiliar**: materiale puse direct de meditator, la care elevul/părintele se abonează printr-un **pachet** → câștig suplimentar **PERPETUU = 50%** din cât plătește elevul/părintele. = **BANI**. (Distinct de instructor-questions pe care le selectează/creează ca parte din predare = fără plată extra.)
+- **Câștig 1 — Invită și câștigă**: 50% din **abonamentul invitatului** (aliniat cu clienții; NU „minim"), per elev, în **primele 3 luni** de plată ale elevului/părintelui (după caz). = **BANI**.
+- **Câștig 2 — Conținut** = **ACELAȘI mecanism ca Creator §286** (nu unul separat): materiale puse direct de meditator, abonate prin pachet → 50% **PERPETUU** din plata cumpărătorului = **BANI**. Meditatorul-care-publică = creator. (Distinct de instructor-questions pe care le selectează/creează ca parte din predare = fără plată extra.)
 - **Trebuie explicat CLAR în pagina lui de meditator.**
 
 ---
@@ -156,15 +156,15 @@ Conditional render în `src/components/sidebar.tsx` (`HIDDEN_NAV` set + filtru `
 | Rol | Mecanism | Reward | Tip | Durată | Acumulare |
 |---|---|---|---|---|---|
 | **ELEV + PĂRINTE** (clienți) | invită (oricine) | 50% din abonamentul invitatului | **credit** | primele 3 luni | la familie SAU la copil |
-| MEDITATOR | invită elev/părinte | 50% din abonament minim | **bani** | primele 3 luni | cont meditator |
-| MEDITATOR | conținut auxiliar (pachet) | 50% din plata elev/părinte | **bani** | **perpetuu** | cont meditator |
-| CREATOR (§286) | conținut | 50% | **bani** | **perpetuu** | cont creator |
+| MEDITATOR | invită elev/părinte | 50% din abonamentul invitatului | **bani** | primele 3 luni | cont meditator |
+| **CREATOR** (= și meditatorul care publică conținut) | conținut auxiliar (pachet) | 50% din plata cumpărătorului | **bani** | **perpetuu** | cont |
 
 - **Model referral UNIFICAT**: 50% × primele 3 luni din abonamentul invitatului, **indiferent de rolul invitatorului** (înlocuiește vechile „1-lună-gratis-elev" + „50%-prima-lună-părinte").
 - **Split clienți vs profesioniști**: elev/părinte = **CREDIT** (aplicat pe abonament, acumulat la familie sau copil); meditator/creator = **BANI** (payout în cont).
 - **Aritmetică confirmată (user 2026-06-04)**: creditul acoperă abonamentul până se epuizează (ex. 120 credit / 75 abonament → luna 1 = 0, luna 2 = 75−45 = **30**, nu 45).
-- ⚠️ **Reziduu minor de confirmat**: meditator = 50% din abonament **MINIM**; client = 50% din abonament **ACTUAL** al invitatului. Intenționat diferit (minim vs actual) sau aliniem?
-- → toate variantele cer **un motor unificat de earnings/credit** (credit-aplicat-pe-abonament vs payout-cash; durată 3-luni vs perpetuu).
+- ✅ **Bază aliniată (user 2026-06-04)**: TOATE referral = 50% din abonamentul **ACTUAL** al invitatului (nu „minim"). Reziduul minim-vs-actual = REZOLVAT.
+- ✅ **Conținut = UN singur mecanism (user 2026-06-04)**: „meditator conținut auxiliar" și „Creator §286" sunt ACELAȘI lucru (50% perpetuu pe plata cumpărătorului) — NU se plătește de 2 ori. Meditatorul care publică conținut = creator.
+- **→ doar 2 TIPURI de earning**: (A) **Referral** = 50% din abonamentul invitatului, primele 3 luni (credit la clienți / bani la meditator); (B) **Conținut** = 50% din plata cumpărătorului, perpetuu, bani (creator/meditator-publică). Ambele cer **un motor unificat de earnings/credit**.
 
 ### Condiție esențială de acumulare (user 2026-06-04)
 **Cerință user (verbatim, NU reformulată)**:
@@ -191,8 +191,8 @@ Conditional render în `src/components/sidebar.tsx` (`HIDDEN_NAV` set + filtru `
 2. **🔨🏆 Baterie de teste remediale (AI) — PUNCTUL FORTE** — AI caută + creează teste exact pe punctele slabe ale copilului (vezi Monitorizare). Depinde de #4 (tag-uire fină).
 3. **🔨🏗️ Tag-uire la IMPORT** (decizie arhitecturală) — concept fin („cos 30°", „discriminant") generat de AI la ingest, nu post-hoc. Face #1 + #2 precise. Conectează Content Quality Mesh §278 + §188. **Premisă pentru sinteză + baterie remedială.**
 4. **🔨 Logica de escaladare/praguri** — pentru Alerte (nivel configurabil de părinte: oră / 6/12/24/48h; escaladarea NU după 4 zile = doar în sumar).
-5. **🔨 Motor unificat de earnings/credit** — multi-rol, multi-tip (vezi „Matricea câștigurilor"): elev+părinte = **50% × primele 3 luni din abonamentul invitatului, ca CREDIT** (acumulat la familie sau copil) · meditator = 50% abonament minim ×3 luni (bani) · meditator conținut = 50% perpetuu (bani) · creator = 50% perpetuu (bani §286). Înlocuiește comisionul universal de azi. **Accruează DOAR pe plată încasată (pro-rata, lună de lună); suportă CLAWBACK la refund (storno credit/bani — inclusiv recuperare credit deja consumat). Hold 30 zile existent. Dependență Legal (legal.knowbest.ro) pentru politica refund/retragere.**
-6. **🔨 Conținut auxiliar meditator (marketplace + revenue-share)** — meditatorul publică materiale auxiliare vândute prin pachet → 50% perpetuu (bani). Explicat clar în pagina lui. Conținut nou + abonare pe pachet + split la plată.
+5. **🔨 Motor unificat de earnings/credit** — DOAR 2 tipuri (vezi „Matricea câștigurilor"): **(A) Referral** = 50% din abonamentul invitatului, primele 3 luni — credit la elev+părinte (acumulat la familie/copil), bani la meditator; **(B) Conținut** = 50% din plata cumpărătorului, perpetuu, bani (creator = și meditatorul care publică, ACELAȘI mecanism §286). Înlocuiește comisionul universal de azi. **Accruează DOAR pe plată încasată (pro-rata, lună de lună); suportă CLAWBACK la refund (storno credit/bani — inclusiv recuperare credit deja consumat). Hold 30 zile existent. Dependență Legal (legal.knowbest.ro) pentru politica refund/retragere.**
+6. **🔨 Conținut creator/meditator (revenue-share §286)** — cine publică materiale auxiliare vândute prin pachet (creator SAU meditator) → 50% perpetuu (bani), ACELAȘI mecanism (nu se plătește de 2 ori). Conținut nou + abonare pe pachet + split la plată.
 7. **🔨 Setări → Notificări: pachet + delegare** (vezi roadmap mai jos).
 
 # Roadmap — Setări → Notificări (developments, NU în meniul Notificări)
