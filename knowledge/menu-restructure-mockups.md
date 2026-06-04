@@ -111,7 +111,9 @@ Conditional render în `src/components/sidebar.tsx` (`HIDDEN_NAV` set + filtru `
 
 ---
 
-# 👨‍🏫 ROL 3 — MEDITATOR  (mockup propus; feedback parțial)
+# 👨‍🏫 ROL 3 — MEDITATOR  (✅ SIDEBAR DONE 2026-06-04 · feature-uri = sesiuni dedicate)
+
+> **✅ Sidebar restructure LIVE** (commit `915f7a8`): cont INSTRUCTOR pur vede Panou · Instructor (hub) · Practică · Simulări · **Invită un prieten** · Notificări · Setări (7 items, verificat autentificat etutor.ro). „Invită un prieten" = vizibil (decizie user 2026-06-04 — meditatorul câștigă din referral). De-anglicizare „XP→Puncte" aplicată în `StudentProgressCard` (partajat cu părinte). Feature-urile de mai jos (mesaje in-app, rapoarte narativ, sinteză AI, pagina câștiguri) = 🔨 sesiuni dedicate.
 
 **Flux**: login → hub Instructor (Studenți, Grupuri, Obiective, Mesaje, Analiză, Rapoarte) → preview conținut → comunică.
 
