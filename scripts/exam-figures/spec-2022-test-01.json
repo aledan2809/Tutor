@@ -1,0 +1,20 @@
+{
+  "pdf": "~/Downloads/Temp/tutor eval nat/pro-matematica2/2022_ENVIII_matematica_Test_01.pdf",
+  "dpi": 300,
+  "outdir": "public/exam-figures",
+  "tag": "2022-test-01",
+  "endpoint": "http://localhost:8099/api/extract-region",
+  "token_file": "/tmp/figtoken.txt",
+  "page_w": 595, "page_h": 842, "pad": 3,
+  "figures": [
+    {"name": "en-viii-2022-mate-test-01-s2-1", "page": 3, "bbox": [384, 709, 530, 723]},
+    {"name": "en-viii-2022-mate-test-01-s2-2", "page": 4, "bbox": [419, 86, 539, 183]},
+    {"name": "en-viii-2022-mate-test-01-s2-3", "page": 4, "bbox": [376, 254, 548, 374]},
+    {"name": "en-viii-2022-mate-test-01-s2-4", "page": 4, "bbox": [438, 392, 553, 504]},
+    {"name": "en-viii-2022-mate-test-01-s2-5", "page": 4, "bbox": [445, 509, 546, 615]},
+    {"name": "en-viii-2022-mate-test-01-s2-6", "page": 4, "bbox": [435, 657, 543, 766]},
+    {"name": "en-viii-2022-mate-test-01-s3-4", "page": 7, "bbox": [460, 112, 545, 244]},
+    {"name": "en-viii-2022-mate-test-01-s3-5", "page": 7, "bbox": [431, 594, 544, 685]},
+    {"name": "en-viii-2022-mate-test-01-s3-6", "page": 8, "bbox": [347, 525, 540, 705]}
+  ]
+}
