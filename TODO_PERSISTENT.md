@@ -220,11 +220,16 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 - **Au conținut**: Practică (question bank), Examene/Simulări/Evaluare (exam-bank EN VIII Mate — 22 papers / 396 items), Progres, Gamificare, Setări, Notificări/Alerte, Invită & Câștigă (feature referral), Monitorizare (părinte/meditator).
 - **Sărac/gol**: Lecții (Lessons — puține/0), Bibliografie (puține/0), Domenii (8 domenii dar doar 3 cu grile publicate, restul goale).
 
-**Plan sesiune nouă**:
-1. Audit per-item: ce model/tabel îl alimentează + count real pe prod.
+**ORDINE OBLIGATORIE pe roluri (cerută explicit user 2026-06-04)**: **(1) ELEV mai întâi** → **(2) PĂRINTE** → **(3) MEDITATOR**. Se face un rol complet (audit + ascundere + verificare) ÎNAINTE de a trece la următorul; nu se sar etape, nu se lucrează roluri în paralel.
+
+**Plan sesiune nouă (se repetă identic pentru fiecare rol, în ordinea de mai sus)**:
+1. Audit per-item: ce model/tabel îl alimentează + count real pe prod (pentru rolul curent).
 2. Ascunde temporar (feature flag / conditional render în sidebar) item-urile cu 0 conținut — NU șterge rute/cod.
 3. Decizie punctuală per item ascuns (populăm / unificăm / scoatem definitiv).
-4. Aplică per rol (elev / părinte / meditator) — fiecare rol vede doar ce e relevant + are conținut.
+4. Verifică pe prod că rolul curent vede doar ce e relevant + are conținut → abia apoi treci la rolul următor.
+   - **Rolul 1 — ELEV**: sidebar-ul elevului (Lecții, Bibliografie, Practică, Evaluare, Examene, Simulări, Progres, Domenii, Calendar, Notificări, Gamificare, Invită & Câștigă, Setări, Alerte).
+   - **Rolul 2 — PĂRINTE**: după ce elev e gata (Monitorizare + ce e relevant pentru părinte).
+   - **Rolul 3 — MEDITATOR**: ultimul (Monitorizare + ce e relevant pentru meditator).
 
 ---
 
