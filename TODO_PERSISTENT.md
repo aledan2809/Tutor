@@ -241,7 +241,39 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
   - Reactivare: șterge href-ul respectiv din `HIDDEN_NAV` în sidebar.tsx.
   - **NB**: ascunderea e GLOBALĂ (toate rolurile) — restructurarea PER-ROL (elev→părinte→meditator, mockups aprobate) e separată, vine după feedback user pe mockups.
 
-**Mockups fluxuri per rol (prezentate user 2026-06-04, AȘTEAPTĂ feedback)**: 3 mockups (ELEV self-learning / PĂRINTE strict-monitoring / MEDITATOR teaching) — sidebar grupat pe secțiuni, ascunzând per rol ce nu e relevant. Decizii deschise: (1) stil grupat vs listă plată; (2) părinte strict vs poate „încerca"; (3) consolidare triplet examen; (4) meditator vede Gamificare/Progres?; (5) mecanism = conditional render sidebar.tsx. **User: revine cu feedback pe roluri după ce vede mockups.** Când aprobă → salvează în `Tutor/knowledge/menu-restructure-mockups.md` + implementează rol cu rol în ordinea obligatorie.
+**📄 Design doc complet (mockups + decizii) → `Tutor/knowledge/menu-restructure-mockups.md`** (creat 2026-06-04). Conține cele 3 mockup-uri detaliate per rol (ELEV/PĂRINTE/MEDITATOR), status ✅/🟡/🔨 per funcție, deciziile blocate + capabilitățile de construit. **Sursă de adevăr pentru implementare** — citește-l înainte de a coda restructurarea.
+
+**🟢 ELEV — DECIZII BLOCATE 2026-06-04** (de implementat, ordine rol-1):
+  1. **MERGE Progres + Gamificare → un item „Progresul meu"** (2 secțiuni: Statistici + Realizări). De-anglicizat: XP→puncte, streak→serii, achievements→insigne, leaderboard→clasament, level→nivel; cuvântul „Gamificare" dispare din UI. Zero migrare DB (arbori diferiți).
+  2. **„Invită un prieten"** (redenumit din „Invită & Câștigă") = model CREDIT (vezi feature item dedicat mai jos).
+  3. **Notificări (elev) = doar istoric, rămâne**. Dezvoltările merg în Setări→Notificări (feature item dedicat).
+  4. **Calendar + Domenii la elev = PĂSTRĂM** (vizibile).
+  - Sidebar final ELEV: Panou · Practică · Simulări · Progresul meu · Domenii · Calendar · Invită un prieten · Notificări · Setări. (Lecții/Evaluare/Examene/Bibliografie deja ascunse global.)
+
+**PĂRINTE / MEDITATOR**: mockups detaliate în design doc; feedback parțial primit (Monitorizare = rapoarte/sinteze/exemple concrete zone-cu-probleme; mockup detaliat pe toate sub-funcțiile instructor). Decizii încă deschise: Recomandă-părinte (comision vs credit), Conținut-meditator (Practică vs Întrebări). Implementare DUPĂ ELEV.
+
+---
+
+## [ ] 🎁 Referral — model CREDIT pentru ELEV (înlocuiește comisionul) — creat 2026-06-04
+
+**Decizie user 2026-06-04** (în restructurare meniuri): comisionul 50% perpetuu pare schemă piramidală → **doar Creatorii (§286) îl păstrează**; elevii primesc **credit lună-gratis**.
+
+**Cerință user (verbatim, NU reformulată)**:
+> e prea mult comision perpetuu - pare schema piramidala. Punem pentru invitat 1 luna gratis (pe a doua, ca pe prima sa si-o plateasca imediat) si 1 luna gratis pentru cel care a facut invitatia (cu conditia ca cel care a facut invitatia sa aiba macar o luna platita. La a doua invitatie care se concretizeaza se transforma iar in credit pe inca o luna si tot asa. Poate ajunge la un moment dat cu o luna platita sa aiba chiar si credite pentru un an intreg - va fi un ambasador pentru aplicatie
+
+**Mecanică**: invitat plătește luna 1 → luna 2 gratis. Cel care invită → +1 lună credit per invitație concretizată (condiție: ≥1 lună plătită); acumulează (a 2-a, a 3-a... → până la ~12 luni = ambasador). **Stare azi**: `src/lib/referral.ts` face comision 50% cash + voucher −25%; modelul de credit NU există → muncă nouă (mecanism credit-lună pe subscription + landing page detalii). Detaliu în `knowledge/menu-restructure-mockups.md` (Decizie 2).
+
+---
+
+## [ ] 🔔 Setări → Notificări — pachet + delegare (NU în meniul Notificări) — creat 2026-06-04
+
+**Cerință user (verbatim, NU reformulată)**:
+> extindere SubscriptionPlan cu compoziție (seat-uri: maxParinti/maxMeditatori + canale incluse per pachet);
+> model de delegare (toggle în Setări părinte: „le fac eu pentru copil" / „lasă copilul să și le facă singur");
+> gating canale pe pachet;
+> tranziție la upgrade pachet (copil-only → +părinți +meditator: provizionezi seat-urile noi + default prefs).
+
+**Stare azi**: `SubscriptionPlan` generic (fără seats/compoziție); `NotificationPreference` self-only (fără delegare, fără gating pe pachet). Tot blocul = 0% construit. Detaliu în `knowledge/menu-restructure-mockups.md` (roadmap final).
 
 ---
 
