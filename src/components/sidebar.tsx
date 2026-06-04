@@ -83,6 +83,17 @@ export function Sidebar({ user }: SidebarProps) {
     navItems.push({ href: "/dashboard/admin", label: t("admin") });
   }
 
+  // HIDDEN 2026-06-04 (§213 restructurare meniuri) — item-uri goale/niche ascunse
+  // temporar din nav; rutele rămân funcționale. Decizie ulterioară (populăm / unificăm /
+  // scoatem) în Projects/Tutor/TODO_PERSISTENT.md §213.
+  const HIDDEN_NAV = new Set([
+    "/dashboard/lessons", // Lesson = 0
+    "/dashboard/assessment", // Assessment = 0
+    "/dashboard/exams", // ExamSimulation = 1 (~gol; exam-bank/Simulări rămâne)
+    "/dashboard/bibliography", // Bibliography = 11 (niche juridic/aviation)
+  ]);
+  const visibleNavItems = navItems.filter((item) => !HIDDEN_NAV.has(item.href));
+
   const sidebarContent = (
     <>
       <div className="flex h-16 items-center justify-between border-b border-gray-800 px-6">
@@ -102,7 +113,7 @@ export function Sidebar({ user }: SidebarProps) {
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-4">
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link

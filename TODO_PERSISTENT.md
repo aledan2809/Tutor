@@ -231,6 +231,18 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
    - **Rolul 2 — PĂRINTE**: după ce elev e gata (Monitorizare + ce e relevant pentru părinte).
    - **Rolul 3 — MEDITATOR**: ultimul (Monitorizare + ce e relevant pentru meditator).
 
+**Content audit pe prod (2026-06-04, real counts)**: Practică=30 grile PUBLISHED (dar misfiled sub „Aviation" — vezi §188) · Simulări/exam-bank=26 papers ✅ · **Lecții(Lesson)=0** · **Evaluare(Assessment)=0** · **Examene(ExamSimulation)=1** · **Bibliografie=11** (juridic/aviation) · Domenii=8 (doar Aviation 24, Drept Penal 2, Istorie 4 cu grile; 5 EN/Bac goale) · features (Progres/Gamificare/Notificări/Invită/Setări/Monitorizare/Alerte/Instructor) OK.
+
+**✅ FĂCUT 2026-06-04 — ascundere globală 4 item-uri goale/niche** (decizie user „unpublish momentan + pune în TODO"): în `src/components/sidebar.tsx` adăugat `HIDDEN_NAV` set + filtru `visibleNavItems` (conditional render, **rutele rămân funcționale**, reversibil). Item-uri ascunse din nav pentru TOATE rolurile:
+  - **`/dashboard/lessons` (Lecții)** — Lesson=0. **Decizie de luat**: populăm lecții sau scoatem definitiv?
+  - **`/dashboard/assessment` (Evaluare)** — Assessment=0. **Decizie**: populăm assessments sau unificăm cu Simulări/Practică?
+  - **`/dashboard/exams` (Examene)** — ExamSimulation=1 (~gol). **Decizie**: consolidăm în „Simulări" (exam-bank, 26 papers) și scoatem „Examene" definitiv?
+  - **`/dashboard/bibliography` (Bibliografie)** — Bibliography=11 (juridic/aviation, irelevant EN/Bac). **Decizie**: păstrăm doar pe domeniile juridice sau scoatem din nav-ul elevului EN/Bac?
+  - Reactivare: șterge href-ul respectiv din `HIDDEN_NAV` în sidebar.tsx.
+  - **NB**: ascunderea e GLOBALĂ (toate rolurile) — restructurarea PER-ROL (elev→părinte→meditator, mockups aprobate) e separată, vine după feedback user pe mockups.
+
+**Mockups fluxuri per rol (prezentate user 2026-06-04, AȘTEAPTĂ feedback)**: 3 mockups (ELEV self-learning / PĂRINTE strict-monitoring / MEDITATOR teaching) — sidebar grupat pe secțiuni, ascunzând per rol ce nu e relevant. Decizii deschise: (1) stil grupat vs listă plată; (2) părinte strict vs poate „încerca"; (3) consolidare triplet examen; (4) meditator vede Gamificare/Progres?; (5) mecanism = conditional render sidebar.tsx. **User: revine cu feedback pe roluri după ce vede mockups.** Când aprobă → salvează în `Tutor/knowledge/menu-restructure-mockups.md` + implementează rol cu rol în ordinea obligatorie.
+
 ---
 
 **[archive] IMPORT serie 2+ — MATEMATICĂ (audit 2026-06-04; user încarcă fișiere)**:
