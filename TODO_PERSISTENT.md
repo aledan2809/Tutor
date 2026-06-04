@@ -181,6 +181,49 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 
 ---
 
+## [ ] 🎨 Homepage demo restriction — allowlist `publicDemo` pe Domain (creat 2026-06-04, deferred → sesiune nouă)
+
+**Context**: 2026-06-04 am schimbat copy-ul homepage (commit `9c4062c`, LIVE etutor.ro): label proof → „demo pentru Evaluarea Națională și Bacalaureat". User a cerut „doar bazele acestea (EN+Bac) să fie pentru demo" și a ales mecanismul **allowlist flag pe Domain**.
+
+**BLOCKER de conținut descoperit** (de rezolvat în sesiunea nouă, ÎNAINTE de a aplica flag-ul):
+- Demo-ul public (`/api/public/practice/{subjects,quiz}`) ia din tabelul `Question` (status PUBLISHED, type MULTIPLE_CHOICE), grupat pe `subject`, fără filtru de domeniu.
+- **8 domenii** există: Aviation, Drept Penal, Istorie, Geografie, Biologie, Chimie, Matematica V-VIII, Matematica IX-XII.
+- **Doar 3 au grile publicate**: `[Aviation]` Fizică=14, Matematică=9, Logică=1 (= conținut școlar EN/Bac **misfiled** sub domeniul „Aviation" — seed/test data); `[Istorie]` Istorie=4; `[Drept Penal]` Drept Penal=2 (NU EN/Bac).
+- Domeniile EN/Bac corecte (Geografie/Biologie/Chimie/Matematica V-VIII/IX-XII) au **0 grile publicate**.
+
+**Consecință**: dacă flag-uiesc `publicDemo=true` doar pe domeniile EN/Bac curate, demo-ul ar arăta **doar Istorie (4)** — Fizică(14)+Matematică(9) sunt blocate sub „Aviation". Trebuie întâi **re-homed** conținutul școlar (creează domeniu Fizică? mută Matematică la Matematica V-VIII?) SAU seed grile EN/Bac.
+
+**Plan sesiune nouă**:
+1. Decizie conținut: re-home Fizică/Matematică/Logică din „Aviation" la domenii EN/Bac proprii (sau redenumire/curățare seed).
+2. Schema: `publicDemo Boolean @default(false)` pe `Domain` + migrare `0019_*` (NB: deploy-ul tutor NU rulează `migrate deploy` automat — aplică manual pe VPS2).
+3. Filtru în ambele rute (`subjects` + `quiz`): `where: { ..., domain: { publicDemo: true } }`.
+4. Set flag `true` pe domeniile EN/Bac cu conținut. `false` pe Aviation (pilot) + Drept Penal (drept).
+5. Verifică: demo arată doar materii EN/Bac; label-ul „demo pentru EN+Bac" devine onest.
+
+**Interim (acum, live)**: label-ul e forward-looking — demo-ul încă arată Fizică/Matematică/Istorie (subiecte EN reale, OK) + **Drept Penal (2 grile, NU EN/Bac — mismatch minor)** până aterizează allowlist-ul.
+
+**Cleanup adiacent (din aceeași sesiune copy)**: `ro.json:476` + `en.json:476` hero = „Învățare Adaptivă Bazată pe AI" / „AI-Powered Adaptive Learning" — încă conțin „AI" (NU sunt randate pe homepage, dar există). Per `feedback_etutor_no_ai_wording` → de reformulat fără „AI" (am rezolvat deja `adaptiveDesc` RO+EN în commit `9c4062c`).
+
+---
+
+## [ ] 🧭 Restructurare meniuri elev/părinte/meditator — ascunde item-urile fără conținut (creat 2026-06-04, deferred → sesiune nouă)
+
+**Cerere user (2026-06-04, cu poză sidebar)**: meniul afișează multe item-uri pentru care **nu avem conținut**; ascunde-le temporar + pune-le aici în TODO ca să decidem punctual ce facem cu fiecare într-o sesiune viitoare.
+
+**Item-uri meniu (din screenshot)**: Lecții · Bibliografie · Practică · Evaluare · Examene · Simulări · Progres · Domenii · Calendar · Notificări · Gamificare · Invită & Câștigă · Setări · Monitorizare · Alerte.
+
+**Audit preliminar conținut (de confirmat exhaustiv în sesiune nouă)**:
+- **Au conținut**: Practică (question bank), Examene/Simulări/Evaluare (exam-bank EN VIII Mate — 22 papers / 396 items), Progres, Gamificare, Setări, Notificări/Alerte, Invită & Câștigă (feature referral), Monitorizare (părinte/meditator).
+- **Sărac/gol**: Lecții (Lessons — puține/0), Bibliografie (puține/0), Domenii (8 domenii dar doar 3 cu grile publicate, restul goale).
+
+**Plan sesiune nouă**:
+1. Audit per-item: ce model/tabel îl alimentează + count real pe prod.
+2. Ascunde temporar (feature flag / conditional render în sidebar) item-urile cu 0 conținut — NU șterge rute/cod.
+3. Decizie punctuală per item ascuns (populăm / unificăm / scoatem definitiv).
+4. Aplică per rol (elev / părinte / meditator) — fiecare rol vede doar ce e relevant + are conținut.
+
+---
+
 **[archive] IMPORT serie 2+ — MATEMATICĂ (audit 2026-06-04; user încarcă fișiere)**:
 
 **Folder primit + auditat:** `~/Downloads/Temp/tutor eval nat/pro-matematica/` — **22 fișiere = 11 perechi Subiect+Barem, toate complete** (zero subiect fără barem / barem fără subiect), **zero duplicate** (nume + size toate distincte). Verificat 2026-06-04.
