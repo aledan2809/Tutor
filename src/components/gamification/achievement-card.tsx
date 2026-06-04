@@ -52,7 +52,7 @@ export function AchievementGrid({ achievements }: { achievements: AchievementInf
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">Achievements</h2>
+        <h2 className="text-lg font-semibold text-white">Insigne</h2>
         <span className="text-sm text-gray-400">
           {unlocked.length}/{achievements.length}
         </span>

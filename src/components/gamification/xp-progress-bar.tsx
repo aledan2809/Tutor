@@ -19,12 +19,12 @@ export function XpProgressBar({
     <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wide text-gray-500">Current Level</p>
+          <p className="text-xs uppercase tracking-wide text-gray-500">Nivel curent</p>
           <p className="text-xl font-bold text-yellow-400">{level}</p>
         </div>
         <div className="text-right">
           <p className="text-2xl font-bold text-purple-400">{xp.toLocaleString()}</p>
-          <p className="text-xs text-gray-500">Total XP</p>
+          <p className="text-xs text-gray-500">Total puncte</p>
         </div>
       </div>
 
@@ -37,11 +37,11 @@ export function XpProgressBar({
 
       {nextLevel && (
         <p className="mt-2 text-xs text-gray-500">
-          {xpToNextLevel.toLocaleString()} XP to <span className="text-white">{nextLevel}</span>
+          {xpToNextLevel.toLocaleString()} puncte până la <span className="text-white">{nextLevel}</span>
         </p>
       )}
       {!nextLevel && (
-        <p className="mt-2 text-xs text-yellow-400">Max level reached!</p>
+        <p className="mt-2 text-xs text-yellow-400">Nivel maxim atins!</p>
       )}
     </div>
   );

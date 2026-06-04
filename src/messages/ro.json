@@ -39,7 +39,7 @@
     "dashboard": "Panou de control",
     "practice": "Practică",
     "exams": "Examene",
-    "progress": "Progres",
+    "progress": "Progresul meu",
     "notifications": "Notificări",
     "calendar": "Calendar",
     "settings": "Setări",
@@ -52,7 +52,7 @@
     "watcherNotifications": "Alerte",
     "instructor": "Instructor",
     "gamification": "Gamificare",
-    "referrals": "Invită & Câștigă"
+    "referrals": "Invită un prieten"
   },
   "exam": {
     "title": "Simulator Examen",

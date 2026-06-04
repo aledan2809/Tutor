@@ -26,7 +26,7 @@ export function LeaderboardTable({
   if (data.top10.length === 0) {
     return (
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-6 text-center text-sm text-gray-400">
-        No leaderboard data this week. Start earning XP!
+        Niciun clasament săptămâna asta. Începe să aduni puncte!
       </div>
     );
   }
@@ -34,8 +34,8 @@ export function LeaderboardTable({
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900">
       <div className="flex items-center justify-between border-b border-gray-800 px-5 py-3">
-        <h2 className="text-lg font-semibold text-white">Weekly Leaderboard</h2>
-        <span className="text-xs text-gray-400">Week {data.week}</span>
+        <h2 className="text-lg font-semibold text-white">Clasament săptămânal</h2>
+        <span className="text-xs text-gray-400">Săptămâna {data.week}</span>
       </div>
 
       <div className="divide-y divide-gray-800">
@@ -63,13 +63,13 @@ export function LeaderboardTable({
 
               <div className="flex-1">
                 <p className={`text-sm font-medium ${isCurrentUser ? "text-blue-400" : "text-white"}`}>
-                  {entry.name || "Anonymous"}
-                  {isCurrentUser && " (you)"}
+                  {entry.name || "Anonim"}
+                  {isCurrentUser && " (tu)"}
                 </p>
               </div>
 
               <span className="text-sm font-semibold text-purple-400">
-                {entry.xp.toLocaleString()} XP
+                {entry.xp.toLocaleString()} puncte
               </span>
             </div>
           );
@@ -78,8 +78,8 @@ export function LeaderboardTable({
 
       {data.rank && data.rank > 10 && (
         <div className="border-t border-gray-800 px-5 py-3 text-center text-sm text-gray-400">
-          Your rank: <span className="font-semibold text-white">#{data.rank}</span> with{" "}
-          <span className="text-purple-400">{data.userXp.toLocaleString()} XP</span>
+          Locul tău: <span className="font-semibold text-white">#{data.rank}</span> cu{" "}
+          <span className="text-purple-400">{data.userXp.toLocaleString()} puncte</span>
         </div>
       )}
     </div>

@@ -91,6 +91,7 @@ export function Sidebar({ user }: SidebarProps) {
     "/dashboard/assessment", // Assessment = 0
     "/dashboard/exams", // ExamSimulation = 1 (~gol; exam-bank/Simulări rămâne)
     "/dashboard/bibliography", // Bibliography = 11 (niche juridic/aviation)
+    "/dashboard/gamification", // MERGE → „Progresul meu" (tab Realizări) — §213
   ]);
   const visibleNavItems = navItems.filter((item) => !HIDDEN_NAV.has(item.href));
 

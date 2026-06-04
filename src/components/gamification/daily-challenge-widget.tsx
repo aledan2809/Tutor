@@ -56,9 +56,9 @@ export function DailyChallengeWidget({
     return (
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Daily Challenge</h2>
+          <h2 className="text-lg font-semibold text-white">Provocarea zilei</h2>
           <span className="rounded-full bg-gray-700 px-2 py-0.5 text-xs text-gray-400">
-            Completed
+            Rezolvată
           </span>
         </div>
         <div
@@ -69,10 +69,10 @@ export function DailyChallengeWidget({
           }`}
         >
           <p className="text-sm font-medium text-white">
-            {isCorrect ? "Correct!" : "Incorrect"}
+            {isCorrect ? "Corect!" : "Greșit"}
           </p>
           <p className="mt-1 text-xs text-gray-400">
-            XP earned: <span className="text-purple-400">+{xpEarned}</span>
+            Puncte câștigate: <span className="text-purple-400">+{xpEarned}</span>
           </p>
         </div>
       </div>
@@ -104,9 +104,9 @@ export function DailyChallengeWidget({
   return (
     <div className="rounded-xl border border-orange-600/30 bg-orange-900/5 p-5">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">Daily Challenge</h3>
+        <h3 className="text-lg font-semibold text-white">Provocarea zilei</h3>
         <span className="rounded-full bg-orange-600/20 px-2 py-0.5 text-xs font-medium text-orange-400">
-          2x XP
+          2× puncte
         </span>
       </div>
 
@@ -136,7 +136,7 @@ export function DailyChallengeWidget({
           type="text"
           value={selectedAnswer}
           onChange={(e) => setSelectedAnswer(e.target.value)}
-          placeholder="Type your answer..."
+          placeholder="Scrie răspunsul..."
           className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
         />
       )}
@@ -146,7 +146,7 @@ export function DailyChallengeWidget({
         disabled={!selectedAnswer || submitting}
         className="mt-4 w-full rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-orange-700 disabled:opacity-50"
       >
-        {submitting ? "Submitting..." : "Submit Answer"}
+        {submitting ? "Se trimite..." : "Trimite răspunsul"}
       </button>
     </div>
   );

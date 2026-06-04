@@ -7,6 +7,7 @@ import { AchievementGrid } from "@/components/gamification/achievement-card";
 import { LeaderboardTable } from "@/components/gamification/leaderboard-table";
 import { DailyChallengeWidget } from "@/components/gamification/daily-challenge-widget";
 import { StreakRecovery } from "@/components/gamification/streak-recovery";
+import { ProgressTabs } from "@/components/progress-tabs";
 
 interface XpData {
   xp: number;
@@ -151,20 +152,21 @@ export default function GamificationPage() {
   };
 
   if (loading && !xpData) {
-    return <div className="py-12 text-center text-gray-500">Loading...</div>;
+    return <div className="py-12 text-center text-gray-500">Se încarcă...</div>;
   }
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
+      <ProgressTabs />
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-white">Gamification</h1>
+        <h1 className="text-2xl font-bold text-white">Realizări</h1>
         <DomainSwitcher activeDomainId={activeDomainId} onSwitch={handleDomainSwitch} />
       </div>
 
       {!activeDomainSlug && (
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-8 text-center text-sm text-gray-500">
-          No domains enrolled. Enroll in a domain to start earning XP!
+          Niciun domeniu activ. Înscrie-te într-un domeniu ca să începi să aduni puncte!
         </div>
       )}
 
@@ -177,16 +179,16 @@ export default function GamificationPage() {
             <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
               <div className="mb-3 flex items-center justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-gray-500">Streak</p>
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Serie</p>
                   <p className="text-3xl font-bold text-orange-400">
                     {streakData?.streak || 0}
-                    <span className="ml-1 text-sm font-normal text-gray-500">days</span>
+                    <span className="ml-1 text-sm font-normal text-gray-500">zile</span>
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-gray-500">Longest</p>
+                  <p className="text-xs text-gray-500">Cea mai lungă</p>
                   <p className="text-lg font-semibold text-white">
-                    {streakData?.longestStreak || 0} days
+                    {streakData?.longestStreak || 0} zile
                   </p>
                 </div>
               </div>
@@ -194,8 +196,8 @@ export default function GamificationPage() {
               {streakData?.isDecayed && (
                 <div className="mt-3 rounded-lg border border-red-800/50 bg-red-900/10 p-3">
                   <p className="mb-2 text-xs text-red-400">
-                    Your streak has decayed!
-                    {streakData.canRecover && " You can recover it."}
+                    Seria ta s-a întrerupt!
+                    {streakData.canRecover && " O poți recupera."}
                   </p>
                   {streakData.canRecover && (
                     <StreakRecovery

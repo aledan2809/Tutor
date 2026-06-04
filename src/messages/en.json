@@ -39,7 +39,7 @@
     "dashboard": "Dashboard",
     "practice": "Practice",
     "exams": "Exams",
-    "progress": "Progress",
+    "progress": "My Progress",
     "notifications": "Notifications",
     "calendar": "Calendar",
     "settings": "Settings",
@@ -52,7 +52,7 @@
     "watcherNotifications": "Alerts",
     "instructor": "Instructor",
     "gamification": "Gamification",
-    "referrals": "Invite & Earn"
+    "referrals": "Invite a friend"
   },
   "exam": {
     "title": "Exam Simulator",

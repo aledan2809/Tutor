@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { ProgressTabs } from "@/components/progress-tabs";
 
 interface ProgressData {
   overall: {
@@ -90,8 +91,9 @@ export default function ProgressPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
+      <ProgressTabs />
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Progress</h1>
+        <h1 className="text-2xl font-bold text-white">Statistici</h1>
         {domains.length > 1 && (
           <select
             value={domain}

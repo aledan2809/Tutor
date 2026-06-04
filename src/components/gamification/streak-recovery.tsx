@@ -114,7 +114,7 @@ export function StreakRecovery({
         onClick={startRecovery}
         className="w-full rounded-lg border border-orange-600/50 bg-orange-600/10 px-4 py-3 text-sm font-medium text-orange-400 transition-colors hover:bg-orange-600/20"
       >
-        Start Recovery Session (2 min, 5 questions)
+        Începe sesiunea de recuperare (2 min, 5 întrebări)
       </button>
     );
   }
@@ -122,7 +122,7 @@ export function StreakRecovery({
   if (stage === "loading") {
     return (
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-6 text-center text-sm text-gray-500">
-        Loading...
+        Se încarcă...
       </div>
     );
   }
@@ -137,19 +137,19 @@ export function StreakRecovery({
         }`}
       >
         <p className="text-lg font-bold text-white">
-          {result.success ? "Streak Recovered!" : "Recovery Failed"}
+          {result.success ? "Serie recuperată!" : "Recuperare eșuată"}
         </p>
         <p className="mt-1 text-sm text-gray-400">
-          {result.correctCount}/{result.totalCount} correct
+          {result.correctCount}/{result.totalCount} corecte
         </p>
         {result.success && (
           <p className="mt-2 text-sm text-green-400">
-            Your streak is now {result.streak} days
+            Seria ta este acum {result.streak} zile
           </p>
         )}
         {!result.success && (
           <p className="mt-2 text-sm text-red-400">
-            You need at least 3 correct answers. Try again tomorrow.
+            Ai nevoie de minim 3 răspunsuri corecte. Încearcă din nou mâine.
           </p>
         )}
       </div>
@@ -166,7 +166,7 @@ export function StreakRecovery({
     <div className="rounded-xl border border-orange-600/30 bg-gray-900 p-5">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-white">
-          Recovery: {currentIdx + 1}/{questions.length}
+          Recuperare: {currentIdx + 1}/{questions.length}
         </h3>
         <span
           className={`rounded-full px-2 py-0.5 text-xs font-mono ${
@@ -202,7 +202,7 @@ export function StreakRecovery({
           type="text"
           value={selectedAnswer}
           onChange={(e) => setSelectedAnswer(e.target.value)}
-          placeholder="Type your answer..."
+          placeholder="Scrie răspunsul..."
           className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
         />
       )}
@@ -212,7 +212,7 @@ export function StreakRecovery({
         disabled={!selectedAnswer}
         className="mt-4 w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
       >
-        {currentIdx < questions.length - 1 ? "Next" : "Submit"}
+        {currentIdx < questions.length - 1 ? "Următoarea" : "Trimite"}
       </button>
     </div>
   );
