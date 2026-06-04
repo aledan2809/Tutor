@@ -74,7 +74,7 @@ const MATH = {
       options: [{ key: "a", text: "4 cm" }, { key: "b", text: "4√2 cm" }, { key: "c", text: "4√3 cm" }, { key: "d", text: "6 cm" }], correctAnswer: "b" },
     { section: "Subiectul al II-lea", label: "6", type: "MCQ", points: 5, autoGradable: false, topic: "Cub. Volum",
       hasFigure: true, figureUrl: FIG("s2-6"),
-      figureNote: "Cutie în formă de cub cu cele 12 muchii; vârfurile etichetate ABCDA′B′C′D′ în figură.",
+      figureNote: "Cutie în formă de cub (cele 12 muchii), în reprezentare standard. (NB: enunțul oficial numește cubul ABCDEFGH, iar figura folosește etichetarea cu prim — inconsecvență preluată ca atare din sursa CNCE.)",
       content: "În figura alăturată este reprezentată o cutie în formă de cub ABCDEFGH care are suma lungimilor tuturor muchiilor egală cu 60 cm. Volumul cutiei este egal cu:",
       options: [{ key: "a", text: "25 cm³" }, { key: "b", text: "100 cm³" }, { key: "c", text: "125 cm³" }, { key: "d", text: "150 cm³" }], correctAnswer: "c" },
     // ── Subiectul al III-lea ──
