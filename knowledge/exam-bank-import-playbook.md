@@ -67,10 +67,19 @@ For each (Subiect PDF, Barem PDF) pair:
    **Use the prod DB** (127.0.0.1:5432/tutor on VPS2) when importing for live — local PG is
    separate. For local work, local DATABASE_URL. Confirm which DB before applying.
 5. **Apply** — `node scripts/...mjs` (idempotent; safe to re-run).
-6. **Extract figures** (offline, PyMuPDF/fitz) — for every `hasFigure` item:
-   open the subiect PDF, find the figure's bounding rect on its page, clip with
-   `page.get_pixmap(clip=rect, matrix=fitz.Matrix(zoom,zoom))`, save PNG to
-   `public/exam-figures/`. **Naming convention (series 2 — include variant to avoid
+6. **Extract figures** — for every `hasFigure` item, render the region to a PNG in
+   `public/exam-figures/`. **Two interchangeable methods** (identical fitz `get_pixmap(clip,zoom)` math):
+   - **(a) 4uPDF backend `/api/extract-region`** (preferred when validating 4uPDF — it's the deployed
+     Pro hi-DPI region render). Locate the bbox with `fig_inspect.py` (raster IMG xref), convert to
+     page fractions `(fx0,fy0,fx1,fy1)=(x0/W, y0/H, x1/W, y1/H)` (A4 W=595 H=842, top-left origin),
+     POST multipart `file,page,fx0..fy1,dpi` with a Bearer token from a **silver/gold/custom** user
+     (the `smart_tools` gate). Run the backend locally (venv + stub `rapidocr_onnxruntime`; register a
+     user via `/api/auth/register` then flip `plan='custom'` in `data/4updf.db`) or hit prod with a Pro
+     account. Returns the clipped PNG. Verified 2026-06-04 on Test_03 (9/9 @ 300 DPI).
+   - **(b) local PyMuPDF/fitz** — `page.get_pixmap(clip=rect, matrix=fitz.Matrix(zoom,zoom))`. No auth,
+     no backend; fallback when 4uPDF is unavailable.
+
+   **Naming convention (series 2 — include variant to avoid
    collisions):** `en-viii-<year>-mate-<variant>-<section-abbr>-<label>.png`
    (section-abbr: s1/s2/s3). E.g. `en-viii-2025-mate-simulare-s2-1.png`.
    **Verify** the clips with a montage-grid image (all figures in one PNG) before wiring —
