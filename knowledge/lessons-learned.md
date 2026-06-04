@@ -52,3 +52,18 @@
 **Fix:** when an MCQ looks impossible, **back-solve from the barem answer** to find what input value makes it consistent — it instantly revealed `BC` had to be √5, not 5. Re-read the PDF's secondary rendering (the layout block, not just the first text block) which showed `√5`. Transcribe `BC = √5 cm`.
 
 **Prevention:** treat "impossible problem" as an OCR-symbol-loss signal (most often a dropped `√`, exponent, or sign), not a flawed source — official CNCE items are sound. Back-solving from the known key + re-reading both PDF text renderings recovers the true value. The `/review` math verifier re-derives with the corrected value and confirms. Cross-ref: `knowledge/exam-bank-import-playbook.md` §0.
+
+## L06 — 2026-06-04 — Limba română import: 3 lessons (figure-restart, accent-render, verbatim-via-fitz)
+
+Importing the 8 official EN VIII Limba română papers surfaced three reusable lessons.
+
+**(a) Figure-bearing papers need `pm2 restart tutor` after data import — data-only imports don't.**
+Tutor runs plain `next start` (NOT standalone). `next start` enumerates `public/` at server boot, so a newly committed+pulled figure (`public/exam-figures/*.png`) returns **404 until a restart**, even though the file is on disk. Pure-text paper imports (the 7 figure-less RO papers) render immediately with no restart — the app reads ExamPaper/ExamItem/ExamPassage rows from the DB at request time. Only the 2025 Model paper (Erasmus chart on A.3) needed `pm2 restart tutor --update-env` + ~8s boot wait (L67 transient 502) before its figure went 200. An existing Mate figure (present at the last `npm run build`) stayed 200 throughout — proof the difference is "present at boot" not "build vs no-build".
+
+**(b) Accentuation MCQs lose their accent marks in fitz text extraction — render the region visually + re-encode with acute vowels.**
+2025 Simulare B.1 ("corect accentuate") printed all four options as the same string `culturile; era` because the distinguishing accent (bold+underline on the stressed syllable) is a glyph attribute fitz drops. Rendered page-region to PNG, read it visually, encoded the stress with acute-accented vowels (`cúlturile`/`cultúrile`, `éra`/`erá`) so the student sees the distinction in HTML. **Ground-truth trap caught in the same item:** the verb `era` (imperfect of "a fi", 3sg) is stressed on the **final** syllable — `e-RÁ` (like `el cântá`) — NOT `éra` (that's the noun "epoch"). The barem key `d` (cultúrile; erá) is correct; my first intuition ("éra") was wrong. Verify stress against grammar, not gut, before encoding.
+
+**(c) `fitz` (PyMuPDF) `get_text()` IS the verbatim source for prose/poetry — far safer than visual transcription.**
+For figure-free Romanian literary texts, `python -c "import fitz; ..."` extracted both passages verbatim (including the long ~1-page nonfiction Text 2), which I cleaned (normalize `ş/ţ` cedilla → `ș/ț` comma-below; keep `[...]` ellipses + archaic spellings like Creangă's `mieu`, `sara`, `lacrâmi` verbatim) and pasted into the import script. No OCR symbol-loss risk for plain text (unlike the Mate radical-drop in L05) — the loss only hits glyph attributes (accents/bold), handled per (b). Verification: authenticated HTML render check greps for first+last line of each passage to confirm the full text shipped.
+
+**Reusable tooling produced:** `/tmp/verify-ro-paper.mjs` (NextAuth login → POST score → assert auto rawPoints == sum-of-autoGradable-points + attempt persisted; handles MCQ-objective + TF_GRID-grid, variable points) + `/tmp/verify-ro-html2.mjs` (authenticated GET of the student take page → grep distinctive content). Cross-ref: `knowledge/exam-bank-import-playbook.md`.

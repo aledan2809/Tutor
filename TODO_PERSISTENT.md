@@ -194,7 +194,9 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 - **Variant slugs serie 3**: single-digit (`model`, `model-2`, `simulare`, `examen-3`, `rezerva-2`, `sesiune-speciala-4`); training tests vor folosi `test-01`..`test-15`.
 - **Rețetă identică** cu serie 2 (playbook). Importere: `scripts/import-exam-mate-2021-*.mjs` (6 modele de copiat). DB prod = VPS2 `127.0.0.1:5432/tutor`. Surse: `~/Downloads/Temp/tutor eval nat/pro-matematica2/`.
 
-### [ ] 🟡 Limba și literatura română — EN VIII (8 lucrări oficiale) — creat 2026-06-04 (cerere user)
+### [x] 🟢 Limba și literatura română — EN VIII (8 lucrări oficiale) — DONE 2026-06-04 (commits f6951b5→ab9da02)
+
+**DONE 2026-06-04**: Toate 8 lucrările live pe etutor.ro. `ro-2026-model` era deja în prod din MVP (verificat: chei MCQ c,b,c,c,d,d,d = baremul oficial nov 2025). Celelalte 7 importate end-to-end: transcriere verbatim via fitz → barem ground-truth → validate → commit+push → import prod VPS2 → verificare autentificată reală (admin-test@tutor.app: 20/20 auto pe MCQ+TF_GRID, attempt persistat; HTML render passages+itemi+accente) → `/review` mesh (toate `issues:[]`). **1 figură** (Erasmus chart pe 2025 Model A.3) extrasă cu fitz local → `public/exam-figures/en-viii-2025-ro-model-fig1.png` (necesită `pm2 restart tutor` ca `next start` să servească public/ nou — L## nou). Prod final: **53 papers / 954 items / 16 passages** (8 RO papers = 144 itemi + 16 passages). 2 capcane ground-truth prinse: B.1 2025 Simulare „erá" se accentuează pe finală (verb imperfect, NU substantiv „éra"); accentele B.1 redate cu vocale acute. Backup DB pre-import: `/root/backups/tutor-pre-ro-simulare-2026-06-04.dump`.
 
 **Sursă**: `~/Downloads/Temp/tutor eval nat/heiprofu-romana/` — 8 perechi subiect + barem (toate oficiale edu.ro/CNPEE, public). **Rețetă identică** cu Matematica (playbook `knowledge/exam-bank-import-playbook.md`), dar structură Română: `subjectKey="limba_romana"`, **ExamPassage** (2 texte: literar + nonficțiune/funcțional), itemi pe **Subiectul I.A** (înțelegerea textului — SHORT/FILL/TF_GRID) + **Subiectul I.B** (compunere pe text, rubric) + **Subiectul al II-lea** (redactare 20p, rubric) + 10p oficiu. **Fără figuri** (de regulă) → fără pas extract-region. Chei/rubrici = **ground-truth din barem**, verbatim. `correctAnswer` doar la itemi obiectivi; restul = `rubric` (sub-puncte) + `OPEN`. `autoGradable=true` doar la obiective fără figură.
 
@@ -209,14 +211,14 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 - **NB transcriere**: textele literare = verbatim din PDF (incl. note de subsol `*cuvânt – explicație`). Itemii MCQ care cer „valorificând textul N" — content trebuie să includă fragmentul relevant SAU passage-ul e atașat via `passageRef`. **Cheile/răspunsurile = ground-truth din barem** (de citit pt fiecare lucrare). Schema `ExamItem` are deja `passageRef` (comma-separated).
 
 **Perechi (subiect → barem)**:
-- [ ] 2024 Varianta 07 — `EN_VIII_2024_Limba_si_literatura_romana_var_07.pdf` + `..._bar_07.pdf` → slug `ro-2024-var-07`
-- [ ] 2025 Varianta 07 — `EN_VIII_2025_..._var_07.pdf` + `..._bar_07.pdf` → slug `ro-2025-var-07`
-- [ ] 2025 Model — `EN_VIII_2025_..._var_model.pdf` + `..._bar_model.pdf` → slug `ro-2025-model`
-- [ ] 2025 Simulare — `EN_VIII_2025_..._var_simulare.pdf` + `..._bar_simulare.pdf` → slug `ro-2025-simulare`
-- [ ] 2025 Rezervă (23 iunie) — `evaluare-nationala-rezerva-romana-23-iunie-2025.pdf` + `barem-...rezerva...pdf` → slug `ro-2025-rezerva`
-- [ ] 2025 Sesiune specială (2 iulie) — `sesiunea-speciala-romana-2-iulie-2025.pdf` + `barem-sesiunea-speciala...pdf` → slug `ro-2025-sesiune-speciala`
-- [ ] Model oficial noiembrie 2025 (pt EN 2026) — `model-oficial-romana-noiembrie-2025.pdf` + `barem-model-oficial...pdf` → slug `ro-2026-model`
-- [ ] Simulare națională (16 martie 2026) — `simulare-nationala-romana-16-martie-2026.pdf` + `barem-simulare-nationala...pdf` → slug `ro-2026-simulare`
+- [x] 2024 Varianta 07 — `EN_VIII_2024_Limba_si_literatura_romana_var_07.pdf` + `..._bar_07.pdf` → slug `ro-2024-var-07`
+- [x] 2025 Varianta 07 — `EN_VIII_2025_..._var_07.pdf` + `..._bar_07.pdf` → slug `ro-2025-var-07`
+- [x] 2025 Model — `EN_VIII_2025_..._var_model.pdf` + `..._bar_model.pdf` → slug `ro-2025-model`
+- [x] 2025 Simulare — `EN_VIII_2025_..._var_simulare.pdf` + `..._bar_simulare.pdf` → slug `ro-2025-simulare`
+- [x] 2025 Rezervă (23 iunie) — `evaluare-nationala-rezerva-romana-23-iunie-2025.pdf` + `barem-...rezerva...pdf` → slug `ro-2025-rezerva`
+- [x] 2025 Sesiune specială (2 iulie) — `sesiunea-speciala-romana-2-iulie-2025.pdf` + `barem-sesiunea-speciala...pdf` → slug `ro-2025-sesiune-speciala`
+- [x] Model oficial noiembrie 2025 (pt EN 2026) — `model-oficial-romana-noiembrie-2025.pdf` + `barem-model-oficial...pdf` → slug `ro-2026-model`
+- [x] Simulare națională (16 martie 2026) — `simulare-nationala-romana-16-martie-2026.pdf` + `barem-simulare-nationala...pdf` → slug `ro-2026-simulare`
 
 **NB**: `bar_07 (1).pdf` = duplicat al `bar_07.pdf` (ignoră). Verificare per lucrare: deploy VPS2 + autentificat etutor.ro (passages + itemi randate, score API pe obiective, finalCheck) + `/review` mesh. `source` ex: „EN VIII 2025 Simulare — Limba și literatura română (CNPEE)". An: pentru model/simulare noiembrie-2025/martie-2026 → `year=2026` (sesiunea pt care sunt), restul `year=2025`/`2024`.
 

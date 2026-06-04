@@ -167,3 +167,29 @@ Every pair verified authenticated: 12 MCQ → 60/60 rawPoints + finalCheck pass 
 - **L05** (OCR drops √): Test_05 SII.4 read `BC=5` (impossible) but true = `BC=√5` — back-solve from the barem answer when a problem looks impossible; it's almost always a dropped symbol, not a flawed source.
 - finalAnswer convention reaffirmed: set only the b-part terminal clean computed scalar (integer/decimal/clean-fraction/degree); skip radicals, multi-value, intervals, proofs, and printed "Arată că …" targets. Some papers legitimately have ZERO finalAnswer (Test_05).
 - New figure type handled: pie chart in **Subiectul I** (Test_06 SI.6, sondaj) — an SI item with a figure ⇒ not autoGradable; first paper where autoGradable < 6.
+
+## 9. Limba și literatura română run (2026-06-04) — reference index
+8 official EN VIII Limba română papers live on etutor.ro (`f6951b5`→`ab9da02`), each
+`scripts/import-exam-ro-<year>-<variant>.mjs`:
+- 2026: simulare (16 mart) · model (Nov-2025, was already in prod from MVP)
+- 2025: simulare · model · varianta-07 · rezerva (23 iun) · sesiune-speciala (2 iul)
+- 2024: varianta-07
+
+**RO paper shape** (differs from Mate): `subjectKey="limba_romana"`, **2 ExamPassage** rows
+(Textul 1 + Textul 2, transcribed verbatim via fitz `get_text()`), 18 items: Subiectul I.A
+(9 lectură) + I.B (8 limbă) + Subiectul al II-lea (1 redactare). Items link to passages via
+`passageRef` (comma-separated). 90 + 10 oficiu = 100. Usually **8 autoGradable** (3-4 MCQ in A
++ TF_GRID A.5 + 4 MCQ in B); open/FILL/SHORT items self-score on `rubric`. SII varies per paper
+(compunere mesaj / caracterizare / text argumentativ / text narativ / rezumat) — copy its rubric
+split from the barem.
+
+**Mostly figure-free.** Only 2025 Model has a figure (Erasmus mobility chart on A.3) →
+`hasFigure:true`, `autoGradable:false`, `figureUrl` baked into the script's `createMany`
+(extended the item mapping with `figureUrl: it.figureUrl ?? null`). Figure extracted with local
+fitz (`page.get_pixmap(clip, Matrix(4,4))`) since 4uPDF backend was down. **A figure-bearing RO
+import needs `pm2 restart tutor` afterwards** (L06a) — text-only imports don't.
+
+**Per-paper verify:** `node /tmp/verify-ro-paper.mjs <paperId> <items.json>` (auto 20/20 + attempt)
++ `node /tmp/verify-ro-html2.mjs <paperId> '<checks[]>'` (passages + items render authenticated)
++ `/review` mesh on the script. See L06 for the 3 RO-specific lessons (figure-restart,
+accent-render, verbatim-via-fitz).
