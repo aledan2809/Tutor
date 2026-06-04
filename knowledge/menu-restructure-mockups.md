@@ -166,6 +166,23 @@ Conditional render în `src/components/sidebar.tsx` (`HIDDEN_NAV` set + filtru `
 - ⚠️ **Reziduu minor de confirmat**: meditator = 50% din abonament **MINIM**; client = 50% din abonament **ACTUAL** al invitatului. Intenționat diferit (minim vs actual) sau aliniem?
 - → toate variantele cer **un motor unificat de earnings/credit** (credit-aplicat-pe-abonament vs payout-cash; durată 3-luni vs perpetuu).
 
+### Condiție esențială de acumulare (user 2026-06-04)
+**Cerință user (verbatim, NU reformulată)**:
+> Conditia esentiala oferirii creditelor (elev/parinte/familie) sau a banilor in cont (meditator) este ca invitatul sa fi platit deja (fie pentru luna in curs, fie pentru lunile respective). Deci, de fiecare data se plateste pro rata din incasari - dar pe maximum de 3 luni pentru invitatii sau perpetuu (lunar, indiferent de cum plateste elevul/parintele) pentru creatorii de continut.
+
+- Earning-ul **accruează DOAR pe plată efectiv încasată** (nu la „invitație concretizată" în avans). **Pro rata din încasări**, lună de lună.
+- **Referral** = 50% pe **fiecare lună plătită efectiv**, plafonat la **max 3 luni**. Dacă invitatul renunță după luna 1 → se acordă doar 50% pe luna 1.
+- **Creator conținut** = 50% pe **fiecare lună plătită**, **perpetuu**.
+
+### ⚖️ Refund / clawback — drepturi consumator (user 2026-06-04, ridicat ca risc)
+**Cerință user (verbatim, NU reformulată)**:
+> Avem o problema - mi se pare ca conform drepturilor consumatorului, fiecare abonat are dreptul sa se razgandeasca si sa isi ceara banii inapoi? Daca e asa, atunci trebuie facute rectificarile respective si pentru creditele primite sau/si banii primiti de creatori.
+
+- **Onest, NU consultanță juridică** — termenii exacți trăiesc în **Legal** (`legal.knowbest.ro`, NO-TOUCH CRITIC) + ToS. RO/UE: drept de retragere 14 zile la distanță (OUG 34/2014 / Dir. 2011/83), DAR **renunțabil** pentru servicii/conținut digital cu consimțământ expres la începere imediată + recunoașterea pierderii dreptului. Plus refund/chargeback oricând.
+- **Cerință de inginerie (indiferent de termeni)**: motorul de earnings **TREBUIE să suporte CLAWBACK** — la refund al plății-sursă, earning-ul derivat (credit SAU bani) se **stornează**.
+- Cod azi: `ReferralEarning` are deja **hold 30 zile** (PENDING→PAYABLE→PAID) = buffer anti-refund pentru bani. **De adăugat**: reversal credit (inclusiv recuperare dacă creditul a fost deja consumat → sold negativ / dedus din viitor) + reversal payout post-PAID (recuperare).
+- **Dependență Legal**: politica de refund + waiver dreptul de retragere se definește în Legal hub, nu aici.
+
 ---
 
 # 🎯 Capabilități de construit (comune pe roluri)
@@ -174,7 +191,7 @@ Conditional render în `src/components/sidebar.tsx` (`HIDDEN_NAV` set + filtru `
 2. **🔨🏆 Baterie de teste remediale (AI) — PUNCTUL FORTE** — AI caută + creează teste exact pe punctele slabe ale copilului (vezi Monitorizare). Depinde de #4 (tag-uire fină).
 3. **🔨🏗️ Tag-uire la IMPORT** (decizie arhitecturală) — concept fin („cos 30°", „discriminant") generat de AI la ingest, nu post-hoc. Face #1 + #2 precise. Conectează Content Quality Mesh §278 + §188. **Premisă pentru sinteză + baterie remedială.**
 4. **🔨 Logica de escaladare/praguri** — pentru Alerte (nivel configurabil de părinte: oră / 6/12/24/48h; escaladarea NU după 4 zile = doar în sumar).
-5. **🔨 Motor unificat de earnings/credit** — multi-rol, multi-tip (vezi „Matricea câștigurilor"): elev+părinte = **50% × primele 3 luni din abonamentul invitatului, ca CREDIT** (acumulat la familie sau copil) · meditator = 50% abonament minim ×3 luni (bani) · meditator conținut = 50% perpetuu (bani) · creator = 50% perpetuu (bani §286). Înlocuiește comisionul universal de azi.
+5. **🔨 Motor unificat de earnings/credit** — multi-rol, multi-tip (vezi „Matricea câștigurilor"): elev+părinte = **50% × primele 3 luni din abonamentul invitatului, ca CREDIT** (acumulat la familie sau copil) · meditator = 50% abonament minim ×3 luni (bani) · meditator conținut = 50% perpetuu (bani) · creator = 50% perpetuu (bani §286). Înlocuiește comisionul universal de azi. **Accruează DOAR pe plată încasată (pro-rata, lună de lună); suportă CLAWBACK la refund (storno credit/bani — inclusiv recuperare credit deja consumat). Hold 30 zile existent. Dependență Legal (legal.knowbest.ro) pentru politica refund/retragere.**
 6. **🔨 Conținut auxiliar meditator (marketplace + revenue-share)** — meditatorul publică materiale auxiliare vândute prin pachet → 50% perpetuu (bani). Explicat clar în pagina lui. Conținut nou + abonare pe pachet + split la plată.
 7. **🔨 Setări → Notificări: pachet + delegare** (vezi roadmap mai jos).
 
