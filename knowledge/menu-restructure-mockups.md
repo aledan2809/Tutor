@@ -79,7 +79,7 @@ Conditional render în `src/components/sidebar.tsx` (`HIDDEN_NAV` set + filtru `
    COPILUL MEU
     Monitorizare   ← sinteză + zone de reparat + evoluție
     Alerte         ← escaladări
-   Recomandă       ← (decizie deschisă: comision vs credit la părinte)
+   Recomandă       ← credit 50% din prima lună a invitatului (NU comision)
    Notificări
    Setări
 ── ascunse: fluxul de învățare al elevului (Practică/Simulări/Progres/...)
@@ -88,16 +88,23 @@ Conditional render în `src/components/sidebar.tsx` (`HIDDEN_NAV` set + filtru `
 ### Monitorizare (piesa centrală)
 - **✅ azi**: listă copii + carduri metrici (acuratețe, serii, puncte, nivel) + top 3 zone slabe + istoric examene + sesiuni recente. RAW metrics.
 - **🔨 de construit (visiune user)**: „se fac rapoarte, sinteze si se dau si exemple de zone cu probleme (ex. greseli frecvente la ecuatiile de gradul 2, reparat formulele trigonometrice cu cos 30, etc)" — strat de **sinteză narativă AI** + **exemple concrete** de zone cu probleme.
-- **Atenție granularitate**: `WeakArea` are doar materie/topic. „cos 30°" / „discriminant" cer fie tag-uire mai fină a întrebărilor, fie analiză AI a răspunsurilor greșite (`Attempt`).
+- **🔨 BATERIE DE TESTE REMEDIALE (AI) — PUNCTUL FORTE al aplicației** (user 2026-06-04): pe baza zonelor slabe, AI **caută + creează o baterie de teste exact pe punctele slabe** ale copilului. Diferențiatorul-cheie al aplicației. Apare în Monitorizare (părinte îl vede) + alimentează sesiunile de reparare ale elevului.
+- **🏗️ Decizie arhitecturală — TAG-UIRE LA IMPORT** (user 2026-06-04): „AI va analiza si cataloga greselile si va tag-ui in log. Ulterior, insa va fi nevoie de search laborios. Poate ar fi bine ca aceste tag-uri sa apara chiar de la import cand se analizeaza materialele? Astfel matchingul va fi mult mai bun." → tag-urile de concept fin („cos 30°", „discriminant") se generează **CHIAR DE LA IMPORT** (când AI analizează materialele), nu doar post-hoc din greșeli. Matching „zonă slabă → întrebări remediale + baterie" net superior + evită search laborios. Conectează: importere exam-bank (azi doar `topic` grosier), **Content Quality Mesh §278**, **§188** (misfiling).
 
 ### Alerte
 - **🟡 azi**: UI listă notificări clasificate + mark-read. Logica de declanșare (`EscalationThreshold`/`EscalationEvent`) e stub/externă.
-- **🔨**: pragurile (când se declanșează) + cine le setează.
+- **🔨 NIVEL DE ALERTARE configurabil de PĂRINTE** (user 2026-06-04): granularitate la nivel de **ORĂ** (părintele vrea să știe în aceeași oră când copilul a sărit peste o oră de studiu) SAU la nivel de **X ore** (6/12/24/48h, etc.).
+- **Regulă**: escaladarea NU se face după 4 zile — „n-a mai intrat de 4 zile" apare DOAR în **sumar** (Monitorizare), nu ca alertă de escaladare.
 
-### Recomandă / Invită (părinte)
-- ❓ decizie deschisă: la părinte (adult) păstrăm comision cash 50% SAU tot model credit ca la elev?
+### Recomandă / Invită (părinte) — DECIZIE 2026-06-04: 50% din prima lună, ca CREDIT
+**Cerință user (verbatim, NU reformulată)**:
+> da, OK cu 50% castig din echivalentul primei luni, dar il facem tot sub forma de credite (ex. Invitatul a platit un abonament de 100 de lei/luna - chiar daca a platit in avans pe 1 an intreg, iar parintele care a invitat primeste credit de 50 de lei. Daca abonamentul sau pe luna este de 75 de lei, va mai plati doar 25 de lei in acea luna si trecem 50 de lei ca si discount. Daca face 3 invitatii de cate 80 de lei fiecare si aceia au platit, atunci i se cumuleaza un credit de 120 de lei pe care ii va folosi in 2 luni (in prima nu va plati nimic din cei 75 de lei, iar in a doua va plati doar 45 de lei).
 
-### Notificări (istoric) ✅ · Setări (generic azi) — vezi roadmap pachet/delegare.
+- Mecanică: credit = **50% din echivalentul PRIMEI luni** a invitatului (chiar dacă invitatul plătește în avans pe 1 an), acumulat și aplicat pe abonamentul propriu lunar până se epuizează.
+- ⚠️ **De confirmat — aritmetică**: cu regula „creditul acoperă integral abonamentul până se epuizează", exemplul 3×80→120 credit / 75 lei abonament dă: luna 1 = 0 (rămân 45), luna 2 = 75−45 = **30 lei** (user a scris 45). De fixat regula exactă.
+- ❓ **De confirmat — diferă de ELEV**: elev = **1 lună gratis** (≈100% din lună); părinte = **50% din prima lună** credit. Intenționat diferite pe persona sau unificăm pe 50%-credit pentru toți?
+
+### Notificări (istoric) ✅ — **5 canale** = Push (web/browser) · WhatsApp · SMS · Email · Apel (telefonic); **fus** = fus orar (ca orele de liniște să se aplice corect). · Setări (generic azi) — vezi roadmap pachet/delegare.
 
 ---
 
@@ -134,10 +141,12 @@ Conditional render în `src/components/sidebar.tsx` (`HIDDEN_NAV` set + filtru `
 
 # 🎯 Capabilități de construit (comune pe roluri)
 
-1. **🔨 Strat de sinteză narativă AI** (peste `WeakArea` + `Attempt`) — alimentează Monitorizare-sinteză (părinte) + Analiză-recomandare + Rapoarte-narativ (meditator). Decizie: granularitate fină prin tag-uire întrebări vs analiză AI a greșelilor.
-2. **🔨 Logica de escaladare/praguri** — pentru Alerte (cine setează, când se declanșează).
-3. **🔨 Referral credit model** (elev) — înlocuiește comisionul; vezi Decizie 2.
-4. **🔨 Setări → Notificări: pachet + delegare** (vezi roadmap mai jos).
+1. **🔨 Strat de sinteză narativă AI** (peste `WeakArea` + `Attempt`) — alimentează Monitorizare-sinteză (părinte) + Analiză-recomandare + Rapoarte-narativ (meditator).
+2. **🔨🏆 Baterie de teste remediale (AI) — PUNCTUL FORTE** — AI caută + creează teste exact pe punctele slabe ale copilului (vezi Monitorizare). Depinde de #4 (tag-uire fină).
+3. **🔨🏗️ Tag-uire la IMPORT** (decizie arhitecturală) — concept fin („cos 30°", „discriminant") generat de AI la ingest, nu post-hoc. Face #1 + #2 precise. Conectează Content Quality Mesh §278 + §188. **Premisă pentru sinteză + baterie remedială.**
+4. **🔨 Logica de escaladare/praguri** — pentru Alerte (nivel configurabil de părinte: oră / 6/12/24/48h; escaladarea NU după 4 zile = doar în sumar).
+5. **🔨 Referral credit model** — elev = 1 lună gratis; părinte = 50% din prima lună ca credit (de confirmat dacă se unifică). Înlocuiește comisionul; vezi deciziile per rol.
+6. **🔨 Setări → Notificări: pachet + delegare** (vezi roadmap mai jos).
 
 # Roadmap — Setări → Notificări (developments, NU în meniul Notificări)
 **Cerință user (verbatim):**

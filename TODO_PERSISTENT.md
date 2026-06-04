@@ -261,7 +261,11 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 **Cerință user (verbatim, NU reformulată)**:
 > e prea mult comision perpetuu - pare schema piramidala. Punem pentru invitat 1 luna gratis (pe a doua, ca pe prima sa si-o plateasca imediat) si 1 luna gratis pentru cel care a facut invitatia (cu conditia ca cel care a facut invitatia sa aiba macar o luna platita. La a doua invitatie care se concretizeaza se transforma iar in credit pe inca o luna si tot asa. Poate ajunge la un moment dat cu o luna platita sa aiba chiar si credite pentru un an intreg - va fi un ambasador pentru aplicatie
 
-**Mecanică**: invitat plătește luna 1 → luna 2 gratis. Cel care invită → +1 lună credit per invitație concretizată (condiție: ≥1 lună plătită); acumulează (a 2-a, a 3-a... → până la ~12 luni = ambasador). **Stare azi**: `src/lib/referral.ts` face comision 50% cash + voucher −25%; modelul de credit NU există → muncă nouă (mecanism credit-lună pe subscription + landing page detalii). Detaliu în `knowledge/menu-restructure-mockups.md` (Decizie 2).
+**Mecanică ELEV**: invitat plătește luna 1 → luna 2 gratis. Cel care invită → +1 lună credit per invitație concretizată (condiție: ≥1 lună plătită); acumulează (a 2-a, a 3-a... → până la ~12 luni = ambasador).
+
+**Varianta PĂRINTE (2026-06-04, verbatim în design doc)**: credit = **50% din echivalentul primei luni** a invitatului (chiar dacă plătește în avans pe 1 an), acumulat și aplicat pe abonamentul propriu lunar până se epuizează. **2 întrebări deschise**: (1) regula exactă de aplicare (exemplul user dă luna-2=45, dar regula „credit acoperă până se epuizează" dă 30); (2) elev (1 lună gratis ≈100%) vs părinte (50%) — intenționat diferite pe persona sau unificăm?
+
+**Stare azi**: `src/lib/referral.ts` face comision 50% cash + voucher −25%; modelul de credit NU există → muncă nouă (mecanism credit-lună/credit-lei pe subscription + landing page detalii). Detaliu complet (ambele variante) în `knowledge/menu-restructure-mockups.md`.
 
 ---
 
