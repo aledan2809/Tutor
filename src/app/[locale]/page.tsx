@@ -10,7 +10,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Tutor - Mii de grile reale pe materia ta | etutor.ro",
   description:
-    "Alege o materie și exersează pe grile reale, gratuit și fără cont — BAC, Evaluare Națională, admitere. Îți salvezi progresul, streak-uri zilnice și învățare adaptivă.",
+    "Alege o materie și exersează pe grile reale, gratuit și fără cont — BAC, Evaluare Națională, admitere. Îți salvezi progresul, serii zilnice și învățare adaptivă.",
 };
 
 // The page renders dynamically (locale/i18n config), so a page-level
@@ -37,12 +37,10 @@ export default async function LandingPage() {
   const t = await getTranslations("landing");
   const locale = await getLocale();
   const ro = locale === "ro";
-  const { questionCount, quizCount } = await getStats();
+  const { quizCount } = await getStats();
 
-  // Floor the real question-bank count to the nearest hundred so the headline
-  // stays honest and stable ("1.400+") instead of a fragile exact figure.
-  const bankFloor = Math.max(100, Math.floor(questionCount / 100) * 100);
-  const bankLabel = `${bankFloor.toLocaleString(ro ? "ro-RO" : "en-US")}+`;
+  // Round, conservative bank figure for the proof card (owner-set).
+  const bankLabel = ro ? "2.000+" : "2,000+";
   // Only surface the visitor-generated counter once it's meaningful — a "0" (or
   // tiny) counter is worse than none. It self-reveals as the demo gets used.
   const showQuizCounter = quizCount >= 50;
@@ -56,32 +54,32 @@ export default async function LandingPage() {
         badge: "Mii de grile reale · pe materia ta · gratuit",
         bubbleParent: "Ești părinte? Vezi dacă cel mic chiar învață",
         headline: "Mii de grile reale, pe materia ta — gata de exersat",
-        sub: "Grile verificate pe BAC, Evaluare Națională și admitere — exersezi pe loc, îți salvezi progresul și primești streak-uri zilnice.",
+        sub: "Grile verificate pe BAC, Evaluare Națională și admitere — exersezi pe loc, îți salvezi progresul și primești serii zilnice.",
         demoHeading: "Încearcă chiar acum 👇",
         ctaPrimary: "Fă-ți cont gratuit",
         ctaSecondary: "Vezi demo-ul complet",
-        proofTitle: "De ce aleg elevii, părinții și profesorii etutor.ro",
+        proofTitle: "De ce elevii, părinții și profesorii aleg ",
         proofLead:
-          "Progresul nu rămâne ascuns: elevul îl vede, părintele îl vede — iar la pachetul cu meditator, îl vede și el. Aceleași scoruri, aceeași evoluție, aceleași greșeli de lucrat. Crește pas cu pas și te ține în priză.",
-        proofBank: "grile reale verificate",
+          "Progresul nu rămâne ascuns: elevul îl vede, părintele îl vede — iar la pachetul cu meditator, îl vede și acesta. Aceleași scoruri, aceeași evoluție, aceleași greșeli de corectat. Crește pas cu pas și ține elevul „în priză”.",
+        proofBank: "grile",
         proofExams: "BAC · Evaluare Națională · INM/Barou",
         proofExamsLabel: "examene acoperite",
         proofSpeed: "~10 secunde",
         proofSpeedLabel: "de la text la test",
         proofFree: "Gratuit, fără card*",
-        proofFreeLabel: "demo public oricând",
+        proofFreeLabel: "demo pentru Evaluarea Națională și Bacalaureat",
         freeFootnote:
-          "* Demo public: mereu gratuit, fără cont. Cont gratuit: 7 zile, 2 materii/zi × 5 întrebări — apoi alegi un plan.",
+          "* Demo pentru copii: gratuit 7 zile, fără cont, 2 materii/zi × 5 întrebări — apoi alegi un plan.",
         proofGdpr: "Date protejate (GDPR)",
         proofGdprLabel: "conform, transparent",
         quizCounter: "teste generate de vizitatori",
         stepsTitle: "Cum funcționează",
         step1Title: "1. Alege materia sau examenul",
         step1Desc: "BAC, Evaluare Națională, admitere sau pe clase — sute de grile reale te așteaptă.",
-        step2Title: "2. Exersezi cu grile reale",
-        step2Desc: "Grile cu variante și explicații, verificate. Dai testul pe loc, fără cont.",
+        step2Title: "2. Exersezi cu grile noi sau date în trecut",
+        step2Desc: "Grilele includ și răspunsuri cu explicații. Dai testul pe loc, fără cont.",
         step3Title: "3. Îți salvezi progresul",
-        step3Desc: "Faci cont și îți salvezi scorul, streak-urile și progresul — vezi cum crește pas cu pas. Sau provoci un prieten la duel.",
+        step3Desc: "Faci cont și îți salvezi scorul, seriile și progresul — vezi cum crește pas cu pas. Sau provoci un prieten la duel.",
         featuresTitle: "Ce primești cu un cont gratuit",
         ownerNote: "",
         ctaBandTitle: "Gata să înveți mai deștept?",
@@ -108,7 +106,7 @@ export default async function LandingPage() {
         demoHeading: "Try it right now 👇",
         ctaPrimary: "Create a free account",
         ctaSecondary: "See the full demo",
-        proofTitle: "Why students, parents and teachers choose etutor.ro",
+        proofTitle: "Why students, parents and teachers choose ",
         proofLead:
           "Progress doesn't stay hidden: the student sees it, the parent sees it — and on the plan with a tutor, the tutor sees it too. Same scores, same trajectory, same mistakes to work on. It grows step by step and keeps you hooked.",
         proofBank: "real, verified questions",
@@ -215,7 +213,10 @@ export default async function LandingPage() {
         {/* Social proof — real, verifiable signals */}
         <section className="border-y border-gray-800 bg-gray-950">
           <div className="mx-auto max-w-7xl px-4 py-12">
-            <h2 className="text-center text-2xl font-bold text-white">{L.proofTitle}</h2>
+            <h2 className="text-center text-xl font-bold text-white sm:text-2xl">
+              {L.proofTitle}
+              <Brand />
+            </h2>
             <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-gray-400">{L.proofLead}</p>
             <div className="mt-8 grid grid-cols-2 gap-6 text-center md:grid-cols-4">
               <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
