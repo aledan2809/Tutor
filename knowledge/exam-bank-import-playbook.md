@@ -158,3 +158,12 @@ Română is a later focus (after Mate).
 10 papers imported + live-verified (`bbc82ff`→`254f214`), each `scripts/import-exam-mate-<year>-<variant>.mjs`:
 2025 simulare/examen-07/model/rezerva-02/sesiune-speciala-03 · 2026 simulare · 2024 examen-07/model/rezerva-02/simulare.
 Every pair verified authenticated: 12 MCQ → 60/60 rawPoints + finalCheck pass + figures-200. Prod total: 12 papers / 216 items.
+
+## 9. CNCE 2022 run (2026-06-04) — reference index + new lessons
+6 papers imported + live-verified (`9976b78`→`c3d7b86`), each `scripts/import-exam-mate-2022-test-0N.mjs` + `scripts/exam-figures/spec-2022-test-0N.json`. **2022 Mate COMPLET** (Test_01..06). Prod total: 46 papers / 828 items (2021 Test_02..15 + 2022 Test_01..06 = whole `pro-matematica2` CNCE series).
+- New reusable tooling: `scripts/exam-figures/extract_4updf.py` (JSON-spec → POST page-fraction regions to 4uPDF `/api/extract-region`, builds montage) + `/tmp/verify-paper.mjs` (generic NextAuth login + POST /score, asserts MCQ full + finalCheck from a prod `{paperId, items[]}` map). Per-paper spec JSON keeps bboxes reproducible.
+- Each verified authenticated on etutor.ro: figures 200 + MCQ 60/60 + finalCheck N/N + attempt persisted + `/review` mesh (2 verifiers: math re-derivation `[]` + policy `[]`).
+- **L04** (barem typo): official barem `SII.6` printed `a)` but correct = 8√2 = `b)` — used math-correct, documented, confirmed by `/review`. NEVER ship an MCQ key on the barem's word alone; math-re-derive every key.
+- **L05** (OCR drops √): Test_05 SII.4 read `BC=5` (impossible) but true = `BC=√5` — back-solve from the barem answer when a problem looks impossible; it's almost always a dropped symbol, not a flawed source.
+- finalAnswer convention reaffirmed: set only the b-part terminal clean computed scalar (integer/decimal/clean-fraction/degree); skip radicals, multi-value, intervals, proofs, and printed "Arată că …" targets. Some papers legitimately have ZERO finalAnswer (Test_05).
+- New figure type handled: pie chart in **Subiectul I** (Test_06 SI.6, sondaj) — an SI item with a figure ⇒ not autoGradable; first paper where autoGradable < 6.

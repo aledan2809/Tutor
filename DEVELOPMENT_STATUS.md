@@ -1,7 +1,29 @@
 # Project Status - Tutor
-Last Updated: 2026-06-04 (exam-bank 2021 batch Test_05..15 + Test_14 done)
+Last Updated: 2026-06-04 (exam-bank 2022 Mate Test_01..06 complete — whole CNCE pro-matematica2 series done)
 
-## Session 2026-06-04 — Exam-bank CNCE import: 2021 batch complete (Test_03..15)
+## Session 2026-06-04 (PM) — Exam-bank CNCE import: 2022 Mate complete (Test_01..06) + Română queued
+
+### Done
+- Imported EN VIII **2022 Mate Test_01..06** (6 papers) end-to-end via the playbook recipe — closes the whole `pro-matematica2` CNCE series (2021 Test_02..15 + 2022 Test_01..06).
+- Per paper: transcribe verbatim → `import-exam-mate-2022-test-0N.mjs` + `spec-2022-test-0N.json` → `--validate` → fig_inspect → **figures via 4uPDF `/api/extract-region`** @ 300 DPI → montage-verify → commit+push → VPS2 pull + prod import + `pm2 restart tutor` → **authenticated score verify on etutor.ro** (all 60/60 + finalCheck) → **mesh `/review`** (math re-derivation + policy, all `[]`).
+- Commits: T01 `9976b78`, T02 `78f21e9`, T03 `92f82b6`, T04 `a9c9fb2`, T05 `fdecb71`, T06 `c3d7b86`.
+- **Prod DB: 46 papers / 828 items** (2021 Test_02..15 + 2022 Test_01..06). Backup pre-import `/root/backups/tutor-pre-exambank-2022test01-2026-06-04.dump`.
+- New reusable tooling: `scripts/exam-figures/extract_4updf.py` (JSON-spec 4uPDF region extractor + montage) + `/tmp/verify-paper.mjs` (generic authenticated score verifier from a prod map).
+- 2 barem/source anomalies caught + handled (see Lessons L04/L05): Test_04 SII.6 official barem typo (printed "a", correct 8√2=b — used math-correct, confirmed by /review); Test_05 SII.4 OCR dropped √ (BC=5 → BC=√5, back-solved from key).
+- **Limba română EN VIII** added to TODO_PERSISTENT with the full confirmed structure (2 passages + 9A + 8B + 1 composition; 8 papers in `heiprofu-romana`). Scoped from 2025 Simulare; not yet imported.
+
+### Pending
+- **Limba română EN VIII — 8 papers** (`heiprofu-romana`): 2024 var_07, 2025 var_07/model/simulare/rezerva/sesiune-speciala, 2026 model/simulare. Bigger lift each (verbatim literary text passages + comprehension + composition rubrics, mostly OPEN). Recipe + structure in TODO_PERSISTENT. 4uPDF venv `/tmp/4updf-venv` + token `/tmp/figtoken.txt` + backend :8099 left running for resume.
+- Bigger Tutor feature items + homepage demo restriction (unchanged in TODO_PERSISTENT).
+
+## Lessons Learned (sesiunea 2026-06-04 PM)
+- **L04** — official barem answer-key can be wrong; math-prove every MCQ key, override + document a typo (Test_04 SII.6: barem "a", correct 8√2=b).
+- **L05** — a "geometrically impossible" MCQ usually means a dropped √/symbol in OCR — back-solve from the barem key before trusting the text (Test_05 SII.4: BC=5 → BC=√5).
+- (knowledge/lessons-learned.md L04, L05)
+
+---
+
+## Session 2026-06-04 (AM) — Exam-bank CNCE import: 2021 batch complete (Test_03..15)
 
 ### Done
 - Imported EN VIII 2021 Mate training tests **Test_05..15** (11 papers) end-to-end via the proven playbook recipe. Test_03/04 done earlier same day; Test_02 the prior session.

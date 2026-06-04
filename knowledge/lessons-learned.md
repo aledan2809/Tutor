@@ -32,3 +32,23 @@
 **Fix:** pass `page` = fig_inspect PAGE number verbatim. Always montage-verify (3×N grid, Read the PNG) before commit — the wrong-page crops are obvious at a glance. Delete junk files with `find ... -name "...* *.png" -delete` (space in name) before staging.
 
 **Prevention:** the extract-region page is the physical page; never offset. Vector figures (e.g. the Test_15 SI.6 pie chart, which has NO raster IMG xref) render correctly via extract-region — estimate their bbox from `page.get_drawings()` union and pass the same fractions. Montage-verify is the cheap catch for any bbox/page mistake. Cross-ref: `knowledge/exam-bank-import-playbook.md` §2.6, memory `project_tutor_exam_bank_import`.
+
+## L04 — 2026-06-04 — Official barem answer-key can be wrong; math-prove every MCQ key, override + document a typo
+
+**Symptom:** importing 2022 Test_04, the official barem prints `SII.6 = a)` (= "8 dm"), but item 6 (regular pyramid VABCD, square base AB=2, triangle VBD equilateral, sum of the 4 lateral edges) is provably **8√2 dm = option b**: square diagonal BD=2√2, VBD equilateral ⇒ VB=VD=BD=2√2, regular pyramid ⇒ all 4 lateral edges = 2√2, sum = 4·2√2 = 8√2. Option a (8) would require each lateral edge = 2 = the base side, contradicting the equilateral condition.
+
+**Root cause:** the official CNCE barem has a typo in the answer letter (or the OCR of the barem flipped a→b). Blindly transcribing the printed key would have given students a *wrong* auto-grade key — a student who correctly answers 8√2 (b) would be marked wrong. The "answer keys are GROUND-TRUTH from the barem" rule exists to stop *me inventing* keys, not to force-copy a provable typo.
+
+**Fix:** use the **mathematically-proven** answer (b), set it as `correctAnswer`, and **document the discrepancy prominently** in the script header (`⚠️ BAREM-DISCREPANCY: barem prints "a" but correct is 8√2=b, <derivation>`) + flag it to the user. The `/review` mesh math verifier independently re-derived 8√2 and confirmed b — that adversarial second opinion is what makes the override safe.
+
+**Prevention:** every MCQ key gets an independent math re-derivation in the `/review` mesh pass; never ship a key on the barem's word alone. When math contradicts a single printed barem letter and the math matches a *specific option*, prefer the math + document (don't silently copy, don't silently change). Cross-ref: `knowledge/exam-bank-import-playbook.md` §0 ground-rules + §7.
+
+## L05 — 2026-06-04 — A "geometrically impossible" MCQ usually means a dropped √ (or symbol) in OCR — back-solve before trusting the text
+
+**Symptom:** 2022 Test_05 SII.4 (rectangle, O = midpoint of diagonal AC, P on DC with PO⊥AC, "AP=3", "BC=5", find AB; barem key b = AB=5) is geometrically **impossible** as first read: PO⊥AC through the midpoint ⇒ PA=PC, and A→P (P on the side opposite AB) forces PA ≥ height = BC = 5, so PA=3 < 5 can't happen for any AB.
+
+**Root cause:** the PDF text rendered `BC = √5 cm` but the first OCR pass dropped the radical, reading `BC = 5 cm`. With the true `BC = √5`: PA²=AD²+DP² ⇒ 9 = 5 + (AB−3)² ⇒ AB = 5 (rejecting AB=1 since PC=3 > DC=1). Everything is consistent and the barem key b=5 is correct.
+
+**Fix:** when an MCQ looks impossible, **back-solve from the barem answer** to find what input value makes it consistent — it instantly revealed `BC` had to be √5, not 5. Re-read the PDF's secondary rendering (the layout block, not just the first text block) which showed `√5`. Transcribe `BC = √5 cm`.
+
+**Prevention:** treat "impossible problem" as an OCR-symbol-loss signal (most often a dropped `√`, exponent, or sign), not a flawed source — official CNCE items are sound. Back-solving from the known key + re-reading both PDF text renderings recovers the true value. The `/review` math verifier re-derives with the corrected value and confirms. Cross-ref: `knowledge/exam-bank-import-playbook.md` §0.
