@@ -72,6 +72,10 @@ export function Sidebar({ user }: SidebarProps) {
     user.isSuperAdmin ||
     user.enrollments?.some((e) => e.roles.includes("ADMIN"));
 
+  // §213 rol 2 — un cont WATCHER pur (părinte) monitorizează un copil; nu e el însuși elev.
+  const isStudent =
+    user.enrollments?.some((e) => e.roles.includes("STUDENT"));
+
   if (isWatcher) {
     navItems.push({ href: "/dashboard/watcher", label: t("watcher") });
     navItems.push({ href: "/dashboard/watcher/notifications", label: t("watcherNotifications") });
@@ -93,7 +97,27 @@ export function Sidebar({ user }: SidebarProps) {
     "/dashboard/bibliography", // Bibliography = 11 (niche juridic/aviation)
     "/dashboard/gamification", // MERGE → „Progresul meu" (tab Realizări) — §213
   ]);
-  const visibleNavItems = navItems.filter((item) => !HIDDEN_NAV.has(item.href));
+  let visibleNavItems = navItems.filter((item) => !HIDDEN_NAV.has(item.href));
+
+  // §213 rol 2 — PĂRINTE: un cont WATCHER pur (nu și elev/instructor/superadmin) primește
+  // meniul focalizat pe monitorizarea copilului. Fluxul de învățare al elevului
+  // (Practică/Simulări/Progresul meu/Domenii/Calendar) e ascuns din nav — rutele rămân
+  // funcționale (conditional render, reversibil). SuperAdmin + instructor + elev păstrează
+  // meniul actual (instructor = rol 3, restructurat ulterior). Ordine per mockup design
+  // (knowledge/menu-restructure-mockups.md ROL 2): Panou · Monitorizare · Alerte ·
+  // Invită un prieten · Notificări · Setări.
+  const isParentView =
+    !user.isSuperAdmin && isWatcher && !isInstructor && !isStudent;
+  if (isParentView) {
+    visibleNavItems = [
+      { href: "/dashboard", label: t("dashboard") },
+      { href: "/dashboard/watcher", label: t("watcher") },
+      { href: "/dashboard/watcher/notifications", label: t("watcherNotifications") },
+      { href: "/dashboard/referrals", label: t("referrals") },
+      { href: "/dashboard/notifications", label: t("notifications") },
+      { href: "/dashboard/settings", label: t("settings") },
+    ];
+  }
 
   const sidebarContent = (
     <>
