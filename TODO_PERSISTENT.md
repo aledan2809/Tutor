@@ -265,6 +265,8 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 
 **Varianta PĂRINTE (2026-06-04, verbatim în design doc)**: credit = **50% din echivalentul primei luni** a invitatului (chiar dacă plătește în avans pe 1 an), acumulat și aplicat pe abonamentul propriu lunar până se epuizează. **2 întrebări deschise**: (1) regula exactă de aplicare (exemplul user dă luna-2=45, dar regula „credit acoperă până se epuizează" dă 30); (2) elev (1 lună gratis ≈100%) vs părinte (50%) — intenționat diferite pe persona sau unificăm?
 
+**Varianta MEDITATOR (2026-06-04, verbatim în design doc)**: **BANI** (nu credit). (a) Invită și câștigă = 50% din abonamentul MINIM, per elev, primele 3 luni de plată ale elevului/părintelui. (b) Conținut auxiliar (materiale puse direct, abonate prin pachet) = câștig PERPETUU 50% din plata elev/părinte — feature separat (marketplace meditator). Mesaje meditator = DOAR in-app. Explicat clar în pagina meditatorului. → toate variantele (elev/părinte/meditator/creator) cer **un motor unificat de earnings/credit** (free-month, credit-lei, %-temporar, %-perpetuu). Matrice completă în `knowledge/menu-restructure-mockups.md`.
+
 **Stare azi**: `src/lib/referral.ts` face comision 50% cash + voucher −25%; modelul de credit NU există → muncă nouă (mecanism credit-lună/credit-lei pe subscription + landing page detalii). Detaliu complet (ambele variante) în `knowledge/menu-restructure-mockups.md`.
 
 ---

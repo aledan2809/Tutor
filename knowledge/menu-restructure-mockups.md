@@ -128,14 +128,36 @@ Conditional render în `src/components/sidebar.tsx` (`HIDDEN_NAV` set + filtru `
 | Studenți | ✅ | carduri + badge RISC (euristic, 6 factori) + sortare risc/acuratețe/nume; detaliu = profil + atribuie sesiune + setează obiectiv |
 | Grupuri | ✅ | CRUD + bulk export JSON |
 | Obiective | ✅ | CRUD per elev + filtru active/completate |
-| Mesaje | ✅ | inbox chat + compose (in_app/email/WhatsApp/SMS) |
+| Mesaje | ✅→🔨 | inbox chat; **DOAR in-app** — scoate email/WhatsApp/SMS (decizie user 2026-06-04) |
 | Analiză | ✅ | risc agregat euristic (NU AI/ML) |
 | Rapoarte | 🟡→🔨 | azi DUMP CSV/JSON brut; vision = raport narativ PDF/HTML stilizat |
 | Conținut: Practică | ✅ | de fapt /instructor/questions (CRUD bancă întrebări) |
 | Conținut: Simulări | ✅ | exam-bank read (26 papers) |
 
 - **🔨 recomandare Studenți/Analiză**: azi text generic pe prag (>70% „intervenție imediată"); vision = sinteză AI concretă per elev.
-- ❓ decizie: meditatorul vede „Practică" elev-style sau „Întrebări" admin-style?
+
+### Meditator — câștiguri (BANI, nu credit) + Conținut — decizie user 2026-06-04
+**Cerință user (verbatim, NU reformulată)**:
+> similar cu creatorul de continut, meditatorul trebuie stimulat sa foloseasca aplicatia si sa o recomande si elevilor/parintilor. El poate castiga bani din aplicatie si prin Invita si castiga - sa primeasca 50% din abonamentul minim pentru fiecare elev in primele 3 luni de plata ale elevului sau parintelui (dupa caz)
+> continut - Practica - instructor questions - daca sunt anumite instructiuni pe care le face/selecteaza Meditatorul e OK. Daca insa discutam despre materiale auxiliare (continut pus direct de catre meditator) la care se aboneaza elevul/studentul sau aboneaza parintele printr-un pachet, atunci acela e un castig suplimentar perpetuu pentru meditator cu 50% din cat plateste elevul sau parintele. Trebuie explicat clar in pagina sa de meditator.
+
+- **Mesaje DOAR in-app** (fără email/WA/SMS).
+- **Câștig 1 — Invită și câștigă**: 50% din **abonamentul minim**, per elev, în **primele 3 luni** de plată ale elevului/părintelui (după caz). = **BANI**.
+- **Câștig 2 — Conținut auxiliar**: materiale puse direct de meditator, la care elevul/părintele se abonează printr-un **pachet** → câștig suplimentar **PERPETUU = 50%** din cât plătește elevul/părintele. = **BANI**. (Distinct de instructor-questions pe care le selectează/creează ca parte din predare = fără plată extra.)
+- **Trebuie explicat CLAR în pagina lui de meditator.**
+
+---
+
+## 💰 Matricea câștigurilor pe roluri (sinteză 2026-06-04)
+| Rol | Mecanism | Reward | Tip | Durată |
+|---|---|---|---|---|
+| ELEV | invită prieten | 1 lună gratis (ambii) | **credit** | one-shot/invitație (≥1 lună plătită) |
+| PĂRINTE | invită părinte | 50% din prima lună a invitatului | **credit lei** | one-shot, acumulat pe abonament propriu |
+| MEDITATOR | invită elev/părinte | 50% din abonament minim/elev | **bani** | primele 3 luni |
+| MEDITATOR | conținut auxiliar (pachet) | 50% din plata elev/părinte | **bani** | **perpetuu** |
+| CREATOR (§286) | conținut | 50% | **bani** | **perpetuu** |
+
+**Split cheie**: ELEV+PĂRINTE = **credit** (clienți, loialitate); MEDITATOR+CREATOR = **bani/payout** (profesioniști, monetizare). Toate au baza 50%, dar tip + durată diferă. → necesită **un motor unificat de earnings/credit** cu mai multe tipuri de reward (free-month, credit-lei, %-temporar, %-perpetuu).
 
 ---
 
@@ -145,8 +167,9 @@ Conditional render în `src/components/sidebar.tsx` (`HIDDEN_NAV` set + filtru `
 2. **🔨🏆 Baterie de teste remediale (AI) — PUNCTUL FORTE** — AI caută + creează teste exact pe punctele slabe ale copilului (vezi Monitorizare). Depinde de #4 (tag-uire fină).
 3. **🔨🏗️ Tag-uire la IMPORT** (decizie arhitecturală) — concept fin („cos 30°", „discriminant") generat de AI la ingest, nu post-hoc. Face #1 + #2 precise. Conectează Content Quality Mesh §278 + §188. **Premisă pentru sinteză + baterie remedială.**
 4. **🔨 Logica de escaladare/praguri** — pentru Alerte (nivel configurabil de părinte: oră / 6/12/24/48h; escaladarea NU după 4 zile = doar în sumar).
-5. **🔨 Referral credit model** — elev = 1 lună gratis; părinte = 50% din prima lună ca credit (de confirmat dacă se unifică). Înlocuiește comisionul; vezi deciziile per rol.
-6. **🔨 Setări → Notificări: pachet + delegare** (vezi roadmap mai jos).
+5. **🔨 Motor unificat de earnings/credit** — multi-rol, multi-tip (vezi „Matricea câștigurilor"): elev=1 lună gratis (credit) · părinte=50% prima lună (credit lei) · meditator=50% abonament minim ×3 luni (bani) · creator=50% perpetuu (bani §286). Înlocuiește comisionul universal de azi.
+6. **🔨 Conținut auxiliar meditator (marketplace + revenue-share)** — meditatorul publică materiale auxiliare vândute prin pachet → 50% perpetuu (bani). Explicat clar în pagina lui. Conținut nou + abonare pe pachet + split la plată.
+7. **🔨 Setări → Notificări: pachet + delegare** (vezi roadmap mai jos).
 
 # Roadmap — Setări → Notificări (developments, NU în meniul Notificări)
 **Cerință user (verbatim):**
