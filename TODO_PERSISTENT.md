@@ -90,7 +90,10 @@ Paginile sunt LIVE (200) și se leagă între ele, dar **nu-s în meniul de sus*
 
 ---
 
-## [ ] 💳 Flux de calculare a plății + checkout + GDPR (creat 2026-06-03)
+## [~] 💳 Flux de calculare a plății + checkout + GDPR (creat 2026-06-03; voucher-path LIVE 2026-06-05)
+
+**PROGRES 2026-06-05** (commit `bf57daa`): **fluxul voucher (fără Stripe) e LIVE**. Pagină `/dashboard/activare` + `POST /api/activate`: elevul alege materiile → vede prețul → introduce voucher → **100% → suma 0 → înscris (STUDENT) + `subscriptionStatus=active` (1 an) + voucher consumat atomic**. `<100%` → `requiresPayment` (ruta card/Stripe, dormant). Nav „Activare acces" + namespace i18n `activare` (RO/EN). Generat **TESTER2026** (100%, 50 utilizări) — cod shareable pentru testeri. Verificat e2e: tester nou (0 materii) → TESTER2026 → înscris Mate+Română cl. VIII + active; voucher usedCount 1/50.
+**RĂMÂNE — plata reală cu cardul (Stripe)**: `STRIPE_SECRET_KEY=""` gol pe prod + planul „Bronze" are `stripeId` fals. Necesită **acțiune user**: cont Stripe (test mode) → 3 chei (`STRIPE_SECRET_KEY` + publishable + `STRIPE_WEBHOOK_SECRET`) + produse/prețuri reale. Apoi: wire `SubscriptionPlan.stripeId` real + activez ruta `/api/admin/stripe/checkout` (deja aplică voucher ca `percent_off` coupon) + webhook acordă acces. GDPR/Legal-hub la checkout = sub-task ulterior.
 
 **Firma (controller):** **Class RDA Impex SRL** (vezi `Master` reference entities).
 
