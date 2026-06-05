@@ -128,7 +128,14 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 
 **Igienă găsită (DEFERRED — domain-level, nu bundle în item 1):** cele două denumiri NU sunt duplicate — **„Matematica" (355)** e domeniul principal *Matematica*, iar **„Matematică" (9)** sunt în domeniul *Aviation* (mate de aviație, separat legitim). Singurul punct cosmetic: domeniul principal e scris fără diacritică („Matematica"). Redenumire corectă „Matematica"→„Matematică" = schimbare la nivel de **domeniu** (atinge `name` + `slug` + URL-uri) → sesiune separată, nu acum.
 
-## [ ] 📚 Capacitate (clasa a VIII-a) — Română + Matematică consolidate V-VIII (pentru SESIUNEA URMĂTOARE, creat 2026-06-03)
+## [~] 📚 Capacitate (clasa a VIII-a) — Română + Matematică consolidate V-VIII (creat 2026-06-03; secțiunea „Grile" LIVE 2026-06-05)
+
+**PROGRES 2026-06-05** (commits `49865d5` + `a3f27fe`): secțiunea **„Grile" e LIVE** pe etutor.ro (= pagina Practise redenumită). Domeniul „Matematica V-VIII" → **„Matematica cl. VIII"** (bancă consolidată de Capacitate; păstrează slug `matematica-v-viii`) cu **343 grile PUBLISHED** (toate AI_GENERATED clasa V, mesh ≥0.8 — primul tier V-VIII). Creat shell gol **„Română cl. VIII"** (slug `romana-cl-viii`). Meniu: Practise→Grile (RO „Grile" / EN „Quizzes") + fix anglo-roman (Simulări/Simulations via `nav.examBank`, nu hardcodat). Pagina: i18n heading + empty-states (pachet gol / materie fără grile) + package-gating (elevul vede doar materiile din înscrierile lui). Script: `scripts/setup-grile-domains.mjs` (idempotent). Verificat autentificat: Mate=343 grile în sesiune, Română=0→empty-state, nav consistent RO+EN. Backup `/root/backups/tutor-pre-grile-2026-06-05.dump`.
+**RĂMÂNE**: loturi Mate VI/VII/VIII + grile Română (generare via pipeline Claude-judge) + afișarea clasei-sursă la corectare (§131 pas 3) + calibrare cu culegeri (pas 4).
+
+---
+
+## [archive] 📚 Capacitate — spec original (creat 2026-06-03)
 
 **Context:** se apropie examenul de Capacitate (clasa a VIII-a); focusul e pe **Română** și **Matematică** din materia claselor **V-VIII**.
 
