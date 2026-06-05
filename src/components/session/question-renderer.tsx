@@ -15,6 +15,7 @@ interface QuestionData {
   subject: string;
   topic: string;
   difficulty: number;
+  imageUrl?: string | null;
 }
 
 interface QuestionRendererProps {
@@ -67,6 +68,17 @@ export function QuestionRenderer({
 
       {/* Question content */}
       <p className="text-lg text-white">{question.content}</p>
+
+      {/* Figure (geometry / chart items) — rendered on a white card so the black line
+          drawings stay legible on the dark theme */}
+      {question.imageUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={question.imageUrl}
+          alt="Figura exercițiului"
+          className="mx-auto max-h-[420px] w-auto max-w-full rounded-lg border border-gray-700 bg-white p-2"
+        />
+      )}
 
       {/* Multiple choice options */}
       {question.type === "MULTIPLE_CHOICE" && options && (
