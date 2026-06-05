@@ -39,6 +39,7 @@
     "dashboard": "Panou de control",
     "practice": "Grile",
     "examBank": "Simulări",
+    "activare": "Activare acces",
     "exams": "Examene",
     "progress": "Progresul meu",
     "notifications": "Notificări",
@@ -61,6 +62,24 @@
     "noSubjects": "Nu ai nicio materie în pachetul tău încă. Alege-ți materiile din contul tău pentru a începe.",
     "noGrile": "Nu există încă grile pentru această materie. Revino curând.",
     "loadError": "Nu am putut încărca datele."
+  },
+  "activare": {
+    "title": "Activare acces",
+    "intro": "Alege materiile, vezi prețul, apoi introdu codul voucher. Un voucher de 100% anulează suma și îți activează accesul pe loc.",
+    "subjects": "Materii",
+    "priceNote": "de la 19,90 lei / materie / lună",
+    "voucher": "Cod voucher",
+    "voucherPlaceholder": "ex. TESTER2026",
+    "total": "Total de plată",
+    "afterVoucher": "După voucher",
+    "activate": "Activează",
+    "payCard": "Plătește cu cardul",
+    "pickSubject": "Selectează cel puțin o materie.",
+    "enterVoucher": "Introdu un cod voucher.",
+    "success": "✅ Acces activat! Suma a fost anulată de voucher.",
+    "toGrile": "Mergi la Grile",
+    "needsPayment": "Acest voucher acoperă doar {percent}%. Plata restului cu cardul va fi disponibilă în curând.",
+    "cardSoon": "Plata cu cardul (Stripe) va fi disponibilă în curând. Momentan folosește un voucher de 100%."
   },
   "exam": {
     "title": "Simulator Examen",

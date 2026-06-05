@@ -39,6 +39,7 @@
     "dashboard": "Dashboard",
     "practice": "Quizzes",
     "examBank": "Simulations",
+    "activare": "Activate access",
     "exams": "Exams",
     "progress": "My Progress",
     "notifications": "Notifications",
@@ -61,6 +62,24 @@
     "noSubjects": "You have no subjects in your package yet. Pick your subjects from your account to get started.",
     "noGrile": "No quizzes yet for this subject. Check back soon.",
     "loadError": "Could not load data."
+  },
+  "activare": {
+    "title": "Activate access",
+    "intro": "Pick your subjects, see the price, then enter a voucher code. A 100% voucher cancels the amount and activates your access instantly.",
+    "subjects": "Subjects",
+    "priceNote": "from 19.90 lei / subject / month",
+    "voucher": "Voucher code",
+    "voucherPlaceholder": "e.g. TESTER2026",
+    "total": "Total due",
+    "afterVoucher": "After voucher",
+    "activate": "Activate",
+    "payCard": "Pay by card",
+    "pickSubject": "Select at least one subject.",
+    "enterVoucher": "Enter a voucher code.",
+    "success": "✅ Access activated! The amount was cancelled by the voucher.",
+    "toGrile": "Go to Quizzes",
+    "needsPayment": "This voucher only covers {percent}%. Card payment for the rest will be available soon.",
+    "cardSoon": "Card payment (Stripe) is coming soon. For now, use a 100% voucher."
   },
   "exam": {
     "title": "Exam Simulator",

@@ -49,6 +49,7 @@ export function Sidebar({ user }: SidebarProps) {
     { href: "/dashboard/assessment", label: t("assessment") },
     { href: "/dashboard/exams", label: t("exams") },
     { href: "/dashboard/exam-bank", label: t("examBank") },
+    { href: "/dashboard/activare", label: t("activare") },
     { href: "/dashboard/progress", label: t("progress") },
     { href: "/dashboard/domains", label: t("domains") },
     { href: "/dashboard/calendar", label: t("calendar") },
