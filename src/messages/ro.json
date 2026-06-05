@@ -37,7 +37,8 @@
   },
   "nav": {
     "dashboard": "Panou de control",
-    "practice": "Practică",
+    "practice": "Grile",
+    "examBank": "Simulări",
     "exams": "Examene",
     "progress": "Progresul meu",
     "notifications": "Notificări",
@@ -53,6 +54,13 @@
     "instructor": "Instructor",
     "gamification": "Gamificare",
     "referrals": "Invită un prieten"
+  },
+  "grile": {
+    "subject": "Materie",
+    "loading": "Se încarcă...",
+    "noSubjects": "Nu ai nicio materie în pachetul tău încă. Alege-ți materiile din contul tău pentru a începe.",
+    "noGrile": "Nu există încă grile pentru această materie. Revino curând.",
+    "loadError": "Nu am putut încărca datele."
   },
   "exam": {
     "title": "Simulator Examen",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { SessionSelector } from "@/components/session/session-selector";
 
@@ -26,11 +27,12 @@ interface SessionNextResponse {
 }
 
 export default function PracticePage() {
+  const t = useTranslations();
   const router = useRouter();
   const [data, setData] = useState<SessionNextResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
-  const [selectedDomain, setSelectedDomain] = useState<string>("aviation");
+  const [selectedDomain, setSelectedDomain] = useState<string>("");
   const [domains, setDomains] = useState<{ slug: string; name: string }[]>([]);
 
   useEffect(() => {
@@ -84,40 +86,48 @@ export default function PracticePage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="mb-6 text-2xl font-bold text-white">Practice</h1>
+      <h1 className="mb-6 text-2xl font-bold text-white">{t("nav.practice")}</h1>
 
-      {/* Domain selector */}
-      {domains.length > 1 && (
-        <div className="mb-6">
-          <label className="mb-2 block text-sm text-gray-400">Domain</label>
-          <select
-            value={selectedDomain}
-            onChange={(e) => setSelectedDomain(e.target.value)}
-            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
-          >
-            {domains.map((d) => (
-              <option key={d.slug} value={d.slug}>
-                {d.name}
-              </option>
-            ))}
-          </select>
+      {domains.length === 0 && !loading ? (
+        <div className="rounded-lg border border-gray-800 bg-gray-900 p-6 text-center text-gray-400">
+          {t("grile.noSubjects")}
         </div>
-      )}
-
-      {loading ? (
-        <div className="py-12 text-center text-gray-500">Loading...</div>
-      ) : data ? (
-        <SessionSelector
-          availableTypes={data.availableTypes}
-          recommended={data.recommended}
-          stats={data.stats}
-          onSelect={handleSelect}
-          loading={starting}
-        />
       ) : (
-        <div className="py-12 text-center text-gray-500">
-          Could not load session data.
-        </div>
+        <>
+          {/* Subject selector — only the subjects in the student's package */}
+          {domains.length > 1 && (
+            <div className="mb-6">
+              <label className="mb-2 block text-sm text-gray-400">{t("grile.subject")}</label>
+              <select
+                value={selectedDomain}
+                onChange={(e) => setSelectedDomain(e.target.value)}
+                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
+              >
+                {domains.map((d) => (
+                  <option key={d.slug} value={d.slug}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {loading ? (
+            <div className="py-12 text-center text-gray-500">{t("grile.loading")}</div>
+          ) : data && data.stats.totalQuestions > 0 ? (
+            <SessionSelector
+              availableTypes={data.availableTypes}
+              recommended={data.recommended}
+              stats={data.stats}
+              onSelect={handleSelect}
+              loading={starting}
+            />
+          ) : data ? (
+            <div className="py-12 text-center text-gray-500">{t("grile.noGrile")}</div>
+          ) : (
+            <div className="py-12 text-center text-gray-500">{t("grile.loadError")}</div>
+          )}
+        </>
       )}
     </div>
   );

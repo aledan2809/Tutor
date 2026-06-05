@@ -37,7 +37,8 @@
   },
   "nav": {
     "dashboard": "Dashboard",
-    "practice": "Practice",
+    "practice": "Quizzes",
+    "examBank": "Simulations",
     "exams": "Exams",
     "progress": "My Progress",
     "notifications": "Notifications",
@@ -53,6 +54,13 @@
     "instructor": "Instructor",
     "gamification": "Gamification",
     "referrals": "Invite a friend"
+  },
+  "grile": {
+    "subject": "Subject",
+    "loading": "Loading...",
+    "noSubjects": "You have no subjects in your package yet. Pick your subjects from your account to get started.",
+    "noGrile": "No quizzes yet for this subject. Check back soon.",
+    "loadError": "Could not load data."
   },
   "exam": {
     "title": "Exam Simulator",
