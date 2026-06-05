@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import {
   selectQuestions,
   SESSION_TYPES,
+  estimateQuestionSeconds,
+  isExamGrileSet,
   type SessionType,
 } from "@/lib/session-engine";
 import { withErrorHandler } from "@/lib/api-handler";
@@ -55,13 +57,20 @@ async function _POST(
     );
   }
 
+  // Official EN VIII norm for exam-bank grile: timer = sum of per-question time
+  // estimates (Subiectul I 4 min, Subiectul al II-lea/figure 6 min, RO language 3 min).
+  // Other domains keep their flat session-type duration.
+  const duration = isExamGrileSet(questions)
+    ? questions.reduce((sum, q) => sum + estimateQuestionSeconds(q), 0)
+    : config.duration;
+
   const newSession = await prisma.session.create({
     data: {
       userId: session.user.id,
       domainId: domain.id,
       type: sessionType,
       metadata: {
-        duration: config.duration,
+        duration,
         totalQuestions: questions.length,
         questionIds: questions.map((q) => q.id),
       },
@@ -83,7 +92,7 @@ async function _POST(
   return NextResponse.json({
     sessionId: newSession.id,
     type: sessionType,
-    duration: config.duration,
+    duration,
     questions: sanitizedQuestions,
     totalQuestions: questions.length,
   });

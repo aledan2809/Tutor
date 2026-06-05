@@ -14,6 +14,35 @@ export const SESSION_TYPES = {
 
 export type SessionType = keyof typeof SESSION_TYPES;
 
+// ─── Per-question time norm (official EN VIII reference: 120 min / 18 items) ───
+// For the Grile (Capacitate) bank the session timer is the SUM of per-question
+// estimates rather than a flat session duration. Calibration:
+//   • Subiectul al II-lea (geometry + figure) → 6 min   (figure items)
+//   • Limba română (language grile)           → 3 min
+//   • Subiectul I / default                    → 4 min
+export function estimateQuestionSeconds(q: {
+  topic?: string | null;
+  subject?: string | null;
+  imageUrl?: string | null;
+}): number {
+  const topic = (q.topic || "").toLowerCase();
+  const subject = (q.subject || "").toLowerCase();
+  if (q.imageUrl || /ii-lea|subiectul ii/.test(topic)) return 6 * 60;
+  if (/român|romana/.test(subject) || /i\.b|limb/.test(topic)) return 3 * 60;
+  return 4 * 60;
+}
+
+// True when the selected questions are official exam-bank grile (carry section
+// topics or figures) — only then do we use the official per-question norm; other
+// domains (e.g. aviation) keep their flat session-type duration.
+export function isExamGrileSet(
+  questions: Array<{ topic?: string | null; imageUrl?: string | null }>
+): boolean {
+  return questions.some(
+    (q) => q.imageUrl || /subiectul|i\.b/i.test(q.topic || "")
+  );
+}
+
 // ─── Recommend session type ───
 
 export async function recommendSessionType(
