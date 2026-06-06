@@ -20,12 +20,10 @@ export function VoucherManager() {
   const [vouchers, setVouchers] = useState<VoucherRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({
-    code: "",
-    discountPercent: 10,
-    maxUses: "",
-    expiresAt: "",
-  });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formError, setFormError] = useState("");
+  const emptyForm = { code: "", discountPercent: 10, maxUses: "", expiresAt: "" };
+  const [form, setForm] = useState(emptyForm);
 
   const fetchVouchers = async () => {
     setLoading(true);
@@ -37,22 +35,52 @@ export function VoucherManager() {
 
   useEffect(() => { fetchVouchers(); }, []);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const res = await fetch("/api/admin/vouchers", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        code: form.code.toUpperCase(),
-        discountPercent: form.discountPercent,
-        maxUses: form.maxUses ? parseInt(form.maxUses) : null,
-        expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : null,
-      }),
+  const resetForm = () => {
+    setForm(emptyForm);
+    setEditingId(null);
+    setShowForm(false);
+    setFormError("");
+  };
+
+  const startEdit = (v: VoucherRow) => {
+    setForm({
+      code: v.code,
+      discountPercent: v.discountPercent,
+      maxUses: v.maxUses != null ? String(v.maxUses) : "",
+      // datetime-local wants "YYYY-MM-DDTHH:mm"
+      expiresAt: v.expiresAt ? new Date(v.expiresAt).toISOString().slice(0, 16) : "",
     });
+    setEditingId(v.id);
+    setFormError("");
+    setShowForm(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError("");
+    const payload = {
+      code: form.code.toUpperCase(),
+      discountPercent: form.discountPercent,
+      maxUses: form.maxUses ? parseInt(form.maxUses) : null,
+      expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : null,
+    };
+    const res = editingId
+      ? await fetch(`/api/admin/vouchers/${editingId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+      : await fetch("/api/admin/vouchers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
     if (res.ok) {
-      setShowForm(false);
-      setForm({ code: "", discountPercent: 10, maxUses: "", expiresAt: "" });
+      resetForm();
       fetchVouchers();
+    } else {
+      const d = await res.json().catch(() => ({}));
+      setFormError(typeof d.error === "string" ? d.error : "Could not save voucher");
     }
   };
 
@@ -76,7 +104,15 @@ export function VoucherManager() {
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold text-white">{t("saVouchers")}</h2>
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            if (showForm) {
+              resetForm();
+            } else {
+              setEditingId(null);
+              setForm(emptyForm);
+              setShowForm(true);
+            }
+          }}
           className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
         >
           {showForm ? t("cancel") : t("createVoucher")}
@@ -84,7 +120,7 @@ export function VoucherManager() {
       </div>
 
       {showForm && (
-        <form onSubmit={handleCreate} className="rounded-lg border border-gray-800 bg-gray-900 p-4 space-y-3">
+        <form onSubmit={handleSubmit} className="rounded-lg border border-gray-800 bg-gray-900 p-4 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm text-gray-400 mb-1">{t("voucherCode")}</label>
@@ -130,11 +166,17 @@ export function VoucherManager() {
               />
             </div>
           </div>
+          {formError && <p className="text-sm text-red-400">{formError}</p>}
+          {editingId && (
+            <p className="text-xs text-yellow-400/80">
+              Editezi voucherul. Schimbarea codului invalidează codurile deja distribuite.
+            </p>
+          )}
           <button
             type="submit"
             className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
           >
-            {t("createVoucher")}
+            {editingId ? "Save" : t("createVoucher")}
           </button>
         </form>
       )}
@@ -174,6 +216,12 @@ export function VoucherManager() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
+                      <button
+                        onClick={() => startEdit(v)}
+                        className="rounded bg-blue-600/20 px-2 py-1 text-xs text-blue-400 hover:bg-blue-600/30"
+                      >
+                        Edit
+                      </button>
                       <button
                         onClick={() => handleToggle(v.id, v.isActive)}
                         className="rounded bg-gray-700 px-2 py-1 text-xs text-gray-300 hover:bg-gray-600"
