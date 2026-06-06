@@ -131,8 +131,8 @@ export default function SignInPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? "Ascunde parola" : "Arată parola"}
-                  title={showPassword ? "Ascunde parola" : "Arată parola"}
+                  aria-label={showPassword ? (locale === "ro" ? "Ascunde parola" : "Hide password") : (locale === "ro" ? "Arată parola" : "Show password")}
+                  title={showPassword ? (locale === "ro" ? "Ascunde parola" : "Hide password") : (locale === "ro" ? "Arată parola" : "Show password")}
                   className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-200"
                 >
                   {showPassword ? (
