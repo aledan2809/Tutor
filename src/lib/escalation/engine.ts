@@ -162,6 +162,9 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
       userName: event.user.name ?? "Student",
       userEmail: event.user.email ?? "",
       level: event.level,
+      // Embedded in the web-push payload so the service worker can ACK this
+      // event on tap (→ /api/escalation/ack → acknowledgedAt → skip paid escalation).
+      escalationEventId: event.id,
     },
   });
 
@@ -256,6 +259,14 @@ export async function advancePendingEscalations(): Promise<number> {
 
     if (recentSession) {
       // User is active — no further escalation needed
+      continue;
+    }
+
+    // Push-first cost gate: if the user tapped the push notification for this
+    // event, treat it as engagement and do NOT escalate to the next (paid)
+    // WhatsApp/SMS channel. The chain stops here because the next level is only
+    // created from this (now skipped) event.
+    if (event.acknowledgedAt) {
       continue;
     }
 

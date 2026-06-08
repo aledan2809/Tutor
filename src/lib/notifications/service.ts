@@ -85,7 +85,20 @@ async function sendPushNotification(
         where: { userId: payload.userId },
       });
 
-      const pushPayload = JSON.stringify({ title, body: message, icon: "/icon-192.png" });
+      // data.url → where the tap navigates; data.escalationEventId → lets the
+      // service worker ACK this escalation (push-first cost gate, see sw-push.js).
+      const escalationEventId = payload.metadata.escalationEventId as
+        | string
+        | undefined;
+      // Tutor routes are locale-prefixed (/[locale]/...); "/" safely redirects
+      // to the localized home. Avoid a hardcoded path that may 404 on tap.
+      const clickUrl = (payload.metadata.url as string) ?? "/";
+      const pushPayload = JSON.stringify({
+        title,
+        body: message,
+        icon: "/icon-192.png",
+        data: { url: clickUrl, escalationEventId },
+      });
 
       for (const sub of subscriptions) {
         try {

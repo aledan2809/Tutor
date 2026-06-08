@@ -384,6 +384,9 @@ model EscalationEvent {
   templateId  String?
   metadata    Json?
   sentAt      DateTime?
+  // Set when the user taps the push notification for this event (via /api/escalation/ack).
+  // An acknowledged event is NOT escalated to the next (paid) channel — push-first cost gate.
+  acknowledgedAt DateTime?
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 
