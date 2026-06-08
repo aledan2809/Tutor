@@ -40,7 +40,9 @@ export function FeedbackDisplay({
       {!isCorrect && (
         <div className="mb-4">
           <p className="text-sm text-gray-400">{t("correctAnswer")}</p>
-          <p className="mt-1 text-sm font-medium text-white">{correctAnswer}</p>
+          <p className="mt-1 text-sm font-medium text-white">
+            {correctAnswer.replace(/^\s*[a-dA-D][).]\s+/, "")}
+          </p>
         </div>
       )}
 

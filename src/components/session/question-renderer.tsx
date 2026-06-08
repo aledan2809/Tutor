@@ -50,6 +50,12 @@ export function QuestionRenderer({
       )
     : null;
 
+  // Some legacy/AI-generated options stored the answer letter inline ("a) 10 ..."),
+  // which double-letters with the A./B./C. the renderer adds. Strip a leading
+  // single-letter prefix at DISPLAY time only (the submitted `value` is unchanged,
+  // so answer matching against the key is unaffected).
+  const displayLabel = (s: string) => s.replace(/^\s*[a-dA-D][).]\s+/, "");
+
   return (
     <div className="space-y-6">
       {/* Question metadata */}
@@ -97,7 +103,7 @@ export function QuestionRenderer({
               <span className="mr-3 font-semibold text-gray-500">
                 {String.fromCharCode(65 + idx)}.
               </span>
-              {opt.label}
+              {displayLabel(opt.label)}
             </button>
           ))}
         </div>
