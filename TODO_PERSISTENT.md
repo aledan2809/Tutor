@@ -4,7 +4,11 @@
 
 ---
 
-## [ ] 💸 Promo pricing — wording + preț tăiat în carduri (creat 2026-06-03)
+## [x] 💸 Promo pricing — wording + preț tăiat în carduri (creat 2026-06-03) — DONE 2026-06-09 (commits `0b88b40`+`fe99ecd`, LIVE + verificat)
+
+**DONE 2026-06-09** (instrucțiuni mesh): ambele puncte livrate pe `/preturi` ȘI `/parinte`, RO+EN.
+- **(1) Wording**: „prețurile cresc în consecință" → „prețurile **revin la normal**" (RO) + „prices **return to normal**" (EN). Verificat live (4 string-uri).
+- **(2) Preț tăiat**: fiecare card arată **prețul normal tăiat cu roșu** lângă promo. Ambiguitatea „afișat=promo sau normal?" REZOLVATĂ de textul promo al paginii („reducere suplimentară de 25%" → afișat=promo) → normal = promo/0,75 = exact numerele din TODO (Elev 26,53 / Family 33,20 / Duo 39,87 / Trio 53,20 / Family Trio 66,53). **Data-driven** prin `src/lib/pricing.ts` (sursă unică: `PROMO_FACTOR=0.75`, `PROMO_END=2026-09-01`): după expirare cardurile afișează automat prețul normal (fără tăiere) + banner-ul promo dispare — fără modificare de cod la dată. Verificat live: 10 `line-through` + toate normalele pe /ro/preturi+/ro/parinte; format cu punct pe /en. `/review` mesh `[]`.
 
 Pe `/parinte` ȘI `/preturi` (RO + EN), 2 ajustări la promo (−25% până la 30/31.08.2026):
 1. **Wording**: înlocuiește „De la 1 septembrie 2026, prețurile cresc în consecință." → „De la 1 septembrie 2026, prețurile vor reveni la normal." (RO) + echivalent EN („…prices return to normal.").
