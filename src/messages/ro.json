@@ -61,7 +61,9 @@
     "loading": "Se încarcă...",
     "noSubjects": "Nu ai nicio materie în pachetul tău încă. Alege-ți materiile din contul tău pentru a începe.",
     "noGrile": "Nu există încă grile pentru această materie. Revino curând.",
-    "loadError": "Nu am putut încărca datele."
+    "loadError": "Nu am putut încărca datele.",
+    "showText": "Vezi textul",
+    "hideText": "Ascunde textul"
   },
   "feedback": {
     "correct": "Corect!",

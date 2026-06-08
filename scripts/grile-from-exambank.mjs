@@ -24,7 +24,7 @@ const RO_SLUG = "romana-cl-viii"; // domain "Română cl. VIII"
 
 // ExamItem.options = [{key,text}], correctAnswer = key letter → convert to Question shape
 // (options = string[], correctAnswer = full text of the keyed option), verbatim.
-function toQuestionShape(item, paper, domainId, subjectName) {
+function toQuestionShape(item, paper, domainId, subjectName, passageText) {
   const opts = Array.isArray(item.options) ? item.options : [];
   const optionTexts = opts.map((o) => String(o.text));
   const keyed = opts.find((o) => String(o.key) === String(item.correctAnswer));
@@ -36,6 +36,7 @@ function toQuestionShape(item, paper, domainId, subjectName) {
     difficulty: 3,
     type: "MULTIPLE_CHOICE",
     content: item.content,
+    passage: passageText || null,
     options: optionTexts,
     correctAnswer: correctText,
     imageUrl: item.figureUrl || null,
@@ -43,6 +44,23 @@ function toQuestionShape(item, paper, domainId, subjectName) {
     source: "MANUAL",
     status: "PUBLISHED",
   };
+}
+
+// Resolve an item's passageRef ("Textul 1" / "Textul 1, Textul 2") to the reading text,
+// concatenating the referenced ExamPassage bodies with a small header each.
+function resolvePassage(item, passages) {
+  if (!item.passageRef || !Array.isArray(passages) || passages.length === 0) return null;
+  const refs = String(item.passageRef).split(",").map((s) => s.trim());
+  const parts = [];
+  for (const ref of refs) {
+    const p = passages.find((x) => x.ref === ref);
+    if (!p) continue;
+    const header = [p.ref, p.title, p.author ? `de ${p.author}` : null]
+      .filter(Boolean)
+      .join(" — ");
+    parts.push(`${header}\n\n${p.body}`);
+  }
+  return parts.length ? parts.join("\n\n———\n\n") : null;
 }
 
 async function main() {
@@ -59,10 +77,11 @@ async function main() {
       include: { paper: { select: { source: true } } },
     });
     const roItems = await prisma.examItem.findMany({
-      where: { type: "MCQ", passageRef: null, paper: { subjectKey: "limba_romana" } },
-      include: { paper: { select: { source: true } } },
+      where: { type: "MCQ", paper: { subjectKey: "limba_romana" } },
+      include: { paper: { select: { source: true, passages: true } } },
     });
-    console.log(`Official MCQ to copy: Matematică=${mateItems.length}, Română (passage-free)=${roItems.length}`);
+    const roWithPassage = roItems.filter((it) => it.passageRef).length;
+    console.log(`Official MCQ to copy: Matematică=${mateItems.length}, Română=${roItems.length} (din care ${roWithPassage} cu text-suport)`);
 
     // AI rows to revert
     const aiCount = await prisma.question.count({
@@ -90,7 +109,9 @@ async function main() {
       const del = await prisma.question.deleteMany({
         where: { domainId: domain.id, sourceReference: { startsWith: "exam-bank:" } },
       });
-      const rows = items.map((it) => toQuestionShape(it, it.paper, domain.id, subjectName));
+      const rows = items.map((it) =>
+        toQuestionShape(it, it.paper, domain.id, subjectName, resolvePassage(it, it.paper.passages))
+      );
       // createMany can't take options as Json[] inline reliably across drivers — map explicitly
       let created = 0;
       const BATCH = 100;
@@ -99,8 +120,9 @@ async function main() {
         await prisma.question.createMany({
           data: slice.map((r) => ({
             domainId: r.domainId, subject: r.subject, topic: r.topic, difficulty: r.difficulty,
-            type: r.type, content: r.content, options: r.options, correctAnswer: r.correctAnswer,
-            imageUrl: r.imageUrl, sourceReference: r.sourceReference, source: r.source, status: r.status,
+            type: r.type, content: r.content, passage: r.passage, options: r.options,
+            correctAnswer: r.correctAnswer, imageUrl: r.imageUrl, sourceReference: r.sourceReference,
+            source: r.source, status: r.status,
           })),
         });
         created += slice.length;

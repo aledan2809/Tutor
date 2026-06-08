@@ -87,6 +87,7 @@ async function _POST(
     content: q.content,
     options: q.type === "MULTIPLE_CHOICE" && !q.options ? ["a)", "b)", "c)", "d)"] : q.options,
     imageUrl: q.imageUrl ?? null,
+    passage: q.passage ?? null,
   }));
 
   return NextResponse.json({

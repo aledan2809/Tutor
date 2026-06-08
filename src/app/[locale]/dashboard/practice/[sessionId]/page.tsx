@@ -17,6 +17,7 @@ interface QuestionData {
   topic: string;
   difficulty: number;
   imageUrl?: string | null;
+  passage?: string | null;
 }
 
 interface SessionData {

@@ -189,6 +189,7 @@ model Question {
   difficulty    Int            @default(3) // 1-5 scale
   type          QuestionType   @default(MULTIPLE_CHOICE)
   content       String         @db.Text
+  passage       String?        @db.Text // Reading text for passage-dependent grile (RO) — shown in a collapsible drawer
   options       Json?          // Array of answer options for multiple choice
   correctAnswer String         @db.Text
   explanation   String?        @db.Text

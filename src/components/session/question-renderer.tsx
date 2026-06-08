@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface QuestionOption {
   label: string;
@@ -16,6 +17,7 @@ interface QuestionData {
   topic: string;
   difficulty: number;
   imageUrl?: string | null;
+  passage?: string | null;
 }
 
 interface QuestionRendererProps {
@@ -29,8 +31,10 @@ export function QuestionRenderer({
   onAnswer,
   disabled = false,
 }: QuestionRendererProps) {
+  const t = useTranslations("grile");
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [openAnswer, setOpenAnswer] = useState("");
+  const [showPassage, setShowPassage] = useState(false);
 
   const handleSubmit = () => {
     if (question.type === "MULTIPLE_CHOICE" && selectedOption) {
@@ -71,6 +75,27 @@ export function QuestionRenderer({
           {"☆".repeat(5 - question.difficulty)}
         </span>
       </div>
+
+      {/* Reading text (passage-dependent grile) — collapsible drawer */}
+      {question.passage && (
+        <div className="rounded-lg border border-gray-700 bg-gray-900/60">
+          <button
+            type="button"
+            onClick={() => setShowPassage((v) => !v)}
+            aria-expanded={showPassage}
+            className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-blue-400 hover:text-blue-300"
+          >
+            <span aria-hidden="true">📖</span>
+            {showPassage ? t("hideText") : t("showText")}
+            <span aria-hidden="true" className="ml-auto text-gray-500">{showPassage ? "▲" : "▼"}</span>
+          </button>
+          {showPassage && (
+            <div className="max-h-72 overflow-y-auto whitespace-pre-line border-t border-gray-700 px-4 py-3 text-sm leading-relaxed text-gray-300">
+              {question.passage}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Question content */}
       <p className="text-lg text-white">{question.content}</p>

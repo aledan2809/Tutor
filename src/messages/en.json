@@ -61,7 +61,9 @@
     "loading": "Loading...",
     "noSubjects": "You have no subjects in your package yet. Pick your subjects from your account to get started.",
     "noGrile": "No quizzes yet for this subject. Check back soon.",
-    "loadError": "Could not load data."
+    "loadError": "Could not load data.",
+    "showText": "Show text",
+    "hideText": "Hide text"
   },
   "feedback": {
     "correct": "Correct!",
