@@ -171,7 +171,15 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 
 ---
 
-## [ ] 🎯 Topics + Weak Areas — mai granulare, nu pe secțiune de examen (creat 2026-06-09)
+## [x] 🎯 Topics + Weak Areas — mai granulare, nu pe secțiune de examen (creat 2026-06-09) — DONE 2026-06-09 (commit `439eb1b`, LIVE etutor.ro + verificat autentificat)
+
+**DONE 2026-06-09** (commit `439eb1b`, instrucțiuni mesh: develop → /review groq `[]` → deploy → verificat autentificat):
+- **Mapper determinist micro→macro** `scripts/lib/macro-topic.mjs` (NU AI — mapează `ExamItem.topic` oficial, L07a). Mate → 8 capitole (Numere întregi și operații, Fracții și numere raționale, Numere reale și radicali, Rapoarte/proporții/procente, Ecuații/inecuații/mulțimi, Statistică/medii/probleme practice, Geometrie plană, Geometrie în spațiu); RO → 6 (Fonetică și ortografie, Vocabular și semantică, Formarea cuvintelor, Morfologie, Sintaxă, Înțelegerea textului). Reguli ordonate first-match cu pre-reguli anti-coliziune (ex. „diferența de pătrate"/„media geometrică"/„viteză…distanță" nu cad pe geometrie). Validat pe TOATE cele 333 topic-uri distincte live + 72/72 aserții smoke (`macro-topic.smoke.mjs`). RO passage-dependent (24, blank topic) → „Înțelegerea textului".
+- **Importer** `grile-from-exambank.mjs`: `topic = macroTopic(item)` în loc de `item.section`. Re-rulat idempotent pe prod → 596 grile re-clasificate (Mate 540 + RO 56). Distribuție echilibrată: Geo plană 225, Numere întregi 63, Statistică 57, Rapoarte 46, Geo spațiu 44, Ecuații 39, Reale 35, Fracții 31; RO: text 24, Vocabular 13, Fonetică 8, Formare 8, Morfologie 3.
+- **Decuplare timer** `session-engine.ts`: `estimateQuestionSeconds` + `isExamGrileSet` nu mai parsează secțiunea din topic (care nu mai există). Acum: RO→3min (după subject), geometrie/figură→6min, restul Mate→4min; detecția set-grile oficial prin `sourceReference exam-bank:` (robust). Drift ~12/540 itemi Sub I geometrie 4→6min (corect pedagogic). Timer verificat live: 4560s/15q = normă oficială sumată.
+- **Cleanup**: 7 Progress + 5 WeakArea orfane cu topic-secțiune (I.A/I.B/Subiectul…) șterse (nu mai există ca întrebări). Backup prod `/root/backups/tutor-pre-topics-reclass-2026-06-09.dump`.
+- **Verificat autentificat etutor.ro** (admin-test SuperAdmin): sesiune Mate → `questions[0].topic="Geometrie plană"` (capitol!), answer 200, **Progress creat cu topic="Geometrie plană"** (capitol, NU secțiune) → Weak Areas + Statistici vor grupa pe capitol.
+- **NB pre-existing (NU din acest task)**: `tests/unit/exam-engine.test.ts` are 1 eroare tsc stale (`passage` lipsă din fixture, de la migrarea 0019 passage). NU blochează `next build` (nu compilează tests/). Fix 1-linie de făcut într-o sesiune de igienă teste.
 
 **Observat live** (Statistici → Română cl. VIII, 2026-06-09): „Topics" și „Weak Areas" sunt **prea generale** — apar doar ca **secțiuni de examen** („I.A", „I.B", „Subiectul I", „Subiectul al II-lea") fiindcă la importul grilelor oficiale am setat `Question.topic = ExamItem.section`. Progresul + punctele slabe se grupează pe secțiune → „I.B = 100% errors" nu spune elevului CE skill are slab.
 
