@@ -114,10 +114,14 @@ Paginile sunt LIVE (200) și se leagă între ele, dar **nu-s în meniul de sus*
 
 Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **Evaluare Națională**, apoi **Bacalaureat**.
 - [x] **Matematica** — DONE 2026-06-03 (`scripts/band-matematica.mjs`): domeniu „Matematica"→„Matematica V-VIII" (169 grile, clasa V) + creat „Matematica IX-XII" gol; subject aliniat. Backup `/root/backups/tutor-Domain-pre-band-2026-06-03.sql`.
-- [ ] **Română** — la fel ca Matematica (V-VIII + IX-XII).
+- [x] **Română** — DONE 2026-06-08 (`scripts/band-romana.mjs`): „Română cl. VIII" (Capacitate, are 32 grile oficiale) + creat „Română IX-XII" (BAC) gol. Oglindă a Mate.
 - [ ] Apoi: **Istorie / Geografie / Biologie / Chimie / Fizică de liceu (IX-XII)**.
 
-## [ ] 🐛 Opțiuni cu literă dublată („A. a) …") + normalizare date publicate (creat 2026-06-03)
+## [x] 🐛 Opțiuni cu literă dublată („A. a) …") — REZOLVAT 2026-06-08 (commit `7092259`)
+
+**REZOLVAT 2026-06-08**: (a) bug-ul **nu mai e vizibil pe nicio grilă publicată** — cele 343 AI cu prefix sunt DRAFT (scoase la trecerea pe grile oficiale), iar grilele oficiale (540 Mate + 32 RO) au opțiuni curate (`["23","40","55"]`). (b) Fix robust la **afișare**: renderer-ul + feedback-ul scot un prefix de literă (`^[a-dA-D][).]\s+`) dacă opțiunea/răspunsul îl conține — strip DOAR la afișare, valoarea trimisă rămâne neatinsă (matching-ul nu se strică). Acoperă publicate + DRAFT + viitor. **RĂMÂNE (opțional, low)**: normalizare la sursă în generator (dacă se reia path-ul AI) — dar display-strip-ul face bug-ul moot oricum.
+
+## [archive] 🐛 Opțiuni cu literă dublată — spec original (creat 2026-06-03)
 
 **Confirmat live** (cele 181 grile Matematica publicate azi). Opțiunile sunt stocate CU prefix de literă inclus — `["a) 10 exerciții", "b) 15 exerciții", …]` — iar AMBELE randere mai adaugă o literă:
 - elev: `src/components/session/question-renderer.tsx` → `A.` + `opt.label` = **„A. a) 10 exerciții"**
@@ -135,7 +139,8 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 
 **PROGRES 2026-06-05** (commits `49865d5`→`4b96641`): secțiunea **„Grile" e LIVE** pe etutor.ro (= pagina Practise redenumită). Domeniul „Matematica V-VIII" → **„Matematica cl. VIII"** (bancă consolidată de Capacitate; păstrează slug `matematica-v-viii`). Creat shell **„Română cl. VIII"** (slug `romana-cl-viii`). Meniu: Practise→Grile (RO „Grile" / EN „Quizzes") + fix anglo-roman (Simulări/Simulations via `nav.examBank`). Pagina: i18n + empty-states + package-gating (elevul vede doar materiile din înscrierile lui).
 **CONȚINUT = OFICIAL VERBATIM** (decizie user 2026-06-05 — NU AI regenerat): inițial publicasem din greșeală 343 grile AI_GENERATED clasa V → **reparat** (`scripts/grile-from-exambank.mjs`): cele 343 AI revenite la DRAFT (scoase din Grile) + copiat **ad-literam** itemii MCQ oficiali din exam-bank (`source=MANUAL`, cheie→text din barem, figureUrl→imageUrl): **Matematica cl. VIII = 540 grile** oficiale (271 fără figură + 269 cu figură); **Română cl. VIII = 32 grile** (doar MCQ independente de text — itemii de limbă B.1-B.4; cele passage-dependent rămân în Simulări). Idempotent (`exam-bank:<id>` în sourceReference). Verificat: 540/32 în sesiune + spot-check verbatim („5·(3+2·4)"→55; „Conțin diftong"→„picioare,liceu"). Backup `/root/backups/tutor-pre-grile-2026-06-05.dump`.
-**RĂMÂNE**: grile Română passage-dependent (UI cu text-suport) + afișarea sursei la corectare (§131 pas 3) + (opțional) restul materialelor.
+**UPDATE 2026-06-08**: (a) **sursa la corectare DONE** (commit `4a377c0`) — la fiecare răspuns, corectarea afișează proveniența (ex. „EN VIII 2022 Testul 4 — antrenament (CNPEE) · Subiectul I"), din `sourceReference` + secțiune; feedback-ul făcut bilingv. (b) **Mate VI/VII/VIII = acoperit** — cele 540 grile oficiale vin din examenele EN VIII care testează TOATĂ materia V-VIII; generarea AI per-an nu mai e necesară pentru Capacitate.
+**RĂMÂNE**: grile Română **passage-dependent** (24 MCQ + 8 grile A/F care cer textul-suport → UI care arată textul lângă grilă; decizie design: embed în content vs flux passage-aware) + (opțional) restul materialelor.
 
 ---
 
