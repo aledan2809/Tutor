@@ -65,6 +65,30 @@
     "showText": "Show text",
     "hideText": "Hide text"
   },
+  "sessions": {
+    "statsQuestions": "Questions available",
+    "statsTopics": "Topics studied",
+    "statsWeak": "Weak areas",
+    "recommended": "RECOMMENDED",
+    "start": "Start session",
+    "starting": "Starting...",
+    "allTypes": "All session types",
+    "questions": "questions",
+    "types": {
+      "micro": "Micro session",
+      "quick": "Quick session",
+      "deep": "Deep session",
+      "repair": "Repair session",
+      "recovery": "Recovery session",
+      "intensive": "Intensive session"
+    },
+    "reasons": {
+      "regular": "Regular practice",
+      "daysSince": "{n} days since last session",
+      "examIn": "Exam in {n} days",
+      "weakAreas": "{n} weak areas detected"
+    }
+  },
   "feedback": {
     "correct": "Correct!",
     "incorrect": "Incorrect",

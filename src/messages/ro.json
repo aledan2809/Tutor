@@ -65,6 +65,30 @@
     "showText": "Vezi textul",
     "hideText": "Ascunde textul"
   },
+  "sessions": {
+    "statsQuestions": "Întrebări disponibile",
+    "statsTopics": "Capitole studiate",
+    "statsWeak": "Puncte slabe",
+    "recommended": "RECOMANDAT",
+    "start": "Începe sesiunea",
+    "starting": "Se pornește...",
+    "allTypes": "Toate tipurile de sesiune",
+    "questions": "întrebări",
+    "types": {
+      "micro": "Sesiune micro",
+      "quick": "Sesiune rapidă",
+      "deep": "Sesiune lungă",
+      "repair": "Sesiune de remediere",
+      "recovery": "Sesiune de recuperare",
+      "intensive": "Sesiune intensivă"
+    },
+    "reasons": {
+      "regular": "Practică obișnuită",
+      "daysSince": "{n} zile de la ultima sesiune",
+      "examIn": "Examen peste {n} zile",
+      "weakAreas": "{n} puncte slabe detectate"
+    }
+  },
   "feedback": {
     "correct": "Corect!",
     "incorrect": "Incorect",

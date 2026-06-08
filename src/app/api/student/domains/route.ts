@@ -111,17 +111,42 @@ async function _GET() {
     },
   });
 
+  const availableMapped = availableDomains.map((d) => ({
+    id: d.id,
+    name: d.name,
+    slug: d.slug,
+    icon: d.icon,
+    description: d.description,
+    questionsAvailable: d._count.questions,
+    totalStudents: d._count.enrollments,
+  }));
+
+  // SuperAdmin previews ALL active subjects in Grile/Practice, not just enrolled ones
+  // (owner/content preview). Students stay package-gated to their enrolled domains.
+  const isSuperAdmin = !!(session.user as { isSuperAdmin?: boolean }).isSuperAdmin;
+  const availableAsEnrolled = availableMapped.map((d) => ({
+    id: d.id,
+    name: d.name,
+    slug: d.slug,
+    icon: d.icon,
+    description: d.description,
+    roles: ["ADMIN"],
+    stats: {
+      questionsAvailable: d.questionsAvailable,
+      totalStudents: d.totalStudents,
+      topicsStudied: 0,
+      accuracy: 0,
+      sessionsCompleted: 0,
+      avgScore: 0,
+      xp: 0,
+      level: "Cadet",
+      streak: 0,
+    },
+  }));
+
   return NextResponse.json({
-    enrolled: domains,
-    available: availableDomains.map((d) => ({
-      id: d.id,
-      name: d.name,
-      slug: d.slug,
-      icon: d.icon,
-      description: d.description,
-      questionsAvailable: d._count.questions,
-      totalStudents: d._count.enrollments,
-    })),
+    enrolled: isSuperAdmin ? [...domains, ...availableAsEnrolled] : domains,
+    available: isSuperAdmin ? [] : availableMapped,
   });
 }
 
