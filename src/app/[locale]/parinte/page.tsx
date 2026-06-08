@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ParentFunnel } from "@/components/parinte/parent-funnel";
 import SubjectQuizDemo from "@/components/SubjectQuizDemo";
 import { SiteHeader } from "@/components/SiteHeader";
+import { isPromoActive, normalFromPromo, fmtPrice } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Pentru părinți — copilul tău învață constant, tu vezi progresul | etutor.ro",
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
     "Oare chiar învață? Aici vezi negru pe alb: copilul exersează zilnic pe grile reale, îl împingem noi pe WhatsApp dacă se lasă, iar tu vezi progresul și unde greșește. Începe gratuit, fără card.",
 };
 
-type Plan = { name: string; tag: string; price: string; points: string[]; featured?: boolean };
+type Plan = { name: string; tag: string; amount: number; from?: boolean; points: string[]; featured?: boolean };
 type Copy = {
   badge: string;
   hero: string;
@@ -49,7 +50,7 @@ const RO: Copy = {
     {
       name: "Family",
       tag: "1 părinte + copil",
-      price: "24,90 lei / materie / lună",
+      amount: 24.9,
       points: [
         "Cont separat pentru copil + cont de părinte",
         "Vezi progresul, scorurile și unde greșește",
@@ -59,7 +60,7 @@ const RO: Copy = {
     {
       name: "Family Duo",
       tag: "2 părinți + copil",
-      price: "29,90 lei / materie / lună",
+      amount: 29.9,
       points: [
         "Tot ce e în Family",
         "Al doilea părinte are cont propriu",
@@ -69,7 +70,7 @@ const RO: Copy = {
     {
       name: "Trio",
       tag: "Părinte + copil + meditator",
-      price: "39,90 lei / materie / lună",
+      amount: 39.9,
       featured: true,
       points: [
         "Tot ce e în Family / Duo",
@@ -81,7 +82,7 @@ const RO: Copy = {
     {
       name: "Family Trio",
       tag: "Ambii părinți + copil + meditator",
-      price: "49,90 lei / materie / lună",
+      amount: 49.9,
       points: [
         "Tot ce e în Trio",
         "Ambii părinți au cont propriu, fiecare cu notificările lui",
@@ -91,7 +92,8 @@ const RO: Copy = {
     {
       name: "Self (elev)",
       tag: "Elevul plătește singur",
-      price: "de la 19,90 lei / materie / lună",
+      amount: 19.9,
+      from: true,
       points: [
         "Pentru elevi/studenți responsabili, fără părinte",
         "Își urmărește singur progresul",
@@ -135,7 +137,7 @@ const EN: Copy = {
     {
       name: "Family",
       tag: "1 parent + child",
-      price: "24.90 lei / subject / month",
+      amount: 24.9,
       points: [
         "Separate account for the child + a parent account",
         "See progress, scores and where they get it wrong",
@@ -145,7 +147,7 @@ const EN: Copy = {
     {
       name: "Family Duo",
       tag: "2 parents + child",
-      price: "29.90 lei / subject / month",
+      amount: 29.9,
       points: [
         "Everything in Family",
         "The second parent gets their own account",
@@ -155,7 +157,7 @@ const EN: Copy = {
     {
       name: "Trio",
       tag: "Parent + child + tutor",
-      price: "39.90 lei / subject / month",
+      amount: 39.9,
       featured: true,
       points: [
         "Everything in Family / Duo",
@@ -167,7 +169,7 @@ const EN: Copy = {
     {
       name: "Family Trio",
       tag: "Both parents + child + tutor",
-      price: "49.90 lei / subject / month",
+      amount: 49.9,
       points: [
         "Everything in Trio",
         "Both parents get their own account, each with their own notifications",
@@ -177,7 +179,8 @@ const EN: Copy = {
     {
       name: "Self (student)",
       tag: "The student pays",
-      price: "from 19.90 lei / subject / month",
+      amount: 19.9,
+      from: true,
       points: [
         "For responsible students with no parent involved",
         "They track their own progress",
@@ -207,6 +210,9 @@ export default async function ParintePage({ params }: { params: Promise<{ locale
   const { locale } = await params;
   const c = locale === "en" ? EN : RO;
   const lp = locale === "en" ? "en" : "ro";
+  const promoActive = isPromoActive();
+  const suffix = lp === "en" ? "lei / subject / month" : "lei / materie / lună";
+  const fromLabel = lp === "en" ? "from" : "de la";
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
@@ -284,7 +290,18 @@ export default async function ParintePage({ params }: { params: Promise<{ locale
                   )}
                 </div>
                 <p className="mt-1 text-sm text-gray-500">{p.tag}</p>
-                <p className="mt-3 text-sm font-medium text-blue-400">{p.price}</p>
+                <p className="mt-3 text-sm font-medium text-blue-400">
+                  {p.from ? `${fromLabel} ` : ""}
+                  {promoActive && (
+                    <span className="mr-1.5 text-gray-500 line-through">
+                      {fmtPrice(normalFromPromo(p.amount), lp)}
+                    </span>
+                  )}
+                  <span className="font-semibold text-white">
+                    {fmtPrice(promoActive ? p.amount : normalFromPromo(p.amount), lp)}
+                  </span>{" "}
+                  {suffix}
+                </p>
                 <ul className="mt-4 space-y-2">
                   {p.points.map((pt) => (
                     <li key={pt} className="flex gap-2 text-sm text-gray-300">
@@ -297,9 +314,11 @@ export default async function ParintePage({ params }: { params: Promise<{ locale
             ))}
           </div>
           <p className="mt-4 text-center text-xs text-gray-500 max-w-2xl mx-auto">{c.priceNote}</p>
-          <div className="mt-4 mx-auto max-w-2xl rounded-xl border border-amber-500/40 bg-amber-500/5 p-3 text-center text-sm font-medium text-amber-200">
-            {c.promoNote}
-          </div>
+          {promoActive && (
+            <div className="mt-4 mx-auto max-w-2xl rounded-xl border border-amber-500/40 bg-amber-500/5 p-3 text-center text-sm font-medium text-amber-200">
+              {c.promoNote}
+            </div>
+          )}
         </section>
 
         {/* Free trial */}

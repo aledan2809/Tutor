@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { SiteHeader } from "@/components/SiteHeader";
+import { isPromoActive, normalFromPromo, fmtPrice } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Prețuri — gratuit la start, plătești când vrei | eTUTOR.ro",
@@ -8,10 +9,12 @@ export const metadata: Metadata = {
     "Începe gratuit 7 zile, fără card. Apoi alegi planul: Elev/Student, Părinte + copil, Părinți + copil sau cu meditator. Reduceri pentru mai mulți copii și plată anuală.",
 };
 
+// Displayed amounts are the −25% promo price; normal = amount / 0.75. See @/lib/pricing.
 type Plan = {
   name: string;
   tag: string;
-  price: string;
+  amount: number; // promo price (RON / subject / month)
+  from?: boolean; // prefix "de la" / "from"
   points: string[];
   cta: string;
   accent: string; // tailwind text color
@@ -32,6 +35,8 @@ type Copy = {
   discountsList: string[];
   note: string;
   promo: string;
+  priceSuffix: string;
+  fromLabel: string;
 };
 
 const RO: Copy = {
@@ -52,7 +57,8 @@ const RO: Copy = {
     {
       name: "Elev / Student",
       tag: "Plătești singur",
-      price: "de la 19,90 lei / materie / lună",
+      amount: 19.9,
+      from: true,
       accent: "text-blue-400",
       points: [
         "Pentru elevi și studenți responsabili, care pot plăti singuri online",
@@ -64,7 +70,7 @@ const RO: Copy = {
     {
       name: "Părinte + copil",
       tag: "Family",
-      price: "24,90 lei / materie / lună",
+      amount: 24.9,
       accent: "text-emerald-400",
       points: [
         "Cont separat pentru copil + cont de părinte",
@@ -76,7 +82,7 @@ const RO: Copy = {
     {
       name: "Părinți + copil",
       tag: "Family Duo",
-      price: "29,90 lei / materie / lună",
+      amount: 29.9,
       accent: "text-emerald-400",
       points: [
         "Tot ce e în Family",
@@ -88,7 +94,7 @@ const RO: Copy = {
     {
       name: "Părinte + copil + meditator",
       tag: "Trio",
-      price: "39,90 lei / materie / lună",
+      amount: 39.9,
       accent: "text-emerald-400",
       featured: true,
       points: [
@@ -101,7 +107,7 @@ const RO: Copy = {
     {
       name: "Ambii părinți + copil + meditator",
       tag: "Family Trio",
-      price: "49,90 lei / materie / lună",
+      amount: 49.9,
       accent: "text-emerald-400",
       points: [
         "Tot ce e în Trio",
@@ -120,6 +126,8 @@ const RO: Copy = {
   note: "O singură factură pe familie.",
   promo:
     "🎁 Prețuri promoționale până la 31.08.2026 — toate pachetele au o reducere suplimentară de 25%. De la 1 septembrie 2026, prețurile cresc în consecință.",
+  priceSuffix: "lei / materie / lună",
+  fromLabel: "de la",
 };
 
 const EN: Copy = {
@@ -140,7 +148,8 @@ const EN: Copy = {
     {
       name: "Student",
       tag: "Self-paid",
-      price: "from 19.90 lei / subject / month",
+      amount: 19.9,
+      from: true,
       accent: "text-blue-400",
       points: [
         "For responsible students who can pay online themselves",
@@ -152,7 +161,7 @@ const EN: Copy = {
     {
       name: "Parent + child",
       tag: "Family",
-      price: "24.90 lei / subject / month",
+      amount: 24.9,
       accent: "text-emerald-400",
       points: [
         "Separate account for the child + a parent account",
@@ -164,7 +173,7 @@ const EN: Copy = {
     {
       name: "Parents + child",
       tag: "Family Duo",
-      price: "29.90 lei / subject / month",
+      amount: 29.9,
       accent: "text-emerald-400",
       points: [
         "Everything in Family",
@@ -176,7 +185,7 @@ const EN: Copy = {
     {
       name: "Parent + child + tutor",
       tag: "Trio",
-      price: "39.90 lei / subject / month",
+      amount: 39.9,
       accent: "text-emerald-400",
       featured: true,
       points: [
@@ -189,7 +198,7 @@ const EN: Copy = {
     {
       name: "Both parents + child + tutor",
       tag: "Family Trio",
-      price: "49.90 lei / subject / month",
+      amount: 49.9,
       accent: "text-emerald-400",
       points: [
         "Everything in Trio",
@@ -208,11 +217,16 @@ const EN: Copy = {
   note: "One bill per family.",
   promo:
     "🎁 Promotional prices until 31.08.2026 — all packages get an extra 25% off. From 1 September 2026, prices increase accordingly.",
+  priceSuffix: "lei / subject / month",
+  fromLabel: "from",
 };
 
 export default async function PreturiPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const c = locale === "en" ? EN : RO;
+
+  const promoActive = isPromoActive();
+  const fmt = (n: number) => fmtPrice(n, locale);
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
@@ -253,7 +267,9 @@ export default async function PreturiPage({ params }: { params: Promise<{ locale
           <div className="lg:col-span-2">
             <h2 className="mb-4 text-center text-xl font-bold text-white lg:text-left">{c.paidTitle}</h2>
             <div className="grid gap-5 sm:grid-cols-2">
-              {c.plans.map((p) => (
+              {c.plans.map((p) => {
+                const normal = normalFromPromo(p.amount);
+                return (
                 <div
                   key={p.name}
                   className={`rounded-2xl border bg-gray-900 p-6 ${
@@ -269,7 +285,16 @@ export default async function PreturiPage({ params }: { params: Promise<{ locale
                     )}
                   </div>
                   <p className="mt-1 text-sm text-gray-500">{p.tag}</p>
-                  <p className="mt-3 text-sm font-medium text-blue-300">{p.price}</p>
+                  <p className="mt-3 text-sm font-medium text-blue-300">
+                    {p.from ? `${c.fromLabel} ` : ""}
+                    {promoActive && (
+                      <span className="mr-1.5 text-gray-500 line-through">{fmt(normal)}</span>
+                    )}
+                    <span className="font-semibold text-white">
+                      {promoActive ? fmt(p.amount) : fmt(normal)}
+                    </span>{" "}
+                    {c.priceSuffix}
+                  </p>
                   <ul className="mt-4 space-y-2">
                     {p.points.map((pt) => (
                       <li key={pt} className="flex gap-2 text-sm text-gray-300">
@@ -285,7 +310,8 @@ export default async function PreturiPage({ params }: { params: Promise<{ locale
                     {p.cta}
                   </Link>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -303,9 +329,11 @@ export default async function PreturiPage({ params }: { params: Promise<{ locale
         </div>
         <p className="mx-auto mt-3 max-w-xl text-center text-xs text-gray-600">{c.note}</p>
 
-        <div className="mx-auto mt-6 max-w-2xl rounded-xl border border-amber-500/40 bg-amber-500/5 p-4 text-center text-sm font-medium text-amber-200">
-          {c.promo}
-        </div>
+        {promoActive && (
+          <div className="mx-auto mt-6 max-w-2xl rounded-xl border border-amber-500/40 bg-amber-500/5 p-4 text-center text-sm font-medium text-amber-200">
+            {c.promo}
+          </div>
+        )}
       </main>
     </div>
   );
