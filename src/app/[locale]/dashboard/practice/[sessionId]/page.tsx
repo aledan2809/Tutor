@@ -33,6 +33,7 @@ interface AnswerResult {
   isCorrect: boolean;
   correctAnswer: string;
   explanation?: string | null;
+  source?: string | null;
   xpAwarded?: number;
 }
 
@@ -230,6 +231,7 @@ export default function ActiveSessionPage() {
             isCorrect={feedback.isCorrect}
             correctAnswer={feedback.correctAnswer}
             explanation={feedback.explanation}
+            source={feedback.source}
             onNext={handleNext}
           />
           {feedback.xpAwarded !== undefined && feedback.xpAwarded > 0 && (

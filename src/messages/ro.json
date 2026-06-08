@@ -63,6 +63,14 @@
     "noGrile": "Nu există încă grile pentru această materie. Revino curând.",
     "loadError": "Nu am putut încărca datele."
   },
+  "feedback": {
+    "correct": "Corect!",
+    "incorrect": "Incorect",
+    "correctAnswer": "Răspuns corect:",
+    "explanation": "Explicație:",
+    "source": "Sursă:",
+    "next": "Următoarea întrebare"
+  },
   "activare": {
     "title": "Activare acces",
     "intro": "Alege materiile, vezi prețul, apoi introdu codul voucher. Un voucher de 100% anulează suma și îți activează accesul pe loc.",

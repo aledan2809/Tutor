@@ -154,11 +154,21 @@ async function _POST(
     xpAwarded = xpResult.xpAwarded;
   }
 
+  // Provenance shown at correction (official grile carry the source paper in
+  // sourceReference as "exam-bank:<id> | <paper source>"; topic holds the section).
+  const paperSource = question.sourceReference?.startsWith("exam-bank:")
+    ? (question.sourceReference.split(" | ")[1] ?? null)
+    : null;
+  const source = paperSource
+    ? `${paperSource}${question.topic ? ` · ${question.topic}` : ""}`
+    : question.topic || null;
+
   return NextResponse.json({
     attemptId: attempt.id,
     isCorrect,
     correctAnswer: question.correctAnswer,
     explanation: question.explanation,
+    source,
     quality,
     nextReview: sm2Result.nextReview,
     xpAwarded,

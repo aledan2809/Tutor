@@ -63,6 +63,14 @@
     "noGrile": "No quizzes yet for this subject. Check back soon.",
     "loadError": "Could not load data."
   },
+  "feedback": {
+    "correct": "Correct!",
+    "incorrect": "Incorrect",
+    "correctAnswer": "Correct answer:",
+    "explanation": "Explanation:",
+    "source": "Source:",
+    "next": "Next question"
+  },
   "activare": {
     "title": "Activate access",
     "intro": "Pick your subjects, see the price, then enter a voucher code. A 100% voucher cancels the amount and activates your access instantly.",
