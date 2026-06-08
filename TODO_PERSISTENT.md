@@ -171,6 +171,20 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 
 ---
 
+## [ ] 🎯 Topics + Weak Areas — mai granulare, nu pe secțiune de examen (creat 2026-06-09)
+
+**Observat live** (Statistici → Română cl. VIII, 2026-06-09): „Topics" și „Weak Areas" sunt **prea generale** — apar doar ca **secțiuni de examen** („I.A", „I.B", „Subiectul I", „Subiectul al II-lea") fiindcă la importul grilelor oficiale am setat `Question.topic = ExamItem.section`. Progresul + punctele slabe se grupează pe secțiune → „I.B = 100% errors" nu spune elevului CE skill are slab.
+
+**De făcut:** topic-uri **granulare pe competență/capitol**, nu pe secțiune:
+- **Română**: diftong/triftong, derivare, sinonime/antonime, omonime, accentuare, cazuri substantiv, moduri/timpuri verbale, propoziții subordonate, figuri de stil, înțelegerea textului, redactare etc.
+- **Matematică**: ordinea operațiilor, divizibilitate, fracții, ecuații, procente, geometrie plană, geometrie în spațiu, funcții, statistică etc.
+
+**Surse posibile de granularitate:** (a) clasificare AI per grilă (mesh/Claude judge → atribuie skill/capitol din conținut); (b) maparea label-ului oficial → skill (ex. „B.1 accentuare" din itemii oficiali — unele au deja `topic` pe item, ex. „Diftong", „Accentuare"); (c) `chapterIndex` deja existent pe `Question` pentru materialele din manual. **NB**: itemii Limba română din exam-bank au deja câmpul `topic` pe ExamItem la unele (ex. „Diftong") — de verificat dacă se poate refolosi la conversie în loc de secțiune.
+
+**Impact:** progres + weak areas + recomandări de sesiune (repair/recovery țintesc weak areas) devin utile abia cu topic-uri reale. Atinge: `scripts/grile-from-exambank.mjs` (setarea topic la import) + eventual o re-clasificare a celor 596 grile deja importate.
+
+---
+
 ## [~] 🏆 Simulări Capacitate — „exam-bank" tier (100% ground-truth) (creat 2026-06-03; SLICE 1-4 DONE 2026-06-03)
 
 **SLICE 4 DONE 2026-06-03** (commit `6f9cd26`, LIVE + verificat autentificat): **persistență + diferențiere + rezultat-final** (treapta 1 din planul de verificare în 3 trepte: self → AI → meditator). `ExamAttempt` (migrare `0018`, userId/paperId fără FK) — ruta /score salvează încercarea, `PATCH /api/exam-bank/attempt/[id]` recalculează cu self-scores → `finalized`. Diferențiere clară grilă (auto) vs rezolvare/compunere (manuală) + notă **split onest**. `ExamItem.finalAnswer` + „rezultat final" tastat la 2 itemi Mate (III.1=14, III.5=90) → auto-check ieftin gratuit. Verificat: attempt persistat+finalizat în DB, finalCheck True, badge-uri pe take. `/code-review`: 3 fix-uri (saved re-enable, norm comma/°/minus, hint over-scoring).
