@@ -58,7 +58,7 @@ async function _POST(
   }
 
   // Official EN VIII norm for exam-bank grile: timer = sum of per-question time
-  // estimates (Subiectul I 4 min, Subiectul al II-lea/figure 6 min, RO language 3 min).
+  // estimates (RO language 3 min, geometry/figure 6 min, other Mate 4 min).
   // Other domains keep their flat session-type duration.
   const duration = isExamGrileSet(questions)
     ? questions.reduce((sum, q) => sum + estimateQuestionSeconds(q), 0)

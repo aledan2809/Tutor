@@ -16,10 +16,11 @@ export type SessionType = keyof typeof SESSION_TYPES;
 
 // ─── Per-question time norm (official EN VIII reference: 120 min / 18 items) ───
 // For the Grile (Capacitate) bank the session timer is the SUM of per-question
-// estimates rather than a flat session duration. Calibration:
-//   • Subiectul al II-lea (geometry + figure) → 6 min   (figure items)
-//   • Limba română (language grile)           → 3 min
-//   • Subiectul I / default                    → 4 min
+// estimates rather than a flat session duration. Calibration (section-independent
+// signals so it survives the move of Question.topic from exam section → capitol):
+//   • Limba română (language grile)            → 3 min   (by subject)
+//   • Geometry items (figure OR geo capitol)   → 6 min   (≈ Subiectul al II-lea)
+//   • Other Matematică / default               → 4 min   (≈ Subiectul I)
 export function estimateQuestionSeconds(q: {
   topic?: string | null;
   subject?: string | null;
@@ -27,19 +28,19 @@ export function estimateQuestionSeconds(q: {
 }): number {
   const topic = (q.topic || "").toLowerCase();
   const subject = (q.subject || "").toLowerCase();
-  if (q.imageUrl || /ii-lea|subiectul ii/.test(topic)) return 6 * 60;
-  if (/român|romana/.test(subject) || /i\.b|limb/.test(topic)) return 3 * 60;
+  if (/român|romana/.test(subject)) return 3 * 60;
+  if (q.imageUrl || /geometrie/.test(topic)) return 6 * 60;
   return 4 * 60;
 }
 
-// True when the selected questions are official exam-bank grile (carry section
-// topics or figures) — only then do we use the official per-question norm; other
-// domains (e.g. aviation) keep their flat session-type duration.
+// True when the selected questions are official exam-bank grile — only then do we
+// use the official per-question norm; other domains (e.g. aviation) keep their flat
+// session-type duration. Detected via the exam-bank source tag (robust) or a figure.
 export function isExamGrileSet(
-  questions: Array<{ topic?: string | null; imageUrl?: string | null }>
+  questions: Array<{ sourceReference?: string | null; imageUrl?: string | null }>
 ): boolean {
   return questions.some(
-    (q) => q.imageUrl || /subiectul|i\.b/i.test(q.topic || "")
+    (q) => q.imageUrl || (q.sourceReference || "").startsWith("exam-bank:")
   );
 }
 

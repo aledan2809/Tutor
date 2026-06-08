@@ -17,6 +17,8 @@
  * Modes: --dry (report, no writes) · (no flag) apply. DB: DATABASE_URL from env (VPS2 local PG).
  */
 
+import { macroTopic } from "./lib/macro-topic.mjs";
+
 const DRY = process.argv.includes("--dry");
 
 const MATE_SLUG = "matematica-v-viii"; // domain "Matematica cl. VIII"
@@ -24,15 +26,22 @@ const RO_SLUG = "romana-cl-viii"; // domain "Română cl. VIII"
 
 // ExamItem.options = [{key,text}], correctAnswer = key letter → convert to Question shape
 // (options = string[], correctAnswer = full text of the keyed option), verbatim.
-function toQuestionShape(item, paper, domainId, subjectName, passageText) {
+function toQuestionShape(item, paper, domainId, subjectName, passageText, subjectKey) {
   const opts = Array.isArray(item.options) ? item.options : [];
   const optionTexts = opts.map((o) => String(o.text));
   const keyed = opts.find((o) => String(o.key) === String(item.correctAnswer));
   const correctText = keyed ? String(keyed.text) : String(item.correctAnswer);
+  // Granular capitol/competență (NOT the exam section) so progress + weak areas are meaningful.
+  const topic = macroTopic({
+    subjectKey,
+    topic: item.topic,
+    passageRef: item.passageRef,
+    content: item.content,
+  });
   return {
     domainId,
     subject: subjectName,
-    topic: item.section || "Grile",
+    topic,
     difficulty: 3,
     type: "MULTIPLE_CHOICE",
     content: item.content,
@@ -102,15 +111,15 @@ async function main() {
     console.log(`  ✅ reverted ${reverted.count} AI questions → DRAFT`);
 
     // 2. delete prior official copies (idempotent) + recreate
-    for (const [domain, items, subjectName] of [
-      [mate, mateItems, "Matematica cl. VIII"],
-      [ro, roItems, "Română cl. VIII"],
+    for (const [domain, items, subjectName, subjectKey] of [
+      [mate, mateItems, "Matematica cl. VIII", "matematica"],
+      [ro, roItems, "Română cl. VIII", "limba_romana"],
     ]) {
       const del = await prisma.question.deleteMany({
         where: { domainId: domain.id, sourceReference: { startsWith: "exam-bank:" } },
       });
       const rows = items.map((it) =>
-        toQuestionShape(it, it.paper, domain.id, subjectName, resolvePassage(it, it.paper.passages))
+        toQuestionShape(it, it.paper, domain.id, subjectName, resolvePassage(it, it.paper.passages), subjectKey)
       );
       // createMany can't take options as Json[] inline reliably across drivers — map explicitly
       let created = 0;
