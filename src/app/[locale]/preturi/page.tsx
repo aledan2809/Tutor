@@ -125,7 +125,7 @@ const RO: Copy = {
   ],
   note: "O singură factură pe familie.",
   promo:
-    "🎁 Prețuri promoționale până la 31.08.2026 — toate pachetele au o reducere suplimentară de 25%. De la 1 septembrie 2026, prețurile cresc în consecință.",
+    "🎁 Prețuri promoționale până la 31.08.2026 — toate pachetele au o reducere suplimentară de 25%. De la 1 septembrie 2026, prețurile revin la normal.",
   priceSuffix: "lei / materie / lună",
   fromLabel: "de la",
 };
@@ -216,7 +216,7 @@ const EN: Copy = {
   ],
   note: "One bill per family.",
   promo:
-    "🎁 Promotional prices until 31.08.2026 — all packages get an extra 25% off. From 1 September 2026, prices increase accordingly.",
+    "🎁 Promotional prices until 31.08.2026 — all packages get an extra 25% off. From 1 September 2026, prices return to normal.",
   priceSuffix: "lei / subject / month",
   fromLabel: "from",
 };

@@ -104,7 +104,7 @@ const RO: Copy = {
   priceNote:
     "O singură factură pe familie. Reduceri: al 2-lea copil −20%, al 3-lea+ −30%; a 2-a materie −15%, a 3-a+ −25%; plată anuală = 2 luni gratuite (plătești 10 luni).",
   promoNote:
-    "🎁 Prețuri promoționale până la 31.08.2026 — toate pachetele au o reducere suplimentară de 25%. De la 1 septembrie 2026, prețurile cresc în consecință.",
+    "🎁 Prețuri promoționale până la 31.08.2026 — toate pachetele au o reducere suplimentară de 25%. De la 1 septembrie 2026, prețurile revin la normal.",
   trialTitle: "Începe gratuit, fără card",
   trialPoints: [
     "7 zile gratuit",
@@ -191,7 +191,7 @@ const EN: Copy = {
   priceNote:
     "One bill per family. Discounts: 2nd child −20%, 3rd+ −30%; 2nd subject −15%, 3rd+ −25%; annual = 2 months free (you pay 10 months).",
   promoNote:
-    "🎁 Promotional prices until 31.08.2026 — all packages get an extra 25% off. From 1 September 2026, prices increase accordingly.",
+    "🎁 Promotional prices until 31.08.2026 — all packages get an extra 25% off. From 1 September 2026, prices return to normal.",
   trialTitle: "Start free, no card",
   trialPoints: [
     "7 days free",
