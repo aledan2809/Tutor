@@ -72,6 +72,35 @@ function resolvePassage(item, passages) {
   return parts.length ? parts.join("\n\n———\n\n") : null;
 }
 
+// Expand a passage-dependent TF_GRID item into one True/False MCQ per statement.
+// Statements live in item.rubric = [{label, answer:"Adevărat"|"Fals", points}]. Verbatim.
+function tfGridToQuestionRows(item, paper, domainId, subjectName, passageText) {
+  const rubric = Array.isArray(item.rubric) ? item.rubric : [];
+  const topic = macroTopic({
+    subjectKey: "limba_romana",
+    topic: item.topic,
+    passageRef: item.passageRef,
+    content: item.content,
+  });
+  return rubric
+    .filter((stmt) => stmt && stmt.label && stmt.answer)
+    .map((stmt, i) => ({
+      domainId,
+      subject: subjectName,
+      topic,
+      difficulty: 3,
+      type: "MULTIPLE_CHOICE",
+      content: String(stmt.label).trim(),
+      passage: passageText || null,
+      options: ["Adevărat", "Fals"],
+      correctAnswer: String(stmt.answer).trim(),
+      imageUrl: null,
+      sourceReference: `exam-bank:${item.id}#${i} | ${paper.source}`,
+      source: "MANUAL",
+      status: "PUBLISHED",
+    }));
+}
+
 async function main() {
   const { PrismaClient } = await import("@prisma/client");
   const prisma = new PrismaClient();
@@ -91,6 +120,15 @@ async function main() {
     });
     const roWithPassage = roItems.filter((it) => it.passageRef).length;
     console.log(`Official MCQ to copy: Matematică=${mateItems.length}, Română=${roItems.length} (din care ${roWithPassage} cu text-suport)`);
+
+    // Passage-dependent True/False grids → expanded into one A/F MCQ per statement
+    // (the Question/Grile flow renders MCQ, not grids). Source = limba română only.
+    const roTfGrid = await prisma.examItem.findMany({
+      where: { type: "TF_GRID", paper: { subjectKey: "limba_romana" } },
+      include: { paper: { select: { source: true, passages: true } } },
+    });
+    const tfStmtCount = roTfGrid.reduce((n, it) => n + (Array.isArray(it.rubric) ? it.rubric.length : 0), 0);
+    console.log(`TF_GRID RO: ${roTfGrid.length} grids → ${tfStmtCount} True/False grile`);
 
     // AI rows to revert
     const aiCount = await prisma.question.count({
@@ -121,6 +159,12 @@ async function main() {
       const rows = items.map((it) =>
         toQuestionShape(it, it.paper, domain.id, subjectName, resolvePassage(it, it.paper.passages), subjectKey)
       );
+      // RO: also expand TF_GRID grids into A/F MCQ grile
+      if (subjectKey === "limba_romana") {
+        for (const it of roTfGrid) {
+          rows.push(...tfGridToQuestionRows(it, it.paper, domain.id, subjectName, resolvePassage(it, it.paper.passages)));
+        }
+      }
       // createMany can't take options as Json[] inline reliably across drivers — map explicitly
       let created = 0;
       const BATCH = 100;
