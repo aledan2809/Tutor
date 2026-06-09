@@ -1,5 +1,21 @@
 # Project Status - Tutor
-Last Updated: 2026-06-04 (exam-bank 2022 Mate Test_01..06 complete — whole CNCE pro-matematica2 series done)
+Last Updated: 2026-06-09 (BAC Română complet: 75 grile + 13 simulări-eseu; + Topics/TF_GRID/Pricing/categorisire pagini)
+
+## Current State (Sesiunea 2026-06-09)
+
+### Done (toate LIVE pe etutor.ro, verificate autentificat)
+1. **Topics + Weak Areas granulare** (`439eb1b`) — `scripts/lib/macro-topic.mjs` (micro→capitol determinist, 72/72 smoke), importer re-clasifică 596 grile, `session-engine.ts` timer decuplat de secțiune. L08.
+2. **TF_GRID → 48 grile A/F** (`69149e3`) — 8 griduri RO expandate în MCQ Adevărat/Fals, RO 56→104.
+3. **Promo pricing** (`0b88b40`+`fe99ecd`) — preț normal tăiat roșu + wording „revin la normal", data-driven (`src/lib/pricing.ts`, auto-expiră 2026-09-01), /preturi + /parinte RO+EN.
+4. **Categorisire dropdown homepage + pagini logate** (`303f877`+`1495b48`+`02ba02e`) — `src/lib/exam-level.ts` (slug/examType→EN_VIII/BAC). Demo homepage + Grile picker (`/dashboard/practice`) grupate pe nivel (Aviation/Drept/Istorie/goale ascunse) + Simulări (`/dashboard/exam-bank`) nested nivel→materie→an.
+5. **BAC Română COMPLET** — `47776c4`→`60c242e`:
+   - **75 grile** ancorate în barem (`scripts/import-grile-bac-ro.mjs`), domeniu `romana-ix-xii`, vizibile sub „Bacalaureat" în dropdown + Grile. 13 lucrări × (6 grile, 2023×5).
+   - **13 simulări-eseu complete** (`scripts/import-exam-ro-bac-batch.mjs` pt 11 + 2 scripturi individuale pt model/simulare 2025) — Subiectul I (text+A+B) + II + III, 90+10, în Simulări.
+   - L09.
+
+### Lessons Learned (sesiunea 2026-06-09)
+- **L07/L08/L09** — deja în `knowledge/lessons-learned.md`. L07 (official-verbatim>AI + i18n + owner-preview); L08 (group analytics pe capitol nu secțiune + decuplare câmp repurposat); L09 (grile dintr-un examen de eseu = ancorate în barem, nu AI + „show X in surface Y" cere ca Y să poată randa X + onorează jumătatea negativă a instrucțiunii).
+
 
 ## Session 2026-06-04 (PM) — Exam-bank CNCE import: 2022 Mate complete (Test_01..06) + Română queued
 
