@@ -1,5 +1,24 @@
 # Project Status - Tutor
-Last Updated: 2026-06-10 (BAC Matematică M1 pilot + batch parțial: 35 grile/6 lucrări LIVE + dropdown Simulări)
+Last Updated: 2026-06-10 (continuare: BAC Mate M1 grile Faza A COMPLETĂ 83/14 + Faza B pilot 2024 simulare)
+
+## Current State (Sesiunea 2026-06-10 — continuare mesh: Faza A complete + Faza B pilot)
+
+### Done (LIVE pe etutor.ro, verificat)
+1. **BAC Mate M1 grile — Faza A COMPLETĂ 14/14 lucrări** (`abbf891`) — +8 lucrări (48 grile noi): 2023 sim/var-01/var-06/var-07 + 2024 sim/var-03/var-09/var-10. **0 itemi sări** (toate 48 transcriabile; itemii „Arătați că" proof — vectori, perpendicularitate — reframate ca MCQ concret ancorat în barem, ex. „dreptele sunt: perpendiculare"). 3 misread-uri prinse la cross-check (L10): 2023sim I.4 = „cel mult două cifre" (0–99=100) NU „două cifre"; 2023v01 I.5 A(4,0) NU A(0,4); 2024v10 I.4 set {1,2,4,6,8,9} (ratase „8"). Import idempotent VPS2 → **83 grile / 14 lucrări LIVE** (API `etutor.ro/api/public/practice/subjects` → „Matematică M1 (Mate-Info)" count=83). `/code-review` = recalcul matematic independent al tuturor 48 → ALL 48 OK, zero buguri.
+2. **BAC Mate M1 SIMULĂRI — Faza B pilot 2024 simulare** (`b3e86b4`) — creat `scripts/import-exam-bac-matematica-m1-batch.mjs` (scaffold `PAPERS[]`, clonă din `-model`). Lucrare completă: SI 6×SHORT+finalAnswer+rubric; SII (matrice A(x) det/inversă + lege compoziție x∗y) + SIII (analiză f=(x+6)√(x²+4) monotonie + integrale/șir Iₙ) câte 2×OPEN cu rubric a/b/c, transcris VERBATIM din subiect+barem CNPEE. Math II+III re-verificat independent (agent) → ALL OK. Import VPS2 → ExamPaper 67→68 (2024 model+simulare, 10 items fiecare, isActive). Verif: DB query (structură identică cu 2024 model care randează în UI).
+3. **TODO** — adăugat item UX tooltips explicative (mouseover) pe pagina de Practică (cerere user, `64906f8`).
+
+### RĂMAS (în TODO_PERSISTENT.md)
+- Faza B simulări: **12 lucrări** rămase (2022 model/sim/v01/v03 + 2023 model/sim/v01/v06/v07 + 2024 v03/v09/v10) — append în `PAPERS[]` per rețeta dovedită de pilot.
+- BAC M2 + M3: grile + simulări (domenii create, goale).
+- UX tooltips pe /dashboard/practice.
+
+### Backups DB VPS2
+- `tutor-pre-mate-m1-faza-a-2026-06-10.dump` (pre grile Faza A)
+- `tutor-pre-mate-m1-simulare-2026-06-10.dump` (pre Faza B pilot)
+
+### Lessons Learned (sesiunea 2026-06-10 continuare)
+- **none novel** — reîntărit **L10** (cross-check subiect+barem+calcul a prins 3 misread-uri noi). Rafinare politică grile (nu lecție nouă): itemii „Arătați că/proof" sunt reframabili ca MCQ concret ancorat în barem → 0 skips Faza A (vs. ~5 skips estimați inițial). Aplicate: barem-anchored grile, idempotent import VPS2, adversarial math re-verify prin agent înainte de deploy.
 
 ## Current State (Sesiunea 2026-06-10)
 
