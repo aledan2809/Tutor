@@ -4,6 +4,16 @@
 
 ---
 
+## [ ] 🛈 UX — Tooltips explicative (mouseover) pe pagina de Practică (cerut 2026-06-10)
+
+Pe `/dashboard/practice` (pagina cu „Întrebări disponibile / Capitole studiate / Puncte slabe" + tipurile de sesiune), adaugă **tooltips cu mouseover explicativ la TOATE** elementele — utilizatorul trebuie să înțeleagă ce înseamnă fiecare fără ghicit:
+- **Cele 3 statistici**: „Întrebări disponibile" (câte grile sunt în materie), „Capitole studiate" (câte capitole ai atins), „Puncte slabe" (subiecte unde ai greșit recent).
+- **Cele 6 tipuri de sesiune** — fiecare cu ce e și când să-l folosești: **Sesiune rapidă** (practică obișnuită, 10 min/15 întrebări), **micro** (2 min/5 — recapitulare scurtă), **lungă** (20 min/30 — antrenament amplu), **remediere** (15 min/20 — se concentrează pe punctele slabe), **recuperare** (10 min/15 — reia întrebări greșite anterior), **intensivă** (20 min/30 — ritm/dificultate crescute).
+- Implementare: componentă tooltip reutilizabilă (hover + focus pentru a11y/tastatură + touch pe mobil), text RO clar, fără jargon. Verifică pe desktop + mobil.
+- Mobil: tooltips pe hover nu funcționează la touch → fallback (tap-to-show sau text descriptiv vizibil sub titlu).
+
+---
+
 ## [~] 🎓 BAC — Matematică → GRILE + SIMULĂRI (creat 2026-06-10)
 
 **3 programe naționale DISTINCTE, NICIODATĂ mixate** (cerere user): **M1 (Mate-Info)**, **M2 (Științele naturii)**, **M3 (Tehnologic)**. Fiecare program = domeniu propriu (`matematica-{m1,m2,m3}-ix-xii`, slug `-ix-xii` → grupul „Bacalaureat") + `subjectKey` propriu pentru Simulări (`matematica_m1/m2/m3` — altfel unique constraint `(examType,year,subjectKey,variant)` s-ar ciocni între programe) + tag grile propriu (`bac-grile-mate-m{n}:`).
