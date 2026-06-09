@@ -4,6 +4,24 @@
 
 ---
 
+## [~] 🎓 BAC — Limba și literatura română (campanie import, creat 2026-06-09)
+
+**Materiale**: `~/Downloads/Temp/BAC-RO/` — 13 perechi oficiale `E_a_romana_real_tehn_<an>_var_<x>` (subiect) + `bar_<x>` (barem), proba E.a, filiera reală/tehnologică (CNPEE, public). 2023×3 (var 01/05/06), 2024×5 (var 02/04/09/model/simulare), 2025×5 (var 06/07/08/model/simulare). (`var_09 (1)` = duplicat, se ignoră.)
+
+**Structură BAC RO** (≠ EN VIII): `examType="BAC"`, grade 12, timeLimit 180. Subiectul I (50p) = 1 text + A (5 itemi comprehensiune, 30p) + B (text argumentativ ≥150 cuv, 20p); Subiectul al II-lea (10p) = comentariu text liric (poemul embed în content); Subiectul al III-lea (30p) = eseu (text studiat). **Toți itemii OPEN/SHORT — ZERO MCQ** → self-score pe barem; **nu produc grile MCQ** (doar Simulări). 90+10 oficiu=100. Script per lucrare: `scripts/import-exam-ro-bac-<an>-<variant>.mjs` (template din `import-exam-ro-2025-model.mjs`).
+
+**Infra (DONE 2026-06-09, commit `53a7665`)**: lista exam-bank (`/dashboard/exam-bank`) **grupată pe nivel** (Evaluarea Națională cl. VIII vs Bacalaureat IX–XII) ca să nu se amestece audiențele. Backup prod pre-campanie: `/root/backups/tutor-pre-bac-2026-06-09.dump`.
+
+**Queue (1/13 DONE)**:
+- [x] **2025 Model** — DONE 2026-06-09 (`53a7665`): text jurnal Puia Florica Rebreanu + 8 itemi (A.1-A.5 + B + II Vlahuță „Sonet" + III eseu Sadoveanu). Verificat autentificat: listă grupată (secțiunea Bacalaureat) + take page randează passage+poem+itemi. ExamPaper 53→54.
+- [ ] 2025: simulare, var_06, var_07, var_08
+- [ ] 2024: model, simulare, var_02, var_04, var_09
+- [ ] 2023: var_01, var_05, var_06
+
+**Per lucrare** (playbook `knowledge/exam-bank-import-playbook.md` §2, adaptat BAC): extract subiect+barem (fitz system python3) → transcriere verbatim (text + itemi + bareme ground-truth) → `--validate` (sum 90) → import pe prod DB → verificare autentificată (listă + take render). `/review` mesh pe script. Fără figuri de regulă (BAC RO e text). Mostly text-only → import nu cere rebuild (doar dacă ating cod).
+
+---
+
 ## [x] 💸 Promo pricing — wording + preț tăiat în carduri (creat 2026-06-03) — DONE 2026-06-09 (commits `0b88b40`+`fe99ecd`, LIVE + verificat)
 
 **DONE 2026-06-09** (instrucțiuni mesh): ambele puncte livrate pe `/preturi` ȘI `/parinte`, RO+EN.
