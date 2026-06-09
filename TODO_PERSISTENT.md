@@ -16,14 +16,18 @@
 
 **Domenii create**: `band-matematica-bac.mjs` (m1/m2/m3 idempotent). `matematica-ix-xii` vechi (gol) rămâne neutilizat.
 
-**PILOT M1 model 2024 DONE + LIVE + VERIFICAT 2026-06-10** (commit `03c0bef`):
-- 6 grile M1 + simulare (10 itemi, 90p) importate pe VPS2 (backup `/root/backups/tutor-pre-mate-m1-2026-06-10.dump`).
-- Verificat autentificat pe etutor.ro: homepage demo „Bacalaureat → Matematică M1 (Mate-Info) (6)"; Simulări grupate sub Bacalaureat/M1; take page randează I+II+III cu notația Unicode intactă (`log₂(x²+8)`, `x²+ax−a`, `det(A(1))`, `3∘5`, `x/(x²+1)²`, `e^(−x)`). M2/M3 goale → ascunse automat.
+**Toate 13 lucrările batch sunt FĂRĂ FIGURI** (Mate-Info = algebră+analiză pură) — verificat cu scan `figur`/`reprezentat`. Deci batch = transcriere pură, fără pipeline de figuri, fără restart.
 
-**RĂMAS (după OK user pe pilot)**:
-- [ ] **Batch restul 13 lucrări M1** (2022/2023/2024 × 5 variante − 1 duplicat 2022_03): grile + simulări. Materiale `~/Downloads/Temp/BAC-Mate Mate-Info/`. Adaugă bloc/paper în scripturile M1 → import → verificare.
-- [ ] **M2 + M3** — când user încarcă materialele (`~/Downloads/Temp/BAC-<M2/M3>/`); clonă scripturile M1, domeniu+subjectKey+tag proprii.
-- Anti-pattern: NU genera AI când există barem (L07a/L09). NU mixa programele (M1/M2/M3 separate). NU transcrie din fitz dump pentru math (L10).
+**PROGRES GRILE M1 (Faza A) — 6/14 lucrări LIVE + VERIFICAT 2026-06-10**:
+- DONE (35 grile, commits `03c0bef`+`16b6006`): **2024 model** (6) + **2022 model/simulare/var-01/var-03** (24) + **2023 model** (5, I.3 omis). Toate barem-anchored, cross-checked manual. Verificat live: homepage demo „Bacalaureat → Matematică M1 (Mate-Info) (35)". Simulare DOAR pentru 2024 model (pilot).
+- **RĂMAS Faza A (grile) — 8 lucrări**: 2023 (simulare, var-01, var-06, var-07) + 2024 (simulare, var-03, var-09, var-10). Rețetă: per lucrare → render barem p1 (band 0.255–0.66) + subiect p1 (band 0.12–0.55) la zoom 3.0 → citește vizual → 6 grile barem-anchored cu cross-check manual (L10 a prins deja 2 misread-uri: 2022v03 I.3=`{−3/2,1}`, 2023mod I.1 b=−2). Adaugă bloc `{year,variant,items[]}` în `scripts/import-grile-bac-matematica-m1.mjs` → `--validate` → import VPS2 (idempotent, înlocuiește tot) → verifică count live. **Politică: itemii cu notație negarbil-transcriabilă se SAR (5 grile), nu se ghicesc.**
+- **RĂMAS Faza B (SIMULĂRI) — 13 lucrări**: pattern în `scripts/import-exam-bac-matematica-m1-model.mjs` (I 6×5p SHORT+finalAnswer; II+III câte 2 probleme OPEN 15p cu rubric a/b/c; 90+10). Recomandare: script-batch `import-exam-bac-matematica-m1-batch.mjs` cu `PAPERS[]` (clonă din `import-exam-ro-bac-batch.mjs`). Necesită transcrierea Subiectelor II+III (matrice, legi de compoziție, analiză) — render subiect+barem p1(jos)+p2 + rubric verbatim per sub-punct, verificat matematic.
+
+**RĂMAS — [ ] BAC M2 (Științele naturii)** — materiale `~/Downloads/Temp/BAC-Mate M2 Stiintele naturii/`. Domeniu `matematica-m2-ix-xii` (DEJA CREAT, gol). Clonă scripturile M1: subject „Matematică M2 (Științele naturii) — Bacalaureat", subjectKey `matematica_m2`, tag `bac-grile-mate-m2:`. M2 e program mai ușor ca M1 (fără analiză avansată / numere complexe în unele variante) — structură similară. NU mixa cu M1.
+
+**RĂMAS — [ ] BAC M3 (Tehnologic)** — materiale `~/Downloads/Temp/BAC-MATE - M3 Tehnologic/`. Domeniu `matematica-m3-ix-xii` (DEJA CREAT, gol). Clonă: subject „Matematică M3 (Tehnologic) — Bacalaureat", subjectKey `matematica_m3`, tag `bac-grile-mate-m3:`. NU mixa cu M1/M2.
+
+**Anti-pattern**: NU genera AI când există barem (L07a/L09). NU mixa programele (M1/M2/M3 — domeniu+subjectKey+tag proprii). NU transcrie din fitz dump pentru math — render PDF→PNG + cross-check barem/calcul (L10). NU ghici itemi negarbil-transcriabili — sari-i.
 
 ---
 
