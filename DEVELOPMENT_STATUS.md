@@ -1,5 +1,21 @@
 # Project Status - Tutor
-Last Updated: 2026-06-09 (BAC Română complet: 75 grile + 13 simulări-eseu; + Topics/TF_GRID/Pricing/categorisire pagini)
+Last Updated: 2026-06-10 (BAC Matematică M1 pilot + batch parțial: 35 grile/6 lucrări LIVE + dropdown Simulări)
+
+## Current State (Sesiunea 2026-06-10)
+
+### Done (toate LIVE pe etutor.ro, verificate autentificat)
+1. **BAC Matematică — taxonomie 3 programe** (`03c0bef`) — `scripts/band-matematica-bac.mjs` creează 3 domenii distincte `matematica-{m1,m2,m3}-ix-xii` (NICIODATĂ mixate, cerere user). Fiecare program = domeniu + `subjectKey` (`matematica_m{n}`) + tag grile (`bac-grile-mate-m{n}:`) proprii.
+2. **Pilot M1 model 2024** (`03c0bef`) — 6 grile (Subiectul I, barem-anchored) + simulare completă (10 itemi, I+II+III, 90+10). Verificat live: notația Unicode randează intact (UI fără KaTeX), grupat sub „Bacalaureat → Matematică M1 (Mate-Info)".
+3. **Batch grile M1 — 6/14 lucrări** (`16b6006`) — +2022 model/simulare/var-01/var-03 + 2023 model = **35 grile LIVE**. Toate cross-checked manual (L10 a prins 2 misread-uri barem: 2022v03 I.3=`{−3/2,1}`, 2023mod I.1 b=−2). Toate 13 lucrările batch = fără figuri (Mate-Info algebră+analiză).
+4. **Dropdown Categorie→Subcategorie pe Simulări** (`0915029`) — `src/components/exam-bank/exam-bank-browser.tsx` (client) + server page rebuild: `<select>` optgroup nivel + option materie (ca la Grile), fără scroll lung. Verificat live (optgroups EN_VIII+BAC, opțiuni randate).
+
+### RĂMAS (documentat în TODO_PERSISTENT.md secțiunea BAC Matematică)
+- Faza A grile: 8 lucrări (2023 sim/v01/v06/v07 + 2024 sim/v03/v09/v10).
+- Faza B simulări: 13 lucrări (II+III multi-part + rubric).
+- BAC M2 (`~/Downloads/Temp/BAC-Mate M2 Stiintele naturii/`) + BAC M3 (`~/Downloads/Temp/BAC-MATE - M3 Tehnologic/`) — domenii deja create, goale.
+
+### Lessons Learned (sesiunea 2026-06-10)
+- **L10** — în `knowledge/lessons-learned.md`: pentru un examen de matematică, transcrie din PDF RANDAT la PNG (citit vizual), nu din dump-ul fitz (math dezordonată); cross-check obligatoriu subiect+barem+calcul manual pe fiecare semn (a prins „=−1" vs „1", b=2 vs b=−2, `{−2,1}` vs `{−3/2,1}`); UI fără KaTeX → Unicode inline; „3 subcategorii nemixate" = 3 domenii + 3 subjectKeys (constraint unique altfel se ciocnește).
 
 ## Current State (Sesiunea 2026-06-09)
 
