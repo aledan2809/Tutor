@@ -10,6 +10,7 @@ import { prisma } from "@/lib/prisma";
 import { ESCALATION_LEVELS } from "./config";
 import { isQuietHours, isOptimalNotificationTime } from "./timing";
 import { sendNotification } from "@/lib/notifications/service";
+import { resolveIsTest, resolveIsTestForUser } from "@/lib/notifications/test-account";
 
 interface EscalationContext {
   userId: string;
@@ -40,6 +41,7 @@ export async function startEscalation(ctx: EscalationContext): Promise<string> {
   const event = await prisma.escalationEvent.create({
     data: {
       userId: ctx.userId,
+      isTest: await resolveIsTestForUser(ctx.userId),
       sessionId: ctx.sessionId,
       level: level.level,
       status: "PENDING",
@@ -219,6 +221,7 @@ async function escalateToNextLevel(
   await prisma.escalationEvent.create({
     data: {
       userId: current.userId,
+      isTest: await resolveIsTestForUser(current.userId),
       sessionId: current.sessionId,
       level: nextLevelConfig.level,
       status: "PENDING",
@@ -294,6 +297,8 @@ export async function advancePendingEscalations(): Promise<number> {
     await prisma.escalationEvent.create({
       data: {
         userId: event.userId,
+        // event.user already loaded via include above — avoid an N+1 lookup in this loop.
+        isTest: resolveIsTest(event.user.email),
         sessionId: event.sessionId,
         level: nextConfig.level,
         status: "PENDING",
