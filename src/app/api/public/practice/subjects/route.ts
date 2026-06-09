@@ -22,6 +22,17 @@ function classifyDomainSlug(slug: string): LevelKey | null {
   return null; // not a classified school domain → excluded from the public demo
 }
 
+// Leaf label shown UNDER a level group — strip the level suffix that the group header
+// already conveys (e.g. "Română — Bacalaureat" → "Română", "Matematica cl. VIII" → "Matematica").
+function displayName(subject: string): string {
+  const d = subject
+    .replace(/\s*[—–-]\s*Bacalaureat$/i, "")
+    .replace(/\s+cl\.?\s*VIII$/i, "")
+    .replace(/\s+(?:V-VIII|IX-XII)$/i, "")
+    .trim();
+  return d || subject;
+}
+
 export async function GET() {
   try {
     const rows = await prisma.question.groupBy({
@@ -38,7 +49,7 @@ export async function GET() {
     const slugById = new Map(domains.map((d) => [d.id, d.slug]));
 
     // Bucket eligible subjects by inferred level.
-    const byLevel = new Map<LevelKey, { subject: string; count: number }[]>();
+    const byLevel = new Map<LevelKey, { subject: string; count: number; display: string }[]>();
     for (const r of rows) {
       const count = r._count._all;
       if (count < MIN_QUESTIONS) continue;
@@ -46,7 +57,7 @@ export async function GET() {
       const level = slug ? classifyDomainSlug(slug) : null;
       if (!level) continue;
       const list = byLevel.get(level) ?? [];
-      list.push({ subject: r.subject, count });
+      list.push({ subject: r.subject, count, display: displayName(r.subject) });
       byLevel.set(level, list);
     }
 

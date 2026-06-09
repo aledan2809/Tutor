@@ -14,7 +14,7 @@ type Q = {
   topic: string | null;
   passage: string | null;
 };
-type Subject = { subject: string; count: number };
+type Subject = { subject: string; count: number; display?: string };
 type Group = { level: string; label: string; subjects: Subject[] };
 type Phase = "select" | "take" | "score";
 
@@ -121,7 +121,7 @@ export default function SubjectQuizDemo({ locale }: { locale?: string }) {
                 <optgroup key={g.level} label={g.label}>
                   {g.subjects.map((s) => (
                     <option key={s.subject} value={s.subject}>
-                      {s.subject} ({s.count} {L.questions})
+                      {s.display ?? s.subject} ({s.count} {L.questions})
                     </option>
                   ))}
                 </optgroup>
