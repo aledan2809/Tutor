@@ -4,7 +4,14 @@
 
 ---
 
-## [~] 🎓 BAC — Limba și literatura română (campanie import, creat 2026-06-09)
+## [~] 🎓 BAC — Limba și literatura română → GRILE (campanie, creat 2026-06-09)
+
+**PIVOT 2026-06-09 (cerere user): output = GRILE, nu Simulări.** BAC RO n-are MCQ oficiale (e eseuri + întrebări deschise), DAR baremul oficial dă răspunsurile → fac grile **ancorate în barem**: întrebarea = cerința oficială reformulată MCQ, opțiunea corectă = răspunsul din barem (verbatim), distractori plauzibili. Fără generare AI de conținut, fără poartă AI-judge (corectitudinea e oficială). Script: `scripts/import-grile-bac-ro.mjs` (idempotent, tag `bac-grile:%`). Țintă: domeniul **`romana-ix-xii`** (slug `-ix-xii` → grupul **Bacalaureat** în dropdown-ul homepage + secțiunea Grile), subject „Română — Bacalaureat", source MANUAL. Textul-suport reutilizat verbatim din ExamPaper-ul deja importat (passage atașat pe grilă, drawer „📖 Vezi textul" + în demo-ul fără cont).
+- **ExamPapers BAC = isActive:false** (depozit text+barem pt grile, ASCUNSE din Simulări — reversibil dacă vrei și Simulări mai târziu). Demo quiz API + SubjectQuizDemo randează acum passage (commit `47776c4`).
+- **Grile DONE: 12** (2025 model 6 + 2025 simulare 6). Verificat: dropdown grupa „Bacalaureat → Română — Bacalaureat (12)", demo quiz întoarce 5 întrebări cu passage + răspuns corect.
+- **Per paper rămas**: extrag barem → adaug bloc grile în `import-grile-bac-ro.mjs` (+ ExamPaper inactiv pt text via `import-exam-ro-bac-<paper>.mjs`) → validate → import → verific dropdown.
+
+## [~] 🎓 BAC — Limba și literatura română (import text/barem, creat 2026-06-09)
 
 **Materiale**: `~/Downloads/Temp/BAC-RO/` — 13 perechi oficiale `E_a_romana_real_tehn_<an>_var_<x>` (subiect) + `bar_<x>` (barem), proba E.a, filiera reală/tehnologică (CNPEE, public). 2023×3 (var 01/05/06), 2024×5 (var 02/04/09/model/simulare), 2025×5 (var 06/07/08/model/simulare). (`var_09 (1)` = duplicat, se ignoră.)
 

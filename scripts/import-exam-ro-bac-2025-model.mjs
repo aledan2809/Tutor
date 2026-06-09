@@ -212,13 +212,13 @@ async function run(dry) {
         update: {
           source: p.source, subjectName: p.subjectName, grade: p.grade, maxScore: p.maxScore,
           officeBonus: p.officeBonus, timeLimit: p.timeLimit, language: p.language,
-          sourceUrl: p.sourceUrl, license: p.license, isActive: true,
+          sourceUrl: p.sourceUrl, license: p.license, isActive: false,
         },
         create: {
           source: p.source, examType: p.examType, year: p.year, subjectKey: p.subjectKey,
           subjectName: p.subjectName, grade: p.grade, variant: p.variant, maxScore: p.maxScore,
           officeBonus: p.officeBonus, timeLimit: p.timeLimit, language: p.language,
-          sourceUrl: p.sourceUrl, license: p.license,
+          sourceUrl: p.sourceUrl, license: p.license, isActive: false,
         },
       });
       await prisma.examItem.deleteMany({ where: { paperId: paper.id } });
