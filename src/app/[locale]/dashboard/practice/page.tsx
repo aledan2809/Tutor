@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { SessionSelector } from "@/components/session/session-selector";
+import { EXAM_LEVELS, classifyDomainSlug, stripLevelSuffix, type ExamLevel } from "@/lib/exam-level";
+
+type DomainOpt = { slug: string; name: string; level: ExamLevel; count: number };
 
 interface SessionNextResponse {
   recommended: {
@@ -33,19 +36,25 @@ export default function PracticePage() {
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<string>("");
-  const [domains, setDomains] = useState<{ slug: string; name: string }[]>([]);
+  const [domains, setDomains] = useState<DomainOpt[]>([]);
 
   useEffect(() => {
     fetch("/api/student/domains")
       .then((r) => r.json())
       .then((d) => {
         if (d.enrolled) {
-          const list = d.enrolled.map((e: { slug: string; name: string }) => ({
-            slug: e.slug,
-            name: e.name,
-          }));
+          // Only school-curriculum subjects with grile, grouped by exam level (non-curriculum
+          // verticals like Aviation/Drept and empty subjects are hidden).
+          const list: DomainOpt[] = (d.enrolled as { slug: string; name: string; stats?: { questionsAvailable?: number } }[])
+            .map((e) => ({
+              slug: e.slug,
+              name: e.name,
+              level: classifyDomainSlug(e.slug),
+              count: e.stats?.questionsAvailable ?? 0,
+            }))
+            .filter((e): e is DomainOpt => e.level !== null && e.count > 0);
           setDomains(list);
-          if (list.length > 0 && !list.find((l: { slug: string }) => l.slug === selectedDomain)) {
+          if (list.length > 0 && !list.find((l) => l.slug === selectedDomain)) {
             setSelectedDomain(list[0].slug);
           }
         }
@@ -103,10 +112,16 @@ export default function PracticePage() {
                 onChange={(e) => setSelectedDomain(e.target.value)}
                 className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
               >
-                {domains.map((d) => (
-                  <option key={d.slug} value={d.slug}>
-                    {d.name}
-                  </option>
+                {EXAM_LEVELS.filter((lvl) => domains.some((d) => d.level === lvl.key)).map((lvl) => (
+                  <optgroup key={lvl.key} label={lvl.label}>
+                    {domains
+                      .filter((d) => d.level === lvl.key)
+                      .map((d) => (
+                        <option key={d.slug} value={d.slug}>
+                          {stripLevelSuffix(d.name)}
+                        </option>
+                      ))}
+                  </optgroup>
                 ))}
               </select>
             </div>

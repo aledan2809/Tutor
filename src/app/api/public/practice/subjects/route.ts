@@ -1,37 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { EXAM_LEVELS, classifyDomainSlug, stripLevelSuffix, type ExamLevel } from "@/lib/exam-level";
 
 // Public: school-curriculum subjects with enough PUBLISHED multiple-choice questions to
 // make a real demo quiz, GROUPED BY EXAM LEVEL. Drives the no-account homepage dropdown.
-// Only school domains are shown (Capacitate cl. VIII / Bacalaureat) — non-curriculum
-// verticals (Aviation pilot-theory, Drept, demo Istorie) are excluded. Level is inferred
-// from the domain slug convention so new curriculum domains classify automatically:
-//   *-v-viii / *cl-viii  → Evaluarea Națională (clasa a VIII-a)
-//   *-ix-xii             → Bacalaureat
+// Only school domains are shown; level + label come from the shared @/lib/exam-level helper.
 const MIN_QUESTIONS = 4;
 
-type LevelKey = "EN_VIII" | "BAC";
-const LEVELS: { key: LevelKey; label: string }[] = [
-  { key: "EN_VIII", label: "Evaluarea Națională — clasa a VIII-a" },
-  { key: "BAC", label: "Bacalaureat" },
-];
-
-function classifyDomainSlug(slug: string): LevelKey | null {
-  if (/(?:-v-viii|cl-viii)$/.test(slug)) return "EN_VIII";
-  if (/-ix-xii$/.test(slug)) return "BAC";
-  return null; // not a classified school domain → excluded from the public demo
-}
-
-// Leaf label shown UNDER a level group — strip the level suffix that the group header
-// already conveys (e.g. "Română — Bacalaureat" → "Română", "Matematica cl. VIII" → "Matematica").
-function displayName(subject: string): string {
-  const d = subject
-    .replace(/\s*[—–-]\s*Bacalaureat$/i, "")
-    .replace(/\s+cl\.?\s*VIII$/i, "")
-    .replace(/\s+(?:V-VIII|IX-XII)$/i, "")
-    .trim();
-  return d || subject;
-}
+type LevelKey = ExamLevel;
+const LEVELS = EXAM_LEVELS;
+const displayName = stripLevelSuffix;
 
 export async function GET() {
   try {
