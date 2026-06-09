@@ -4,13 +4,17 @@
 
 ---
 
-## [~] 🎓 BAC — Limba și literatura română → GRILE (campanie, creat 2026-06-09)
+## [x] 🎓 BAC — Limba și literatura română → GRILE — DONE 2026-06-09 (13/13 papers, 75 grile LIVE)
 
 **PIVOT 2026-06-09 (cerere user): output = GRILE, nu Simulări.** BAC RO n-are MCQ oficiale (e eseuri + întrebări deschise), DAR baremul oficial dă răspunsurile → fac grile **ancorate în barem**: întrebarea = cerința oficială reformulată MCQ, opțiunea corectă = răspunsul din barem (verbatim), distractori plauzibili. Fără generare AI de conținut, fără poartă AI-judge (corectitudinea e oficială). Script: `scripts/import-grile-bac-ro.mjs` (idempotent, tag `bac-grile:%`). Țintă: domeniul **`romana-ix-xii`** (slug `-ix-xii` → grupul **Bacalaureat** în dropdown-ul homepage + secțiunea Grile), subject „Română — Bacalaureat", source MANUAL. Textul-suport reutilizat verbatim din ExamPaper-ul deja importat (passage atașat pe grilă, drawer „📖 Vezi textul" + în demo-ul fără cont).
 - **ExamPapers BAC = isActive:false** (depozit text+barem pt grile, ASCUNSE din Simulări — reversibil dacă vrei și Simulări mai târziu). Demo quiz API + SubjectQuizDemo randează acum passage (commit `47776c4`).
 - **Etichetă dropdown** (amendament user 2026-06-09, commit `1495b48`): sub grup nu se repetă nivelul → „Română (30)" nu „Română — Bacalaureat"; idem EN VIII „Matematica"/„Română". Display-only (API câmp `display`), valoarea `subject` neatinsă.
-- **Grile DONE: 30 / 5 papers** (commit `3af78cb`): 2025 model + simulare + var-06 (Pillat) + var-07 (Pârvan) + var-08 (Crainic), câte 6 grile (A.1a/A.1b vocabular + A.2-A.5 comprehensiune, ancorate în barem). Passage inline în `import-grile-bac-ro.mjs` (self-contained, fără ExamPaper pt papers noi). Verificat: dropdown „Bacalaureat → Română (30)", quiz 5q cu passage + correctIndex valid.
-- **Per paper rămas (8)**: extrag subiect+barem (fitz) → adaug bloc {year,variant,passage,items[6]} în `import-grile-bac-ro.mjs` → validate → import prod → verific. **Rămase: 2024 model/simulare/var-02/var-04/var-09 · 2023 var-01/var-05/var-06.**
+- **TOATE 13 papers DONE (75 grile)** — commits `3af78cb`(2025×5=30) + `709d008`(2024×5=30) + `ac122ab`(2023×3=15). Verificat live: dropdown „Bacalaureat → Română (75)", quiz 5q cu passage + correctIndex valid.
+  - 2025: model (Rebreanu jurnal) · simulare (Doinaș) · var-06 (Carianopol/Pillat) · var-07 (Băjenaru/Pârvan) · var-08 (Crainic) — 6 grile/paper.
+  - 2024: model (Slavici) · simulare (Rebreanu Metropole) · var-02 (Dimisianu/Arghezi) · var-04 (Brătescu-Voinești) · var-09 (Mihail Șerban/Sadoveanu) — 6 grile/paper.
+  - 2023: var-01 (Maria Banuș) · var-05 (Marin Preda) · var-06 (Călinescu/Creangă) — 5 grile/paper (A.1 single secvență).
+  - Toate ancorate în barem (răspuns corect = răspunsul oficial; distractori plauzibili), passage inline self-contained, topic Vocabular/Înțelegerea textului.
+- **Extensie viitoare**: pentru materiale BAC noi (RO sau altă materie), adaugă bloc {year,variant,passage,items[]} în `import-grile-bac-ro.mjs` (RO) sau un script-frate (altă materie) → import → grile apar automat sub „Bacalaureat" în dropdown (slug domeniu `*-ix-xii`).
 
 ## [~] 🎓 BAC — Limba și literatura română (import text/barem, creat 2026-06-09)
 
