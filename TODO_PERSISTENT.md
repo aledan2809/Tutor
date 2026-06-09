@@ -15,6 +15,7 @@
   - 2023: var-01 (Maria Banuș) · var-05 (Marin Preda) · var-06 (Călinescu/Creangă) — 5 grile/paper (A.1 single secvență).
   - Toate ancorate în barem (răspuns corect = răspunsul oficial; distractori plauzibili), passage inline self-contained, topic Vocabular/Înțelegerea textului.
 - **Extensie viitoare**: pentru materiale BAC noi (RO sau altă materie), adaugă bloc {year,variant,passage,items[]} în `import-grile-bac-ro.mjs` (RO) sau un script-frate (altă materie) → import → grile apar automat sub „Bacalaureat" în dropdown (slug domeniu `*-ix-xii`).
+- **Categorisire pagini logate (DONE 2026-06-09, commit `02ba02e`)**: shared `src/lib/exam-level.ts` (slug/examType → EN_VIII/BAC). (a) **Grile picker** `/dashboard/practice` — dropdown „Materie" grupat pe nivel (optgroup), doar materii școlare cu grile (Aviation/Drept/Istorie/Geo/Bio/Chimie + materii goale ascunse). (b) **Simulări** `/dashboard/exam-bank` — nested **nivel → materie → an** (ex. Evaluarea Națională / Matematică / 2024). **ExamPapers BAC REACTIVATE** (`isActive:true`, reversez ascunderea din pivot — user vrea BAC și în Simulări categorizat). **GAP conținut**: doar 2 ExamPapers BAC complete (model+simulare 2025) → secțiunea Bacalaureat/Simulări arată 2 lucrări; celelalte 11 BAC există DOAR ca grile (passage inline, fără ExamPaper essay-complet). De decis dacă fac și restul de 11 ca simulări complete (eseu) — necesită extragere B/II/III + rubrici.
 
 ## [~] 🎓 BAC — Limba și literatura română (import text/barem, creat 2026-06-09)
 
