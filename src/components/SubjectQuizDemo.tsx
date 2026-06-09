@@ -14,6 +14,7 @@ type Q = {
   topic: string | null;
 };
 type Subject = { subject: string; count: number };
+type Group = { level: string; label: string; subjects: Subject[] };
 type Phase = "select" | "take" | "score";
 
 export default function SubjectQuizDemo({ locale }: { locale?: string }) {
@@ -52,7 +53,7 @@ export default function SubjectQuizDemo({ locale }: { locale?: string }) {
         answerAll: "Answer every question to see your result.",
       };
 
-  const [subjects, setSubjects] = useState<Subject[] | null>(null);
+  const [groups, setGroups] = useState<Group[] | null>(null);
   const [selected, setSelected] = useState("");
   const [phase, setPhase] = useState<Phase>("select");
   const [questions, setQuestions] = useState<Q[]>([]);
@@ -63,12 +64,13 @@ export default function SubjectQuizDemo({ locale }: { locale?: string }) {
     fetch("/api/public/practice/subjects")
       .then((r) => r.json())
       .then((d) => {
-        const s: Subject[] = d.subjects ?? [];
-        setSubjects(s);
+        const g: Group[] = d.groups ?? [];
+        setGroups(g);
         // Carousel: pick a random subject each load so a refresh shows variety.
-        if (s.length) setSelected(s[Math.floor(Math.random() * s.length)].subject);
+        const all = g.flatMap((x) => x.subjects);
+        if (all.length) setSelected(all[Math.floor(Math.random() * all.length)].subject);
       })
-      .catch(() => setSubjects([]));
+      .catch(() => setGroups([]));
   }, []);
 
   async function startQuiz() {
@@ -101,9 +103,9 @@ export default function SubjectQuizDemo({ locale }: { locale?: string }) {
     return (
       <div>
         <p className="mb-4 text-center text-sm font-semibold text-blue-300">{L.pick}</p>
-        {subjects === null ? (
+        {groups === null ? (
           <p className="text-center text-sm text-gray-400">{L.loadingSubjects}</p>
-        ) : subjects.length === 0 ? (
+        ) : groups.length === 0 ? (
           <p className="text-center text-sm text-gray-400">{L.none}</p>
         ) : (
           <div className="flex flex-col gap-3">
@@ -112,10 +114,14 @@ export default function SubjectQuizDemo({ locale }: { locale?: string }) {
               onChange={(e) => setSelected(e.target.value)}
               className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
             >
-              {subjects.map((s) => (
-                <option key={s.subject} value={s.subject}>
-                  {s.subject} ({s.count} {L.questions})
-                </option>
+              {groups.map((g) => (
+                <optgroup key={g.level} label={g.label}>
+                  {g.subjects.map((s) => (
+                    <option key={s.subject} value={s.subject}>
+                      {s.subject} ({s.count} {L.questions})
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
             <button
