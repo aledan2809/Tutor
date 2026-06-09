@@ -19,14 +19,14 @@ export async function GET(req: Request) {
   try {
     const rows = await prisma.question.findMany({
       where: { status: "PUBLISHED", type: "MULTIPLE_CHOICE", subject },
-      select: { content: true, options: true, correctAnswer: true, explanation: true, topic: true },
+      select: { content: true, options: true, correctAnswer: true, explanation: true, topic: true, passage: true },
     });
 
     const usable = rows
       .map((q) => {
         const options = Array.isArray(q.options) ? (q.options as string[]) : [];
         const correctIndex = options.findIndex((o) => strip(o) === strip(q.correctAnswer));
-        return { content: q.content, options, correctIndex, explanation: q.explanation, topic: q.topic };
+        return { content: q.content, options, correctIndex, explanation: q.explanation, topic: q.topic, passage: q.passage };
       })
       .filter((q) => q.correctIndex >= 0 && q.options.length >= 2);
 

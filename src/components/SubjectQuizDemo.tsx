@@ -12,6 +12,7 @@ type Q = {
   correctIndex: number;
   explanation: string | null;
   topic: string | null;
+  passage: string | null;
 };
 type Subject = { subject: string; count: number };
 type Group = { level: string; label: string; subjects: Subject[] };
@@ -35,6 +36,7 @@ export default function SubjectQuizDemo({ locale }: { locale?: string }) {
         retry: "Altă materie",
         cta: "Fă-ți cont gratuit ca să-ți salvezi progresul",
         answerAll: "Răspunde la toate întrebările ca să vezi rezultatul.",
+        seeText: "📖 Vezi textul",
       }
     : {
         pick: "Pick a subject and practice on real questions:",
@@ -51,6 +53,7 @@ export default function SubjectQuizDemo({ locale }: { locale?: string }) {
         retry: "Another subject",
         cta: "Create a free account to save your progress",
         answerAll: "Answer every question to see your result.",
+        seeText: "📖 See the text",
       };
 
   const [groups, setGroups] = useState<Group[] | null>(null);
@@ -198,6 +201,16 @@ export default function SubjectQuizDemo({ locale }: { locale?: string }) {
               <span className="mb-1 inline-block rounded bg-gray-800 px-1.5 py-0.5 text-[11px] text-gray-400">
                 {q.topic}
               </span>
+            )}
+            {q.passage && (
+              <details className="mb-2 rounded-md border border-gray-800 bg-gray-950/60">
+                <summary className="cursor-pointer px-2 py-1 text-xs font-medium text-blue-300">
+                  {L.seeText}
+                </summary>
+                <p className="max-h-48 overflow-y-auto whitespace-pre-line px-3 py-2 text-xs text-gray-300">
+                  {q.passage}
+                </p>
+              </details>
             )}
             <p className="text-sm font-medium text-white">
               {qi + 1}. {q.content}
