@@ -12,9 +12,10 @@
 
 **Infra (DONE 2026-06-09, commit `53a7665`)**: lista exam-bank (`/dashboard/exam-bank`) **grupată pe nivel** (Evaluarea Națională cl. VIII vs Bacalaureat IX–XII) ca să nu se amestece audiențele. Backup prod pre-campanie: `/root/backups/tutor-pre-bac-2026-06-09.dump`.
 
-**Queue (1/13 DONE)**:
+**Queue (2/13 DONE)**:
 - [x] **2025 Model** — DONE 2026-06-09 (`53a7665`): text jurnal Puia Florica Rebreanu + 8 itemi (A.1-A.5 + B + II Vlahuță „Sonet" + III eseu Sadoveanu). Verificat autentificat: listă grupată (secțiunea Bacalaureat) + take page randează passage+poem+itemi. ExamPaper 53→54.
-- [ ] 2025: simulare, var_06, var_07, var_08
+- [x] **2025 Simulare** — DONE 2026-06-09 (`84dfee0`): text Ștefan Aug. Doinaș „Liviu Rusu"/Evocări + 8 itemi (A.1-A.5 + B + II Adrian Maniu „Iarnă" + III eseu roman psihologic/al experienței). ExamPaper 54→55, verificat în DB (8 itemi) + listă.
+- [ ] 2025: var_06, var_07, var_08
 - [ ] 2024: model, simulare, var_02, var_04, var_09
 - [ ] 2023: var_01, var_05, var_06
 
