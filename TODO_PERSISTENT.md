@@ -4,6 +4,29 @@
 
 ---
 
+## [~] 🎓 BAC — Matematică → GRILE + SIMULĂRI (creat 2026-06-10)
+
+**3 programe naționale DISTINCTE, NICIODATĂ mixate** (cerere user): **M1 (Mate-Info)**, **M2 (Științele naturii)**, **M3 (Tehnologic)**. Fiecare program = domeniu propriu (`matematica-{m1,m2,m3}-ix-xii`, slug `-ix-xii` → grupul „Bacalaureat") + `subjectKey` propriu pentru Simulări (`matematica_m1/m2/m3` — altfel unique constraint `(examType,year,subjectKey,variant)` s-ar ciocni între programe) + tag grile propriu (`bac-grile-mate-m{n}:`).
+
+**Două surse per lucrare** (ca la RO):
+1. **GRILE** (Subiectul I, 6 itemi cu rezultat concret → MCQ ancorat în barem; corect = rezultatul oficial, distractori numerici plauzibili). `scripts/import-grile-bac-matematica-m1.mjs` (clonă per program). FĂRĂ AI, FĂRĂ poartă AI-judge.
+2. **SIMULĂRI** complete (I 6×5p SHORT+finalAnswer; II+III câte 2 probleme OPEN 15p cu rubric a/b/c). `scripts/import-exam-bac-matematica-m1-model.mjs`. examType="BAC", grade 12, 180min, 90+10.
+
+**Notație**: UI **fără KaTeX/MathJax** → Unicode inline (`√`, `²`, `∘`, `e^(−x)`, `log₂`, matrice `(0 0 1 / a −1 a / 1 0 0)`). fitz scoate matematica **dezordonată** → transcriere din **PDF randat la PNG citit vizual** (ground-truth), cross-check barem + calcul manual (vezi L10).
+
+**Domenii create**: `band-matematica-bac.mjs` (m1/m2/m3 idempotent). `matematica-ix-xii` vechi (gol) rămâne neutilizat.
+
+**PILOT M1 model 2024 DONE + LIVE + VERIFICAT 2026-06-10** (commit `03c0bef`):
+- 6 grile M1 + simulare (10 itemi, 90p) importate pe VPS2 (backup `/root/backups/tutor-pre-mate-m1-2026-06-10.dump`).
+- Verificat autentificat pe etutor.ro: homepage demo „Bacalaureat → Matematică M1 (Mate-Info) (6)"; Simulări grupate sub Bacalaureat/M1; take page randează I+II+III cu notația Unicode intactă (`log₂(x²+8)`, `x²+ax−a`, `det(A(1))`, `3∘5`, `x/(x²+1)²`, `e^(−x)`). M2/M3 goale → ascunse automat.
+
+**RĂMAS (după OK user pe pilot)**:
+- [ ] **Batch restul 13 lucrări M1** (2022/2023/2024 × 5 variante − 1 duplicat 2022_03): grile + simulări. Materiale `~/Downloads/Temp/BAC-Mate Mate-Info/`. Adaugă bloc/paper în scripturile M1 → import → verificare.
+- [ ] **M2 + M3** — când user încarcă materialele (`~/Downloads/Temp/BAC-<M2/M3>/`); clonă scripturile M1, domeniu+subjectKey+tag proprii.
+- Anti-pattern: NU genera AI când există barem (L07a/L09). NU mixa programele (M1/M2/M3 separate). NU transcrie din fitz dump pentru math (L10).
+
+---
+
 ## [x] 🎓 BAC — Limba și literatura română → GRILE — DONE 2026-06-09 (13/13 papers, 75 grile LIVE)
 
 **PIVOT 2026-06-09 (cerere user): output = GRILE, nu Simulări.** BAC RO n-are MCQ oficiale (e eseuri + întrebări deschise), DAR baremul oficial dă răspunsurile → fac grile **ancorate în barem**: întrebarea = cerința oficială reformulată MCQ, opțiunea corectă = răspunsul din barem (verbatim), distractori plauzibili. Fără generare AI de conținut, fără poartă AI-judge (corectitudinea e oficială). Script: `scripts/import-grile-bac-ro.mjs` (idempotent, tag `bac-grile:%`). Țintă: domeniul **`romana-ix-xii`** (slug `-ix-xii` → grupul **Bacalaureat** în dropdown-ul homepage + secțiunea Grile), subject „Română — Bacalaureat", source MANUAL. Textul-suport reutilizat verbatim din ExamPaper-ul deja importat (passage atașat pe grilă, drawer „📖 Vezi textul" + în demo-ul fără cont).
