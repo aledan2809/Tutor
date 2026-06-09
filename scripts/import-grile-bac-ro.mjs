@@ -269,6 +269,75 @@ const GRILE = [
         options: ["nerăbdarea", "bucuria", "admirația", "somnolența"], correct: "nerăbdarea" },
     ],
   },
+  {
+    year: 2023, variant: "var-01",
+    passage:
+      "București, joi 22 decembrie 1927\n" +
+      "E prima zi de vacanță! Ce cuvinte miraculoase pentru o elevă! Cu toate astea, nu mă bucur. Așa sunt eu; aștept, aștept cu nerăbdare un lucru și după ce l-am căpătat nu mai îmi face nicio plăcere. Așa a fost și cu vacanța. [...] Când mă gândesc că o să vină Bubi la București mi se face rău. O să-l am toată vacanța pe cap. N-ar trebui să scriu aceste cuvinte, căci e „un băiat foarte reușit” (cum îi zice mama). Știe mai multe limbi, face scrisori frumoase (cu stil), e primul în clasă, face sporturi, în fine, e un băiat model. Deși am scris în râs toate astea, văd că așa e. Nu știu de ce oare nu-l prea am eu la stomac. [...] În loc să spun ce am făcut azi, am înșirat vrute și nevrute. Așa, acuma să anunț marele eveniment care s-a săvârșit azi: am fost prima dată la patinaj. [...] până atunci m-am învârtit și am exersat la pian. [...] Orice aș face, tot timidă rămân cu străinii. În casă sunt obraznică și cu un străin mă fac mică, mică [...].\n" +
+      "[...] ne-am dus la Cișmigiu, la patinoarul din față. [...] Tineri, tinere, toți petrec, patinează, beau, mănâncă... Numai inima mea se strânge și pocăie sărăcuța... Și stau, tremur, mă uit cum se duce și vine lumea, numai eu nu patinez. De ce? Mi-e frică! Ah! Frica asta în fața oricărui lucru mă omoară. [...]\n" +
+      "După ce-am mers puțin pe gheață, m-am dus iar în sală. Și iar tremuram de frig și iar mă simțeam oropsită, tare oropsită. Trecea atâta lume prin fața mea și toată mulțimea aceea era fericită... sau părea, cel puțin. [...] Stam și mă gândeam: sunt fată sportivă, patinez, joc tenis, am să ajung o fată modernă! Eu? Nu, niciodată, simt că nu-s făcută eu pentru asta. [...] fiecare trebuie să meargă cum îi dictează mediul în care trăiește, nu după înclinările sale.\n" +
+      "(Maria Banuș, „Însemnările mele”)",
+    items: [
+      { label: "A.1", topic: VOCAB, content: "Sensul din text al secvenței „vrute și nevrute” (în „am înșirat vrute și nevrute”) este:",
+        options: ["fleacuri, nimicuri", "lucruri importante", "secrete", "planuri de viitor"], correct: "fleacuri, nimicuri" },
+      { label: "A.2", topic: TEXT, content: "Instrumentul muzical la care cânta Maria Banuș când era elevă, conform textului, este:",
+        options: ["pianul", "vioara", "chitara", "flautul"], correct: "pianul" },
+      { label: "A.3", topic: TEXT, content: "Atitudinea Mariei Banuș față de Bubi este una de:",
+        options: ["respingere", "admirație", "indiferență", "recunoștință"], correct: "respingere" },
+      { label: "A.4", topic: TEXT, content: "Motivul pentru care, aflată la patinaj, eleva Maria Banuș se simte diferită de ceilalți este:",
+        options: ["teama și sentimentul că ceilalți sunt mai fericiți decât ea", "lipsa patinelor", "frigul de afară", "absența prietenei sale"], correct: "teama și sentimentul că ceilalți sunt mai fericiți decât ea" },
+      { label: "A.5", topic: TEXT, content: "O trăsătură morală a Mariei Banuș, așa cum reiese din primul paragraf al textului, este:",
+        options: ["emotivitatea", "încrederea în sine", "vanitatea", "indiferența"], correct: "emotivitatea" },
+    ],
+  },
+  {
+    year: 2023, variant: "var-05",
+    passage:
+      "— Întrebările ce urmează vor să scoată în lumină secretul tinereții fără de bătrânețe, cuprinse deopotrivă în literatura pe care o scrieți. Care este cel mai vechi început?\n" +
+      "— În 1942, spre primăvară, am cunoscut redacția literară a Timpului. Era condusă de M. R. Paraschivescu. Dar nu mai țin minte cum am ajuns la Timpul. Țin minte cum am ajuns să pun un picior pe țărmul literaturii. Prin legătură de generație. L-am cunoscut pe Geo Dumitrescu. [...] Mi-a căzut în mână Albatros. [...] „La ăsta mă duc”, mi-am zis. Am citit adresa pe coperta revistei și m-am înființat pe Calea Griviței, numărul 257. Ei bine: la postul lui se găsea un băiat ca mine, un mărunțel foarte vioi [...].\n" +
+      "— Câți ani aveați?\n" +
+      "— 18 și unul, și altul.\n" +
+      "— Se putea scoate revistă la 18 ani?\n" +
+      "— Uite că se putea. Geo era acolo, afișase Albatros pe ușa odăii. O odaie de patru pe patru [...]. Și asta era și casa lui. Cum s-ar zice, se afla la domiciliu și la datorie în același timp. [...]\n" +
+      "— Cum v-a primit Geo Dumitrescu?\n" +
+      "— Am intrat, am discutat c-o fi, c-o păți. Cei de aceeași generație au mereu ce vorbi. Despre literatură, firește. Iar pe urmă nu mai avea să ne despartă nimic. [...] această luminiță care s-a aprins pe Calea Griviței a rămas mereu aprinsă [...].\n" +
+      "— Pentru o mare parte din cititori, afirmațiile dumneavoastră vor fi descoperiri.\n" +
+      "— Sunt și pentru mine unele dintre ele, pe măsură ce mi le împrospătez. Țin minte că atunci, din tipografie, unde eram corector, am trimis la un moment dat o bucată literară intitulată Pârlitul. [...] redactorul paginii [...], anume M. R. Paraschivescu [...], a scos din buzunar un manuscris: „să vă citesc ceva formidabil!” a anunțat el. Când colo, aud că titlul lucrării era Pârlitul.\n" +
+      "(Interviu cu Marin Preda, realizat de Sânziana Pop, „Luceafărul”, 1974)",
+    items: [
+      { label: "A.1", topic: VOCAB, content: "Sensul din text al secvenței „țin minte” este:",
+        options: ["îmi amintesc", "uit", "înțeleg", "observ"], correct: "îmi amintesc" },
+      { label: "A.2", topic: TEXT, content: "Revista al cărei sediu se află în locuința lui Geo Dumitrescu, conform textului, este:",
+        options: ["Albatros", "Timpul", "Luceafărul", "Contemporanul"], correct: "Albatros" },
+      { label: "A.3", topic: TEXT, content: "Un efect pe care îl are asupra lui Marin Preda dialogul cu Sânziana Pop este:",
+        options: ["împrospătarea memoriei, revelația unor amintiri", "plictiseala", "supărarea", "oboseala"], correct: "împrospătarea memoriei, revelația unor amintiri" },
+      { label: "A.4", topic: TEXT, content: "Marin Preda este surprins de titlul textului pe care vrea să îl citească M. R. Paraschivescu pentru că:",
+        options: ["acesta coincide cu titlul propriului text trimis la redacție („Pârlitul”)", "este un titlu foarte lung", "este scris greșit", "nu îi place deloc"], correct: "acesta coincide cu titlul propriului text trimis la redacție („Pârlitul”)" },
+      { label: "A.5", topic: TEXT, content: "Atitudinea lui Marin Preda față de Geo Dumitrescu, așa cum reiese din text, este una de:",
+        options: ["admirație", "dispreț", "invidie", "indiferență"], correct: "admirație" },
+    ],
+  },
+  {
+    year: 2023, variant: "var-06",
+    passage:
+      "Ninsese și omătul era „de o palmă domnească” de gros. Dis-de-dimineață, pe la orele șase și jumătate, Creangă privi din arhondaricul mănăstirii un curcubeu ivit la răsărit, semn, poate, pentru el, de schimbări în bine. E de bănuit că o superstiție caracteristică bolnavilor cuprinsese sufletul povestitorului, fiindcă de aici încolo el pare a urmări de aproape starea lui Eminescu. Va fi avut credința că, dacă poetul învinge boala [...], ar fi biruit-o și el.\n" +
+      "Eminescu plecă deocamdată la Botoșani, la Harieta, și Creangă rămase singur. [...] începu să se tragă spre locurile copilăriei. Presimțea că n-are s-o mai ducă mult și, cu instinctul oamenilor simpli, voia să mai guste o dată din bucuriile vieții de sat. [...] În toamnă se duse pe la Târgu-Neamț. Zicea cum că el nu mai are mult de trăit și mai vrea să vadă o dată locurile copilăriei și neamurile. [...] scoase un exemplar din Povățuitor [...] și-l dărui școlii unde învățase el împreună cu Conta [...].\n" +
+      "Ruda cu care se-nvoia mai mult era cumintele și acum bătrânul popă Gheorghe. [...] „— Moșule – zise el către părintele Gheorghe – hai la Humulești, să vedem pe părintele Teofan Focșa!” [...]\n" +
+      "În 2 septembrie [...] Creangă văzu pe cer la răsărit un alt curcubeu, care-i dădu poate o nouă alinare. [...] „Bădiță Gheorghe dragă [...] mă aflu acum puțin mai binișor, dar tot îmi tremură carnea pe mine și sunt trist și descurajat din această pricină.” Din trebuința de a se agăța de ceva în viață devenise mai afectuos [...]. Nici peste vară nu se mai duse la Slănic [...], deși abecedarul lui stă să iasă în cea de a douăzeci și una ediție, fiind el totodată institutor cu patru gradații, debitant de tutun și proprietar asociat de tipografie. [...]\n" +
+      "(G. Călinescu, „Ion Creangă. Viața și opera”) [arhondaric = aripă a unei mănăstiri rezervată oaspeților; Povățuitor = carte didactică a lui Ion Creangă; debitant = proprietar al unei tutungerii]",
+    items: [
+      { label: "A.1", topic: VOCAB, content: "Sensul din text al secvenței „de bună seamă” este:",
+        options: ["desigur", "poate", "rareori", "niciodată"], correct: "desigur" },
+      { label: "A.2", topic: TEXT, content: "Două dintre sursele de venit ale lui Ion Creangă, conform textului, sunt:",
+        options: ["activitatea de institutor și comerțul (tutungerie / tipografie)", "agricultura și pescuitul", "pictura și muzica", "medicina și dreptul"], correct: "activitatea de institutor și comerțul (tutungerie / tipografie)" },
+      { label: "A.3", topic: TEXT, content: "O posibilă semnificație a curcubeului pentru Ion Creangă, conform textului, este:",
+        options: ["speranța unor schimbări în bine", "teama de moarte", "tristețea", "mânia"], correct: "speranța unor schimbări în bine" },
+      { label: "A.4", topic: TEXT, content: "Un motiv pentru care Ion Creangă călătorește la Târgu-Neamț este:",
+        options: ["revederea locurilor copilăriei și a rudelor", "căutarea unui doctor", "deschiderea unei tipografii", "vânzarea de cărți"], correct: "revederea locurilor copilăriei și a rudelor" },
+      { label: "A.5", topic: TEXT, content: "O trăsătură morală a lui Ion Creangă, așa cum reiese din text, este:",
+        options: ["sensibilitatea (fire superstițioasă)", "cruzimea", "aroganța", "indiferența"], correct: "sensibilitatea (fire superstițioasă)" },
+    ],
+  },
 ];
 
 function validate() {
