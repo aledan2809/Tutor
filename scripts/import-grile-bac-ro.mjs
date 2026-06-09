@@ -144,6 +144,131 @@ const GRILE = [
         options: ["hărnicia", "lenea", "egoismul", "lăcomia"], correct: "hărnicia" },
     ],
   },
+  {
+    year: 2024, variant: "model",
+    passage:
+      "Eu m-am simțit viața mea întreagă mai presus de toate dascăl. A le da altora învățături a fost pentru mine totdeauna o mulțumire, și cele mai vii mulțumiri le-am avut stând de vorbă cu oameni prin care mă puteam dumiri ori plimbându-mă cu elevii mei. Mai ales ca dascăl mi-am câștigat și pânea de toate zilele, și nu-mi aduc aminte să mi se fi-ntâmplat vreodată ca să fiu nemulțumit de-nvățăturile ce-am dat.\n" +
+      "Nu tot așa ca ziarist.\n" +
+      "Fiind adecă vorba de interesele obștești, îmi dădeam totdeauna silința să spun ceea ce simt, gândesc și vor cei mulți, și nu o dată mi se-ntâmpla să stau la-ndoială dacă nu cumva greșesc. Abia târziu de tot am ajuns să mă-ncredințez că sunt puțini oamenii care au convingeri. Cei mai mulți nici nu știu ce va să zică a fi convins. Ei au numai păreri, pe care le schimbă după împrejurări și după impulsiuni momentane.\n" +
+      "Partea individuală deci în scrisa mea ca ziarist erau îndrumările pe care le dădeam, iar aceste adeseori nu se potriveau cu felul de a gândi al celor mai mulți.\n" +
+      "Cu atât mai vârtos ieșea la iveală această râvnă dăscălească în scrierile mele literare.\n" +
+      "Nu puteam să mă-mpac cu gândul că lectura de orișice fel e numai o plăcută pierdere de vreme. În gândul meu, rostul scrierii a fost totdeauna îndrumarea spre o viețuire potrivită cu firea omenească.\n" +
+      "Din onorariul pe care-l aveam la Sibiu ca director al ziarului Tribuna ori din cel ce mi se dedea în urmă la București ca director al ziarului Minerva nu aveam să trăiesc. Cu atât mai puțin aș fi putut să trăiesc din onorariile ce am primit pentru scrierile mele literare. [...] Scriam deci pentru mulțumirea mea sufletească și-mi era destul că le făceam prin aceasta plăcere unora dintre prietenii și binevoitorii mei.\n" +
+      "Scriam pentru că nu eram în stare să mă stăpânesc. [...] Așa se adeverea în ceea ce mă privește că lucrarea literară se desfășoară sub înrâurirea publicului cititor.\n" +
+      "La Viena și la Iași am scris sub înrâurirea lui Eminescu, în primii ani ai petrecerii mele la București, sub a lui Titu Maiorescu, iar în urmă nu am publicat decât ceea ce am citit mai nainte soției mele. [...]\n" +
+      "(Ioan Slavici, „Scrietor”, în volumul „Amintiri”)",
+    items: [
+      { label: "A.1a", topic: VOCAB, content: "Sensul din text al cuvântului „totdeauna” este:",
+        options: ["mereu", "niciodată", "uneori", "îndată"], correct: "mereu" },
+      { label: "A.1b", topic: VOCAB, content: "Sensul din text al secvenței „nu eram în stare” (în „nu eram în stare să mă stăpânesc”) este:",
+        options: ["nu puteam", "nu voiam", "nu știam", "nu îndrăzneam"], correct: "nu puteam" },
+      { label: "A.2", topic: TEXT, content: "Publicațiile pe care le-a condus Ioan Slavici, conform textului, sunt:",
+        options: ["Tribuna și Minerva", "Tribuna și Convorbiri literare", "Minerva și Gândirea", "Viața românească și Tribuna"], correct: "Tribuna și Minerva" },
+      { label: "A.3", topic: TEXT, content: "O personalitate culturală sub a cărei înrâurire a scris Ioan Slavici la Viena și la Iași este:",
+        options: ["Eminescu", "Caragiale", "Creangă", "Coșbuc"], correct: "Eminescu" },
+      { label: "A.4", topic: TEXT, content: "Un motiv pentru care Ioan Slavici se consideră împlinit mai ales prin activitatea didactică este:",
+        options: ["are ocazia de a le oferi altora învățături", "câștigă foarte mulți bani", "devine celebru", "evită munca de ziarist"], correct: "are ocazia de a le oferi altora învățături" },
+      { label: "A.5", topic: TEXT, content: "O trăsătură a lui Ioan Slavici, așa cum reiese din text, este:",
+        options: ["sinceritatea", "trufia", "indiferența", "superficialitatea"], correct: "sinceritatea" },
+    ],
+  },
+  {
+    year: 2024, variant: "simulare",
+    passage:
+      "În fiecare dimineață, când ies, oricât aș fi de grăbit, mă oprește un răstimp librăria de alături. E un local modest, ca mai toate librăriile pariziene, cu vitrinele întinse afară, pe tejghele ieftine, până în mijlocul trotuarului. Farmecul ei, și al tuturor, tocmai asta îl face. Astfel poate întâmpina și pe trecătorii cei mai indiferenți. Jumătate din deverul cotidian de-aici iese, din vânzările de pe trotuar oamenilor grăbiți care altminteri n-ar fi cumpărat. Printre tejghele mișună veșnic curioșii. Cei ce zăbovesc mai îndelung sunt studenți care n-au mijloace să cumpere și care citesc aici cartea pe care le-o poftește inima. Și mai sunt alți însetați de carte, tineri și bătrâni, săraci care-și hrănesc astfel sufletul cu lectura ce le trebuie. [...]\n" +
+      "Cartierul Latin e plin de librării, trotuarele lui oferă cărți la fiece pas. [...] Parcă e o cetate a cărții subt oblăduirea Institutului, a Sorbonei și a celorlalte uzine de cultură. [...]\n" +
+      "Nicăieri în lume cartea nu e mai prețuită ca în Franța. În alte țări poate să se citească mai mult, să se tipărească mai multe cărți. Aici, cartea e o realitate vie, un factor social cu o influență covârșitoare.\n" +
+      "Numai la Paris cartea devine un eveniment monden care interesează nu doar cercurile literare, ci și saloanele, pe oamenii de stat, colectivitățile. [...] Mândria presei franceze, de orice nuanță, continuă a fi rubrica literară, care nu e întâmplătoare, ci organică. [...] Adevărat că acolo cititorii se interesează de faptele literare, ca și de cele diverse, și le reclamă, pe când ziarele noastre au scuza că rubrica literară e loc mort, fiindcă nimeni, afară de scriitorii înșiși, ba uneori nici chiar ei, nu se pasionează de soarta ei, pe când pentru sporturi, de pildă, se manifestă un interes tot mai viu, ceea ce justifică permanentizarea și sporirea cronicii respective. [...] Ziaristul francez se consideră scriitor înainte de toate [...]. Scriitorii înșiși îi consideră drept colegi adevărați pe ziariști și nu disprețuiesc suveran scrisul destinat să trăiască o singură zi. Asemenea cordialitate de relații nu se mai întâlnește aiurea.\n" +
+      "(Liviu Rebreanu, „Metropole”) [dever = volumul vânzărilor pe o perioadă dată; a tăia = a desface filele unei cărți necitite; buchinist = vânzător de cărți vechi]",
+    items: [
+      { label: "A.1a", topic: VOCAB, content: "Sensul din text al cuvântului „sforțări” este:",
+        options: ["eforturi", "renunțări", "ezitări", "plăceri"], correct: "eforturi" },
+      { label: "A.1b", topic: VOCAB, content: "Sensul din text al secvenței „la fiece pas” (în „trotuarele lui oferă cărți la fiece pas”) este:",
+        options: ["pretutindeni", "rareori", "cu greutate", "la întâmplare"], correct: "pretutindeni" },
+      { label: "A.2", topic: TEXT, content: "Soluția găsită de persoanele interesate de lectură care nu au bani să cumpere cărți este, conform textului:",
+        options: ["lectura în librărie, pe trotuar", "împrumutul de la bibliotecă", "copierea cărților de mână", "renunțarea la lectură"], correct: "lectura în librărie, pe trotuar" },
+      { label: "A.3", topic: TEXT, content: "Un efect al creșterii interesului față de sport în spațiul românesc, conform textului, este:",
+        options: ["dezvoltarea jurnalismului sportiv", "dispariția rubricii literare", "scăderea vânzărilor de cărți", "creșterea numărului de librării"], correct: "dezvoltarea jurnalismului sportiv" },
+      { label: "A.4", topic: TEXT, content: "Un motiv pentru care tejghelele librăriilor din Paris sunt amplasate până în mijlocul trotuarului este:",
+        options: ["pentru a atrage atenția trecătorilor", "din lipsă de spațiu în interior", "pentru a feri cărțile de soare", "pentru a respecta o lege locală"], correct: "pentru a atrage atenția trecătorilor" },
+      { label: "A.5", topic: TEXT, content: "Relația dintre jurnaliștii francezi și scriitori, așa cum reiese din text, este una de:",
+        options: ["colegialitate și respect", "rivalitate", "indiferență", "dispreț"], correct: "colegialitate și respect" },
+    ],
+  },
+  {
+    year: 2024, variant: "var-02",
+    passage:
+      "Eram, în 1960, tânăr redactor la Gazeta literară, când colega mea Andriana Fianu mi-a propus pe neașteptate, într-o după-amiază, s-o însoțesc acasă la Tudor Arghezi, de unde urma să luăm un text pe care poetul îl pregătise pentru revistă. [...]\n" +
+      "I-am fost recunoscător Andrianei Fianu pentru ideea de-a mă lua cu ea la Arghezi, asta în primul moment, după care m-au copleșit emoțiile și mai c-aș fi renunțat. [...] Ce era să fac? Am urmat-o fără murmur, pe drum tot gândindu-mă cum să mă comport când mă voi afla în fața marelui om. Voi fi ochi și urechi, dar mut, am decis până la urmă. [...] Înainte de-a ne urca în troleibuz, în Piața Romană, am cumpărat flori, căci ne aflam în preajma zilei de 21 mai, când era aniversarea lui Arghezi. Și nu o aniversare oarecare, poetul împlinind chiar atunci optzeci de ani.\n" +
+      "În epoca de care vorbesc, familia Arghezi ocupa un apartament la parterul unui mic bloc de pe Bulevardul Aviatorilor [...]. Am sunat, cineva ne-a deschis, conducându-ne într-un living cu ferestre mari, unde, după ce am așteptat câteva minute, a intrat poetul, neînsoțit. Ce m-a izbit îndată au fost pașii repezi făcuți de Arghezi, siguranța mișcărilor de om în toată puterea. Imaginea contrasta frapant cu aceea a neajutorării fizice pe care-o aveam despre poet de la cele câteva apariții în săli publice. Acolo pășea încet, ezitant, sprijinit în baston [...]. Aici, în schimb, în spațiul intim, Arghezi se mișca dezinvolt, fără baston [...].\n" +
+      "De ce mi-era teamă, n-am scăpat. Adi m-a prezentat [...], dar a adăugat, rea inspirație, că sunt critic literar [...]. Arghezi a reacționat, săgetându-mă cu o întrebare care m-a descumpănit: „Și ce vrei dumneata să critici?”. M-am pierdut, cred că roșisem, după care totuși am încercat să articulez un răspuns [...]. Că eu de fapt nu vreau să critic ceva sau pe cineva, că mai mult decât să scriu îmi place să citesc [...]. „Așa mai merge”, mi-a oprit Arghezi chinuita perorație, schițând parcă și un zâmbet [...].\n" +
+      "(Gabriel Dimisianu, „O vizită la Tudor Arghezi”, în vol. „Amintiri și portrete literare”) [Mițura și Baruțu = fiica și fiul lui Tudor Arghezi; perorație = vorbire însuflețită, care caută să convingă]",
+    items: [
+      { label: "A.1a", topic: VOCAB, content: "Sensul din text al secvenței „pe neașteptate” este:",
+        options: ["deodată", "treptat", "cu greu", "în glumă"], correct: "deodată" },
+      { label: "A.1b", topic: VOCAB, content: "Sensul din text al cuvântului „împrejurare” este:",
+        options: ["circumstanță", "vecinătate", "explicație", "amintire"], correct: "circumstanță" },
+      { label: "A.2", topic: TEXT, content: "Revista la care lucrează Andriana Fianu, conform textului, este:",
+        options: ["Gazeta literară", "Viața românească", "Contemporanul", "România literară"], correct: "Gazeta literară" },
+      { label: "A.3", topic: TEXT, content: "Modul în care Gabriel Dimisianu își propune să se comporte în timpul vizitei la Arghezi este:",
+        options: ["să rămână tăcut, doar să asculte și să observe", "să poarte o discuție aprinsă", "să-i critice opera", "să-i ceară un autograf"], correct: "să rămână tăcut, doar să asculte și să observe" },
+      { label: "A.4", topic: TEXT, content: "Motivul pentru care Gabriel Dimisianu este surprins când Tudor Arghezi intră în cameră este:",
+        options: ["vioiciunea și siguranța mișcărilor poetului", "vârsta înaintată a poetului", "îmbrăcămintea elegantă a poetului", "prezența familiei poetului"], correct: "vioiciunea și siguranța mișcărilor poetului" },
+      { label: "A.5", topic: TEXT, content: "O trăsătură morală a lui Gabriel Dimisianu, care se desprinde din text, este:",
+        options: ["emotivitatea", "aroganța", "nepăsarea", "cruzimea"], correct: "emotivitatea" },
+    ],
+  },
+  {
+    year: 2024, variant: "var-04",
+    passage:
+      "Ne alăturăm cu însuflețire la inițiativa luată de scriitori, în frunte cu președintele Liviu Rebreanu, pentru a sărbători pe I. Al. Brătescu-Voinești cu prilejul împlinirii vârstei de 60 de ani. Această săptămână de ovații nu-i numai a autorului intrat în istorie, ea reprezintă pentru breasla scriitoricească o ridicare în conștiința profesională [...].\n" +
+      "L-am găsit pe prozator într-o cameră din locuința sa amenajată în atelier, lucrând la un banc de tâmplărie. [...]\n" +
+      "— Deși știu că fugiți de interviuri, v-aș ruga, din partea cititorilor Vieții literare, să ne acordați câteva cuvinte în această săptămână consacrată dvs.\n" +
+      "— Simt o adâncă jenă. Îți mărturisesc sincer, îmi pare rău că se începe cu mine. Aș fi luat parte bucuros, împreună cu dvs., la această serbare, dar să fi fost vorba de altul. Uite, mă gândesc la ceilalți din generația mea, care ar fi meritat mai mult ca mine această onoare: Caragiale, Vlahuță etc. [...]\n" +
+      "Este puternică impresia când scriitorul, care este o fabrică de bucurii pentru alții, simte el însuși întorcându-se dintre oameni recunoștința, răsplătindu-i durerile măcar la bătrânețe. [...]\n" +
+      "Dar pentru că veni vorba de preferință, îți voi spune câteva cuvinte despre pasiunea pe care mi-o cunoști: pescuitul. [...] Stând nemișcat cu undița pe malul apei, gândurile curg la vale în voie și sufletul ți se purifică. [...]\n" +
+      "Când nu plec la pescuit, divertismentul de la munca intelectuală mi-l procur cu lucrul tâmplăriei. Aici găsesc ritmul sufletesc care-mi trebuie pentru scris. [...] Pasiunea florilor am moștenit-o de la tata, mic boiernaș la Târgoviște. [...] Florile oferă o sursă perpetuă de fericire. Idealul meu este să mă retrag undeva la țară. [...]\n" +
+      "(I. Valerian, interviu cu I. Al. Brătescu-Voinești, în vol. „Cu scriitorii prin veac”)",
+    items: [
+      { label: "A.1a", topic: VOCAB, content: "Sensul din text al cuvântului „pildă” este:",
+        options: ["exemplu", "poveste", "greșeală", "pedeapsă"], correct: "exemplu" },
+      { label: "A.1b", topic: VOCAB, content: "Sensul din text al secvenței „din când în când” este:",
+        options: ["uneori", "mereu", "niciodată", "imediat"], correct: "uneori" },
+      { label: "A.2", topic: TEXT, content: "Durata evenimentului în cadrul căruia a fost sărbătorit I. Al. Brătescu-Voinești este, conform textului:",
+        options: ["o săptămână", "o zi", "o lună", "un an"], correct: "o săptămână" },
+      { label: "A.3", topic: TEXT, content: "Un rol pe care tâmplăria îl are în viața lui I. Al. Brătescu-Voinești este:",
+        options: ["de relaxare / divertisment de la munca intelectuală", "de sursă principală de venit", "de obligație impusă de familie", "de pregătire pentru o expoziție"], correct: "de relaxare / divertisment de la munca intelectuală" },
+      { label: "A.4", topic: TEXT, content: "Un motiv pentru care I. Al. Brătescu-Voinești consideră potrivită sărbătorirea scriitorilor este:",
+        options: ["recunoașterea rolului pe care scriitorii îl au în societate", "creșterea vânzărilor de cărți", "obținerea de premii financiare", "promovarea generației tinere"], correct: "recunoașterea rolului pe care scriitorii îl au în societate" },
+      { label: "A.5", topic: TEXT, content: "O trăsătură morală a lui I. Al. Brătescu-Voinești, așa cum reiese din text, este:",
+        options: ["modestia", "vanitatea", "lăcomia", "indiferența"], correct: "modestia" },
+    ],
+  },
+  {
+    year: 2024, variant: "var-09",
+    passage:
+      "Lui Sadoveanu nu-i plăceau oamenii care vorbeau mult. Îi suporta cât îi suporta înverșunat în tăcere și dacă aceștia, la toate semnele lui – tăcere, uitatul pe fereastră, la ceas –, nu-și dădeau seama că au întrecut măsura, le-o spunea în față. Am asistat o dată la o scenă de acest fel plină de pitoresc.\n" +
+      "Într-o zi, aflându-mă la Sadoveanu [...] a venit la dânsul un cunoscut publicist, celebru prin performanțele lui în vorbire. Era în stare să vorbească, fără să obosească, douăzeci și patru de ore în șir, ba poate și mai mult. Sărea de la un subiect la altul cu ușurința cu care o veveriță sare de pe o creangă pe alta. Era un om foarte deștept și foarte cult, dar suferea de boala asta – vorbea prea mult și într-un ritm obositor pentru cel care-l asculta. [...]\n" +
+      "Intrând în salonul vast [...], noul oaspete, mic și pirpiriu, se afundă într-un fotoliu și începu să vorbească… Și a vorbit… Și a vorbit… [...]\n" +
+      "La început, vreo jumătate de ceas, Sadoveanu l-a ascultat atent, în tăcere, apoi și-a trimis privirile afară pe fereastră, apoi s-a uitat la ceas, o dată, de două ori. Constantin Mitru s-a ridicat de câteva ori, a răspuns la telefon, a ieșit de câteva ori pe ușă [...]. Când s-a întors, omul nostru tot mai vorbea…\n" +
+      "Dar, cum toate au o limită, a avut-o și această răbdare. La un moment dat [...], Sadoveanu a ridicat mâna și l-a oprit zicându-i: „Gata! Lasă-mă! M-ai obosit!”.\n" +
+      "Firul vorbirii s-a rupt brusc. [...] I-a zis lui Sadoveanu, fără să se arate supărat: „Dacă v-am obosit, plec… — Poți să mai șezi, da' vorbește mai puțin și în alt tempo că m-ai obosit... — Nu, lasă, maestre, plec... [...]”. „Bine, să mai vii!”, i-a zis Sadoveanu zâmbind, întinzându-i mâna cu prietenie.\n" +
+      "(Mihail Șerban, „Amintiri”)",
+    items: [
+      { label: "A.1a", topic: VOCAB, content: "Sensul din text al secvenței „în stare” (în „Era în stare să vorbească [...] douăzeci și patru de ore”) este:",
+        options: ["capabil", "obligat", "dornic", "nevoit"], correct: "capabil" },
+      { label: "A.1b", topic: VOCAB, content: "Sensul din text al cuvântului „oaspete” este:",
+        options: ["musafir", "gazdă", "vecin", "prieten"], correct: "musafir" },
+      { label: "A.2", topic: TEXT, content: "Două indicii prin care Sadoveanu le sugera celorlalți că vorbesc prea mult sunt, conform textului:",
+        options: ["privea pe fereastră și se uita la ceas", "tușea și se ridica în picioare", "ofta și închidea ochii", "ieșea din cameră și telefona"], correct: "privea pe fereastră și se uita la ceas" },
+      { label: "A.3", topic: TEXT, content: "Atitudinea lui Sadoveanu în momentul plecării publicistului este una de:",
+        options: ["bunăvoință", "furie", "dispreț", "regret"], correct: "bunăvoință" },
+      { label: "A.4", topic: TEXT, content: "Motivul pentru care publicistul se oprește brusc din vorbit este:",
+        options: ["intervenția lui Sadoveanu", "oboseala proprie", "un telefon primit", "plecarea lui Constantin Mitru"], correct: "intervenția lui Sadoveanu" },
+      { label: "A.5", topic: TEXT, content: "O stare manifestată de Constantin Mitru în timp ce vorbește prietenul lui Sadoveanu este:",
+        options: ["nerăbdarea", "bucuria", "admirația", "somnolența"], correct: "nerăbdarea" },
+    ],
+  },
 ];
 
 function validate() {
