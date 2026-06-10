@@ -19,6 +19,71 @@ const MODE = process.argv.includes("--validate") ? "validate" : process.argv.inc
 
 const PAPERS = [
   {
+    source: "BAC 2022 Model — Matematică M_mate-info (CNPEE)",
+    examType: "BAC", year: 2022, subjectKey: "matematica_m1", subjectName: "Matematică M1 (Mate-Info)",
+    grade: 12, variant: "model", maxScore: 100, officeBonus: 10, timeLimit: 180, language: "ro",
+    sourceUrl: "https://subiecte.edu.ro/2022/bacalaureat/", license: "edu.ro public (CNPEE)", passages: [],
+    items: [
+      // ── SUBIECTUL I (30p) — 6 itemi × 5p ──
+      { section: "Subiectul I", label: "1", type: "SHORT", points: 5, autoGradable: false, topic: "Progresii geometrice",
+        content: "Arătați că numerele 6−3√3, √3 și 2+√3 sunt termeni consecutivi ai unei progresii geometrice.",
+        finalAnswer: "(√3)²=(6−3√3)(2+√3)=3",
+        rubric: [{ label: "barem", points: 5, answer: "(6−3√3)(2+√3)=12+6√3−6√3−9=3=(√3)², deci numerele 6−3√3, √3 și 2+√3 sunt termeni consecutivi ai unei progresii geometrice." }] },
+      { section: "Subiectul I", label: "2", type: "SHORT", points: 5, autoGradable: false, topic: "Funcția de gradul al II-lea. Tangență",
+        content: "Se consideră funcția f:ℝ→ℝ, f(x)=x²+mx+1, unde m este număr real. Determinați numerele reale m pentru care graficul funcției f este tangent axei Ox.",
+        finalAnswer: "m∈{−2, 2}",
+        rubric: [{ label: "barem", points: 5, answer: "Axa Ox este tangentă graficului funcției f ⟺ Δ=0 ⟺ m²−4=0, de unde obținem m=−2 sau m=2." }] },
+      { section: "Subiectul I", label: "3", type: "SHORT", points: 5, autoGradable: false, topic: "Ecuații exponențiale",
+        content: "Rezolvați în mulțimea numerelor reale ecuația 5^(x+2) − 5^x = 24.",
+        finalAnswer: "x=0",
+        rubric: [{ label: "barem", points: 5, answer: "5^(x+2)−5^x=24 ⟺ 25·5^x−5^x=24 ⟺ 24·5^x=24, deci 5^x=1, de unde obținem x=0." }] },
+      { section: "Subiectul I", label: "4", type: "SHORT", points: 5, autoGradable: false, topic: "Probabilități",
+        content: "Calculați probabilitatea ca, alegând un număr din mulțimea numerelor naturale de două cifre distincte, acesta să aibă cifra zecilor multiplu de 3.",
+        finalAnswer: "1/3",
+        rubric: [{ label: "barem", points: 5, answer: "Mulțimea numerelor naturale de două cifre distincte are 81 de elemente, deci sunt 81 de cazuri posibile. Cifra zecilor multiplu de 3 înseamnă cifra zecilor ∈{3,6,9}; pentru fiecare, cifra unităților are 9 valori (distinctă de cea a zecilor), deci 3·9=27 de cazuri favorabile. p=27/81=1/3." }] },
+      { section: "Subiectul I", label: "5", type: "SHORT", points: 5, autoGradable: false, topic: "Vectori",
+        content: "Se consideră triunghiul ABC, punctul D mijlocul laturii AC și punctul M astfel încât MA⃗+2MB⃗+3MC⃗=0⃗. Arătați că dreptele MD și AB sunt paralele.",
+        finalAnswer: "MD⃗=−(1/3)·AB⃗, deci MD ∥ AB",
+        rubric: [{ label: "barem", points: 5, answer: "MA⃗+2MB⃗+3MC⃗=0⃗ ⟺ 3(MA⃗+MC⃗)+2AB⃗=0⃗ și, cum MA⃗+MC⃗=2MD⃗ (D mijlocul laturii AC), obținem 6MD⃗+2AB⃗=0⃗, deci MD⃗=−(1/3)AB⃗. Vectorii MD⃗ și AB⃗ sunt coliniari, deci dreptele MD și AB sunt paralele." }] },
+      { section: "Subiectul I", label: "6", type: "SHORT", points: 5, autoGradable: false, topic: "Trigonometrie. Triunghi dreptunghic",
+        content: "Calculați lungimea laturii AB a triunghiului ABC, în care AC=3 și măsurile unghiurilor A și B sunt de 30°, respectiv 60°.",
+        finalAnswer: "AB=2√3",
+        rubric: [{ label: "barem", points: 5, answer: "Unghiul C are măsura de 90°, deci triunghiul ABC este dreptunghic în C. sin B=AC/AB, sin 60°=√3/2, deci AB=AC/sin B=3/(√3/2)=2√3." }] },
+
+      // ── SUBIECTUL al II-lea (30p) — 2 probleme × 15p ──
+      { section: "Subiectul al II-lea", label: "1", type: "OPEN", points: 15, autoGradable: false, topic: "Matrice. Determinanți. Numere complexe",
+        content: "Se consideră matricele I₃=(1 0 0 / 0 1 0 / 0 0 1) și B=(1 0 1 / 0 i 0 / −2 0 −1), iar A(z)=aI₃+bB, unde z=a+ib, cu a și b numere reale și i²=−1.\na) Arătați că det B=i.\nb) Demonstrați că A(z₁)·A(z₂)=A(z₁z₂), pentru orice numere complexe z₁ și z₂.\nc) Determinați numărul natural n pentru care A(1+i)·A(2+i)·A(3+i)·A(1−i)·A(2−i)·A(3−i)=nI₃.",
+        rubric: [
+          { label: "a)", points: 5, answer: "det B=|1 0 1; 0 i 0; −2 0 −1|=1·(i·(−1)−0·0)−0+1·(0·0−i·(−2))=−i+2i=i." },
+          { label: "b)", points: 5, answer: "A(z)=aI₃+bB, cu z=a+ib. Pentru z₁=a+ib și z₂=c+id: A(z₁)·A(z₂)=(aI₃+bB)(cI₃+dB)=acI₃+(ad+bc)B+bdB². Cum B²=−I₃, obținem A(z₁)·A(z₂)=(ac−bd)I₃+(ad+bc)B. Cum z₁z₂=(ac−bd)+i(ad+bc), rezultă A(z₁z₂)=(ac−bd)I₃+(ad+bc)B=A(z₁)·A(z₂)." },
+          { label: "c)", points: 5, answer: "A(1+i)·A(2+i)·A(3+i)·A(1−i)·A(2−i)·A(3−i)=A((1+i)(1−i)·(2+i)(2−i)·(3+i)(3−i))=A(2·5·10)=A(100)=100I₃, deci n=100." },
+        ] },
+      { section: "Subiectul al II-lea", label: "2", type: "OPEN", points: 15, autoGradable: false, topic: "Lege de compoziție. Element neutru",
+        content: "Pe mulțimea M=[1,+∞) se definește legea de compoziție asociativă x∗y=log₂(2^(x+y) − 2^(x+1) − 2^(y+1) + 6).\na) Arătați că x∗y=log₂((2ˣ−2)(2ʸ−2)+2), pentru orice x,y∈M.\nb) Determinați elementul neutru al legii de compoziție „∗”.\nc) Arătați că x∗x∗x < 3x, pentru orice x∈M.",
+        rubric: [
+          { label: "a)", points: 5, answer: "x∗y=log₂(2ˣ·2ʸ−2·2ˣ−2·2ʸ+4+2)=log₂(2ˣ(2ʸ−2)−2(2ʸ−2)+2)=log₂((2ˣ−2)(2ʸ−2)+2), pentru orice x,y∈M." },
+          { label: "b)", points: 5, answer: "x∗e=x, pentru orice x∈M, unde e este elementul neutru ⟺ (2ˣ−2)(2ᵉ−2)+2=2ˣ ⟺ (2ˣ−2)(2ᵉ−3)=0, pentru orice x∈M, de unde obținem 2ᵉ=3, deci e=log₂3 este elementul neutru al legii „∗”." },
+          { label: "c)", points: 5, answer: "x∗x∗x=log₂((2ˣ−2)³+2), pentru orice x∈M. (x∗x∗x)−3x=log₂(((2ˣ−2)³+2)/2^(3x))=log₂(1−6(2ˣ−1)²/2^(3x))<0, pentru orice x∈M (deoarece 6(2ˣ−1)²/2^(3x)>0), deci x∗x∗x<3x." },
+        ] },
+
+      // ── SUBIECTUL al III-lea (30p) — 2 probleme × 15p ──
+      { section: "Subiectul al III-lea", label: "1", type: "OPEN", points: 15, autoGradable: false, topic: "Analiză. Derivate. Limite. Extreme",
+        content: "Se consideră funcția f:ℝ→ℝ, f(x)=(x³+3x+1)·e^(−x).\na) Arătați că f′(x)=(2−x)(x²−x+1)·e^(−x), x∈ℝ.\nb) Arătați că lim_{x→+∞} ((f(x)−e^(−x))/(f(x)+e^(−x)))^(f(x)·eˣ) = e^(−2).\nc) Demonstrați că funcția g:ℝ→ℝ, g(x)=|f(x)/e^(−x) − 1| are un singur punct de extrem.",
+        rubric: [
+          { label: "a)", points: 5, answer: "f′(x)=(3x²+3)e^(−x)+(x³+3x+1)·(−e^(−x))=(3x²+3−x³−3x−1)e^(−x)=(−x³+3x²−3x+2)e^(−x)=(2−x)(x²−x+1)e^(−x), x∈ℝ." },
+          { label: "b)", points: 5, answer: "f(x)−e^(−x)=(x³+3x)e^(−x), f(x)+e^(−x)=(x³+3x+2)e^(−x), iar f(x)·eˣ=x³+3x+1. lim_{x→+∞}((x³+3x)/(x³+3x+2))^(x³+3x+1)=lim(1+(−2)/(x³+3x+2))^(x³+3x+1)=e^(lim_{x→+∞}(−2(x³+3x+1)/(x³+3x+2)))=e^(−2)." },
+          { label: "c)", points: 5, answer: "f(x)/e^(−x)=x³+3x+1, deci g(x)=|x³+3x|, adică g(x)=−x³−3x pentru x∈(−∞,0) și g(x)=x³+3x pentru x∈[0,+∞). g este continuă; pentru x<0, g′(x)=−3x²−3<0 ⇒ g strict descrescătoare pe (−∞,0]; pentru x>0, g′(x)=3x²+3>0 ⇒ g strict crescătoare pe [0,+∞). Deci g are un singur punct de extrem (minim în x=0)." },
+        ] },
+      { section: "Subiectul al III-lea", label: "2", type: "OPEN", points: 15, autoGradable: false, topic: "Analiză. Integrale. Primitive",
+        content: "Se consideră funcția f:(1,+∞)→ℝ, f(x)=x·ln(x−1).\na) Arătați că ∫₄⁶ f(x)/ln(x−1) dx = 10.\nb) Demonstrați că F(√7) < F(3), pentru orice primitivă F a funcției f.\nc) Determinați numărul real m, știind că ∫₃⁵ f(x) dx = m(4ln2 − 1).",
+        rubric: [
+          { label: "a)", points: 5, answer: "∫₄⁶ f(x)/ln(x−1) dx=∫₄⁶ x·ln(x−1)/ln(x−1) dx=∫₄⁶ x dx=(x²/2)|₄⁶=18−8=10." },
+          { label: "b)", points: 5, answer: "F este o primitivă a lui f, deci F′(x)=f(x)=x·ln(x−1)>0 pentru orice x∈(2,+∞), deci F este strict crescătoare pe (2,+∞). Cum 2<√7<3, obținem F(√7)<F(3)." },
+          { label: "c)", points: 5, answer: "∫₃⁵ x·ln(x−1) dx=((x²/2)ln(x−1)−x²/4−x/2−(1/2)ln(x−1))|₃⁵=(24ln2−35/4)−(4ln2−15/4)=20ln2−5=5(4ln2−1), deci m=5." },
+        ] },
+    ],
+  },
+  {
     source: "BAC 2024 Simulare — Matematică M_mate-info (CNPEE)",
     examType: "BAC", year: 2024, subjectKey: "matematica_m1", subjectName: "Matematică M1 (Mate-Info)",
     grade: 12, variant: "simulare", maxScore: 100, officeBonus: 10, timeLimit: 180, language: "ro",
