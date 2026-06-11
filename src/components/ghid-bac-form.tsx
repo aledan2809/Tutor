@@ -4,6 +4,7 @@
 // (/api/lead-magnet) which forwards to MarketingAutomation. UTM params are read from the URL so
 // reel/ad clicks keep their attribution all the way into the CRM.
 import { useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 export function GhidBacForm() {
@@ -89,7 +90,7 @@ export function GhidBacForm() {
         />
         <span>
           Sunt de acord să primesc ghidul și emailuri ocazionale cu sfaturi pentru Bac de la etutor.ro.
-          Mă pot dezabona oricând. <a href="/privacy" className="underline">Politica de confidențialitate</a>
+          Mă pot dezabona oricând. <Link href="/privacy" className="underline">Politica de confidențialitate</Link>
         </span>
       </label>
       {error && <p className="text-sm font-medium text-red-600">{error}</p>}
