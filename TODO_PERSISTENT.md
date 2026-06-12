@@ -4,9 +4,9 @@
 
 ---
 
-## [ ] 🎯 Link campanie BAC — replica /evaluare pentru Bacalaureat (cerut 2026-06-12, după livrarea EN)
+## [x] 🎯 Link campanie BAC — DONE 2026-06-12 (commit `e7349d6`, LIVE)
 
-Replica link-ului de campanie Evaluarea Națională (livrat 2026-06-12, commits `e0f0cde`+follow-up fix) pentru **BAC**: rută scurtă `/bac` → `/ro/auth/register?exam=bac&voucher=<BAC_VOUCHER>`. Mecanismul există deja (preset `CAMPAIGNS` în `src/app/[locale]/auth/register/page.tsx` + rută model `src/app/evaluare/route.ts` — copy-adapt cu env `BAC_VOUCHER`). **Decizie user necesară înainte de implementare**: ce materii intră în presetul BAC — `romana-ix-xii` sigur, dar matematica are 3 variante (M1 mate-info / M2 științe / M3 tehnologic) + opționale istorie/geografie/biologie/chimie; pre-selectăm toate sau lăsăm doar lista filtrată cu selecție liberă? + codul/discount-ul voucherului BAC.
+**https://etutor.ro/bac** → `/ro/auth/register?exam=bac&voucher=BAC2026FREE`. Voucher **BAC2026FREE** (100%, nelimitat, fără expirare) creat în prod; env `BAC_VOUCHER` pe VPS2 + mirror `Master/credentials/tutor.env`. Preset: 8 materii BAC filtrate (română IX-XII pre-bifată — obligatorie; M1/M2/M3 + istorie/geo/bio/chimie selectabile per profil). E2E verificat pe prod: register cu voucher → abonament activ 1 an + enrollments corecte (cont smoke șters, usedCount decrementat). Sora link: `/evaluare` (EVALUARE100, commit `e0f0cde`).
 
 ---
 
