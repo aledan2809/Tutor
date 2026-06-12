@@ -4,6 +4,12 @@
 
 ---
 
+## [ ] 🎯 Link campanie BAC — replica /evaluare pentru Bacalaureat (cerut 2026-06-12, după livrarea EN)
+
+Replica link-ului de campanie Evaluarea Națională (livrat 2026-06-12, commits `e0f0cde`+follow-up fix) pentru **BAC**: rută scurtă `/bac` → `/ro/auth/register?exam=bac&voucher=<BAC_VOUCHER>`. Mecanismul există deja (preset `CAMPAIGNS` în `src/app/[locale]/auth/register/page.tsx` + rută model `src/app/evaluare/route.ts` — copy-adapt cu env `BAC_VOUCHER`). **Decizie user necesară înainte de implementare**: ce materii intră în presetul BAC — `romana-ix-xii` sigur, dar matematica are 3 variante (M1 mate-info / M2 științe / M3 tehnologic) + opționale istorie/geografie/biologie/chimie; pre-selectăm toate sau lăsăm doar lista filtrată cu selecție liberă? + codul/discount-ul voucherului BAC.
+
+---
+
 ## [ ] 🛈 UX — Tooltips explicative (mouseover) pe pagina de Practică (cerut 2026-06-10)
 
 Pe `/dashboard/practice` (pagina cu „Întrebări disponibile / Capitole studiate / Puncte slabe" + tipurile de sesiune), adaugă **tooltips cu mouseover explicativ la TOATE** elementele — utilizatorul trebuie să înțeleagă ce înseamnă fiecare fără ghicit:
