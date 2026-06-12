@@ -13,11 +13,31 @@ interface Domain {
 
 // Campaign presets for direct marketing links (?exam=<key>).
 // A campaign locks the subject list to its slugs and shows a dedicated banner.
-const CAMPAIGNS: Record<string, { slugs: string[]; titleRo: string; subtitleRo: string }> = {
+// `preselect` (default: all slugs) = subjects checked on load — BAC keeps only
+// Română checked because the math variant (M1/M2/M3) and optionals depend on profile.
+const CAMPAIGNS: Record<
+  string,
+  { slugs: string[]; preselect?: string[]; titleRo: string; subtitleRo: string }
+> = {
   en: {
     slugs: ["romana-cl-viii", "matematica-v-viii"],
     titleRo: "Pregătire Evaluarea Națională",
     subtitleRo: "Română și Matematică — clasa a VIII-a",
+  },
+  bac: {
+    slugs: [
+      "romana-ix-xii",
+      "matematica-m1-ix-xii",
+      "matematica-m2-ix-xii",
+      "matematica-m3-ix-xii",
+      "istorie",
+      "geografie",
+      "biologie",
+      "chimie",
+    ],
+    preselect: ["romana-ix-xii"],
+    titleRo: "Pregătire Bacalaureat",
+    subtitleRo: "Bifează materiile pentru profilul tău",
   },
 };
 
@@ -49,7 +69,7 @@ export default function RegisterPage() {
     const preset = exam ? CAMPAIGNS[exam] : undefined;
     if (preset) {
       setCampaign(preset);
-      setDomainSlugs(preset.slugs);
+      setDomainSlugs(preset.preselect ?? preset.slugs);
     } else {
       const subjects = params.get("subjects");
       if (subjects) {
