@@ -11,6 +11,16 @@ interface Domain {
   name: string;
 }
 
+// Campaign presets for direct marketing links (?exam=<key>).
+// A campaign locks the subject list to its slugs and shows a dedicated banner.
+const CAMPAIGNS: Record<string, { slugs: string[]; titleRo: string; subtitleRo: string }> = {
+  en: {
+    slugs: ["romana-cl-viii", "matematica-v-viii"],
+    titleRo: "Pregătire Evaluarea Națională",
+    subtitleRo: "Română și Matematică — clasa a VIII-a",
+  },
+};
+
 export default function RegisterPage() {
   const router = useRouter();
   const ro = useLocale() === "ro";
@@ -25,6 +35,30 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [campaign, setCampaign] = useState<(typeof CAMPAIGNS)[string] | null>(null);
+  const [voucherCode, setVoucherCode] = useState("");
+  const [voucherApplied, setVoucherApplied] = useState(false);
+  const [voucherDiscount, setVoucherDiscount] = useState<number | null>(null);
+
+  // Read campaign params (?exam=, ?subjects=, ?voucher=) once on mount.
+  // window.location is used instead of useSearchParams() to avoid the
+  // Suspense-boundary requirement on this client page.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const exam = params.get("exam")?.toLowerCase();
+    const preset = exam ? CAMPAIGNS[exam] : undefined;
+    if (preset) {
+      setCampaign(preset);
+      setDomainSlugs(preset.slugs);
+    } else {
+      const subjects = params.get("subjects");
+      if (subjects) {
+        setDomainSlugs(subjects.split(",").map((s) => s.trim()).filter(Boolean));
+      }
+    }
+    const voucher = params.get("voucher");
+    if (voucher) setVoucherCode(voucher.trim().toUpperCase());
+  }, []);
 
   useEffect(() => {
     fetch("/api/student/domains")
@@ -62,11 +96,11 @@ export default function RegisterPage() {
     setError("");
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError(ro ? "Parola trebuie să aibă minimum 8 caractere" : "Password must be at least 8 characters");
       return;
     }
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(ro ? "Parolele nu coincid" : "Passwords do not match");
       return;
     }
 
@@ -75,16 +109,24 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, domainSlugs }),
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          domainSlugs,
+          ...(voucherCode ? { voucherCode } : {}),
+        }),
       });
       const data = await res.json();
       if (data.success) {
+        setVoucherApplied(Boolean(data.voucherApplied));
+        setVoucherDiscount(typeof data.voucherDiscount === "number" ? data.voucherDiscount : null);
         setSuccess(true);
       } else {
-        setError(data.error || "Something went wrong");
+        setError(data.error || (ro ? "Ceva nu a mers. Încearcă din nou." : "Something went wrong"));
       }
     } catch {
-      setError("Network error. Please try again.");
+      setError(ro ? "Eroare de rețea. Încearcă din nou." : "Network error. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -99,15 +141,40 @@ export default function RegisterPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="mb-2 text-xl font-bold text-white">Account created!</h2>
-          <p className="mb-6 text-sm text-gray-400">
-            You can now sign in with your email and password.
-          </p>
+          <h2 className="mb-2 text-xl font-bold text-white">
+            {ro ? "Cont creat!" : "Account created!"}
+          </h2>
+          {voucherApplied ? (
+            <p className="mb-6 text-sm text-green-300">
+              {ro
+                ? "Voucherul a fost aplicat — accesul la materiile tale este activ. Intră în cont și începe să exersezi."
+                : "Your voucher was applied — access to your subjects is active. Sign in and start practicing."}
+            </p>
+          ) : (
+            <p className="mb-6 text-sm text-gray-400">
+              {ro
+                ? "Te poți autentifica acum cu emailul și parola ta."
+                : "You can now sign in with your email and password."}
+              {voucherCode && voucherDiscount !== null && !voucherApplied && (
+                <span className="mt-2 block text-yellow-300">
+                  {ro
+                    ? `Voucherul ${voucherCode} (−${voucherDiscount}%) se aplică la plată, după autentificare.`
+                    : `Voucher ${voucherCode} (−${voucherDiscount}%) applies at payment, after you sign in.`}
+                </span>
+              )}
+            </p>
+          )}
           <button
-            onClick={() => router.push("/auth/signin")}
+            onClick={() =>
+              router.push(
+                voucherCode && !voucherApplied
+                  ? `/auth/signin?callbackUrl=${encodeURIComponent(`/dashboard/activare?voucher=${voucherCode}`)}`
+                  : "/auth/signin"
+              )
+            }
             className="inline-block rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-500"
           >
-            Sign in
+            {ro ? "Autentifică-te" : "Sign in"}
           </button>
         </div>
       </div>
@@ -117,8 +184,19 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm rounded-xl border border-gray-800 bg-gray-900 p-8">
+        {campaign && (
+          <div className="mb-4 rounded-lg border border-blue-800 bg-blue-900/30 p-3 text-center">
+            <p className="text-sm font-semibold text-blue-200">{campaign.titleRo}</p>
+            <p className="text-xs text-blue-300">{campaign.subtitleRo}</p>
+            {voucherCode && (
+              <p className="mt-1.5 inline-block rounded-full bg-green-900/40 px-3 py-0.5 text-xs font-medium text-green-300">
+                ✓ Voucher {voucherCode} inclus
+              </p>
+            )}
+          </div>
+        )}
         <h2 className="mb-2 text-center text-xl font-bold text-white">
-          Create account
+          {ro ? "Creează cont" : "Create account"}
         </h2>
         <p className="mb-6 text-center text-sm text-gray-400">
           {ro ? "Intră în " : "Join "}
@@ -128,7 +206,7 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="mb-1 block text-sm text-gray-400">Name</label>
+            <label className="mb-1 block text-sm text-gray-400">{ro ? "Nume" : "Name"}</label>
             <input
               type="text"
               value={name}
@@ -136,7 +214,7 @@ export default function RegisterPage() {
               required
               minLength={2}
               className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-              placeholder="Your name"
+              placeholder={ro ? "Numele tău" : "Your name"}
             />
           </div>
 
@@ -148,7 +226,7 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-              placeholder="you@example.com"
+              placeholder={ro ? "tu@exemplu.ro" : "you@example.com"}
             />
           </div>
 
@@ -222,10 +300,12 @@ export default function RegisterPage() {
           {domains.length > 0 && (
             <div>
               <label className="mb-1 block text-sm text-gray-400">
-                {ro ? "Materii (poți alege mai multe, opțional)" : "Subjects (pick one or more, optional)"}
+                {campaign
+                  ? "Materiile tale"
+                  : ro ? "Materii (poți alege mai multe, opțional)" : "Subjects (pick one or more, optional)"}
               </label>
               <div className="max-h-44 space-y-1 overflow-y-auto rounded-lg border border-gray-700 bg-gray-800 p-2">
-                {domains.map((d) => {
+                {(campaign ? domains.filter((d) => campaign.slugs.includes(d.slug)) : domains).map((d) => {
                   const checked = domainSlugs.includes(d.slug);
                   return (
                     <label
@@ -259,14 +339,16 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50"
           >
-            {loading ? "Creating account..." : "Create account"}
+            {loading
+              ? ro ? "Se creează contul..." : "Creating account..."
+              : ro ? "Creează cont" : "Create account"}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-500">
-          Already have an account?{" "}
+          {ro ? "Ai deja cont? " : "Already have an account? "}
           <Link href="/auth/signin" className="text-blue-400 hover:text-blue-300">
-            Sign in
+            {ro ? "Autentifică-te" : "Sign in"}
           </Link>
         </p>
 

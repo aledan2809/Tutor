@@ -20,6 +20,9 @@ export default function ActivarePage() {
   const [msg, setMsg] = useState<{ kind: "ok" | "err" | "pay"; text: string } | null>(null);
 
   useEffect(() => {
+    // Prefill from campaign links (e.g. register success → activare?voucher=X).
+    const v = new URLSearchParams(window.location.search).get("voucher");
+    if (v) setVoucher(v.trim().toUpperCase());
     fetch("/api/student/domains")
       .then((r) => r.json())
       .then((d) => {

@@ -12,6 +12,7 @@ const schema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   domainSlug: z.string().optional(), // legacy single-select
   domainSlugs: z.array(z.string()).optional(), // multi-select
+  voucherCode: z.string().min(1).max(50).optional(), // campaign links (?voucher=)
 });
 
 async function _POST(req: NextRequest) {
@@ -30,7 +31,7 @@ async function _POST(req: NextRequest) {
     );
   }
 
-  const { name, email, password, domainSlug, domainSlugs } = parsed.data;
+  const { name, email, password, domainSlug, domainSlugs, voucherCode } = parsed.data;
 
   // Check if user already exists
   const existing = await prisma.user.findUnique({ where: { email } });
@@ -57,6 +58,7 @@ async function _POST(req: NextRequest) {
   const slugs = Array.from(
     new Set([...(domainSlugs ?? []), ...(domainSlug ? [domainSlug] : [])])
   );
+  let enrolledCount = 0;
   if (slugs.length) {
     const found = await prisma.domain.findMany({
       where: { slug: { in: slugs } },
@@ -67,6 +69,48 @@ async function _POST(req: NextRequest) {
         data: found.map((d) => ({ userId: user.id, domainId: d.id, roles: ["STUDENT"] as const })),
         skipDuplicates: true,
       });
+      enrolledCount = found.length;
+    }
+  }
+
+  // ─── Campaign voucher (best-effort — never blocks signup) ───
+  // 100% voucher → redeem atomically + activate subscription (same semantics as
+  // POST /api/activate, including the ≥1 enrolled subject requirement). < 100%
+  // voucher → NOT redeemed here (it applies at payment time); the client routes
+  // the user to /dashboard/activare with the code prefilled.
+  let voucherApplied = false;
+  let voucherDiscount: number | null = null;
+  if (voucherCode && enrolledCount > 0) {
+    try {
+      const code = voucherCode.toUpperCase();
+      await prisma.$transaction(async (tx) => {
+        const voucher = await tx.voucher.findUnique({ where: { code } });
+        if (!voucher || !voucher.isActive) return;
+        if (voucher.expiresAt && voucher.expiresAt < new Date()) return;
+        if (voucher.maxUses !== null && voucher.usedCount >= voucher.maxUses) return;
+        if (voucher.discountPercent < 100) {
+          // Reported to the client so the success screen can say "applies at payment".
+          voucherDiscount = voucher.discountPercent;
+          return;
+        }
+
+        await tx.voucher.update({
+          where: {
+            id: voucher.id,
+            ...(voucher.maxUses !== null ? { usedCount: { lt: voucher.maxUses } } : {}),
+          },
+          data: { usedCount: { increment: 1 } },
+        });
+        const endsAt = new Date();
+        endsAt.setFullYear(endsAt.getFullYear() + 1);
+        await tx.user.update({
+          where: { id: user.id },
+          data: { subscriptionStatus: "active", subscriptionEndsAt: endsAt },
+        });
+        voucherApplied = true;
+      });
+    } catch (err) {
+      logger.error("Signup voucher apply failed", err, { userId: user.id });
     }
   }
 
@@ -100,6 +144,8 @@ async function _POST(req: NextRequest) {
   const res = NextResponse.json({
     success: true,
     message: "Account created. You can now sign in.",
+    voucherApplied,
+    voucherDiscount,
   }, { status: 201 });
 
   // Consume the one-shot cookies regardless of outcome.

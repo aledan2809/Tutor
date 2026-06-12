@@ -17,6 +17,16 @@ export default function SignInPage() {
   const [emailSent, setEmailSent] = useState(false);
   const [mode, setMode] = useState<"credentials" | "magic">("credentials");
 
+  // Honors ?callbackUrl= (set by middleware and campaign flows). Only same-site
+  // relative paths are accepted — anything else falls back to the dashboard.
+  const postLoginUrl = () => {
+    const cb = new URLSearchParams(window.location.search).get("callbackUrl");
+    if (cb && cb.startsWith("/") && !cb.startsWith("//") && !cb.startsWith("/\\")) {
+      return cb.match(/^\/(en|ro)\//) ? cb : `/${locale}${cb}`;
+    }
+    return `/${locale}/dashboard`;
+  };
+
   const handleCredentialsSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -28,7 +38,7 @@ export default function SignInPage() {
     if (res?.error) {
       setError(t("invalidCredentials") || "Invalid email or password");
     } else {
-      router.push(`/${locale}/dashboard`);
+      router.push(postLoginUrl());
     }
   };
 
@@ -61,7 +71,7 @@ export default function SignInPage() {
 
         {/* Google OAuth */}
         <button
-          onClick={() => signIn("google", { callbackUrl: `/${locale}/dashboard` })}
+          onClick={() => signIn("google", { callbackUrl: postLoginUrl() })}
           className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-700 transition-colors"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
