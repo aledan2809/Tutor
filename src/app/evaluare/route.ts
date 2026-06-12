@@ -9,16 +9,19 @@ import { NextRequest, NextResponse } from "next/server";
  * public URL stays clean. Default voucher comes from EVALUARE_VOUCHER env so
  * campaigns can rotate codes without a redeploy.
  */
-export function GET(req: NextRequest) {
-  const url = req.nextUrl.clone();
-  const voucher =
-    url.searchParams.get("voucher")?.trim() || process.env.EVALUARE_VOUCHER || "";
-  url.pathname = "/ro/auth/register";
-  url.search = "";
-  url.searchParams.set("exam", "en");
-  if (voucher) url.searchParams.set("voucher", voucher);
+export const dynamic = "force-dynamic";
 
-  const res = NextResponse.redirect(url, 307);
+export function GET(req: NextRequest) {
+  const voucher =
+    req.nextUrl.searchParams.get("voucher")?.trim() || process.env.EVALUARE_VOUCHER || "";
+  // Behind nginx the backend Host is the internal address (localhost:3013), so
+  // req.url would leak it into the redirect. Use the canonical public origin.
+  const base = process.env.AUTH_URL || req.nextUrl.origin;
+  const dest = new URL("/ro/auth/register", base);
+  dest.searchParams.set("exam", "en");
+  if (voucher) dest.searchParams.set("voucher", voucher);
+
+  const res = NextResponse.redirect(dest, 307);
   // Persist Romanian for the rest of the visit (next-intl reads NEXT_LOCALE).
   res.cookies.set("NEXT_LOCALE", "ro", {
     path: "/",
