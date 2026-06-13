@@ -10,6 +10,7 @@ const superadminLinks = [
   { href: "/dashboard/admin/superadmin/vouchers", labelKey: "saVouchers" },
   { href: "/dashboard/admin/superadmin/revenue", labelKey: "saRevenue" },
   { href: "/dashboard/admin/superadmin/ads", labelKey: "saAds" },
+  { href: "/dashboard/admin/superadmin/campaigns", labelKey: "saCampaigns" },
   { href: "/dashboard/admin/superadmin/audit", labelKey: "saAudit" },
 ];
 
