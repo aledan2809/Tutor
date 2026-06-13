@@ -17,6 +17,7 @@ import {
   UPGRADE_PATH,
   WHATSAPP_UPGRADE_TEMPLATE,
   decideWhatsAppForFreeUser,
+  isPaidChannelDeliverable,
   isPaidSubscriber,
 } from "./segmentation";
 
@@ -161,6 +162,42 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     return;
   }
 
+  // Skip a PAID channel that can't deliver right now (WhatsApp unconfigured +
+  // no linked Telegram; SMS gateway unconfigured) — otherwise the send fails and
+  // the event retries forever. Applies to all users; makes cron activation safe
+  // while channels are still being wired (funnel item 3).
+  if (event.channel === "WHATSAPP" || event.channel === "SMS") {
+    const deliverable = isPaidChannelDeliverable(event.channel, {
+      telegramLinked: Boolean(event.user.telegramChatId),
+      telegramEnabled:
+        process.env.FEATURE_TELEGRAM_NUDGES === "true" &&
+        Boolean(process.env.TELEGRAM_BOT_TOKEN),
+      whatsappConfigured: Boolean(
+        process.env.WHATSAPP_PHONE_NUMBER_ID && process.env.WHATSAPP_ACCESS_TOKEN
+      ),
+      smsConfigured: Boolean(
+        process.env.SMSLINK_CONNECTION_ID && process.env.SMSLINK_PASSWORD
+      ),
+    });
+    if (!deliverable) {
+      await escalateToNextLevel(event.id, event.level);
+      return;
+    }
+  }
+
+  // Instructor-facing rungs with no instructor to alert are the natural end of
+  // the chain — terminate instead of retrying an unreachable level forever
+  // (self-serve students have no instructor enrollment).
+  if (event.channel === "EMAIL" || event.channel === "CALL") {
+    if (!(await userHasInstructor(event.userId))) {
+      await prisma.escalationEvent.update({
+        where: { id: event.id },
+        data: { status: "COMPLETED" },
+      });
+      return;
+    }
+  }
+
   // Free-vs-paid funnel segmentation (skip for test accounts so journey-audit
   // can exercise the full ladder). We gate only the PAID STUDENT channels for
   // free users: WhatsApp is capped (last touch = upgrade CTA, then skipped) and
@@ -273,6 +310,29 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
       data: { status: "PENDING" },
     });
   }
+}
+
+/**
+ * Whether the user has an instructor (same domain, INSTRUCTOR role) to receive
+ * the L5/L6 instructor-facing escalations. Mirrors the lookup in
+ * sendEmailNotification / triggerInstructorCall so the engine can terminate the
+ * chain early when there's nobody to alert.
+ */
+async function userHasInstructor(userId: string): Promise<boolean> {
+  const enrollment = await prisma.enrollment.findFirst({
+    where: { userId, isActive: true, roles: { has: "STUDENT" } },
+    select: { domainId: true },
+  });
+  if (!enrollment) return false;
+  const instructor = await prisma.enrollment.findFirst({
+    where: {
+      domainId: enrollment.domainId,
+      isActive: true,
+      roles: { has: "INSTRUCTOR" },
+    },
+    select: { id: true },
+  });
+  return Boolean(instructor);
 }
 
 /**

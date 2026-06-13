@@ -6,6 +6,7 @@ import {
   ESCALATION_LADDER,
   isPaidSubscriber,
   decideWhatsAppForFreeUser,
+  isPaidChannelDeliverable,
 } from "@/lib/escalation/segmentation";
 import { ESCALATION_LEVELS } from "@/lib/escalation/config";
 
@@ -109,6 +110,41 @@ describe("Escalation segmentation", () => {
     it("gives the terminal step zero grace", () => {
       const last = ESCALATION_LADDER.steps[ESCALATION_LADDER.steps.length - 1];
       expect(last.graceMs).toBe(0);
+    });
+  });
+
+  describe("isPaidChannelDeliverable", () => {
+    const base = {
+      telegramLinked: false,
+      telegramEnabled: false,
+      whatsappConfigured: false,
+      smsConfigured: false,
+    };
+
+    it("PUSH/EMAIL/CALL are always deliverable", () => {
+      expect(isPaidChannelDeliverable("PUSH", base)).toBe(true);
+      expect(isPaidChannelDeliverable("EMAIL", base)).toBe(true);
+      expect(isPaidChannelDeliverable("CALL", base)).toBe(true);
+    });
+
+    it("WhatsApp undeliverable when neither WhatsApp nor Telegram is usable", () => {
+      expect(isPaidChannelDeliverable("WHATSAPP", base)).toBe(false);
+      // Telegram enabled but user not linked → still no
+      expect(isPaidChannelDeliverable("WHATSAPP", { ...base, telegramEnabled: true })).toBe(false);
+      // Linked but feature disabled → still no
+      expect(isPaidChannelDeliverable("WHATSAPP", { ...base, telegramLinked: true })).toBe(false);
+    });
+
+    it("WhatsApp deliverable via configured WhatsApp OR linked+enabled Telegram", () => {
+      expect(isPaidChannelDeliverable("WHATSAPP", { ...base, whatsappConfigured: true })).toBe(true);
+      expect(
+        isPaidChannelDeliverable("WHATSAPP", { ...base, telegramLinked: true, telegramEnabled: true })
+      ).toBe(true);
+    });
+
+    it("SMS deliverable only when the gateway is configured", () => {
+      expect(isPaidChannelDeliverable("SMS", base)).toBe(false);
+      expect(isPaidChannelDeliverable("SMS", { ...base, smsConfigured: true })).toBe(true);
     });
   });
 

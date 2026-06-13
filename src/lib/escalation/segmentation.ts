@@ -43,6 +43,29 @@ export function isPaidSubscriber(u: {
   return true;
 }
 
+/**
+ * Whether a PAID channel can actually deliver right now. If not (WhatsApp not
+ * configured and no linked Telegram; SMS gateway not configured), the engine
+ * must skip the rung — otherwise the send fails and the event retries forever.
+ * Pure: the engine passes the resolved config booleans. PUSH/EMAIL/CALL are
+ * always "deliverable" here (in-app / SMTP best-effort handled elsewhere).
+ */
+export function isPaidChannelDeliverable(
+  channel: EscalationChannel,
+  ctx: {
+    telegramLinked: boolean;
+    telegramEnabled: boolean;
+    whatsappConfigured: boolean;
+    smsConfigured: boolean;
+  }
+): boolean {
+  if (channel === "WHATSAPP") {
+    return (ctx.telegramEnabled && ctx.telegramLinked) || ctx.whatsappConfigured;
+  }
+  if (channel === "SMS") return ctx.smsConfigured;
+  return true;
+}
+
 export type WhatsAppDecision =
   | { action: "send"; templateId: string } // normal paid touch (1..cap-1)
   | { action: "upgrade"; templateId: string } // final touch = upgrade CTA
