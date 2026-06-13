@@ -63,7 +63,9 @@ Pe `/dashboard/practice` (pagina cu „Întrebări disponibile / Capitole studia
 - **Categorisire pagini logate (DONE 2026-06-09, commit `02ba02e`)**: shared `src/lib/exam-level.ts` (slug/examType → EN_VIII/BAC). (a) **Grile picker** `/dashboard/practice` — dropdown „Materie" grupat pe nivel (optgroup), doar materii școlare cu grile (Aviation/Drept/Istorie/Geo/Bio/Chimie + materii goale ascunse). (b) **Simulări** `/dashboard/exam-bank` — nested **nivel → materie → an** (ex. Evaluarea Națională / Matematică / 2024).
 - **BAC Simulări COMPLETE 13/13 (DONE 2026-06-09, commit `5351368`)**: `scripts/import-exam-ro-bac-batch.mjs` — 11 ExamPapers BAC noi (peste model+simulare 2025) ca simulări-eseu complete: Subiectul I (text + A 5 itemi + B argumentativ) + II (comentariu liric / rol notații autor dramă / perspectivă narativă / modalități caracterizare — fragment inline) + III (eseu) = 90+10. **Textul Subiectului I reutilizat din rândurile grile** (`bac-grile:%`, sursă unică — fără duplicare). Bareme B/II/III = baremul-standard oficial; A per-item verbatim. Verificat: 13 ExamPapers BAC (8 itemi + 1 passage fiecare), take page 200 cu passage+B/II/III, grupate în Simulări sub Bacalaureat/Limba și literatura română/an. **BAC complet acum: 75 grile + 13 simulări-eseu.**
 
-## [~] 🎓 BAC — Limba și literatura română (import text/barem, creat 2026-06-09)
+## [x] 🎓 BAC — Limba și literatura română (import text/barem, creat 2026-06-09) — SUPERSEDED/DONE 2026-06-13
+
+> **Reconciliere 2026-06-13**: această secțiune `[~]` (abordarea per-variantă „import text/barem → Simulări") a fost **înlocuită de PIVOT-ul la GRILE** (vezi secțiunea de deasupra, „BAC RO → GRILE — DONE 2026-06-09, 75 grile") + batch-ul de Simulări-eseu (`import-exam-ro-bac-batch.mjs`, commit `5351368`, 13/13 ExamPapers). Toate cele 13 lucrări (2023×3 + 2024×5 + 2025×5) sunt LIVE. **Verificat prod 2026-06-13** (`/api/public/practice/subjects`): Bacalaureat → Română = **75 grile** live. Markerele queue de mai jos erau stale (munca s-a închis pe calea pivotată, în secțiunea de sus). Niciun conținut BAC RO restant.
 
 **Materiale**: `~/Downloads/Temp/BAC-RO/` — 13 perechi oficiale `E_a_romana_real_tehn_<an>_var_<x>` (subiect) + `bar_<x>` (barem), proba E.a, filiera reală/tehnologică (CNPEE, public). 2023×3 (var 01/05/06), 2024×5 (var 02/04/09/model/simulare), 2025×5 (var 06/07/08/model/simulare). (`var_09 (1)` = duplicat, se ignoră.)
 
@@ -74,9 +76,9 @@ Pe `/dashboard/practice` (pagina cu „Întrebări disponibile / Capitole studia
 **Queue (2/13 DONE)**:
 - [x] **2025 Model** — DONE 2026-06-09 (`53a7665`): text jurnal Puia Florica Rebreanu + 8 itemi (A.1-A.5 + B + II Vlahuță „Sonet" + III eseu Sadoveanu). Verificat autentificat: listă grupată (secțiunea Bacalaureat) + take page randează passage+poem+itemi. ExamPaper 53→54.
 - [x] **2025 Simulare** — DONE 2026-06-09 (`84dfee0`): text Ștefan Aug. Doinaș „Liviu Rusu"/Evocări + 8 itemi (A.1-A.5 + B + II Adrian Maniu „Iarnă" + III eseu roman psihologic/al experienței). ExamPaper 54→55, verificat în DB (8 itemi) + listă.
-- [ ] 2025: var_06, var_07, var_08
-- [ ] 2024: model, simulare, var_02, var_04, var_09
-- [ ] 2023: var_01, var_05, var_06
+- [x] 2025: var_06, var_07, var_08 — DONE via GRILE+batch (`5351368`), prod-verified 2026-06-13
+- [x] 2024: model, simulare, var_02, var_04, var_09 — DONE via GRILE+batch (`5351368`), prod-verified 2026-06-13
+- [x] 2023: var_01, var_05, var_06 — DONE via GRILE+batch (`5351368`), prod-verified 2026-06-13
 
 **Per lucrare** (playbook `knowledge/exam-bank-import-playbook.md` §2, adaptat BAC): extract subiect+barem (fitz system python3) → transcriere verbatim (text + itemi + bareme ground-truth) → `--validate` (sum 90) → import pe prod DB → verificare autentificată (listă + take render). `/review` mesh pe script. Fără figuri de regulă (BAC RO e text). Mostly text-only → import nu cere rebuild (doar dacă ating cod).
 
