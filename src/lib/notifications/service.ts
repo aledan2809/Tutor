@@ -11,6 +11,7 @@
 
 import { prisma } from "@/lib/prisma";
 import type { EscalationChannel } from "@prisma/client";
+import { getTelegramClient, telegramNudgesEnabled } from "@/lib/telegram/connect";
 
 interface NotificationPayload {
   userId: string;
@@ -31,7 +32,7 @@ export async function sendNotification(
       case "PUSH":
         return await sendPushNotification(payload);
       case "WHATSAPP":
-        return await sendWhatsAppNotification(payload);
+        return await sendWhatsAppOrTelegram(payload);
       case "SMS":
         return await sendSMSNotification(payload);
       case "EMAIL":
@@ -120,6 +121,83 @@ async function sendPushNotification(
   }
 
   return true;
+}
+
+/**
+ * Cost-saving substitution at the WhatsApp escalation level: if the user has
+ * opted into Telegram (linked chat + FEATURE_TELEGRAM_NUDGES), send the nudge
+ * for FREE on Telegram instead of a paid WhatsApp template. Degrades to
+ * WhatsApp when Telegram isn't eligible or the send fails — the user still
+ * gets reminded, just on the paid channel.
+ */
+async function sendWhatsAppOrTelegram(
+  payload: NotificationPayload
+): Promise<boolean> {
+  if (telegramNudgesEnabled()) {
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId },
+      select: { telegramChatId: true },
+    });
+    if (user?.telegramChatId) {
+      const sent = await sendTelegramNotification(payload, user.telegramChatId);
+      if (sent) return true;
+      // Telegram failed → fall through to paid WhatsApp so the user is still reached.
+      console.warn(
+        `Telegram nudge failed for user ${payload.userId}, falling back to WhatsApp`
+      );
+    }
+  }
+  return await sendWhatsAppNotification(payload);
+}
+
+/**
+ * Telegram notification — free nudge for opted-in users. No template approval
+ * (bot can message freely after /start), so we send localized text + a button
+ * back into the app.
+ */
+async function sendTelegramNotification(
+  payload: NotificationPayload,
+  chatId: string
+): Promise<boolean> {
+  const client = getTelegramClient();
+  if (!client) return false;
+
+  // sendText/sendInlineKeyboard default to parseMode HTML — escape interpolated
+  // values so a name/stat containing < > & can't break parsing (a failed send
+  // would silently degrade the user to paid WhatsApp).
+  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const userName = esc((payload.metadata.userName as string) ?? "Student");
+  let text: string;
+  if (payload.templateId === "whatsapp_pressure_stats") {
+    const stats = esc((payload.metadata.stats as string) ?? "Seria ta e în pericol!");
+    text = `📚 Salut ${userName}! ${stats}\n\nDeschide eTutor și păstrează-ți seria de studiu.`;
+  } else {
+    text = `📚 Salut ${userName}! Nu ai mai studiat de ceva vreme — hai înapoi să-ți păstrezi seria.`;
+  }
+
+  // Absolute https URL for the Telegram button (relative paths aren't allowed).
+  const base = (process.env.AUTH_URL ?? "").replace(/\/$/, "");
+  const rawUrl = payload.metadata.url as string | undefined;
+  const buttonUrl =
+    rawUrl && rawUrl.startsWith("http")
+      ? rawUrl
+      : base
+        ? `${base}${rawUrl && rawUrl.startsWith("/") ? rawUrl : "/"}`
+        : null;
+
+  try {
+    if (buttonUrl) {
+      const res = await client.sendInlineKeyboard(chatId, text, [
+        [{ text: "Deschide eTutor", url: buttonUrl }],
+      ]);
+      return res.success;
+    }
+    const res = await client.sendText(chatId, text);
+    return res.success;
+  } catch (error) {
+    console.error("Telegram send error:", error);
+    return false;
+  }
 }
 
 /**

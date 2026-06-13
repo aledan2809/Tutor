@@ -103,6 +103,25 @@ model User {
   referralAsReferred  Referral?         @relation("ReferralReferred")
   referralEarnings    ReferralEarning[] @relation("EarningPromoter")
   magicQuizzes        MagicQuiz[]       @relation("UserMagicQuizzes")
+  // Telegram opt-in channel (free nudges in place of paid WhatsApp).
+  telegramChatId       String?   @unique
+  telegramUsername     String?
+  telegramLinkedAt     DateTime?
+  telegramConnectTokens TelegramConnectToken[]
+}
+
+/// Single-use, short-lived nonce binding a t.me/<bot>?start=<nonce> deep link
+/// to the user who requested it. Consumed (deleted) atomically on /start.
+/// No Redis in Tutor → Postgres row-lock on delete guarantees single-use.
+model TelegramConnectToken {
+  nonce     String   @id
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
 }
 
 model Domain {

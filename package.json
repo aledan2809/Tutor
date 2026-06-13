@@ -25,6 +25,7 @@
     "@aledan/gcalendar": "file:../GCalendar",
     "@aledan/notify-ladder": "file:../notify-ladder",
     "@aledan/sms": "file:../SMS",
+    "@aledan/telegram": "file:../Telegram",
     "@aledan/whatsapp": "file:../whatsapp",
     "@auth/prisma-adapter": "^2.7.4",
     "@prisma/client": "^5.22.0",
