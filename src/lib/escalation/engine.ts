@@ -6,11 +6,19 @@
  *           L4 SMS → L5 Email instructor → L6 Call trigger
  */
 
+import { shouldEscalate, nextStep, resolveGraceMs } from "@aledan/notify-ladder";
 import { prisma } from "@/lib/prisma";
 import { ESCALATION_LEVELS } from "./config";
 import { isQuietHours, isOptimalNotificationTime } from "./timing";
 import { sendNotification } from "@/lib/notifications/service";
 import { resolveIsTest, resolveIsTestForUser } from "@/lib/notifications/test-account";
+import {
+  ESCALATION_LADDER,
+  UPGRADE_PATH,
+  WHATSAPP_UPGRADE_TEMPLATE,
+  decideWhatsAppForFreeUser,
+  isPaidSubscriber,
+} from "./segmentation";
 
 interface EscalationContext {
   userId: string;
@@ -120,6 +128,40 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     return;
   }
 
+  // Free-vs-paid funnel segmentation (skip for test accounts so journey-audit
+  // can exercise the full ladder). We gate only the PAID STUDENT channels for
+  // free users: WhatsApp is capped (last touch = upgrade CTA, then skipped) and
+  // SMSLink SMS is skipped until the own-number gateway lands (funnel item 3).
+  // Free in-app push + the instructor-facing EMAIL/CALL rungs (no per-message
+  // cost) flow unchanged. Paid (or trialing) subscribers run the full ladder.
+  let sendTemplateId = event.templateId ?? "";
+  if (!isPaidSubscriber(event.user) && !event.isTest) {
+    if (event.channel === "WHATSAPP") {
+      const priorWa = await prisma.escalationEvent.count({
+        where: {
+          userId: event.userId,
+          channel: "WHATSAPP",
+          status: "COMPLETED",
+          sentAt: { not: null },
+          isTest: false,
+        },
+      });
+      const decision = decideWhatsAppForFreeUser(priorWa, event.templateId ?? "");
+      if (decision.action === "suppress") {
+        // Past the free WhatsApp cap → skip this paid rung; the chain still
+        // advances to the free instructor-facing levels (no paid send).
+        await escalateToNextLevel(event.id, event.level);
+        return;
+      }
+      sendTemplateId = decision.templateId;
+    } else if (event.channel === "SMS") {
+      // SMSLink SMS is paid → skip for free users (own-number gateway = funnel
+      // item 3). The chain still advances to the free instructor levels.
+      await escalateToNextLevel(event.id, event.level);
+      return;
+    }
+  }
+
   // Check SMS daily limit
   if (event.channel === "SMS") {
     const levelConfig = ESCALATION_LEVELS.find((l) => l.level === event.level);
@@ -158,12 +200,17 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
   const success = await sendNotification({
     userId: event.userId,
     channel: event.channel,
-    templateId: event.templateId ?? "",
+    templateId: sendTemplateId,
     metadata: {
       ...metadata,
       userName: event.user.name ?? "Student",
       userEmail: event.user.email ?? "",
       level: event.level,
+      // Upgrade CTA points the deep link at pricing; otherwise keep any caller URL.
+      url:
+        sendTemplateId === WHATSAPP_UPGRADE_TEMPLATE
+          ? UPGRADE_PATH
+          : (metadata.url as string | undefined),
       // Embedded in the web-push payload so the service worker can ACK this
       // event on tap (→ /api/escalation/ack → acknowledgedAt → skip paid escalation).
       escalationEventId: event.id,
@@ -260,16 +307,17 @@ export async function advancePendingEscalations(): Promise<number> {
       },
     });
 
-    if (recentSession) {
-      // User is active — no further escalation needed
-      continue;
-    }
-
-    // Push-first cost gate: if the user tapped the push notification for this
-    // event, treat it as engagement and do NOT escalate to the next (paid)
-    // WhatsApp/SMS channel. The chain stops here because the next level is only
-    // created from this (now skipped) event.
-    if (event.acknowledgedAt) {
+    // Push-first cost gate via @aledan/notify-ladder: escalate to the next
+    // (paid) rung only when the user neither tapped the push (acknowledged) nor
+    // resumed studying (a completed session = the domain "done" signal). When
+    // either gate passes the chain stops here — the next level is only ever
+    // created from this event.
+    if (
+      !shouldEscalate({
+        acknowledged: !!event.acknowledgedAt,
+        actionDone: !!recentSession,
+      })
+    ) {
       continue;
     }
 
@@ -285,13 +333,20 @@ export async function advancePendingEscalations(): Promise<number> {
 
     if (existingNext) continue;
 
-    // Check if delay has passed
-    const nextConfig = ESCALATION_LEVELS.find((l) => l.level === nextLevel);
+    // Resolve the next rung + its grace from the shared ladder. currentIndex is
+    // 0-based (level - 1); resolveGraceMs(currentIndex) = wait after this step
+    // before escalating to the next.
+    const currentIndex = event.level - 1;
+    if (!nextStep(ESCALATION_LADDER, currentIndex)) continue; // terminal rung
+    const nextConfig = ESCALATION_LEVELS[currentIndex + 1];
     if (!nextConfig) continue;
 
-    const sentAt = event.sentAt!;
-    const delayMs = nextConfig.delayMinutes * 60 * 1000;
-    if (Date.now() - sentAt.getTime() < delayMs) continue;
+    const messageType =
+      ((event.metadata as Record<string, unknown> | null)?.reason as string) ??
+      "missed_session";
+    const grace = resolveGraceMs(ESCALATION_LADDER, currentIndex, messageType);
+    if (grace == null) continue;
+    if (Date.now() - event.sentAt!.getTime() < grace) continue;
 
     // Create next level event
     await prisma.escalationEvent.create({

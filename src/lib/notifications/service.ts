@@ -12,6 +12,7 @@
 import { prisma } from "@/lib/prisma";
 import type { EscalationChannel } from "@prisma/client";
 import { getTelegramClient, telegramNudgesEnabled } from "@/lib/telegram/connect";
+import { WHATSAPP_UPGRADE_TEMPLATE } from "@/lib/escalation/segmentation";
 
 interface NotificationPayload {
   userId: string;
@@ -50,7 +51,17 @@ export async function sendNotification(
 }
 
 /**
- * Push notification — creates an in-app notification record.
+ * Push notification — registers an in-app reminder and best-effort delivers a
+ * real web push.
+ *
+ * Delivery-aware (cost-safety linchpin): web-push transport is no longer fire-
+ * and-forget. We count how many subscriptions actually accepted the push and
+ * record that outcome (`pushSubscriptions` / `pushDelivered`) on the in-app
+ * notification, so cost reports can see real device reach (the ladder is only a
+ * cost lever once push adoption > 0). The function still returns `true` when the
+ * in-app reminder is registered — that surface always reaches the user on next
+ * app open — but a configured-yet-undelivered push now logs a warning instead of
+ * silently reporting success.
  */
 async function sendPushNotification(
   payload: NotificationPayload
@@ -58,16 +69,8 @@ async function sendPushNotification(
   const title = (payload.metadata.title as string) ?? "Study Reminder";
   const message = (payload.metadata.message as string) ?? "You have a session waiting!";
 
-  // Save in-app notification
-  await prisma.notification.create({
-    data: {
-      userId: payload.userId,
-      type: "push",
-      title,
-      message,
-      metadata: { templateId: payload.templateId },
-    },
-  });
+  let subscriptionCount = 0;
+  let deliveredCount = 0;
 
   // Send real web push if VAPID configured
   const vapidPublic = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -85,6 +88,7 @@ async function sendPushNotification(
       const subscriptions = await prisma.pushSubscription.findMany({
         where: { userId: payload.userId },
       });
+      subscriptionCount = subscriptions.length;
 
       // data.url → where the tap navigates; data.escalationEventId → lets the
       // service worker ACK this escalation (push-first cost gate, see sw-push.js).
@@ -107,6 +111,7 @@ async function sendPushNotification(
             { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
             pushPayload
           );
+          deliveredCount++;
         } catch (err) {
           const statusCode = (err as { statusCode?: number }).statusCode;
           if (statusCode === 410 || statusCode === 404) {
@@ -120,6 +125,29 @@ async function sendPushNotification(
     }
   }
 
+  // In-app notification — the always-available free reminder surface. Carries
+  // the physical web-push delivery outcome for cost/adoption observability.
+  await prisma.notification.create({
+    data: {
+      userId: payload.userId,
+      type: "push",
+      title,
+      message,
+      metadata: {
+        templateId: payload.templateId,
+        pushSubscriptions: subscriptionCount,
+        pushDelivered: deliveredCount,
+      },
+    },
+  });
+
+  if (subscriptionCount > 0 && deliveredCount === 0) {
+    console.warn(
+      `Push not delivered for user ${payload.userId}: ${subscriptionCount} subscription(s), 0 delivered`
+    );
+  }
+
+  // The L1 reminder is registered in-app regardless of web-push transport result.
   return true;
 }
 
@@ -168,7 +196,9 @@ async function sendTelegramNotification(
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const userName = esc((payload.metadata.userName as string) ?? "Student");
   let text: string;
-  if (payload.templateId === "whatsapp_pressure_stats") {
+  if (payload.templateId === WHATSAPP_UPGRADE_TEMPLATE) {
+    text = `📚 Salut ${userName}! Mementourile pe WhatsApp fac parte din abonamentul premium eTutor. Continuă cu acces complet și păstrează-ți ritmul de studiu.`;
+  } else if (payload.templateId === "whatsapp_pressure_stats") {
     const stats = esc((payload.metadata.stats as string) ?? "Seria ta e în pericol!");
     text = `📚 Salut ${userName}! ${stats}\n\nDeschide eTutor și păstrează-ți seria de studiu.`;
   } else {
@@ -237,7 +267,22 @@ async function sendWhatsAppNotification(
 
     const userName = (payload.metadata.userName as string) ?? "Student";
 
-    if (payload.templateId === "whatsapp_friendly_reminder") {
+    if (payload.templateId === WHATSAPP_UPGRADE_TEMPLATE) {
+      // Final capped WhatsApp touch for free users — upgrade CTA. Requires the
+      // Meta-approved `study_upgrade` template (submit with funnel item 3; this
+      // path is dormant until WhatsApp is configured).
+      await client.sendTemplate(
+        normalizePhone(phone),
+        "study_upgrade",
+        "ro",
+        [
+          {
+            type: "body" as const,
+            parameters: [{ type: "text" as const, text: userName }],
+          },
+        ]
+      );
+    } else if (payload.templateId === "whatsapp_friendly_reminder") {
       await client.sendTemplate(
         normalizePhone(phone),
         "study_reminder",
