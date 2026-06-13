@@ -2,6 +2,38 @@
 
 import { useState, useEffect } from "react";
 
+/** Web-push supported in this browser. Safe to call during render/effects. */
+export function isPushSupported(): boolean {
+  return (
+    typeof navigator !== "undefined" &&
+    "serviceWorker" in navigator &&
+    typeof window !== "undefined" &&
+    "PushManager" in window
+  );
+}
+
+/**
+ * Register the push service worker, subscribe, and persist the subscription.
+ * Returns true on success. Shared by the Settings toggle and the post-login
+ * prompt so the subscribe flow has a single source of truth.
+ */
+export async function subscribeToPush(): Promise<boolean> {
+  const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  if (!vapidKey) return false;
+  const reg = await navigator.serviceWorker.register("/sw-push.js");
+  await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(vapidKey) as BufferSource,
+  });
+  const res = await fetch("/api/notifications/push-subscribe", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(sub.toJSON()),
+  });
+  return res.ok;
+}
+
 export function PushSubscribeButton() {
   const [supported, setSupported] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
@@ -40,21 +72,9 @@ export function PushSubscribeButton() {
         }
         setSubscribed(false);
       } else {
-        // Subscribe
-        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-        if (!vapidKey) return;
-
-        const sub = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidKey) as BufferSource,
-        });
-
-        await fetch("/api/notifications/push-subscribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(sub.toJSON()),
-        });
-        setSubscribed(true);
+        // Subscribe (shared flow)
+        const ok = await subscribeToPush();
+        setSubscribed(ok);
       }
     } catch (err) {
       console.error("Push subscription error:", err);

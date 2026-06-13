@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { GamificationToastContainer } from "@/components/gamification/gamification-toast";
+import { PushPrompt } from "@/components/push-prompt";
 
 export const metadata: Metadata = {
   title: "Dashboard - Tutor",
@@ -28,7 +29,10 @@ export default async function DashboardLayout({
         <header className="flex h-14 items-center justify-end border-b border-gray-800 px-4 sm:px-6">
           <NotificationBell />
         </header>
-        <main className="flex-1 p-4 pt-14 sm:p-6 lg:pt-6">{children}</main>
+        <main className="flex-1 p-4 pt-14 sm:p-6 lg:pt-6">
+          <PushPrompt />
+          {children}
+        </main>
       </div>
       <GamificationToastContainer />
     </div>
