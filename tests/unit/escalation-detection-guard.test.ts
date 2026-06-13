@@ -3,6 +3,7 @@ import {
   escalationDetectionEnabled,
   escalationMaxNewPerRun,
   escalationDetectionWindow,
+  escalationCooldownStart,
 } from "@/lib/escalation/engine";
 
 describe("Escalation detection storm-guard", () => {
@@ -69,6 +70,36 @@ describe("Escalation detection storm-guard", () => {
         const { lapsedAfter } = escalationDetectionWindow(now, bad);
         expect(now.getTime() - lapsedAfter.getTime()).toBe(14 * 24 * 60 * 60 * 1000);
       }
+    });
+  });
+
+  describe("escalationCooldownStart", () => {
+    const now = new Date("2026-06-13T12:00:00.000Z");
+
+    it("defaults to 7 days before now", () => {
+      expect(now.getTime() - escalationCooldownStart(now, 7).getTime()).toBe(
+        7 * 24 * 60 * 60 * 1000
+      );
+    });
+
+    it("honors a positive override", () => {
+      expect(now.getTime() - escalationCooldownStart(now, 3).getTime()).toBe(
+        3 * 24 * 60 * 60 * 1000
+      );
+    });
+
+    it("clamps invalid cooldownDays to 7", () => {
+      for (const bad of [0, -1, NaN]) {
+        expect(now.getTime() - escalationCooldownStart(now, bad).getTime()).toBe(
+          7 * 24 * 60 * 60 * 1000
+        );
+      }
+    });
+
+    it("exceeds the full ladder duration (≈48h) so a finished chain isn't re-started", () => {
+      const ladderMs = 2880 * 60 * 1000; // L6 delay
+      const cooldownMs = now.getTime() - escalationCooldownStart(now, 7).getTime();
+      expect(cooldownMs).toBeGreaterThan(ladderMs);
     });
   });
 });

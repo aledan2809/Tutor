@@ -62,6 +62,20 @@ export function escalationDetectionWindow(
 }
 
 /**
+ * Re-engagement cooldown start. A user with ANY escalation event created after
+ * this is NOT re-detected — so a finished/terminated chain (whose events are all
+ * COMPLETED, hence "no active escalation") doesn't get re-started every cron run.
+ * Must exceed the full ladder duration (L1→L6 ≈ 48h). Default 7 days.
+ */
+export function escalationCooldownStart(
+  now: Date,
+  cooldownDays = Number(process.env.ESCALATION_COOLDOWN_DAYS ?? 7)
+): Date {
+  const days = Number.isFinite(cooldownDays) && cooldownDays > 0 ? cooldownDays : 7;
+  return new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+}
+
+/**
  * Start an escalation chain for a user (e.g., missed session).
  * Creates a PENDING L1 event and immediately attempts to send it.
  */
@@ -496,10 +510,11 @@ export async function detectMissedSessions(): Promise<string[]> {
 
   const now = new Date();
   const { inactiveBefore, lapsedAfter } = escalationDetectionWindow(now);
+  const cooldownStart = escalationCooldownStart(now);
 
   // Find STUDENT users who lapsed recently (inactive ≥24h, but not dormant
-  // longer than the recency window) and have no active escalation. Capped per
-  // run to bound the blast radius on the first/large run.
+  // longer than the recency window) and are NOT already in / just out of a
+  // chain. Capped per run to bound the blast radius on the first/large run.
   const inactiveUsers = await prisma.user.findMany({
     where: {
       enrollments: {
@@ -517,10 +532,15 @@ export async function detectMissedSessions(): Promise<string[]> {
           },
         },
       },
-      // No active escalation
+      // No active chain AND no recent chain within the cooldown — otherwise a
+      // just-finished chain (all events COMPLETED → "no active") would be
+      // re-started every run.
       escalationEvents: {
         none: {
-          status: { in: ["PENDING", "ESCALATING"] },
+          OR: [
+            { status: { in: ["PENDING", "ESCALATING"] } },
+            { createdAt: { gte: cooldownStart } },
+          ],
         },
       },
     },
