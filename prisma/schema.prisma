@@ -108,6 +108,33 @@ model User {
   telegramUsername     String?
   telegramLinkedAt     DateTime?
   telegramConnectTokens TelegramConnectToken[]
+  // Marketing campaign attribution (UTM / per-voucher conversion tracking).
+  campaignSignup       CampaignSignup?
+}
+
+/// Marketing campaign attribution for a signed-up user (UTM + per-voucher
+/// conversion tracking). One row per user (unique userId). `isTest` keeps
+/// synthetic/seed accounts out of conversion stats. Conversion is read live via
+/// the user's subscription status; `activatedAt` records the first activation.
+model CampaignSignup {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  campaign    String?
+  voucherCode String?
+  landingPath String?
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmContent  String?
+  utmTerm     String?
+  isTest      Boolean   @default(false)
+  activatedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([campaign])
+  @@index([voucherCode])
 }
 
 /// Single-use, short-lived nonce binding a t.me/<bot>?start=<nonce> deep link

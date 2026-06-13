@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  CAMPAIGN_COOKIE,
+  CAMPAIGN_COOKIE_MAX_AGE,
+  attributionFromParams,
+  serializeAttribution,
+} from "@/lib/campaign-attribution";
 
 /**
  * Short marketing link for the Evaluarea Națională campaign:
@@ -29,5 +35,23 @@ export function GET(req: NextRequest) {
     secure: req.nextUrl.protocol === "https:",
     maxAge: 60 * 60 * 24 * 365,
   });
+
+  // Stamp campaign attribution (read at signup → CampaignSignup). Forwards any
+  // utm_* on the short link so paid-traffic sources are attributed.
+  const attr = serializeAttribution(
+    attributionFromParams(req.nextUrl.searchParams, "/evaluare", {
+      campaign: "evaluare",
+      voucher: voucher || undefined,
+    })
+  );
+  if (attr) {
+    res.cookies.set(CAMPAIGN_COOKIE, attr, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: req.nextUrl.protocol === "https:",
+      maxAge: CAMPAIGN_COOKIE_MAX_AGE,
+    });
+  }
   return res;
 }

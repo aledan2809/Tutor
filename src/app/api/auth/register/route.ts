@@ -4,6 +4,11 @@ import { withErrorHandler } from "@/lib/api-handler";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { attributeReferral, grantWelcomeVoucher, REFERRAL_COOKIE } from "@/lib/referral";
+import {
+  CAMPAIGN_COOKIE,
+  parseAttribution,
+  recordCampaignSignup,
+} from "@/lib/campaign-attribution";
 import { logger } from "@/lib/logger";
 
 const schema = z.object({
@@ -114,6 +119,19 @@ async function _POST(req: NextRequest) {
     }
   }
 
+  // ─── Campaign attribution (best-effort — never blocks signup) ───
+  // Read the one-shot campaign cookie (set by /evaluare, /bac, or any utm_* link).
+  // Fall back to voucher-only attribution when a code was used without a cookie.
+  const campaignCookieRaw = req.cookies.get(CAMPAIGN_COOKIE)?.value;
+  const campaignAttr =
+    parseAttribution(campaignCookieRaw) ??
+    (voucherCode ? { voucher: voucherCode.toUpperCase() } : null);
+  if (campaignAttr) {
+    await recordCampaignSignup(user.id, email, campaignAttr, {
+      activated: voucherApplied,
+    });
+  }
+
   // ─── Referral attribution (best-effort — never blocks signup) ───
   const refCode = req.cookies.get(REFERRAL_COOKIE)?.value;
   if (refCode) {
@@ -151,6 +169,9 @@ async function _POST(req: NextRequest) {
   // Consume the one-shot cookies regardless of outcome.
   if (refCode) {
     res.cookies.set(REFERRAL_COOKIE, "", { path: "/", maxAge: 0 });
+  }
+  if (campaignCookieRaw) {
+    res.cookies.set(CAMPAIGN_COOKIE, "", { path: "/", maxAge: 0 });
   }
   if (demoQuizId) {
     res.cookies.set("tutor_demo_quiz", "", { path: "/", maxAge: 0 });

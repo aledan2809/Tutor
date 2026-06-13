@@ -3,6 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
+import { markCampaignActivated } from "@/lib/campaign-attribution";
 
 /**
  * POST /api/activate — voucher-based activation (no Stripe needed for 100% vouchers).
@@ -101,6 +102,11 @@ async function _POST(req: NextRequest) {
   if ("requiresPayment" in result) {
     return NextResponse.json(result);
   }
+
+  // Conversion: a 100% voucher just activated this account — stamp the campaign
+  // attribution (best-effort, no-op if the user wasn't campaign-attributed).
+  await markCampaignActivated(userId);
+
   return NextResponse.json(result);
 }
 
