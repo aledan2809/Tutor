@@ -1,5 +1,31 @@
 # Project Status - Tutor
-Last Updated: 2026-06-10 (continuare: BAC Mate M1 grile Faza A COMPLETĂ 83/14 + Faza B pilot 2024 simulare)
+Last Updated: 2026-06-13 (linkuri campanii directe /evaluare + /bac — RO + voucher auto-aplicat, LIVE)
+
+## Current State (Sesiunea 2026-06-13 — Direct/mesh: linkuri campanii Evaluare + BAC)
+
+### Done (LIVE pe etutor.ro, verificat E2E pe prod)
+1. **Link campanie Evaluarea Națională** (`e0f0cde` + fix `608a657`) — **https://etutor.ro/evaluare** → 307 `/ro/auth/register?exam=en&voucher=EVALUARE100` + cookie `NEXT_LOCALE=ro`. Voucher `EVALUARE100` (100%, nelimitat, fără expirare) creat în prod, auto-aplicat la signup → abonament activ 1 an + înscriere automată Română cl. VIII + Matematică cl. VIII (ambele pre-bifate). Register localizat complet RO (textele hardcodate EN: „Creează cont", „Nume", parole, ecran succes).
+2. **Link campanie BAC** (`e7349d6`) — **https://etutor.ro/bac** → `/ro/auth/register?exam=bac&voucher=BAC2026FREE`. Voucher `BAC2026FREE` (100%, nelimitat) creat în prod. Preset 8 materii BAC filtrate (Română IX-XII pre-bifată — obligatorie; M1/M2/M3 + istorie/geo/bio/chimie selectabile per profil).
+3. **Mecanism reutilizabil**: preset `CAMPAIGNS` în `src/app/[locale]/auth/register/page.tsx` (`slugs` + `preselect` opțional + banner RO); rute scurte în afara `[locale]` (`src/app/evaluare/route.ts` + `src/app/bac/route.ts`, origin canonic `AUTH_URL`); aplicare voucher la signup în `src/app/api/auth/register/route.ts` (100% redeem atomic + sub activ, gate pe ≥1 materie înscrisă; <100% rută la `/dashboard/activare?voucher=X`). Vouchere config via env `EVALUARE_VOUCHER`/`BAC_VOUCHER` (schimbabile fără redeploy) + override ad-hoc `?voucher=`.
+4. **Referință la îndemână**: `LINKURI-CAMPANII.md` în rădăcina proiectului (`daa2606`).
+5. **/review (high)**: 4 buguri reale fixate — signin ignora `callbackUrl` (flux voucher <100% mort), redeem fără gate de înscriere, discount raportat înșelător la race-loss, redirect care scurgea `localhost:3013` din nginx Host.
+
+### Verificat E2E pe prod (conturi smoke create + șterse, usedCount decrementat)
+- `/evaluare` + register cu EVALUARE100 → user activ până 2027 + 2 materii înscrise ✓
+- `/bac` + register cu BAC2026FREE → user activ + materii bifate înscrise ✓
+- Build 224/224 teste, vecini VPS2 (L41) toți 200.
+
+### Incident rezolvat (vezi L240 Master)
+- Primul deploy: build VPS picat pe `ai-router` bare import din `whatsapp/dist` (bombă latentă din 2026-06-10) → etutor.ro 502 ~3 min → fix symlink `/var/www/whatsapp/node_modules/ai-router → /var/www/AIRouter` → rebuild OK.
+
+### RĂMAS / follow-up
+- Niciun item blocant pe acest feature. Idei viitoare (NU cerute): tracking conversie pe campanii (UTM / per-voucher), variante voucher cu maxUses/expirare pentru limitarea bugetului de campanie.
+- Items pre-existente Tutor neatinse: BAC M2/M3 grile+simulări, Faza B 12 simulări M1, UX tooltips /dashboard/practice, funnel re-engagement (Master TODO).
+
+### Lessons Learned (sesiunea 2026-06-13)
+- **L240** (în Master `knowledge/lessons-learned.md`) — shared-lib `dist` cu import bare al unui peer = bombă latentă pe primul rebuild al unui consumator VPS; peer-ul trebuie rezolvabil din node_modules-ul BIBLIOTECII, nu doar al consumatorului. Cross-ref L41/L93/L43.
+
+---
 
 ## Current State (Sesiunea 2026-06-10 — continuare mesh: Faza A complete + Faza B pilot)
 
