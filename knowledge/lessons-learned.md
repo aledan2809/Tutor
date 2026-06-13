@@ -125,3 +125,15 @@ Deploying the campaign-tracking migration (`0023_campaign_signup`) I ran a *reme
 **(b) Never `pm2 restart` until the build has actually succeeded.** Restarting on a failed build swaps the live process onto a broken/partial `.next`. Gate the restart on the build's exit code (chain with `&&`, or check before restarting), and curl the local port after.
 
 **(c) For a migration that adds a *model* (not just a column), the client MUST be regenerated before build** — a new column on an existing model often still typechecks, but a new model's accessor (`prisma.campaignSignup`) does not exist until `prisma generate` runs.
+
+## L12 — 2026-06-13 — Activating a dormant cron exposes latent loops; guard for re-detection, undeliverable channels, and dead-end rungs BEFORE flipping it on
+
+The escalation ladder had been built but never run (cron unscheduled). Turning it on surfaced three latent bugs that unit tests on the happy path never hit — caught by reasoning through the *steady state*, then verified live with a controlled manual run before leaving the schedule active.
+
+**(a) "No active escalation" ≠ "not recently escalated".** `detectMissedSessions` excluded only PENDING/ESCALATING events. A finished chain is all-COMPLETED → the user has "no active escalation" → re-detected every run → a fresh L1 + in-app reminder every 15 min, forever. Fix = a **cooldown** (exclude users with ANY escalation event created within N days, N > full-ladder duration). The "is this entity already being processed?" check for any recurring job must cover *recently-finished*, not just *in-flight*.
+
+**(b) A channel that can't deliver must be SKIPPED, not retried.** With WhatsApp/SMS unconfigured, the send returns false → the engine reverted to PENDING → retried forever. Added `isPaidChannelDeliverable` (WhatsApp needs config OR a linked+enabled Telegram; SMS needs its gateway) → escalate past an undeliverable rung. A boolean "send failed" can't distinguish "try later" from "can never send here" — decide deliverability *before* attempting.
+
+**(c) An instructor-facing rung with no instructor is the END of the chain, not a failure to retry.** Self-serve students have no INSTRUCTOR enrollment → the L5 email send returned false → infinite retry. Pre-check (`userHasInstructor`) and terminate instead.
+
+**(d) Activate guarded + staged.** Opt-in env flag (deploy ≠ activate), recency window + per-run cap (bounded blast radius — measured 4 real students first), then a **manual single cron run inspected** (events created? channel? isTest stamped? in-app rows?) *before* scheduling the 15-min job. When the manual run revealed bug (a), `ESCALATION_DETECT_ENABLED=false` was the instant kill-switch while fixing — the reason the flag exists.
