@@ -10,7 +10,9 @@
 
 ---
 
-## [ ] 🛈 UX — Tooltips explicative (mouseover) pe pagina de Practică (cerut 2026-06-10)
+## [x] 🛈 UX — Tooltips explicative (mouseover) pe pagina de Practică — DONE 2026-06-13
+
+> Componentă reutilizabilă `InfoTooltip` (`src/components/ui/info-tooltip.tsx`) — hover + focus (tastatură/a11y) + tap (mobil, unde hover nu există), `role="tooltip"` + `aria-describedby`. Cablată în `SessionSelector` pe cele 3 statistici + cardul recomandat + cele 6 tipuri de sesiune (ⓘ ca overlay sibling, ca să nu fie buton-în-buton). Texte RO+EN sub `sessions.tip.*`. tsc + build OK.
 
 Pe `/dashboard/practice` (pagina cu „Întrebări disponibile / Capitole studiate / Puncte slabe" + tipurile de sesiune), adaugă **tooltips cu mouseover explicativ la TOATE** elementele — utilizatorul trebuie să înțeleagă ce înseamnă fiecare fără ghicit:
 - **Cele 3 statistici**: „Întrebări disponibile" (câte grile sunt în materie), „Capitole studiate" (câte capitole ai atins), „Puncte slabe" (subiecte unde ai greșit recent).
@@ -626,27 +628,29 @@ Created `Tutor/AUDIT_GAPS.md` with 9 gaps from TRUE-E2E-FULL-2026-05-11 audit.
 
 ---
 
-## [ ] Fix AGT-001 — PATCH handler on admin/questions/[id]
+## [x] Fix AGT-001 — PATCH handler on admin/questions/[id] — ALREADY DONE (verified 2026-06-13)
 
-Add `export const PATCH` to `src/app/api/admin/questions/[id]/route.ts` for partial updates.
-
----
-
-## [ ] Fix AGT-003 — Calendar page empty
-
-Configure Google Calendar OAuth env vars on VPS2 OR add "Connect Google Calendar" CTA with clear explanation.
+`src/app/api/admin/questions/[id]/route.ts:107` already exports `PATCH = withErrorHandler(_PUT)` with an all-optional zod schema (partial update). Stale marker.
 
 ---
 
-## [ ] Fix AGT-004 — Seed aviation bibliography
+## [~] Fix AGT-003 — Calendar page empty — CTA exists; OAuth env = USER action (verified 2026-06-13)
+
+The "Connect Google Calendar" CTA already exists (`CalendarConnect` in `src/app/[locale]/dashboard/calendar/page.tsx`). The page reads "empty" only because Google OAuth env vars aren't set on VPS2. Remaining = **user action**: provision Google Calendar OAuth creds + set env on VPS2. No code change needed.
+
+---
+
+## [ ] Fix AGT-004 — Seed aviation bibliography — DEFERRED 2026-06-13
 
 Run POST /api/admin/bibliography to add items for aviation domain.
+> Deferred: needs real aviation reference content (won't fabricate bibliography), and the Aviation domain is leftover non-curriculum demo data (etutor = RO school tutoring) whose product value is unconfirmed. Decide whether to keep/retire the Aviation domain before seeding it.
 
 ---
 
-## [ ] WG Fixes — a11y 55/100 + mobile-tester 75/100
+## [ ] WG Fixes — a11y 55/100 + mobile-tester 75/100 — DEFERRED 2026-06-13
 
 Use Website Guru (`POST guru.techbiz.ae/api/fix`) to fix AGT-008 (a11y) + AGT-009 (mobile touch targets).
+> Deferred from the quick-wins batch: this is a multi-page audit + WG-driven loop, best run as a focused TWG-GW session (not a single quick fix). Pairs with the "Mobile touch targets" item above.
 
 ---
 

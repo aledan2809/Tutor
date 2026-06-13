@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 
 interface SessionTypeOption {
   type: string;
@@ -57,15 +58,24 @@ export function SessionSelector({
       <div className="grid grid-cols-3 gap-4">
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
           <p className="text-2xl font-bold text-white">{stats.totalQuestions}</p>
-          <p className="text-xs text-gray-500">{t("statsQuestions")}</p>
+          <div className="flex items-center justify-center gap-1">
+            <p className="text-xs text-gray-500">{t("statsQuestions")}</p>
+            <InfoTooltip text={t("tip.statsQuestions")} label={t("infoLabel")} />
+          </div>
         </div>
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
           <p className="text-2xl font-bold text-white">{stats.topicsStudied}</p>
-          <p className="text-xs text-gray-500">{t("statsTopics")}</p>
+          <div className="flex items-center justify-center gap-1">
+            <p className="text-xs text-gray-500">{t("statsTopics")}</p>
+            <InfoTooltip text={t("tip.statsTopics")} label={t("infoLabel")} />
+          </div>
         </div>
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
           <p className="text-2xl font-bold text-red-400">{stats.weakAreas}</p>
-          <p className="text-xs text-gray-500">{t("statsWeak")}</p>
+          <div className="flex items-center justify-center gap-1">
+            <p className="text-xs text-gray-500">{t("statsWeak")}</p>
+            <InfoTooltip text={t("tip.statsWeak")} label={t("infoLabel")} />
+          </div>
         </div>
       </div>
 
@@ -76,8 +86,11 @@ export function SessionSelector({
             {t("recommended")}
           </span>
         </div>
-        <h3 className="mb-1 text-lg font-semibold text-white">
-          {SESSION_ICONS[recommended.type]} {typeLabel(recommended.type)}
+        <h3 className="mb-1 flex items-center gap-2 text-lg font-semibold text-white">
+          <span>
+            {SESSION_ICONS[recommended.type]} {typeLabel(recommended.type)}
+          </span>
+          <InfoTooltip text={t(`tip.${recommended.type}`)} label={t("infoLabel")} />
         </h3>
         <p className="mb-3 text-sm text-gray-400">{reasonText(recommended.reason)}</p>
         <div className="mb-4 flex gap-4 text-sm text-gray-500">
@@ -100,22 +113,26 @@ export function SessionSelector({
         </h3>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {availableTypes
-            .filter((t) => t.type !== recommended.type)
+            .filter((st) => st.type !== recommended.type)
             .map((st) => (
-              <button
-                key={st.type}
-                onClick={() => onSelect(st.type)}
-                disabled={loading}
-                className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-left transition-colors hover:border-gray-700 disabled:opacity-50"
-              >
-                <h4 className="font-medium text-white">
-                  {SESSION_ICONS[st.type]} {typeLabel(st.type)}
-                </h4>
-                <div className="mt-1 flex gap-3 text-xs text-gray-500">
-                  <span>{Math.round(st.duration / 60)} min</span>
-                  <span>{st.questionCount} {t("questions")}</span>
-                </div>
-              </button>
+              <div key={st.type} className="relative">
+                <button
+                  onClick={() => onSelect(st.type)}
+                  disabled={loading}
+                  className="w-full rounded-xl border border-gray-800 bg-gray-900 p-4 pr-10 text-left transition-colors hover:border-gray-700 disabled:opacity-50"
+                >
+                  <h4 className="font-medium text-white">
+                    {SESSION_ICONS[st.type]} {typeLabel(st.type)}
+                  </h4>
+                  <div className="mt-1 flex gap-3 text-xs text-gray-500">
+                    <span>{Math.round(st.duration / 60)} min</span>
+                    <span>{st.questionCount} {t("questions")}</span>
+                  </div>
+                </button>
+                <span className="absolute right-2 top-2">
+                  <InfoTooltip text={t(`tip.${st.type}`)} label={t("infoLabel")} />
+                </span>
+              </div>
             ))}
         </div>
       </div>

@@ -82,6 +82,18 @@
       "recovery": "Sesiune de recuperare",
       "intensive": "Sesiune intensivă"
     },
+    "infoLabel": "Detalii",
+    "tip": {
+      "statsQuestions": "Câte grile sunt disponibile în materia selectată.",
+      "statsTopics": "Câte capitole ai atins până acum.",
+      "statsWeak": "Subiecte unde ai greșit recent — pe astea le țintește remedierea.",
+      "micro": "2 min · 5 întrebări — recapitulare scurtă, ideală între activități.",
+      "quick": "10 min · 15 întrebări — practica obișnuită de zi cu zi.",
+      "deep": "20 min · 30 întrebări — antrenament amplu, când ai timp.",
+      "repair": "15 min · 20 întrebări — se concentrează pe punctele tale slabe.",
+      "recovery": "10 min · 15 întrebări — reia întrebările pe care le-ai greșit anterior.",
+      "intensive": "20 min · 30 întrebări — ritm și dificultate crescute, pentru antrenament intens."
+    },
     "reasons": {
       "regular": "Practică obișnuită",
       "daysSince": "{n} zile de la ultima sesiune",

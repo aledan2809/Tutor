@@ -82,6 +82,18 @@
       "recovery": "Recovery session",
       "intensive": "Intensive session"
     },
+    "infoLabel": "Details",
+    "tip": {
+      "statsQuestions": "How many practice questions are available in the selected subject.",
+      "statsTopics": "How many chapters you have covered so far.",
+      "statsWeak": "Topics you got wrong recently — repair sessions target these.",
+      "micro": "2 min · 5 questions — a quick refresher between activities.",
+      "quick": "10 min · 15 questions — your everyday practice.",
+      "deep": "20 min · 30 questions — a longer workout when you have time.",
+      "repair": "15 min · 20 questions — focuses on your weak areas.",
+      "recovery": "10 min · 15 questions — replays questions you previously got wrong.",
+      "intensive": "20 min · 30 questions — higher pace and difficulty for intense practice."
+    },
     "reasons": {
       "regular": "Regular practice",
       "daysSince": "{n} days since last session",
