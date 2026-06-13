@@ -44,3 +44,7 @@ next-env.d.ts
 
 # Exam-bank draft rollback lists (runtime artifacts, written on apply)
 scripts/_rollback/
+
+# Master [7] plugin audit artifacts (screenshots/auth state — regenerable)
+.tester/
+.tester-screenshots/
