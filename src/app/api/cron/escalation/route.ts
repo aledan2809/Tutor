@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { detectMissedSessions, advancePendingEscalations } from "@/lib/escalation/engine";
+import {
+  detectMissedSessions,
+  advancePendingEscalations,
+  escalationDetectionEnabled,
+} from "@/lib/escalation/engine";
 import { withErrorHandler } from "@/lib/api-handler";
 
 /**
@@ -28,6 +32,7 @@ async function _POST(req: NextRequest) {
 
   return NextResponse.json({
     success: true,
+    detectionEnabled: escalationDetectionEnabled(),
     missedSessions: missedUserIds.length,
     escalationsAdvanced: advancedCount,
     timestamp: new Date().toISOString(),

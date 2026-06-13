@@ -27,6 +27,39 @@ interface EscalationContext {
   metadata?: Record<string, unknown>;
 }
 
+// ─── Storm guard for cron-driven missed-session detection ───
+// The ladder was dormant in prod (no cron). Turning it on must NOT erupt a
+// retroactive storm: only re-engage users who lapsed RECENTLY (re-engagement
+// has value there, not for months-dormant accounts) and cap how many new chains
+// a single run starts. Detection is opt-in (ESCALATION_DETECT_ENABLED=true) so
+// deploying the code alone changes nothing — activation = env flag + scheduling.
+
+/** New missed-session chains are started only when this is explicitly enabled. */
+export function escalationDetectionEnabled(): boolean {
+  return process.env.ESCALATION_DETECT_ENABLED === "true";
+}
+
+/** Max new escalation chains a single cron run may start (blast-radius cap). */
+export function escalationMaxNewPerRun(): number {
+  const n = Number(process.env.ESCALATION_MAX_NEW_PER_RUN ?? 50);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 50;
+}
+
+/**
+ * The lastActivityDate window for "recently lapsed" students: inactive for ≥24h
+ * but not dormant longer than `recencyDays` (default 14). Pure for testability.
+ */
+export function escalationDetectionWindow(
+  now: Date,
+  recencyDays = Number(process.env.ESCALATION_RECENCY_DAYS ?? 14)
+): { inactiveBefore: Date; lapsedAfter: Date } {
+  const days = Number.isFinite(recencyDays) && recencyDays > 0 ? recencyDays : 14;
+  return {
+    inactiveBefore: new Date(now.getTime() - 24 * 60 * 60 * 1000),
+    lapsedAfter: new Date(now.getTime() - days * 24 * 60 * 60 * 1000),
+  };
+}
+
 /**
  * Start an escalation chain for a user (e.g., missed session).
  * Creates a PENDING L1 event and immediately attempts to send it.
@@ -396,10 +429,17 @@ export async function cancelEscalation(userId: string): Promise<number> {
  * Detect users with missed sessions who need escalation.
  */
 export async function detectMissedSessions(): Promise<string[]> {
-  const now = new Date();
-  const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  // Guard: never start NEW chains unless explicitly enabled (prevents the
+  // dormant-ladder activation from erupting). advancePendingEscalations still
+  // runs separately to advance any already-started chains.
+  if (!escalationDetectionEnabled()) return [];
 
-  // Find users with active enrollments who haven't had a session in 24h+
+  const now = new Date();
+  const { inactiveBefore, lapsedAfter } = escalationDetectionWindow(now);
+
+  // Find STUDENT users who lapsed recently (inactive ≥24h, but not dormant
+  // longer than the recency window) and have no active escalation. Capped per
+  // run to bound the blast radius on the first/large run.
   const inactiveUsers = await prisma.user.findMany({
     where: {
       enrollments: {
@@ -408,12 +448,12 @@ export async function detectMissedSessions(): Promise<string[]> {
           roles: { has: "STUDENT" },
         },
       },
-      // Has gamification (meaning they've been active before)
+      // Recently lapsed: 24h+ idle but within the recency window.
       gamification: {
         some: {
           lastActivityDate: {
-            lt: oneDayAgo,
-            not: null,
+            lt: inactiveBefore,
+            gte: lapsedAfter,
           },
         },
       },
@@ -425,6 +465,7 @@ export async function detectMissedSessions(): Promise<string[]> {
       },
     },
     select: { id: true },
+    take: escalationMaxNewPerRun(),
   });
 
   const userIds: string[] = [];
