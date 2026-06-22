@@ -115,6 +115,33 @@ model User {
   guardianLinks        Guardian[] @relation("GuardianChild")
   // Scheduled study reminders (fixed days + time → escalation cascade + deep-link).
   studyReminders       StudyReminder[]
+  // Parent monitoring escalations (as parent / as child).
+  parentEscAsParent    ParentEscalation[] @relation("ParentEscParent")
+  parentEscAsChild     ParentEscalation[] @relation("ParentEscChild")
+}
+
+/// One parent-monitoring episode: opened when a child ignores their whole
+/// cascade. The parent is re-notified every 30 min until they react; they can
+/// authorize an extra (full, incl. WhatsApp) cascade. Resolves positive when the
+/// child finally engages, negative when the authorized cascade also lapses.
+model ParentEscalation {
+  id                   String    @id @default(cuid())
+  parentId             String
+  childId              String
+  status               String    @default("awaiting_parent") // awaiting_parent | authorized | resolved_positive | resolved_negative
+  childChannel         String? // channel that finally reached the child (attribution)
+  openedFor            DateTime  @default(now()) // reference time the child's chain lapsed
+  lastParentNotifiedAt DateTime?
+  authorizedAt         DateTime?
+  resolvedAt           DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  parent User @relation("ParentEscParent", fields: [parentId], references: [id], onDelete: Cascade)
+  child  User @relation("ParentEscChild", fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([childId, status])
+  @@index([status])
 }
 
 /// A recurring scheduled study reminder. On its days+time it starts an

@@ -5,6 +5,7 @@ import {
   escalationDetectionEnabled,
 } from "@/lib/escalation/engine";
 import { runDueReminders } from "@/lib/escalation/reminders";
+import { runParentMonitoring } from "@/lib/escalation/parent-monitor";
 import { withErrorHandler } from "@/lib/api-handler";
 
 /**
@@ -33,6 +34,8 @@ async function _POST(req: NextRequest) {
     detectMissedSessions(),
     advancePendingEscalations(),
   ]);
+  // Parent monitoring runs after advancement so it sees the latest chain state.
+  const parentMonitoring = await runParentMonitoring();
 
   return NextResponse.json({
     success: true,
@@ -40,6 +43,7 @@ async function _POST(req: NextRequest) {
     remindersFired,
     missedSessions: missedUserIds.length,
     escalationsAdvanced: advancedCount,
+    parentMonitoring,
     timestamp: new Date().toISOString(),
   });
 }

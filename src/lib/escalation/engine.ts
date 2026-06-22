@@ -201,12 +201,15 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
   }
 
   // WhatsApp is PREMIUM-ONLY. A free (non-trialing) student's chain ends after
-  // email — no paid WhatsApp. Test accounts are exempt so journey-audit can
-  // exercise the full cascade.
+  // email — no paid WhatsApp. Test accounts are exempt (journey-audit), and a
+  // parent-authorized extra cascade may use WhatsApp regardless of plan.
+  const parentAuthorized =
+    (event.metadata as Record<string, unknown> | null)?.parentAuthorized === true;
   if (
     event.channel === "WHATSAPP" &&
     !isPaidSubscriber(event.user) &&
-    !event.isTest
+    !event.isTest &&
+    !parentAuthorized
   ) {
     await prisma.escalationEvent.update({
       where: { id: event.id },
