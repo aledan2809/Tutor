@@ -1,34 +1,22 @@
 /**
- * Free-vs-paid funnel segmentation for the escalation ladder.
+ * Free-vs-paid funnel segmentation for the escalation cascade.
  *
- * Product decision (re-engagement funnel, 2026-06-11): a FREE inactive learner
- * gets free nudges (push / Telegram / in-app) plus at most `WHATSAPP_FREE_CAP`
- * paid WhatsApp touches — the first three mimic the paid experience, the fourth
- * is an upgrade CTA, and beyond that the chain stops. A PAID (or trialing)
- * subscriber gets the full ladder. Instructor-facing rungs (SMS / email / call)
- * are reserved for subscribers until the own-number SMS gateway lands (funnel
- * item 3).
+ * Cascade (2026 funnel): App push → Telegram (if linked) → student email →
+ * WhatsApp. WhatsApp is PREMIUM-ONLY — free users' chain ends after email.
+ * Grace between steps is short in the morning window and relaxed in the evening
+ * (scheduled reminders set the window via messageType).
  *
  * These helpers are pure so the decision logic is unit-testable without a DB.
  */
 
 import type { LadderConfig, LadderStep } from "@aledan/notify-ladder";
 import type { EscalationChannel } from "@prisma/client";
-import { ESCALATION_LEVELS } from "./config";
-
-/** Max paid WhatsApp touches a free user receives before the upgrade wall. */
-export const WHATSAPP_FREE_CAP = 4;
-
-/** templateId for the final (capped) WhatsApp touch — the upgrade CTA. */
-export const WHATSAPP_UPGRADE_TEMPLATE = "whatsapp_upgrade_cta";
-
-/** Deep-link target for the upgrade CTA (locale middleware resolves the prefix). */
-export const UPGRADE_PATH = "/preturi";
+import { ESCALATION_LEVELS, CASCADE_GRACE_MINUTES } from "./config";
 
 /**
- * A subscriber gets the full experience. "trialing" counts as paid (they're
- * actively experiencing the paid tier). An expired `subscriptionEndsAt` demotes
- * the user to free even if the status string still says active.
+ * A subscriber gets the paid channels (incl. WhatsApp). "trialing" counts as
+ * paid. An expired `subscriptionEndsAt` demotes to free even if status says
+ * active.
  */
 export function isPaidSubscriber(u: {
   subscriptionStatus: string | null;
@@ -44,11 +32,10 @@ export function isPaidSubscriber(u: {
 }
 
 /**
- * Whether a PAID channel can actually deliver right now. If not (WhatsApp not
- * configured and no linked Telegram; SMS gateway not configured), the engine
- * must skip the rung — otherwise the send fails and the event retries forever.
- * Pure: the engine passes the resolved config booleans. PUSH/EMAIL/CALL are
- * always "deliverable" here (in-app / SMTP best-effort handled elsewhere).
+ * Whether a channel can actually deliver right now. Telegram needs a linked +
+ * enabled chat; WhatsApp needs config; SMS needs its gateway. PUSH/EMAIL are
+ * always deliverable (in-app / SMTP best-effort). The engine skips a rung that
+ * can't deliver so the event doesn't retry forever.
  */
 export function isPaidChannelDeliverable(
   channel: EscalationChannel,
@@ -59,40 +46,28 @@ export function isPaidChannelDeliverable(
     smsConfigured: boolean;
   }
 ): boolean {
-  if (channel === "WHATSAPP") {
-    return (ctx.telegramEnabled && ctx.telegramLinked) || ctx.whatsappConfigured;
-  }
+  if (channel === "TELEGRAM") return ctx.telegramEnabled && ctx.telegramLinked;
+  if (channel === "WHATSAPP") return ctx.whatsappConfigured;
   if (channel === "SMS") return ctx.smsConfigured;
   return true;
 }
 
-export type WhatsAppDecision =
-  | { action: "send"; templateId: string } // normal paid touch (1..cap-1)
-  | { action: "upgrade"; templateId: string } // final touch = upgrade CTA
-  | { action: "suppress" }; // past the cap → no more paid WhatsApp
+export type CascadeWindow = keyof typeof CASCADE_GRACE_MINUTES;
 
-/**
- * Decide how to handle a WhatsApp touch for a FREE user given how many paid
- * WhatsApp touches they've already received (`priorTouches` = completed,
- * actually-sent, non-test WhatsApp escalations).
- */
-export function decideWhatsAppForFreeUser(
-  priorTouches: number,
-  defaultTemplateId: string
-): WhatsAppDecision {
-  if (priorTouches >= WHATSAPP_FREE_CAP) return { action: "suppress" };
-  if (priorTouches === WHATSAPP_FREE_CAP - 1) {
-    return { action: "upgrade", templateId: WHATSAPP_UPGRADE_TEMPLATE };
-  }
-  return { action: "send", templateId: defaultTemplateId };
+/** Resolve the time-window from a reminder messageType (reason). */
+export function resolveCascadeWindow(messageType: string | undefined): CascadeWindow {
+  if (messageType?.startsWith("morning")) return "morning";
+  if (messageType?.startsWith("evening")) return "evening";
+  return "default";
 }
 
-// notify-ladder's LadderStep.channel union has no "call"; CALL maps to "email"
-// purely to satisfy the type. The ladder config is used ONLY for the decision
-// primitives (shouldEscalate / nextStep / resolveGraceMs) — the REAL channel +
-// template for each rung always come from ESCALATION_LEVELS, never from here.
+// notify-ladder's LadderStep.channel union has no "telegram"/"call"; those map
+// to free-ish stand-ins purely to satisfy the type. The ladder config drives
+// ONLY the decision primitives (shouldEscalate / nextStep / resolveGraceMs) —
+// the REAL channel + template for each rung always come from ESCALATION_LEVELS.
 const LADDER_CHANNEL: Record<EscalationChannel, LadderStep["channel"]> = {
   PUSH: "push",
+  TELEGRAM: "push",
   WHATSAPP: "whatsapp",
   SMS: "sms",
   EMAIL: "email",
@@ -100,15 +75,15 @@ const LADDER_CHANNEL: Record<EscalationChannel, LadderStep["channel"]> = {
 };
 
 /**
- * The escalation ladder expressed for `@aledan/notify-ladder`. Each step's
- * `graceMs` is the wait AFTER that step before escalating to the next rung —
- * i.e. the *next* level's `delayMinutes` (Tutor encodes delay as "before this
- * level"; notify-ladder encodes grace as "after this step"). The last step has
- * no successor → grace 0.
+ * The escalation cascade expressed for `@aledan/notify-ladder`. Grace is
+ * resolved per time-window via `graceMsFor` (fast morning / slow evening), so
+ * scheduled reminders escalate at the right pace for their window.
  */
 export const ESCALATION_LADDER: LadderConfig = {
   steps: ESCALATION_LEVELS.map((l, i) => ({
     channel: LADDER_CHANNEL[l.channel],
     graceMs: (ESCALATION_LEVELS[i + 1]?.delayMinutes ?? 0) * 60_000,
   })),
+  graceMsFor: (_step, messageType) =>
+    CASCADE_GRACE_MINUTES[resolveCascadeWindow(messageType)] * 60_000,
 };

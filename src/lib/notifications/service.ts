@@ -11,8 +11,7 @@
 
 import { prisma } from "@/lib/prisma";
 import type { EscalationChannel } from "@prisma/client";
-import { getTelegramClient, telegramNudgesEnabled } from "@/lib/telegram/connect";
-import { WHATSAPP_UPGRADE_TEMPLATE } from "@/lib/escalation/segmentation";
+import { getTelegramClient } from "@/lib/telegram/connect";
 
 interface NotificationPayload {
   userId: string;
@@ -32,8 +31,10 @@ export async function sendNotification(
     switch (payload.channel) {
       case "PUSH":
         return await sendPushNotification(payload);
+      case "TELEGRAM":
+        return await sendTelegramChannel(payload);
       case "WHATSAPP":
-        return await sendWhatsAppOrTelegram(payload);
+        return await sendWhatsAppNotification(payload);
       case "SMS":
         return await sendSMSNotification(payload);
       case "EMAIL":
@@ -152,30 +153,19 @@ async function sendPushNotification(
 }
 
 /**
- * Cost-saving substitution at the WhatsApp escalation level: if the user has
- * opted into Telegram (linked chat + FEATURE_TELEGRAM_NUDGES), send the nudge
- * for FREE on Telegram instead of a paid WhatsApp template. Degrades to
- * WhatsApp when Telegram isn't eligible or the send fails — the user still
- * gets reminded, just on the paid channel.
+ * Telegram channel (distinct cascade step, before email). Free nudge for users
+ * who linked their Telegram chat. Returns false when not linked / not enabled —
+ * the engine's deliverability guard skips the step in that case.
  */
-async function sendWhatsAppOrTelegram(
+async function sendTelegramChannel(
   payload: NotificationPayload
 ): Promise<boolean> {
-  if (telegramNudgesEnabled()) {
-    const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
-      select: { telegramChatId: true },
-    });
-    if (user?.telegramChatId) {
-      const sent = await sendTelegramNotification(payload, user.telegramChatId);
-      if (sent) return true;
-      // Telegram failed → fall through to paid WhatsApp so the user is still reached.
-      console.warn(
-        `Telegram nudge failed for user ${payload.userId}, falling back to WhatsApp`
-      );
-    }
-  }
-  return await sendWhatsAppNotification(payload);
+  const user = await prisma.user.findUnique({
+    where: { id: payload.userId },
+    select: { telegramChatId: true },
+  });
+  if (!user?.telegramChatId) return false;
+  return sendTelegramNotification(payload, user.telegramChatId);
 }
 
 /**
@@ -191,19 +181,13 @@ async function sendTelegramNotification(
   if (!client) return false;
 
   // sendText/sendInlineKeyboard default to parseMode HTML — escape interpolated
-  // values so a name/stat containing < > & can't break parsing (a failed send
-  // would silently degrade the user to paid WhatsApp).
+  // values so a name/stat containing < > & can't break parsing.
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const userName = esc((payload.metadata.userName as string) ?? "Student");
-  let text: string;
-  if (payload.templateId === WHATSAPP_UPGRADE_TEMPLATE) {
-    text = `📚 Salut ${userName}! Mementourile pe WhatsApp fac parte din abonamentul premium eTutor. Continuă cu acces complet și păstrează-ți ritmul de studiu.`;
-  } else if (payload.templateId === "whatsapp_pressure_stats") {
-    const stats = esc((payload.metadata.stats as string) ?? "Seria ta e în pericol!");
-    text = `📚 Salut ${userName}! ${stats}\n\nDeschide eTutor și păstrează-ți seria de studiu.`;
-  } else {
-    text = `📚 Salut ${userName}! Nu ai mai studiat de ceva vreme — hai înapoi să-ți păstrezi seria.`;
-  }
+  const stats = payload.metadata.stats ? esc(String(payload.metadata.stats)) : "";
+  const text = stats
+    ? `📚 Salut ${userName}! ${stats}\n\nDeschide eTutor și păstrează-ți seria de studiu.`
+    : `📚 Salut ${userName}! E timpul pentru un quiz scurt — hai să-ți păstrezi seria de studiu.`;
 
   // Absolute https URL for the Telegram button (relative paths aren't allowed).
   const base = (process.env.AUTH_URL ?? "").replace(/\/$/, "");
@@ -267,50 +251,19 @@ async function sendWhatsAppNotification(
 
     const userName = (payload.metadata.userName as string) ?? "Student";
 
-    if (payload.templateId === WHATSAPP_UPGRADE_TEMPLATE) {
-      // Final capped WhatsApp touch for free users — upgrade CTA. Requires the
-      // Meta-approved `study_upgrade` template (submit with funnel item 3; this
-      // path is dormant until WhatsApp is configured).
-      await client.sendTemplate(
-        normalizePhone(phone),
-        "study_upgrade",
-        "ro",
-        [
-          {
-            type: "body" as const,
-            parameters: [{ type: "text" as const, text: userName }],
-          },
-        ]
-      );
-    } else if (payload.templateId === "whatsapp_friendly_reminder") {
-      await client.sendTemplate(
-        normalizePhone(phone),
-        "study_reminder",
-        "ro",
-        [
-          {
-            type: "body" as const,
-            parameters: [{ type: "text" as const, text: userName }],
-          },
-        ]
-      );
-    } else if (payload.templateId === "whatsapp_pressure_stats") {
-      const stats = (payload.metadata.stats as string) ?? "Your streak is at risk!";
-      await client.sendTemplate(
-        normalizePhone(phone),
-        "study_pressure",
-        "ro",
-        [
-          {
-            type: "body" as const,
-            parameters: [
-              { type: "text" as const, text: userName },
-              { type: "text" as const, text: stats },
-            ],
-          },
-        ]
-      );
-    }
+    // Paid WhatsApp reminder (Premium-only — gated in the engine before we get
+    // here). Uses the Meta-approved `study_reminder` template.
+    await client.sendTemplate(
+      normalizePhone(phone),
+      "study_reminder",
+      "ro",
+      [
+        {
+          type: "body" as const,
+          parameters: [{ type: "text" as const, text: userName }],
+        },
+      ]
+    );
 
     return true;
   } catch (error) {
@@ -359,8 +312,9 @@ async function sendSMSNotification(
 }
 
 /**
- * Email notification via nodemailer.
- * L5: Sends email to the student's instructor.
+ * Email notification via nodemailer — a study reminder sent to the STUDENT
+ * (cascade step between Telegram and WhatsApp). Instructor/parent alerts are a
+ * separate concern (parent monitoring).
  */
 async function sendEmailNotification(
   payload: NotificationPayload
@@ -374,32 +328,19 @@ async function sendEmailNotification(
     return false;
   }
 
-  // Find the instructor for this user
-  const enrollment = await prisma.enrollment.findFirst({
-    where: {
-      userId: payload.userId,
-      isActive: true,
-      roles: { has: "STUDENT" },
-    },
-    include: { domain: true },
+  const user = await prisma.user.findUnique({
+    where: { id: payload.userId },
+    select: { email: true, name: true },
   });
-
-  if (!enrollment) return false;
-
-  const instructorEnrollment = await prisma.enrollment.findFirst({
-    where: {
-      domainId: enrollment.domainId,
-      isActive: true,
-      roles: { has: "INSTRUCTOR" },
-    },
-    include: { user: true },
-  });
-
-  const instructorEmail = instructorEnrollment?.user.email;
-  if (!instructorEmail) {
-    console.warn("No instructor email found");
+  if (!user?.email) {
+    console.warn(`No email for user ${payload.userId}`);
     return false;
   }
+
+  const userName = (payload.metadata.userName as string) ?? user.name ?? "Salut";
+  const base = (process.env.AUTH_URL ?? "https://etutor.ro").replace(/\/$/, "");
+  const rawUrl = payload.metadata.url as string | undefined;
+  const ctaUrl = rawUrl && rawUrl.startsWith("http") ? rawUrl : `${base}${rawUrl?.startsWith("/") ? rawUrl : "/"}`;
 
   try {
     const nodemailer = await import("nodemailer");
@@ -409,20 +350,16 @@ async function sendEmailNotification(
       auth: { user: smtpUser, pass: smtpPass },
     });
 
-    const userName = (payload.metadata.userName as string) ?? "A student";
-    const domainName = enrollment.domain.name;
-
     await transporter.sendMail({
-      from: process.env.EMAIL_FROM ?? "noreply@tutor.app",
-      to: instructorEmail,
-      subject: `[Tutor] Student Inactivity Alert — ${userName}`,
+      from: process.env.EMAIL_FROM ?? "noreply@etutor.ro",
+      to: user.email,
+      subject: "eTutor — e timpul pentru un quiz scurt",
       html: `
-        <h2>Student Inactivity Alert</h2>
-        <p><strong>${userName}</strong> has been inactive in <strong>${domainName}</strong> for an extended period.</p>
-        <p>The student has not responded to automated reminders (push, WhatsApp, SMS).</p>
-        <p>Please consider reaching out to help them get back on track.</p>
+        <p>Salut ${userName},</p>
+        <p>E timpul pentru un quiz scurt — păstrează-ți seria de studiu.</p>
+        <p><a href="${ctaUrl}" style="display:inline-block;background:#3b82f6;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none">Începe quiz-ul</a></p>
         <hr>
-        <p style="color: #888; font-size: 12px;">This is an automated alert from Tutor's escalation system.</p>
+        <p style="color:#888;font-size:12px">Memento automat de la eTutor.</p>
       `,
     });
 

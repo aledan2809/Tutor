@@ -14,9 +14,6 @@ import { sendNotification } from "@/lib/notifications/service";
 import { resolveIsTest, resolveIsTestForUser } from "@/lib/notifications/test-account";
 import {
   ESCALATION_LADDER,
-  UPGRADE_PATH,
-  WHATSAPP_UPGRADE_TEMPLATE,
-  decideWhatsAppForFreeUser,
   isPaidChannelDeliverable,
   isPaidSubscriber,
 } from "./segmentation";
@@ -176,11 +173,15 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     return;
   }
 
-  // Skip a PAID channel that can't deliver right now (WhatsApp unconfigured +
-  // no linked Telegram; SMS gateway unconfigured) — otherwise the send fails and
-  // the event retries forever. Applies to all users; makes cron activation safe
-  // while channels are still being wired (funnel item 3).
-  if (event.channel === "WHATSAPP" || event.channel === "SMS") {
+  // Skip a channel that can't deliver right now (Telegram not linked/enabled,
+  // WhatsApp unconfigured, SMS gateway unconfigured) — otherwise the send fails
+  // and the event retries forever. WhatsApp is the last rung, so skipping it
+  // ends the chain.
+  if (
+    event.channel === "TELEGRAM" ||
+    event.channel === "WHATSAPP" ||
+    event.channel === "SMS"
+  ) {
     const deliverable = isPaidChannelDeliverable(event.channel, {
       telegramLinked: Boolean(event.user.telegramChatId),
       telegramEnabled:
@@ -199,52 +200,22 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     }
   }
 
-  // Instructor-facing rungs with no instructor to alert are the natural end of
-  // the chain — terminate instead of retrying an unreachable level forever
-  // (self-serve students have no instructor enrollment).
-  if (event.channel === "EMAIL" || event.channel === "CALL") {
-    if (!(await userHasInstructor(event.userId))) {
-      await prisma.escalationEvent.update({
-        where: { id: event.id },
-        data: { status: "COMPLETED" },
-      });
-      return;
-    }
+  // WhatsApp is PREMIUM-ONLY. A free (non-trialing) student's chain ends after
+  // email — no paid WhatsApp. Test accounts are exempt so journey-audit can
+  // exercise the full cascade.
+  if (
+    event.channel === "WHATSAPP" &&
+    !isPaidSubscriber(event.user) &&
+    !event.isTest
+  ) {
+    await prisma.escalationEvent.update({
+      where: { id: event.id },
+      data: { status: "COMPLETED" },
+    });
+    return;
   }
 
-  // Free-vs-paid funnel segmentation (skip for test accounts so journey-audit
-  // can exercise the full ladder). We gate only the PAID STUDENT channels for
-  // free users: WhatsApp is capped (last touch = upgrade CTA, then skipped) and
-  // SMSLink SMS is skipped until the own-number gateway lands (funnel item 3).
-  // Free in-app push + the instructor-facing EMAIL/CALL rungs (no per-message
-  // cost) flow unchanged. Paid (or trialing) subscribers run the full ladder.
-  let sendTemplateId = event.templateId ?? "";
-  if (!isPaidSubscriber(event.user) && !event.isTest) {
-    if (event.channel === "WHATSAPP") {
-      const priorWa = await prisma.escalationEvent.count({
-        where: {
-          userId: event.userId,
-          channel: "WHATSAPP",
-          status: "COMPLETED",
-          sentAt: { not: null },
-          isTest: false,
-        },
-      });
-      const decision = decideWhatsAppForFreeUser(priorWa, event.templateId ?? "");
-      if (decision.action === "suppress") {
-        // Past the free WhatsApp cap → skip this paid rung; the chain still
-        // advances to the free instructor-facing levels (no paid send).
-        await escalateToNextLevel(event.id, event.level);
-        return;
-      }
-      sendTemplateId = decision.templateId;
-    } else if (event.channel === "SMS") {
-      // SMSLink SMS is paid → skip for free users (own-number gateway = funnel
-      // item 3). The chain still advances to the free instructor levels.
-      await escalateToNextLevel(event.id, event.level);
-      return;
-    }
-  }
+  const sendTemplateId = event.templateId ?? "";
 
   // Check SMS daily limit
   if (event.channel === "SMS") {
@@ -273,9 +244,9 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     data: { status: "ESCALATING" },
   });
 
-  // Generate stats for L3 WhatsApp pressure message
+  // Telegram nudge can carry a short progress line (streak/XP at risk).
   const metadata = (event.metadata as Record<string, unknown>) ?? {};
-  if (event.level === 3) {
+  if (event.channel === "TELEGRAM") {
     const stats = await generateUserStats(event.userId);
     metadata.stats = stats;
   }
@@ -290,11 +261,8 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
       userName: event.user.name ?? "Student",
       userEmail: event.user.email ?? "",
       level: event.level,
-      // Upgrade CTA points the deep link at pricing; otherwise keep any caller URL.
-      url:
-        sendTemplateId === WHATSAPP_UPGRADE_TEMPLATE
-          ? UPGRADE_PATH
-          : (metadata.url as string | undefined),
+      // Deep-link target (set by scheduled reminders); defaults to home on tap.
+      url: metadata.url as string | undefined,
       // Embedded in the web-push payload so the service worker can ACK this
       // event on tap (→ /api/escalation/ack → acknowledgedAt → skip paid escalation).
       escalationEventId: event.id,
@@ -324,29 +292,6 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
       data: { status: "PENDING" },
     });
   }
-}
-
-/**
- * Whether the user has an instructor (same domain, INSTRUCTOR role) to receive
- * the L5/L6 instructor-facing escalations. Mirrors the lookup in
- * sendEmailNotification / triggerInstructorCall so the engine can terminate the
- * chain early when there's nobody to alert.
- */
-async function userHasInstructor(userId: string): Promise<boolean> {
-  const enrollment = await prisma.enrollment.findFirst({
-    where: { userId, isActive: true, roles: { has: "STUDENT" } },
-    select: { domainId: true },
-  });
-  if (!enrollment) return false;
-  const instructor = await prisma.enrollment.findFirst({
-    where: {
-      domainId: enrollment.domainId,
-      isActive: true,
-      roles: { has: "INSTRUCTOR" },
-    },
-    select: { id: true },
-  });
-  return Boolean(instructor);
 }
 
 /**

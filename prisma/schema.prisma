@@ -414,6 +414,7 @@ enum EscalationStatus {
 
 enum EscalationChannel {
   PUSH
+  TELEGRAM
   WHATSAPP
   SMS
   EMAIL
