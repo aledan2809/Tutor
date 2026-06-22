@@ -149,3 +149,11 @@ A real Google-login student (enrolled only in the leftover non-curriculum `aviat
 **(c) Don't swallow fetch errors into the loading state.** `.catch(() => {})` left `loading=true`; at minimum clear the gating state in catch so the UI shows an error/empty message.
 
 **Adjacent product issue (flagged, not fixed):** real RO students shouldn't be able to enroll in `aviation` (leftover demo), and Google-OAuth signup may skip subject selection → users land with no curriculum subjects. Separate onboarding/data cleanup.
+
+## L14 — 2026-06-22 — `window` is a Postgres reserved keyword; quote it in raw SQL (a seed in a BEGIN block silently rolled back the whole transaction)
+
+The family-plan build added a `StudyReminder.window` column. Prisma created it fine (the migration's `"window" TEXT` is quoted), but a hand-written seed used `INSERT ... (id, "userId", label, window, ...)` — unquoted — which Postgres parsed as the start of a `WINDOW` clause → `syntax error at or near "window"`. Because the seed was wrapped in `BEGIN; ...; COMMIT;`, the error aborted the transaction and the *earlier* statements (the Premium update + Guardian insert that had reported `UPDATE 1` / `INSERT 0 1`) were **rolled back** — the verification SELECTs then showed nothing applied, which momentarily looked like the writes had failed.
+
+**(a) Quote reserved identifiers in raw SQL** — `"window"`, `"order"`, `"user"`, `"end"`, etc. Prisma quotes everything it generates, so reserved-word column names only bite hand-written SQL.
+**(b) `UPDATE 1` / `INSERT 0 1` inside an open transaction is not "done"** — a later error rolls them back. Read to the final `COMMIT` (vs `ROLLBACK`) before trusting any row counts, and re-run the verification SELECTs after commit.
+**(c) Prefer column names that aren't SQL keywords** when you know data will be touched by raw SQL/ops scripts (would have avoided this entirely).
