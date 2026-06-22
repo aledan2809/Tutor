@@ -113,6 +113,33 @@ model User {
   // Parent (WATCHER) ↔ child (STUDENT) links — a parent sees ONLY linked children.
   childrenLinks        Guardian[] @relation("GuardianParent")
   guardianLinks        Guardian[] @relation("GuardianChild")
+  // Scheduled study reminders (fixed days + time → escalation cascade + deep-link).
+  studyReminders       StudyReminder[]
+}
+
+/// A recurring scheduled study reminder. On its days+time it starts an
+/// escalation cascade (push → Telegram → email → WhatsApp) with a deep-link into
+/// the right session. `window` (morning/evening) sets the cascade grace pace.
+model StudyReminder {
+  id          String   @id @default(cuid())
+  userId      String
+  label       String?
+  window      String   @default("morning") // morning | evening — drives cascade grace
+  sessionType String   @default("quick")   // quick | deep | ...
+  daysOfWeek  Int[]                          // JS getDay: 0=Sun .. 6=Sat
+  hour        Int                            // 0-23, local to timezone
+  minute      Int      @default(0)
+  domainSlug  String?                        // deep-link target subject
+  timezone    String   @default("Europe/Bucharest")
+  isActive    Boolean  @default(true)
+  lastFiredOn String?                        // YYYY-MM-DD in timezone (anti double-fire)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isActive])
 }
 
 /// Parent↔child link for the family plan. A WATCHER (parent) is scoped to ONLY

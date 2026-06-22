@@ -44,6 +44,27 @@ export default function PracticePage() {
   // Admins/superadmins + allowlisted users may practice non-curriculum domains.
   const canSeeRestricted = canSeeRestrictedDomains(session?.user);
 
+  // Deep-link from a reminder: ?start=<sessionType>&domain=<slug> auto-starts.
+  const [autoStartType, setAutoStartType] = useState<string | null>(null);
+  const [autoStartDomain, setAutoStartDomain] = useState<string | null>(null);
+  const [autoStarted, setAutoStarted] = useState(false);
+
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    const s = p.get("start");
+    if (s) {
+      setAutoStartType(s);
+      setAutoStartDomain(p.get("domain"));
+    }
+  }, []);
+
+  // Honour the deep-link's target subject once domains are loaded.
+  useEffect(() => {
+    if (autoStartDomain && domains.some((d) => d.slug === autoStartDomain)) {
+      setSelectedDomain(autoStartDomain);
+    }
+  }, [autoStartDomain, domains]);
+
   useEffect(() => {
     // Wait until the session resolves so the restricted-domain gate is known.
     if (status === "loading") return;
@@ -108,6 +129,15 @@ export default function PracticePage() {
       setStarting(false);
     }
   };
+
+  // Fire the deep-linked autostart once the target domain's session data is ready.
+  useEffect(() => {
+    if (autoStarted || !autoStartType || starting) return;
+    if (!data || data.stats.totalQuestions === 0 || !selectedDomain) return;
+    if (autoStartDomain && selectedDomain !== autoStartDomain) return;
+    setAutoStarted(true);
+    handleSelect(autoStartType);
+  }, [autoStarted, autoStartType, autoStartDomain, data, selectedDomain, starting]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="mx-auto max-w-2xl">

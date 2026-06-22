@@ -4,6 +4,7 @@ import {
   advancePendingEscalations,
   escalationDetectionEnabled,
 } from "@/lib/escalation/engine";
+import { runDueReminders } from "@/lib/escalation/reminders";
 import { withErrorHandler } from "@/lib/api-handler";
 
 /**
@@ -25,6 +26,9 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Scheduled reminders run first (they may start fresh chains), then detection,
+  // then advancement of all pending chains.
+  const remindersFired = await runDueReminders();
   const [missedUserIds, advancedCount] = await Promise.all([
     detectMissedSessions(),
     advancePendingEscalations(),
@@ -33,6 +37,7 @@ async function _POST(req: NextRequest) {
   return NextResponse.json({
     success: true,
     detectionEnabled: escalationDetectionEnabled(),
+    remindersFired,
     missedSessions: missedUserIds.length,
     escalationsAdvanced: advancedCount,
     timestamp: new Date().toISOString(),
