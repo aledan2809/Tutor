@@ -9,6 +9,7 @@ import {
   type SessionType,
 } from "@/lib/session-engine";
 import { withErrorHandler } from "@/lib/api-handler";
+import { canAccessDomain } from "@/lib/domain-access";
 
 async function _POST(
   req: NextRequest,
@@ -40,6 +41,12 @@ async function _POST(
   });
   if (!domain) {
     return NextResponse.json({ error: "Domain not found" }, { status: 404 });
+  }
+
+  // Restricted (non-curriculum) domains — e.g. aviation — are practiceable only
+  // by admins/superadmins, allowlisted users, or users enrolled in that domain.
+  if (!canAccessDomain(session.user, domainSlug, domain.id)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const config = SESSION_TYPES[sessionType];

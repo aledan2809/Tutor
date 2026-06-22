@@ -3,6 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { recommendSessionType, SESSION_TYPES } from "@/lib/session-engine";
 import { withErrorHandler } from "@/lib/api-handler";
+import { canAccessDomain } from "@/lib/domain-access";
 
 async function _GET(
   _req: Request,
@@ -20,6 +21,12 @@ async function _GET(
   });
   if (!domain) {
     return NextResponse.json({ error: "Domain not found" }, { status: 404 });
+  }
+
+  // Restricted (non-curriculum) domains are gated to admins/superadmins,
+  // allowlisted users, or users enrolled in that domain.
+  if (!canAccessDomain(session.user, domainSlug, domain.id)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const recommendation = await recommendSessionType(

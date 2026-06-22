@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { useSession } from "next-auth/react";
 import { useRouter } from "@/i18n/navigation";
 import { SessionSelector } from "@/components/session/session-selector";
 import { EXAM_LEVELS, classifyDomainSlug, stripLevelSuffix, type ExamLevel } from "@/lib/exam-level";
+import { canSeeRestrictedDomains } from "@/lib/domain-access";
 
-type DomainOpt = { slug: string; name: string; level: ExamLevel; count: number };
+type DomainOpt = { slug: string; name: string; level: ExamLevel | null; count: number };
 
 interface SessionNextResponse {
   recommended: {
@@ -38,12 +40,16 @@ export default function PracticePage() {
   const [selectedDomain, setSelectedDomain] = useState<string>("");
   const [domains, setDomains] = useState<DomainOpt[]>([]);
 
+  const { data: session, status } = useSession();
+  // Admins/superadmins + allowlisted users may practice non-curriculum domains.
+  const canSeeRestricted = canSeeRestrictedDomains(session?.user);
+
   useEffect(() => {
+    // Wait until the session resolves so the restricted-domain gate is known.
+    if (status === "loading") return;
     fetch("/api/student/domains")
       .then((r) => r.json())
       .then((d) => {
-        // Only school-curriculum subjects with grile, grouped by exam level (non-curriculum
-        // verticals like Aviation/Drept and empty subjects are hidden).
         const list: DomainOpt[] = Array.isArray(d?.enrolled)
           ? (d.enrolled as { slug: string; name: string; stats?: { questionsAvailable?: number } }[])
               .map((e) => ({
@@ -52,7 +58,9 @@ export default function PracticePage() {
                 level: classifyDomainSlug(e.slug),
                 count: e.stats?.questionsAvailable ?? 0,
               }))
-              .filter((e): e is DomainOpt => e.level !== null && e.count > 0)
+              // School-curriculum subjects (grouped by exam level) always; non-curriculum
+              // verticals (level null, e.g. aviation) only for allowed users.
+              .filter((e) => e.count > 0 && (e.level !== null || canSeeRestricted))
           : [];
         setDomains(list);
         if (list.length > 0) {
@@ -67,7 +75,8 @@ export default function PracticePage() {
         }
       })
       .catch(() => setLoading(false));
-  }, []);
+    // canSeeRestricted derives from the session, which is stable once status resolves.
+  }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!selectedDomain) return;
@@ -130,6 +139,18 @@ export default function PracticePage() {
                       ))}
                   </optgroup>
                 ))}
+                {/* Non-curriculum domains (level null, e.g. aviation) — only present for allowed users. */}
+                {domains.some((d) => d.level === null) && (
+                  <optgroup label={t("grile.otherSubjects")}>
+                    {domains
+                      .filter((d) => d.level === null)
+                      .map((d) => (
+                        <option key={d.slug} value={d.slug}>
+                          {d.name}
+                        </option>
+                      ))}
+                  </optgroup>
+                )}
               </select>
             </div>
           )}

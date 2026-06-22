@@ -58,6 +58,7 @@
   },
   "grile": {
     "subject": "Subject",
+    "otherSubjects": "Other",
     "loading": "Loading...",
     "noSubjects": "You have no subjects in your package yet. Pick your subjects from your account to get started.",
     "noGrile": "No quizzes yet for this subject. Check back soon.",
