@@ -4,10 +4,13 @@ import { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
 import { isPushSupported, subscribeToPush } from "./push-subscribe";
 
-// EAT-style post-login banner that drives BOTH actions in one card: install the
-// app (PWA — Android/desktop via beforeinstallprompt) and enable web push (the
-// free re-engagement channel). Each CTA disappears once done; the whole banner
-// hides when there's nothing left to offer or after a 7-day snooze.
+// Post-login banner driving install + web push in one card.
+// - Chromium (Android/desktop) fires `beforeinstallprompt` → a real Install button.
+// - Firefox / iOS never fire it → after a short wait we show a manual "how to
+//   install" hint (iOS: Share → Add to Home Screen; others: browser menu), so
+//   mobile users still get an install solicitation.
+// Each CTA disappears once done; the banner hides when nothing's left or after a
+// 7-day snooze.
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -24,6 +27,17 @@ function isStandalone(): boolean {
     (window.navigator as unknown as { standalone?: boolean }).standalone === true
   );
 }
+function isIOS(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return (
+    /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+function isMobileUA(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
 
 export function AppBanner() {
   const ro = useLocale() === "ro";
@@ -31,6 +45,8 @@ export function AppBanner() {
   const [installed, setInstalled] = useState(false);
   const [needsPush, setNeedsPush] = useState(false);
   const [snoozed, setSnoozed] = useState(true);
+  const [noAutoPrompt, setNoAutoPrompt] = useState(false);
+  const [showSteps, setShowSteps] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -57,13 +73,19 @@ export function AppBanner() {
         .catch(() => setNeedsPush(true));
     }
 
+    // If no auto-prompt arrives shortly, fall back to a manual hint (Firefox/iOS).
+    const t = setTimeout(() => setNoAutoPrompt(true), 1500);
+
     return () => {
       window.removeEventListener("beforeinstallprompt", onPrompt);
       window.removeEventListener("appinstalled", onInstalled);
+      clearTimeout(t);
     };
   }, []);
 
   const canInstall = !installed && !!installEvt;
+  const manualInstall = !installed && !installEvt && noAutoPrompt && isMobileUA();
+
   const snooze = () => {
     try {
       localStorage.setItem(SNOOZE_KEY, String(Date.now() + SNOOZE_MS));
@@ -100,64 +122,87 @@ export function AppBanner() {
     }
   };
 
-  if (snoozed || (!canInstall && !needsPush)) return null;
+  if (snoozed || (!canInstall && !manualInstall && !needsPush)) return null;
 
-  const both = canInstall && needsPush;
-  const title = both
-    ? ro
-      ? "Instalează eTutor + activează notificările"
-      : "Install eTutor + turn on notifications"
-    : canInstall
+  const anyInstall = canInstall || manualInstall;
+  const title =
+    anyInstall && needsPush
       ? ro
-        ? "Instalează eTutor"
-        : "Install eTutor"
-      : ro
-        ? "Activează notificările"
-        : "Turn on notifications";
+        ? "Instalează eTutor + activează notificările"
+        : "Install eTutor + turn on notifications"
+      : anyInstall
+        ? ro
+          ? "Instalează eTutor"
+          : "Install eTutor"
+        : ro
+          ? "Activează notificările"
+          : "Turn on notifications";
   const desc = ro
     ? "Acces rapid de pe ecranul principal + mementouri gratuite ca să-ți păstrezi ritmul de studiu."
     : "One-tap access from your home screen + free reminders to keep your study rhythm.";
 
+  const iosSteps = ro
+    ? "Apasă butonul Share (pătrat cu săgeată ↑), apoi „Adaugă la ecranul principal”."
+    : "Tap the Share button (square with ↑), then “Add to Home Screen”.";
+  const otherSteps = ro
+    ? "Deschide meniul browserului (⋮) și alege „Instalează aplicația” / „Adaugă la ecranul principal”."
+    : "Open the browser menu (⋮) and choose “Install app” / “Add to Home Screen”.";
+
   return (
-    <div className="mb-4 flex flex-col gap-3 rounded-lg border border-blue-900/50 bg-blue-950/30 p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-start gap-3">
-        <span aria-hidden className="text-xl">📲</span>
-        <div>
-          <p className="text-sm font-semibold text-white">{title}</p>
-          <p className="text-xs text-gray-400">{desc}</p>
+    <div className="mb-4 rounded-lg border border-blue-900/50 bg-blue-950/30 p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <span aria-hidden className="text-xl">📲</span>
+          <div>
+            <p className="text-sm font-semibold text-white">{title}</p>
+            <p className="text-xs text-gray-400">{desc}</p>
+          </div>
+        </div>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          {canInstall && (
+            <button
+              onClick={install}
+              disabled={busy}
+              className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+            >
+              {ro ? "Instalează" : "Install"}
+            </button>
+          )}
+          {manualInstall && (
+            <button
+              onClick={() => setShowSteps((s) => !s)}
+              className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              {ro ? "Instalează" : "Install"}
+            </button>
+          )}
+          {needsPush && (
+            <button
+              onClick={enablePush}
+              disabled={busy}
+              className={`rounded-lg px-4 py-1.5 text-sm font-medium disabled:opacity-60 ${
+                anyInstall
+                  ? "border border-blue-700 text-blue-200 hover:bg-blue-900/40"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
+            >
+              {busy ? "…" : ro ? "Activează" : "Enable"}
+            </button>
+          )}
+          <button
+            onClick={snooze}
+            disabled={busy}
+            className="rounded-lg px-3 py-1.5 text-sm text-gray-400 hover:text-white"
+          >
+            {ro ? "Mai târziu" : "Later"}
+          </button>
         </div>
       </div>
-      <div className="flex shrink-0 flex-wrap gap-2">
-        {canInstall && (
-          <button
-            onClick={install}
-            disabled={busy}
-            className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-          >
-            {ro ? "Instalează" : "Install"}
-          </button>
-        )}
-        {needsPush && (
-          <button
-            onClick={enablePush}
-            disabled={busy}
-            className={`rounded-lg px-4 py-1.5 text-sm font-medium disabled:opacity-60 ${
-              canInstall
-                ? "border border-blue-700 text-blue-200 hover:bg-blue-900/40"
-                : "bg-blue-600 text-white hover:bg-blue-700"
-            }`}
-          >
-            {busy ? "…" : ro ? "Activează" : "Enable"}
-          </button>
-        )}
-        <button
-          onClick={snooze}
-          disabled={busy}
-          className="rounded-lg px-3 py-1.5 text-sm text-gray-400 hover:text-white"
-        >
-          {ro ? "Mai târziu" : "Later"}
-        </button>
-      </div>
+      {manualInstall && showSteps && (
+        <p className="mt-3 rounded-lg border border-blue-900/40 bg-blue-950/40 p-3 text-xs text-blue-100">
+          {isIOS() ? iosSteps : otherSteps}
+        </p>
+      )}
     </div>
   );
 }
