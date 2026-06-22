@@ -3,6 +3,7 @@ import { requireWatcherOrInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { getStudentProgressSummary } from "@/lib/predictive-analytics";
 import { withErrorHandler } from "@/lib/api-handler";
+import { getLinkedChildIds, watcherSeesAllStudents } from "@/lib/guardian";
 
 async function _GET(req: NextRequest) {
   const { error, session } = await requireWatcherOrInstructor();
@@ -25,13 +26,18 @@ async function _GET(req: NextRequest) {
     ? [domainId]
     : watcherEnrollments.map((e) => e.domainId);
 
-  // Get all students enrolled in these domains
+  // Parent scoping: instructors/admins see all students in their domains
+  // (teaching); a pure parent watcher sees ONLY their linked children.
+  const seesAll = watcherSeesAllStudents(session!.user);
+  const linkedChildIds = seesAll ? null : await getLinkedChildIds(userId);
+
+  // Get students in these domains, scoped to the watcher's allowed set.
   const studentEnrollments = await prisma.enrollment.findMany({
     where: {
       domainId: { in: domainIds },
       roles: { hasSome: ["STUDENT"] },
       isActive: true,
-      userId: { not: userId },
+      userId: seesAll ? { not: userId } : { in: linkedChildIds ?? [] },
     },
     include: {
       user: { select: { id: true, name: true, email: true, image: true } },

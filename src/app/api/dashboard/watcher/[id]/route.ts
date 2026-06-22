@@ -3,6 +3,7 @@ import { requireWatcherOrInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { getStudentProgressSummary } from "@/lib/predictive-analytics";
 import { withErrorHandler } from "@/lib/api-handler";
+import { isGuardianOf, watcherSeesAllStudents } from "@/lib/guardian";
 
 async function _GET(
   req: NextRequest,
@@ -12,6 +13,14 @@ async function _GET(
   if (error) return error;
 
   const { id: studentId } = await params;
+
+  // Parent scoping: a pure parent watcher may only view a linked child.
+  if (
+    !watcherSeesAllStudents(session!.user) &&
+    !(await isGuardianOf(session!.user.id, studentId))
+  ) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   // Verify watcher has access to this student's domains
   const watcherDomainIds = session!.user.enrollments

@@ -110,6 +110,27 @@ model User {
   telegramConnectTokens TelegramConnectToken[]
   // Marketing campaign attribution (UTM / per-voucher conversion tracking).
   campaignSignup       CampaignSignup?
+  // Parent (WATCHER) ↔ child (STUDENT) links — a parent sees ONLY linked children.
+  childrenLinks        Guardian[] @relation("GuardianParent")
+  guardianLinks        Guardian[] @relation("GuardianChild")
+}
+
+/// Parent↔child link for the family plan. A WATCHER (parent) is scoped to ONLY
+/// the children linked here — without this, a watcher saw every student in a
+/// domain (the family-plan minor-data leak). One row per (parent, child).
+model Guardian {
+  id        String   @id @default(cuid())
+  parentId  String
+  childId   String
+  status    String   @default("active") // active | pending | removed
+  createdAt DateTime @default(now())
+
+  parent User @relation("GuardianParent", fields: [parentId], references: [id], onDelete: Cascade)
+  child  User @relation("GuardianChild", fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([parentId, childId])
+  @@index([parentId])
+  @@index([childId])
 }
 
 /// Marketing campaign attribution for a signed-up user (UTM + per-voucher
