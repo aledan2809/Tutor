@@ -3,6 +3,15 @@
 import { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
 import { isPushSupported, subscribeToPush } from "./push-subscribe";
+import {
+  INSTALL_DONE_KEY,
+  MANUAL_SEEN_KEY,
+  isStandalone,
+  isIOS,
+  isMobileUA,
+  readFlag,
+  writeFlag,
+} from "@/lib/pwa";
 
 // Post-login banner driving install + web push in one card.
 // - Chromium (Android/desktop) fires `beforeinstallprompt` → a real Install button.
@@ -19,47 +28,6 @@ interface BeforeInstallPromptEvent extends Event {
 
 const SNOOZE_KEY = "tutor_app_banner_snooze";
 const SNOOZE_MS = 7 * 24 * 60 * 60 * 1000;
-// Set the first time the app runs in standalone (real install). On Android the
-// installed PWA shares localStorage with the browser tab, so the tab then knows
-// it's installed and stops offering install. (iOS keeps separate storage.)
-const INSTALL_DONE_KEY = "tutor_pwa_installed";
-// iOS best-effort: once the user opened the manual install steps, stop nagging
-// (we can't detect Add-to-Home-Screen there, and re-prompting every visit is worse).
-const MANUAL_SEEN_KEY = "tutor_pwa_manual_seen";
-
-function readFlag(key: string): boolean {
-  try {
-    return localStorage.getItem(key) === "1";
-  } catch {
-    return false;
-  }
-}
-function writeFlag(key: string) {
-  try {
-    localStorage.setItem(key, "1");
-  } catch {
-    /* ignore */
-  }
-}
-
-function isStandalone(): boolean {
-  if (typeof window === "undefined") return false;
-  return (
-    window.matchMedia?.("(display-mode: standalone)").matches ||
-    (window.navigator as unknown as { standalone?: boolean }).standalone === true
-  );
-}
-function isIOS(): boolean {
-  if (typeof navigator === "undefined") return false;
-  return (
-    /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
-  );
-}
-function isMobileUA(): boolean {
-  if (typeof navigator === "undefined") return false;
-  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
 
 export function AppBanner() {
   const ro = useLocale() === "ro";

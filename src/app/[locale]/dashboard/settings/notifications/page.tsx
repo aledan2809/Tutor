@@ -1,6 +1,7 @@
 import { NotificationPreferences } from "@/components/notifications/notification-preferences";
 import { TelegramConnectCard } from "@/components/notifications/telegram-connect-card";
 import { PushSubscribeButton } from "@/components/push-subscribe";
+import { InstallAppButton } from "@/components/install-app-button";
 import { Link } from "@/i18n/navigation";
 
 export default function NotificationSettingsPage() {
@@ -22,6 +23,8 @@ export default function NotificationSettingsPage() {
         </div>
         <PushSubscribeButton />
       </div>
+
+      <InstallAppButton />
 
       <TelegramConnectCard />
 
