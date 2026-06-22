@@ -137,3 +137,15 @@ The escalation ladder had been built but never run (cron unscheduled). Turning i
 **(c) An instructor-facing rung with no instructor is the END of the chain, not a failure to retry.** Self-serve students have no INSTRUCTOR enrollment → the L5 email send returned false → infinite retry. Pre-check (`userHasInstructor`) and terminate instead.
 
 **(d) Activate guarded + staged.** Opt-in env flag (deploy ≠ activate), recency window + per-run cap (bounded blast radius — measured 4 real students first), then a **manual single cron run inspected** (events created? channel? isTest stamped? in-app rows?) *before* scheduling the 15-min job. When the manual run revealed bug (a), `ESCALATION_DETECT_ENABLED=false` was the instant kill-switch while fixing — the reason the flag exists.
+
+## L13 — 2026-06-13 — A `loading` state must be cleared on EVERY resolution path — empty and error included, not just the happy one
+
+A real Google-login student (enrolled only in the leftover non-curriculum `aviation` demo domain) hit an infinite spinner on the Practice page. Cause: `loading` started `true` and was only ever cleared by the *second* effect (`/session/next`), which is gated on `selectedDomain`. When the domain list filtered to empty (non-curriculum/zero-grile enrollments), `selectedDomain` was never set → the second effect never ran → `loading` stayed `true` forever. The domains `fetch().catch(() => {})` made it worse: a fetch error also hung.
+
+**(a) Every state that gates the UI must be resolved on all branches** — success-with-data, success-empty, AND error. Here: clear `loading` when the list is empty and in `.catch`. The happy path being correct hides the empty/error paths, which are exactly the ones real edge-case users hit.
+
+**(b) Empty ≠ loading.** "No items" is a *resolved* state with its own message ("choose your subjects"), not a perpetual spinner. Distinguish "still fetching" from "fetched, nothing to show".
+
+**(c) Don't swallow fetch errors into the loading state.** `.catch(() => {})` left `loading=true`; at minimum clear the gating state in catch so the UI shows an error/empty message.
+
+**Adjacent product issue (flagged, not fixed):** real RO students shouldn't be able to enroll in `aviation` (leftover demo), and Google-OAuth signup may skip subject selection → users land with no curriculum subjects. Separate onboarding/data cleanup.
