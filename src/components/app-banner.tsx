@@ -19,6 +19,28 @@ interface BeforeInstallPromptEvent extends Event {
 
 const SNOOZE_KEY = "tutor_app_banner_snooze";
 const SNOOZE_MS = 7 * 24 * 60 * 60 * 1000;
+// Set the first time the app runs in standalone (real install). On Android the
+// installed PWA shares localStorage with the browser tab, so the tab then knows
+// it's installed and stops offering install. (iOS keeps separate storage.)
+const INSTALL_DONE_KEY = "tutor_pwa_installed";
+// iOS best-effort: once the user opened the manual install steps, stop nagging
+// (we can't detect Add-to-Home-Screen there, and re-prompting every visit is worse).
+const MANUAL_SEEN_KEY = "tutor_pwa_manual_seen";
+
+function readFlag(key: string): boolean {
+  try {
+    return localStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+}
+function writeFlag(key: string) {
+  try {
+    localStorage.setItem(key, "1");
+  } catch {
+    /* ignore */
+  }
+}
 
 function isStandalone(): boolean {
   if (typeof window === "undefined") return false;
@@ -46,11 +68,17 @@ export function AppBanner() {
   const [needsPush, setNeedsPush] = useState(false);
   const [snoozed, setSnoozed] = useState(true);
   const [noAutoPrompt, setNoAutoPrompt] = useState(false);
+  const [manualSeen, setManualSeen] = useState(false);
   const [showSteps, setShowSteps] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    setInstalled(isStandalone());
+    // Standalone launch is the ground truth for "installed" — persist it so the
+    // browser tab (shared storage on Android) stops offering install afterwards.
+    const standalone = isStandalone();
+    if (standalone) writeFlag(INSTALL_DONE_KEY);
+    setInstalled(standalone || readFlag(INSTALL_DONE_KEY));
+    setManualSeen(readFlag(MANUAL_SEEN_KEY));
 
     const snoozedUntil = Number(localStorage.getItem(SNOOZE_KEY) ?? 0);
     setSnoozed(Date.now() < snoozedUntil);
@@ -61,6 +89,7 @@ export function AppBanner() {
     };
     window.addEventListener("beforeinstallprompt", onPrompt);
     const onInstalled = () => {
+      writeFlag(INSTALL_DONE_KEY);
       setInstalled(true);
       setInstallEvt(null);
     };
@@ -84,7 +113,8 @@ export function AppBanner() {
   }, []);
 
   const canInstall = !installed && !!installEvt;
-  const manualInstall = !installed && !installEvt && noAutoPrompt && isMobileUA();
+  const manualInstall =
+    !installed && !manualSeen && !installEvt && noAutoPrompt && isMobileUA();
 
   const snooze = () => {
     try {
@@ -170,7 +200,12 @@ export function AppBanner() {
           )}
           {manualInstall && (
             <button
-              onClick={() => setShowSteps((s) => !s)}
+              onClick={() => {
+                setShowSteps((s) => !s);
+                // Seen the steps → don't nag on the next visit (can't detect
+                // manual Add-to-Home-Screen on iOS/Firefox). Stays visible now.
+                writeFlag(MANUAL_SEEN_KEY);
+              }}
               className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
             >
               {ro ? "Instalează" : "Install"}
