@@ -42,24 +42,31 @@ export default function PracticePage() {
     fetch("/api/student/domains")
       .then((r) => r.json())
       .then((d) => {
-        if (d.enrolled) {
-          // Only school-curriculum subjects with grile, grouped by exam level (non-curriculum
-          // verticals like Aviation/Drept and empty subjects are hidden).
-          const list: DomainOpt[] = (d.enrolled as { slug: string; name: string; stats?: { questionsAvailable?: number } }[])
-            .map((e) => ({
-              slug: e.slug,
-              name: e.name,
-              level: classifyDomainSlug(e.slug),
-              count: e.stats?.questionsAvailable ?? 0,
-            }))
-            .filter((e): e is DomainOpt => e.level !== null && e.count > 0);
-          setDomains(list);
-          if (list.length > 0 && !list.find((l) => l.slug === selectedDomain)) {
+        // Only school-curriculum subjects with grile, grouped by exam level (non-curriculum
+        // verticals like Aviation/Drept and empty subjects are hidden).
+        const list: DomainOpt[] = Array.isArray(d?.enrolled)
+          ? (d.enrolled as { slug: string; name: string; stats?: { questionsAvailable?: number } }[])
+              .map((e) => ({
+                slug: e.slug,
+                name: e.name,
+                level: classifyDomainSlug(e.slug),
+                count: e.stats?.questionsAvailable ?? 0,
+              }))
+              .filter((e): e is DomainOpt => e.level !== null && e.count > 0)
+          : [];
+        setDomains(list);
+        if (list.length > 0) {
+          if (!list.find((l) => l.slug === selectedDomain)) {
             setSelectedDomain(list[0].slug);
           }
+          // When a domain is selected, the session/next effect manages `loading`.
+        } else {
+          // No practiceable subject (e.g. only non-curriculum/empty enrollments) →
+          // stop the spinner so the "no subjects" message shows instead of hanging.
+          setLoading(false);
         }
       })
-      .catch(() => {});
+      .catch(() => setLoading(false));
   }, []);
 
   useEffect(() => {
