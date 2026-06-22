@@ -2,7 +2,6 @@ export const dynamic = "force-dynamic";
 
 import type { Metadata, Viewport } from "next";
 import { PwaRegister } from "@/components/pwa-register";
-import { PwaInstallPrompt } from "@/components/pwa-install-prompt";
 import { OfflineIndicator } from "@/components/offline-indicator";
 import "./globals.css";
 
@@ -62,7 +61,6 @@ export default function RootLayout({
         <OfflineIndicator />
         {children}
         <PwaRegister />
-        <PwaInstallPrompt />
       </body>
     </html>
   );
