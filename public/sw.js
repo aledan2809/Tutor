@@ -1,9 +1,9 @@
-const CACHE_NAME = "tutor-cache-v4";
+const CACHE_NAME = "tutor-cache-v5";
 const API_CACHE_NAME = "tutor-api-cache-v3";
 const LESSON_CACHE_NAME = "tutor-lessons-cache-v2";
 const SYNC_QUEUE_NAME = "tutor-sync-queue";
 
-const PRECACHE_URLS = ["/", "/offline"];
+const PRECACHE_URLS = ["/"];
 
 // API routes to cache for offline use
 const CACHEABLE_API_PATTERNS = [
@@ -27,8 +27,12 @@ const LESSON_CONTENT_PATTERNS = [
 ];
 
 self.addEventListener("install", (event) => {
+  // Tolerant precache: a single 404 must NOT fail install (addAll is atomic and
+  // would otherwise leave a broken old SW in place forever).
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.allSettled(PRECACHE_URLS.map((u) => cache.add(u)))
+    )
   );
   self.skipWaiting();
 });
@@ -134,6 +138,21 @@ self.addEventListener("fetch", (event) => {
 
   if (event.request.method !== "GET") return;
 
+  // Navigations (HTML documents) are NETWORK-FIRST: always fetch fresh HTML so
+  // the page never references stale, redeployed-away /_next chunks (which would
+  // blank the page). Fall back to the cached shell only when truly offline.
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).catch(
+        async () =>
+          (await caches.match("/")) ||
+          (await caches.match(event.request)) ||
+          Response.error()
+      )
+    );
+    return;
+  }
+
   const url = event.request.url;
 
   // API requests
@@ -194,7 +213,7 @@ self.addEventListener("fetch", (event) => {
           }
           return response;
         })
-        .catch(() => cached || caches.match("/offline"));
+        .catch(() => cached || caches.match("/"));
 
       return cached || fetchPromise;
     })
