@@ -157,3 +157,12 @@ The family-plan build added a `StudyReminder.window` column. Prisma created it f
 **(a) Quote reserved identifiers in raw SQL** — `"window"`, `"order"`, `"user"`, `"end"`, etc. Prisma quotes everything it generates, so reserved-word column names only bite hand-written SQL.
 **(b) `UPDATE 1` / `INSERT 0 1` inside an open transaction is not "done"** — a later error rolls them back. Read to the final `COMMIT` (vs `ROLLBACK`) before trusting any row counts, and re-run the verification SELECTs after commit.
 **(c) Prefer column names that aren't SQL keywords** when you know data will be touched by raw SQL/ops scripts (would have avoided this entirely).
+
+## L15 — 2026-06-23 — A channel that fails-and-retries silently stalls the whole chain; the deliverability guard must cover EVERY such channel, and "stall" must be measured from the last delivered touch
+
+The parent-monitoring "no-reaction" alert never fired in the first live test. Root cause chain: SMTP wasn't configured on prod → the EMAIL rung's send returned false → the engine reverted the event to PENDING and retried it every cron forever. EMAIL had been left out of the deliverability guard (only the "paid" channels — Telegram/WhatsApp/SMS — were gated) on the assumption email is "always available". A perpetually-PENDING event = an "active" chain, and parent-monitoring only opens an episode once the child's chain is *done* → it never opened → the parent was never alerted.
+
+**(a) Any channel whose send can fail must be in the deliverability guard — skip it when its transport isn't configured, don't retry-forever.** "Free" ≠ "always deliverable": email needs SMTP just as WhatsApp needs a token. Gate EMAIL on `SMTP_HOST`.
+**(b) A stuck-PENDING rung silently freezes everything downstream that keys off "chain done"** (here: parent monitoring). When adding a consumer that waits for terminal state, make sure no rung can hang non-terminally.
+**(c) "Stall" / inactivity windows must be measured from the last time you actually REACHED the user (last `sentAt`), not from `createdAt` of skipped/undeliverable rungs** — those are created "now" and reset the clock, hiding a hours-old lapse.
+**(d) Verify cross-component flows with the real prod config, not just unit tests** — the unit tests were green; the bug only showed with SMTP-absent prod + a multi-cron-pass cascade. A live cron run + DB inspection caught it.
