@@ -17,27 +17,32 @@ export function NotificationCenter() {
   const t = useTranslations("notifications");
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [total, setTotal] = useState(0);
+  const [childTotal, setChildTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "unread">("all");
+  // Separate own notifications from parent-about-child alerts so a parent who is
+  // also a student doesn't see the two audiences mixed "la grămadă".
+  const [audience, setAudience] = useState<"self" | "child">("self");
   const [offset, setOffset] = useState(0);
   const limit = 20;
 
   useEffect(() => {
     fetchNotifications();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, offset]);
+  }, [filter, offset, audience]);
 
   async function fetchNotifications() {
     setLoading(true);
     try {
       const unread = filter === "unread" ? "&unread=true" : "";
       const res = await fetch(
-        `/api/notifications?limit=${limit}&offset=${offset}${unread}`
+        `/api/notifications?limit=${limit}&offset=${offset}&audience=${audience}${unread}`
       );
       if (res.ok) {
         const data = await res.json();
         setNotifications(data.notifications);
         setTotal(data.total);
+        setChildTotal(data.childTotal ?? 0);
       }
     } catch {
       // Silently fail
@@ -86,6 +91,32 @@ export function NotificationCenter() {
           </button>
         </div>
       </div>
+
+      {/* Audience tabs — only shown to a parent who actually receives child alerts. */}
+      {childTotal > 0 && (
+        <div className="mb-3 flex gap-2 border-b border-gray-800 pb-3">
+          <button
+            onClick={() => { setAudience("self"); setOffset(0); }}
+            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+              audience === "self"
+                ? "bg-blue-600 text-white"
+                : "text-gray-400 hover:bg-gray-800"
+            }`}
+          >
+            {t("audienceSelf")}
+          </button>
+          <button
+            onClick={() => { setAudience("child"); setOffset(0); }}
+            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+              audience === "child"
+                ? "bg-blue-600 text-white"
+                : "text-gray-400 hover:bg-gray-800"
+            }`}
+          >
+            {t("audienceChild")}
+          </button>
+        </div>
+      )}
 
       <div className="mb-4 flex gap-2">
         <button

@@ -329,7 +329,9 @@
     "timezone": "Timezone",
     "save": "Save Preferences",
     "saving": "Saving...",
-    "saved": "Saved!"
+    "saved": "Saved!",
+    "audienceSelf": "Mine",
+    "audienceChild": "About child"
   },
   "calendar": {
     "title": "Calendar",

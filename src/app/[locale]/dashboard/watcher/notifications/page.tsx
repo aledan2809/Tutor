@@ -20,7 +20,9 @@ export default function WatcherNotificationsPage() {
   const [filter, setFilter] = useState<"all" | "unread">("all");
 
   useEffect(() => {
-    fetch("/api/notifications")
+    // Watcher context → only parent-about-child alerts (not the user's own
+    // student notifications, which live in the main Notification Center).
+    fetch("/api/notifications?audience=child")
       .then((r) => r.json())
       .then((data) => setNotifications(data.notifications ?? []))
       .finally(() => setLoading(false));

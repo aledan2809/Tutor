@@ -1,4 +1,4 @@
-const CACHE_NAME = "tutor-cache-v5";
+const CACHE_NAME = "tutor-cache-v6";
 const API_CACHE_NAME = "tutor-api-cache-v3";
 const LESSON_CACHE_NAME = "tutor-lessons-cache-v2";
 const SYNC_QUEUE_NAME = "tutor-sync-queue";

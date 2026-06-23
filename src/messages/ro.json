@@ -329,7 +329,9 @@
     "timezone": "Fus orar",
     "save": "Salvează preferințele",
     "saving": "Se salvează...",
-    "saved": "Salvat!"
+    "saved": "Salvat!",
+    "audienceSelf": "Ale mele",
+    "audienceChild": "Despre copil"
   },
   "calendar": {
     "title": "Calendar",
