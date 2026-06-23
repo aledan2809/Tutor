@@ -159,9 +159,10 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
   const byChild = new Map<string, { start: Date; lastTouch: Date; active: boolean }>();
   for (const e of recent) {
     const cur = byChild.get(e.userId) ?? { start: e.createdAt, lastTouch: e.createdAt, active: false };
-    cur.start = cur.start < e.createdAt ? cur.start : e.createdAt;
-    const touch = e.sentAt ?? e.createdAt;
-    cur.lastTouch = cur.lastTouch > touch ? cur.lastTouch : touch;
+    if (e.createdAt < cur.start) cur.start = e.createdAt;
+    // Stall is measured from the last time we actually REACHED the child (a sent
+    // event), so skipped/undeliverable rungs created later don't reset the clock.
+    if (e.sentAt && e.sentAt.getTime() > cur.lastTouch.getTime()) cur.lastTouch = e.sentAt;
     if (e.status === "PENDING" || e.status === "ESCALATING") cur.active = true;
     byChild.set(e.userId, cur);
   }
