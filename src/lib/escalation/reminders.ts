@@ -66,6 +66,30 @@ export function isReminderDue(
   return { due, today };
 }
 
+/**
+ * Is a scheduled study session imminent for this user — about to fire within
+ * `withinMin`, or already inside its fire window? Used by parent nudges so a
+ * series doesn't overlap the child's next scheduled session.
+ */
+export async function reminderImminent(
+  userId: string,
+  now: Date,
+  withinMin: number
+): Promise<boolean> {
+  const reminders = await prisma.studyReminder.findMany({
+    where: { userId, isActive: true },
+  });
+  for (const r of reminders) {
+    const { weekday, minutesOfDay } = tzParts(now, r.timezone);
+    if (!r.daysOfWeek.includes(weekday)) continue;
+    const scheduled = r.hour * 60 + r.minute;
+    const delta = scheduled - minutesOfDay; // minutes until scheduled time today
+    // Imminent if it's just fired (within its window) or fires within `withinMin`.
+    if (delta >= -FIRE_WINDOW_MIN && delta <= withinMin) return true;
+  }
+  return false;
+}
+
 /** Deep-link that auto-starts the reminder's session type (+ optional subject). */
 export function buildReminderUrl(r: { sessionType: string; domainSlug: string | null }): string {
   const q = new URLSearchParams({ start: r.sessionType });

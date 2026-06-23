@@ -5,12 +5,17 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { isGuardianOf } from "@/lib/guardian";
 import { fireNudge } from "@/lib/escalation/parent-nudge";
+import { reminderImminent } from "@/lib/escalation/reminders";
 
 const nudgeInput = z.object({
   message: z.string().trim().min(1).max(300),
   // null/omitted = one-shot; otherwise repeat every N minutes.
   intervalMin: z.number().int().min(5).max(240).nullable().optional(),
+  // Series end ("până la 18:00" / "peste 4h") as an ISO datetime; null = use caps.
+  untilAt: z.string().datetime().nullable().optional(),
 });
+
+const MAX_SERIES_HOURS = 12;
 
 /** GET — active nudges for this child (guardian only). */
 async function _GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -39,7 +44,29 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ id: strin
   const parsed = nudgeInput.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Date invalide" }, { status: 400 });
 
+  const now = new Date();
   const intervalMin = parsed.data.intervalMin ?? null;
+
+  // Validate the series end (must be future + within a sane cap).
+  let untilAt: Date | null = null;
+  if (parsed.data.untilAt) {
+    untilAt = new Date(parsed.data.untilAt);
+    if (untilAt.getTime() <= now.getTime()) {
+      return NextResponse.json({ error: "Ora de final trebuie să fie în viitor." }, { status: 400 });
+    }
+    if (untilAt.getTime() - now.getTime() > MAX_SERIES_HOURS * 3_600_000) {
+      untilAt = new Date(now.getTime() + MAX_SERIES_HOURS * 3_600_000);
+    }
+  }
+
+  // No-overlap: don't start when the child already has a scheduled session imminent.
+  if (await reminderImminent(childId, now, 25)) {
+    return NextResponse.json(
+      { error: "Urmează o sesiune programată în curând — nu pornesc un memento acum." },
+      { status: 400 }
+    );
+  }
+
   // Fire the first one now so the parent sees instant effect; cron handles repeats.
   await fireNudge(childId, parsed.data.message);
   const nudge = await prisma.parentNudge.create({
@@ -48,9 +75,10 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ id: strin
       childId,
       message: parsed.data.message,
       intervalMin,
+      untilAt,
       active: intervalMin != null, // one-shot is done after this first fire
       fireCount: 1,
-      lastFiredAt: new Date(),
+      lastFiredAt: now,
     },
     select: { id: true, message: true, intervalMin: true, fireCount: true, lastFiredAt: true, createdAt: true },
   });

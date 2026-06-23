@@ -7,9 +7,11 @@
 import { prisma } from "@/lib/prisma";
 import { sendNotification } from "@/lib/notifications/service";
 import { userIdsOnBreak } from "./breaks";
+import { reminderImminent } from "./reminders";
 
 const MAX_FIRES = 12; // safety cap on repeats
 const MAX_AGE_HOURS = 24; // auto-stop a nudge after a day
+const OVERLAP_GUARD_MIN = 25; // stop a series when a scheduled session is this close
 
 async function childReactedSince(childId: string, since: Date): Promise<boolean> {
   const acked = await prisma.escalationEvent.count({
@@ -70,8 +72,13 @@ export async function runParentNudges(now: Date = new Date()): Promise<{ fired: 
     // Per-row isolation: a transient error on one nudge must not abort the sweep
     // (this runs alongside the other escalation sweeps in the shared cron route).
     try {
-      // Safety cap: too many fires or too old → stop.
-      if (n.fireCount >= MAX_FIRES || now.getTime() - n.createdAt.getTime() > MAX_AGE_HOURS * 3_600_000) {
+      // Safety cap: too many fires or too old → stop. Also the parent-set end
+      // time of the series ("până la 18:00" / "peste 4h").
+      if (
+        n.fireCount >= MAX_FIRES ||
+        now.getTime() - n.createdAt.getTime() > MAX_AGE_HOURS * 3_600_000 ||
+        (n.untilAt != null && now.getTime() >= n.untilAt.getTime())
+      ) {
         await prisma.parentNudge.update({ where: { id: n.id }, data: { active: false } });
         stopped++;
         continue;
@@ -84,6 +91,14 @@ export async function runParentNudges(now: Date = new Date()): Promise<{ fired: 
         continue;
       }
       if (onBreak.has(n.childId)) continue; // vacanță: pauză, fără a opri
+
+      // No-overlap: stop the series when the child's next scheduled session is
+      // imminent — don't nudge on top of a programmed reminder.
+      if (await reminderImminent(n.childId, now, OVERLAP_GUARD_MIN)) {
+        await prisma.parentNudge.update({ where: { id: n.id }, data: { active: false } });
+        stopped++;
+        continue;
+      }
 
       const due =
         !n.lastFiredAt ||

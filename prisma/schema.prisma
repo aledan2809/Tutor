@@ -1285,6 +1285,7 @@ model ParentNudge {
   childId     String
   message     String    @db.Text
   intervalMin Int? // null = o singură dată; altfel repetă la fiecare N minute
+  untilAt     DateTime? // sfârșitul seriei („până la 18:00" / „peste 4h"); după → stop
   active      Boolean   @default(true)
   fireCount   Int       @default(0)
   lastFiredAt DateTime?

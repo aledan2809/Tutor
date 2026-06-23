@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { ParentAlertActions } from "@/components/watcher/parent-alert-actions";
 
 interface WatcherNotification {
   id: string;
@@ -170,6 +171,13 @@ export default function WatcherNotificationsPage() {
                       {notif.type.replace(/_/g, " ")}
                     </span>
                   </div>
+                  {notif.type === "parent_alert" &&
+                    ["no_reaction", "no_reaction_reminder"].includes(
+                      (notif.metadata?.alertType as string) ?? ""
+                    ) &&
+                    typeof notif.metadata?.childId === "string" && (
+                      <ParentAlertActions childId={notif.metadata.childId as string} />
+                    )}
                 </div>
                 {!notif.isRead && (
                   <button
