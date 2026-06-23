@@ -32,6 +32,14 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true },
   },
   manifest: "/manifest.json",
+  // iOS home-screen install (prerequisite for "Add to Home Screen" + web push on
+  // iOS 16.4+). Without capable:true + a real apple-touch-icon, Safari (esp.
+  // iOS 18 / iPhone 16) silently refuses to add the app.
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Tutor",
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -39,7 +47,7 @@ export const metadata: Metadata = {
       { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
       { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
     ],
-    apple: "/icons/icon-192x192.png",
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
 };
 

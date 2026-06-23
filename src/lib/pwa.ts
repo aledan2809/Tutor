@@ -27,6 +27,21 @@ export function isMobileUA(): boolean {
   return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
+/**
+ * In-app webview (Telegram / WhatsApp / Instagram / Facebook / a non-Safari iOS
+ * wrapper). "Add to Home Screen" doesn't work there, so we must NOT show an
+ * install prompt — it would just confuse the user.
+ */
+export function isInAppWebView(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  if (isStandalone()) return false;
+  return (
+    /Telegram|WhatsApp|WAiOS|FB_IAB|FBAN|FBAV|Instagram|Line\//i.test(ua) ||
+    (isIOS() && !/Safari\//i.test(ua))
+  );
+}
+
 export function readFlag(key: string): boolean {
   try {
     return localStorage.getItem(key) === "1";

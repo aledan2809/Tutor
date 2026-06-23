@@ -9,6 +9,7 @@ import {
   isStandalone,
   isIOS,
   isMobileUA,
+  isInAppWebView,
   readFlag,
   writeFlag,
 } from "@/lib/pwa";
@@ -81,8 +82,11 @@ export function AppBanner() {
   }, []);
 
   const canInstall = !installed && !!installEvt;
+  // Show the manual "Add to Home Screen" hint on mobile when no native prompt
+  // fired (iOS always; Firefox) — but never inside an in-app webview where it
+  // can't work.
   const manualInstall =
-    !installed && !manualSeen && !installEvt && noAutoPrompt && isMobileUA();
+    !installed && !manualSeen && !installEvt && noAutoPrompt && isMobileUA() && !isInAppWebView();
 
   const snooze = () => {
     try {
