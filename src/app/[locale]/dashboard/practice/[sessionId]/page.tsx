@@ -63,14 +63,20 @@ export default function ActiveSessionPage() {
 
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  // Questions already answered before this view loaded (resume case) — used so
+  // the progress counter is correct when we resume mid-session.
+  const [answeredBase, setAnsweredBase] = useState(0);
   const [phase, setPhase] = useState<Phase>("loading");
   const [feedback, setFeedback] = useState<AnswerResult | null>(null);
   const [results, setResults] = useState<CompletionResult | null>(null);
   const [answeredCount, setAnsweredCount] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [answerError, setAnswerError] = useState<string | null>(null);
   const questionStartTime = useRef<number>(Date.now());
 
-  // Load session from localStorage (saved during start)
+  // Load session from localStorage (saved during start). On a miss (cache
+  // cleared / new device / crash) resume the in-progress session from the
+  // server at the next unanswered question — never force a restart.
   useEffect(() => {
     const stored = localStorage.getItem(`session_${sessionId}`);
     if (stored) {
@@ -91,9 +97,29 @@ export default function ActiveSessionPage() {
           .catch(() => {});
       }
       setPhase("answering");
-    } else {
-      setPhase("not_found");
+      return;
     }
+    fetch("/api/student/sessions/continue", { method: "POST" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d && d.sessionId === sessionId && Array.isArray(d.questions) && d.questions.length) {
+          setSessionData({
+            sessionId: d.sessionId,
+            type: d.type,
+            duration: d.duration ?? 0,
+            questions: d.questions,
+            totalQuestions: d.totalQuestions ?? d.questions.length,
+            domainSlug: d.domainSlug ?? undefined,
+            domainId: d.domainId ?? undefined,
+          });
+          if (d.domainSlug) setDomainSlug(d.domainSlug);
+          setAnsweredBase(d.answeredQuestions ?? 0);
+          setPhase("answering");
+        } else {
+          setPhase("not_found");
+        }
+      })
+      .catch(() => setPhase("not_found"));
   }, [sessionId]);
 
   const handleAnswer = useCallback(
@@ -114,12 +140,18 @@ export default function ActiveSessionPage() {
             responseTime,
           }),
         });
+        if (!res.ok) {
+          // Don't lose the session — let the student re-submit this same question.
+          setAnswerError("Nu am putut trimite răspunsul. Încearcă din nou.");
+          return;
+        }
         const result = await res.json();
+        setAnswerError(null);
         setFeedback(result);
         setPhase("feedback");
         setAnsweredCount((c) => c + 1);
       } catch {
-        // Allow retry on error
+        setAnswerError("Conexiune întreruptă — răspunsul nu s-a pierdut. Încearcă din nou.");
       } finally {
         setSubmitting(false);
       }
@@ -162,19 +194,19 @@ export default function ActiveSessionPage() {
 
   if (phase === "loading") {
     return (
-      <div className="py-12 text-center text-gray-500">Loading session...</div>
+      <div className="py-12 text-center text-gray-500">Se încarcă sesiunea…</div>
     );
   }
 
   if (phase === "not_found") {
     return (
       <div className="mx-auto max-w-md py-12 text-center">
-        <p className="mb-4 text-gray-400">Session not found or expired.</p>
+        <p className="mb-4 text-gray-400">Sesiunea nu a fost găsită sau a expirat.</p>
         <Link
           href="/dashboard/practice"
           className="inline-block rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
         >
-          Start New Session
+          Începe o sesiune nouă
         </Link>
       </div>
     );
@@ -202,10 +234,10 @@ export default function ActiveSessionPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold text-white">
-          Question {currentIndex + 1} of {sessionData.totalQuestions}
+          Întrebarea {answeredBase + currentIndex + 1} din {sessionData.totalQuestions}
         </h1>
         <span className="text-sm text-gray-500">
-          {answeredCount} answered
+          {answeredBase + answeredCount} rezolvate
         </span>
       </div>
 
@@ -215,6 +247,16 @@ export default function ActiveSessionPage() {
         onTimeUp={handleTimeUp}
         isPaused={phase === "feedback"}
       />
+
+      {/* Inline retry — keeps the same question + session (no restart). */}
+      {answerError && phase === "answering" && (
+        <div className="rounded-lg border border-red-700 bg-red-900/20 p-3 text-sm text-red-300">
+          {answerError}{" "}
+          <button onClick={() => setAnswerError(null)} className="ml-1 underline hover:no-underline">
+            Încearcă din nou
+          </button>
+        </div>
+      )}
 
       {/* Question or Feedback */}
       {phase === "answering" && currentQuestion && (

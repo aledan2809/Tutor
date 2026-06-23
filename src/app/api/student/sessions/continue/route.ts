@@ -67,6 +67,8 @@ async function _POST() {
       type: q.type,
       content: q.content,
       options: q.options,
+      imageUrl: q.imageUrl ?? null,
+      passage: q.passage ?? null,
     })),
     totalQuestions: questionIds.length,
     answeredQuestions: answeredIds.size,
