@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { ReminderManager } from "@/components/reminder-manager";
 import { BreaksManager } from "@/components/watcher/breaks-manager";
+import { PhoneCapture } from "@/components/phone-capture";
 import { ParentNudgeManager } from "@/components/watcher/parent-nudge-manager";
 
 const KNOWN_SESSION_TYPES = ["micro", "quick", "deep", "repair", "recovery", "intensive"];
@@ -159,6 +160,18 @@ export function ChildChapter({ child }: { child: ChildLite }) {
 
       {open && (
         <div className="border-t border-gray-800 p-4">
+          {/* WhatsApp phone band (sus) — guardian sets the child's number so
+              reminders can also go out via WhatsApp (Meta). */}
+          {detail?.canManageSchedule && (
+            <div className="mb-4">
+              <PhoneCapture
+                apiBase={`/api/dashboard/watcher/${child.id}/phone`}
+                label="Remindere pe WhatsApp"
+                hint="Adaugă un număr de telefon dacă vrei ca acest copil să primească remindere și pe WhatsApp (Meta)."
+              />
+            </div>
+          )}
+
           {/* Sub-tabs (subcapitole) */}
           <div className="mb-4 flex flex-wrap gap-2">
             <TabBtn active={tab === "sesiuni"} onClick={() => setTab("sesiuni")}>

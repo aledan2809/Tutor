@@ -2,6 +2,7 @@ import { NotificationPreferences } from "@/components/notifications/notification
 import { TelegramConnectCard } from "@/components/notifications/telegram-connect-card";
 import { PushSubscribeButton } from "@/components/push-subscribe";
 import { InstallAppButton } from "@/components/install-app-button";
+import { PhoneCapture } from "@/components/phone-capture";
 import { Link } from "@/i18n/navigation";
 
 export default function NotificationSettingsPage() {
@@ -25,6 +26,14 @@ export default function NotificationSettingsPage() {
       </div>
 
       <InstallAppButton />
+
+      <div className="mb-6">
+        <PhoneCapture
+          apiBase="/api/student/phone"
+          label="Numărul meu de telefon (WhatsApp)"
+          hint="Adaugă un număr dacă vrei să primești remindere și pe WhatsApp (Meta)."
+        />
+      </div>
 
       <Link
         href="/dashboard/settings/reminders"
