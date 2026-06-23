@@ -10,6 +10,7 @@ import {
 } from "@/lib/session-engine";
 import { withErrorHandler } from "@/lib/api-handler";
 import { canAccessDomain } from "@/lib/domain-access";
+import { LICENTA_DOMAIN_SLUG } from "@/lib/licenta-constants";
 
 async function _POST(
   req: NextRequest,
@@ -54,7 +55,10 @@ async function _POST(
     session.user.id,
     domain.id,
     sessionType,
-    config.questionCount
+    config.questionCount,
+    // Licență is a short-window cram with a small bank → allow repeats so the
+    // whole material can be drilled every session.
+    { excludeRecent: domainSlug !== LICENTA_DOMAIN_SLUG }
   );
 
   if (questions.length === 0) {

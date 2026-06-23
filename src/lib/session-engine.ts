@@ -148,9 +148,15 @@ export async function selectQuestions(
   userId: string,
   domainId: string,
   sessionType: SessionType,
-  count: number
+  count: number,
+  opts: { excludeRecent?: boolean } = {}
 ): Promise<Question[]> {
-  const recent = await recentlyAttemptedIds(userId, domainId, RECENT_DAYS);
+  // Cram materials (e.g. licență — exam within days, small bank meant to be
+  // drilled repeatedly) opt out of the no-repeat rule.
+  const { excludeRecent = true } = opts;
+  const recent = excludeRecent
+    ? await recentlyAttemptedIds(userId, domainId, RECENT_DAYS)
+    : new Set<string>();
 
   let questions: Question[];
   if (sessionType === "repair") {
