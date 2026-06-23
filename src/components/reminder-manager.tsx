@@ -27,7 +27,12 @@ const SESSION_TYPES = ["micro", "quick", "deep", "repair", "recovery", "intensiv
 const hhmm = (h: number, m: number) =>
   `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 
-export function ReminderManager() {
+export function ReminderManager({
+  apiBase = "/api/student/reminders",
+}: {
+  /** CRUD base path. Default = own schedule; a parent passes the child-scoped base. */
+  apiBase?: string;
+}) {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -35,7 +40,7 @@ export function ReminderManager() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/student/reminders");
+      const res = await fetch(apiBase);
       const d = await res.json();
       setReminders(Array.isArray(d?.reminders) ? d.reminders : []);
     } finally {
@@ -60,7 +65,7 @@ export function ReminderManager() {
     if (r.daysOfWeek.length === 0) return;
     setSavingId(r.id);
     try {
-      await fetch(`/api/student/reminders/${r.id}`, {
+      await fetch(`${apiBase}/${r.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -79,12 +84,12 @@ export function ReminderManager() {
   };
 
   const remove = async (id: string) => {
-    await fetch(`/api/student/reminders/${id}`, { method: "DELETE" });
+    await fetch(`${apiBase}/${id}`, { method: "DELETE" });
     setReminders((rs) => rs.filter((r) => r.id !== id));
   };
 
   const add = async () => {
-    const res = await fetch("/api/student/reminders", {
+    const res = await fetch(apiBase, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

@@ -100,7 +100,7 @@ async function _GET(
     ? await prisma.escalationEvent.findMany({
         where: { userId: studentId },
         orderBy: { createdAt: "desc" },
-        take: 30,
+        take: 80,
         select: {
           id: true,
           level: true,
@@ -113,7 +113,7 @@ async function _GET(
         },
       })
     : [];
-  const reminderLog = events.map((e) => ({
+  const reminderLog = events.slice(0, 40).map((e) => ({
     id: e.id,
     channel: e.channel,
     level: e.level,
@@ -123,12 +123,87 @@ async function _GET(
     at: e.sentAt ?? e.createdAt,
   }));
 
+  // Program (schedule) — the child's study reminders. Parent-facing config:
+  // returned only to guardians; the same payload powers the editable manager.
+  const schedule = isGuardian
+    ? await prisma.studyReminder.findMany({
+        where: { userId: studentId },
+        orderBy: [{ hour: "asc" }, { minute: "asc" }],
+      })
+    : [];
+
+  // Scheduled sessions (incl. ignored) — each reminder that fired is an episode.
+  // Group escalation touches by (reason, calendar-day); a window reason looks
+  // like "morning_quick". Outcome: reacted (any channel acknowledged) or a
+  // session that day after it fired → "done" (+score); otherwise "ignored".
+  const dayKey = (d: Date) =>
+    new Date(d).toLocaleDateString("ro-RO", { timeZone: "Europe/Bucharest" });
+  type Episode = {
+    key: string;
+    firstAt: Date;
+    window: string;
+    sessionType: string;
+    channels: { level: number; channel: string }[];
+    reacted: boolean;
+    reactedChannel: string | null;
+  };
+  const episodeMap = new Map<string, Episode>();
+  for (const e of events) {
+    const reason = ((e.metadata as Record<string, unknown> | null)?.reason as string) ?? "";
+    if (!reason.startsWith("morning") && !reason.startsWith("evening")) continue;
+    const [win, ...rest] = reason.split("_");
+    const key = `${reason}|${dayKey(e.createdAt)}`;
+    let ep = episodeMap.get(key);
+    if (!ep) {
+      ep = {
+        key,
+        firstAt: e.createdAt,
+        window: win,
+        sessionType: rest.join("_") || "—",
+        channels: [],
+        reacted: false,
+        reactedChannel: null,
+      };
+      episodeMap.set(key, ep);
+    }
+    if (e.createdAt < ep.firstAt) ep.firstAt = e.createdAt;
+    ep.channels.push({ level: e.level, channel: e.channel });
+    if (e.acknowledgedAt) {
+      ep.reacted = true;
+      if (!ep.reactedChannel) ep.reactedChannel = e.channel;
+    }
+  }
+  const scheduledSessions = Array.from(episodeMap.values())
+    .map((ep) => {
+      const epDay = dayKey(ep.firstAt);
+      const match = sessions.find(
+        (s) => dayKey(s.startedAt) === epDay && s.startedAt >= ep.firstAt
+      );
+      const done = ep.reacted || match != null;
+      return {
+        key: ep.key,
+        at: ep.firstAt,
+        window: ep.window,
+        sessionType: ep.sessionType,
+        channels: ep.channels.sort((a, b) => a.level - b.level).map((c) => c.channel),
+        reactedChannel: ep.reactedChannel,
+        done,
+        score: match?.score ?? null,
+        completed: match?.endedAt != null,
+      };
+    })
+    .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+    .slice(0, 20);
+
   return NextResponse.json({
     student: {
       ...student,
       domains: studentEnrollments.map((e) => e.domain),
     },
+    canManageSchedule: isGuardian,
     domainSummaries,
+    schedule,
+    scheduledSessions,
     sessionLog,
     reminderLog,
   });

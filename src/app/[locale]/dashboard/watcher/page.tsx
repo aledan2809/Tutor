@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { StudentProgressCard } from "@/components/watcher/student-progress-card";
+import { ChildChapter } from "@/components/watcher/child-chapter";
 
 interface StudentSummary {
   id: string;
@@ -10,11 +10,8 @@ interface StudentSummary {
   email: string | null;
   image: string | null;
   domains: { id: string; name: string; slug: string; icon: string | null }[];
-  sessions: unknown[];
   progress: { totalAttempts: number; accuracy: number; topicsStudied: number; correctAttempts: number };
-  weakAreas: { subject: string; topic: string; errorRate: number; suggestion: string | null }[];
   gamification: { totalXp: number; currentStreak: number; longestStreak: number; level: string };
-  examHistory: { score: number | null; passed: boolean | null; submittedAt: Date | null }[];
 }
 
 export default function WatcherDashboardPage() {
@@ -39,7 +36,10 @@ export default function WatcherDashboardPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-white">{t("title")}</h1>
+      <h1 className="mb-1 text-2xl font-bold text-white">{t("title")}</h1>
+      <p className="mb-6 text-sm text-gray-400">
+        Fiecare copil are un capitol. Deschide-l pentru program, sesiuni și remindere.
+      </p>
 
       <div className="mb-6">
         <input
@@ -56,13 +56,9 @@ export default function WatcherDashboardPage() {
       ) : filtered.length === 0 ? (
         <p className="text-gray-500">{t("noStudents")}</p>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="space-y-3">
           {filtered.map((student) => (
-            <StudentProgressCard
-              key={student.id}
-              student={student}
-              linkBase="/dashboard/watcher"
-            />
+            <ChildChapter key={student.id} child={student} />
           ))}
         </div>
       )}
