@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { Question } from "@prisma/client";
+import { Prisma, type Question } from "@prisma/client";
 
 // ─── Session Type Definitions ───
 
@@ -103,27 +103,80 @@ export async function recommendSessionType(
 
 // ─── Select questions for a session ───
 
+// Don't re-serve questions the student answered in the last N days — the main
+// cause of "same questions every session". Relaxed automatically when the pool
+// is too small to fill a session (top-up below), so a session is never short.
+const RECENT_DAYS = 10;
+
+async function recentlyAttemptedIds(
+  userId: string,
+  domainId: string,
+  days: number
+): Promise<Set<string>> {
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const rows = await prisma.attempt.findMany({
+    where: { userId, createdAt: { gte: since }, question: { domainId } },
+    select: { questionId: true },
+    distinct: ["questionId"],
+  });
+  return new Set(rows.map((r) => r.questionId));
+}
+
+/**
+ * Pick up to `count` PUBLISHED questions in the domain, excluding `exclude`,
+ * chosen at RANDOM (not by createdAt — that returned the same newest questions
+ * every time). Fetches candidate ids only, shuffles, then loads the chosen rows.
+ */
+async function pickRandom(
+  domainId: string,
+  count: number,
+  exclude: Set<string>,
+  extra: Prisma.QuestionWhereInput = {}
+): Promise<Question[]> {
+  if (count <= 0) return [];
+  const ids = await prisma.question.findMany({
+    where: { domainId, status: "PUBLISHED", ...extra, id: { notIn: [...exclude] } },
+    select: { id: true },
+  });
+  const chosen = shuffle(ids.map((x) => x.id)).slice(0, count);
+  if (chosen.length === 0) return [];
+  const rows = await prisma.question.findMany({ where: { id: { in: chosen } } });
+  return shuffle(rows);
+}
+
 export async function selectQuestions(
   userId: string,
   domainId: string,
   sessionType: SessionType,
   count: number
 ): Promise<Question[]> {
+  const recent = await recentlyAttemptedIds(userId, domainId, RECENT_DAYS);
+
+  let questions: Question[];
   if (sessionType === "repair") {
-    return selectRepairQuestions(userId, domainId, count);
+    questions = await selectRepairQuestions(userId, domainId, count, recent);
+  } else if (sessionType === "recovery") {
+    questions = await selectRecoveryQuestions(userId, domainId, count, recent);
+  } else {
+    questions = await selectAdaptiveQuestions(userId, domainId, count, recent);
   }
 
-  if (sessionType === "recovery") {
-    return selectRecoveryQuestions(userId, domainId, count);
+  // Top-up: if excluding recents left the session short (small question bank),
+  // backfill ignoring the recency filter so the session is never under-filled.
+  if (questions.length < count) {
+    const have = new Set(questions.map((q) => q.id));
+    const topUp = await pickRandom(domainId, count - questions.length, have);
+    questions = [...questions, ...topUp];
   }
 
-  return selectAdaptiveQuestions(userId, domainId, count);
+  return questions.slice(0, count);
 }
 
 async function selectAdaptiveQuestions(
   userId: string,
   domainId: string,
-  count: number
+  count: number,
+  exclude: Set<string>
 ): Promise<Question[]> {
   // Get user progress to find due reviews for this domain
   const dueProgress = await prisma.progress.findMany({
@@ -141,7 +194,7 @@ async function selectAdaptiveQuestions(
     difficulty: Math.round(p.easeFactor),
   }));
 
-  // Fetch due review questions first (60% of session)
+  // Fetch due review questions first (60% of session), skipping recents.
   const reviewQuestions: Question[] = [];
   for (const dt of dueTopics) {
     if (reviewQuestions.length >= Math.ceil(count * 0.6)) break;
@@ -151,34 +204,25 @@ async function selectAdaptiveQuestions(
         subject: dt.subject,
         topic: dt.topic,
         status: "PUBLISHED",
-        id: { notIn: reviewQuestions.map((rq) => rq.id) },
+        id: { notIn: [...reviewQuestions.map((rq) => rq.id), ...exclude] },
       },
     });
     if (q) reviewQuestions.push(q);
   }
 
-  // Fill remaining with new/random questions
+  // Fill remaining with random fresh questions (not recently seen).
   const remaining = count - reviewQuestions.length;
-  const existingIds = reviewQuestions.map((q) => q.id);
+  const existing = new Set([...reviewQuestions.map((q) => q.id), ...exclude]);
+  const newQuestions = await pickRandom(domainId, remaining, existing);
 
-  const newQuestions = await prisma.question.findMany({
-    where: {
-      domainId,
-      status: "PUBLISHED",
-      id: { notIn: existingIds },
-    },
-    take: remaining,
-    orderBy: { createdAt: "desc" },
-  });
-
-  const allQuestions = [...reviewQuestions, ...newQuestions];
-  return shuffle(allQuestions);
+  return shuffle([...reviewQuestions, ...newQuestions]);
 }
 
 async function selectRepairQuestions(
   userId: string,
   domainId: string,
-  count: number
+  count: number,
+  exclude: Set<string>
 ): Promise<Question[]> {
   const weakAreas = await prisma.weakArea.findMany({
     where: { userId, domainId },
@@ -194,23 +238,20 @@ async function selectRepairQuestions(
         subject: wa.subject,
         topic: wa.topic,
         status: "PUBLISHED",
-        id: { notIn: questions.map((q) => q.id) },
+        id: { notIn: [...questions.map((q) => q.id), ...exclude] },
       },
       take: Math.ceil(count / Math.max(weakAreas.length, 1)),
     });
     questions.push(...topicQuestions);
   }
 
-  // If not enough weak area questions, fill with general
+  // If not enough weak-area questions, fill with random fresh ones.
   if (questions.length < count) {
-    const fill = await prisma.question.findMany({
-      where: {
-        domainId,
-        status: "PUBLISHED",
-        id: { notIn: questions.map((q) => q.id) },
-      },
-      take: count - questions.length,
-    });
+    const fill = await pickRandom(
+      domainId,
+      count - questions.length,
+      new Set([...questions.map((q) => q.id), ...exclude])
+    );
     questions.push(...fill);
   }
 
@@ -220,7 +261,8 @@ async function selectRepairQuestions(
 async function selectRecoveryQuestions(
   userId: string,
   domainId: string,
-  count: number
+  count: number,
+  exclude: Set<string>
 ): Promise<Question[]> {
   // For recovery: mix of easy questions + overdue reviews
   const overdueProgress = await prisma.progress.findMany({
@@ -235,7 +277,7 @@ async function selectRecoveryQuestions(
 
   const questions: Question[] = [];
 
-  // Add overdue review questions
+  // Add overdue review questions (skipping recents).
   for (const p of overdueProgress) {
     if (questions.length >= Math.ceil(count * 0.5)) break;
     const q = await prisma.question.findFirst({
@@ -245,35 +287,28 @@ async function selectRecoveryQuestions(
         topic: p.topic,
         status: "PUBLISHED",
         difficulty: { lte: 3 },
-        id: { notIn: questions.map((rq) => rq.id) },
+        id: { notIn: [...questions.map((rq) => rq.id), ...exclude] },
       },
     });
     if (q) questions.push(q);
   }
 
-  // Fill with easy questions
-  const remaining = count - questions.length;
-  const easyQuestions = await prisma.question.findMany({
-    where: {
-      domainId,
-      status: "PUBLISHED",
-      difficulty: { lte: 2 },
-      id: { notIn: questions.map((q) => q.id) },
-    },
-    take: remaining,
-  });
-  questions.push(...easyQuestions);
+  // Fill with random easy questions (not recently seen).
+  const easy = await pickRandom(
+    domainId,
+    count - questions.length,
+    new Set([...questions.map((q) => q.id), ...exclude]),
+    { difficulty: { lte: 2 } }
+  );
+  questions.push(...easy);
 
-  // Still not enough? Get any published questions
+  // Still not enough? Any fresh published questions.
   if (questions.length < count) {
-    const fill = await prisma.question.findMany({
-      where: {
-        domainId,
-        status: "PUBLISHED",
-        id: { notIn: questions.map((q) => q.id) },
-      },
-      take: count - questions.length,
-    });
+    const fill = await pickRandom(
+      domainId,
+      count - questions.length,
+      new Set([...questions.map((q) => q.id), ...exclude])
+    );
     questions.push(...fill);
   }
 
