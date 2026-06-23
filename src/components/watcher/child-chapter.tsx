@@ -6,6 +6,7 @@ import Image from "next/image";
 import { ReminderManager } from "@/components/reminder-manager";
 import { BreaksManager } from "@/components/watcher/breaks-manager";
 import { PhoneCapture } from "@/components/phone-capture";
+import { ParentAlertActions } from "@/components/watcher/parent-alert-actions";
 import { ParentNudgeManager } from "@/components/watcher/parent-nudge-manager";
 
 const KNOWN_SESSION_TYPES = ["micro", "quick", "deep", "repair", "recovery", "intensive"];
@@ -214,7 +215,15 @@ export function ChildChapter({ child }: { child: ChildLite }) {
           ) : tab === "sesiuni" ? (
             <SesiuniTab scheduled={detail.scheduledSessions} sessions={detail.sessionLog} />
           ) : (
-            <RemindereTab episodes={episodes} />
+            <div className="space-y-4">
+              {detail.canManageSchedule && (
+                <div>
+                  <h3 className="mb-2 text-sm font-medium text-gray-400">Trimite un memento</h3>
+                  <ParentAlertActions childId={child.id} />
+                </div>
+              )}
+              <RemindereTab episodes={episodes} />
+            </div>
           )}
         </div>
       )}
@@ -321,11 +330,18 @@ function RemindereTab({
   return (
     <div className="space-y-3">
       {episodes.map((ep, i) => {
-        const win = ep.reason?.startsWith("morning")
+        const r = ep.reason ?? "";
+        const win = r.startsWith("morning")
           ? "dimineață"
-          : ep.reason?.startsWith("evening")
+          : r.startsWith("evening")
             ? "seară"
-            : ep.reason ?? "memento";
+            : r === "missed_session"
+              ? "sesiune ratată"
+              : r === "parent_authorized"
+                ? "memento autorizat"
+                : r === "parent_nudge"
+                  ? "memento de la părinte"
+                  : "memento";
         const reacted = ep.touches.some((t) => t.acknowledged);
         return (
           <div key={`${ep.reason}-${ep.day}-${i}`} className="rounded-lg border border-gray-800 bg-gray-800/40 p-3">
