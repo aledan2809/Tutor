@@ -54,8 +54,8 @@ export default function WatcherNotificationsPage() {
     : notifications
   )
     .slice()
-    // Chronological: oldest → newest, so a re-notify sequence reads top-to-bottom.
-    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    // Newest first: today's actionable alert stays at the top, old ones below.
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
