@@ -15,10 +15,12 @@ async function _GET(
   const { id: studentId } = await params;
 
   // Parent scoping: a pure parent watcher may only view a linked child.
-  if (
-    !watcherSeesAllStudents(session!.user) &&
-    !(await isGuardianOf(session!.user.id, studentId))
-  ) {
+  // `isGuardian` is also reused below to decide the breadth of the new logs:
+  // a guardian legitimately sees the whole child; a domain-scoped instructor
+  // must NOT see the child's activity outside their own domains.
+  const seesAll = watcherSeesAllStudents(session!.user);
+  const isGuardian = await isGuardianOf(session!.user.id, studentId);
+  if (!seesAll && !isGuardian) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -68,9 +70,14 @@ async function _GET(
     })
   );
 
-  // Session log — each session + its result (score).
+  // Session log — each session + its result (score). A guardian sees the whole
+  // child; a domain-scoped instructor only sees sessions inside their domains
+  // (Session carries domainId), so they can't read other-domain activity.
   const sessions = await prisma.session.findMany({
-    where: { userId: studentId },
+    where: {
+      userId: studentId,
+      ...(isGuardian ? {} : { domainId: { in: watcherDomainIds } }),
+    },
     orderBy: { startedAt: "desc" },
     take: 25,
     select: { id: true, type: true, subject: true, startedAt: true, endedAt: true, score: true },
@@ -85,22 +92,27 @@ async function _GET(
   }));
 
   // Reminder log — each reminder/escalation touch, with the channel + whether it
-  // was actually sent + whether the child acknowledged it.
-  const events = await prisma.escalationEvent.findMany({
-    where: { userId: studentId },
-    orderBy: { createdAt: "desc" },
-    take: 30,
-    select: {
-      id: true,
-      level: true,
-      channel: true,
-      status: true,
-      sentAt: true,
-      acknowledgedAt: true,
-      createdAt: true,
-      metadata: true,
-    },
-  });
+  // was actually sent + whether the child acknowledged it. EscalationEvent has
+  // no domainId (it's student-global), so it can't be domain-scoped — it's a
+  // parent-facing feature, restricted to guardians. A pure domain-scoped
+  // instructor gets an empty log rather than a cross-domain leak.
+  const events = isGuardian
+    ? await prisma.escalationEvent.findMany({
+        where: { userId: studentId },
+        orderBy: { createdAt: "desc" },
+        take: 30,
+        select: {
+          id: true,
+          level: true,
+          channel: true,
+          status: true,
+          sentAt: true,
+          acknowledgedAt: true,
+          createdAt: true,
+          metadata: true,
+        },
+      })
+    : [];
   const reminderLog = events.map((e) => ({
     id: e.id,
     channel: e.channel,
