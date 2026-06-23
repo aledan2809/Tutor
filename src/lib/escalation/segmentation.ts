@@ -44,11 +44,13 @@ export function isPaidChannelDeliverable(
     telegramEnabled: boolean;
     whatsappConfigured: boolean;
     smsConfigured: boolean;
+    emailConfigured: boolean;
   }
 ): boolean {
   if (channel === "TELEGRAM") return ctx.telegramEnabled && ctx.telegramLinked;
   if (channel === "WHATSAPP") return ctx.whatsappConfigured;
   if (channel === "SMS") return ctx.smsConfigured;
+  if (channel === "EMAIL") return ctx.emailConfigured;
   return true;
 }
 

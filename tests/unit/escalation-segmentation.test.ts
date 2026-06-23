@@ -25,10 +25,19 @@ describe("Escalation segmentation", () => {
   });
 
   describe("isPaidChannelDeliverable", () => {
-    const base = { telegramLinked: false, telegramEnabled: false, whatsappConfigured: false, smsConfigured: false };
-    it("PUSH and EMAIL are always deliverable", () => {
+    const base = {
+      telegramLinked: false,
+      telegramEnabled: false,
+      whatsappConfigured: false,
+      smsConfigured: false,
+      emailConfigured: false,
+    };
+    it("PUSH is always deliverable", () => {
       expect(isPaidChannelDeliverable("PUSH", base)).toBe(true);
-      expect(isPaidChannelDeliverable("EMAIL", base)).toBe(true);
+    });
+    it("Email needs SMTP configured (else skip, not retry-forever)", () => {
+      expect(isPaidChannelDeliverable("EMAIL", base)).toBe(false);
+      expect(isPaidChannelDeliverable("EMAIL", { ...base, emailConfigured: true })).toBe(true);
     });
     it("Telegram needs linked AND enabled", () => {
       expect(isPaidChannelDeliverable("TELEGRAM", base)).toBe(false);

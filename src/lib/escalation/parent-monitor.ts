@@ -15,7 +15,7 @@ import { startEscalation } from "./engine";
 export const RENOTIFY_MIN = 30; // re-nag the parent at this interval
 export const STALL_MIN = 45; // child chain considered lapsed after last touch
 export const AUTH_EXHAUST_MIN = 60; // authorized cascade considered lapsed after this
-const LOOKBACK_HOURS = 6;
+const LOOKBACK_HOURS = 12;
 
 /** Pure: is it time to re-notify the parent again? */
 export function shouldRenotifyParent(

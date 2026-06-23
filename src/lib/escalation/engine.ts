@@ -180,7 +180,8 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
   if (
     event.channel === "TELEGRAM" ||
     event.channel === "WHATSAPP" ||
-    event.channel === "SMS"
+    event.channel === "SMS" ||
+    event.channel === "EMAIL"
   ) {
     const deliverable = isPaidChannelDeliverable(event.channel, {
       telegramLinked: Boolean(event.user.telegramChatId),
@@ -193,6 +194,7 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
       smsConfigured: Boolean(
         process.env.SMSLINK_CONNECTION_ID && process.env.SMSLINK_PASSWORD
       ),
+      emailConfigured: Boolean(process.env.SMTP_HOST),
     });
     if (!deliverable) {
       await escalateToNextLevel(event.id, event.level);
