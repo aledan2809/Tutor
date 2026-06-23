@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "ParentNudge" ADD COLUMN "channels" TEXT[] NOT NULL DEFAULT ARRAY['PUSH', 'TELEGRAM']::TEXT[];

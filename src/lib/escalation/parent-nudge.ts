@@ -5,6 +5,7 @@
  * the child's reaction, parent stop, or a safety cap.
  */
 import { prisma } from "@/lib/prisma";
+import type { EscalationChannel } from "@prisma/client";
 import { sendNotification } from "@/lib/notifications/service";
 import { userIdsOnBreak } from "./breaks";
 import { reminderImminent } from "./reminders";
@@ -39,20 +40,31 @@ async function notifyParentReacted(parentId: string, childId: string): Promise<v
   });
 }
 
-/** Deliver one nudge over free channels (in-app + push, and Telegram if linked). */
-export async function fireNudge(childId: string, message: string): Promise<void> {
+/** Deliver one nudge over the chosen channels (default: in-app push + Telegram). */
+export async function fireNudge(
+  childId: string,
+  message: string,
+  channels: string[] = ["PUSH", "TELEGRAM"]
+): Promise<void> {
   const metadata = {
     title: "Memento de la părinte",
     message,
     url: "/dashboard/practice",
     templateId: "parent_nudge",
   };
-  await sendNotification({ userId: childId, channel: "PUSH", templateId: "parent_nudge", metadata });
-  // Best-effort free Telegram (no-op if the child hasn't linked Telegram).
-  try {
-    await sendNotification({ userId: childId, channel: "TELEGRAM", templateId: "parent_nudge", metadata });
-  } catch {
-    /* ignore */
+  for (const ch of channels) {
+    // Per-channel best-effort: one channel failing (e.g. no WhatsApp phone /
+    // Telegram not linked) must not block the others.
+    try {
+      await sendNotification({
+        userId: childId,
+        channel: ch as EscalationChannel,
+        templateId: "parent_nudge",
+        metadata,
+      });
+    } catch {
+      /* ignore */
+    }
   }
 }
 
@@ -105,7 +117,7 @@ export async function runParentNudges(now: Date = new Date()): Promise<{ fired: 
         (n.intervalMin != null && now.getTime() - n.lastFiredAt.getTime() >= n.intervalMin * 60_000);
       if (!due) continue;
 
-      await fireNudge(n.childId, n.message);
+      await fireNudge(n.childId, n.message, n.channels);
       const oneShot = n.intervalMin == null;
       await prisma.parentNudge.update({
         where: { id: n.id },

@@ -12,9 +12,19 @@ export function ParentAlertActions({ childId }: { childId: string }) {
   const [msg, setMsg] = useState("Hai la o sesiune scurtă! 💪");
   const [intervalMin, setIntervalMin] = useState(15);
   const [until, setUntil] = useState("2h");
+  const [channels, setChannels] = useState<string[]>(["PUSH", "TELEGRAM"]);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const CHANNELS: { v: string; label: string }[] = [
+    { v: "PUSH", label: "Aplicație" },
+    { v: "TELEGRAM", label: "Telegram" },
+    { v: "WHATSAPP", label: "WhatsApp" },
+    { v: "EMAIL", label: "Email" },
+  ];
+  const toggleChannel = (v: string) =>
+    setChannels((cs) => (cs.includes(v) ? cs.filter((c) => c !== v) : [...cs, v]));
 
   const computeUntil = (): string => {
     if (until === "18") {
@@ -28,6 +38,10 @@ export function ParentAlertActions({ childId }: { childId: string }) {
   };
 
   const post = async (body: { message: string; intervalMin?: number; untilAt?: string }) => {
+    if (channels.length === 0) {
+      setError("Alege cel puțin un canal.");
+      return;
+    }
     setBusy(true);
     setError(null);
     setDone(null);
@@ -35,7 +49,7 @@ export function ParentAlertActions({ childId }: { childId: string }) {
       const r = await fetch(`/api/dashboard/watcher/${childId}/nudge`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ ...body, channels }),
       });
       const d = await r.json().catch(() => ({}));
       if (!r.ok) {
@@ -53,6 +67,23 @@ export function ParentAlertActions({ childId }: { childId: string }) {
 
   return (
     <div className="mt-3 space-y-2 border-t border-gray-800 pt-3">
+      {/* Channel picker — e.g. direct WhatsApp only. */}
+      <div className="flex flex-wrap items-center gap-2 text-xs text-gray-400">
+        <span>Pe:</span>
+        {CHANNELS.map((c) => (
+          <button
+            key={c.v}
+            onClick={() => toggleChannel(c.v)}
+            className={`rounded-full border px-2.5 py-1 transition-colors ${
+              channels.includes(c.v)
+                ? "border-blue-500 bg-blue-600/20 text-blue-300"
+                : "border-gray-700 text-gray-400 hover:bg-gray-800"
+            }`}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
       <div className="flex flex-wrap gap-2">
         <button
           disabled={busy}

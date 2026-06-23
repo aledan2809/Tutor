@@ -13,6 +13,8 @@ const nudgeInput = z.object({
   intervalMin: z.number().int().min(5).max(240).nullable().optional(),
   // Series end ("până la 18:00" / "peste 4h") as an ISO datetime; null = use caps.
   untilAt: z.string().datetime().nullable().optional(),
+  // Channels to deliver on; default in-app push + Telegram.
+  channels: z.array(z.enum(["PUSH", "TELEGRAM", "WHATSAPP", "EMAIL"])).min(1).max(4).optional(),
 });
 
 const MAX_SERIES_HOURS = 12;
@@ -67,8 +69,9 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ id: strin
     );
   }
 
+  const channels = parsed.data.channels ?? ["PUSH", "TELEGRAM"];
   // Fire the first one now so the parent sees instant effect; cron handles repeats.
-  await fireNudge(childId, parsed.data.message);
+  await fireNudge(childId, parsed.data.message, channels);
   const nudge = await prisma.parentNudge.create({
     data: {
       parentId: session.user.id,
@@ -76,6 +79,7 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ id: strin
       message: parsed.data.message,
       intervalMin,
       untilAt,
+      channels,
       active: intervalMin != null, // one-shot is done after this first fire
       fireCount: 1,
       lastFiredAt: now,
