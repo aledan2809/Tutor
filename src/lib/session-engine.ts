@@ -175,7 +175,11 @@ export async function selectQuestions(
     questions = [...questions, ...topUp];
   }
 
-  return questions.slice(0, count);
+  // Crescendo: easy → hard within the session (shuffle first for intra-difficulty
+  // variety, then a stable sort by difficulty ascending — V8 sort is stable).
+  return shuffle(questions.slice(0, count)).sort(
+    (a, b) => (a.difficulty ?? 3) - (b.difficulty ?? 3)
+  );
 }
 
 async function selectAdaptiveQuestions(

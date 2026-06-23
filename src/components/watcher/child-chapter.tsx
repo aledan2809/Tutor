@@ -49,11 +49,17 @@ interface SessionItem {
   completed: boolean;
   score: number | null;
 }
+interface WeakArea {
+  subject: string;
+  topic: string;
+  errorRate: number;
+}
 interface Detail {
   canManageSchedule: boolean;
   scheduledSessions: ScheduledSession[];
   reminderLog: ReminderTouch[];
   sessionLog: SessionItem[];
+  domainSummaries?: { domain: { name: string }; weakAreas: WeakArea[] }[];
 }
 
 const CHANNEL_RO: Record<string, string> = {
@@ -154,8 +160,8 @@ export function ChildChapter({ child }: { child: ChildLite }) {
           </span>
         </span>
         <span className="flex items-center gap-3 text-xs text-gray-400">
-          <span title="Serie zile">🔥 {streak}</span>
-          <span title="Acuratețe">{accuracy}%</span>
+          <span title="Serie: zile consecutive cu cel puțin o sesiune de studiu">🔥 {streak} zile</span>
+          <span title="Acuratețe: procentul răspunsurilor corecte">{accuracy}% corect</span>
         </span>
       </button>
 
@@ -213,7 +219,10 @@ export function ChildChapter({ child }: { child: ChildLite }) {
               <p className="text-sm text-gray-500">Programul poate fi gestionat doar de părinte.</p>
             )
           ) : tab === "sesiuni" ? (
-            <SesiuniTab scheduled={detail.scheduledSessions} sessions={detail.sessionLog} />
+            <div className="space-y-5">
+              <WeakAreasBlock domainSummaries={detail.domainSummaries} />
+              <SesiuniTab scheduled={detail.scheduledSessions} sessions={detail.sessionLog} />
+            </div>
           ) : (
             <div className="space-y-4">
               {detail.canManageSchedule && (
@@ -315,6 +324,41 @@ function SesiuniTab({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function WeakAreasBlock({
+  domainSummaries,
+}: {
+  domainSummaries?: { domain: { name: string }; weakAreas: WeakArea[] }[];
+}) {
+  // Aggregate (overall) weak topics — what the repair sessions target. Highest
+  // error rate first.
+  const all = (domainSummaries ?? [])
+    .flatMap((ds) => ds.weakAreas.map((w) => ({ ...w, domain: ds.domain.name })))
+    .sort((a, b) => b.errorRate - a.errorRate)
+    .slice(0, 8);
+  return (
+    <div>
+      <h3 className="mb-2 text-sm font-medium text-gray-400">Puncte slabe (per ansamblu)</h3>
+      {all.length === 0 ? (
+        <p className="text-sm text-gray-500">Niciun punct slab detectat încă.</p>
+      ) : (
+        <div className="space-y-1">
+          {all.map((w) => (
+            <div
+              key={`${w.subject}-${w.topic}`}
+              className="flex items-center justify-between rounded bg-gray-800 px-3 py-2"
+            >
+              <span className="text-sm text-white">
+                {w.subject} · {w.topic}
+              </span>
+              <span className="text-xs text-red-400">{Math.round(w.errorRate)}% greșeli</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
