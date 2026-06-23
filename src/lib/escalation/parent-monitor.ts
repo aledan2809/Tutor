@@ -69,8 +69,13 @@ async function childReactionSince(
   });
   if (acked) return { reacted: true, channel: acked.channel };
 
+  // Count a session that STARTED or FINISHED since `since` — a late/resumed
+  // session has an old startedAt but completing it now still means the child engaged.
   const session = await prisma.session.findFirst({
-    where: { userId: childId, startedAt: { gte: since } },
+    where: {
+      userId: childId,
+      OR: [{ startedAt: { gte: since } }, { endedAt: { gte: since } }],
+    },
     select: { id: true },
   });
   if (session) {

@@ -176,9 +176,15 @@ async function _GET(
   const scheduledSessions = Array.from(episodeMap.values())
     .map((ep) => {
       const epDay = dayKey(ep.firstAt);
-      const match = sessions.find(
-        (s) => dayKey(s.startedAt) === epDay && s.startedAt >= ep.firstAt
-      );
+      // A session counts for this episode if it was STARTED or FINISHED the same
+      // day, at/after the episode fired — so a late/resumed completion still
+      // marks the episode done (not "ignored").
+      const match = sessions.find((s) => {
+        const startedHit = dayKey(s.startedAt) === epDay && s.startedAt >= ep.firstAt;
+        const endedHit =
+          s.endedAt != null && dayKey(s.endedAt) === epDay && s.endedAt >= ep.firstAt;
+        return startedHit || endedHit;
+      });
       const done = ep.reacted || match != null;
       return {
         key: ep.key,

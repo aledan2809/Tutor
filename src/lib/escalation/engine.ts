@@ -358,12 +358,17 @@ export async function advancePendingEscalations(): Promise<number> {
 
   for (const event of completedEvents) {
     if (onBreak.has(event.userId)) continue; // vacanță: nu escaladăm
-    // Check if user has resumed activity (completed a session since escalation)
+    // Check if user has resumed activity (completed a session since escalation).
+    // A late/resumed session has an old startedAt, so also count one that FINISHED
+    // after the escalation — the completion is the real "studied" signal.
     const recentSession = await prisma.session.findFirst({
       where: {
         userId: event.userId,
         endedAt: { not: null },
-        startedAt: { gt: event.createdAt },
+        OR: [
+          { startedAt: { gt: event.createdAt } },
+          { endedAt: { gt: event.createdAt } },
+        ],
       },
     });
 

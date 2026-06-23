@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { updateWeakAreas } from "@/lib/session-engine";
 import { awardSessionCompleteXp } from "@/lib/gamification";
 import { withErrorHandler } from "@/lib/api-handler";
+import { cancelEscalation } from "@/lib/escalation/engine";
 
 async function _POST(
   req: NextRequest,
@@ -66,6 +67,11 @@ async function _POST(
       score,
     },
   });
+
+  // Finishing a session — even a late/resumed one — means the student engaged.
+  // Stop any active escalation chain immediately (the cron's passive gate also
+  // catches this, but this makes it instant so no further nudges go out).
+  await cancelEscalation(session.user.id);
 
   // Update weak areas (domain-scoped)
   await updateWeakAreas(session.user.id, domain.id);
