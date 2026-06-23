@@ -17,6 +17,7 @@ import {
   isPaidChannelDeliverable,
   isPaidSubscriber,
 } from "./segmentation";
+import { userIdsOnBreak } from "./breaks";
 
 interface EscalationContext {
   userId: string;
@@ -352,9 +353,11 @@ export async function advancePendingEscalations(): Promise<number> {
     include: { user: true },
   });
 
+  const onBreak = await userIdsOnBreak();
   let advanced = 0;
 
   for (const event of completedEvents) {
+    if (onBreak.has(event.userId)) continue; // vacanță: nu escaladăm
     // Check if user has resumed activity (completed a session since escalation)
     const recentSession = await prisma.session.findFirst({
       where: {
@@ -423,12 +426,13 @@ export async function advancePendingEscalations(): Promise<number> {
     advanced++;
   }
 
-  // Process all pending events
+  // Process all pending events (skip students on a break — no delivery during vacanță)
   const pending = await prisma.escalationEvent.findMany({
     where: { status: "PENDING" },
   });
 
   for (const p of pending) {
+    if (onBreak.has(p.userId)) continue;
     await processEscalationEvent(p.id);
   }
 
@@ -498,9 +502,11 @@ export async function detectMissedSessions(): Promise<string[]> {
     take: escalationMaxNewPerRun(),
   });
 
+  const onBreak = await userIdsOnBreak(now);
   const userIds: string[] = [];
 
   for (const user of inactiveUsers) {
+    if (onBreak.has(user.id)) continue; // vacanță: nu deschidem lanț nou
     await startEscalation({
       userId: user.id,
       reason: "missed_session",

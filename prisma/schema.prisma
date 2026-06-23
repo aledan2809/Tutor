@@ -1260,3 +1260,17 @@ model LicentaDocument {
   @@index([userId, createdAt])
   @@index([domainId])
 }
+
+// Vacanță / excepții de program. În intervalul [startDate, endDate] (inclusiv,
+// calendar Europe/Bucharest) studentul nu primește remindere și nu se declanșează
+// escaladări sau alerte către părinte. Fără FK pe User (nu atingem modelul User).
+model StudyBreak {
+  id        String   @id @default(cuid())
+  userId    String // studentul (copilul) în vacanță
+  startDate DateTime @db.Date
+  endDate   DateTime @db.Date
+  label     String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, startDate])
+}

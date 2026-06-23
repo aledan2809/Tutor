@@ -11,6 +11,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { startEscalation } from "./engine";
+import { userIdsOnBreak } from "./breaks";
 
 export const RENOTIFY_MIN = 30; // re-nag the parent at this interval
 export const STALL_MIN = 45; // child chain considered lapsed after last touch
@@ -108,6 +109,9 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
   let resolvedPositive = 0;
   let resolvedNegative = 0;
 
+  // Vacanță: copiii în vacanță sunt excluși complet — niciun fel de alertă către părinte.
+  const onBreak = await userIdsOnBreak(now);
+
   const open = await prisma.parentEscalation.findMany({
     where: { status: { in: ["awaiting_parent", "authorized"] } },
     include: { child: { select: { name: true } } },
@@ -115,6 +119,7 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
 
   // 1) Resolve episodes where the child has since engaged → positive.
   for (const esc of open) {
+    if (onBreak.has(esc.childId)) continue;
     const { reacted, channel } = await childReactionSince(esc.childId, esc.openedFor);
     if (reacted) {
       await prisma.parentEscalation.update({
@@ -133,6 +138,7 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
 
   // 2) Authorized episodes that lapsed again (no reaction past the window) → negative.
   for (const esc of open) {
+    if (onBreak.has(esc.childId)) continue;
     if (esc.status !== "authorized" || !esc.authorizedAt) continue;
     if (now.getTime() - esc.authorizedAt.getTime() < AUTH_EXHAUST_MIN * 60_000) continue;
     const { reacted } = await childReactionSince(esc.childId, esc.authorizedAt);
@@ -167,6 +173,7 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
     byChild.set(e.userId, cur);
   }
   for (const [childId, chain] of byChild) {
+    if (onBreak.has(childId)) continue; // vacanță
     if (chain.active) continue; // chain still running
     const guardians = await prisma.guardian.findMany({
       where: { childId, status: "active" },
@@ -230,6 +237,7 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
     include: { child: { select: { name: true } } },
   });
   for (const esc of awaiting) {
+    if (onBreak.has(esc.childId)) continue; // vacanță
     if (!shouldRenotifyParent(esc.lastParentNotifiedAt, now)) continue;
     await notifyGuardians(esc.childId, esc.child.name, {
       alertType: "no_reaction_reminder",

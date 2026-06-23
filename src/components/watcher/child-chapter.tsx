@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import Image from "next/image";
 import { ReminderManager } from "@/components/reminder-manager";
+import { BreaksManager } from "@/components/watcher/breaks-manager";
 
 interface ChildLite {
   id: string;
@@ -179,7 +180,13 @@ export function ChildChapter({ child }: { child: ChildLite }) {
             <p className="text-sm text-gray-500">Se încarcă…</p>
           ) : tab === "program" ? (
             detail.canManageSchedule ? (
-              <ReminderManager apiBase={`/api/dashboard/watcher/${child.id}/reminders`} />
+              <div className="space-y-6">
+                <ReminderManager apiBase={`/api/dashboard/watcher/${child.id}/reminders`} />
+                <div>
+                  <h3 className="mb-2 text-sm font-medium text-gray-400">Vacanță / excepții</h3>
+                  <BreaksManager apiBase={`/api/dashboard/watcher/${child.id}/breaks`} />
+                </div>
+              </div>
             ) : (
               <p className="text-sm text-gray-500">Programul poate fi gestionat doar de părinte.</p>
             )

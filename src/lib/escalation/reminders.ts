@@ -7,6 +7,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { startEscalation } from "./engine";
+import { userIdsOnBreak } from "./breaks";
 
 export interface ReminderLike {
   isActive: boolean;
@@ -93,8 +94,10 @@ function reminderCopy(r: { window: string; label: string | null }): { title: str
  */
 export async function runDueReminders(now: Date = new Date()): Promise<number> {
   const reminders = await prisma.studyReminder.findMany({ where: { isActive: true } });
+  const onBreak = await userIdsOnBreak(now);
   let fired = 0;
   for (const r of reminders) {
+    if (onBreak.has(r.userId)) continue; // vacanță: nu trimitem remindere
     const { due, today } = isReminderDue(r, now);
     if (!due) continue;
     const { title, message } = reminderCopy(r);
