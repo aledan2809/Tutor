@@ -12,6 +12,7 @@
 import { prisma } from "@/lib/prisma";
 import type { EscalationChannel } from "@prisma/client";
 import { getTelegramClient } from "@/lib/telegram/connect";
+import { sendAppEmail } from "@/lib/email";
 
 interface NotificationPayload {
   userId: string;
@@ -312,22 +313,13 @@ async function sendSMSNotification(
 }
 
 /**
- * Email notification via nodemailer — a study reminder sent to the STUDENT
- * (cascade step between Telegram and WhatsApp). Instructor/parent alerts are a
- * separate concern (parent monitoring).
+ * Email notification — a study reminder sent to the STUDENT (cascade step
+ * between Telegram and WhatsApp), via the app email transport (Resend, SMTP
+ * fallback). Instructor/parent alerts are a separate concern (parent monitoring).
  */
 async function sendEmailNotification(
   payload: NotificationPayload
 ): Promise<boolean> {
-  const smtpHost = process.env.SMTP_HOST;
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
-
-  if (!smtpHost) {
-    console.warn("SMTP not configured — skipping email");
-    return false;
-  }
-
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
     select: { email: true, name: true },
@@ -342,32 +334,17 @@ async function sendEmailNotification(
   const rawUrl = payload.metadata.url as string | undefined;
   const ctaUrl = rawUrl && rawUrl.startsWith("http") ? rawUrl : `${base}${rawUrl?.startsWith("/") ? rawUrl : "/"}`;
 
-  try {
-    const nodemailer = await import("nodemailer");
-    const transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: Number(process.env.SMTP_PORT ?? 587),
-      auth: { user: smtpUser, pass: smtpPass },
-    });
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM ?? "noreply@etutor.ro",
-      to: user.email,
-      subject: "eTutor — e timpul pentru un quiz scurt",
-      html: `
+  return sendAppEmail({
+    to: user.email,
+    subject: "eTutor — e timpul pentru un quiz scurt",
+    html: `
         <p>Salut ${userName},</p>
         <p>E timpul pentru un quiz scurt — păstrează-ți seria de studiu.</p>
         <p><a href="${ctaUrl}" style="display:inline-block;background:#3b82f6;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none">Începe quiz-ul</a></p>
         <hr>
         <p style="color:#888;font-size:12px">Memento automat de la eTutor.</p>
       `,
-    });
-
-    return true;
-  } catch (error) {
-    console.error("Email send error:", error);
-    return false;
-  }
+  });
 }
 
 /**

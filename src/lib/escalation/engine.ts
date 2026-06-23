@@ -194,7 +194,7 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
       smsConfigured: Boolean(
         process.env.SMSLINK_CONNECTION_ID && process.env.SMSLINK_PASSWORD
       ),
-      emailConfigured: Boolean(process.env.SMTP_HOST),
+      emailConfigured: Boolean(process.env.AUTH_RESEND_KEY || process.env.SMTP_HOST),
     });
     if (!deliverable) {
       await escalateToNextLevel(event.id, event.level);
