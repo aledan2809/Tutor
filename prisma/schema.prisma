@@ -1274,3 +1274,23 @@ model StudyBreak {
 
   @@index([userId, startDate])
 }
+
+// Memento la cerere de la părinte: un mesaj personalizat trimis copilului, opțional
+// repetat la fiecare `intervalMin` minute până când copilul reacționează (sau e
+// oprit / atinge plafonul de siguranță). Canale gratuite (app + Telegram), fără
+// cascadă plătită. Fără FK pe User.
+model ParentNudge {
+  id          String    @id @default(cuid())
+  parentId    String
+  childId     String
+  message     String    @db.Text
+  intervalMin Int? // null = o singură dată; altfel repetă la fiecare N minute
+  active      Boolean   @default(true)
+  fireCount   Int       @default(0)
+  lastFiredAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([active])
+  @@index([childId])
+}

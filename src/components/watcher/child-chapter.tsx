@@ -1,9 +1,13 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { ReminderManager } from "@/components/reminder-manager";
 import { BreaksManager } from "@/components/watcher/breaks-manager";
+import { ParentNudgeManager } from "@/components/watcher/parent-nudge-manager";
+
+const KNOWN_SESSION_TYPES = ["micro", "quick", "deep", "repair", "recovery", "intensive"];
 
 interface ChildLite {
   id: string;
@@ -186,6 +190,10 @@ export function ChildChapter({ child }: { child: ChildLite }) {
                   <h3 className="mb-2 text-sm font-medium text-gray-400">Vacanță / excepții</h3>
                   <BreaksManager apiBase={`/api/dashboard/watcher/${child.id}/breaks`} />
                 </div>
+                <div>
+                  <h3 className="mb-2 text-sm font-medium text-gray-400">Trimite memento acum</h3>
+                  <ParentNudgeManager apiBase={`/api/dashboard/watcher/${child.id}/nudge`} />
+                </div>
               </div>
             ) : (
               <p className="text-sm text-gray-500">Programul poate fi gestionat doar de părinte.</p>
@@ -229,6 +237,8 @@ function SesiuniTab({
   scheduled: ScheduledSession[];
   sessions: SessionItem[];
 }) {
+  const t = useTranslations("sessions");
+  const typeLabel = (x: string) => (KNOWN_SESSION_TYPES.includes(x) ? t(`types.${x}`) : x);
   return (
     <div className="space-y-5">
       <div>
@@ -242,7 +252,7 @@ function SesiuniTab({
             {scheduled.map((s) => (
               <div key={s.key} className="flex items-center justify-between rounded bg-gray-800 px-3 py-2">
                 <span className="text-sm text-white">
-                  {WINDOW_RO[s.window] ?? s.window} · <span className="capitalize">{s.sessionType}</span>
+                  {WINDOW_RO[s.window] ?? s.window} · {typeLabel(s.sessionType)}
                   <span className="ml-2 text-xs text-gray-500">{fmt(s.at)}</span>
                 </span>
                 <span className="flex items-center gap-2 text-xs">
@@ -268,8 +278,8 @@ function SesiuniTab({
           <div className="space-y-1">
             {sessions.map((s) => (
               <div key={s.id} className="flex items-center justify-between rounded bg-gray-800 px-3 py-2">
-                <span className="text-sm capitalize text-white">
-                  {s.type}
+                <span className="text-sm text-white">
+                  {typeLabel(s.type)}
                   {s.subject ? ` · ${s.subject}` : ""}
                 </span>
                 <span className="flex items-center gap-3 text-xs">
