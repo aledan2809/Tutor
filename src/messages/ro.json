@@ -85,6 +85,14 @@
       "intensive": "Sesiune intensivă"
     },
     "infoLabel": "Detalii",
+    "cascade": {
+      "morning": "Cascadă rapidă",
+      "evening": "Cascadă lentă"
+    },
+    "cascadeTip": {
+      "morning": "Insistă repede: ~6 min între canale (Aplicație → Telegram → Email → WhatsApp). Pentru dimineața / autobuz.",
+      "evening": "Mai relaxat: ~18 min între canale. Pentru seara, când are mai mult timp."
+    },
     "tip": {
       "statsQuestions": "Câte grile sunt disponibile în materia selectată.",
       "statsTopics": "Câte capitole ai atins până acum.",

@@ -85,6 +85,14 @@
       "intensive": "Intensive session"
     },
     "infoLabel": "Details",
+    "cascade": {
+      "morning": "Fast cascade",
+      "evening": "Slow cascade"
+    },
+    "cascadeTip": {
+      "morning": "Escalates quickly: ~6 min between channels (App → Telegram → Email → WhatsApp). For mornings / on the bus.",
+      "evening": "More relaxed: ~18 min between channels. For evenings, when there's more time."
+    },
     "tip": {
       "statsQuestions": "How many practice questions are available in the selected subject.",
       "statsTopics": "How many chapters you have covered so far.",

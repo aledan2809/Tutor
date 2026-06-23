@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 
 interface Reminder {
   id: string;
@@ -33,6 +35,7 @@ export function ReminderManager({
   /** CRUD base path. Default = own schedule; a parent passes the child-scoped base. */
   apiBase?: string;
 }) {
+  const t = useTranslations("sessions");
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -157,26 +160,31 @@ export function ReminderManager({
                 </button>
               ))}
             </div>
-            <select
-              value={r.sessionType}
-              onChange={(e) => patch(r.id, { sessionType: e.target.value })}
-              className="rounded-lg border border-gray-700 bg-gray-800 px-2 py-2 text-xs text-white"
-            >
-              {SESSION_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-            <select
-              value={r.window}
-              onChange={(e) => patch(r.id, { window: e.target.value })}
-              className="rounded-lg border border-gray-700 bg-gray-800 px-2 py-2 text-xs text-white"
-              title="Ritmul cascadei: dimineața = rapid, seara = lent"
-            >
-              <option value="morning">cascadă rapidă</option>
-              <option value="evening">cascadă lentă</option>
-            </select>
+            <span className="inline-flex items-center gap-1">
+              <select
+                value={r.sessionType}
+                onChange={(e) => patch(r.id, { sessionType: e.target.value })}
+                className="rounded-lg border border-gray-700 bg-gray-800 px-2 py-2 text-xs text-white"
+              >
+                {SESSION_TYPES.map((ty) => (
+                  <option key={ty} value={ty}>
+                    {t(`types.${ty}`)}
+                  </option>
+                ))}
+              </select>
+              <InfoTooltip text={t(`tip.${r.sessionType}`)} label={t("infoLabel")} />
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <select
+                value={r.window}
+                onChange={(e) => patch(r.id, { window: e.target.value })}
+                className="rounded-lg border border-gray-700 bg-gray-800 px-2 py-2 text-xs text-white"
+              >
+                <option value="morning">{t("cascade.morning")}</option>
+                <option value="evening">{t("cascade.evening")}</option>
+              </select>
+              <InfoTooltip text={t(`cascadeTip.${r.window}`)} label={t("infoLabel")} />
+            </span>
           </div>
 
           <div className="flex items-center justify-between">
