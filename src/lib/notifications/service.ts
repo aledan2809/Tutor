@@ -53,6 +53,91 @@ export async function sendNotification(
 }
 
 /**
+ * Direct web push to a user's devices with a custom title/body — does NOT create
+ * an in-app Notification row (caller owns that). Used to deliver parent alerts in
+ * real time without duplicating the in-app feed entry. Returns delivered count.
+ */
+export async function webPushToUser(
+  userId: string,
+  opts: { title: string; body: string; url?: string }
+): Promise<number> {
+  const vapidPublic = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
+  if (!vapidPublic || !vapidPrivate) return 0;
+  let delivered = 0;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const webpush = require("web-push");
+    webpush.setVapidDetails(
+      `mailto:${process.env.EMAIL_FROM || "noreply@tutor.app"}`,
+      vapidPublic,
+      vapidPrivate
+    );
+    const subs = await prisma.pushSubscription.findMany({ where: { userId } });
+    const pushPayload = JSON.stringify({
+      title: opts.title,
+      body: opts.body,
+      icon: "/icons/icon-192x192.png",
+      data: { url: opts.url ?? "/" },
+    });
+    for (const sub of subs) {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          pushPayload
+        );
+        delivered++;
+      } catch (err) {
+        const sc = (err as { statusCode?: number }).statusCode;
+        if (sc === 410 || sc === 404) await prisma.pushSubscription.delete({ where: { id: sub.id } });
+      }
+    }
+  } catch (e) {
+    console.error("webPushToUser error:", e);
+  }
+  return delivered;
+}
+
+/**
+ * Send arbitrary alert text to a user's linked Telegram (real-time, free). Unlike
+ * the student-cascade Telegram step, this delivers the EXACT text given (used for
+ * parent alerts). Returns false if not linked.
+ */
+export async function telegramAlertToUser(
+  userId: string,
+  opts: { text: string; url?: string; buttonLabel?: string }
+): Promise<boolean> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { telegramChatId: true },
+  });
+  if (!user?.telegramChatId) return false;
+  const client = getTelegramClient();
+  if (!client) return false;
+  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const base = (process.env.AUTH_URL ?? "").replace(/\/$/, "");
+  const url =
+    opts.url && opts.url.startsWith("http")
+      ? opts.url
+      : base && opts.url
+        ? `${base}${opts.url.startsWith("/") ? opts.url : `/${opts.url}`}`
+        : null;
+  try {
+    if (url) {
+      const r = await client.sendInlineKeyboard(user.telegramChatId, esc(opts.text), [
+        [{ text: opts.buttonLabel ?? "Deschide", url }],
+      ]);
+      return r.success;
+    }
+    const r = await client.sendText(user.telegramChatId, esc(opts.text));
+    return r.success;
+  } catch (e) {
+    console.error("telegramAlertToUser error:", e);
+    return false;
+  }
+}
+
+/**
  * Push notification — registers an in-app reminder and best-effort delivers a
  * real web push.
  *

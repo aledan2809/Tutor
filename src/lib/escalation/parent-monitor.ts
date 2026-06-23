@@ -12,6 +12,48 @@
 import { prisma } from "@/lib/prisma";
 import { startEscalation } from "./engine";
 import { userIdsOnBreak } from "./breaks";
+import { isQuietHours } from "./timing";
+import { webPushToUser, telegramAlertToUser } from "@/lib/notifications/service";
+import { sendAppEmail } from "@/lib/email";
+
+const PARENT_ALERT_URL = "/dashboard/watcher/notifications";
+
+/**
+ * Deliver a parent alert to the parent's real channels in real time (push +
+ * Telegram + email), on top of the in-app feed row. Respects the parent's
+ * enabled channels + quiet hours ("orele agreate, canalele agreate"). Best-effort
+ * — never throws (alert delivery must not break the monitoring sweep).
+ */
+async function deliverParentAlert(parentId: string, title: string, message: string): Promise<void> {
+  try {
+    const [parent, prefs] = await Promise.all([
+      prisma.user.findUnique({ where: { id: parentId }, select: { email: true } }),
+      prisma.notificationPreference.findUnique({ where: { userId: parentId } }),
+    ]);
+    const tz = prefs?.timezone ?? "Europe/Bucharest";
+    if (isQuietHours(tz, prefs?.quietHoursStart ?? "22:00", prefs?.quietHoursEnd ?? "07:00")) return;
+
+    const base = (process.env.AUTH_URL ?? "").replace(/\/$/, "");
+    const tasks: Promise<unknown>[] = [];
+    if (prefs?.push ?? true) tasks.push(webPushToUser(parentId, { title, body: message, url: PARENT_ALERT_URL }));
+    // Telegram has no per-channel pref toggle; deliver if the parent linked it.
+    tasks.push(
+      telegramAlertToUser(parentId, { text: `${title}\n${message}`, url: PARENT_ALERT_URL, buttonLabel: "Vezi alertele" })
+    );
+    if ((prefs?.email ?? true) && parent?.email) {
+      tasks.push(
+        sendAppEmail({
+          to: parent.email,
+          subject: title,
+          html: `<p>${message}</p><p><a href="${base}${PARENT_ALERT_URL}">Vezi alertele</a></p>`,
+        })
+      );
+    }
+    await Promise.allSettled(tasks);
+  } catch (e) {
+    console.error("deliverParentAlert error:", e);
+  }
+}
 
 export const RENOTIFY_MIN = 30; // re-nag the parent at this interval
 export const STALL_MIN = 45; // child chain considered lapsed after last touch
@@ -53,6 +95,8 @@ async function notifyGuardians(
         },
       },
     });
+    // Real-time delivery to the parent's devices (not just the in-app feed).
+    await deliverParentAlert(l.parentId, alert.title, alert.message);
   }
   return links.length;
 }

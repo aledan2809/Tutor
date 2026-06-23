@@ -48,9 +48,13 @@ export default function WatcherNotificationsPage() {
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
   };
 
-  const filtered = filter === "unread"
+  const filtered = (filter === "unread"
     ? notifications.filter((n) => !n.isRead)
-    : notifications;
+    : notifications
+  )
+    .slice()
+    // Chronological: oldest → newest, so a re-notify sequence reads top-to-bottom.
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
