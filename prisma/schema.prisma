@@ -1237,3 +1237,26 @@ model ExamAttempt {
   @@index([userId, paperId])
   @@index([userId, createdAt])
 }
+
+// Licență — material privat de studiu. Un document încărcat (PDF/DOCX/TXT) din
+// care se generează grile; progresul generării e urmărit aici. Fără FK pe User
+// (nu atingem modelul User). Domeniul țintă e cel restricționat "licenta-rares".
+model LicentaDocument {
+  id                String   @id @default(cuid())
+  userId            String   // studentul pentru care e materialul (Rareș)
+  domainId          String   // domeniul restricționat licenta-rares
+  title             String
+  filePath          String
+  fileType          String   // pdf | docx | txt
+  totalPassages     Int      @default(0)
+  processedPassages Int      @default(0)
+  questionCount     Int      @default(0)
+  status            String   @default("processing") // processing | ready | error
+  error             String?  @db.Text
+  createdById       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([domainId])
+}

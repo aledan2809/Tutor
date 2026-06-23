@@ -142,6 +142,16 @@ export function Sidebar({ user }: SidebarProps) {
     ];
   }
 
+  // Licență — private study material, visible only to admins + the allowlisted
+  // student (mirrors src/lib/licenta canUseLicenta / domain-access allowlist).
+  const canLicenta =
+    user.isSuperAdmin ||
+    user.enrollments?.some((e) => e.roles.includes("ADMIN")) ||
+    user.email === "raresdanciulescu9@gmail.com";
+  if (canLicenta && !visibleNavItems.some((i) => i.href === "/dashboard/licenta")) {
+    visibleNavItems.push({ href: "/dashboard/licenta", label: t("licenta") });
+  }
+
   const sidebarContent = (
     <>
       <div className="flex h-16 items-center justify-between border-b border-gray-800 px-6">
