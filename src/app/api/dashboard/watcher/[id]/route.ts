@@ -68,12 +68,57 @@ async function _GET(
     })
   );
 
+  // Session log — each session + its result (score).
+  const sessions = await prisma.session.findMany({
+    where: { userId: studentId },
+    orderBy: { startedAt: "desc" },
+    take: 25,
+    select: { id: true, type: true, subject: true, startedAt: true, endedAt: true, score: true },
+  });
+  const sessionLog = sessions.map((s) => ({
+    id: s.id,
+    type: s.type,
+    subject: s.subject,
+    startedAt: s.startedAt,
+    completed: s.endedAt != null,
+    score: s.score,
+  }));
+
+  // Reminder log — each reminder/escalation touch, with the channel + whether it
+  // was actually sent + whether the child acknowledged it.
+  const events = await prisma.escalationEvent.findMany({
+    where: { userId: studentId },
+    orderBy: { createdAt: "desc" },
+    take: 30,
+    select: {
+      id: true,
+      level: true,
+      channel: true,
+      status: true,
+      sentAt: true,
+      acknowledgedAt: true,
+      createdAt: true,
+      metadata: true,
+    },
+  });
+  const reminderLog = events.map((e) => ({
+    id: e.id,
+    channel: e.channel,
+    level: e.level,
+    sent: e.sentAt != null,
+    acknowledged: e.acknowledgedAt != null,
+    reason: ((e.metadata as Record<string, unknown> | null)?.reason as string) ?? null,
+    at: e.sentAt ?? e.createdAt,
+  }));
+
   return NextResponse.json({
     student: {
       ...student,
       domains: studentEnrollments.map((e) => e.domain),
     },
     domainSummaries,
+    sessionLog,
+    reminderLog,
   });
 }
 

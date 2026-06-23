@@ -23,9 +23,53 @@ interface StudentInfo {
   domains: { id: string; name: string; slug: string; icon: string | null }[];
 }
 
+interface SessionLogItem {
+  id: string;
+  type: string;
+  subject: string | null;
+  startedAt: string;
+  completed: boolean;
+  score: number | null;
+}
+interface ReminderLogItem {
+  id: string;
+  channel: string;
+  level: number;
+  sent: boolean;
+  acknowledged: boolean;
+  reason: string | null;
+  at: string;
+}
 interface ApiResponse {
   student: StudentInfo;
   domainSummaries: DomainSummary[];
+  sessionLog: SessionLogItem[];
+  reminderLog: ReminderLogItem[];
+}
+
+const CHANNEL_RO: Record<string, string> = {
+  PUSH: "Aplicație",
+  TELEGRAM: "Telegram",
+  EMAIL: "Email",
+  WHATSAPP: "WhatsApp",
+  SMS: "SMS",
+  CALL: "Apel",
+};
+function reasonRO(reason: string | null): string {
+  if (!reason) return "memento";
+  if (reason.startsWith("morning")) return "memento dimineață";
+  if (reason.startsWith("evening")) return "memento seară";
+  if (reason === "parent_authorized") return "memento autorizat de părinte";
+  if (reason === "missed_session") return "sesiune ratată";
+  return reason;
+}
+function fmt(d: string): string {
+  return new Date(d).toLocaleString("ro-RO", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export default function WatcherStudentDetailPage({
@@ -55,7 +99,7 @@ export default function WatcherStudentDetailPage({
   if (loading) return <p className="text-gray-500">{t("loading")}</p>;
   if (!data) return <p className="text-red-400">{t("studentNotFound")}</p>;
 
-  const { student, domainSummaries } = data;
+  const { student, domainSummaries, sessionLog = [], reminderLog = [] } = data;
 
   return (
     <div>
@@ -192,6 +236,59 @@ export default function WatcherStudentDetailPage({
           <p className="text-gray-500">{t("noSessions")}</p>
         </div>
       )}
+
+      {/* Jurnal mementouri — fiecare memento + canalul + rezultatul */}
+      <div className="mb-6 rounded-xl border border-gray-800 bg-gray-900 p-5">
+        <h2 className="mb-3 text-lg font-semibold text-white">Jurnal mementouri</h2>
+        {reminderLog.length === 0 ? (
+          <p className="text-sm text-gray-500">Niciun memento încă.</p>
+        ) : (
+          <div className="space-y-1">
+            {reminderLog.map((r) => (
+              <div key={r.id} className="flex items-center justify-between rounded bg-gray-800 px-3 py-2">
+                <span className="text-sm text-white">
+                  {CHANNEL_RO[r.channel] ?? r.channel} · {reasonRO(r.reason)}
+                </span>
+                <div className="flex items-center gap-3 text-xs">
+                  <span className={r.acknowledged ? "text-green-400" : r.sent ? "text-gray-400" : "text-gray-600"}>
+                    {r.acknowledged ? "a reacționat" : r.sent ? "trimis" : "sărit"}
+                  </span>
+                  <span className="text-gray-500">{fmt(r.at)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Jurnal sesiuni — fiecare sesiune + rezultatul */}
+      <div className="mb-6 rounded-xl border border-gray-800 bg-gray-900 p-5">
+        <h2 className="mb-3 text-lg font-semibold text-white">Jurnal sesiuni</h2>
+        {sessionLog.length === 0 ? (
+          <p className="text-sm text-gray-500">Nicio sesiune încă.</p>
+        ) : (
+          <div className="space-y-1">
+            {sessionLog.map((s) => (
+              <div key={s.id} className="flex items-center justify-between rounded bg-gray-800 px-3 py-2">
+                <span className="text-sm capitalize text-white">
+                  {s.type}
+                  {s.subject ? ` · ${s.subject}` : ""}
+                </span>
+                <div className="flex items-center gap-3 text-xs">
+                  <span className={s.completed ? "text-green-400" : "text-yellow-400"}>
+                    {s.completed
+                      ? s.score !== null
+                        ? `${Math.round(s.score)}%`
+                        : "terminat"
+                      : "neterminat"}
+                  </span>
+                  <span className="text-gray-500">{fmt(s.startedAt)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
