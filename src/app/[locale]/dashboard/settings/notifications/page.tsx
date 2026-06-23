@@ -26,6 +26,17 @@ export default function NotificationSettingsPage() {
 
       <InstallAppButton />
 
+      <Link
+        href="/dashboard/settings/reminders"
+        className="mb-6 flex items-center justify-between rounded-lg border border-gray-800 bg-gray-900 px-4 py-3 hover:border-gray-700"
+      >
+        <div>
+          <h3 className="text-sm font-medium text-white">Programul de studiu</h3>
+          <p className="text-xs text-gray-500">Zilele și ora mementourilor (ex. 13:15)</p>
+        </div>
+        <span className="text-gray-500">&rarr;</span>
+      </Link>
+
       <TelegramConnectCard />
 
       <NotificationPreferences />
