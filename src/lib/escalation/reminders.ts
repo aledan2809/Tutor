@@ -97,18 +97,28 @@ export function buildReminderUrl(r: { sessionType: string; domainSlug: string | 
   return `/dashboard/practice?${q.toString()}`;
 }
 
-function reminderCopy(r: { window: string; label: string | null }): { title: string; message: string } {
-  if (r.label) return { title: r.label, message: "E timpul pentru sesiunea ta de studiu." };
-  if (r.window === "morning") {
-    return {
-      title: "Quiz de 10–15 min?",
-      message: "Un quiz scurt acum — păstrează-ți seria de studiu.",
-    };
-  }
-  return {
-    title: "Sesiune de seară",
-    message: "E timpul pentru o sesiune mai amplă. Hai să recuperăm materia.",
-  };
+const SESSION_TYPE_RO: Record<string, string> = {
+  micro: "Sesiune micro",
+  quick: "Sesiune rapidă",
+  deep: "Sesiune lungă",
+  repair: "Sesiune de remediere",
+  recovery: "Sesiune de recuperare",
+  intensive: "Sesiune intensivă",
+};
+
+// Each scheduled session gets its OWN, identifiable notification (type + time),
+// so multiple sessions in the same window aren't vague/indistinguishable.
+function reminderCopy(r: {
+  window: string;
+  label: string | null;
+  sessionType: string;
+  hour: number;
+  minute: number;
+}): { title: string; message: string } {
+  const time = `${String(r.hour).padStart(2, "0")}:${String(r.minute).padStart(2, "0")}`;
+  const typeLabel = SESSION_TYPE_RO[r.sessionType] ?? r.sessionType;
+  const title = r.label?.trim() || `${typeLabel} · ${time}`;
+  return { title, message: `${typeLabel} programată la ${time} — hai să începem.` };
 }
 
 /**
