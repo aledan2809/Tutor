@@ -76,8 +76,9 @@ function genCube() {
   while (opts.size < 4 && guard++ < 50) opts.add(faces[rand(0, 5)]);
   return {
     content:
-      `Un cub: A (sus), B (jos), C (față), D (spate), E (dreapta), F (stânga). ` +
-      `Pornind cu A sus, execută ÎN ORDINE: ${parts.join(", ")}. Pe ce față ajungi sus?`,
+      `Un cub stă pe masă: A (sus), B (jos), C (față, spre tine), D (spate), E (dreapta), F (stânga). ` +
+      `Îl rostogolești pe masă în direcția indicată (ex. „jos" = se rostogolește spre tine, fața de sus ajunge în față). ` +
+      `Pornind cu A sus, execută ÎN ORDINE: ${parts.join(", ")}. Ce față este sus la final?`,
     options: shuffle([...opts]),
     correctAnswer: correct,
     difficulty: 4,
