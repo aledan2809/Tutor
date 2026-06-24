@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
+import { wasScheduledDayMissed } from "@/lib/streak";
 
 // ─── XP Constants ───
 
@@ -162,8 +163,10 @@ export async function awardSessionCompleteXp(
     } else if (diffDays === 0) {
       // Same day, no change
     } else {
-      // Missed days — streak decayed, start fresh
-      newStreak = 1;
+      // Gap of >1 day: weekends/vacations without a scheduled session must NOT
+      // break the streak — only a missed *scheduled* day resets it.
+      const missed = await wasScheduledDayMissed(userId, lastDay, today);
+      newStreak = missed ? 1 : gam.streak + 1;
     }
   } else {
     newStreak = 1;
