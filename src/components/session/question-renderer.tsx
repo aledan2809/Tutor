@@ -126,8 +126,11 @@ export function QuestionRenderer({
         </div>
       )}
 
-      {/* Question content */}
-      <p className="text-lg text-white">{question.content}</p>
+      {/* Question content (+ read-aloud — voice variant for cube/spatial tasks) */}
+      <div className="flex items-start gap-2">
+        <p className="flex-1 whitespace-pre-line text-lg text-white">{question.content}</p>
+        <SpeakButton text={question.content} />
+      </div>
 
       {/* Figure (geometry / chart items) — rendered on a white card so the black line
           drawings stay legible on the dark theme */}
@@ -188,5 +191,29 @@ export function QuestionRenderer({
         Submit Answer
       </button>
     </div>
+  );
+}
+
+/** Read the question aloud (browser TTS, RO). Powers the voice variant of the
+ *  cube/spatial exercises — "sesiune vocală cu indicații". No-op if unsupported. */
+function SpeakButton({ text }: { text: string }) {
+  const speak = () => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "ro-RO";
+    u.rate = 0.95;
+    window.speechSynthesis.speak(u);
+  };
+  return (
+    <button
+      type="button"
+      onClick={speak}
+      title="Ascultă întrebarea"
+      aria-label="Ascultă întrebarea"
+      className="flex-shrink-0 rounded-lg border border-gray-700 px-2 py-1 text-sm text-gray-400 hover:border-gray-500 hover:text-white"
+    >
+      🔊
+    </button>
   );
 }

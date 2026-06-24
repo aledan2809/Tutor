@@ -112,6 +112,37 @@ function genMemory() {
   };
 }
 
+// ── Instrument monitoring: scan dials, spot the one out of limits ──
+function genMonitoring() {
+  const instruments = [
+    { name: "Altitudine", unit: "ft", min: 2800, max: 3500 },
+    { name: "Viteză", unit: "kt", min: 250, max: 320 },
+    { name: "Combustibil", unit: "%", min: 20, max: 100 },
+    { name: "Temperatură motor", unit: "°C", min: 600, max: 900 },
+    { name: "Presiune ulei", unit: "psi", min: 40, max: 80 },
+    { name: "Turații (RPM)", unit: "%", min: 60, max: 100 },
+  ];
+  const chosen = shuffle(instruments).slice(0, 4);
+  const outIdx = rand(0, 3);
+  const lines = chosen.map((ins, i) => {
+    const val =
+      i === outIdx
+        ? rand(0, 1)
+          ? ins.min - rand(5, 40)
+          : ins.max + rand(5, 40)
+        : rand(ins.min, ins.max);
+    return `• ${ins.name}: ${val} ${ins.unit} (normal ${ins.min}–${ins.max})`;
+  });
+  return {
+    content: `Verifică instrumentele. Care este ÎN AFARA limitelor normale?\n${lines.join("\n")}`,
+    options: shuffle(chosen.map((c) => c.name)),
+    correctAnswer: chosen[outIdx].name,
+    difficulty: 3,
+    subject: "Monitorizare instrumente",
+    topic: "Scanare cadrane",
+  };
+}
+
 async function main() {
   let domain = await prisma.domain.findUnique({ where: { slug: SLUG } });
   if (!domain) {
@@ -167,6 +198,7 @@ async function main() {
   for (let i = 0; i < 140; i++) rows.push({ ...genArithmetic(), ref: `${MARK}:arithmetic` });
   for (let i = 0; i < 90; i++) rows.push({ ...genCube(), ref: `${MARK}:cube` });
   for (let i = 0; i < 70; i++) rows.push({ ...genMemory(), ref: `${MARK}:memory` });
+  for (let i = 0; i < 70; i++) rows.push({ ...genMonitoring(), ref: `${MARK}:monitoring` });
 
   await prisma.question.createMany({
     data: rows.map((r, idx) => ({
