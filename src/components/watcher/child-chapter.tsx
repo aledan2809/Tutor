@@ -84,7 +84,6 @@ const CHANNEL_RO: Record<string, string> = {
   SMS: "SMS",
   CALL: "Apel",
 };
-const WINDOW_RO: Record<string, string> = { morning: "dimineață", evening: "seară" };
 
 function fmt(d: string): string {
   return new Date(d).toLocaleString("ro-RO", {
@@ -307,7 +306,7 @@ function SesiuniTab({
             {scheduled.map((s) => (
               <div key={s.key} className="flex items-center justify-between rounded bg-gray-800 px-3 py-2">
                 <span className="text-sm text-white">
-                  {WINDOW_RO[s.window] ?? s.window} · {s.label || typeLabel(s.sessionType)}
+                  {s.label || typeLabel(s.sessionType)}
                   <span className="ml-2 text-xs text-gray-500">{fmt(s.at)}</span>
                 </span>
                 <span className="flex items-center gap-2 text-xs">
