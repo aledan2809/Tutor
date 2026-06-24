@@ -50,65 +50,90 @@ function genArithmetic() {
   };
 }
 
-// ── Spatial cube rotation ──
-function roll(s, dir) {
-  switch (dir) {
-    case "jos": return { U: s.S, N: s.U, D: s.N, S: s.D, E: s.E, W: s.W };
-    case "sus": return { U: s.N, S: s.U, D: s.S, N: s.D, E: s.E, W: s.W };
-    case "dreapta": return { U: s.W, E: s.U, D: s.E, W: s.D, N: s.N, S: s.S };
-    case "stânga": return { U: s.E, W: s.U, D: s.W, E: s.D, N: s.N, S: s.S };
-    default: return s;
-  }
-}
+// ── Spatial cube navigation (Rareș's rules) ──
+// Move a marker across cube faces. Allowed moves depend on the current face:
+//   Top/Bottom    → only up/down
+//   Left/Right    → only left/right
+//   Front/Back    → all four (up/down/left/right)
+// Two loops: vertical F→T→K→B→F (up) and horizontal F→R→K→L→F (right).
+// Start face + 6 moves are DICTATED (voice, English); the student picks the
+// final face from 6 buttons.
+const CUBE_FACE_RO = { T: "Sus", B: "Jos", F: "Față", K: "Spate", L: "Stânga", R: "Dreapta" };
+const CUBE_FACE_EN = { T: "Top", B: "Bottom", F: "Front", K: "Back", L: "Left", R: "Right" };
+const CUBE_ALLOWED = {
+  T: ["up", "down"],
+  B: ["up", "down"],
+  L: ["left", "right"],
+  R: ["left", "right"],
+  F: ["up", "down", "left", "right"],
+  K: ["up", "down", "left", "right"],
+};
+const CUBE_TRANS = {
+  up: { F: "T", T: "K", K: "B", B: "F" },
+  down: { F: "B", B: "K", K: "T", T: "F" },
+  right: { F: "R", R: "K", K: "L", L: "F" },
+  left: { F: "L", L: "K", K: "R", R: "F" },
+};
 function genCube() {
-  let st = { U: "A", D: "B", N: "C", S: "D", E: "E", W: "F" };
-  const order = shuffle(["jos", "sus", "stânga", "dreapta"]).slice(0, rand(2, 4));
-  const parts = [];
-  for (const d of order) {
-    const n = rand(1, 3);
-    parts.push(`${n}× ${d}`);
-    for (let i = 0; i < n; i++) st = roll(st, d);
+  const faces = ["T", "B", "F", "K", "L", "R"];
+  const start = faces[rand(0, 5)];
+  let cur = start;
+  const moves = [];
+  for (let i = 0; i < 6; i++) {
+    const opts = CUBE_ALLOWED[cur];
+    const m = opts[rand(0, opts.length - 1)];
+    moves.push(m);
+    cur = CUBE_TRANS[m][cur];
   }
-  const correct = st.U;
-  const faces = ["A", "B", "C", "D", "E", "F"];
-  const opts = new Set([correct]);
-  let guard = 0;
-  while (opts.size < 4 && guard++ < 50) opts.add(faces[rand(0, 5)]);
+  const correct = CUBE_FACE_RO[cur];
   return {
     content:
-      `Un cub stă pe masă: A (sus), B (jos), C (față, spre tine), D (spate), E (dreapta), F (stânga). ` +
-      `Îl rostogolești pe masă în direcția indicată (ex. „jos" = se rostogolește spre tine, fața de sus ajunge în față). ` +
-      `Pornind cu A sus, execută ÎN ORDINE: ${parts.join(", ")}. Ce față este sus la final?`,
-    options: shuffle([...opts]),
+      "Ascultă: pornești de pe o față dictată și urmează 6 mișcări dictate (sus/jos/stânga/dreapta). " +
+      "Pe ce față ești la final? Apasă 🔊 pentru a reasculta.",
+    // Voice-only payload (start + moves) — read aloud, never shown.
+    passage: `[CUBEVOICE] start=${CUBE_FACE_EN[start]}; moves=${moves.join(",")}`,
+    options: shuffle(Object.values(CUBE_FACE_RO)),
     correctAnswer: correct,
     difficulty: 4,
     subject: "Raționament spațial",
-    topic: "Rotație cub",
+    topic: "Rotație cub (voce)",
   };
 }
 
-// ── Working memory: show 10 numbers, then pick the 7-set fully among them ──
+// ── Working memory: a robot DICTATES 7 two-digit numbers (English), nothing is
+//    shown; the student types them back IN ORDER. ──
 function genMemory() {
-  const pool = shuffle(Array.from({ length: 90 }, (_, i) => i + 10)); // 10..99
-  const shown = pool.slice(0, 10);
-  const outsiders = pool.slice(10);
-  const fmt = (arr) => [...arr].sort((a, b) => a - b).join(", ");
-  const correctStr = fmt(shuffle(shown).slice(0, 7));
-  const mkDistractor = () => fmt([...shuffle(shown).slice(0, 5), ...shuffle(outsiders).slice(0, 2)]);
-  const opts = new Set([correctStr]);
-  let guard = 0;
-  while (opts.size < 3 && guard++ < 40) {
-    const d = mkDistractor();
-    if (d !== correctStr) opts.add(d);
-  }
+  const nums = Array.from({ length: 7 }, () => rand(10, 99));
+  const seq = nums.join(" ");
   return {
-    content: "Care set de 7 numere conține DOAR numere care au fost afișate?",
-    passage: `[MEMORIE:10] ${shown.join("    ")}`,
-    options: shuffle([...opts]),
-    correctAnswer: correctStr,
-    difficulty: 3,
+    type: "OPEN",
+    content:
+      "Ascultă cele 7 numere dictate (în engleză), apoi introdu-le în ORDINE. Nu sunt afișate — apasă 🔊 pentru a reasculta.",
+    // Voice-only payload — read aloud (English), never shown.
+    passage: `[AUDIODICT:en] ${seq}`,
+    options: null,
+    correctAnswer: seq, // "14 83 27 ..." — graded as normalized exact match
+    difficulty: 4,
     subject: "Memorie de lucru",
-    topic: "Memorare numere",
+    topic: "Memorare numere (audio)",
+  };
+}
+
+// ── Clock reading: an analog clock shows a random time (5-min steps); the
+//    student reads it and enters HH:MM (12h). ──
+function genClock() {
+  const h = rand(1, 12);
+  const m = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55][rand(0, 11)];
+  const ans = `${h}:${String(m).padStart(2, "0")}`;
+  return {
+    type: "OPEN",
+    content: "Citește ceasul analog și introdu ora afișată (format de 12 ore).",
+    passage: `[CLOCK] ${ans}`,
+    options: null,
+    correctAnswer: ans, // "3:25"
+    difficulty: 2,
+    subject: "Citire ceas",
+    topic: "Ceas analog",
   };
 }
 
@@ -199,6 +224,7 @@ async function main() {
   for (let i = 0; i < 90; i++) rows.push({ ...genCube(), ref: `${MARK}:cube` });
   for (let i = 0; i < 70; i++) rows.push({ ...genMemory(), ref: `${MARK}:memory` });
   for (let i = 0; i < 70; i++) rows.push({ ...genMonitoring(), ref: `${MARK}:monitoring` });
+  for (let i = 0; i < 70; i++) rows.push({ ...genClock(), ref: `${MARK}:clock` });
 
   await prisma.question.createMany({
     data: rows.map((r, idx) => ({
@@ -206,7 +232,7 @@ async function main() {
       subject: r.subject,
       topic: r.topic,
       difficulty: r.difficulty,
-      type: "MULTIPLE_CHOICE",
+      type: r.type ?? "MULTIPLE_CHOICE",
       content: r.content,
       options: r.options,
       correctAnswer: r.correctAnswer,
