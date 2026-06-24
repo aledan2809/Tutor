@@ -48,18 +48,20 @@ interface SessionItem {
   startedAt: string;
   completed: boolean;
   score: number | null;
+  wrongTopics?: string[];
 }
-interface WeakArea {
+interface RecentMistake {
   subject: string;
   topic: string;
-  errorRate: number;
+  wrong: number;
+  total: number;
 }
 interface Detail {
   canManageSchedule: boolean;
   scheduledSessions: ScheduledSession[];
   reminderLog: ReminderTouch[];
   sessionLog: SessionItem[];
-  domainSummaries?: { domain: { name: string }; weakAreas: WeakArea[] }[];
+  recentMistakes?: RecentMistake[];
 }
 
 const CHANNEL_RO: Record<string, string> = {
@@ -220,7 +222,7 @@ export function ChildChapter({ child }: { child: ChildLite }) {
             )
           ) : tab === "sesiuni" ? (
             <div className="space-y-5">
-              <WeakAreasBlock domainSummaries={detail.domainSummaries} />
+              <WeakAreasBlock mistakes={detail.recentMistakes} />
               <SesiuniTab scheduled={detail.scheduledSessions} sessions={detail.sessionLog} />
             </div>
           ) : (
@@ -308,17 +310,22 @@ function SesiuniTab({
         ) : (
           <div className="space-y-1">
             {sessions.map((s) => (
-              <div key={s.id} className="flex items-center justify-between rounded bg-gray-800 px-3 py-2">
-                <span className="text-sm text-white">
-                  {typeLabel(s.type)}
-                  {s.subject ? ` · ${s.subject}` : ""}
-                </span>
-                <span className="flex items-center gap-3 text-xs">
-                  <span className={s.completed ? "text-green-400" : "text-yellow-400"}>
-                    {s.completed ? (s.score !== null ? `${Math.round(s.score)}%` : "terminat") : "neterminat"}
+              <div key={s.id} className="rounded bg-gray-800 px-3 py-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-white">
+                    {typeLabel(s.type)}
+                    {s.subject ? ` · ${s.subject}` : ""}
                   </span>
-                  <span className="text-gray-500">{fmt(s.startedAt)}</span>
-                </span>
+                  <span className="flex items-center gap-3 text-xs">
+                    <span className={s.completed ? "text-green-400" : "text-yellow-400"}>
+                      {s.completed ? (s.score !== null ? `${Math.round(s.score)}%` : "terminat") : "neterminat"}
+                    </span>
+                    <span className="text-gray-500">{fmt(s.startedAt)}</span>
+                  </span>
+                </div>
+                {s.wrongTopics && s.wrongTopics.length > 0 && (
+                  <p className="mt-1 text-xs text-red-400/80">greșit la: {s.wrongTopics.join(", ")}</p>
+                )}
               </div>
             ))}
           </div>
@@ -328,22 +335,15 @@ function SesiuniTab({
   );
 }
 
-function WeakAreasBlock({
-  domainSummaries,
-}: {
-  domainSummaries?: { domain: { name: string }; weakAreas: WeakArea[] }[];
-}) {
-  // Aggregate (overall) weak topics — what the repair sessions target. Highest
-  // error rate first.
-  const all = (domainSummaries ?? [])
-    .flatMap((ds) => ds.weakAreas.map((w) => ({ ...w, domain: ds.domain.name })))
-    .sort((a, b) => b.errorRate - a.errorRate)
-    .slice(0, 8);
+function WeakAreasBlock({ mistakes }: { mistakes?: RecentMistake[] }) {
+  // Recent mistakes by topic (from actual answers) — responsive, shows up as soon
+  // as the child gets something wrong. Most-missed first.
+  const all = (mistakes ?? []).slice(0, 8);
   return (
     <div>
-      <h3 className="mb-2 text-sm font-medium text-gray-400">Puncte slabe (per ansamblu)</h3>
+      <h3 className="mb-2 text-sm font-medium text-gray-400">Puncte slabe (greșeli recente)</h3>
       {all.length === 0 ? (
-        <p className="text-sm text-gray-500">Niciun punct slab detectat încă.</p>
+        <p className="text-sm text-gray-500">Niciun punct slab recent — bravo!</p>
       ) : (
         <div className="space-y-1">
           {all.map((w) => (
@@ -354,7 +354,9 @@ function WeakAreasBlock({
               <span className="text-sm text-white">
                 {w.subject} · {w.topic}
               </span>
-              <span className="text-xs text-red-400">{Math.round(w.errorRate)}% greșeli</span>
+              <span className="text-xs text-red-400">
+                {w.wrong}/{w.total} greșite ({Math.round((w.wrong / w.total) * 100)}%)
+              </span>
             </div>
           ))}
         </div>

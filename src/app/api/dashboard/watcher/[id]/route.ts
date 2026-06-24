@@ -82,6 +82,37 @@ async function _GET(
     take: 25,
     select: { id: true, type: true, subject: true, startedAt: true, endedAt: true, score: true },
   });
+  // Mistakes from the actual answers — both per-session ("greșit la …") and an
+  // aggregate recent-mistakes view (more responsive than the high-bar WeakArea
+  // table, which only flags a topic after ≥5 attempts <60% and clears on improve).
+  const sessionIds = sessions.map((s) => s.id);
+  const attempts = sessionIds.length
+    ? await prisma.attempt.findMany({
+        where: { sessionId: { in: sessionIds } },
+        select: { sessionId: true, isCorrect: true, question: { select: { subject: true, topic: true } } },
+      })
+    : [];
+  const wrongBySession = new Map<string, Set<string>>();
+  const aggByTopic = new Map<string, { subject: string; topic: string; wrong: number; total: number }>();
+  for (const a of attempts) {
+    const subject = a.question.subject || "—";
+    const topic = a.question.topic || subject;
+    const key = `${subject}|${topic}`;
+    const agg = aggByTopic.get(key) ?? { subject, topic, wrong: 0, total: 0 };
+    agg.total++;
+    if (!a.isCorrect) {
+      agg.wrong++;
+      const set = wrongBySession.get(a.sessionId) ?? new Set<string>();
+      set.add(topic);
+      wrongBySession.set(a.sessionId, set);
+    }
+    aggByTopic.set(key, agg);
+  }
+  const recentMistakes = Array.from(aggByTopic.values())
+    .filter((m) => m.wrong > 0)
+    .sort((x, y) => y.wrong / y.total - x.wrong / x.total)
+    .slice(0, 8);
+
   const sessionLog = sessions.map((s) => ({
     id: s.id,
     type: s.type,
@@ -89,6 +120,7 @@ async function _GET(
     startedAt: s.startedAt,
     completed: s.endedAt != null,
     score: s.score,
+    wrongTopics: [...(wrongBySession.get(s.id) ?? [])].slice(0, 5),
   }));
 
   // Reminder log — each reminder/escalation touch, with the channel + whether it
@@ -211,6 +243,7 @@ async function _GET(
     schedule,
     scheduledSessions,
     sessionLog,
+    recentMistakes,
     reminderLog,
   });
 }
