@@ -40,6 +40,8 @@ interface ReminderTouch {
   sent: boolean;
   acknowledged: boolean;
   reason: string | null;
+  reminderId?: string | null;
+  name?: string;
   at: string;
 }
 interface SessionItem {
@@ -128,18 +130,23 @@ export function ChildChapter({ child }: { child: ChildLite }) {
   const streak = child.gamification?.currentStreak ?? 0;
   const accuracy = child.progress?.accuracy ?? 0;
 
-  // Group reminder touches into episodes (reason + calendar-day) for the cascade view.
+  // Group reminder touches into episodes (per reminder + calendar-day). The header
+  // shows the actual session (name + scheduled time), not the cascade window.
   const episodes = (() => {
     if (!detail) return [];
-    const map = new Map<string, { reason: string | null; day: string; touches: ReminderTouch[] }>();
+    const map = new Map<
+      string,
+      { name: string; day: string; firstAt: string; touches: ReminderTouch[] }
+    >();
     for (const t of detail.reminderLog) {
       const day = fmtDay(t.at);
-      const key = `${t.reason ?? "—"}|${day}`;
+      const key = `${t.reminderId ?? t.reason ?? "—"}|${day}`;
       let g = map.get(key);
       if (!g) {
-        g = { reason: t.reason, day, touches: [] };
+        g = { name: t.name ?? "Memento", day, firstAt: t.at, touches: [] };
         map.set(key, g);
       }
+      if (new Date(t.at) < new Date(g.firstAt)) g.firstAt = t.at;
       g.touches.push(t);
     }
     return Array.from(map.values()).map((g) => ({
@@ -397,32 +404,22 @@ function RezultateTab({ byDomain }: { byDomain?: DomainResult[] }) {
 function RemindereTab({
   episodes,
 }: {
-  episodes: { reason: string | null; day: string; touches: ReminderTouch[] }[];
+  episodes: { name: string; day: string; firstAt: string; touches: ReminderTouch[] }[];
 }) {
   if (episodes.length === 0) {
     return <p className="text-sm text-gray-500">Niciun memento încă.</p>;
   }
+  const hm = (d: string) =>
+    new Date(d).toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" });
   return (
     <div className="space-y-3">
       {episodes.map((ep, i) => {
-        const r = ep.reason ?? "";
-        const win = r.startsWith("morning")
-          ? "dimineață"
-          : r.startsWith("evening")
-            ? "seară"
-            : r === "missed_session"
-              ? "sesiune ratată"
-              : r === "parent_authorized"
-                ? "memento autorizat"
-                : r === "parent_nudge"
-                  ? "memento de la părinte"
-                  : "memento";
         const reacted = ep.touches.some((t) => t.acknowledged);
         return (
-          <div key={`${ep.reason}-${ep.day}-${i}`} className="rounded-lg border border-gray-800 bg-gray-800/40 p-3">
+          <div key={`${ep.name}-${ep.day}-${i}`} className="rounded-lg border border-gray-800 bg-gray-800/40 p-3">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-sm font-medium text-white">
-                {win} · {ep.day}
+                {ep.name} · {hm(ep.firstAt)} · {ep.day}
               </span>
               <span
                 className={`rounded px-2 py-0.5 text-xs ${

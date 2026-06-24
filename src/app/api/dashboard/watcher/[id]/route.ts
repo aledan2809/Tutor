@@ -171,15 +171,47 @@ async function _GET(
         },
       })
     : [];
-  const reminderLog = events.slice(0, 40).map((e) => ({
-    id: e.id,
-    channel: e.channel,
-    level: e.level,
-    sent: e.sentAt != null,
-    acknowledged: e.acknowledgedAt != null,
-    reason: ((e.metadata as Record<string, unknown> | null)?.reason as string) ?? null,
-    at: e.sentAt ?? e.createdAt,
-  }));
+  // Resolve the current name of each reminder referenced by the events, so the
+  // Remindere log shows the actual session (name + time), not the cascade window.
+  const TYPE_RO: Record<string, string> = {
+    micro: "Sesiune micro",
+    quick: "Sesiune rapidă",
+    deep: "Sesiune lungă",
+    repair: "Sesiune de remediere",
+    recovery: "Sesiune de recuperare",
+    intensive: "Sesiune intensivă",
+  };
+  const allRemIds = [
+    ...new Set(events.map((e) => (e.metadata as Record<string, unknown> | null)?.reminderId).filter(Boolean)),
+  ] as string[];
+  const remById = new Map(
+    (allRemIds.length
+      ? await prisma.studyReminder.findMany({
+          where: { id: { in: allRemIds } },
+          select: { id: true, label: true, sessionType: true, window: true },
+        })
+      : []
+    ).map((r) => [r.id, r])
+  );
+  const reminderLog = events.slice(0, 40).map((e) => {
+    const meta = e.metadata as Record<string, unknown> | null;
+    const reason = (meta?.reason as string) ?? null;
+    const reminderId = (meta?.reminderId as string) ?? null;
+    const cur = reminderId ? remById.get(reminderId) : undefined;
+    const sessionType = cur?.sessionType ?? (reason ? reason.split("_").slice(1).join("_") : "");
+    const name = cur?.label?.trim() || (sessionType ? TYPE_RO[sessionType] ?? sessionType : "Memento");
+    return {
+      id: e.id,
+      channel: e.channel,
+      level: e.level,
+      sent: e.sentAt != null,
+      acknowledged: e.acknowledgedAt != null,
+      reason,
+      reminderId,
+      name,
+      at: e.sentAt ?? e.createdAt,
+    };
+  });
 
   // Program (schedule) — the child's study reminders. Parent-facing config:
   // returned only to guardians; the same payload powers the editable manager.
@@ -237,21 +269,11 @@ async function _GET(
       if (!ep.reactedChannel) ep.reactedChannel = e.channel;
     }
   }
-  // Resolve the CURRENT name/type of each episode's reminder (it may have been
-  // renamed/re-typed since the cascade fired) — always show the latest name.
-  const epReminderIds = [...new Set(Array.from(episodeMap.values()).map((e) => e.reminderId).filter(Boolean))] as string[];
-  const reminderRows = epReminderIds.length
-    ? await prisma.studyReminder.findMany({
-        where: { id: { in: epReminderIds } },
-        select: { id: true, label: true, sessionType: true, window: true },
-      })
-    : [];
-  const reminderById = new Map(reminderRows.map((r) => [r.id, r]));
-
+  // Reuse the reminder map resolved above — always show the latest name/type.
   const scheduledSessions = Array.from(episodeMap.values())
     .map((ep) => {
       const epDay = dayKey(ep.firstAt);
-      const cur = ep.reminderId ? reminderById.get(ep.reminderId) : undefined;
+      const cur = ep.reminderId ? remById.get(ep.reminderId) : undefined;
       // A session counts for this episode if it was STARTED or FINISHED the same
       // day, at/after the episode fired — so a late/resumed completion still
       // marks the episode done (not "ignored").
