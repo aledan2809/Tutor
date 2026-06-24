@@ -222,6 +222,39 @@ async function _GET(
       })
     : [];
 
+  // Mementos the parent SENT (ParentNudge) — distinct from scheduled reminders.
+  // One-shot mementos go inactive immediately, so we show recent ones (not just
+  // active), newest first. Guardian-only (parent-facing).
+  const mementos = isGuardian
+    ? (
+        await prisma.parentNudge.findMany({
+          where: { childId: studentId },
+          orderBy: { createdAt: "desc" },
+          take: 20,
+          select: {
+            id: true,
+            message: true,
+            channels: true,
+            intervalMin: true,
+            untilAt: true,
+            active: true,
+            fireCount: true,
+            lastFiredAt: true,
+            createdAt: true,
+          },
+        })
+      ).map((n) => ({
+        id: n.id,
+        message: n.message,
+        channels: n.channels,
+        series: n.intervalMin != null,
+        intervalMin: n.intervalMin,
+        active: n.active,
+        fireCount: n.fireCount,
+        at: n.lastFiredAt ?? n.createdAt,
+      }))
+    : [];
+
   // Scheduled sessions (incl. ignored) — each reminder that fired is an episode.
   // Group escalation touches by (reason, calendar-day); a window reason looks
   // like "morning_quick". Outcome: reacted (any channel acknowledged) or a
@@ -317,6 +350,7 @@ async function _GET(
     sessionLog,
     byDomain,
     reminderLog,
+    mementos,
   });
 }
 

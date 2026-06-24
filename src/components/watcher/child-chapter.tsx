@@ -68,12 +68,23 @@ interface DomainResult {
   accuracy: number;
   mistakes: RecentMistake[];
 }
+interface Memento {
+  id: string;
+  message: string;
+  channels: string[];
+  series: boolean;
+  intervalMin: number | null;
+  active: boolean;
+  fireCount: number;
+  at: string;
+}
 interface Detail {
   canManageSchedule: boolean;
   scheduledSessions: ScheduledSession[];
   reminderLog: ReminderTouch[];
   sessionLog: SessionItem[];
   byDomain?: DomainResult[];
+  mementos?: Memento[];
 }
 
 const CHANNEL_RO: Record<string, string> = {
@@ -253,6 +264,9 @@ export function ChildChapter({ child }: { child: ChildLite }) {
                   <h3 className="mb-2 text-sm font-medium text-gray-400">Trimite un memento</h3>
                   <ParentAlertActions childId={child.id} />
                 </div>
+              )}
+              {detail.mementos && detail.mementos.length > 0 && (
+                <MementosLog mementos={detail.mementos} />
               )}
               <RemindereTab episodes={episodes} />
             </div>
@@ -440,6 +454,40 @@ function RezultateTab({
           )}
         </div>
       ))}
+    </div>
+  );
+}
+
+// Mementos the parent SENT (distinct from the scheduled reminders below).
+function MementosLog({ mementos }: { mementos: Memento[] }) {
+  const CH: Record<string, string> = { PUSH: "Aplicație", TELEGRAM: "Telegram", WHATSAPP: "WhatsApp", EMAIL: "Email" };
+  const dt = (s: string) =>
+    new Date(s).toLocaleString("ro-RO", {
+      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Bucharest",
+    });
+  return (
+    <div>
+      <h3 className="mb-2 text-sm font-medium text-gray-400">Mementouri trimise de tine</h3>
+      <div className="space-y-1">
+        {mementos.map((m) => (
+          <div key={m.id} className="flex flex-wrap items-center justify-between gap-2 rounded bg-gray-800 px-3 py-2">
+            <div className="text-sm text-white">
+              {m.message}
+              <div className="mt-0.5 text-xs text-gray-500">
+                {m.channels.map((c) => CH[c] ?? c).join(", ")} · {dt(m.at)}
+                {m.series && ` · serie la ${m.intervalMin} min`}
+              </div>
+            </div>
+            <span
+              className={`rounded px-2 py-0.5 text-xs ${
+                m.series && m.active ? "bg-blue-600/20 text-blue-300" : "bg-green-600/20 text-green-400"
+              }`}
+            >
+              {m.series ? (m.active ? "serie activă" : "serie oprită") : "trimis"}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
