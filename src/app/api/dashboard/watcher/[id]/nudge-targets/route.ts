@@ -47,11 +47,15 @@ async function _GET(_req: NextRequest, { params }: { params: Promise<{ id: strin
     orderBy: { createdAt: "asc" },
     select: { metadata: true, createdAt: true, acknowledgedAt: true },
   });
+  // Sessions in the window, with timing — so an ignored episode is matched
+  // PER-EPISODE (a session done for THIS reminder, same day, after it fired),
+  // not via a global "did any session happen" flag. That flag wrongly hid every
+  // ignored session as soon as the child did one unrelated session.
   const sessionsSince = await prisma.session.findMany({
     where: { userId: childId, OR: [{ startedAt: { gte: since } }, { endedAt: { gte: since } }] },
-    select: { id: true },
+    select: { startedAt: true, endedAt: true },
   });
-  const reactedBySession = sessionsSince.length > 0;
+  const dayKey = (d: Date) => new Date(d).toLocaleDateString("ro-RO", { timeZone: "Europe/Bucharest" });
 
   type G = { reminderId: string | null; reason: string; firstAt: Date; reacted: boolean };
   const groups = new Map<string, G>();
@@ -67,6 +71,16 @@ async function _GET(_req: NextRequest, { params }: { params: Promise<{ id: strin
     groups.set(key, g);
   }
 
+  const episodeDone = (g: G): boolean => {
+    if (g.reacted) return true;
+    const epDay = dayKey(g.firstAt);
+    return sessionsSince.some((s) => {
+      const started = dayKey(s.startedAt) === epDay && s.startedAt >= g.firstAt;
+      const ended = s.endedAt != null && dayKey(s.endedAt) === epDay && s.endedAt >= g.firstAt;
+      return started || ended;
+    });
+  };
+
   const ridList = [...new Set([...groups.values()].map((g) => g.reminderId).filter(Boolean))] as string[];
   const reminders = ridList.length
     ? await prisma.studyReminder.findMany({
@@ -77,7 +91,8 @@ async function _GET(_req: NextRequest, { params }: { params: Promise<{ id: strin
   const remById = new Map(reminders.map((r) => [r.id, r]));
 
   const recent = [...groups.values()]
-    .filter((g) => !g.reacted && !reactedBySession)
+    .filter((g) => !episodeDone(g))
+    .sort((a, b) => b.firstAt.getTime() - a.firstAt.getTime())
     .map((g) => {
       const r = g.reminderId ? remById.get(g.reminderId) : undefined;
       const sessionType = r?.sessionType ?? (g.reason.split("_").slice(1).join("_") || "quick");

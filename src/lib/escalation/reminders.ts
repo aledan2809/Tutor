@@ -67,10 +67,16 @@ export function isReminderDue(
 }
 
 /**
- * Is a scheduled study session imminent for this user — about to fire within
- * `withinMin`, or already inside its fire window? Used by parent nudges so a
- * series doesn't overlap the child's next scheduled session.
+ * Is a scheduled study session imminent for this user — i.e. about to fire
+ * within `withinMin` minutes (or in the last few minutes)? Used by parent nudges
+ * so a repeating SERIES doesn't overlap the child's NEXT scheduled session.
+ *
+ * Forward-looking by design: a reminder that already fired a while ago (e.g. an
+ * ignored 14:45 session viewed at 15:20) is NOT imminent — the parent must be
+ * able to send a memento for it. Only a small backward grace covers a reminder
+ * that fired in the last few minutes (its cascade is still actively running).
  */
+const IMMINENT_BACK_GRACE_MIN = 10;
 export async function reminderImminent(
   userId: string,
   now: Date,
@@ -84,8 +90,7 @@ export async function reminderImminent(
     if (!r.daysOfWeek.includes(weekday)) continue;
     const scheduled = r.hour * 60 + r.minute;
     const delta = scheduled - minutesOfDay; // minutes until scheduled time today
-    // Imminent if it's just fired (within its window) or fires within `withinMin`.
-    if (delta >= -FIRE_WINDOW_MIN && delta <= withinMin) return true;
+    if (delta >= -IMMINENT_BACK_GRACE_MIN && delta <= withinMin) return true;
   }
   return false;
 }

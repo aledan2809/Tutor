@@ -63,10 +63,12 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ id: strin
     }
   }
 
-  // No-overlap: don't start when the child already has a scheduled session imminent.
-  if (await reminderImminent(childId, now, 25)) {
+  // No-overlap guard: only a repeating SERIES can collide with an upcoming
+  // scheduled session. A one-shot memento (including one targeting a past,
+  // ignored session) can't overlap anything → always allowed.
+  if (intervalMin != null && (await reminderImminent(childId, now, 25))) {
     return NextResponse.json(
-      { error: "Urmează o sesiune programată în curând — nu pornesc un memento acum." },
+      { error: "Urmează o sesiune programată în curând — nu pornesc o serie acum." },
       { status: 400 }
     );
   }

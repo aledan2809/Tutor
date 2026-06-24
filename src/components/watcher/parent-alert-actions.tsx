@@ -10,9 +10,10 @@ interface NudgeTarget {
 }
 
 /**
- * CTA shown on a "no reaction" parent alert: authorize a single extra memento,
- * or a SERIES (every N min until a chosen time). The server refuses / auto-stops
- * the series when the child's next scheduled session is imminent (no overlap).
+ * CTA shown on a "no reaction" parent alert: send a memento for ONE or SEVERAL
+ * un-done sessions (recent ignored ≤4h + upcoming ≤4h), or a free-text message;
+ * optionally as a SERIES (every N min until a chosen time). The server refuses /
+ * auto-stops a series when the child's next scheduled session is imminent.
  */
 export function ParentAlertActions({ childId }: { childId: string }) {
   const [open, setOpen] = useState(false);
@@ -21,8 +22,7 @@ export function ParentAlertActions({ childId }: { childId: string }) {
   const [until, setUntil] = useState("2h");
   const [channels, setChannels] = useState<string[]>(["PUSH", "TELEGRAM"]);
   const [targets, setTargets] = useState<{ recent: NudgeTarget[]; upcoming: NudgeTarget[] }>({ recent: [], upcoming: [] });
-  const [targetValue, setTargetValue] = useState(""); // "" = mesaj liber
-  const [url, setUrl] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string[]>([]); // [] = mesaj liber
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -34,17 +34,19 @@ export function ParentAlertActions({ childId }: { childId: string }) {
       .catch(() => {});
   }, [childId]);
 
-  const onPickTarget = (value: string) => {
-    setTargetValue(value);
-    const all = [...targets.recent, ...targets.upcoming];
-    const t = all.find((x) => x.value === value);
-    if (t) {
-      setMsg(t.message);
-      setUrl(t.url);
-    } else {
-      setUrl(null);
+  const allTargets = [...targets.recent, ...targets.upcoming];
+  const toggleTarget = (value: string) =>
+    setSelected((s) => (s.includes(value) ? s.filter((v) => v !== value) : [...s, value]));
+
+  // When exactly one target is picked, prefill the message (so the free-text box
+  // + a series both reflect that session).
+  useEffect(() => {
+    if (selected.length === 1) {
+      const t = allTargets.find((x) => x.value === selected[0]);
+      if (t) setMsg(t.message);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected]);
 
   const CHANNELS: { v: string; label: string }[] = [
     { v: "PUSH", label: "Aplicație" },
@@ -66,7 +68,28 @@ export function ParentAlertActions({ childId }: { childId: string }) {
     return new Date(Date.now() + h * 3_600_000).toISOString();
   };
 
-  const post = async (body: { message: string; intervalMin?: number; untilAt?: string }) => {
+  const postOne = async (body: {
+    message: string;
+    intervalMin?: number;
+    untilAt?: string;
+    url?: string;
+  }): Promise<boolean> => {
+    const r = await fetch(`/api/dashboard/watcher/${childId}/nudge`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...body, channels }),
+    });
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      setError(d.error || "Nu am putut trimite.");
+      return false;
+    }
+    return true;
+  };
+
+  // "Trimite memento acum": one memento per selected un-done session, or a single
+  // free-text memento when nothing is selected.
+  const sendNow = async () => {
     if (channels.length === 0) {
       setError("Alege cel puțin un canal.");
       return;
@@ -75,18 +98,45 @@ export function ParentAlertActions({ childId }: { childId: string }) {
     setError(null);
     setDone(null);
     try {
-      const r = await fetch(`/api/dashboard/watcher/${childId}/nudge`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...body, channels, ...(url ? { url } : {}) }),
-      });
-      const d = await r.json().catch(() => ({}));
-      if (!r.ok) {
-        setError(d.error || "Nu am putut trimite.");
+      if (selected.length === 0) {
+        if (await postOne({ message: msg })) setDone("Memento trimis ✅");
         return;
       }
-      setDone(body.intervalMin ? "Serie pornită ✅" : "Memento trimis ✅");
-      setOpen(false);
+      let ok = 0;
+      for (const value of selected) {
+        const t = allTargets.find((x) => x.value === value);
+        if (!t) continue;
+        if (await postOne({ message: t.message, url: t.url })) ok++;
+        else break;
+      }
+      if (ok > 0) setDone(`${ok} ${ok === 1 ? "memento trimis" : "mementouri trimise"} ✅`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // Series uses the free-text message; if exactly one session is selected it
+  // carries that session's deep-link.
+  const startSeries = async () => {
+    if (channels.length === 0) {
+      setError("Alege cel puțin un canal.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    setDone(null);
+    try {
+      const one = selected.length === 1 ? allTargets.find((x) => x.value === selected[0]) : undefined;
+      const ok = await postOne({
+        message: msg,
+        intervalMin,
+        untilAt: computeUntil(),
+        ...(one ? { url: one.url } : {}),
+      });
+      if (ok) {
+        setDone("Serie pornită ✅");
+        setOpen(false);
+      }
     } finally {
       setBusy(false);
     }
@@ -94,37 +144,46 @@ export function ParentAlertActions({ childId }: { childId: string }) {
 
   if (done) return <p className="mt-3 text-xs text-green-400">{done}</p>;
 
-  const hasTargets = targets.recent.length > 0 || targets.upcoming.length > 0;
+  const hasTargets = allTargets.length > 0;
+  const Target = ({ t }: { t: NudgeTarget }) => (
+    <label className="flex cursor-pointer items-start gap-2 rounded px-1 py-0.5 hover:bg-gray-800">
+      <input
+        type="checkbox"
+        checked={selected.includes(t.value)}
+        onChange={() => toggleTarget(t.value)}
+        className="mt-0.5 accent-blue-500"
+      />
+      <span className="text-white">{t.label}</span>
+    </label>
+  );
 
   return (
     <div className="mt-3 space-y-2 border-t border-gray-800 pt-3">
-      {/* Target session picker — recent ignored (≤4h) or upcoming (≤4h). */}
+      {/* Target picker — pick one OR several un-done sessions (ignored ≤4h / upcoming ≤4h). */}
       {hasTargets && (
-        <div className="text-xs text-gray-400">
-          <label className="flex flex-col gap-1">
-            Pentru sesiunea:
-            <select
-              value={targetValue}
-              onChange={(e) => onPickTarget(e.target.value)}
-              className="rounded-lg border border-gray-700 bg-gray-800 px-2 py-1.5 text-white"
-            >
-              <option value="">Mesaj liber</option>
-              {targets.recent.length > 0 && (
-                <optgroup label="Sărite recent (≤4h)">
-                  {targets.recent.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
-                </optgroup>
-              )}
-              {targets.upcoming.length > 0 && (
-                <optgroup label="Viitoare (≤4h)">
-                  {targets.upcoming.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
-                </optgroup>
-              )}
-            </select>
-          </label>
+        <div className="space-y-1 text-xs text-gray-400">
+          <span>Pentru ce sesiuni (bifează una sau mai multe):</span>
+          {targets.recent.length > 0 && (
+            <div>
+              <p className="mt-1 text-[11px] uppercase tracking-wide text-gray-500">Sărite recent (≤4h)</p>
+              {targets.recent.map((t) => (
+                <Target key={t.value} t={t} />
+              ))}
+            </div>
+          )}
+          {targets.upcoming.length > 0 && (
+            <div>
+              <p className="mt-1 text-[11px] uppercase tracking-wide text-gray-500">Viitoare (≤4h)</p>
+              {targets.upcoming.map((t) => (
+                <Target key={t.value} t={t} />
+              ))}
+            </div>
+          )}
+          {selected.length > 1 && (
+            <p className="text-[11px] text-blue-300">
+              {selected.length} sesiuni selectate — se trimite câte un memento pentru fiecare.
+            </p>
+          )}
         </div>
       )}
 
@@ -148,10 +207,10 @@ export function ParentAlertActions({ childId }: { childId: string }) {
       <div className="flex flex-wrap gap-2">
         <button
           disabled={busy}
-          onClick={() => post({ message: msg })}
+          onClick={sendNow}
           className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-60"
         >
-          Trimite memento acum
+          {selected.length > 1 ? `Trimite ${selected.length} mementouri acum` : "Trimite memento acum"}
         </button>
         <button
           onClick={() => setOpen((o) => !o)}
@@ -197,7 +256,7 @@ export function ParentAlertActions({ childId }: { childId: string }) {
             </label>
             <button
               disabled={busy || !msg.trim()}
-              onClick={() => post({ message: msg, intervalMin, untilAt: computeUntil() })}
+              onClick={startSeries}
               className="rounded-lg bg-blue-600 px-3 py-1.5 font-medium text-white hover:bg-blue-700 disabled:opacity-60"
             >
               Pornește seria
