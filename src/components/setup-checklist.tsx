@@ -17,7 +17,12 @@ import {
  * Platform-aware setup checklist, opened from the top bar. Adapts to the user's
  * device (iOS Safari / Android / in-app browser / desktop) and walks any new
  * user through: install the app → enable notifications → connect Telegram.
- * Each step shows live status + the right action/instruction for THIS phone.
+ *
+ * Resilience: if the user keeps tapping "install" without success (counted in
+ * localStorage), we surface an ALTERNATE plan (check Safari / use Telegram
+ * without installing / skip). The notification + Telegram steps are OPTIONAL and
+ * can be dismissed ("Mai târziu") — e.g. a user who doesn't want notifications
+ * or has no Telegram account.
  */
 
 interface BeforeInstallPromptEvent extends Event {
@@ -29,25 +34,36 @@ interface TgStatus {
   linked: boolean;
 }
 
+const ATTEMPTS_KEY = "tutor_pwa_install_attempts";
+const SKIP_INSTALL = "tutor_setup_skip_install";
+const SKIP_PUSH = "tutor_setup_skip_push";
+const SKIP_TG = "tutor_setup_skip_tg";
+const ATTEMPT_THRESHOLD = 2; // after this many tries with no install → alt plan
+
 export function SetupChecklist() {
   const ro = useLocale() === "ro";
+  const t = (r: string, e: string) => (ro ? r : e);
   const [open, setOpen] = useState(false);
-  const [ready, setReady] = useState(false); // platform known (avoids SSR mismatch)
+  const [ready, setReady] = useState(false);
 
-  // platform
   const [ios, setIos] = useState(false);
   const [mobile, setMobile] = useState(false);
   const [inApp, setInApp] = useState(false);
 
-  // step state
   const [installed, setInstalled] = useState(false);
   const [installEvt, setInstallEvt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallSteps, setShowInstallSteps] = useState(false);
+  const [attempts, setAttempts] = useState(0);
   const [pushSupported, setPushSupported] = useState(false);
   const [pushOn, setPushOn] = useState(false);
   const [tg, setTg] = useState<TgStatus | null>(null);
   const [tgWaiting, setTgWaiting] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+
+  // dismissed (skipped) steps
+  const [skipInstall, setSkipInstall] = useState(false);
+  const [skipPush, setSkipPush] = useState(false);
+  const [skipTg, setSkipTg] = useState(false);
 
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -56,6 +72,12 @@ export function SetupChecklist() {
     setMobile(isMobileUA());
     setInApp(isInAppWebView());
     setInstalled(isStandalone() || readFlag(INSTALL_DONE_KEY));
+    setSkipInstall(readFlag(SKIP_INSTALL));
+    setSkipPush(readFlag(SKIP_PUSH));
+    setSkipTg(readFlag(SKIP_TG));
+    try {
+      setAttempts(Number(localStorage.getItem(ATTEMPTS_KEY) ?? 0) || 0);
+    } catch {}
     setReady(true);
 
     const onPrompt = (e: Event) => {
@@ -64,20 +86,23 @@ export function SetupChecklist() {
     };
     const onInstalled = () => {
       writeFlag(INSTALL_DONE_KEY);
+      try {
+        localStorage.removeItem(ATTEMPTS_KEY);
+      } catch {}
       setInstalled(true);
       setInstallEvt(null);
     };
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
 
-    if (isPushSupported() && Notification.permission !== "denied") {
+    if (isPushSupported()) {
       setPushSupported(true);
-      navigator.serviceWorker.ready
-        .then((reg) => reg.pushManager.getSubscription())
-        .then((sub) => setPushOn(!!sub))
-        .catch(() => {});
-    } else if (isPushSupported()) {
-      setPushSupported(true);
+      if (Notification.permission !== "denied") {
+        navigator.serviceWorker.ready
+          .then((reg) => reg.pushManager.getSubscription())
+          .then((sub) => setPushOn(!!sub))
+          .catch(() => {});
+      }
     }
 
     fetch("/api/telegram/link")
@@ -91,7 +116,6 @@ export function SetupChecklist() {
     };
   }, []);
 
-  // Close on outside click.
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
@@ -101,7 +125,6 @@ export function SetupChecklist() {
     return () => document.removeEventListener("mousedown", onDoc);
   }, [open]);
 
-  // Poll Telegram status while waiting for the user to tap /start.
   useEffect(() => {
     if (!tgWaiting) return;
     let n = 0;
@@ -120,18 +143,49 @@ export function SetupChecklist() {
     return () => clearInterval(id);
   }, [tgWaiting]);
 
+  const bumpAttempts = () => {
+    setAttempts((a) => {
+      const next = a + 1;
+      try {
+        localStorage.setItem(ATTEMPTS_KEY, String(next));
+      } catch {}
+      return next;
+    });
+  };
+  const skip = (key: "install" | "push" | "tg") => {
+    const map = { install: SKIP_INSTALL, push: SKIP_PUSH, tg: SKIP_TG } as const;
+    writeFlag(map[key]);
+    if (key === "install") setSkipInstall(true);
+    if (key === "push") setSkipPush(true);
+    if (key === "tg") setSkipTg(true);
+  };
+  const resetSkips = () => {
+    try {
+      [SKIP_INSTALL, SKIP_PUSH, SKIP_TG].forEach((k) => localStorage.removeItem(k));
+    } catch {}
+    setSkipInstall(false);
+    setSkipPush(false);
+    setSkipTg(false);
+  };
+
   const doInstall = async () => {
     if (installEvt) {
       setBusy("install");
       try {
         await installEvt.prompt();
-        await installEvt.userChoice;
-      } catch {} finally {
+        const choice = await installEvt.userChoice;
+        if (choice.outcome !== "accepted") bumpAttempts();
+      } catch {
+        bumpAttempts();
+      } finally {
         setInstallEvt(null);
         setBusy(null);
       }
     } else {
-      setShowInstallSteps((s) => !s);
+      // No native prompt (iOS / Firefox / nothing happens) → show steps + count
+      // the attempt so we can offer an alternate plan after a few tries.
+      setShowInstallSteps(true);
+      bumpAttempts();
     }
   };
   const doPush = async () => {
@@ -157,9 +211,6 @@ export function SetupChecklist() {
     }
   };
 
-  // ---- derive per-step status/labels for THIS device ----
-  const t = (r: string, e: string) => (ro ? r : e);
-
   const installSteps = inApp
     ? t(
         ios
@@ -170,24 +221,25 @@ export function SetupChecklist() {
           : "Tap “⋯” → “Open in Chrome”, then menu (⋮) → “Install app”."
       )
     : ios
-      ? t(
-          "În Safari: apasă Share ↑ (jos), apoi „Adaugă la ecranul principal”.",
-          "In Safari: tap Share ↑ (bottom), then “Add to Home Screen”."
-        )
+      ? t("În Safari: apasă Share ↑ (jos), apoi „Adaugă la ecranul principal”.", "In Safari: tap Share ↑ (bottom), then “Add to Home Screen”.")
       : mobile
-        ? t(
-            "Meniul browserului (⋮) → „Instalează aplicația” / „Adaugă la ecranul principal”.",
-            "Browser menu (⋮) → “Install app” / “Add to Home Screen”."
-          )
-        : t(
-            "În bara de adrese apasă pictograma de instalare (⊕), sau meniul → „Instalează”.",
-            "Click the install icon (⊕) in the address bar, or menu → “Install”."
-          );
+        ? t("Meniul browserului (⋮) → „Instalează aplicația” / „Adaugă la ecranul principal”.", "Browser menu (⋮) → “Install app” / “Add to Home Screen”.")
+        : t("În bara de adrese apasă pictograma de instalare (⊕), sau meniul → „Instalează”.", "Click the install icon (⊕) in the address bar, or menu → “Install”.");
 
-  const pushBlockedByInstall = ios && !installed; // iOS push needs an installed PWA
+  const pushBlockedByInstall = ios && !installed;
   const tgApplies = tg?.configured === true;
+  const tgLinked = tg?.linked === true;
+  const showAltPlan = !installed && attempts >= ATTEMPT_THRESHOLD;
 
-  const steps = [
+  type Step = {
+    key: "install" | "push" | "tg";
+    done: boolean;
+    title: string;
+    sub: string;
+    action: { label: string; on: () => void } | null;
+    canSkip: boolean;
+  };
+  const all: Step[] = [
     {
       key: "install",
       done: installed,
@@ -195,11 +247,8 @@ export function SetupChecklist() {
       sub: installed
         ? t("Instalată ✓", "Installed ✓")
         : t("Acces rapid de pe ecranul principal.", "Quick access from your home screen."),
-      action:
-        installed || inApp
-          ? null
-          : { label: installEvt ? t("Instalează", "Install") : t("Cum?", "How?"), on: doInstall },
-      hint: !installed && (inApp || showInstallSteps || (ios && !installEvt)) ? installSteps : null,
+      action: installed || inApp ? null : { label: installEvt ? t("Instalează", "Install") : t("Cum?", "How?"), on: doInstall },
+      canSkip: false, // skip is offered only via the alternate plan
     },
     {
       key: "push",
@@ -212,37 +261,35 @@ export function SetupChecklist() {
           : pushSupported
             ? t("Mementouri gratuite pe telefon.", "Free reminders on your phone.")
             : t("Neacceptat pe acest browser.", "Not supported on this browser."),
-      action:
-        pushOn || pushBlockedByInstall || !pushSupported
-          ? null
-          : { label: t("Activează", "Enable"), on: doPush },
-      hint: null,
+      action: pushOn || pushBlockedByInstall || !pushSupported ? null : { label: t("Activează", "Enable"), on: doPush },
+      canSkip: true,
     },
     ...(tgApplies
       ? [
           {
-            key: "tg",
-            done: tg!.linked,
+            key: "tg" as const,
+            done: tgLinked,
             title: t("Conectează Telegram", "Connect Telegram"),
-            sub: tg!.linked
+            sub: tgLinked
               ? t("Conectat ✓", "Connected ✓")
               : tgWaiting
                 ? t("Apasă „Start” în Telegram…", "Tap “Start” in Telegram…")
-                : t("Mementouri gratuite, fără cost.", "Free reminders, no cost."),
-            action: tg!.linked
-              ? null
-              : { label: t("Conectează", "Connect"), on: doTelegram },
-            hint: null,
+                : t("Mementouri gratuite (necesită cont Telegram).", "Free reminders (needs a Telegram account)."),
+            action: tgLinked ? null : { label: t("Conectează", "Connect"), on: doTelegram },
+            canSkip: true,
           },
         ]
       : []),
   ];
 
-  const remaining = steps.filter((s) => !s.done).length;
-  // Don't render until platform is known; hide entirely once nothing is left.
+  const skipped: Record<string, boolean> = { install: skipInstall, push: skipPush, tg: skipTg };
+  const visible = all.filter((s) => !skipped[s.key]);
+  const anySkipped = all.some((s) => skipped[s.key]);
+  const remaining = visible.filter((s) => !s.done).length;
+
   if (!ready) return null;
-  const allCoreDone = steps.every((s) => s.done);
-  if (allCoreDone && !open) return null;
+  const allDone = visible.every((s) => s.done);
+  if (allDone && !anySkipped && !open) return null;
 
   return (
     <div className="relative mr-2" ref={panelRef}>
@@ -267,7 +314,7 @@ export function SetupChecklist() {
             <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-white">✕</button>
           </div>
           <div className="space-y-2">
-            {steps.map((s) => (
+            {visible.map((s) => (
               <div key={s.key} className="rounded-lg bg-gray-800 p-3">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-start gap-2">
@@ -279,25 +326,74 @@ export function SetupChecklist() {
                       <p className="text-xs text-gray-400">{s.sub}</p>
                     </div>
                   </div>
-                  {s.action && (
-                    <button
-                      onClick={s.action.on}
-                      disabled={busy === s.key}
-                      className="shrink-0 rounded-lg bg-blue-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-                    >
-                      {busy === s.key ? "…" : s.action.label}
-                    </button>
-                  )}
+                  <div className="flex shrink-0 items-center gap-1">
+                    {s.action && (
+                      <button
+                        onClick={s.action.on}
+                        disabled={busy === s.key}
+                        className="rounded-lg bg-blue-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                      >
+                        {busy === s.key ? "…" : s.action.label}
+                      </button>
+                    )}
+                    {s.canSkip && !s.done && (
+                      <button
+                        onClick={() => skip(s.key)}
+                        className="rounded-lg px-2 py-1 text-[11px] text-gray-500 hover:text-gray-300"
+                        title={t("Ascunde acest pas", "Hide this step")}
+                      >
+                        {t("Mai târziu", "Later")}
+                      </button>
+                    )}
+                  </div>
                 </div>
-                {s.hint && (
+
+                {/* Install: steps + alternate plan after repeated failed attempts */}
+                {s.key === "install" && !installed && (inApp || showInstallSteps) && (
                   <p className="mt-2 rounded-lg border border-blue-900/40 bg-blue-950/40 p-2 text-xs text-blue-100">
-                    {s.hint}
+                    {installSteps}
                   </p>
+                )}
+                {s.key === "install" && showAltPlan && (
+                  <div className="mt-2 rounded-lg border border-amber-900/40 bg-amber-950/30 p-2 text-xs text-amber-100">
+                    <p className="font-medium">{t("Nu reușește instalarea?", "Install not working?")}</p>
+                    <ul className="ml-4 mt-1 list-disc space-y-0.5">
+                      <li>
+                        {inApp
+                          ? t("Ești într-un browser din altă aplicație — deschide întâi în Safari/Chrome.", "You're in another app's browser — open in Safari/Chrome first.")
+                          : t("Asigură-te că ești în Safari/Chrome (nu într-o altă aplicație).", "Make sure you're in Safari/Chrome (not inside another app).")}
+                      </li>
+                      <li>{t("Instalarea NU e obligatorie — poți primi notificările pe Telegram, fără instalare.", "Installing is NOT required — you can get reminders on Telegram, no install needed.")}</li>
+                    </ul>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {tgApplies && !tgLinked && (
+                        <button
+                          onClick={doTelegram}
+                          disabled={busy === "tg"}
+                          className="rounded-lg bg-blue-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                        >
+                          {t("Folosește Telegram", "Use Telegram")}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => skip("install")}
+                        className="rounded-lg border border-gray-600 px-2.5 py-1 text-xs text-gray-300 hover:bg-gray-800"
+                      >
+                        {t("Sari peste instalare", "Skip install")}
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
             ))}
           </div>
-          {allCoreDone && (
+
+          {anySkipped && (
+            <button onClick={resetSkips} className="mt-2 w-full text-center text-[11px] text-gray-500 hover:text-gray-300">
+              {t("Arată pașii ascunși", "Show hidden steps")}
+            </button>
+          )}
+          {allDone && !anySkipped && (
             <p className="mt-2 text-center text-xs text-green-400">{t("Totul e gata! 🎉", "All set! 🎉")}</p>
           )}
         </div>
