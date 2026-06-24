@@ -660,3 +660,58 @@ Use Website Guru (`POST guru.techbiz.ae/api/fix`) to fix AGT-008 (a11y) + AGT-00
 |------|--------|
 | 2026-05-11 | Created. E2E [9] done (CODE 89/100, Journey 17/17 OK). Sidebar focus trap + touch targets + contrast + dangerouslySetInnerHTML + cookie Secure flag fixed. |
 | 2026-05-11 | True Full E2E [10] COMPLETE. 31/35 PASS (89%). Bugs: AGT-001 (PATCH 405), AGT-002 (Settings blank), AGT-003 (Calendar empty), AGT-004 (bibliography empty), AGT-007/009 (mobile touch targets). Reports/TRUE-E2E-FULL-2026-05-11.md + AUDIT_GAPS.md created. |
+
+## Tutor (`etutor.ro`) — ACTIVE (fix-urile așteaptă review-ul tău)
+Sursă: `Tutor/Reports/INTROSPECTION-2026-06-20/`
+
+- [ ] 🔴 **Leak date despre MINORI în portalul de părinte (A1)** — planurile Family/Duo/Trio vândute pe `/preturi`, dar lipsește modelul `Guardian`/`FamilyGroup` → un părinte vede TOȚI studenții dintr-un domeniu. Necesită model nou + migrare + rescriere autorizare watcher. **Prioritate maximă** înainte de a împinge planurile de familie. Aprobi designul legăturii părinte↔copil?
+- [ ] 🔴 **GDPR pe public cu minori** — banner cookie + GA consent-mode; posibil aviz juridic (risc ANSPDCP). Folosim Legal Hub?
+- [ ] 🔴 **Upgrade `next` (CVE critic — middleware bypass)** — upgrade + test build/auth (posibile breaking). Aprobi fereastra?
+- [ ] 🟡 **`npm audit fix`** (nodemailer/xmldom/postcss/next-intl, majoritatea non-breaking).
+- [ ] 🟡 **Întărire CSP** (elimină `unsafe-inline/unsafe-eval` via nonce) + **footer Privacy/Terms vizibil**.
+- [ ] 🟡 **Decizie `requireDomainAccess`** pe rutele `[domain]/*` — restrângi accesul per-înscriere acum sau la materii plătite?
+- _Notă produs (din 01, decizii nu blockere): motorul de escaladare e construit dar DORMANT (`ESCALATION_DETECT_ENABLED=false`, cron neprogramat) + payout real lipsă (nu poți onora comisionul 50% `/creatori`)._
+
+---
+
+## Tutor (`etutor.ro`) — ACTIVE (fix-urile așteaptă review-ul tău)
+Sursă: `Tutor/Reports/INTROSPECTION-2026-06-20/`
+
+- [ ] 🔴 **Leak date despre MINORI în portalul de părinte (A1)** — planurile Family/Duo/Trio vândute pe `/preturi`, dar lipsește modelul `Guardian`/`FamilyGroup` → un părinte vede TOȚI studenții dintr-un domeniu. Necesită model nou + migrare + rescriere autorizare watcher. **Prioritate maximă** înainte de a împinge planurile de familie. Aprobi designul legăturii părinte↔copil?
+- [ ] 🔴 **GDPR pe public cu minori** — banner cookie + GA consent-mode; posibil aviz juridic (risc ANSPDCP). Folosim Legal Hub?
+- [ ] 🔴 **Upgrade `next` (CVE critic — middleware bypass)** — upgrade + test build/auth (posibile breaking). Aprobi fereastra?
+- [ ] 🟡 **`npm audit fix`** (nodemailer/xmldom/postcss/next-intl, majoritatea non-breaking).
+- [ ] 🟡 **Întărire CSP** (elimină `unsafe-inline/unsafe-eval` via nonce) + **footer Privacy/Terms vizibil**.
+- [ ] 🟡 **Decizie `requireDomainAccess`** pe rutele `[domain]/*` — restrângi accesul per-înscriere acum sau la materii plătite?
+- _Notă produs (din 01, decizii nu blockere): motorul de escaladare e construit dar DORMANT (`ESCALATION_DETECT_ENABLED=false`, cron neprogramat) + payout real lipsă (nu poți onora comisionul 50% `/creatori`)._
+
+---
+
+## 🔍 Introspection Audit 2026-06-20
+> Audit complet (gap strategie↔cod · ghid per-pagină · deep research · funcțional + cyber).
+> **Scor AIWebAuditor: 76/100** · GDPR 20. 6 acțiuni deschise · 🔴 3 critice.
+> Rapoarte: `Reports/INTROSPECTION-2026-06-20/` (00-SUMMARY.md, 01-gap-strategy-vs-code.md, 02-pages-guide-RO.md, 03-deep-research-optimization.md, 04-audit-findings.md, 04b-security-audit.md)
+> Checklist Alex centralizat: `Master/reports/Alex_TODO_2026-06-20.md` + tab „Introspection Audit" în UI Master.
+
+## Tutor (`etutor.ro`) — ACTIVE (fix-urile așteaptă review-ul tău)
+Sursă: `Tutor/Reports/INTROSPECTION-2026-06-20/`
+
+- [ ] 🔴 **Leak date despre MINORI în portalul de părinte (A1)** — planurile Family/Duo/Trio vândute pe `/preturi`, dar lipsește modelul `Guardian`/`FamilyGroup` → un părinte vede TOȚI studenții dintr-un domeniu. Necesită model nou + migrare + rescriere autorizare watcher. **Prioritate maximă** înainte de a împinge planurile de familie. Aprobi designul legăturii părinte↔copil?
+  - 🗣️ *Pe înțelesul tău:* Vinzi abonamente de familie, dar legătura părinte–copil nu e construită, deci un părinte vede TOȚI elevii de la o materie, nu doar copilul lui — date despre minori expuse. După fix, fiecare părinte vede strict propriul copil și poți lansa în siguranță planurile de familie.
+- [ ] 🔴 **GDPR pe public cu minori** — banner cookie + GA consent-mode; posibil aviz juridic (risc ANSPDCP). Folosim Legal Hub?
+  - 🗣️ *Pe înțelesul tău:* Urmărești vizitatorii (inclusiv minori) fără banner de acord — risc serios de amendă pe date despre copii. După fix, urmărirea pornește doar cu acordul lor și ești în regulă cu legea.
+- [ ] 🔴 **Upgrade `next` (CVE critic — middleware bypass)** — upgrade + test build/auth (posibile breaking). Aprobi fereastra?
+  - 🗣️ *Pe înțelesul tău:* Framework-ul site-ului are o gaură gravă prin care cineva poate ocoli protecțiile de acces. Aprobă o sesiune ca să-l urc la o versiune sigură, cu testare după.
+- [ ] 🟡 **`npm audit fix`** (nodemailer/xmldom/postcss/next-intl, majoritatea non-breaking).
+  - 🗣️ *Pe înțelesul tău:* Câteva biblioteci externe sunt învechite și au vulnerabilități. Le actualizez (majoritatea fără risc), ca să fie totul curat.
+- [ ] 🟡 **Întărire CSP** (elimină `unsafe-inline/unsafe-eval` via nonce) + **footer Privacy/Terms vizibil**.
+  - 🗣️ *Pe înțelesul tău:* Întăresc apărarea site-ului împotriva codului injectat și pun linkurile de politici la vedere în subsol. Site-ul devine mai sigur și mai serios.
+- [ ] 🟡 **Decizie `requireDomainAccess`** pe rutele `[domain]/*` — restrângi accesul per-înscriere acum sau la materii plătite?
+  - 🗣️ *Pe înțelesul tău:* Trebuie să decizi dacă un elev poate intra pe orice materie sau doar pe cele la care e înscris/le-a plătit. Decizia ta stabilește exact ce conținut e deschis și ce e blocat.
+- _Notă produs (din 01, decizii nu blockere): motorul de escaladare e construit dar DORMANT (`ESCALATION_DETECT_ENABLED=false`, cron neprogramat) + payout real lipsă (nu poți onora comisionul 50% `/creatori`)._
+
+---
+
+## [ ] 🧩 Module reuse gaps (adăugat 2026-06-24 din Master MODULE-PROJECT-MATRIX, aprobat user — necesită sesiune dedicată per item)
+- [ ] **Stripe broker** — folosește Stripe direct (@stripe/stripe-js + stripe); de migrat la broker central `stripe.knowbest.ro` (chei centralizate, webhook + HMAC callback).
+- [ ] **@aledan/ai-governance** — AIRouter fără harness guvernanță pe output AI.
