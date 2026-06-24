@@ -31,9 +31,13 @@ const hhmm = (h: number, m: number) =>
 
 export function ReminderManager({
   apiBase = "/api/student/reminders",
+  domains,
 }: {
   /** CRUD base path. Default = own schedule; a parent passes the child-scoped base. */
   apiBase?: string;
+  /** Targetable domains; when provided, each reminder gets a domain picker so you
+   *  can schedule e.g. an evening "Aptitudini Aviație" session alongside others. */
+  domains?: { slug: string; name: string }[];
 }) {
   const t = useTranslations("sessions");
   const [reminders, setReminders] = useState<Reminder[]>([]);
@@ -78,6 +82,7 @@ export function ReminderManager({
           daysOfWeek: r.daysOfWeek,
           hour: r.hour,
           minute: r.minute,
+          domainSlug: r.domainSlug ?? null,
           isActive: r.isActive,
         }),
       });
@@ -185,6 +190,21 @@ export function ReminderManager({
               </select>
               <InfoTooltip text={t(`cascadeTip.${r.window}`)} label={t("infoLabel")} />
             </span>
+            {domains && domains.length > 0 && (
+              <select
+                value={r.domainSlug ?? ""}
+                onChange={(e) => patch(r.id, { domainSlug: e.target.value || null })}
+                className="rounded-lg border border-gray-700 bg-gray-800 px-2 py-2 text-xs text-white"
+                title="Domeniul pe care îl deschide mementoul"
+              >
+                <option value="">Domeniu implicit</option>
+                {domains.map((dm) => (
+                  <option key={dm.slug} value={dm.slug}>
+                    {dm.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div className="flex items-center justify-between">

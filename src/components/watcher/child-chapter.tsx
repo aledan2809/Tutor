@@ -207,7 +207,10 @@ export function ChildChapter({ child }: { child: ChildLite }) {
           ) : tab === "program" ? (
             detail.canManageSchedule ? (
               <div className="space-y-6">
-                <ReminderManager apiBase={`/api/dashboard/watcher/${child.id}/reminders`} />
+                <ReminderManager
+                  apiBase={`/api/dashboard/watcher/${child.id}/reminders`}
+                  domains={child.domains.map((d) => ({ slug: d.slug, name: d.name }))}
+                />
                 <div>
                   <h3 className="mb-2 text-sm font-medium text-gray-400">Vacanță / excepții</h3>
                   <BreaksManager apiBase={`/api/dashboard/watcher/${child.id}/breaks`} />
