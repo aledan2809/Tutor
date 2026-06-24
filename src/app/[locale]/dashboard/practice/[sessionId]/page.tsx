@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { SessionTimer } from "@/components/session/session-timer";
 import { QuestionRenderer } from "@/components/session/question-renderer";
 import { FeedbackDisplay } from "@/components/session/feedback-display";
+import { QuestionFeedback } from "@/components/session/question-feedback";
 import { SessionResults } from "@/components/session/session-results";
 
 interface QuestionData {
@@ -281,6 +282,9 @@ export default function ActiveSessionPage() {
             <div className="text-center text-sm text-purple-400">
               +{feedback.xpAwarded} XP
             </div>
+          )}
+          {currentQuestion && (
+            <QuestionFeedback key={currentQuestion.id} questionId={currentQuestion.id} sessionId={sessionId} />
           )}
         </>
       )}

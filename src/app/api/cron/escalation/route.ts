@@ -7,6 +7,7 @@ import {
 import { runDueReminders } from "@/lib/escalation/reminders";
 import { runParentMonitoring } from "@/lib/escalation/parent-monitor";
 import { runParentNudges } from "@/lib/escalation/parent-nudge";
+import { runFeedbackReview } from "@/lib/feedback-review";
 import { withErrorHandler } from "@/lib/api-handler";
 
 /**
@@ -39,6 +40,8 @@ async function _POST(req: NextRequest) {
   const parentMonitoring = await runParentMonitoring();
   // Parent on-demand nudges (custom message, repeat every N min until reaction).
   const parentNudges = await runParentNudges();
+  // Auto-review of 👎 question feedback (fix/hide on private banks, flag curriculum).
+  const feedbackReview = await runFeedbackReview();
 
   return NextResponse.json({
     success: true,
@@ -48,6 +51,7 @@ async function _POST(req: NextRequest) {
     escalationsAdvanced: advancedCount,
     parentMonitoring,
     parentNudges,
+    feedbackReview,
     timestamp: new Date().toISOString(),
   });
 }

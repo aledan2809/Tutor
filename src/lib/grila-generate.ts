@@ -44,7 +44,7 @@ export interface GeneratedGrila {
   difficulty?: number;
 }
 
-async function callTextAI(prompt: string): Promise<string> {
+export async function callTextAI(prompt: string): Promise<string> {
   const groqKey = process.env.GROQ_API_KEY;
   const geminiKey = process.env.GEMINI_API_KEY;
 

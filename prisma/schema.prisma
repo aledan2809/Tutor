@@ -1296,3 +1296,23 @@ model ParentNudge {
   @@index([active])
   @@index([childId])
 }
+
+// Feedback per întrebare (👍/👎 + comentariu). Un feedback negativ spune direct
+// ce e în neregulă; agentul cron îl verifică + corectează/ascunde + notifică.
+// Fără FK pe User (nu atingem modelul User).
+model QuestionFeedback {
+  id         String   @id @default(cuid())
+  questionId String
+  userId     String
+  sessionId  String?
+  rating     String // "up" | "down"
+  comment    String?  @db.Text
+  status     String   @default("new") // new | resolved
+  resolution String?  @db.Text // decizia agentului
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, questionId])
+  @@index([status, rating])
+  @@index([questionId])
+}
