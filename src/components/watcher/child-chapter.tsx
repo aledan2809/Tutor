@@ -26,6 +26,7 @@ interface ScheduledSession {
   at: string;
   window: string;
   sessionType: string;
+  label: string | null;
   channels: string[];
   reactedChannel: string | null;
   done: boolean;
@@ -56,12 +57,20 @@ interface RecentMistake {
   wrong: number;
   total: number;
 }
+interface DomainResult {
+  domainId: string;
+  domainName: string;
+  total: number;
+  correct: number;
+  accuracy: number;
+  mistakes: RecentMistake[];
+}
 interface Detail {
   canManageSchedule: boolean;
   scheduledSessions: ScheduledSession[];
   reminderLog: ReminderTouch[];
   sessionLog: SessionItem[];
-  recentMistakes?: RecentMistake[];
+  byDomain?: DomainResult[];
 }
 
 const CHANNEL_RO: Record<string, string> = {
@@ -86,7 +95,7 @@ function fmtDay(d: string): string {
   return new Date(d).toLocaleDateString("ro-RO", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
-type Tab = "sesiuni" | "remindere" | "program";
+type Tab = "sesiuni" | "rezultate" | "remindere" | "program";
 
 export function ChildChapter({ child }: { child: ChildLite }) {
   const [open, setOpen] = useState(false);
@@ -186,6 +195,9 @@ export function ChildChapter({ child }: { child: ChildLite }) {
             <TabBtn active={tab === "sesiuni"} onClick={() => setTab("sesiuni")}>
               Sesiuni
             </TabBtn>
+            <TabBtn active={tab === "rezultate"} onClick={() => setTab("rezultate")}>
+              Rezultate
+            </TabBtn>
             <TabBtn active={tab === "remindere"} onClick={() => setTab("remindere")}>
               Remindere
             </TabBtn>
@@ -224,10 +236,9 @@ export function ChildChapter({ child }: { child: ChildLite }) {
               <p className="text-sm text-gray-500">Programul poate fi gestionat doar de părinte.</p>
             )
           ) : tab === "sesiuni" ? (
-            <div className="space-y-5">
-              <WeakAreasBlock mistakes={detail.recentMistakes} />
-              <SesiuniTab scheduled={detail.scheduledSessions} sessions={detail.sessionLog} />
-            </div>
+            <SesiuniTab scheduled={detail.scheduledSessions} sessions={detail.sessionLog} />
+          ) : tab === "rezultate" ? (
+            <RezultateTab byDomain={detail.byDomain} />
           ) : (
             <div className="space-y-4">
               {detail.canManageSchedule && (
@@ -288,7 +299,7 @@ function SesiuniTab({
             {scheduled.map((s) => (
               <div key={s.key} className="flex items-center justify-between rounded bg-gray-800 px-3 py-2">
                 <span className="text-sm text-white">
-                  {WINDOW_RO[s.window] ?? s.window} · {typeLabel(s.sessionType)}
+                  {WINDOW_RO[s.window] ?? s.window} · {s.label || typeLabel(s.sessionType)}
                   <span className="ml-2 text-xs text-gray-500">{fmt(s.at)}</span>
                 </span>
                 <span className="flex items-center gap-2 text-xs">
@@ -338,32 +349,47 @@ function SesiuniTab({
   );
 }
 
-function WeakAreasBlock({ mistakes }: { mistakes?: RecentMistake[] }) {
-  // Recent mistakes by topic (from actual answers) — responsive, shows up as soon
-  // as the child gets something wrong. Most-missed first.
-  const all = (mistakes ?? []).slice(0, 8);
+// Total results + weak areas, grouped per domain.
+function RezultateTab({ byDomain }: { byDomain?: DomainResult[] }) {
+  const doms = byDomain ?? [];
+  if (doms.length === 0) {
+    return <p className="text-sm text-gray-500">Niciun rezultat încă.</p>;
+  }
   return (
-    <div>
-      <h3 className="mb-2 text-sm font-medium text-gray-400">Puncte slabe (greșeli recente)</h3>
-      {all.length === 0 ? (
-        <p className="text-sm text-gray-500">Niciun punct slab recent — bravo!</p>
-      ) : (
-        <div className="space-y-1">
-          {all.map((w) => (
-            <div
-              key={`${w.subject}-${w.topic}`}
-              className="flex items-center justify-between rounded bg-gray-800 px-3 py-2"
-            >
-              <span className="text-sm text-white">
-                {w.subject} · {w.topic}
+    <div className="space-y-5">
+      {doms.map((d) => (
+        <div key={d.domainId} className="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-base font-semibold text-white">{d.domainName}</h3>
+            <span className="text-xs text-gray-400">
+              {d.correct}/{d.total} corecte ·{" "}
+              <span className={d.accuracy >= 70 ? "text-green-400" : d.accuracy >= 50 ? "text-yellow-400" : "text-red-400"}>
+                {d.accuracy}%
               </span>
-              <span className="text-xs text-red-400">
-                {w.wrong}/{w.total} greșite ({Math.round((w.wrong / w.total) * 100)}%)
-              </span>
+            </span>
+          </div>
+          <p className="mb-2 text-xs font-medium text-gray-500">Puncte slabe</p>
+          {d.mistakes.length === 0 ? (
+            <p className="text-sm text-gray-500">Niciun punct slab — bravo!</p>
+          ) : (
+            <div className="space-y-1">
+              {d.mistakes.map((w) => (
+                <div
+                  key={`${w.subject}-${w.topic}`}
+                  className="flex items-center justify-between rounded bg-gray-800 px-3 py-2"
+                >
+                  <span className="text-sm text-white">
+                    {w.subject} · {w.topic}
+                  </span>
+                  <span className="text-xs text-red-400">
+                    {w.wrong}/{w.total} greșite ({Math.round((w.wrong / w.total) * 100)}%)
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
-      )}
+      ))}
     </div>
   );
 }

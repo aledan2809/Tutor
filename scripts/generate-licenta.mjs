@@ -115,6 +115,15 @@ async function main() {
       create: { userId: student.id, domainId: domain.id, roles: ["STUDENT"], isActive: true },
       update: { isActive: true },
     });
+    // Guardians as WATCHER so the domain shows in their Watcher + reminder picker.
+    const guardians = await prisma.guardian.findMany({ where: { childId: student.id, status: "active" }, select: { parentId: true } });
+    for (const g of guardians) {
+      await prisma.enrollment.upsert({
+        where: { userId_domainId: { userId: g.parentId, domainId: domain.id } },
+        create: { userId: g.parentId, domainId: domain.id, roles: ["WATCHER"], isActive: true },
+        update: { isActive: true },
+      });
+    }
   }
   console.log("domain", domain.id, "student", student?.id ?? "MISSING");
 

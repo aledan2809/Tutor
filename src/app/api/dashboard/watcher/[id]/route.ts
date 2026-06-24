@@ -89,29 +89,55 @@ async function _GET(
   const attempts = sessionIds.length
     ? await prisma.attempt.findMany({
         where: { sessionId: { in: sessionIds } },
-        select: { sessionId: true, isCorrect: true, question: { select: { subject: true, topic: true } } },
+        select: {
+          sessionId: true,
+          isCorrect: true,
+          question: { select: { subject: true, topic: true } },
+          session: { select: { domainId: true } },
+        },
       })
     : [];
   const wrongBySession = new Map<string, Set<string>>();
-  const aggByTopic = new Map<string, { subject: string; topic: string; wrong: number; total: number }>();
+  type TopicAgg = { subject: string; topic: string; wrong: number; total: number };
+  const domAgg = new Map<string, { total: number; correct: number; topics: Map<string, TopicAgg> }>();
   for (const a of attempts) {
     const subject = a.question.subject || "—";
     const topic = a.question.topic || subject;
-    const key = `${subject}|${topic}`;
-    const agg = aggByTopic.get(key) ?? { subject, topic, wrong: 0, total: 0 };
-    agg.total++;
+    const domainId = a.session?.domainId ?? "—";
+    const dom = domAgg.get(domainId) ?? { total: 0, correct: 0, topics: new Map<string, TopicAgg>() };
+    dom.total++;
+    if (a.isCorrect) dom.correct++;
+    const tk = `${subject}|${topic}`;
+    const t = dom.topics.get(tk) ?? { subject, topic, wrong: 0, total: 0 };
+    t.total++;
     if (!a.isCorrect) {
-      agg.wrong++;
+      t.wrong++;
       const set = wrongBySession.get(a.sessionId) ?? new Set<string>();
       set.add(topic);
       wrongBySession.set(a.sessionId, set);
     }
-    aggByTopic.set(key, agg);
+    dom.topics.set(tk, t);
+    domAgg.set(domainId, dom);
   }
-  const recentMistakes = Array.from(aggByTopic.values())
-    .filter((m) => m.wrong > 0)
-    .sort((x, y) => y.wrong / y.total - x.wrong / x.total)
-    .slice(0, 8);
+  // Per-domain results + weak areas (for the "Rezultate" tab).
+  const domIds = [...domAgg.keys()].filter((id) => id !== "—");
+  const domRows = domIds.length
+    ? await prisma.domain.findMany({ where: { id: { in: domIds } }, select: { id: true, name: true } })
+    : [];
+  const domNames = new Map(domRows.map((d) => [d.id, d.name]));
+  const byDomain = [...domAgg.entries()]
+    .map(([domainId, d]) => ({
+      domainId,
+      domainName: domNames.get(domainId) ?? "Altul",
+      total: d.total,
+      correct: d.correct,
+      accuracy: d.total > 0 ? Math.round((d.correct / d.total) * 100) : 0,
+      mistakes: [...d.topics.values()]
+        .filter((m) => m.wrong > 0)
+        .sort((x, y) => y.wrong / y.total - x.wrong / x.total)
+        .slice(0, 8),
+    }))
+    .sort((a, b) => b.total - a.total);
 
   const sessionLog = sessions.map((s) => ({
     id: s.id,
@@ -175,16 +201,21 @@ async function _GET(
     firstAt: Date;
     window: string;
     sessionType: string;
+    reminderId: string | null;
     channels: { level: number; channel: string }[];
     reacted: boolean;
     reactedChannel: string | null;
   };
   const episodeMap = new Map<string, Episode>();
   for (const e of events) {
-    const reason = ((e.metadata as Record<string, unknown> | null)?.reason as string) ?? "";
+    const meta = e.metadata as Record<string, unknown> | null;
+    const reason = (meta?.reason as string) ?? "";
     if (!reason.startsWith("morning") && !reason.startsWith("evening")) continue;
+    const reminderId = (meta?.reminderId as string) ?? null;
     const [win, ...rest] = reason.split("_");
-    const key = `${reason}|${dayKey(e.createdAt)}`;
+    // Key by reminderId when present so renaming/re-typing a reminder doesn't split
+    // its episodes; falls back to the frozen reason for older events.
+    const key = `${reminderId ? `r:${reminderId}` : reason}|${dayKey(e.createdAt)}`;
     let ep = episodeMap.get(key);
     if (!ep) {
       ep = {
@@ -192,6 +223,7 @@ async function _GET(
         firstAt: e.createdAt,
         window: win,
         sessionType: rest.join("_") || "—",
+        reminderId,
         channels: [],
         reacted: false,
         reactedChannel: null,
@@ -205,9 +237,21 @@ async function _GET(
       if (!ep.reactedChannel) ep.reactedChannel = e.channel;
     }
   }
+  // Resolve the CURRENT name/type of each episode's reminder (it may have been
+  // renamed/re-typed since the cascade fired) — always show the latest name.
+  const epReminderIds = [...new Set(Array.from(episodeMap.values()).map((e) => e.reminderId).filter(Boolean))] as string[];
+  const reminderRows = epReminderIds.length
+    ? await prisma.studyReminder.findMany({
+        where: { id: { in: epReminderIds } },
+        select: { id: true, label: true, sessionType: true, window: true },
+      })
+    : [];
+  const reminderById = new Map(reminderRows.map((r) => [r.id, r]));
+
   const scheduledSessions = Array.from(episodeMap.values())
     .map((ep) => {
       const epDay = dayKey(ep.firstAt);
+      const cur = ep.reminderId ? reminderById.get(ep.reminderId) : undefined;
       // A session counts for this episode if it was STARTED or FINISHED the same
       // day, at/after the episode fired — so a late/resumed completion still
       // marks the episode done (not "ignored").
@@ -221,8 +265,9 @@ async function _GET(
       return {
         key: ep.key,
         at: ep.firstAt,
-        window: ep.window,
-        sessionType: ep.sessionType,
+        window: cur?.window ?? ep.window,
+        sessionType: cur?.sessionType ?? ep.sessionType,
+        label: cur?.label?.trim() || null,
         channels: ep.channels.sort((a, b) => a.level - b.level).map((c) => c.channel),
         reactedChannel: ep.reactedChannel,
         done,
@@ -243,7 +288,7 @@ async function _GET(
     schedule,
     scheduledSessions,
     sessionLog,
-    recentMistakes,
+    byDomain,
     reminderLog,
   });
 }
