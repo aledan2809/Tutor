@@ -8,6 +8,7 @@ import { runDueReminders } from "@/lib/escalation/reminders";
 import { runParentMonitoring } from "@/lib/escalation/parent-monitor";
 import { runParentNudges } from "@/lib/escalation/parent-nudge";
 import { runFeedbackReview } from "@/lib/feedback-review";
+import { runWatcherReports } from "@/lib/escalation/watcher-reports";
 import { withErrorHandler } from "@/lib/api-handler";
 
 /**
@@ -42,6 +43,8 @@ async function _POST(req: NextRequest) {
   const parentNudges = await runParentNudges();
   // Auto-review of 👎 question feedback (fix/hide on private banks, flag curriculum).
   const feedbackReview = await runFeedbackReview();
+  // Scheduled Watcher KPI reports (daily/weekly digest to parents).
+  const watcherReports = await runWatcherReports();
 
   return NextResponse.json({
     success: true,
@@ -52,6 +55,7 @@ async function _POST(req: NextRequest) {
     parentMonitoring,
     parentNudges,
     feedbackReview,
+    watcherReports,
     timestamp: new Date().toISOString(),
   });
 }

@@ -1317,3 +1317,27 @@ model QuestionFeedback {
   @@index([status, rating])
   @@index([questionId])
 }
+
+// Rapoarte/KPI programate pentru părinte (Watcher): un rezumat automat despre
+// sesiuni, puncte slabe, disciplină și rezultate, trimis zilnic sau săptămânal
+// la ziua/ora aleasă de părinte, pe canalele alese. childId null = TOȚI copiii
+// linkați. Fără FK pe User (nu atingem modelul User).
+model WatcherReportSchedule {
+  id         String   @id @default(cuid())
+  parentId   String
+  childId    String? // null = toți copiii linkați
+  cadence    String   @default("weekly") // "daily" | "weekly"
+  dayOfWeek  Int? // doar pt weekly; JS getDay 0=Dum..6=Sâm
+  hour       Int      @default(8) // 0-23, local timezone
+  minute     Int      @default(0)
+  timezone   String   @default("Europe/Bucharest")
+  channels   String[] @default(["EMAIL"]) // EMAIL | PUSH | TELEGRAM
+  sections   String[] @default(["sessions", "discipline", "weaknesses", "results"])
+  isActive   Boolean  @default(true)
+  lastSentOn String? // YYYY-MM-DD în timezone (anti dublă-trimitere)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([parentId])
+  @@index([isActive])
+}

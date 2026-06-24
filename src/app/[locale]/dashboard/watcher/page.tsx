@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { ChildChapter } from "@/components/watcher/child-chapter";
+import { ReportsManager } from "@/components/watcher/reports-manager";
 
 interface StudentSummary {
   id: string;
@@ -40,6 +41,8 @@ export default function WatcherDashboardPage() {
       <p className="mb-6 text-sm text-gray-400">
         Fiecare copil are un capitol. Deschide-l pentru program, sesiuni și remindere.
       </p>
+
+      <ReportsManager />
 
       <div className="mb-6">
         <input
