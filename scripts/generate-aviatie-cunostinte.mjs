@@ -17,8 +17,11 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 const SLUG = "aviatie-cunostinte";
 const STUDENT_EMAIL = "raresdanciulescu9@gmail.com";
-const MARK = "aviatie-cunostinte-gen";
 const PER_TOPIC = Number(process.argv[2] || 12);
+// Wave label keeps a new batch APPENDED (its own marker) instead of replacing
+// the previous one. e.g. `node ... 16 w2` → marker "aviatie-cunostinte-gen-w2".
+const WAVE = (process.argv[3] || "").trim();
+const MARK = WAVE ? `aviatie-cunostinte-gen-${WAVE}` : "aviatie-cunostinte-gen";
 
 const TOPICS = [
   { subject: "Mathematics", topic: "Fractions" },
@@ -67,6 +70,55 @@ async function callTextAI(prompt) {
     } catch { /* fall through */ }
   }
   throw new Error("All AI providers failed");
+}
+
+// Independent verifier — prefers GEMINI (different model than the Groq generator)
+// so a generation error isn't blindly confirmed by the same model.
+async function callVerifyAI(prompt) {
+  const groqKey = process.env.GROQ_API_KEY;
+  const geminiKey = process.env.GEMINI_API_KEY;
+  if (geminiKey) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0, responseMimeType: "application/json" } }),
+        }
+      );
+      if (res.ok) return (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || "";
+    } catch { /* fall through */ }
+  }
+  if (groqKey) {
+    try {
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${groqKey}` },
+        body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{ role: "user", content: prompt }], temperature: 0, response_format: { type: "json_object" } }),
+      });
+      if (res.ok) return (await res.json()).choices?.[0]?.message?.content || "";
+    } catch { /* fall through */ }
+  }
+  return "";
+}
+
+// Re-solve a question independently → "agree" | "disagree" | "unknown".
+// Only "disagree" is discarded (infra flakiness shouldn't nuke the batch).
+async function verifyOne(q) {
+  const prompt = `Solve this multiple-choice question independently and choose the single correct option.
+Question: ${q.content}
+${q.options.join("\n")}
+Reply ONLY with JSON: {"correct":"a"} where the value is a, b, c, or d.`;
+  let raw = await callVerifyAI(prompt);
+  raw = (raw || "").trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+  let letter;
+  try {
+    letter = (JSON.parse(raw.match(/\{[\s\S]*\}/)?.[0] ?? raw).correct || "").toString().trim().toLowerCase()[0];
+  } catch { return "unknown"; }
+  if (!letter || !"abcd".includes(letter)) return "unknown";
+  const marked = q.correctAnswer.trim()[0]?.toLowerCase();
+  return letter === marked ? "agree" : "disagree";
 }
 
 const PROMPT = (subject, topic, n) => {
@@ -138,8 +190,19 @@ async function main() {
       console.log("  ! failed", subject, topic, e.message);
     }
     if (qs.length === 0) { console.log("  -", subject, "/", topic, "→ 0"); continue; }
+    // Independent cross-model verification: drop questions whose marked answer
+    // an independent solve contradicts.
+    const kept = [];
+    let disagree = 0, unknown = 0;
+    for (const q of qs) {
+      const v = await verifyOne(q);
+      if (v === "disagree") { disagree++; continue; }
+      if (v === "unknown") unknown++;
+      kept.push(q);
+    }
+    if (kept.length === 0) { console.log("  -", subject, "/", topic, "→ 0 after verify (", disagree, "rejected )"); continue; }
     await prisma.question.createMany({
-      data: qs.map((q) => ({
+      data: kept.map((q) => ({
         domainId: domain.id,
         subject,
         topic,
@@ -155,10 +218,10 @@ async function main() {
         bookOrder: order++,
       })),
     });
-    total += qs.length;
-    console.log("  +", subject, "/", topic, "→", qs.length);
+    total += kept.length;
+    console.log("  +", subject, "/", topic, "→", kept.length, `(rejected ${disagree}, unverified ${unknown})`);
   }
-  console.log("created", total, "questions in", SLUG);
+  console.log("created", total, "verified questions in", SLUG, `(wave: ${MARK})`);
 }
 
 main()
