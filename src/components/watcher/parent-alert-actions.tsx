@@ -1,6 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+interface NudgeTarget {
+  value: string;
+  label: string;
+  message: string;
+  url: string;
+}
 
 /**
  * CTA shown on a "no reaction" parent alert: authorize a single extra memento,
@@ -13,9 +20,31 @@ export function ParentAlertActions({ childId }: { childId: string }) {
   const [intervalMin, setIntervalMin] = useState(15);
   const [until, setUntil] = useState("2h");
   const [channels, setChannels] = useState<string[]>(["PUSH", "TELEGRAM"]);
+  const [targets, setTargets] = useState<{ recent: NudgeTarget[]; upcoming: NudgeTarget[] }>({ recent: [], upcoming: [] });
+  const [targetValue, setTargetValue] = useState(""); // "" = mesaj liber
+  const [url, setUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/dashboard/watcher/${childId}/nudge-targets`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d) setTargets({ recent: d.recent ?? [], upcoming: d.upcoming ?? [] }); })
+      .catch(() => {});
+  }, [childId]);
+
+  const onPickTarget = (value: string) => {
+    setTargetValue(value);
+    const all = [...targets.recent, ...targets.upcoming];
+    const t = all.find((x) => x.value === value);
+    if (t) {
+      setMsg(t.message);
+      setUrl(t.url);
+    } else {
+      setUrl(null);
+    }
+  };
 
   const CHANNELS: { v: string; label: string }[] = [
     { v: "PUSH", label: "Aplicație" },
@@ -49,7 +78,7 @@ export function ParentAlertActions({ childId }: { childId: string }) {
       const r = await fetch(`/api/dashboard/watcher/${childId}/nudge`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...body, channels }),
+        body: JSON.stringify({ ...body, channels, ...(url ? { url } : {}) }),
       });
       const d = await r.json().catch(() => ({}));
       if (!r.ok) {
@@ -65,8 +94,40 @@ export function ParentAlertActions({ childId }: { childId: string }) {
 
   if (done) return <p className="mt-3 text-xs text-green-400">{done}</p>;
 
+  const hasTargets = targets.recent.length > 0 || targets.upcoming.length > 0;
+
   return (
     <div className="mt-3 space-y-2 border-t border-gray-800 pt-3">
+      {/* Target session picker — recent ignored (≤4h) or upcoming (≤4h). */}
+      {hasTargets && (
+        <div className="text-xs text-gray-400">
+          <label className="flex flex-col gap-1">
+            Pentru sesiunea:
+            <select
+              value={targetValue}
+              onChange={(e) => onPickTarget(e.target.value)}
+              className="rounded-lg border border-gray-700 bg-gray-800 px-2 py-1.5 text-white"
+            >
+              <option value="">Mesaj liber</option>
+              {targets.recent.length > 0 && (
+                <optgroup label="Sărite recent (≤4h)">
+                  {targets.recent.map((t) => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </optgroup>
+              )}
+              {targets.upcoming.length > 0 && (
+                <optgroup label="Viitoare (≤4h)">
+                  {targets.upcoming.map((t) => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
+          </label>
+        </div>
+      )}
+
       {/* Channel picker — e.g. direct WhatsApp only. */}
       <div className="flex flex-wrap items-center gap-2 text-xs text-gray-400">
         <span>Pe:</span>

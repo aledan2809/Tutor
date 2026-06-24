@@ -1287,6 +1287,7 @@ model ParentNudge {
   intervalMin Int? // null = o singură dată; altfel repetă la fiecare N minute
   untilAt     DateTime? // sfârșitul seriei („până la 18:00" / „peste 4h"); după → stop
   channels    String[]  @default(["PUSH", "TELEGRAM"]) // canalele pe care se trimite
+  url         String? // deep-link spre sesiunea țintă (recentă ignorată / viitoare)
   active      Boolean   @default(true)
   fireCount   Int       @default(0)
   lastFiredAt DateTime?

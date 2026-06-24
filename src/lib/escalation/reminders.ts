@@ -90,6 +90,45 @@ export async function reminderImminent(
   return false;
 }
 
+export interface UpcomingReminder {
+  id: string;
+  label: string | null;
+  sessionType: string;
+  window: string;
+  domainSlug: string | null;
+  hour: number;
+  minute: number;
+  inMin: number;
+}
+
+/** Active reminders scheduled to fire within the next `withinMin` minutes today. */
+export async function upcomingReminders(
+  userId: string,
+  now: Date,
+  withinMin: number
+): Promise<UpcomingReminder[]> {
+  const reminders = await prisma.studyReminder.findMany({ where: { userId, isActive: true } });
+  const out: UpcomingReminder[] = [];
+  for (const r of reminders) {
+    const { weekday, minutesOfDay } = tzParts(now, r.timezone);
+    if (!r.daysOfWeek.includes(weekday)) continue;
+    const delta = r.hour * 60 + r.minute - minutesOfDay;
+    if (delta > 0 && delta <= withinMin) {
+      out.push({
+        id: r.id,
+        label: r.label,
+        sessionType: r.sessionType,
+        window: r.window,
+        domainSlug: r.domainSlug,
+        hour: r.hour,
+        minute: r.minute,
+        inMin: delta,
+      });
+    }
+  }
+  return out.sort((a, b) => a.inMin - b.inMin);
+}
+
 /** Deep-link that auto-starts the reminder's session type (+ optional subject). */
 export function buildReminderUrl(r: { sessionType: string; domainSlug: string | null }): string {
   const q = new URLSearchParams({ start: r.sessionType });

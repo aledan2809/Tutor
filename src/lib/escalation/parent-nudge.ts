@@ -44,12 +44,13 @@ async function notifyParentReacted(parentId: string, childId: string): Promise<v
 export async function fireNudge(
   childId: string,
   message: string,
-  channels: string[] = ["PUSH", "TELEGRAM"]
+  channels: string[] = ["PUSH", "TELEGRAM"],
+  url: string = "/dashboard/practice"
 ): Promise<void> {
   const metadata = {
     title: "Memento de la părinte",
     message,
-    url: "/dashboard/practice",
+    url: url || "/dashboard/practice",
     templateId: "parent_nudge",
   };
   for (const ch of channels) {
@@ -117,7 +118,7 @@ export async function runParentNudges(now: Date = new Date()): Promise<{ fired: 
         (n.intervalMin != null && now.getTime() - n.lastFiredAt.getTime() >= n.intervalMin * 60_000);
       if (!due) continue;
 
-      await fireNudge(n.childId, n.message, n.channels);
+      await fireNudge(n.childId, n.message, n.channels, n.url ?? "/dashboard/practice");
       const oneShot = n.intervalMin == null;
       await prisma.parentNudge.update({
         where: { id: n.id },
