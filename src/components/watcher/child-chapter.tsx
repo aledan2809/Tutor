@@ -143,8 +143,17 @@ export function ChildChapter({ child }: { child: ChildLite }) {
 
   // Group reminder touches into episodes (per reminder + calendar-day). The header
   // shows the actual session (name + scheduled time), not the cascade window.
+  // Sent mementos (ParentNudge) are correlated back to their episode by the
+  // session time embedded in the memento message ("…de la 13:45…") + day, so the
+  // episode card can show how many mementos the parent already sent for it.
   const episodes = (() => {
     if (!detail) return [];
+    const epTime = (iso: string) =>
+      new Date(iso).toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Bucharest" });
+    const mementoTargets = (detail.mementos ?? [])
+      .map((m) => ({ time: m.message.match(/\b(\d{1,2}:\d{2})\b/)?.[1] ?? null, day: fmtDay(m.at) }))
+      .filter((x): x is { time: string; day: string } => x.time != null);
+
     const map = new Map<
       string,
       { name: string; day: string; firstAt: string; touches: ReminderTouch[] }
@@ -163,6 +172,7 @@ export function ChildChapter({ child }: { child: ChildLite }) {
     return Array.from(map.values()).map((g) => ({
       ...g,
       touches: g.touches.sort((a, b) => a.level - b.level),
+      mementoCount: mementoTargets.filter((x) => x.day === g.day && x.time === epTime(g.firstAt)).length,
     }));
   })();
 
@@ -495,7 +505,7 @@ function MementosLog({ mementos }: { mementos: Memento[] }) {
 function RemindereTab({
   episodes,
 }: {
-  episodes: { name: string; day: string; firstAt: string; touches: ReminderTouch[] }[];
+  episodes: { name: string; day: string; firstAt: string; touches: ReminderTouch[]; mementoCount?: number }[];
 }) {
   if (episodes.length === 0) {
     return <p className="text-sm text-gray-500">Niciun memento încă.</p>;
@@ -506,18 +516,26 @@ function RemindereTab({
     <div className="space-y-3">
       {episodes.map((ep, i) => {
         const reacted = ep.touches.some((t) => t.acknowledged);
+        const mc = ep.mementoCount ?? 0;
         return (
           <div key={`${ep.name}-${ep.day}-${i}`} className="rounded-lg border border-gray-800 bg-gray-800/40 p-3">
-            <div className="mb-2 flex items-center justify-between">
+            <div className="mb-2 flex items-center justify-between gap-2">
               <span className="text-sm font-medium text-white">
                 {ep.name} · {hm(ep.firstAt)} · {ep.day}
               </span>
-              <span
-                className={`rounded px-2 py-0.5 text-xs ${
-                  reacted ? "bg-green-600/20 text-green-400" : "bg-red-600/20 text-red-400"
-                }`}
-              >
-                {reacted ? "a reacționat" : "ignorat"}
+              <span className="flex shrink-0 items-center gap-2">
+                {mc > 0 && (
+                  <span className="rounded bg-blue-600/20 px-2 py-0.5 text-xs text-blue-300">
+                    📨 {mc === 1 ? "memento trimis" : `${mc} mementouri`}
+                  </span>
+                )}
+                <span
+                  className={`rounded px-2 py-0.5 text-xs ${
+                    reacted ? "bg-green-600/20 text-green-400" : "bg-red-600/20 text-red-400"
+                  }`}
+                >
+                  {reacted ? "a reacționat" : "ignorat"}
+                </span>
               </span>
             </div>
             <div className="space-y-1">
