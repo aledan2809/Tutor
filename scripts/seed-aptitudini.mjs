@@ -87,6 +87,31 @@ function genCube() {
   };
 }
 
+// ── Working memory: show 10 numbers, then pick the 7-set fully among them ──
+function genMemory() {
+  const pool = shuffle(Array.from({ length: 90 }, (_, i) => i + 10)); // 10..99
+  const shown = pool.slice(0, 10);
+  const outsiders = pool.slice(10);
+  const fmt = (arr) => [...arr].sort((a, b) => a - b).join(", ");
+  const correctStr = fmt(shuffle(shown).slice(0, 7));
+  const mkDistractor = () => fmt([...shuffle(shown).slice(0, 5), ...shuffle(outsiders).slice(0, 2)]);
+  const opts = new Set([correctStr]);
+  let guard = 0;
+  while (opts.size < 3 && guard++ < 40) {
+    const d = mkDistractor();
+    if (d !== correctStr) opts.add(d);
+  }
+  return {
+    content: "Care set de 7 numere conține DOAR numere care au fost afișate?",
+    passage: `[MEMORIE:10] ${shown.join("    ")}`,
+    options: shuffle([...opts]),
+    correctAnswer: correctStr,
+    difficulty: 3,
+    subject: "Memorie de lucru",
+    topic: "Memorare numere",
+  };
+}
+
 async function main() {
   let domain = await prisma.domain.findUnique({ where: { slug: SLUG } });
   if (!domain) {
@@ -141,6 +166,7 @@ async function main() {
   const rows = [];
   for (let i = 0; i < 140; i++) rows.push({ ...genArithmetic(), ref: `${MARK}:arithmetic` });
   for (let i = 0; i < 90; i++) rows.push({ ...genCube(), ref: `${MARK}:cube` });
+  for (let i = 0; i < 70; i++) rows.push({ ...genMemory(), ref: `${MARK}:memory` });
 
   await prisma.question.createMany({
     data: rows.map((r, idx) => ({
@@ -152,6 +178,7 @@ async function main() {
       content: r.content,
       options: r.options,
       correctAnswer: r.correctAnswer,
+      passage: r.passage ?? null,
       source: "MANUAL",
       status: "PUBLISHED",
       sourceReference: r.ref,

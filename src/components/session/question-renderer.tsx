@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 
 interface QuestionOption {
@@ -36,6 +36,21 @@ export function QuestionRenderer({
   const [openAnswer, setOpenAnswer] = useState("");
   const [showPassage, setShowPassage] = useState(false);
 
+  // Memory exercise: passage marked "[MEMORIE:N] <stimulus>" → show the stimulus
+  // for N seconds, then hide it and reveal the options. (Component is keyed by
+  // question id at the call site, so this state resets per question.)
+  const memMatch = question.passage?.match(/^\[MEMORIE(?::(\d+))?\]\s*([\s\S]*)$/);
+  const isMemory = !!memMatch;
+  const memSeconds = memMatch ? Number(memMatch[1] || 8) : 0;
+  const stimulus = memMatch ? memMatch[2] : "";
+  const [memLeft, setMemLeft] = useState(memSeconds);
+  const memActive = isMemory && memLeft > 0;
+  useEffect(() => {
+    if (!isMemory || memLeft <= 0) return;
+    const id = setTimeout(() => setMemLeft((n) => n - 1), 1000);
+    return () => clearTimeout(id);
+  }, [isMemory, memLeft]);
+
   const handleSubmit = () => {
     if (question.type === "MULTIPLE_CHOICE" && selectedOption) {
       onAnswer(selectedOption);
@@ -60,24 +75,38 @@ export function QuestionRenderer({
   // so answer matching against the key is unaffected).
   const displayLabel = (s: string) => s.replace(/^\s*[a-dA-D][).]\s+/, "");
 
+  const metaHeader = (
+    <div className="flex items-center gap-2 text-xs text-gray-500">
+      <span className="rounded bg-gray-800 px-2 py-0.5">{question.subject}</span>
+      <span className="rounded bg-gray-800 px-2 py-0.5">{question.topic}</span>
+      <span className="rounded bg-gray-800 px-2 py-0.5">
+        {"★".repeat(question.difficulty)}
+        {"☆".repeat(5 - question.difficulty)}
+      </span>
+    </div>
+  );
+
+  // Memorize phase — show the stimulus big with a countdown; options come after.
+  if (memActive) {
+    return (
+      <div className="space-y-6">
+        {metaHeader}
+        <div className="rounded-xl border border-blue-700 bg-blue-950/30 p-6 text-center">
+          <p className="mb-3 text-sm font-medium text-blue-300">Memorează! ({memLeft}s)</p>
+          <p className="whitespace-pre-line text-2xl font-bold tracking-wide text-white">{stimulus}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Question metadata */}
-      <div className="flex items-center gap-2 text-xs text-gray-500">
-        <span className="rounded bg-gray-800 px-2 py-0.5">
-          {question.subject}
-        </span>
-        <span className="rounded bg-gray-800 px-2 py-0.5">
-          {question.topic}
-        </span>
-        <span className="rounded bg-gray-800 px-2 py-0.5">
-          {"★".repeat(question.difficulty)}
-          {"☆".repeat(5 - question.difficulty)}
-        </span>
-      </div>
+      {metaHeader}
 
-      {/* Reading text (passage-dependent grile) — collapsible drawer */}
-      {question.passage && (
+      {/* Reading text (passage-dependent grile) — collapsible drawer. Hidden for
+          memory questions (the passage was the stimulus, shown then hidden). */}
+      {question.passage && !isMemory && (
         <div className="rounded-lg border border-gray-700 bg-gray-900/60">
           <button
             type="button"
