@@ -69,10 +69,15 @@ async function callTextAI(prompt) {
   throw new Error("All AI providers failed");
 }
 
-const PROMPT = (subject, topic, n) =>
-  `Generate exactly ${n} multiple-choice questions in ENGLISH for an airline pilot academy entrance KNOWLEDGE test (Wizz Air Pilot Academy style). Subject: ${subject}. Topic: ${topic}.
-RULES: each question self-contained and unambiguous; 4 options labeled "a) ", "b) ", "c) ", "d) "; EXACTLY one correct; plausible but clearly wrong distractors; options of similar length; include units in numeric answers; vary difficulty 1-5. correctAnswer MUST be one of the options verbatim. No duplicates.
+const PROMPT = (subject, topic, n) => {
+  const unitRule =
+    subject === "Physics"
+      ? "Include correct SI units in numeric answers (m/s, N, J, kg·m/s, etc.)."
+      : "Do NOT attach physical units (no km, kg, N, m/s) — answers are purely numeric/symbolic (fractions, decimals, expressions, degrees only where an angle is the answer). A pure algebra result like x = 36 must NOT carry units.";
+  return `Generate exactly ${n} multiple-choice questions in ENGLISH for an airline pilot academy entrance KNOWLEDGE test (Wizz Air Pilot Academy style). Subject: ${subject}. Topic: ${topic}.
+RULES: each question self-contained, mathematically/physically CORRECT and unambiguous; 4 options labeled "a) ", "b) ", "c) ", "d) "; EXACTLY one correct; plausible but clearly wrong distractors; options of similar length; ${unitRule} vary difficulty 1-5. correctAnswer MUST be one of the options verbatim. No duplicates.
 Respond ONLY with JSON: {"questions":[{"content":"...","options":["a) ...","b) ...","c) ...","d) ..."],"correctAnswer":"a) ...","explanation":"...","difficulty":3}]}`;
+};
 
 async function genTopic(subject, topic, n) {
   const raw = (await callTextAI(PROMPT(subject, topic, n))).trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
