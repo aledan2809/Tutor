@@ -284,6 +284,10 @@ async function _GET(
         return startedHit || endedHit;
       });
       const done = ep.reacted || match != null;
+      // Late = done, but the session started more than 90 min after the reminder
+      // fired (discipline delay).
+      const late =
+        match != null && match.startedAt.getTime() - ep.firstAt.getTime() > 90 * 60_000;
       return {
         key: ep.key,
         at: ep.firstAt,
@@ -293,6 +297,7 @@ async function _GET(
         channels: ep.channels.sort((a, b) => a.level - b.level).map((c) => c.channel),
         reactedChannel: ep.reactedChannel,
         done,
+        late,
         score: match?.score ?? null,
         completed: match?.endedAt != null,
       };

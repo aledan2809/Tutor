@@ -1,0 +1,459 @@
+{
+  "auditDate": "2026-04-16",
+  "retestDate": "2026-04-20",
+  "project": "Tutor",
+  "scope": "ML2 Wave 5 #19 — Full security and code quality audit",
+  "auditor": "Automated + Manual Review (2 rounds)",
+  "totalFindings": 42,
+  "summary": {
+    "critical": 6,
+    "high": 8,
+    "medium": 13,
+    "low": 5,
+    "totalApiRoutes": 97,
+    "totalFilesAudited": 97,
+    "testCoverage": "203 tests across 17 files",
+    "lintStatus": "PASS (10 react-hooks/exhaustive-deps warnings only)",
+    "typeCheckStatus": "PASS (0 errors)"
+  },
+  "findings": [
+    {
+      "id": "AUDIT-001",
+      "severity": "CRITICAL",
+      "category": "Security",
+      "title": "Hardcoded impersonation secret fallback",
+      "file": "src/lib/impersonation.ts",
+      "line": 3,
+      "description": "IMPERSONATION_SECRET falls back to hardcoded string 'fallback-change-me' if env vars are not set, allowing token forgery.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-001b",
+      "severity": "CRITICAL",
+      "category": "Security",
+      "title": "CRON_SECRET validation bypass on /api/health/ready",
+      "file": "src/app/api/health/ready/route.ts",
+      "line": 21,
+      "description": "Uses `if (cronSecret && ...)` which allows unauthenticated access when CRON_SECRET env var is not set, leaking database stats, env var status, table info, and server version.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-002",
+      "severity": "CRITICAL",
+      "category": "Security",
+      "title": "No server-side CSRF validation",
+      "file": "src/lib/csrf.ts, src/components/csrf-interceptor.tsx",
+      "line": null,
+      "description": "CSRF tokens are generated client-side and sent in headers, but no server-side middleware validates them. All state-changing endpoints are vulnerable to CSRF attacks.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-003",
+      "severity": "CRITICAL",
+      "category": "Security",
+      "title": "Auth routes bypass rate limiting in middleware",
+      "file": "src/middleware.ts",
+      "line": 100,
+      "description": "Auth API routes skip rate limit enforcement in middleware. The auth bypass allows requests through even when rate limited.",
+      "status": "RESOLVED",
+      "resolution": "False positive — auth routes DO pass through checkRateLimit() before the early return at line 100. The early return only skips intl middleware, not rate limiting."
+    },
+    {
+      "id": "AUDIT-004",
+      "severity": "CRITICAL",
+      "category": "Security",
+      "title": "Stripe webhook missing idempotency check",
+      "file": "src/app/api/admin/stripe/webhook/route.ts",
+      "line": 30,
+      "description": "Webhook handler creates Payment records without checking for duplicate Stripe events. Retries can cause duplicate payments.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-005",
+      "severity": "CRITICAL",
+      "category": "Authorization",
+      "title": "Missing domain enrollment checks on domain-scoped endpoints",
+      "file": "src/app/api/[domain]/ (multiple routes)",
+      "line": null,
+      "description": "Routes under [domain]/ do not verify user enrollment before returning domain-scoped data.",
+      "status": "FIXED",
+      "resolution": "Round 8: Applied requireEnrollment() to all 19 remaining [domain]/ routes. Replaced inline hasAnyRole checks with consistent requireEnrollment() calls. Routes now properly verify user enrollment before returning domain-scoped data."
+    },
+    {
+      "id": "AUDIT-006",
+      "severity": "HIGH",
+      "category": "Authorization",
+      "title": "Student domains list: admin role privilege escalation",
+      "file": "src/app/api/student/domains/route.ts",
+      "line": 29,
+      "description": "If user is ADMIN/INSTRUCTOR in ANY domain, isContentEditor is set globally, showing unpublished questions across ALL domains.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-007",
+      "severity": "HIGH",
+      "category": "Validation",
+      "title": "Unbounded XP override in progress endpoint",
+      "file": "src/app/api/student/progress/route.ts",
+      "line": 14,
+      "description": "xpOverride parameter has no maximum limit, allowing unlimited XP addition per request.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-008",
+      "severity": "HIGH",
+      "category": "Security",
+      "title": "Password reset token timing attack",
+      "file": "src/app/api/auth/reset-password/route.ts",
+      "line": 32,
+      "description": "Token lookup and expiration check are separate operations, leaking timing information about token validity.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-009",
+      "severity": "HIGH",
+      "category": "Data Leak",
+      "title": "Assessment returns correct answers immediately",
+      "file": "src/app/api/student/assessment/route.ts",
+      "line": 73,
+      "description": "POST response includes correctAnswer and explanation for all questions, enabling answer harvesting.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-010",
+      "severity": "HIGH",
+      "category": "Data Leak",
+      "title": "Session answer endpoint returns correct answer",
+      "file": "src/app/api/[domain]/session/answer/route.ts",
+      "line": 160,
+      "description": "Response includes correctAnswer, explanation, and quality — enables answer harvesting via scripts.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-011",
+      "severity": "HIGH",
+      "category": "Validation",
+      "title": "Voucher PATCH: no input validation or audit logging",
+      "file": "src/app/api/admin/vouchers/[id]/route.ts",
+      "line": 15,
+      "description": "PATCH endpoint accepts raw body without schema validation and has no audit log entry.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-012",
+      "severity": "HIGH",
+      "category": "Authorization",
+      "title": "Question creation: no domain ownership validation",
+      "file": "src/app/api/admin/questions/route.ts",
+      "line": 66,
+      "description": "Only checks global admin role, not that user is enrolled/admin in the specified domain.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-013",
+      "severity": "HIGH",
+      "category": "Validation",
+      "title": "Password min inconsistency: admin 6, register 8",
+      "file": "src/app/api/admin/users/route.ts",
+      "line": 62,
+      "description": "Admin user creation allows 6-char passwords while registration requires 8. No max length.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-014",
+      "severity": "MEDIUM",
+      "category": "Logic",
+      "title": "Inconsistent answer-checking algorithms",
+      "file": "session/answer, exam/verify, exam/submit",
+      "line": null,
+      "description": "Three different answer-checking implementations may produce different results for same input.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-015",
+      "severity": "MEDIUM",
+      "category": "Security",
+      "title": "No password max length validation",
+      "file": "src/app/api/auth/register/route.ts, reset-password/route.ts",
+      "line": 10,
+      "description": "No maximum password length. Excessively long passwords can DOS via bcrypt computation.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-015b",
+      "severity": "MEDIUM",
+      "category": "Security",
+      "title": "Unbounded pagination limits on 5 admin/instructor endpoints",
+      "files": [
+        "src/app/api/admin/users/route.ts:14",
+        "src/app/api/admin/questions/route.ts:35",
+        "src/app/api/admin/vouchers/route.ts:21",
+        "src/app/api/admin/audit/route.ts:12",
+        "src/app/api/dashboard/instructor/students/route.ts:15"
+      ],
+      "description": "No maximum on limit parameter allows dumping entire database tables in single request. Attacker could set limit=999999.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-015c",
+      "severity": "MEDIUM",
+      "category": "XSS",
+      "title": "User name not HTML-escaped in password reset email",
+      "file": "src/app/api/auth/forgot-password/route.ts",
+      "line": 79,
+      "description": "user.name injected directly into HTML email body without escaping, allowing stored XSS via malicious username in email clients.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-016",
+      "severity": "MEDIUM",
+      "category": "Race Condition",
+      "title": "Exam start: concurrent in-progress exam check",
+      "file": "src/app/api/[domain]/exam/start/route.ts",
+      "line": 65,
+      "description": "Check for existing in-progress exam and creation are not atomic — race condition allows multiple concurrent exams.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-017",
+      "severity": "MEDIUM",
+      "category": "Race Condition",
+      "title": "Session completion: double-count race condition",
+      "file": "src/app/api/[domain]/session/complete/route.ts",
+      "line": 48,
+      "description": "endedAt check and update are not atomic — concurrent requests may both complete the session.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-018",
+      "severity": "MEDIUM",
+      "category": "Validation",
+      "title": "Missing answer string length validation in exam submit",
+      "file": "src/app/api/[domain]/exam/submit/route.ts",
+      "line": 24,
+      "description": "Individual answer strings have no length limit.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-019",
+      "severity": "MEDIUM",
+      "category": "Security",
+      "title": "IP spoofing in rate limiting",
+      "file": "src/middleware.ts",
+      "line": 85,
+      "description": "Rate limiting uses x-forwarded-for without validation. Attacker can bypass by spoofing header.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-020",
+      "severity": "MEDIUM",
+      "category": "Security",
+      "title": "Duplicate rate limiting implementations",
+      "file": "src/middleware.ts, src/lib/rate-limit.ts",
+      "line": null,
+      "description": "Two separate rate limit implementations with independent in-memory stores.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-021",
+      "severity": "MEDIUM",
+      "category": "Data Leak",
+      "title": "Dashboard loads unscoped progress data",
+      "file": "src/app/api/student/dashboard/route.ts",
+      "line": 64,
+      "description": "Fetches ALL progress for user without domain filtering, then filters client-side.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-022",
+      "severity": "MEDIUM",
+      "category": "Validation",
+      "title": "Assessment questions not scoped to domain",
+      "file": "src/app/api/student/assessment/route.ts",
+      "line": 57,
+      "description": "Questions fetched by ID without verifying they belong to the enrolled domain.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-023",
+      "severity": "MEDIUM",
+      "category": "Security",
+      "title": "Email exposed in password reset URL",
+      "file": "src/app/api/auth/forgot-password/route.ts",
+      "line": 57,
+      "description": "Reset URL contains plaintext email as query parameter — visible in browser history, logs, referrer headers.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-024",
+      "severity": "LOW",
+      "category": "Logic",
+      "title": "GET handler returns 404 for inactive enrollment",
+      "file": "src/app/api/student/domains/[id]/route.ts",
+      "line": 44,
+      "description": "Returns 404 instead of 403 for inactive enrollment — minor info leak.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-025",
+      "severity": "LOW",
+      "category": "Logic",
+      "title": "Domain isActive not checked in GET enrollment",
+      "file": "src/app/api/student/domains/[id]/route.ts",
+      "line": 47,
+      "description": "GET handler returns enrollment data even if domain.isActive is false.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-026",
+      "severity": "LOW",
+      "category": "Code Quality",
+      "title": "Duplicate slug fields in GET response",
+      "file": "src/app/api/student/domains/[id]/route.ts",
+      "line": 51,
+      "description": "Response includes both 'slug' and 'domainSlug' with same value — redundant.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-027",
+      "severity": "LOW",
+      "category": "Code Quality",
+      "title": "React hooks exhaustive-deps warnings (10 components)",
+      "file": "Multiple components",
+      "line": null,
+      "description": "10 react-hooks/exhaustive-deps warnings in dashboard and admin components.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-028",
+      "severity": "LOW",
+      "category": "Testing",
+      "title": "Impersonation tests fail without env vars after security fix",
+      "file": "tests/unit/impersonation.test.ts",
+      "line": 42,
+      "description": "After fixing AUDIT-001, tests crash because no env var is set in test environment.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-029",
+      "severity": "MEDIUM",
+      "category": "Validation",
+      "title": "Exam submit: answers schema mismatch with scoreExam",
+      "file": "src/app/api/[domain]/exam/submit/route.ts",
+      "line": 11,
+      "description": "Zod schema validated answers as string[] but scoreExam expects ExamAnswer[] ({questionId, answer}). TypeScript error at line 81.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-030",
+      "severity": "LOW",
+      "category": "Testing",
+      "title": "Test fixtures missing new schema fields",
+      "file": "tests/unit/exam-engine.test.ts, tests/unit/auth-security.test.ts, tests/integration/security-audit.test.ts",
+      "line": null,
+      "description": "Test fixtures for Question type missing sourceReference, bookOrder, pdfPage, bookPage, qNumberInBook, chapterIndex, imageUrl, explanationVideoUrl fields added in recent schema migration. Auth test fixtures use untyped null causing TS errors.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-031",
+      "severity": "MEDIUM",
+      "category": "Schema",
+      "title": "Missing indexes on 4 models (Account, ContentSource, ExamSimulation, StudySession)",
+      "file": "prisma/schema.prisma",
+      "line": null,
+      "description": "Account missing @@index([userId]), ContentSource missing @@index([domainId]), ExamSimulation missing @@index([domainId]), StudySession missing @@index([userId, domainId]) and @@index([startTime]). Causes full table scans on common query patterns.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-032",
+      "severity": "HIGH",
+      "category": "Testing",
+      "title": "Tautological tests in security-audit and auth-security test suites",
+      "file": "tests/integration/security-audit.test.ts, tests/unit/auth-security.test.ts",
+      "line": null,
+      "description": "Multiple tests construct mock objects and assert on their own hardcoded values, never exercising real production code. Provides false confidence in security coverage.",
+      "status": "ACKNOWLEDGED",
+      "resolution": "Tests validate security patterns/logic in isolation. Full HTTP-level integration tests require test server infrastructure — deferred to future sprint."
+    },
+    {
+      "id": "AUDIT-033",
+      "severity": "MEDIUM",
+      "category": "Security",
+      "title": "CSRF race condition on initial page load",
+      "file": "src/components/csrf-interceptor.tsx",
+      "line": 13,
+      "description": "csrfToken starts null; if POST fires before /api/auth/csrf completes, request may be sent without CSRF protection.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-034",
+      "severity": "HIGH",
+      "category": "Security",
+      "title": "OAuth callback state parameter not signed — calendar account linking forgery",
+      "file": "src/app/api/calendar/callback/route.ts",
+      "line": 28,
+      "description": "OAuth callback trusts the `state` query parameter (raw JSON with userId/domainId) without verifying it was issued by the server. Attacker can craft a state to link their Google Calendar to a victim's account.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-035",
+      "severity": "HIGH",
+      "category": "Race Condition",
+      "title": "Voucher race condition in Stripe checkout (not transactional)",
+      "file": "src/app/api/admin/stripe/checkout/route.ts",
+      "line": 43,
+      "description": "Voucher validation and usedCount increment are not wrapped in a transaction. Concurrent requests can redeem the same voucher beyond maxUses.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-036",
+      "severity": "HIGH",
+      "category": "Authorization",
+      "title": "requireAdmin() grants cross-domain admin access",
+      "file": "src/lib/admin-auth.ts",
+      "line": 12,
+      "description": "requireAdmin() grants admin access if user has ADMIN or INSTRUCTOR role in ANY domain. An instructor of Domain A can manage resources belonging to Domain B via admin/* routes.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-037",
+      "severity": "MEDIUM",
+      "category": "Authorization",
+      "title": "Any student can self-award XP via xpOverride",
+      "file": "src/app/api/student/progress/route.ts",
+      "line": 62,
+      "description": "xpOverride field allows any enrolled student to award themselves up to 10,000 XP per request. No role check restricting this to admins/instructors.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-038",
+      "severity": "MEDIUM",
+      "category": "Authorization",
+      "title": "XP award endpoint allows awarding XP to unenrolled users",
+      "file": "src/app/api/[domain]/xp/route.ts",
+      "line": 61,
+      "description": "POST handler allows any ADMIN/INSTRUCTOR to award XP to ANY userId without verifying the target is enrolled in that domain.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-039",
+      "severity": "MEDIUM",
+      "category": "Validation",
+      "title": "Missing input validation on plan PATCH and notification preferences",
+      "file": "src/app/api/admin/plans/[id]/route.ts, src/app/api/notifications/preferences/route.ts",
+      "line": null,
+      "description": "PATCH handler for subscription plans and PUT for notification preferences accept raw body without Zod validation.",
+      "status": "FIXED"
+    },
+    {
+      "id": "AUDIT-040",
+      "severity": "MEDIUM",
+      "category": "Security",
+      "title": "Unsanitized filenames in bulk-import uploads",
+      "file": "src/app/api/admin/questions/bulk-import/route.ts",
+      "line": 268,
+      "description": "Uploaded files saved to disk with original filename not sanitized for path traversal characters. Upload directory is inside project root.",
+      "status": "FIXED"
+    }
+  ]
+}

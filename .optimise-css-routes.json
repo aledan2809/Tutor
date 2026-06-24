@@ -1,0 +1,29 @@
+{
+  "_comment": "Optimise CSS regression config. Baselines at Master/reports/optimise/css-regression/Tutor/__baseline__/",
+  "baseUrl": "https://tutor.knowbest.ro",
+  "routes": [
+    { "path": "/",        "viewports": ["mobile", "desktop"] },
+    { "path": "/login",   "viewports": ["mobile"] }
+  ],
+  "viewports": {
+    "mobile":  { "width": 390,  "height": 844 },
+    "desktop": { "width": 1440, "height": 900 }
+  },
+  "thresholds": {
+    "pixelDiffPct": 2,
+    "sizeDeltaPct": 50
+  },
+  "wait": {
+    "waitUntil": "domcontentloaded",
+    "settleMs": 500,
+    "timeoutMs": 20000
+  },
+  "screenshot": {
+    "fullPage": false
+  },
+  "pixelmatch": {
+    "threshold": 0.1,
+    "alpha": 0.5,
+    "includeAA": false
+  }
+}

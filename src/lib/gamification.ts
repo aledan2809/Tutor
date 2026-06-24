@@ -144,6 +144,26 @@ export async function awardSessionCompleteXp(
     xp += XP_REWARDS.PERFECT_SCORE;
   }
 
+  // Discipline: reward finishing a SCHEDULED session ON TIME (within ~90 min of the
+  // reminder firing). Late completions get no bonus (implicit cost); a missed
+  // scheduled day already resets the streak below.
+  const ON_TIME_BONUS = 15;
+  const nowD = new Date();
+  const dayStartD = new Date(nowD.getFullYear(), nowD.getMonth(), nowD.getDate());
+  const fires = await prisma.escalationEvent.findMany({
+    where: { userId, createdAt: { gte: dayStartD } },
+    orderBy: { createdAt: "desc" },
+    select: { createdAt: true, metadata: true },
+    take: 30,
+  });
+  const sched = fires.find((e) => {
+    const r = (e.metadata as Record<string, unknown> | null)?.reason;
+    return typeof r === "string" && (r.startsWith("morning") || r.startsWith("evening"));
+  });
+  if (sched && (nowD.getTime() - sched.createdAt.getTime()) / 60_000 <= 90) {
+    xp += ON_TIME_BONUS;
+  }
+
   const newXp = gam.xp + xp;
   const newLevel = calculateLevel(newXp, levels);
 

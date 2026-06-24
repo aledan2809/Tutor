@@ -30,6 +30,7 @@ interface ScheduledSession {
   channels: string[];
   reactedChannel: string | null;
   done: boolean;
+  late: boolean;
   score: number | null;
   completed: boolean;
 }
@@ -245,7 +246,7 @@ export function ChildChapter({ child }: { child: ChildLite }) {
           ) : tab === "sesiuni" ? (
             <SesiuniTab scheduled={detail.scheduledSessions} sessions={detail.sessionLog} />
           ) : tab === "rezultate" ? (
-            <RezultateTab byDomain={detail.byDomain} />
+            <RezultateTab byDomain={detail.byDomain} scheduled={detail.scheduledSessions} />
           ) : (
             <div className="space-y-4">
               {detail.canManageSchedule && (
@@ -310,9 +311,18 @@ function SesiuniTab({
                   <span className="ml-2 text-xs text-gray-500">{fmt(s.at)}</span>
                 </span>
                 <span className="flex items-center gap-2 text-xs">
+                  {s.done && s.late && (
+                    <span className="rounded bg-yellow-600/20 px-2 py-0.5 text-yellow-400">întârziat</span>
+                  )}
                   {s.done ? (
                     <span className="rounded bg-green-600/20 px-2 py-0.5 text-green-400">
-                      {s.score !== null ? `${Math.round(s.score)}%` : s.completed ? "făcută" : "a reacționat"}
+                      {s.score !== null
+                        ? `${Math.round(s.score)}%`
+                        : s.completed
+                          ? "făcută"
+                          : s.late
+                            ? "a reacționat"
+                            : "la timp"}
                     </span>
                   ) : (
                     <span className="rounded bg-red-600/20 px-2 py-0.5 text-red-400">ignorată</span>
@@ -357,13 +367,47 @@ function SesiuniTab({
 }
 
 // Total results + weak areas, grouped per domain.
-function RezultateTab({ byDomain }: { byDomain?: DomainResult[] }) {
+function RezultateTab({
+  byDomain,
+  scheduled,
+}: {
+  byDomain?: DomainResult[];
+  scheduled?: ScheduledSession[];
+}) {
   const doms = byDomain ?? [];
-  if (doms.length === 0) {
+  const sched = scheduled ?? [];
+  // Discipline: how the child kept to the SCHEDULE (on-time vs late vs ignored).
+  const onTime = sched.filter((s) => s.done && !s.late).length;
+  const lateN = sched.filter((s) => s.done && s.late).length;
+  const ignored = sched.filter((s) => !s.done).length;
+  const hasDiscipline = sched.length > 0;
+  if (doms.length === 0 && !hasDiscipline) {
     return <p className="text-sm text-gray-500">Niciun rezultat încă.</p>;
   }
   return (
     <div className="space-y-5">
+      {hasDiscipline && (
+        <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+          <h3 className="mb-3 text-base font-semibold text-white">Disciplină</h3>
+          <p className="mb-3 text-xs text-gray-500">
+            Cum a respectat sesiunile programate (contează în gamification).
+          </p>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-lg bg-green-600/15 px-2 py-3">
+              <div className="text-lg font-bold text-green-400">{onTime}</div>
+              <div className="text-xs text-gray-400">la timp</div>
+            </div>
+            <div className="rounded-lg bg-yellow-600/15 px-2 py-3">
+              <div className="text-lg font-bold text-yellow-400">{lateN}</div>
+              <div className="text-xs text-gray-400">întârziate</div>
+            </div>
+            <div className="rounded-lg bg-red-600/15 px-2 py-3">
+              <div className="text-lg font-bold text-red-400">{ignored}</div>
+              <div className="text-xs text-gray-400">ignorate</div>
+            </div>
+          </div>
+        </div>
+      )}
       {doms.map((d) => (
         <div key={d.domainId} className="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
           <div className="mb-3 flex items-center justify-between">
