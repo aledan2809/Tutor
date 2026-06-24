@@ -38,6 +38,12 @@ export function sm2(input: SM2Input): SM2Output {
     repetitions = 0;
   }
 
+  // Cap the interval: prevInterval * easeFactor compounds unbounded, so after many
+  // correct answers it overflowed the date (year 23326 → Prisma rejected the upsert
+  // → 500 on answer submit). 365 days is plenty for spaced repetition.
+  const MAX_INTERVAL_DAYS = 365;
+  if (interval > MAX_INTERVAL_DAYS) interval = MAX_INTERVAL_DAYS;
+
   // Update ease factor
   easeFactor =
     easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
