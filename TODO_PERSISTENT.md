@@ -4,6 +4,21 @@
 
 ---
 
+## [ ] 📧 Email branded — trece de pe techbiz.ae pe `notifications@etutor.ro` (creat 2026-06-24)
+
+**Context**: pe 2026-06-24 am conectat cheia Resend partajată (cont techbiz) în prod-ul Tutor, dar singurul domeniu **verificat** pe acel cont e `techbiz.ae` → rapoartele Watcher + reminderele pleacă temporar de pe **`eTutor <noreply@techbiz.ae>`** (deliverabil, dar cross-brand). `etutor.ro` NU e verificat în Resend.
+
+**De făcut** (sesiune dedicată, necesită acces DNS Hostico + decizie cont Resend):
+1. Verifică `etutor.ro` în Resend: `POST https://api.resend.com/domains {name:"etutor.ro"}` (decide pe ce cont — cel partajat techbiz SAU cont/cheie Resend dedicat eTutor) → obține înregistrările DNS (TXT SPF + DKIM CNAME-uri + DMARC).
+2. Adaugă înregistrările DNS la Hostico pentru `etutor.ro` → așteaptă propagare + status `verified` în Resend.
+3. Schimbă `EMAIL_FROM` în `/var/www/tutor/.env` (+ mirror `Master/credentials/tutor.env`) la **`eTutor <notifications@etutor.ro>`** + `pm2 restart tutor --update-env`.
+4. Dacă folosești cheie Resend nouă (cont dedicat) → actualizează și `AUTH_RESEND_KEY`.
+5. Verifică: test send → `notifications@etutor.ro` livrează; apoi un raport Watcher real „Trimite acum" ajunge cu expeditor branded.
+
+**Note**: backup-uri config curente `/var/www/tutor/.env.bak-2026-06-24-channels` + `Master/credentials/tutor.env.bak-2026-06-24-channels`. Codul e gata — e doar config DNS + 1 linie env.
+
+---
+
 ## [x] 🎯 Link campanie BAC — DONE 2026-06-12 (commit `e7349d6`, LIVE)
 
 **https://etutor.ro/bac** → `/ro/auth/register?exam=bac&voucher=BAC2026FREE`. Voucher **BAC2026FREE** (100%, nelimitat, fără expirare) creat în prod; env `BAC_VOUCHER` pe VPS2 + mirror `Master/credentials/tutor.env`. Preset: 8 materii BAC filtrate (română IX-XII pre-bifată — obligatorie; M1/M2/M3 + istorie/geo/bio/chimie selectabile per profil). E2E verificat pe prod: register cu voucher → abonament activ 1 an + enrollments corecte (cont smoke șters, usedCount decrementat). Sora link: `/evaluare` (EVALUARE100, commit `e0f0cde`).
