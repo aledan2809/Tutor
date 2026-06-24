@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
-import { INSTALL_DONE_KEY, isStandalone, isIOS, isMobileUA, readFlag } from "@/lib/pwa";
+import { INSTALL_DONE_KEY, isStandalone, isIOS, isMobileUA, isInAppWebView, readFlag } from "@/lib/pwa";
 
 // Permanent "Install the app" card in Settings — always available (no snooze),
 // complementing the dismissible post-login banner. Chromium uses the native
@@ -52,10 +52,14 @@ export function InstallAppButton() {
     }
   };
 
-  const steps = isIOS()
+  const steps = isInAppWebView()
     ? ro
-      ? "Apasă butonul Share (pătrat cu săgeată ↑), apoi „Adaugă la ecranul principal”."
-      : "Tap the Share button (square with ↑), then “Add to Home Screen”."
+      ? "Ai deschis linkul într-o altă aplicație (ex. WhatsApp/Telegram) — de aici „Adaugă la ecranul principal” nu apare. Apasă butonul „⋯” / de partajare și alege „Deschide în Safari”, apoi reia instalarea de acolo."
+      : "You opened this inside another app (e.g. WhatsApp/Telegram) — “Add to Home Screen” isn’t available here. Tap the “⋯” / share button and choose “Open in Safari”, then install from there."
+    : isIOS()
+    ? ro
+      ? "În Safari: apasă butonul Share (pătrat cu săgeată ↑), apoi „Adaugă la ecranul principal”."
+      : "In Safari: tap the Share button (square with ↑), then “Add to Home Screen”."
     : isMobileUA()
       ? ro
         ? "Deschide meniul browserului (⋮) și alege „Instalează aplicația” / „Adaugă la ecranul principal”."

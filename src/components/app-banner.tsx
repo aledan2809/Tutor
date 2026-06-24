@@ -124,6 +124,33 @@ export function AppBanner() {
     }
   };
 
+  // First-touch from a chat link opens an in-app browser where install + push
+  // can't work. Instead of staying silent, point the user to Safari.
+  if (!snoozed && !installed && isInAppWebView()) {
+    return (
+      <div className="mb-4 rounded-lg border border-blue-900/50 bg-blue-950/30 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <span aria-hidden className="text-xl">📲</span>
+            <div>
+              <p className="text-sm font-semibold text-white">
+                {ro ? "Instalează eTutor din Safari" : "Install eTutor from Safari"}
+              </p>
+              <p className="text-xs text-gray-400">
+                {ro
+                  ? "Ai deschis linkul în altă aplicație. Apasă „⋯” / butonul de partajare → „Deschide în Safari”, apoi Share ↑ → „Adaugă la ecranul principal”. Așa primești și notificările."
+                  : "You opened this in another app. Tap “⋯” / the share button → “Open in Safari”, then Share ↑ → “Add to Home Screen”. That also enables notifications."}
+              </p>
+            </div>
+          </div>
+          <button onClick={snooze} className="shrink-0 rounded-lg px-3 py-1.5 text-sm text-gray-400 hover:text-white">
+            {ro ? "Mai târziu" : "Later"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (snoozed || (!canInstall && !manualInstall && !needsPush)) return null;
 
   const anyInstall = canInstall || manualInstall;
