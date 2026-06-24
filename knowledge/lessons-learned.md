@@ -3,6 +3,18 @@
 > Capture incident root causes here. One entry per lesson: L## — YYYY-MM-DD — <short title>.
 > Format: **Symptom / Root cause / Fix / Prevention**.
 
+## L16 — 2026-06-25 — Content verification must be module-appropriate (never AI-verify deterministic/spatial)
+**Symptom**: Asked to "verify" all of Rareș's generated content the same way. Blindly AI-verifying everything would falsely reject correct answers in the spatial cube exercise.
+**Root cause**: Two classes of content need two verification methods. (a) Deterministic generators (cube, clock, audio-memory, arithmetic) compute the answer in code → correct by construction; an LLM re-solving the cube is unreliable (LLMs are weak at spatial reasoning) and would mark correct answers wrong. (b) LLM-generated content (knowledge grile, thesis grile) genuinely needs an independent correctness check.
+**Fix**: `scripts/verify-rares-content.mjs` — Abilități → CODE checks (cube re-derived from the stored `[CUBEVOICE]` payload, clock/memory vs their stimulus, arithmetic re-evaluated, monitoring structural). Aviație-Cunoștințe + Licență → AI cross-model re-solve (Gemini verifying Groq-generated; Licență grounded on its stored explanation since the passage isn't stored). Failures → `status=DRAFT` (hidden, reversible), not deleted. Result: Abilități 0/440 issues; LLM content 33 drafted.
+**Prevention**: Before "verifying" generated content, classify it: deterministic → code re-derivation; LLM-guessed → cross-model AI (different model than the generator). Bake cross-model verification into the generator going forward (done for Aviație-Cunoștințe wave 2).
+
+## L17 — 2026-06-25 — Shared-channel wiring ≠ working delivery (WABA template + transport prerequisites)
+**Symptom**: After saving an email address + WhatsApp number for the student, the cascade still showed Email/WhatsApp/Telegram as "sărit" (skipped). User assumed it was a bug.
+**Root cause**: "sărit" = the deliverability guard found the transport unusable, not a code defect. Telegram skipped = student not linked; Email skipped = no real Resend key / unverified sender domain; WhatsApp skipped = WhatsApp Cloud API creds not set. Additionally, even after wiring the shared WABA creds, sends failed because the code calls a fixed template name (`study_reminder`) that did not exist on the shared WABA — wiring credentials is necessary but not sufficient.
+**Fix**: Wired Tutor to the shared WABA + shared Resend key (sending from the only verified domain, techbiz.ae); created + got Meta-approval for the `study_reminder` ro template on the shared WABA; live-verified delivery to the student. Telegram already had its own bot — only the user-side link is missing.
+**Prevention**: When reusing a shared channel, verify the full chain: (1) creds wired, (2) the exact template name the code sends is approved on that WABA, (3) the sender domain is verified (email), (4) the recipient is linked (Telegram). Treat "address present in UI" as necessary-not-sufficient.
+
 ## L01 — 2026-06-01 — Route-handler redirect leaks internal host behind nginx
 
 **Symptom:** `GET /r/<CODE>` returned `307 Location: https://localhost:3013/ro/try` on prod (etutor.ro) — a browser would follow it to the dead internal address. Caught by live behavioral E2E, not by build/tests.

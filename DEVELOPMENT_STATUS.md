@@ -1,5 +1,39 @@
 # Project Status - Tutor
-Last Updated: 2026-06-13 (linkuri campanii directe /evaluare + /bac — RO + voucher auto-aplicat, LIVE)
+Last Updated: 2026-06-25 (Watcher KPI reports + parent-monitoring fixes + canale WABA/Email/Telegram + Setup checklist + Aptitudini rework + Aviație-Cunoștințe + verificare conținut)
+
+## Current State (Sesiunea 2026-06-25 — Direct/mesh: Watcher + canale + aptitudini Rareș)
+
+### Done (LIVE pe etutor.ro, verificat pe prod la fiecare pas)
+**Watcher / monitorizare părinte**
+1. **Disciplină în gamification** (`570ebcb`) — bonus +15 XP la finalizare „la timp" (≤90 min de la reminder); streak schedule-aware; badge `late` + sumar Disciplină în tab Rezultate.
+2. **Scos „dimineață/seară"** (`a1f2e03`) din sesiunile programate — afișează numele + ora reală.
+3. **Rapoarte KPI programate** (`7fa4ae3`, migrare `0034`) — rapoarte zilnice/săptămânale (sesiuni/disciplină/puncte slabe/rezultate) la ziua+ora aleasă, pe canale, per copil/toți. Cron `runWatcherReports`. 7 teste.
+4. **Mementouri manuale reparate** (`4c03d07`) — one-shot nu mai e blocat (doar seriile); `reminderImminent` forward-looking; nudge-targets per-episode; picker **multi-select**.
+5. **Log „Mementouri trimise"** (`62b1e8a`) + **badge „📨 memento trimis"** pe episodul corelat (`a90017d`).
+
+**Canale notificări (config shared infra, fără commit)**
+6. **WhatsApp** wired la WABA partajat + template `study_reminder` ro APPROVED + test live livrat lui Rareș. **Email** cheie Resend partajată, `EMAIL_FROM="eTutor <noreply@techbiz.ae>"` (verificat), test primit. **Telegram** bot propriu @eTUTORro_Notifications_bot (Rareș trebuie să lege contul).
+
+**Onboarding**
+7. **Setup checklist în bara de sus** (`84ca8c9`+`6062e53`) platform-aware (install→notificări→Telegram, status live, detectare încercări + plan alternativ, pași opționali închidabili) + PWA in-app guidance (`1130776`).
+
+**Aptitudini (abilități) reproiectate**
+8. (`986917a`) #2 Memorare audio EN (7×2 cifre, ordine) · #3 Cub voce→fața finală (regulile pe fețe) · #4 Ceas analog 5min. Renderer + `ClockFace` SVG; re-seed 440.
+
+**Aviație — Cunoștințe (domeniu nou)**
+9. (`deb26bd`+`b1b7c59`+`18d6a36`) Matematică + Fizică (cap.1–9 fără 7), **283 grile EN** (val1 131 + val2 152 verificat cross-model). Fix unități subject-aware.
+
+**Verificare retroactivă** (`7014780`)
+10. Module-appropriate: Abilități=cod → 0/440 probleme; Aviație-Cunoștințe+Licență=AI cross-model → **33 pe DRAFT** (22+11), reversibil. PUBLISHED rămase: aviatie 261, licență 193, abilități 440.
+
+### Blockers / user-action
+- **Email branded** `notifications@etutor.ro` — verificare domeniu Resend (DNS Hostico); item în TODO. Acum trimite de pe techbiz.ae.
+- **Telegram Rareș** — apasă „Conectează" (Setări → Notificări).
+- **33 grile DRAFT** — listare/recuperare sau regenerare pe topicele afectate (la cerere).
+
+## Lessons Learned (sesiunea 2026-06-25)
+- **L16** — Verificare module-appropriate: NU AI-verifica generatoare deterministe/spațiale (cub) — LLM greșește spațial; folosește re-derivare în cod. AI cross-model doar pentru conținut generat de LLM.
+- **L17** — La canale partajate (WABA) wiring-ul credențialelor NU e suficient: codul trimite template cu nume fix (`study_reminder`) care trebuie să existe+aprobat; „sărit" = transport neconfigurat (config/user-action), nu bug.
 
 ## Current State (Sesiunea 2026-06-13 — Direct/mesh: linkuri campanii Evaluare + BAC)
 
