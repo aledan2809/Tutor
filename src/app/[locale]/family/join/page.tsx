@@ -62,6 +62,7 @@ export default function FamilyJoinPage() {
     else if (d.status === "expired") setError("Codul a expirat.");
     else if (d.status === "already_used") setError("Codul a fost deja folosit.");
     else if (d.status === "self_invite") setError("Nu îți poți accepta propriul cod.");
+    else if (d.status === "role_conflict") setError("Ai deja un alt rol în această familie.");
     else setError("Nu am putut folosi codul.");
   };
 

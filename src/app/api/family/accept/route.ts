@@ -45,7 +45,7 @@ async function _POST(req: NextRequest) {
     const code =
       result.status === "not_found"
         ? 404
-        : result.status === "seat_unavailable"
+        : result.status === "seat_unavailable" || result.status === "role_conflict"
         ? 409
         : 410; // expired / already used / self
     return NextResponse.json({ ok: false, status: result.status, seat: result.seat }, { status: code });

@@ -382,6 +382,15 @@ export class FamilySeatError extends Error {
   }
 }
 
+/** Thrown inside the accept transaction when the accepter already holds a
+ * conflicting role in this family (rolls back the single-use claim). */
+export class RoleConflictError extends Error {
+  constructor() {
+    super("Role conflict");
+    this.name = "RoleConflictError";
+  }
+}
+
 export async function createAndDeliverInvite(params: {
   inviterId: string;
   inviterName?: string | null;
@@ -509,7 +518,14 @@ async function deliverInvite(params: {
 
 export interface AcceptResult {
   ok: boolean;
-  status: "accepted" | "expired" | "not_found" | "already_used" | "seat_unavailable" | "self_invite";
+  status:
+    | "accepted"
+    | "expired"
+    | "not_found"
+    | "already_used"
+    | "seat_unavailable"
+    | "self_invite"
+    | "role_conflict";
   target?: InviteTargetRole;
   seat?: SeatCheck;
 }
@@ -562,23 +578,54 @@ export async function acceptInvite(params: {
     });
     if (claimed.count !== 1) return { ok: false, status: "already_used" as const };
 
+    const txDb = tx as unknown as Db;
+
     // Authoritative seat re-check at accept time.
-    const seat = await checkSeat(invite.inviterId, target, tx as unknown as Db);
+    const seat = await checkSeat(invite.inviterId, target, txDb);
     if (!seat.allowed) {
       throw new FamilySeatError(seat); // rolls back the claim
+    }
+
+    // Role-conflict guard: the accepter must not already be in this family in a
+    // different role. Prevents e.g. a TUTOR invite flipping an existing
+    // co-parent's PARENT link, or one of the owner's children becoming a tutor
+    // of their siblings. Throws → rolls back the claim (invite stays usable).
+    const ownerChildIds = await getOwnerChildIds(invite.inviterId, txDb);
+    const targetRelation = relationForTarget(target);
+    if (target === INVITE_TARGET_ROLE.CHILD) {
+      // The accepter must not already be a guardian of this family.
+      const asGuardian = await tx.guardian.count({
+        where: { parentId: params.accepterUserId, childId: { in: ownerChildIds }, status: "active" },
+      });
+      if (asGuardian > 0) throw new RoleConflictError();
+    } else {
+      // A parent/tutor accepter must not be one of the owner's children…
+      if (ownerChildIds.includes(params.accepterUserId)) throw new RoleConflictError();
+      // …and must not already hold a different-relation active link to them.
+      const conflicting = await tx.guardian.count({
+        where: {
+          parentId: params.accepterUserId,
+          childId: { in: ownerChildIds },
+          status: "active",
+          relation: { not: targetRelation },
+        },
+      });
+      if (conflicting > 0) throw new RoleConflictError();
     }
 
     await addMemberToFamily({
       ownerId: invite.inviterId,
       memberId: params.accepterUserId,
       target,
-      db: tx as unknown as Db,
+      db: txDb,
     });
 
     return { ok: true, status: "accepted" as const, target };
-  }).catch((err) => {
+  }, { timeout: 15000 }).catch((err) => {
     if (err instanceof FamilySeatError)
       return { ok: false, status: "seat_unavailable" as const, seat: err.check };
+    if (err instanceof RoleConflictError)
+      return { ok: false, status: "role_conflict" as const };
     throw err;
   });
 }
@@ -660,7 +707,7 @@ export async function createChildDirectly(params: {
     });
 
     return { childId: child.id };
-  });
+  }, { timeout: 15000 });
 }
 
 /** Revoke a still-pending invite the owner created. */
@@ -685,17 +732,50 @@ export async function removeFamilyMember(params: {
   memberId: string;
 }): Promise<boolean> {
   const { ownerId, memberId } = params;
-  // Is the member one of the owner's children?
+  // Is the member an ACTIVE child of the caller (caller holds a PARENT link)?
   const asChild = await prisma.guardian.findUnique({
     where: { parentId_childId: { parentId: ownerId, childId: memberId } },
-    select: { id: true, relation: true },
+    select: { id: true, relation: true, status: true },
   });
-  if (asChild && asChild.relation === GUARDIAN_RELATION.PARENT) {
-    // Remove the child from the whole family (owner + co-parents/tutors).
-    await prisma.guardian.updateMany({
-      where: { childId: memberId, status: "active" },
-      data: { status: "removed" },
+  if (
+    asChild &&
+    asChild.status === "active" &&
+    asChild.relation === GUARDIAN_RELATION.PARENT
+  ) {
+    // Only the child's ANCHOR (the account that added the child) may remove the
+    // child from the WHOLE family. A co-parent removing "a child" must not be
+    // able to evict everyone — they only drop their own link. The anchor is the
+    // inviter on the child's accepted CHILD/DIRECT invite; if there's no invite
+    // row (legacy/manual link), the caller counts as anchor only when they are
+    // the sole active PARENT of the child.
+    const anchorInvite = await prisma.familyInvite.findFirst({
+      where: { acceptedById: memberId, targetRole: "CHILD", status: "accepted" },
+      select: { inviterId: true },
+      orderBy: { acceptedAt: "asc" },
     });
+    let isAnchor: boolean;
+    if (anchorInvite) {
+      isAnchor = anchorInvite.inviterId === ownerId;
+    } else {
+      const activeParents = await prisma.guardian.count({
+        where: { childId: memberId, relation: GUARDIAN_RELATION.PARENT, status: "active" },
+      });
+      isAnchor = activeParents <= 1;
+    }
+
+    if (isAnchor) {
+      // Remove the child from the whole family (owner + co-parents/tutors).
+      await prisma.guardian.updateMany({
+        where: { childId: memberId, status: "active" },
+        data: { status: "removed" },
+      });
+    } else {
+      // Co-parent: drop only their own link to this child.
+      await prisma.guardian.update({
+        where: { id: asChild.id },
+        data: { status: "removed" },
+      });
+    }
     return true;
   }
 

@@ -49,6 +49,8 @@ export function AcceptInviteClient({
       setError("Invitația a fost deja folosită.");
     } else if (d.status === "self_invite") {
       setError("Nu îți poți accepta propria invitație.");
+    } else if (d.status === "role_conflict") {
+      setError("Ai deja un alt rol în această familie.");
     } else {
       setError("Nu am putut accepta invitația.");
     }
