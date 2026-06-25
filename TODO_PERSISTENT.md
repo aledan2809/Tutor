@@ -21,7 +21,9 @@
 
 ## [x] 📄 Licență — proveniență verificabilă (pagină + secțiune + citat) pe grile — DONE 2026-06-25 (commits `1ccf78c` + `a51465b`, LIVE etutor.ro)
 
-**Rezultat**: 204/204 grile actualizate pe prod (199 ancorate la pagină reală + secțiune; 0 mai au „Secțiunea N"; 5 front-matter fără pagină = candidate review). Rareș vede acum DUPĂ răspuns: „📄 Citat din lucrare: «...»" + „Sursă: Lucrare de licență — pagina X · 1.2. ...". Backup DB pre-backfill: `VPS2:/root/backups/tutor-pre-licenta-provenance-2026-06-25.dump`. Verificat: deploy OK, date corecte (ex. p7 → „1.2. Calitatea serviciilor"), prod 307. Cele 5 fără pagină + 11 DRAFT → vezi item-ul de mai jos.
+**Rezultat**: 204/204 grile actualizate pe prod (199 ancorate la pagină reală + secțiune; 0 mai au „Secțiunea N"; 5 front-matter fără pagină = candidate review). Rareș vede acum DUPĂ răspuns: „📄 Citat din lucrare: «...»" + „Sursă: Lucrare de licență — pagina X · 1.2. ..." + referința e **țesută și în textul Explicației** (commit `b5b8fe1`). Backup DB pre-backfill: `VPS2:/root/backups/tutor-pre-licenta-provenance-2026-06-25.dump`. Verificat: deploy OK, date corecte (ex. p7 → „1.2. Calitatea serviciilor"), prod 307. Cele 5 fără pagină + 11 DRAFT → vezi item-ul de mai jos.
+
+**🔒 SECURITY (fixat în aceeași sesiune, commit `b5b8fe1`)**: quiz-ul public demo (`/api/public/practice/quiz`) filtra doar după `subject`, fără verificare de domeniu → conținutul restricționat (grilele private de licență ale lui Rareș + domeniile aviație doar-Rareș) era **citibil public fără login** (subiecte generice „Licență"/„Mathematics"/„Physics"). Acum servește DOAR domenii publice (curriculum). Verificat pe prod: `subject=Licență/Physics/Mathematics` → 0; subiecte publice → 5. Lecție: orice endpoint public care servește `Question` după `subject` TREBUIE să excludă domeniile restricționate (subiectele nu sunt unice per domeniu).
 
 **Problemă (Rareș nu putea verifica)**: grilele de Licență aveau `topic = "Secțiunea N"` = doar al N-lea fragment auto-tăiat din PDF, fără sens. Citatul-sursă era stocat în `sourceReference` dar ascuns studentului.
 
