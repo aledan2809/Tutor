@@ -1,5 +1,20 @@
 # Project Status - Tutor
-Last Updated: 2026-06-25 (Watcher KPI reports + parent-monitoring fixes + canale WABA/Email/Telegram + Setup checklist + Aptitudini rework + Aviație-Cunoștințe + verificare conținut)
+Last Updated: 2026-06-25 #2 (Licență — proveniență verificabilă pe grile + fix leak quiz public)
+
+## Current State (Sesiunea 2026-06-25 #2 — Direct/mesh: Licență proveniență + securitate)
+
+### Done (LIVE pe etutor.ro, verificat pe prod la fiecare pas)
+1. **Proveniență verificabilă pe grilele de Licență** (`1ccf78c` + `a51465b` + `b5b8fe1`). Problema: `topic="Secțiunea N"` = doar al N-lea fragment auto-tăiat din PDF (fără sens pt Rareș); citatul-sursă era stocat dar ascuns. Soluție: `scripts/backfill-licenta-provenance.mjs` re-citește `1. Fabulosos srl licenta final.pdf` pagină-cu-pagină, leagă fiecare grilă de pagina reală (match pe citat: cascadă full→prefix→approx) + setează `topic` la secțiunea reală (1.1/.../Bibliografie). **204/204 actualizate pe prod, 199 ancorate la pagină + secțiune, 0 mai au „Secțiunea N", 5 front-matter fără pagină.** Rareș vede DUPĂ răspuns: „📄 Citat din lucrare: «...»" + „Sursă: Lucrare de licență — pagina X · 1.2. ..." + referința **țesută și în textul Explicației**. Citatul expus DOAR pe `licenta-rares` (material propriu). Backup DB: `VPS2:/root/backups/tutor-pre-licenta-provenance-2026-06-25.dump`.
+2. **🔒 SECURITY — fix leak quiz public** (`b5b8fe1`). `/api/public/practice/quiz` filtra doar după `subject`, fără verificare de domeniu → conținut restricționat (grile private licență Rareș + domenii aviație doar-Rareș) era citibil PUBLIC fără login (subiecte generice „Licență"/„Physics"/„Mathematics"). Acum servește DOAR domenii publice (curriculum). Verificat prod: `subject=Licență/Physics/Mathematics`→0; `Matematica cl. VIII` / `Matematică M1 — Bacalaureat`→5 (demo intact).
+3. TODO sync: item Licență proveniență marcat `[x]` (commits inline); items 33-DRAFT + val nou Mate/Fizică adăugate (decizie user: amânate).
+
+### Decizii produs (user, 2026-06-25 #2) pentru sesiunea dedicată următoare
+- **Pachete de familie** — replicarea experienței 1P+1C la TOATE pachetele. Decizii luate: legare copil = email + cod + creare-directă + **canal WhatsApp** pt invitație; meditator = regim **Watcher**, vede DOAR copiii plătiți, poate fi în mai multe familii (containerizat); limite pachet = **blocare strictă + invitație upgrade**. Scenariu lipsă identificat: #8 (1 părinte + mai mulți copii + meditator) + #9 (elev singur). Vezi ST handoff `Master/reports/handoffs/ST-2026-06-25.md`.
+
+### Lessons Learned (sesiunea 2026-06-25 #2)
+- **L18** — endpoint public care servește `Question` după `subject` trebuie să excludă domeniile restricționate (subiectele NU sunt unice per domeniu → leak de conținut privat). Vezi `knowledge/lessons-learned.md` L18.
+
+---
 
 ## Current State (Sesiunea 2026-06-25 — Direct/mesh: Watcher + canale + aptitudini Rareș)
 

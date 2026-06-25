@@ -3,6 +3,12 @@
 > Capture incident root causes here. One entry per lesson: L## — YYYY-MM-DD — <short title>.
 > Format: **Symptom / Root cause / Fix / Prevention**.
 
+## L18 — 2026-06-25 — A public endpoint that serves `Question` by `subject` alone leaks restricted-domain content (subjects aren't unique per domain)
+**Symptom**: While wiring licență provenance, `GET /api/public/practice/quiz?subject=Licență` (no auth) returned Rareș's private thesis grile — content, options, correct index, explanation — to anyone. Same for the Rareș-only aviație domains via `subject=Physics`/`Mathematics`.
+**Root cause**: the public demo quiz filtered only `{ status: PUBLISHED, type: MULTIPLE_CHOICE, subject }` with **no domain check**. Generic subject strings ("Licență", "Mathematics", "Physics") exist in BOTH public curriculum domains AND restricted (Rareș-only) domains, so a subject-only filter pulls the restricted rows too. Restricted-domain access control (`domain-access.ts` allowlist) gates the authenticated practice/session routes but the public demo route never applied it.
+**Fix**: the public quiz now resolves public domain IDs (`isRestrictedDomainSlug(slug) === false`) and adds `domainId: { in: publicDomainIds }` to the query. Verified on prod: `subject=Licență/Physics/Mathematics` → 0; public subjects (`Matematica cl. VIII`, `Matematică M1 — Bacalaureat`) → 5. Commit `b5b8fe1`.
+**Prevention**: ANY endpoint (especially no-auth/public) that selects `Question` by a non-domain field (subject, topic, tag) MUST also constrain by domain access — subjects/topics are not unique per domain. When adding a restricted domain, audit every public/demo content endpoint for subject-only filters.
+
 ## L16 — 2026-06-25 — Content verification must be module-appropriate (never AI-verify deterministic/spatial)
 **Symptom**: Asked to "verify" all of Rareș's generated content the same way. Blindly AI-verifying everything would falsely reject correct answers in the spatial cube exercise.
 **Root cause**: Two classes of content need two verification methods. (a) Deterministic generators (cube, clock, audio-memory, arithmetic) compute the answer in code → correct by construction; an LLM re-solving the cube is unreliable (LLMs are weak at spatial reasoning) and would mark correct answers wrong. (b) LLM-generated content (knowledge grile, thesis grile) genuinely needs an independent correctness check.
