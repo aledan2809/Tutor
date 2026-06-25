@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { isRestrictedDomainSlug, canSeeRestrictedDomains } from "@/lib/domain-access";
 import { z } from "zod";
 
 const paramsSchema = z.object({
@@ -38,6 +39,19 @@ async function _POST(
 
   if (!domain.isActive) {
     return NextResponse.json({ error: "Domain is not active" }, { status: 400 });
+  }
+
+  // Restricted/non-curriculum domains (aviation, private licență) can't be
+  // self-enrolled by a non-allowed user — even by POSTing the id directly.
+  if (
+    isRestrictedDomainSlug(domain.slug) &&
+    !canSeeRestrictedDomains({
+      isSuperAdmin: (session.user as { isSuperAdmin?: boolean }).isSuperAdmin,
+      email: session.user.email,
+      enrollments: session.user.enrollments,
+    })
+  ) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   // Check if already enrolled

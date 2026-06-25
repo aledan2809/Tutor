@@ -31,6 +31,7 @@
     "agreePrefix": "Prin autentificare, ești de acord cu",
     "passwordLabel": "Parola",
     "signInButton": "Autentificare",
+    "forgotPassword": "Ai uitat parola?",
     "useMagicLink": "Folosește magic link",
     "usePassword": "Folosește parola",
     "invalidCredentials": "Email sau parolă incorectă"
@@ -57,10 +58,26 @@
     "gamification": "Gamificare",
     "referrals": "Invită un prieten",
     "family": "Familia mea",
-    "tabLearn": "Învață",
+    "tabLearn": "Grile",
     "tabSim": "Simulări",
     "tabProgress": "Progres",
     "tabProfile": "Profil"
+  },
+  "results": {
+    "complete": "Sesiune terminată",
+    "correct": "Corecte",
+    "incorrect": "Greșite",
+    "duration": "Timp",
+    "xpEarned": "XP câștigat",
+    "total": "Total",
+    "levelUp": "Nivel nou!",
+    "reached": "Ai ajuns la",
+    "newAchievement": "Realizare nouă!",
+    "newAchievements": "Realizări noi!",
+    "continue": "🔥 Continuă cu încă o serie",
+    "continuing": "Se pornește…",
+    "backToPractice": "Înapoi la grile",
+    "viewProgress": "Vezi progresul"
   },
   "grile": {
     "subject": "Materie",

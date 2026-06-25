@@ -171,9 +171,9 @@ export default function SignInPage() {
             <div className="mt-1 flex items-center justify-between">
               <Link
                 href="/auth/forgot-password"
-                className="inline-flex min-h-[44px] items-center text-xs text-blue-400 hover:text-blue-300"
+                className="inline-flex min-h-[44px] items-center text-sm font-medium text-blue-400 hover:text-blue-300"
               >
-                Forgot password?
+                {t("forgotPassword")}
               </Link>
               <button
                 onClick={() => setMode("magic")}

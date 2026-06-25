@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { isRestrictedDomainSlug, canSeeRestrictedDomains } from "@/lib/domain-access";
 
 async function _GET() {
   const session = await getSession();
@@ -111,15 +112,24 @@ async function _GET() {
     },
   });
 
-  const availableMapped = availableDomains.map((d) => ({
-    id: d.id,
-    name: d.name,
-    slug: d.slug,
-    icon: d.icon,
-    description: d.description,
-    questionsAvailable: d._count.questions,
-    totalStudents: d._count.enrollments,
-  }));
+  // Restricted/non-curriculum domains (e.g. aviation) must not appear in the
+  // "available to enroll" catalog unless the user is allowed to see them.
+  const seeRestricted = canSeeRestrictedDomains({
+    isSuperAdmin: (session.user as { isSuperAdmin?: boolean }).isSuperAdmin,
+    email: session.user.email,
+    enrollments: enrollments.map((e) => ({ domainId: e.domainId, roles: e.roles })),
+  });
+  const availableMapped = availableDomains
+    .filter((d) => seeRestricted || !isRestrictedDomainSlug(d.slug))
+    .map((d) => ({
+      id: d.id,
+      name: d.name,
+      slug: d.slug,
+      icon: d.icon,
+      description: d.description,
+      questionsAvailable: d._count.questions,
+      totalStudents: d._count.enrollments,
+    }));
 
   // SuperAdmin previews ALL active subjects in Grile/Practice, not just enrolled ones
   // (owner/content preview). Students stay package-gated to their enrolled domains.

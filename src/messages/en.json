@@ -31,6 +31,7 @@
     "agreePrefix": "By signing in, you agree to our",
     "passwordLabel": "Password",
     "signInButton": "Sign In",
+    "forgotPassword": "Forgot password?",
     "useMagicLink": "Use magic link instead",
     "usePassword": "Use password instead",
     "invalidCredentials": "Invalid email or password"
@@ -57,10 +58,26 @@
     "gamification": "Gamification",
     "referrals": "Invite a friend",
     "family": "My family",
-    "tabLearn": "Learn",
+    "tabLearn": "Quizzes",
     "tabSim": "Mock exams",
     "tabProgress": "Progress",
     "tabProfile": "Profile"
+  },
+  "results": {
+    "complete": "Session complete",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "duration": "Time",
+    "xpEarned": "XP earned",
+    "total": "Total",
+    "levelUp": "Level up!",
+    "reached": "You reached",
+    "newAchievement": "New achievement!",
+    "newAchievements": "New achievements!",
+    "continue": "🔥 Keep going — another set",
+    "continuing": "Starting…",
+    "backToPractice": "Back to practice",
+    "viewProgress": "View progress"
   },
   "grile": {
     "subject": "Subject",

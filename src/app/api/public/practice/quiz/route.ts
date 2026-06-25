@@ -37,22 +37,45 @@ export async function GET(req: Request) {
         subject,
         domainId: { in: publicDomainIds },
       },
-      select: { content: true, options: true, correctAnswer: true, explanation: true, topic: true, passage: true },
+      select: {
+        content: true,
+        options: true,
+        correctAnswer: true,
+        explanation: true,
+        topic: true,
+        passage: true,
+        sourceReference: true,
+      },
     });
 
     const usable = rows
       .map((q) => {
         const options = Array.isArray(q.options) ? (q.options as string[]) : [];
         const correctIndex = options.findIndex((o) => strip(o) === strip(q.correctAnswer));
-        return { content: q.content, options, correctIndex, explanation: q.explanation, topic: q.topic, passage: q.passage };
+        // Human-readable citation (curriculum). Defensive prefix-strip — restricted
+        // licență grile never reach here, so no quote leaks.
+        const sr = (q.sourceReference ?? "").replace(/^licenta-gen:\s*/i, "").trim();
+        return {
+          content: q.content,
+          options,
+          correctIndex,
+          explanation: q.explanation,
+          topic: q.topic,
+          passage: q.passage,
+          source: sr || null,
+        };
       })
       .filter((q) => q.correctIndex >= 0 && q.options.length >= 2);
 
-    // Shuffle so each demo run feels fresh, then take a short quiz.
+    // Shuffle so each demo run feels fresh…
     for (let i = usable.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [usable[i], usable[j]] = [usable[j], usable[i]];
     }
+    // …then bias toward questions that carry an explanation — that's what makes
+    // the demo compelling (V8 sort is stable, so the shuffle order is preserved
+    // within each group).
+    usable.sort((a, b) => (b.explanation ? 1 : 0) - (a.explanation ? 1 : 0));
 
     return NextResponse.json({ subject, questions: usable.slice(0, LIMIT) });
   } catch {

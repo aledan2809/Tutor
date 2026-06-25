@@ -13,6 +13,7 @@ type Q = {
   explanation: string | null;
   topic: string | null;
   passage: string | null;
+  source: string | null;
 };
 type Subject = { subject: string; count: number; display?: string };
 type Group = { level: string; label: string; subjects: Subject[] };
@@ -33,6 +34,8 @@ export default function SubjectQuizDemo({ locale }: { locale?: string }) {
         of: "din",
         correct: "Corect",
         yourAnswer: "Răspunsul tău",
+        explLabel: "De ce:",
+        sourceLabel: "Sursă:",
         retry: "Altă materie",
         cta: "Fă-ți cont gratuit ca să-ți salvezi progresul",
         answerAll: "Răspunde la toate întrebările ca să vezi rezultatul.",
@@ -50,6 +53,8 @@ export default function SubjectQuizDemo({ locale }: { locale?: string }) {
         of: "of",
         correct: "Correct",
         yourAnswer: "Your answer",
+        explLabel: "Why:",
+        sourceLabel: "Source:",
         retry: "Another subject",
         cta: "Create a free account to save your progress",
         answerAll: "Answer every question to see your result.",
@@ -168,7 +173,17 @@ export default function SubjectQuizDemo({ locale }: { locale?: string }) {
                     {L.yourAnswer}: {String.fromCharCode(65 + (answers[i] as number))}. {q.options[answers[i] as number]}
                   </p>
                 )}
-                {q.explanation && <p className="mt-1 text-xs text-gray-400">{q.explanation}</p>}
+                {q.explanation && (
+                  <p className="mt-2 text-xs text-gray-300">
+                    <span className="text-gray-500">{L.explLabel} </span>
+                    {q.explanation}
+                  </p>
+                )}
+                {q.source && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    {L.sourceLabel} {q.source}
+                  </p>
+                )}
               </div>
             );
           })}
