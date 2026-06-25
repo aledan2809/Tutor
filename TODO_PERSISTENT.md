@@ -30,8 +30,15 @@
 - **Remarcile „cool" se adaptează și după feedback-ul userului** (like/dislike pe remarcă) → buclă de învățare: păstrează tonul care-i place, renunță la ce respinge.
 - 🔒 **Guardrail obligatoriu (de proiectat din start)**: conținutul remarcilor pt **minori** trebuie age-appropriate + opt-out + vizibil/controlabil de părinte (părinții sunt watchers pe platformă!). Orice ton romantic/gendered se trece printr-un filtru de siguranță + setare de profil (părinte poate dezactiva tonul „cool"). Fără asta = risc de reclamație părinte. Nu blocant pt restul gamification-ului.
 
-### Status
-- [ ] Plan aprobat, **cod neînceput**. Următorul pas natural (când reluăm): A1 (fix empty-state) + B (bucla feed) împreună = saltul cel mai mare cu risc mic. Apoi A2–A5, apoi C, apoi 🔥 gamification deepening.
+### Status (build în curs 2026-06-25, regim mesh)
+- [x] **A1 — fix fundătură Quizzes** DONE+LIVE (commit `a750009`): empty-state → picker de materii (catalog inline, deja întors de API) → tap → self-enroll gratuit → auto-start sesiune. Verificat vizual ca `test_student` (vede Matematica 540 grile, Română, M1/M2/M3…). Filtrat la materii curriculum/permise (L18-safe).
+- [x] **A2 — amână corvoezile** DONE+LIVE (commit `b41152b`): bannerul install/notificări (`AppBanner`) apare doar după ~5 răspunsuri (`src/lib/engagement.ts`, semnal localStorage bumpuit la fiecare răspuns). Userii deja-instalați neafectați.
+- [x] **A3 — momentum în buclă** DONE+LIVE (`b41152b`): chip discret „🔥 N la rând" în feedback la streak corect (XP deja afișat). Streak per-sesiune.
+- [x] **A5 — coachmark unic** DONE+LIVE (`b41152b`): „👆 Atinge un răspuns" pe prima întrebare, o singură dată (localStorage), fără tur.
+- [ ] **A4 — bară-jos pe mobil / sidebar slab la primul contact**: mai mare, atinge sidebar-ul complex (§213) → de făcut cu grijă.
+- [ ] **B — bucla feed de grile** (motorul WOW): o întrebare full-screen → tap → feedback instant → următoarea/glisare, endless. Reuse: QuestionRenderer + FeedbackDisplay + session API (bucla există deja în pagina de sesiune; B = mod „feed" fără session-selector + auto-continue).
+- [ ] **C — răspunzi-întâi-cont-la-urmă**.
+- [ ] 🔥 **Gamification deepening** (foc progresiv + remarci adaptive) — deferat per user.
 - Referințe: mockup viziune (chat 2026-06-25) · memory `feedback-no-ai-in-user-copy` (zero „AI" în copy) · `feedback-ro-nontech-comms`.
 
 ---

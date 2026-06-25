@@ -19,6 +19,9 @@ interface SessionResultsProps {
   duration: number;
   domainSlug: string;
   gamification?: GamificationData | null;
+  /** Start another series in the same subject without leaving — the endless feed. */
+  onContinue?: () => void;
+  continuing?: boolean;
 }
 
 export function SessionResults({
@@ -28,6 +31,8 @@ export function SessionResults({
   duration,
   domainSlug,
   gamification,
+  onContinue,
+  continuing = false,
 }: SessionResultsProps) {
   const minutes = Math.floor(duration / 60);
   const seconds = duration % 60;
@@ -135,6 +140,16 @@ export function SessionResults({
             </div>
           )}
         </div>
+      )}
+
+      {onContinue && (
+        <button
+          onClick={onContinue}
+          disabled={continuing}
+          className="w-full rounded-lg bg-orange-600 px-4 py-3 text-center text-base font-medium text-white transition-colors hover:bg-orange-500 disabled:opacity-60"
+        >
+          {continuing ? "Se pornește…" : "🔥 Continuă cu încă o serie"}
+        </button>
       )}
 
       <div className="flex gap-3">

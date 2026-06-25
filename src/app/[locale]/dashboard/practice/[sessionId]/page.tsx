@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { SessionTimer } from "@/components/session/session-timer";
 import { QuestionRenderer } from "@/components/session/question-renderer";
 import { FeedbackDisplay } from "@/components/session/feedback-display";
@@ -61,8 +61,10 @@ type Phase = "loading" | "answering" | "feedback" | "completed" | "not_found";
 
 export default function ActiveSessionPage() {
   const params = useParams<{ sessionId: string }>();
+  const router = useRouter();
   const sessionId = params?.sessionId ?? "";
   const [domainSlug, setDomainSlug] = useState("aviation");
+  const [continuing, setContinuing] = useState(false);
 
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -195,6 +197,29 @@ export default function ActiveSessionPage() {
     }
   }, [sessionId, domainSlug]);
 
+  // B (feed): "never ends" — start a fresh quick series in the same subject
+  // straight from the results screen, no trip back to a menu.
+  const startNext = useCallback(async () => {
+    if (continuing) return;
+    setContinuing(true);
+    try {
+      const res = await fetch(`/api/${domainSlug}/session/start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "quick" }),
+      });
+      const s = await res.json();
+      if (s.sessionId) {
+        localStorage.setItem(`session_${s.sessionId}`, JSON.stringify({ ...s, domainSlug }));
+        router.push(`/dashboard/practice/${s.sessionId}`);
+      } else {
+        setContinuing(false);
+      }
+    } catch {
+      setContinuing(false);
+    }
+  }, [domainSlug, router, continuing]);
+
   const handleNext = useCallback(async () => {
     if (!sessionData) return;
 
@@ -241,6 +266,8 @@ export default function ActiveSessionPage() {
         duration={results.duration}
         domainSlug={domainSlug}
         gamification={results.gamification}
+        onContinue={startNext}
+        continuing={continuing}
       />
     );
   }
