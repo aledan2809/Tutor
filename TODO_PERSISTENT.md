@@ -4,6 +4,29 @@
 
 ---
 
+## [~] 👨‍👩‍👧 Pachete de familie — Fazele 0-3 DONE + LIVE 2026-06-25 (commits `dec353e`+`e750b6d`+`246e2fb`); Faza 4 (True E2E full) rămâne
+
+**Rezolvă „CE LIPSEȘTE" #1+#2+#3 de mai jos** (legătură 1:1, onboarding self-service, scaffold pachete) — wiring real, nu doar marketing. Plan (a) agreat 2026-06-03, executat acum.
+
+**Livrat + LIVE pe etutor.ro:**
+- **Model (migrare aditivă `0035`)**: `Guardian.relation` PARENT|TUTOR + `FamilyInvite` (token + cod scurt, single-use, TTL 7 zile). Backup DB prod: `VPS2:/root/backups/tutor-pre-family-2026-06-25.dump`. Pilot Alex→Rareș backfilled la `PARENT`.
+- **`src/lib/family.ts`** (sursă unică pachet→locuri→funcții + reguli seat pure) + **`src/lib/family-invite.ts`** (invite create/deliver email/WhatsApp/Telegram/cod, accept token+cod, creează-cont-copil-direct, scoatere membru, math household/seats).
+- **UI** `/dashboard/family` (adaugă copil/părinte/meditator; 3 căi de legare; invitații pending + revocare; scoatere) + public `/family/accept/[token]` + `/family/join` (cod). Merge pe conturi existente (Google) via signin callbackUrl. Nav „Familia mea" (RO+EN).
+- **Drepturi**: seat strict la creare+accept+direct (advisory lock per familie → ține sub accept-uri concurente); CTA upgrade (părinte) / add-on cu reducere (copil). **Leak fix**: meditatorul = WATCHER + Guardian `relation=TUTOR`, **niciodată INSTRUCTOR** → vede doar copiii plătiți.
+- **Faza 3 audit suprafață**: `Reports/family-packages-surface-audit-2026-06-25.md` (matrice rol×pachet; toate rutele watcher/[id] gate-uite `isGuardianOf` → fără IDOR pe copil).
+- **/review adversarial (2 treceri)** → 2 buguri reale găsite+fixate (P1 IDOR co-părinte la `removeFamilyMember`; P2 mutare-rol la accept) → re-verificat CLOSED/SHIP.
+- Verificat: tsc clean, 325/325 vitest (+27 noi), build verde, smoke prod (join/accept 200 public, dashboard 307, api 401), L41 vecini OK.
+
+**Rămas:**
+- [ ] **Faza 4 — True E2E Full Audit [10]** pe etutor.ro: necesită provisioning conturi test per rol (copil/părinte/meditator) cu pachet + journey walks logate + concurrency + role-play. = sesiune dedicată (scrie date test pe prod → cu acceptul user).
+- [ ] **Billing → roluri**: achiziția pachetului Stripe să acorde acces „Familia mea" (acum nav e gate-uit pe WATCHER/SuperAdmin; seat-gate-urile sunt deja gata să consume `subscriptionPlan.name`).
+- [ ] **WhatsApp invitație rece**: template Meta aprobat `WHATSAPP_INVITE_TEMPLATE` (acțiune user; până atunci email/Telegram cad pe „copiază linkul").
+- [ ] **Email branded** invitații: depinde de itemul Resend DNS `etutor.ro` de mai jos.
+- [ ] **Sync enrollment**: la înscriere ulterioară a copilului la un domeniu nou, guardianul nu e auto-înrolat WATCHER acolo (hook pe `enrollment.create`).
+- [ ] **Ancoră explicită**: marker de ancoră pe Guardian (acum: familie legacy fără invitație cu ≥2 părinți → nici ancora nu poate cascada scoaterea copilului; fail-safe, under-removes).
+
+---
+
 ## [ ] 📧 Email branded — trece de pe techbiz.ae pe `notifications@etutor.ro` (creat 2026-06-24)
 
 **Context**: pe 2026-06-24 am conectat cheia Resend partajată (cont techbiz) în prod-ul Tutor, dar singurul domeniu **verificat** pe acel cont e `techbiz.ae` → rapoartele Watcher + reminderele pleacă temporar de pe **`eTutor <noreply@techbiz.ae>`** (deliverabil, dar cross-brand). `etutor.ro` NU e verificat în Resend.

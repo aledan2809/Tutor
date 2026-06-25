@@ -98,11 +98,19 @@ PARENT activ Alex→Rareș.
 
 ## 5. Findings / limitări cunoscute (follow-up)
 
-1. **Co-părinte poate scoate copilul din toată familia.** `removeFamilyMember`
-   pentru un copil dezactivează TOATE legăturile copilului (owner + co-părinți +
-   meditatori). Un co-părinte (tot `relation=PARENT`) poate declanșa asta. Benign
-   pentru pilot (1 părinte); de rafinat dacă apar familii cu 2 părinți reali
-   (doar owner-ul primar să poată scoate copilul).
+> **Notă:** un /review adversarial (2 treceri) a găsit și **reparat în aceeași
+> sesiune** 2 probleme reale: P1 IDOR co-părinte (mai jos #1, FIXAT) + P2 mutare
+> de rol la acceptare (FIXAT — guard `RoleConflictError` în tranzacția de accept).
+> Ambele re-verificate: CLOSED. Restul de mai jos sunt rafinări deschise.
+
+1. **[FIXAT 2026-06-25]** Co-părinte putea scoate copilul din toată familia.
+   `removeFamilyMember` cascada family-wide pe orice `relation=PARENT`. Acum
+   cascada family-wide se face DOAR de ancora copilului (inviter-ul invitației
+   CHILD/DIRECT acceptate, sau — pe legături legacy fără invitație — singurul
+   părinte activ); un co-părinte non-ancoră își scoate doar propria legătură.
+   **Limitare reziduală (fail-safe):** pe o familie legacy fără invitație cu ≥2
+   părinți activi, nici ancora reală nu mai poate cascada (under-removes, fără
+   impact de securitate) — de rafinat cu un marker explicit de ancoră pe Guardian.
 2. **WhatsApp invitație rece** necesită un template Meta APROBAT
    (`WHATSAPP_INVITE_TEMPLATE`). Până atunci email/Telegram cad pe „copiază linkul";
    `study_reminder` (singurul aprobat) e intenție greșită pentru invitație.
