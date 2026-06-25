@@ -4,6 +4,38 @@
 
 ---
 
+## [ ] 🌟🔥 WOW first-run UX + Gamification "ca pe social-media" — PRIORITATE MARE (plan aprobat 2026-06-25, cod NEÎNCEPUT)
+
+> **Decizie user 2026-06-25**: experiența primului contact trebuie să fie WOW, fără manual, auto-descoperită (model Facebook/Instagram/TikTok/Duolingo). Userii principali = **copiii** → gamification în prim-plan. „Pune în TODO acum, ne ocupăm mai încolo, dar e FOARTE IMPORTANT." Mockup viziune livrat în chat (feed de grile + feedback instant + streak + bară-jos).
+
+### Diagnostic (din journey-audit 2026-06-25, capturi reale)
+- **Quizzes = fundătură**: empty-state „You have no subjects in your package yet. Pick your subjects from your account" — text fără buton, trimite userul „în cont". 🔴 anti-WOW #1.
+- **Sidebar 16 intrări** → paralizie de alegere. **Banner install/notificări** apare înainte de orice valoare. Aterizezi pe dashboard, nu pe o întrebare.
+
+### Plan aprobat — foaie de parcurs (mesh, fază cu fază)
+**A. Quick-wins (impact mare, efort mic):**
+1. Omoară fundăturile (Quizzes gol → selector materie + buton „Începe acum" inline, niciodată „mergi în cont").
+2. Amână corvoezile: banner install/notificări DUPĂ primele ~5 răspunsuri.
+3. Streak + XP în ecranul de răspuns (nu pe pagina separată „Realizări").
+4. Sidebar slab la primul contact / **bară-jos pe mobil** (Învață · Simulări · Progres · Profil); restul, dezvăluire progresivă.
+5. Un singur coachmark contextual („👆 Atinge un răspuns"), o dată, dismissabil.
+
+**B. Motorul WOW:** feed de grile — o întrebare pe ecran → tap → feedback instant + explicație scurtă → „Următoarea"/glisare. Devine ecranul default „Învață" (Duolingo × TikTok).
+
+**C. Intrare fără fricțiune:** răspunzi întâi (3–5 grile din home „Începe testul"), cont doar ca să salvezi progresul (reuse `/try` + demo-quiz cookie existent).
+
+### 🔥 Gamification deepening (copiii = userii principali) — cerut 2026-06-25
+- **Animație cu focul reutilizată din demo Procu**, dar **mult mai discretă** decât acolo, care **se aprinde din ce în ce mai tare** pe măsură ce crește streak-ul/momentum-ul (intensitate progresivă, nu burst). Pointer reuse: `procuchaingo2/apps/web/src/components/gamification/streak-counter.tsx` (Flame lucide) + versiunea animată din `procuchaingo2/apps/web/src/app/(dashboard)/gamification/page.tsx` + `demo-simulation/`. De localizat exact flacăra animată când construim.
+- **Animații + remarci adaptive** funcție de **vârstă / sex / profilare** (serios ↔ șmecher/„cool"). Ex. verbatim user: *„Ești foarte tare, dragule! Știai că fetele se îndrăgostesc de mintea băieților deștepți?"*.
+- **Remarcile „cool" se adaptează și după feedback-ul userului** (like/dislike pe remarcă) → buclă de învățare: păstrează tonul care-i place, renunță la ce respinge.
+- 🔒 **Guardrail obligatoriu (de proiectat din start)**: conținutul remarcilor pt **minori** trebuie age-appropriate + opt-out + vizibil/controlabil de părinte (părinții sunt watchers pe platformă!). Orice ton romantic/gendered se trece printr-un filtru de siguranță + setare de profil (părinte poate dezactiva tonul „cool"). Fără asta = risc de reclamație părinte. Nu blocant pt restul gamification-ului.
+
+### Status
+- [ ] Plan aprobat, **cod neînceput**. Următorul pas natural (când reluăm): A1 (fix empty-state) + B (bucla feed) împreună = saltul cel mai mare cu risc mic. Apoi A2–A5, apoi C, apoi 🔥 gamification deepening.
+- Referințe: mockup viziune (chat 2026-06-25) · memory `feedback-no-ai-in-user-copy` (zero „AI" în copy) · `feedback-ro-nontech-comms`.
+
+---
+
 ## [~] 🔔 Feedback elevi — inbox bell + admin click-through + override — DONE+LIVE 2026-06-25 (commits `e5a5bf7`+`6217fe7`)
 
 **Context (cerere user 2026-06-25)**: Rareș dăduse 9 👎 (toate procesate de cron — vezi mai jos). User a cerut: (1) notificările să apară clar în inbox-ul cu clopoțel (badge alb pe roșu) separat de „Alerte"; (2) să poată da click pe fiecare feedback și să vadă întrebarea+răspunsul „corect" cum a fost expus, problema elevului, decizia + justificarea (auto vs necesită admin), trimiterea la text (paragraf+secțiune+pagină+link document), și să poată **suprascrie** decizia.
