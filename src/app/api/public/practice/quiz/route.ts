@@ -52,9 +52,13 @@ export async function GET(req: Request) {
       .map((q) => {
         const options = Array.isArray(q.options) ? (q.options as string[]) : [];
         const correctIndex = options.findIndex((o) => strip(o) === strip(q.correctAnswer));
-        // Human-readable citation (curriculum). Defensive prefix-strip — restricted
-        // licență grile never reach here, so no quote leaks.
-        const sr = (q.sourceReference ?? "").replace(/^licenta-gen:\s*/i, "").trim();
+        // Human-readable citation only — strip internal prefixes:
+        //  "exam-bank:<id> | EN VIII 2021 …" → "EN VIII 2021 …"
+        //  "licenta-gen: …" (defensive; restricted never reaches here)
+        const sr = (q.sourceReference ?? "")
+          .replace(/^exam-bank:[^|]*\|\s*/i, "")
+          .replace(/^licenta-gen:\s*/i, "")
+          .trim();
         return {
           content: q.content,
           options,
