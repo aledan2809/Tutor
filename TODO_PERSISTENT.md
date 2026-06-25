@@ -19,16 +19,18 @@
 
 ---
 
-## [~] 📄 Licență — proveniență verificabilă (pagină + secțiune + citat) pe grile (creat 2026-06-25)
+## [x] 📄 Licență — proveniență verificabilă (pagină + secțiune + citat) pe grile — DONE 2026-06-25 (commits `1ccf78c` + `a51465b`, LIVE etutor.ro)
+
+**Rezultat**: 204/204 grile actualizate pe prod (199 ancorate la pagină reală + secțiune; 0 mai au „Secțiunea N"; 5 front-matter fără pagină = candidate review). Rareș vede acum DUPĂ răspuns: „📄 Citat din lucrare: «...»" + „Sursă: Lucrare de licență — pagina X · 1.2. ...". Backup DB pre-backfill: `VPS2:/root/backups/tutor-pre-licenta-provenance-2026-06-25.dump`. Verificat: deploy OK, date corecte (ex. p7 → „1.2. Calitatea serviciilor"), prod 307. Cele 5 fără pagină + 11 DRAFT → vezi item-ul de mai jos.
 
 **Problemă (Rareș nu putea verifica)**: grilele de Licență aveau `topic = "Secțiunea N"` = doar al N-lea fragment auto-tăiat din PDF, fără sens. Citatul-sursă era stocat în `sourceReference` dar ascuns studentului.
 
-**Livrat (cod + build verde + /review clean, AȘTEAPTĂ deploy + backfill prod)**:
+**Livrat**:
 - `scripts/backfill-licenta-provenance.mjs` — re-citește `1. Fabulosos srl licenta final.pdf` pagină-cu-pagină, leagă fiecare grilă de pagina reală (match pe citatul stocat, cascadă full→prefix→approx) + setează `topic` la secțiunea reală (1.1/1.2/.../Bibliografie). Idempotent, dry-run default. **Validat offline pe cele 204 grile: 199/204 (98%) ancorate la pagină + secțiune, 5 front-matter fără pagină.**
 - Answer route + `FeedbackDisplay` + i18n RO/EN: Rareș vede DUPĂ ce răspunde „📄 Sursă: Lucrare de licență — pagina X · 1.2. ..." + **citatul verbatim** (ca să găsească pasajul). Citatul e expus DOAR pe domeniul `licenta-rares` (material propriu) — nu pe domenii cu surse cu drepturi de autor.
 - `generate-licenta.mjs`: notă — după orice (re)generare, rulează backfill-ul.
 
-**Rămas**: deploy VPS2 + backup DB + scp PDF + `node scripts/backfill-licenta-provenance.mjs /tmp/licenta.pdf --apply` + verificare Rareș + prod 307. Cele 5 grile fără pagină = candidate de review (suprapunere cu item-ul DRAFT de mai jos).
+**Follow-up minor**: verificare UI autentificată (login Rareș → sesiune licență → vede citatul) va fi acoperită de True E2E final. Cele 5 grile fără pagină = candidate de review (suprapunere cu item-ul DRAFT de mai jos).
 
 ---
 
