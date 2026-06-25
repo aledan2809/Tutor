@@ -168,6 +168,7 @@ async function _POST(
   // section + the verbatim quote so they can open the PDF and verify. The quote
   // is exposed ONLY for this own-material domain — other domains' sourceReference
   // may cite copyrighted books (schema marks it Instructor/Admin-only).
+  let explanationText = question.explanation;
   let sourceQuote: string | null = null;
   if (domain.slug === LICENTA_DOMAIN_SLUG) {
     const sec =
@@ -179,13 +180,19 @@ async function _POST(
       : `Lucrare de licență${sec}`;
     const m = /^licenta-gen:\s*"([\s\S]*)"$/.exec(question.sourceReference ?? "");
     if (m) sourceQuote = m[1];
+    // Weave the page + section reference into the explanation text itself, so the
+    // provenance travels with the answer wherever the explanation is read.
+    if (question.pdfPage) {
+      const ref = `📄 Sursă: pagina ${question.pdfPage}${sec}`;
+      explanationText = explanationText ? `${explanationText} — ${ref}` : ref;
+    }
   }
 
   return NextResponse.json({
     attemptId: attempt.id,
     isCorrect,
     correctAnswer: question.correctAnswer,
-    explanation: question.explanation,
+    explanation: explanationText,
     source,
     sourceQuote,
     quality,
