@@ -17,8 +17,10 @@
 - **/review adversarial (2 treceri)** → 2 buguri reale găsite+fixate (P1 IDOR co-părinte la `removeFamilyMember`; P2 mutare-rol la accept) → re-verificat CLOSED/SHIP.
 - Verificat: tsc clean, 325/325 vitest (+27 noi), build verde, smoke prod (join/accept 200 public, dashboard 307, api 401), L41 vecini OK.
 
-**Rămas:**
-- [ ] **Faza 4 — True E2E Full Audit [10]** pe etutor.ro: necesită provisioning conturi test per rol (copil/părinte/meditator) cu pachet + journey walks logate + concurrency + role-play. = sesiune dedicată (scrie date test pe prod → cu acceptul user).
+**Faza 4 — parțial DONE 2026-06-25:**
+- [x] **/review adversarial** (2 treceri) → 2 bug-uri reale fixate (vezi mai sus).
+- [x] **Integration E2E pe prod** (12/12) cu conturile test existente (`admin-test`=owner, `test_student`=copil, `test_watcher`=meditator), canal CODE (fără send-uri externe): child accept · child link PARENT · tutor accept · tutor link TUTOR · **tutor fără INSTRUCTOR + watcherSeesAllStudents=false + getLinkedChildIds include copilul** (leak-fix dovedit) · overview · role_conflict child→tutor · double-accept · self-invite. Snapshot+cleanup verificat (prod restaurat: doar legătura pilot, 0 invitații, roluri admin-test restaurate). Harness rulat ad-hoc (necomis).
+- [ ] **Rămas din [10]**: journey walks UI logate per rol (Tester, cere parole conturi test) + concurrency (2 accept-uri simultane pe același loc) + parity. = follow-on.
 - [ ] **Billing → roluri**: achiziția pachetului Stripe să acorde acces „Familia mea" (acum nav e gate-uit pe WATCHER/SuperAdmin; seat-gate-urile sunt deja gata să consume `subscriptionPlan.name`).
 - [ ] **WhatsApp invitație rece**: template Meta aprobat `WHATSAPP_INVITE_TEMPLATE` (acțiune user; până atunci email/Telegram cad pe „copiază linkul").
 - [ ] **Email branded** invitații: depinde de itemul Resend DNS `etutor.ro` de mai jos.
