@@ -48,8 +48,10 @@ async function _GET(req: NextRequest) {
       skip: offset,
     }),
     prisma.notification.count({ where }),
+    // Unread count respects the requested audience so the badge matches the feed
+    // the caller shows (the bell uses audience=self → it won't count parent "Alerte").
     prisma.notification.count({
-      where: { userId: session.user.id, isRead: false },
+      where: { userId: session.user.id, ...audienceWhere, isRead: false },
     }),
     // Whether this user receives child alerts at all → drives the UI tab.
     prisma.notification.count({

@@ -37,7 +37,9 @@ export function NotificationBell() {
 
   async function fetchNotifications() {
     try {
-      const res = await fetch("/api/notifications?limit=10");
+      // Inbox bell = the user's own notifications (feedback + general). Parent
+      // "Alerte" (parent_alert) live on the dedicated Alerte page, not here.
+      const res = await fetch("/api/notifications?limit=10&audience=self");
       if (res.ok) {
         const data = await res.json();
         setNotifications(data.notifications);
