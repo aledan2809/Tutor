@@ -35,10 +35,11 @@
 - [x] **A2 — amână corvoezile** DONE+LIVE (commit `b41152b`): bannerul install/notificări (`AppBanner`) apare doar după ~5 răspunsuri (`src/lib/engagement.ts`, semnal localStorage bumpuit la fiecare răspuns). Userii deja-instalați neafectați.
 - [x] **A3 — momentum în buclă** DONE+LIVE (`b41152b`): chip discret „🔥 N la rând" în feedback la streak corect (XP deja afișat). Streak per-sesiune.
 - [x] **A5 — coachmark unic** DONE+LIVE (`b41152b`): „👆 Atinge un răspuns" pe prima întrebare, o singură dată (localStorage), fără tur.
-- [ ] **A4 — bară-jos pe mobil / sidebar slab la primul contact**: mai mare, atinge sidebar-ul complex (§213) → de făcut cu grijă.
-- [ ] **B — bucla feed de grile** (motorul WOW): o întrebare full-screen → tap → feedback instant → următoarea/glisare, endless. Reuse: QuestionRenderer + FeedbackDisplay + session API (bucla există deja în pagina de sesiune; B = mod „feed" fără session-selector + auto-continue).
-- [ ] **C — răspunzi-întâi-cont-la-urmă**.
-- [ ] 🔥 **Gamification deepening** (foc progresiv + remarci adaptive) — deferat per user.
+- [x] **A4 — bară-jos pe mobil** DONE+LIVE (commit `a74326b`): `MobileBottomNav` (Învață/Simulări/Progres/Profil, inline SVG, active-by-pathname), `lg:hidden`, gated pe rol STUDENT (kids); desktop păstrează sidebar-ul. main primește pb-20 pe mobil.
+- [x] **B — bucla feed** DONE+LIVE (commit `8c55ce7`): „🔥 Continuă cu încă o serie" pe ecranul de rezultate → pornește o serie nouă în aceeași materie fără meniu (senzația de feed endless). Bucla 1-întrebare→feedback→next exista deja; A1 a scos frecușul de intrare, asta scoate fundătura de ieșire.
+- [x] **C — răspunzi-întâi-cont-la-urmă** DONE (pre-existent, verificat): `/try` → `SubjectQuizDemo` (alegi materie → răspunzi fără cont → scor cu CTA „Fă-ți cont gratuit ca să-ți salvezi progresul" → /auth/register). Polish opțional: ridică demo-ul ca CTA primar pe home (acum primar=register, secundar=/try).
+- **✅ Roadmap WOW (A1-A5 + B + C) COMPLET + LIVE 2026-06-25.** Verificat: build verde fiecare, smoke prod OK, A1 + family + feedback confirmate vizual via journey-audit, vecini VPS2 200. 502 tranzitoriu la /ro = blip de pm2 restart (200 stabil după).
+- [ ] 🔥 **Gamification deepening** (foc progresiv din Procu + remarci adaptive după vârstă/sex/profil + învățare din like/dislike + guardrail age-appropriate/parent-control) — **deferat per user**, prioritate mare, vezi blocul de sus.
 - Referințe: mockup viziune (chat 2026-06-25) · memory `feedback-no-ai-in-user-copy` (zero „AI" în copy) · `feedback-ro-nontech-comms`.
 
 ---
