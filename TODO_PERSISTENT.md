@@ -4,6 +4,22 @@
 
 ---
 
+## [~] 🔔 Feedback elevi — inbox bell + admin click-through + override — DONE+LIVE 2026-06-25 (commits `e5a5bf7`+`6217fe7`)
+
+**Context (cerere user 2026-06-25)**: Rareș dăduse 9 👎 (toate procesate de cron — vezi mai jos). User a cerut: (1) notificările să apară clar în inbox-ul cu clopoțel (badge alb pe roșu) separat de „Alerte"; (2) să poată da click pe fiecare feedback și să vadă întrebarea+răspunsul „corect" cum a fost expus, problema elevului, decizia + justificarea (auto vs necesită admin), trimiterea la text (paragraf+secțiune+pagină+link document), și să poată **suprascrie** decizia.
+
+**Livrat + LIVE:**
+- **(1) Bell = inbox propriu**: clopoțelul (deja există pe desktop ȘI mobil, în header-ul comun `dashboard/layout.tsx`) trăgea `/api/notifications` fără `audience` → amesteca feedback-ul cu „Alerte" (`parent_alert`) care au pagina lor → „se confunda". Fix: bell `audience=self` + `unreadCount` respectă audience (badge corect). Parent-alerts rămân pe pagina Alerte.
+- **(2) Admin feedback review** (migrare aditivă `0036`: `reviewAction`/`reviewIssue`/`correctedAnswer`/`overriddenById`/`overrideNote`/`overriddenAt` pe `QuestionFeedback`; cron-ul le populează acum; backfill 9 existente = 6 hidden + 1 flagged + 2 dismissed). Pagină `/dashboard/admin/feedback` (nav „Feedback elevi"): listă filtrabilă (toate/necesită-admin/neprocesate) → click → detaliu: întrebarea cum a văzut-o elevul (răspuns corect marcat), problema lui, decizia + justificare + auto/necesită-admin, **proveniență** (citat paragraf + secțiune/capitol + pagină + **link la document la pagina exactă** via nou `GET /api/licenta/[id]/file`), + **override** (repune/ascunde/setează-răspuns/confirmă + notă → mută întrebarea + audit + notifică elevul în bell). Domain-scoped (`requireAdminOrInstructor`).
+- **Verificat pe prod (read-only) pe cele 9 feedback-uri reale ale lui Rareș**: detaliul se asamblează corect; cazul flagged `q(-3)` pt `x²+4x+4` marcat „d) 13" — Rareș are dreptate (=1) → corect semnalat pt admin, gata de override. tsc clean, build verde, 325/325.
+
+**Cron feedback — CONFIRMAT pornit + funcțional**: `*/15 * * * *` pe VPS2 → `/api/cron/escalation` → `runFeedbackReview()` (identificare 👎 → judecată AI → fix/ascunde/semnalează → resolved → notificare user+admin). 9/9 ale lui Rareș rezolvate + notificate.
+
+**Rămas**:
+- [ ] **Desktop bell — confirmare vizuală**: clopoțelul e în header-ul comun (desktop+mobil), deci ar trebui identic. Dacă pe desktop tot pare lipsă/greșit, am nevoie să-l văd logat (parolă cont test) sau un screenshot — din cod e prezent pe ambele.
+
+---
+
 ## [~] 👨‍👩‍👧 Pachete de familie — Fazele 0-3 DONE + LIVE 2026-06-25 (commits `dec353e`+`e750b6d`+`246e2fb`); Faza 4 (True E2E full) rămâne
 
 **Rezolvă „CE LIPSEȘTE" #1+#2+#3 de mai jos** (legătură 1:1, onboarding self-service, scaffold pachete) — wiring real, nu doar marketing. Plan (a) agreat 2026-06-03, executat acum.
