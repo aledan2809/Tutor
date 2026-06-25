@@ -4,6 +4,17 @@
 
 ---
 
+## [~] 🐛 Bug-uri din review user 2026-06-25 (6 raportate)
+
+- [x] **#2 SECURITATE — domeniu Aviație vizibil fără acces** DONE+LIVE (`6b5f58d`): scurgeri închise la sursă — `/api/domains/public` (dropdown register nelogat) + `/api/student/domains` `available` (catalog) filtrează acum domeniile restricționate (non-curriculum) dacă userul nu e admin/allowlist; POST enroll direct blocat (403) pe restricționate (defense-in-depth). Verificat prod: `/api/domains/public` întoarce doar curriculum (zero aviation/licenta). Enrolații existenți păstrează accesul.
+- [x] **#5 — demo nelogat arăta doar răspunsul corect** DONE+LIVE (`6b5f58d`+`c689cea`): API-ul public de quiz întoarce acum **sursa** (99% acoperire) + biasează spre întrebări cu **explicație**; `SubjectQuizDemo` afișează „De ce:" (explicație) + „Sursă:" (citat curat, fără prefixul intern `exam-bank:<id>|`). Verificat: sursa = „EN VIII 2022 Testul 5 (CNPEE)".
+- [x] **#3 — buton „Am uitat parola"** DONE+LIVE (`6b5f58d`): linkul exista la signin dar era hardcodat în engleză + mic → acum `t("forgotPassword")` = „Ai uitat parola?", text-sm/medium, vizibil.
+- [x] **#4 — „unde sunt grilele?"** DONE+LIVE (`6b5f58d`): pe mobil tab-ul era „Învață" → redenumit **„Grile"** (termenul userului; e primul tab). Grilele = practica cu feedback imediat (deja așa); Simulările = exam-bank (altceva).
+- [~] **#6 — romgleză în multe locuri** PARȚIAL (`6b5f58d`): reparat `SessionResults` (era integral engleză: „Session Complete/Correct/Back to Practice"…) → bloc i18n `results` (ro+en) + linkul forgot-pw. **Rămas**: sweep sistematic (ex. catalog `/dashboard/domains` „No domains available", alte fallback-uri `|| "..."` engleze). De făcut o trecere completă pe componentele dashboard.
+- [ ] **#1 — Google OAuth nu merge pe Android** = **ACȚIUNE USER (Google Cloud Console)**. Config server OK (verificat: AUTH_URL=etutor.ro, client ID/secret setate, callback 302, providers corect). Lipsește în consola Google OAuth (client `59424…`): **Authorized redirect URI** `https://etutor.ro/api/auth/callback/google` + **Authorized JavaScript origin** `https://etutor.ro` (origin-ul e necesar pt Google One Tap din auth.ts). Fără ele, OAuth/One Tap eșuează. După adăugare → re-test pe Android.
+
+---
+
 ## [ ] 🌟🔥 WOW first-run UX + Gamification "ca pe social-media" — PRIORITATE MARE (plan aprobat 2026-06-25, cod NEÎNCEPUT)
 
 > **Decizie user 2026-06-25**: experiența primului contact trebuie să fie WOW, fără manual, auto-descoperită (model Facebook/Instagram/TikTok/Duolingo). Userii principali = **copiii** → gamification în prim-plan. „Pune în TODO acum, ne ocupăm mai încolo, dar e FOARTE IMPORTANT." Mockup viziune livrat în chat (feed de grile + feedback instant + streak + bară-jos).
