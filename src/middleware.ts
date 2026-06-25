@@ -4,9 +4,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 const intlMiddleware = createMiddleware(routing);
 
-const publicPaths = ["/", "/try", "/scor", "/grile", "/auth/signin", "/auth/verify", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/terms", "/privacy", "/creatori", "/parinte", "/elev", "/preturi", "/ghid-bac"];
+const publicPaths = ["/", "/try", "/scor", "/grile", "/auth/signin", "/auth/verify", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/terms", "/privacy", "/creatori", "/parinte", "/elev", "/preturi", "/ghid-bac", "/family/join"];
 // Public sections that carry a dynamic segment (e.g. /duel/<id>, /certificat/<id>, /grile/<slug>).
-const publicPrefixes = ["/duel/", "/certificat/", "/grile/"];
+// /family/accept/<token> must render for a logged-out invitee (the page itself
+// offers sign-in / sign-up); the accept POST stays auth-gated server-side.
+const publicPrefixes = ["/duel/", "/certificat/", "/grile/", "/family/accept/"];
 
 function isPublicPath(pathname: string): boolean {
   const pathWithoutLocale = pathname.replace(/^\/(en|ro)/, "") || "/";
@@ -144,5 +146,5 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/try", "/scor", "/ghid-bac", "/(en|ro)/:path*", "/api/:path*", "/dashboard/:path*", "/auth/:path*"],
+  matcher: ["/", "/try", "/scor", "/ghid-bac", "/(en|ro)/:path*", "/api/:path*", "/dashboard/:path*", "/auth/:path*", "/family/:path*"],
 };
