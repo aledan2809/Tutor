@@ -90,7 +90,8 @@ function buildSectionMap(pages, cuprinsPages) {
     // Scan every line — subsection headings (1.2, 2.3…) often sit mid-page where
     // the previous section's text ends. The \d+\.\d+ form + biblio-lock keep the
     // bibliography's numbered reference list from being read as headings.
-    for (const l of pg.lines) {
+    for (const lRaw of pg.lines) {
+      const l = lRaw.replace(/[.:·]+$/, "").trim(); // "INTRODUCERE." → "INTRODUCERE"
       if (l.length <= 90 && HEAD_RE.test(l)) {
         const label = l.replace(/\s+/g, " ").trim();
         anchors.push([pageNo, label]);
