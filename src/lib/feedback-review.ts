@@ -140,7 +140,16 @@ export async function runFeedbackReview(): Promise<{
         stats.flagged++;
       }
 
-      await prisma.questionFeedback.update({ where: { id: fb.id }, data: { status: "resolved", resolution: decision } });
+      await prisma.questionFeedback.update({
+        where: { id: fb.id },
+        data: {
+          status: "resolved",
+          resolution: decision,
+          reviewAction: action,
+          reviewIssue: j.valid ? j.issue : j.reason,
+          correctedAnswer: action === "corrected" ? j.correctedAnswer : null,
+        },
+      });
 
       const meta = { questionId: q.id, feedbackId: fb.id, action, domain: domain?.slug ?? null };
       // The user who complained

@@ -8,6 +8,7 @@ const adminLinks: { href: string; labelKey: string; superAdminOnly: boolean; lab
   { href: "/dashboard/admin", labelKey: "overview", superAdminOnly: false },
   { href: "/dashboard/admin/questions", labelKey: "questions", superAdminOnly: false },
   { href: "/dashboard/admin/questions/review", labelKey: "reviewQueue", superAdminOnly: false },
+  { href: "/dashboard/admin/feedback", labelKey: "feedback", label: "Feedback elevi", superAdminOnly: false },
   { href: "/dashboard/admin/domains", labelKey: "domains", superAdminOnly: false },
   { href: "/dashboard/admin/tags", labelKey: "tags", superAdminOnly: false },
   { href: "/dashboard/admin/subjects", labelKey: "subjectsTopics", superAdminOnly: false },

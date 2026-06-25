@@ -1347,6 +1347,14 @@ model QuestionFeedback {
   comment    String?  @db.Text
   status     String   @default("new") // new | resolved
   resolution String?  @db.Text // decizia agentului
+  // Structured decision (so an admin can understand + override it, not just read prose).
+  reviewAction    String? // corrected | hidden | flagged | dismissed | overridden
+  reviewIssue     String? @db.Text // the problem the reviewer identified
+  correctedAnswer String? // the answer the reviewer set, when action=corrected
+  // Admin override of the reviewer's decision. Fără FK pe User (nu atingem modelul User).
+  overriddenById String?
+  overrideNote   String?   @db.Text
+  overriddenAt   DateTime?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
