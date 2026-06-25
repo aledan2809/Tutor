@@ -15,8 +15,7 @@
 
 **Cron feedback — CONFIRMAT pornit + funcțional**: `*/15 * * * *` pe VPS2 → `/api/cron/escalation` → `runFeedbackReview()` (identificare 👎 → judecată AI → fix/ascunde/semnalează → resolved → notificare user+admin). 9/9 ale lui Rareș rezolvate + notificate.
 
-**Rămas**:
-- [ ] **Desktop bell — confirmare vizuală**: clopoțelul e în header-ul comun (desktop+mobil), deci ar trebui identic. Dacă pe desktop tot pare lipsă/greșit, am nevoie să-l văd logat (parolă cont test) sau un screenshot — din cod e prezent pe ambele.
+- [x] **Desktop bell — CONFIRMAT vizual 2026-06-25** via journey-audit logat ca `admin-test` (SuperAdmin): clopoțelul e în colțul dreapta-sus cu **badge roșu „9"** (necitite, alb pe roșu) — exact standardul cerut. Screenshot `journey-audit-results/tutor/screenshots/en_dashboard_family.png`.
 
 ---
 
@@ -36,7 +35,8 @@
 **Faza 4 — parțial DONE 2026-06-25:**
 - [x] **/review adversarial** (2 treceri) → 2 bug-uri reale fixate (vezi mai sus).
 - [x] **Integration E2E pe prod** (12/12) cu conturile test existente (`admin-test`=owner, `test_student`=copil, `test_watcher`=meditator), canal CODE (fără send-uri externe): child accept · child link PARENT · tutor accept · tutor link TUTOR · **tutor fără INSTRUCTOR + watcherSeesAllStudents=false + getLinkedChildIds include copilul** (leak-fix dovedit) · overview · role_conflict child→tutor · double-accept · self-invite. Snapshot+cleanup verificat (prod restaurat: doar legătura pilot, 0 invitații, roluri admin-test restaurate). Harness rulat ad-hoc (necomis).
-- [ ] **Rămas din [10]**: journey walks UI logate per rol (Tester, cere parole conturi test) + concurrency (2 accept-uri simultane pe același loc) + parity. = follow-on.
+- [x] **Journey walks UI — DONE 2026-06-25**: journey-audit logat ca `admin-test` (SuperAdmin), **19/19 pagini OK** incl. `/dashboard/family` (h1 „Familia mea" + butoane add + linie pachet/locuri) și `/dashboard/admin/feedback` (listă + badge-uri). Creds în `Master/credentials/tutor-test-users.env`. Config audit extins cu Family + Admin Feedback.
+- [ ] **Rămas din [10]**: journey walks per rol NON-admin (elev/părinte/meditator, parolele există în creds) + concurrency (2 accept-uri simultane pe același loc) + parity. = follow-on.
 - [ ] **Billing → roluri**: achiziția pachetului Stripe să acorde acces „Familia mea" (acum nav e gate-uit pe WATCHER/SuperAdmin; seat-gate-urile sunt deja gata să consume `subscriptionPlan.name`).
 - [ ] **WhatsApp invitație rece**: template Meta aprobat `WHATSAPP_INVITE_TEMPLATE` (acțiune user; până atunci email/Telegram cad pe „copiază linkul").
 - [ ] **Email branded** invitații: depinde de itemul Resend DNS `etutor.ro` de mai jos.

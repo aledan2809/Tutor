@@ -29,7 +29,9 @@
     { "name": "Gamification", "href": "/en/dashboard/gamification" },
     { "name": "Settings", "href": "/en/dashboard/settings" },
     { "name": "Instructor Questions", "href": "/en/dashboard/instructor/questions" },
-    { "name": "Admin Questions", "href": "/en/dashboard/admin/questions" }
+    { "name": "Admin Questions", "href": "/en/dashboard/admin/questions" },
+    { "name": "Family", "href": "/en/dashboard/family" },
+    { "name": "Admin Feedback", "href": "/en/dashboard/admin/feedback" }
   ],
   "onboardingMarkers": "onboarding|setup wizard|getting started",
   "emptyStateMarkers": "No .*yet|No .*found|empty|Niciun|Nu exista",
