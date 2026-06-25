@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { GamificationToastContainer } from "@/components/gamification/gamification-toast";
 import { AppBanner } from "@/components/app-banner";
@@ -23,6 +24,11 @@ export default async function DashboardLayout({
     redirect("/auth/signin");
   }
 
+  // Bottom tab bar is for the learners (kids) — parents/instructors keep the menu.
+  const isStudent = session.user.enrollments?.some((e) =>
+    e.roles.includes("STUDENT" as never)
+  );
+
   return (
     <div className="flex min-h-screen">
       <Sidebar user={session.user} />
@@ -31,11 +37,12 @@ export default async function DashboardLayout({
           <SetupChecklist />
           <NotificationBell />
         </header>
-        <main className="flex-1 p-4 pt-14 sm:p-6 lg:pt-6">
+        <main className={`flex-1 p-4 pt-14 sm:p-6 lg:pt-6 ${isStudent ? "pb-20 lg:pb-6" : ""}`}>
           <AppBanner />
           {children}
         </main>
       </div>
+      {isStudent && <MobileBottomNav />}
       <GamificationToastContainer />
     </div>
   );

@@ -56,7 +56,11 @@
     "instructor": "Instructor",
     "gamification": "Gamificare",
     "referrals": "Invită un prieten",
-    "family": "Familia mea"
+    "family": "Familia mea",
+    "tabLearn": "Învață",
+    "tabSim": "Simulări",
+    "tabProgress": "Progres",
+    "tabProfile": "Profil"
   },
   "grile": {
     "subject": "Materie",

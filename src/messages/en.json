@@ -56,7 +56,11 @@
     "instructor": "Instructor",
     "gamification": "Gamification",
     "referrals": "Invite a friend",
-    "family": "My family"
+    "family": "My family",
+    "tabLearn": "Learn",
+    "tabSim": "Mock exams",
+    "tabProgress": "Progress",
+    "tabProfile": "Profile"
   },
   "grile": {
     "subject": "Subject",
