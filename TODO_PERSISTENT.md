@@ -35,8 +35,13 @@
 **Faza 4 — parțial DONE 2026-06-25:**
 - [x] **/review adversarial** (2 treceri) → 2 bug-uri reale fixate (vezi mai sus).
 - [x] **Integration E2E pe prod** (12/12) cu conturile test existente (`admin-test`=owner, `test_student`=copil, `test_watcher`=meditator), canal CODE (fără send-uri externe): child accept · child link PARENT · tutor accept · tutor link TUTOR · **tutor fără INSTRUCTOR + watcherSeesAllStudents=false + getLinkedChildIds include copilul** (leak-fix dovedit) · overview · role_conflict child→tutor · double-accept · self-invite. Snapshot+cleanup verificat (prod restaurat: doar legătura pilot, 0 invitații, roluri admin-test restaurate). Harness rulat ad-hoc (necomis).
-- [x] **Journey walks UI — DONE 2026-06-25**: journey-audit logat ca `admin-test` (SuperAdmin), **19/19 pagini OK** incl. `/dashboard/family` (h1 „Familia mea" + butoane add + linie pachet/locuri) și `/dashboard/admin/feedback` (listă + badge-uri). Creds în `Master/credentials/tutor-test-users.env`. Config audit extins cu Family + Admin Feedback.
-- [ ] **Rămas din [10]**: journey walks per rol NON-admin (elev/părinte/meditator, parolele există în creds) + concurrency (2 accept-uri simultane pe același loc) + parity. = follow-on.
+- [x] **Journey walks UI — DONE 2026-06-25 (toate 4 rolurile)**: journey-audit per rol (creds aliniate în `Master/credentials/tutor-test-users.env`):
+  - **admin-test** (SuperAdmin): 19/19 OK — vede Familia mea + Admin Feedback + **clopoțel cu badge roșu „9"**.
+  - **test_student** (elev): 18 OK + 1 fals-pozitiv (Exam Simulator „HAS_ERRORS" = regex prinde badge-urile „FAILED" din istoricul de examene, pagina e OK). Blocat corect de Admin Feedback/Questions/Instructor (redirect → Dashboard).
+  - **test_watcher** (părinte): 19/19 OK — vede Familia mea; blocat de Admin Feedback.
+  - **test_instructor** (meditator): 19/19 OK — vede paginile Instructor; blocat de Admin Feedback/Admin Questions.
+  - **Concluzie audit suprafață**: fiecare rol ajunge la ce-i al lui; Admin Feedback e admin-only (layout `dashboard/admin` cere ADMIN/superadmin) — non-adminii sunt redirecționați. „Nimic lipsă, nimic neplătit accesibil" = confirmat la runtime.
+- [ ] **Rămas din [10]**: concurrency (2 accept-uri simultane pe același loc) + parity demo/prod. = follow-on.
 - [ ] **Billing → roluri**: achiziția pachetului Stripe să acorde acces „Familia mea" (acum nav e gate-uit pe WATCHER/SuperAdmin; seat-gate-urile sunt deja gata să consume `subscriptionPlan.name`).
 - [ ] **WhatsApp invitație rece**: template Meta aprobat `WHATSAPP_INVITE_TEMPLATE` (acțiune user; până atunci email/Telegram cad pe „copiază linkul").
 - [ ] **Email branded** invitații: depinde de itemul Resend DNS `etutor.ro` de mai jos.
