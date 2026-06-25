@@ -113,6 +113,9 @@ model User {
   // Parent (WATCHER) ↔ child (STUDENT) links — a parent sees ONLY linked children.
   childrenLinks        Guardian[] @relation("GuardianParent")
   guardianLinks        Guardian[] @relation("GuardianChild")
+  // Family invitations (as inviter / as the accepted invitee).
+  familyInvitesSent     FamilyInvite[] @relation("FamilyInviteInviter")
+  familyInvitesAccepted FamilyInvite[] @relation("FamilyInviteAccepted")
   // Scheduled study reminders (fixed days + time → escalation cascade + deep-link).
   studyReminders       StudyReminder[]
   // Parent monitoring escalations (as parent / as child).
@@ -172,10 +175,13 @@ model StudyReminder {
 /// Parent↔child link for the family plan. A WATCHER (parent) is scoped to ONLY
 /// the children linked here — without this, a watcher saw every student in a
 /// domain (the family-plan minor-data leak). One row per (parent, child).
+/// `relation` tells PARENT (mother/father) from TUTOR (paid meditator): a tutor
+/// is a WATCHER scoped per-child via this link, NOT a domain-wide instructor.
 model Guardian {
   id        String   @id @default(cuid())
   parentId  String
   childId   String
+  relation  String   @default("PARENT") // PARENT | TUTOR
   status    String   @default("active") // active | pending | removed
   createdAt DateTime @default(now())
 
@@ -185,6 +191,37 @@ model Guardian {
   @@unique([parentId, childId])
   @@index([parentId])
   @@index([childId])
+}
+
+/// A single-use invitation to join a family. The inviter (account owner) creates
+/// one row per person they add (child / 2nd parent / tutor). Accepted either by
+/// opening the `token` link (email / WhatsApp / Telegram delivery) or by typing
+/// the short `code` (family-code path). For the "parent creates the account
+/// directly" path the row is created already accepted. Seat limits are enforced
+/// at accept time, not at create time. No hard FK on the user model is added
+/// beyond the two relations below.
+model FamilyInvite {
+  id           String    @id @default(cuid())
+  inviterId    String                          // account owner who sent the invite
+  token        String    @unique               // opaque accept-link token (all channels)
+  code         String?   @unique               // short human code (family-code path)
+  targetRole   String                          // CHILD | PARENT | TUTOR (what the invitee becomes)
+  relation     String    @default("PARENT")    // Guardian.relation to stamp on accept (PARENT | TUTOR)
+  email        String?                         // delivery target for EMAIL channel
+  phone        String?                         // delivery target for WHATSAPP channel
+  channel      String                          // EMAIL | WHATSAPP | TELEGRAM | CODE | DIRECT
+  status       String    @default("pending")   // pending | accepted | revoked | expired
+  acceptedById String?                         // user who accepted (set on accept)
+  expiresAt    DateTime
+  acceptedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  inviter    User  @relation("FamilyInviteInviter", fields: [inviterId], references: [id], onDelete: Cascade)
+  acceptedBy User? @relation("FamilyInviteAccepted", fields: [acceptedById], references: [id], onDelete: SetNull)
+
+  @@index([inviterId, status])
+  @@index([status, expiresAt])
 }
 
 /// Marketing campaign attribution for a signed-up user (UTM + per-voucher

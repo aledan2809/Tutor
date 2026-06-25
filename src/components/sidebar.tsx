@@ -78,6 +78,7 @@ export function Sidebar({ user }: SidebarProps) {
     user.enrollments?.some((e) => e.roles.includes("STUDENT"));
 
   if (isWatcher) {
+    navItems.push({ href: "/dashboard/family", label: t("family") });
     navItems.push({ href: "/dashboard/watcher", label: t("watcher") });
     navItems.push({ href: "/dashboard/watcher/notifications", label: t("watcherNotifications") });
   }
@@ -112,6 +113,7 @@ export function Sidebar({ user }: SidebarProps) {
   if (isParentView) {
     visibleNavItems = [
       { href: "/dashboard", label: t("dashboard") },
+      { href: "/dashboard/family", label: t("family") },
       { href: "/dashboard/watcher", label: t("watcher") },
       { href: "/dashboard/watcher/notifications", label: t("watcherNotifications") },
       { href: "/dashboard/referrals", label: t("referrals") },
