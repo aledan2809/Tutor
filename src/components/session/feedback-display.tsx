@@ -7,6 +7,7 @@ interface FeedbackDisplayProps {
   correctAnswer: string;
   explanation?: string | null;
   source?: string | null;
+  sourceQuote?: string | null;
   onNext: () => void;
 }
 
@@ -15,6 +16,7 @@ export function FeedbackDisplay({
   correctAnswer,
   explanation,
   source,
+  sourceQuote,
   onNext,
 }: FeedbackDisplayProps) {
   const t = useTranslations("feedback");
@@ -50,6 +52,15 @@ export function FeedbackDisplay({
         <div className="mb-4 rounded-lg bg-gray-800/50 p-4">
           <p className="text-sm text-gray-400">{t("explanation")}</p>
           <p className="mt-1 text-sm text-gray-300">{explanation}</p>
+        </div>
+      )}
+
+      {sourceQuote && (
+        <div className="mb-4 rounded-lg border border-gray-700 bg-gray-800/40 p-4">
+          <p className="text-sm text-gray-400">{t("sourceQuote")}</p>
+          <p className="mt-1 border-l-2 border-gray-600 pl-3 text-sm italic text-gray-300">
+            {`„${sourceQuote}”`}
+          </p>
         </div>
       )}
 

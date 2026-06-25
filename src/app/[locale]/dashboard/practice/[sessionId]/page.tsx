@@ -36,6 +36,7 @@ interface AnswerResult {
   correctAnswer: string;
   explanation?: string | null;
   source?: string | null;
+  sourceQuote?: string | null;
   xpAwarded?: number;
 }
 
@@ -276,6 +277,7 @@ export default function ActiveSessionPage() {
             correctAnswer={feedback.correctAnswer}
             explanation={feedback.explanation}
             source={feedback.source}
+            sourceQuote={feedback.sourceQuote}
             onNext={handleNext}
           />
           {feedback.xpAwarded !== undefined && feedback.xpAwarded > 0 && (

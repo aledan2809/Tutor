@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { sm2, gradeResponse } from "@/lib/sm2";
 import { awardAnswerXp } from "@/lib/gamification";
 import { withErrorHandler } from "@/lib/api-handler";
+import { LICENTA_DOMAIN_SLUG } from "@/lib/licenta-constants";
 
 async function _POST(
   req: NextRequest,
@@ -159,9 +160,26 @@ async function _POST(
   const paperSource = question.sourceReference?.startsWith("exam-bank:")
     ? (question.sourceReference.split(" | ")[1] ?? null)
     : null;
-  const source = paperSource
+  let source = paperSource
     ? `${paperSource}${question.topic ? ` · ${question.topic}` : ""}`
     : question.topic || null;
+
+  // Licență grile come from the student's OWN thesis: surface the real page +
+  // section + the verbatim quote so they can open the PDF and verify. The quote
+  // is exposed ONLY for this own-material domain — other domains' sourceReference
+  // may cite copyrighted books (schema marks it Instructor/Admin-only).
+  let sourceQuote: string | null = null;
+  if (domain.slug === LICENTA_DOMAIN_SLUG) {
+    const sec =
+      question.topic && !question.topic.startsWith("Lucrare de licență")
+        ? ` · ${question.topic}`
+        : "";
+    source = question.pdfPage
+      ? `Lucrare de licență — pagina ${question.pdfPage}${sec}`
+      : `Lucrare de licență${sec}`;
+    const m = /^licenta-gen:\s*"([\s\S]*)"$/.exec(question.sourceReference ?? "");
+    if (m) sourceQuote = m[1];
+  }
 
   return NextResponse.json({
     attemptId: attempt.id,
@@ -169,6 +187,7 @@ async function _POST(
     correctAnswer: question.correctAnswer,
     explanation: question.explanation,
     source,
+    sourceQuote,
     quality,
     nextReview: sm2Result.nextReview,
     xpAwarded,

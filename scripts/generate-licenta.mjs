@@ -6,6 +6,11 @@
  * Run (on a host with the AI keys + prod DB):
  *   cd /var/www/tutor && set -a && source .env && set +a && \
  *   node scripts/generate-licenta.mjs /tmp/licenta.pdf
+ *
+ * NOTE: this seeds topic="Secțiunea N" (the chunk index — not meaningful to the
+ * student). ALWAYS follow a (re)generation with the provenance backfill so each
+ * grilă gets its real PDF page + section heading + verifiable quote:
+ *   node scripts/backfill-licenta-provenance.mjs /tmp/licenta.pdf --apply
  */
 import { createRequire } from "module";
 import { readFileSync } from "fs";

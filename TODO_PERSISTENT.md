@@ -19,6 +19,34 @@
 
 ---
 
+## [~] 📄 Licență — proveniență verificabilă (pagină + secțiune + citat) pe grile (creat 2026-06-25)
+
+**Problemă (Rareș nu putea verifica)**: grilele de Licență aveau `topic = "Secțiunea N"` = doar al N-lea fragment auto-tăiat din PDF, fără sens. Citatul-sursă era stocat în `sourceReference` dar ascuns studentului.
+
+**Livrat (cod + build verde + /review clean, AȘTEAPTĂ deploy + backfill prod)**:
+- `scripts/backfill-licenta-provenance.mjs` — re-citește `1. Fabulosos srl licenta final.pdf` pagină-cu-pagină, leagă fiecare grilă de pagina reală (match pe citatul stocat, cascadă full→prefix→approx) + setează `topic` la secțiunea reală (1.1/1.2/.../Bibliografie). Idempotent, dry-run default. **Validat offline pe cele 204 grile: 199/204 (98%) ancorate la pagină + secțiune, 5 front-matter fără pagină.**
+- Answer route + `FeedbackDisplay` + i18n RO/EN: Rareș vede DUPĂ ce răspunde „📄 Sursă: Lucrare de licență — pagina X · 1.2. ..." + **citatul verbatim** (ca să găsească pasajul). Citatul e expus DOAR pe domeniul `licenta-rares` (material propriu) — nu pe domenii cu surse cu drepturi de autor.
+- `generate-licenta.mjs`: notă — după orice (re)generare, rulează backfill-ul.
+
+**Rămas**: deploy VPS2 + backup DB + scp PDF + `node scripts/backfill-licenta-provenance.mjs /tmp/licenta.pdf --apply` + verificare Rareș + prod 307. Cele 5 grile fără pagină = candidate de review (suprapunere cu item-ul DRAFT de mai jos).
+
+---
+
+## [ ] 🧪 Conținut Rareș — 33 grile DRAFT + (opțional) val nou Mate/Fizică (creat 2026-06-25)
+
+**Context**: la verificarea retroactivă cross-model (commit `7014780`, sesiunea 2026-06-24/25), **33 grile** au picat (model A ≠ model B) și au fost puse pe `status='DRAFT'` (reversibil): **22 Aviație — Cunoștințe** + **11 Licență**. Abilitățile (440) au trecut 0 probleme (verificare = cod determinist). Decizie user 2026-06-25: **amânat pentru sesiune dedicată** (nu acum).
+
+**De făcut** (sesiune dedicată):
+1. **Listează cele 33 DRAFT** (read-only) cu întrebare/răspuns/motiv-disagree, grupate pe topic. Query: `SELECT id, "domainSlug", topic, status FROM "Question" WHERE status='DRAFT' AND ...` (cele marcate de `verify-rares-content.mjs`).
+2. **Triere per-grilă**: publică cele corecte manual (`UPDATE "Question" SET status='PUBLISHED' WHERE id IN (...)`), șterge cele greșite, regenerează topicele cu gol via `scripts/generate-aviatie-cunostinte.mjs [perTopic] [wave]` (verificare cross-model încorporată → umple golul cu grile verificate).
+3. Backup DB pre-orice mutație (`pg_dump` pe prod).
+
+**Opțional (decizie user 2026-06-25: momentan NU)**: încă un val de **Matematică/Fizică** pentru Aviație — Cunoștințe (val 2 deja făcut). Rulează `scripts/generate-aviatie-cunostinte.mjs [perTopic] [wave-nou]` (append) doar dacă Rareș cere mai mult conținut.
+
+**Reversibilitate**: DRAFT-urile rămân exact unde sunt până la decizie — `UPDATE "Question" SET status='PUBLISHED' WHERE id IN (...)` le readuce instant. Domenii: `aviatie-cunostinte`, `licenta-rares`.
+
+---
+
 ## [x] 🎯 Link campanie BAC — DONE 2026-06-12 (commit `e7349d6`, LIVE)
 
 **https://etutor.ro/bac** → `/ro/auth/register?exam=bac&voucher=BAC2026FREE`. Voucher **BAC2026FREE** (100%, nelimitat, fără expirare) creat în prod; env `BAC_VOUCHER` pe VPS2 + mirror `Master/credentials/tutor.env`. Preset: 8 materii BAC filtrate (română IX-XII pre-bifată — obligatorie; M1/M2/M3 + istorie/geo/bio/chimie selectabile per profil). E2E verificat pe prod: register cu voucher → abonament activ 1 an + enrollments corecte (cont smoke șters, usedCount decrementat). Sora link: `/evaluare` (EVALUARE100, commit `e0f0cde`).
