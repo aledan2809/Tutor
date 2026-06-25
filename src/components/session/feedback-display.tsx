@@ -8,6 +8,8 @@ interface FeedbackDisplayProps {
   explanation?: string | null;
   source?: string | null;
   sourceQuote?: string | null;
+  /** Consecutive correct answers in this session — drives the momentum chip. */
+  streak?: number;
   onNext: () => void;
 }
 
@@ -17,6 +19,7 @@ export function FeedbackDisplay({
   explanation,
   source,
   sourceQuote,
+  streak = 0,
   onNext,
 }: FeedbackDisplayProps) {
   const t = useTranslations("feedback");
@@ -37,6 +40,11 @@ export function FeedbackDisplay({
         >
           {isCorrect ? t("correct") : t("incorrect")}
         </h3>
+        {isCorrect && streak >= 2 && (
+          <span className="ml-auto rounded-full bg-orange-500/15 px-2.5 py-1 text-xs font-medium text-orange-300">
+            🔥 {streak} la rând
+          </span>
+        )}
       </div>
 
       {!isCorrect && (

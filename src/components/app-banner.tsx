@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
 import { isPushSupported, subscribeToPush } from "./push-subscribe";
+import { hasFeltValue } from "@/lib/engagement";
 import {
   INSTALL_DONE_KEY,
   MANUAL_SEEN_KEY,
@@ -40,6 +41,10 @@ export function AppBanner() {
   const [manualSeen, setManualSeen] = useState(false);
   const [showSteps, setShowSteps] = useState(false);
   const [busy, setBusy] = useState(false);
+  // A2: hold the install/notifications chore until the user has answered a few
+  // questions and felt the value (like social apps asking for notifications only
+  // after you're hooked). Defaults hidden until confirmed client-side.
+  const [feltValue, setFeltValue] = useState(false);
 
   useEffect(() => {
     // Standalone launch is the ground truth for "installed" — persist it so the
@@ -48,6 +53,8 @@ export function AppBanner() {
     if (standalone) writeFlag(INSTALL_DONE_KEY);
     setInstalled(standalone || readFlag(INSTALL_DONE_KEY));
     setManualSeen(readFlag(MANUAL_SEEN_KEY));
+    // Already-installed users have clearly engaged → don't hide it from them.
+    setFeltValue(hasFeltValue() || standalone || readFlag(INSTALL_DONE_KEY));
 
     const snoozedUntil = Number(localStorage.getItem(SNOOZE_KEY) ?? 0);
     setSnoozed(Date.now() < snoozedUntil);
@@ -123,6 +130,10 @@ export function AppBanner() {
       setBusy(false);
     }
   };
+
+  // A2: nothing before first value — defer the whole install/push solicitation
+  // until the user has actually answered a few questions.
+  if (!feltValue) return null;
 
   // First-touch from a chat link opens an in-app browser where install + push
   // can't work. Instead of staying silent, point the user to Safari.

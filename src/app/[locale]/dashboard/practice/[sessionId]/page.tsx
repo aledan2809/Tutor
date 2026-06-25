@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { SessionTimer } from "@/components/session/session-timer";
 import { QuestionRenderer } from "@/components/session/question-renderer";
 import { FeedbackDisplay } from "@/components/session/feedback-display";
+import { bumpAnswered } from "@/lib/engagement";
 import { QuestionFeedback } from "@/components/session/question-feedback";
 import { SessionResults } from "@/components/session/session-results";
 
@@ -72,9 +73,20 @@ export default function ActiveSessionPage() {
   const [feedback, setFeedback] = useState<AnswerResult | null>(null);
   const [results, setResults] = useState<CompletionResult | null>(null);
   const [answeredCount, setAnsweredCount] = useState(0);
+  // Consecutive correct answers in this session — drives the momentum chip.
+  const [correctStreak, setCorrectStreak] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [answerError, setAnswerError] = useState<string | null>(null);
+  // A5: a single contextual coachmark on the very first question (no manual/tour).
+  const [coachmarkSeen, setCoachmarkSeen] = useState(true);
   const questionStartTime = useRef<number>(Date.now());
+
+  // Coachmark shows once, ever (read client-side to avoid an SSR flash).
+  useEffect(() => {
+    try {
+      setCoachmarkSeen(localStorage.getItem("tutor_coachmark_seen") === "1");
+    } catch {}
+  }, []);
 
   // Load session from localStorage (saved during start). On a miss (cache
   // cleared / new device / crash) resume the in-progress session from the
@@ -152,6 +164,12 @@ export default function ActiveSessionPage() {
         setFeedback(result);
         setPhase("feedback");
         setAnsweredCount((c) => c + 1);
+        setCorrectStreak((s) => (result.isCorrect ? s + 1 : 0));
+        bumpAnswered(); // first-value signal (gates the install/notifications banner)
+        try {
+          localStorage.setItem("tutor_coachmark_seen", "1");
+        } catch {}
+        setCoachmarkSeen(true);
       } catch {
         setAnswerError("Conexiune întreruptă — răspunsul nu s-a pierdut. Încearcă din nou.");
       } finally {
@@ -262,12 +280,19 @@ export default function ActiveSessionPage() {
 
       {/* Question or Feedback */}
       {phase === "answering" && currentQuestion && (
-        <QuestionRenderer
-          key={currentQuestion.id}
-          question={currentQuestion}
-          onAnswer={handleAnswer}
-          disabled={submitting}
-        />
+        <>
+          {!coachmarkSeen && answeredCount === 0 && (
+            <div className="mb-3 rounded-lg border border-blue-700/50 bg-blue-900/20 px-4 py-2 text-sm text-blue-200">
+              👆 Atinge un răspuns ca să vezi pe loc dacă e corect.
+            </div>
+          )}
+          <QuestionRenderer
+            key={currentQuestion.id}
+            question={currentQuestion}
+            onAnswer={handleAnswer}
+            disabled={submitting}
+          />
+        </>
       )}
 
       {phase === "feedback" && feedback && (
@@ -278,6 +303,7 @@ export default function ActiveSessionPage() {
             explanation={feedback.explanation}
             source={feedback.source}
             sourceQuote={feedback.sourceQuote}
+            streak={correctStreak}
             onNext={handleNext}
           />
           {feedback.xpAwarded !== undefined && feedback.xpAwarded > 0 && (
