@@ -41,7 +41,9 @@
   - **test_watcher** (părinte): 19/19 OK — vede Familia mea; blocat de Admin Feedback.
   - **test_instructor** (meditator): 19/19 OK — vede paginile Instructor; blocat de Admin Feedback/Admin Questions.
   - **Concluzie audit suprafață**: fiecare rol ajunge la ce-i al lui; Admin Feedback e admin-only (layout `dashboard/admin` cere ADMIN/superadmin) — non-adminii sunt redirecționați. „Nimic lipsă, nimic neplătit accesibil" = confirmat la runtime.
-- [ ] **Rămas din [10]**: concurrency (2 accept-uri simultane pe același loc) + parity demo/prod. = follow-on.
+- [x] **Concurrency — DONE 2026-06-25**: seat-race pe prod (date throwaway, cleanup): 2 accept-uri simultane (`Promise.all`) pe pachet Family (1 loc copil) → advisory lock per-familie → **exact 1 acordat, 1 `seat_unavailable`, finalChildren=1**. Validează hardening-ul din /review.
+- [x] **Parity / Stress — N/A documentat**: Tutor = un singur mediu prod (etutor.ro; Neon=rollback), fără demo separat; invite/accept human-paced → contention-ul real e deja acoperit de concurrency. Vezi raport.
+- [x] **True E2E [10] — COMPLET pt scope aplicabil** (8/8 faze aplicabile + 3 N/A documentate, 0 P0/P1). Raport consolidat: `Reports/TRUE-E2E-family-packages-2026-06-25.md`.
 - [ ] **Billing → roluri**: achiziția pachetului Stripe să acorde acces „Familia mea" (acum nav e gate-uit pe WATCHER/SuperAdmin; seat-gate-urile sunt deja gata să consume `subscriptionPlan.name`).
 - [ ] **WhatsApp invitație rece**: template Meta aprobat `WHATSAPP_INVITE_TEMPLATE` (acțiune user; până atunci email/Telegram cad pe „copiază linkul").
 - [ ] **Email branded** invitații: depinde de itemul Resend DNS `etutor.ro` de mai jos.
