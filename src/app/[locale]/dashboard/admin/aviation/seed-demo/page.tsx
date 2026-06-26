@@ -1,7 +1,9 @@
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { SeedDemoButton } from "@/components/admin/seed-demo-button";
 
 export default async function SeedDemoPage() {
+  const t = await getTranslations("admin");
   const domain = await prisma.domain.findUnique({ where: { slug: "aviation" } });
 
   const [questionCount, templateCount, examFormatCount, studentCount] = await Promise.all([
@@ -23,25 +25,24 @@ export default async function SeedDemoPage() {
 
   return (
     <div>
-      <h2 className="mb-6 text-xl font-semibold text-white">Aviation Demo Data Seeder</h2>
+      <h2 className="mb-6 text-xl font-semibold text-white">{t("seederTitle")}</h2>
 
       <div className="mb-6 rounded-lg border border-yellow-800 bg-yellow-950 p-4">
         <p className="text-sm text-yellow-300">
-          This will populate the aviation domain with WizzAir Academy content: 250+ questions across all subjects,
-          exam formats, escalation templates, and demo student accounts. SuperAdmin access required.
+          {t("seederWarning")}
         </p>
       </div>
 
       <div className="mb-6 grid gap-4 md:grid-cols-4">
-        <StatCard label="Questions" value={questionCount} />
-        <StatCard label="Exam Formats" value={examFormatCount} />
-        <StatCard label="Escalation Templates" value={templateCount} />
-        <StatCard label="Enrolled Students" value={studentCount} />
+        <StatCard label={t("questions")} value={questionCount} />
+        <StatCard label={t("examFormats")} value={examFormatCount} />
+        <StatCard label={t("escalationTemplates")} value={templateCount} />
+        <StatCard label={t("enrolledStudents")} value={studentCount} />
       </div>
 
       {questionsBySubject.length > 0 && (
         <div className="mb-6">
-          <h3 className="mb-3 text-sm font-medium text-gray-400">Questions by Subject</h3>
+          <h3 className="mb-3 text-sm font-medium text-gray-400">{t("questionsBySubject")}</h3>
           <div className="grid gap-2 md:grid-cols-4">
             {questionsBySubject.map((g) => (
               <div key={g.subject} className="rounded border border-gray-700 bg-gray-900 px-3 py-2">

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 
 interface EnrolledDomain {
   id: string;
@@ -29,6 +30,7 @@ interface AvailableDomain {
 }
 
 export default function DomainsPage() {
+  const t = useTranslations();
   const router = useRouter();
   const [enrolled, setEnrolled] = useState<EnrolledDomain[]>([]);
   const [available, setAvailable] = useState<AvailableDomain[]>([]);
@@ -59,22 +61,22 @@ export default function DomainsPage() {
         fetchDomains();
       } else {
         const data = await res.json().catch(() => ({}));
-        setEnrollError(data.error || "Enrollment failed");
+        setEnrollError(data.error || t("domains.enrollFailed"));
       }
     } catch {
-      setEnrollError("Network error");
+      setEnrollError(t("domains.networkError"));
     } finally {
       setEnrolling(null);
     }
   };
 
   if (loading) {
-    return <div className="py-12 text-center text-gray-500">Loading...</div>;
+    return <div className="py-12 text-center text-gray-500">{t("common.loading")}</div>;
   }
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
-      <h1 className="text-2xl font-bold text-white">Domains</h1>
+      <h1 className="text-2xl font-bold text-white">{t("domains.title")}</h1>
       {enrollError && (
         <div className="rounded-lg border border-red-800 bg-red-900/20 p-3 text-sm text-red-400">{enrollError}</div>
       )}
@@ -82,7 +84,7 @@ export default function DomainsPage() {
       {/* Enrolled */}
       {enrolled.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold text-white">Your Domains</h2>
+          <h2 className="mb-3 text-lg font-semibold text-white">{t("domains.yourDomains")}</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {enrolled.map((d) => {
               const isAdmin = d.roles.includes("ADMIN");
@@ -100,43 +102,43 @@ export default function DomainsPage() {
                   </div>
                   {d.description && <p className="mb-3 text-xs text-gray-400">{d.description}</p>}
                   <div className="mb-3 flex gap-4 text-xs text-gray-500">
-                    <span>{d.stats.questionsAvailable} questions</span>
+                    <span>{d.stats.questionsAvailable} {t("domains.questions")}</span>
                     <span>{d.stats.level}</span>
                     <span>{d.stats.xp} XP</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button
-                      onClick={() => router.push(`/en/dashboard/practice`)}
+                      onClick={() => router.push(`/dashboard/practice`)}
                       className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
                     >
-                      Practice
+                      {t("domains.practice")}
                     </button>
                     <button
-                      onClick={() => router.push(`/en/dashboard/exams`)}
+                      onClick={() => router.push(`/dashboard/exams`)}
                       className="rounded-lg bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700"
                     >
-                      Exams
+                      {t("domains.exams")}
                     </button>
                     <button
-                      onClick={() => router.push(`/en/dashboard/bibliography?domain=${d.slug}`)}
+                      onClick={() => router.push(`/dashboard/bibliography?domain=${d.slug}`)}
                       className="rounded-lg bg-gray-800 px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700"
                     >
-                      Bibliography
+                      {t("domains.bibliography")}
                     </button>
                     {(isAdmin || isInstructor) && (
                       <button
-                        onClick={() => router.push(`/en/dashboard/admin/questions?domain=${d.slug}`)}
+                        onClick={() => router.push(`/dashboard/admin/questions?domain=${d.slug}`)}
                         className="rounded-lg bg-purple-600/20 border border-purple-600/50 px-3 py-1.5 text-xs text-purple-400 hover:bg-purple-600/30"
                       >
-                        Questions ({d.stats.questionsAvailable})
+                        {t("domains.questionsCount", { n: d.stats.questionsAvailable })}
                       </button>
                     )}
                     {isAdmin && (
                       <button
-                        onClick={() => router.push(`/en/dashboard/admin/domains/${d.id}`)}
+                        onClick={() => router.push(`/dashboard/admin/domains/${d.id}`)}
                         className="rounded-lg bg-gray-800 px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-700"
                       >
-                        Edit Domain
+                        {t("domains.editDomain")}
                       </button>
                     )}
                   </div>
@@ -150,7 +152,7 @@ export default function DomainsPage() {
       {/* Available */}
       {available.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold text-white">Available Domains</h2>
+          <h2 className="mb-3 text-lg font-semibold text-white">{t("domains.availableDomains")}</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {available.map((d) => (
               <div key={d.id} className="rounded-xl border border-gray-800 bg-gray-900 p-4">
@@ -160,15 +162,15 @@ export default function DomainsPage() {
                 </div>
                 {d.description && <p className="mb-3 text-xs text-gray-400">{d.description}</p>}
                 <div className="mb-3 flex gap-4 text-xs text-gray-500">
-                  <span>{d.questionsAvailable} questions</span>
-                  <span>{d.totalStudents} students</span>
+                  <span>{d.questionsAvailable} {t("domains.questions")}</span>
+                  <span>{d.totalStudents} {t("domains.students")}</span>
                 </div>
                 <button
                   onClick={() => handleEnroll(d.id)}
                   disabled={enrolling === d.id}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {enrolling === d.id ? "Enrolling..." : "Enroll"}
+                  {enrolling === d.id ? t("domains.enrolling") : t("domains.enroll")}
                 </button>
               </div>
             ))}
@@ -177,7 +179,7 @@ export default function DomainsPage() {
       )}
 
       {enrolled.length === 0 && available.length === 0 && (
-        <div className="py-12 text-center text-gray-500">No domains available.</div>
+        <div className="py-12 text-center text-gray-500">{t("domains.noDomains")}</div>
       )}
     </div>
   );

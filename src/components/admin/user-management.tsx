@@ -102,7 +102,7 @@ export function UserManagement() {
       fetchUsers();
     } else {
       const data = await res.json();
-      setCreateError(data.error || "Failed to create user");
+      setCreateError(data.error || t("failedCreateUser"));
     }
   };
 
@@ -131,7 +131,7 @@ export function UserManagement() {
       fetchUsers();
     } else {
       const data = await res.json();
-      setEnrollError(data.error || "Failed to enroll user");
+      setEnrollError(data.error || t("failedEnrollUser"));
     }
     setEnrollLoading(false);
   };
@@ -175,7 +175,7 @@ export function UserManagement() {
           onClick={() => setShowCreate(!showCreate)}
           className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
         >
-          {showCreate ? "Cancel" : "+ Create User"}
+          {showCreate ? t("cancel") : t("createUserToggle")}
         </button>
       </div>
 
@@ -183,7 +183,7 @@ export function UserManagement() {
         <form onSubmit={handleCreateUser} className="rounded-lg border border-gray-800 bg-gray-900 p-4 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Name</label>
+              <label className="block text-sm text-gray-400 mb-1">{t("userName")}</label>
               <input
                 type="text"
                 value={createForm.name}
@@ -193,7 +193,7 @@ export function UserManagement() {
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Email</label>
+              <label className="block text-sm text-gray-400 mb-1">{t("userEmail")}</label>
               <input
                 type="email"
                 value={createForm.email}
@@ -203,7 +203,7 @@ export function UserManagement() {
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Password</label>
+              <label className="block text-sm text-gray-400 mb-1">{t("password")}</label>
               <input
                 type="password"
                 value={createForm.password}
@@ -214,15 +214,15 @@ export function UserManagement() {
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Role</label>
+              <label className="block text-sm text-gray-400 mb-1">{t("role")}</label>
               <select
                 value={createForm.role}
                 onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}
                 className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-purple-500 focus:outline-none"
               >
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-                <option value="superadmin">SuperAdmin</option>
+                <option value="user">{t("roleUser")}</option>
+                <option value="admin">{t("roleAdmin")}</option>
+                <option value="superadmin">{t("roleSuperadmin")}</option>
               </select>
             </div>
           </div>
@@ -231,7 +231,7 @@ export function UserManagement() {
             type="submit"
             className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
           >
-            Create User
+            {t("createUserSubmit")}
           </button>
         </form>
       )}
@@ -261,7 +261,7 @@ export function UserManagement() {
               <tr>
                 <th className="px-4 py-3">{t("userName")}</th>
                 <th className="px-4 py-3">{t("userEmail")}</th>
-                <th className="px-4 py-3">Domains & Roles</th>
+                <th className="px-4 py-3">{t("domainsRoles")}</th>
                 <th className="px-4 py-3">{t("userSubscription")}</th>
                 <th className="px-4 py-3">{t("userStatus")}</th>
                 <th className="px-4 py-3">{t("userActions")}</th>
@@ -291,7 +291,7 @@ export function UserManagement() {
                             <button
                               onClick={() => handleUnenroll(user.id, e.domain.name, e.domain.slug)}
                               className="ml-1 hidden group-hover:inline text-red-400 hover:text-red-300"
-                              title="Remove enrollment"
+                              title={t("removeEnrollment")}
                             >
                               ×
                             </button>
@@ -299,11 +299,11 @@ export function UserManagement() {
                         ))}
                       </div>
                     ) : (
-                      <span className="text-gray-600 text-xs">No enrollments</span>
+                      <span className="text-gray-600 text-xs">{t("noEnrollments")}</span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-gray-300">
-                    {user.subscriptionPlan?.name || "Free"}
+                    {user.subscriptionPlan?.name || t("free")}
                     {user.subscriptionStatus && (
                       <span className={`ml-1 text-xs ${
                         user.subscriptionStatus === "active" ? "text-green-400" :
@@ -390,12 +390,12 @@ export function UserManagement() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md rounded-lg bg-gray-900 p-6 border border-gray-700">
             <h3 className="text-lg font-semibold text-white">
-              Ban {banModal.name || "User"}
+              {t("banUser", { name: banModal.name || t("userFallback") })}
             </h3>
             <textarea
               value={banReason}
               onChange={(e) => setBanReason(e.target.value)}
-              placeholder="Reason for ban..."
+              placeholder={t("banReasonPlaceholder")}
               className="mt-3 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white placeholder-gray-500 focus:border-red-500 focus:outline-none"
               rows={3}
             />
@@ -404,13 +404,13 @@ export function UserManagement() {
                 onClick={() => { setBanModal(null); setBanReason(""); }}
                 className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800"
               >
-                Cancel
+                {t("cancel")}
               </button>
               <button
                 onClick={() => handleBan(banModal.id, true)}
                 className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
               >
-                Confirm Ban
+                {t("confirmBan")}
               </button>
             </div>
           </div>
@@ -422,12 +422,12 @@ export function UserManagement() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md rounded-lg bg-gray-900 p-6 border border-gray-700">
             <h3 className="text-lg font-semibold text-white">
-              Enroll {enrollModal.userName || "User"} in Domain
+              {t("enrollUserInDomain", { name: enrollModal.userName || t("userFallback") })}
             </h3>
 
             <form onSubmit={handleEnroll} className="mt-4 space-y-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Domain</label>
+                <label className="block text-sm text-gray-400 mb-1">{t("domain")}</label>
                 {domains.length === 0 ? (
                   <p className="text-sm text-yellow-400">
                     No domains created yet. Go to Admin → Domains to create one first.
@@ -457,7 +457,7 @@ export function UserManagement() {
               </div>
 
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Roles</label>
+                <label className="block text-sm text-gray-400 mb-2">{t("userRoles")}</label>
                 <div className="flex flex-wrap gap-2">
                   {ROLES.map((role) => (
                     <button
@@ -484,14 +484,14 @@ export function UserManagement() {
                   onClick={() => setEnrollModal(null)}
                   className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
                 <button
                   type="submit"
                   disabled={!enrollDomainId || enrollRoles.length === 0 || enrollLoading}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {enrollLoading ? "Enrolling..." : "Enroll User"}
+                  {enrollLoading ? t("loading") : t("enrollUser")}
                 </button>
               </div>
             </form>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 
 interface ExamFormat {
@@ -43,6 +44,7 @@ interface EnrolledDomain {
 }
 
 export default function ExamsPage() {
+  const t = useTranslations();
   const router = useRouter();
   const [domains, setDomains] = useState<EnrolledDomain[]>([]);
   const [selectedDomain, setSelectedDomain] = useState("");
@@ -115,13 +117,13 @@ export default function ExamsPage() {
   });
 
   if (loading && domains.length === 0) {
-    return <div className="py-12 text-center text-gray-500">Loading...</div>;
+    return <div className="py-12 text-center text-gray-500">{t("common.loading")}</div>;
   }
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-white">Exam Simulator</h1>
+        <h1 className="text-2xl font-bold text-white">{t("exam.title")}</h1>
         {domains.length > 1 && (
           <select
             value={selectedDomain}
@@ -137,7 +139,7 @@ export default function ExamsPage() {
 
       {domains.length === 0 && (
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-8 text-center text-gray-500">
-          Enroll in a domain to access exam simulations.
+          {t("exam.enrollFirst")}
         </div>
       )}
 
@@ -146,25 +148,25 @@ export default function ExamsPage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
             <p className="text-2xl font-bold text-white">{trends.totalAttempts}</p>
-            <p className="text-xs text-gray-400">Total Attempts</p>
+            <p className="text-xs text-gray-400">{t("exam.totalAttempts")}</p>
           </div>
           <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
             <p className="text-2xl font-bold text-blue-400">
               {trends.averageScore !== null ? `${Math.round(trends.averageScore)}%` : "-"}
             </p>
-            <p className="text-xs text-gray-400">Average Score</p>
+            <p className="text-xs text-gray-400">{t("exam.averageScore")}</p>
           </div>
           <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
             <p className="text-2xl font-bold text-green-400">
               {trends.passRate !== null ? `${Math.round(trends.passRate)}%` : "-"}
             </p>
-            <p className="text-xs text-gray-400">Pass Rate</p>
+            <p className="text-xs text-gray-400">{t("exam.passRate")}</p>
           </div>
           <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
             <p className="text-2xl font-bold text-yellow-400">
               {trends.bestScore !== null ? `${Math.round(trends.bestScore)}%` : "-"}
             </p>
-            <p className="text-xs text-gray-400">Best Score</p>
+            <p className="text-xs text-gray-400">{t("exam.bestScore")}</p>
           </div>
         </div>
       )}
@@ -172,7 +174,7 @@ export default function ExamsPage() {
       {/* Score Trend Mini-Chart */}
       {history.length >= 2 && (
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
-          <h3 className="mb-3 text-sm font-semibold text-gray-400">Score Trend</h3>
+          <h3 className="mb-3 text-sm font-semibold text-gray-400">{t("exam.scoreTrend")}</h3>
           <div className="flex h-24 items-end gap-1">
             {history
               .slice(0, 20)
@@ -204,8 +206,8 @@ export default function ExamsPage() {
               })}
           </div>
           <div className="mt-1 flex justify-between text-xs text-gray-600">
-            <span>Oldest</span>
-            <span>Latest</span>
+            <span>{t("exam.oldest")}</span>
+            <span>{t("exam.latest")}</span>
           </div>
         </div>
       )}
@@ -213,7 +215,7 @@ export default function ExamsPage() {
       {/* Exam Formats */}
       {formats.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold text-white">Available Exams</h2>
+          <h2 className="mb-3 text-lg font-semibold text-white">{t("exam.availableExams")}</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {formats.map((fmt) => {
               const mode = selectedMode[fmt.id] || "PRACTICE";
@@ -227,9 +229,9 @@ export default function ExamsPage() {
                     <p className="mb-3 text-sm text-gray-400">{fmt.description}</p>
                   )}
                   <div className="mb-4 flex flex-wrap gap-3 text-xs text-gray-400">
-                    <span>{fmt.questionCount} questions</span>
+                    <span>{fmt.questionCount} {t("exam.questions")}</span>
                     {fmt.timeLimit && <span>{fmt.timeLimit} min</span>}
-                    <span>Pass: {fmt.passingScore}%</span>
+                    <span>{t("exam.pass")}: {fmt.passingScore}%</span>
                   </div>
 
                   {/* Mode Toggle */}
@@ -242,7 +244,7 @@ export default function ExamsPage() {
                           : "text-gray-400 hover:text-white"
                       }`}
                     >
-                      Practice
+                      {t("exam.practice")}
                     </button>
                     <button
                       onClick={() => setSelectedMode((prev) => ({ ...prev, [fmt.id]: "REAL" }))}
@@ -252,18 +254,18 @@ export default function ExamsPage() {
                           : "text-gray-400 hover:text-white"
                       }`}
                     >
-                      Real Exam
+                      {t("exam.realExam")}
                     </button>
                   </div>
 
                   {mode === "PRACTICE" && (
                     <p className="mb-3 text-xs text-blue-400/70">
-                      Hints enabled. Explanations shown after each answer.
+                      {t("exam.practiceHint")}
                     </p>
                   )}
                   {mode === "REAL" && (
                     <p className="mb-3 text-xs text-red-400/70">
-                      Timed. No hints or explanations. Simulates real exam conditions.
+                      {t("exam.realHint")}
                     </p>
                   )}
 
@@ -277,10 +279,10 @@ export default function ExamsPage() {
                     }`}
                   >
                     {starting === fmt.id
-                      ? "Starting..."
+                      ? t("exam.starting")
                       : mode === "REAL"
-                        ? "Start Real Exam"
-                        : "Start Practice"}
+                        ? t("exam.startRealExam")
+                        : t("exam.startPractice")}
                   </button>
                 </div>
               );
@@ -291,7 +293,7 @@ export default function ExamsPage() {
 
       {formats.length === 0 && domains.length > 0 && !loading && (
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-8 text-center text-gray-500">
-          No exam formats configured for this domain yet.
+          {t("exam.noFormats")}
         </div>
       )}
 
@@ -299,7 +301,7 @@ export default function ExamsPage() {
       {history.length > 0 && (
         <section>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white">Exam History</h2>
+            <h2 className="text-lg font-semibold text-white">{t("exam.examHistory")}</h2>
             <div className="flex rounded-lg border border-gray-700 p-0.5">
               {(["all", "passed", "failed"] as const).map((tab) => (
                 <button
@@ -311,7 +313,7 @@ export default function ExamsPage() {
                       : "text-gray-500 hover:text-gray-300"
                   }`}
                 >
-                  {tab}
+                  {t(`exam.${tab}`)}
                 </button>
               ))}
             </div>
@@ -330,7 +332,7 @@ export default function ExamsPage() {
                         ? "bg-red-900/30 text-red-400"
                         : "bg-blue-900/30 text-blue-400"
                     }`}>
-                      {entry.mode}
+                      {entry.mode === "REAL" ? t("exam.modeReal") : t("exam.modePractice")}
                     </span>
                   </div>
                   <div className="flex gap-3 text-xs text-gray-400">
@@ -339,7 +341,7 @@ export default function ExamsPage() {
                       <span>{Math.round(entry.timeTaken)} min</span>
                     )}
                     {entry.correct !== null && entry.totalQuestions !== null && (
-                      <span>{entry.correct}/{entry.totalQuestions} correct</span>
+                      <span>{entry.correct}/{entry.totalQuestions} {t("exam.correctShort")}</span>
                     )}
                   </div>
                 </div>
@@ -360,7 +362,7 @@ export default function ExamsPage() {
                             : "bg-red-900/30 text-red-400"
                         }`}
                       >
-                        {entry.passed ? "PASSED" : "FAILED"}
+                        {entry.passed ? t("exam.resultPassed") : t("exam.resultFailed")}
                       </span>
                     </>
                   ) : (
@@ -373,7 +375,7 @@ export default function ExamsPage() {
                       rel="noopener noreferrer"
                       className="rounded bg-green-900/30 px-2 py-0.5 text-xs text-green-400 hover:bg-green-900/50"
                     >
-                      Cert
+                      {t("exam.certShort")}
                     </a>
                   )}
                 </div>
@@ -381,7 +383,7 @@ export default function ExamsPage() {
             ))}
             {filteredHistory.length === 0 && (
               <p className="py-4 text-center text-sm text-gray-400">
-                No {historyTab === "all" ? "" : historyTab} exams found.
+                {t("exam.noExamsFound")}
               </p>
             )}
           </div>

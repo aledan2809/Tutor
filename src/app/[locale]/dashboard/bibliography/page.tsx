@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 
 interface BibItem {
@@ -19,6 +20,7 @@ interface BibItem {
 interface Domain { slug: string; name: string; }
 
 export default function StudentBibliographyPage() {
+  const t = useTranslations("common");
   const searchParams = useSearchParams();
   const [domains, setDomains] = useState<Domain[]>([]);
   const [domain, setDomain] = useState(searchParams?.get("domain") || "");
@@ -73,7 +75,7 @@ export default function StudentBibliographyPage() {
       </div>
 
       {loading ? (
-        <p className="text-center text-gray-500">Loading...</p>
+        <p className="text-center text-gray-500">{t("loading")}</p>
       ) : items.length === 0 ? (
         <p className="rounded-lg border border-gray-800 bg-gray-900 px-4 py-8 text-center text-gray-500">
           Nu există bibliografie publicată pentru acest domeniu.

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { DomainSwitcher } from "@/components/domain-switcher";
 import { DemoQuizCard } from "@/components/demo-quiz-card";
@@ -57,6 +58,7 @@ interface DashboardData {
 }
 
 export default function DashboardPage() {
+  const t = useTranslations();
   const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,11 +89,11 @@ export default function DashboardPage() {
   };
 
   if (loading && !data) {
-    return <div className="py-12 text-center text-gray-400">Loading...</div>;
+    return <div className="py-12 text-center text-gray-400">{t("common.loading")}</div>;
   }
 
   if (!data) {
-    return <div className="py-12 text-center text-gray-400">Could not load dashboard.</div>;
+    return <div className="py-12 text-center text-gray-400">{t("dashboard.couldNotLoad")}</div>;
   }
 
   const activeDomain = data.domains.find((d) => d.domainId === activeDomainId) || data.domains[0];
@@ -100,7 +102,7 @@ export default function DashboardPage() {
     <div className="mx-auto max-w-6xl space-y-6">
       {/* Header with domain switcher */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-white">{t("dashboard.title")}</h1>
         <DomainSwitcher activeDomainId={activeDomainId} onSwitch={handleDomainSwitch} />
       </div>
 
@@ -110,12 +112,12 @@ export default function DashboardPage() {
       {/* No enrollments */}
       {data.domains.length === 0 && (
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-8 text-center">
-          <p className="mb-4 text-gray-400">You are not enrolled in any domains yet.</p>
+          <p className="mb-4 text-gray-400">{t("dashboard.noDomains")}</p>
           <button
             onClick={() => router.push("/dashboard/domains")}
             className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 min-h-[44px]"
           >
-            Browse Domains
+            {t("dashboard.browseDomains")}
           </button>
         </div>
       )}
@@ -125,19 +127,19 @@ export default function DashboardPage() {
           {/* Top stats row */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <StatCard
-              label="Current Streak"
-              value={`${data.streak.current} days`}
+              label={t("dashboard.currentStreak")}
+              value={`${data.streak.current} ${t("dashboard.days")}`}
               accent={data.streak.isDecayed ? "red" : data.streak.current >= 7 ? "green" : "blue"}
-              sub={data.streak.canRecover ? "Recoverable!" : `Best: ${data.streak.longest}`}
+              sub={data.streak.canRecover ? t("dashboard.recoverable") : t("dashboard.best", { n: data.streak.longest })}
             />
             <StatCard
-              label="Total XP"
+              label={t("dashboard.totalXp")}
               value={data.xp.total.toLocaleString()}
               accent="purple"
-              sub={data.xp.nextLevel ? `${data.xp.xpToNextLevel} to ${data.xp.nextLevel}` : "Max level"}
+              sub={data.xp.nextLevel ? t("dashboard.toNextLevel", { n: data.xp.xpToNextLevel, level: data.xp.nextLevel }) : t("dashboard.maxLevel")}
             />
             <StatCard
-              label="Level"
+              label={t("dashboard.level")}
               value={data.xp.level}
               accent="yellow"
               sub={
@@ -150,7 +152,7 @@ export default function DashboardPage() {
               }
             />
             <StatCard
-              label="Accuracy"
+              label={t("dashboard.accuracy")}
               value={`${activeDomain?.accuracy ?? 0}%`}
               accent={
                 (activeDomain?.accuracy ?? 0) >= 80
@@ -159,7 +161,7 @@ export default function DashboardPage() {
                     ? "yellow"
                     : "red"
               }
-              sub={`${activeDomain?.sessionsCompleted ?? 0} sessions`}
+              sub={t("dashboard.sessionsCount", { n: activeDomain?.sessionsCompleted ?? 0 })}
             />
           </div>
 
@@ -173,9 +175,9 @@ export default function DashboardPage() {
                 &#9889;
               </div>
               <div>
-                <p className="text-sm font-medium text-white">Quick Session</p>
+                <p className="text-sm font-medium text-white">{t("dashboard.quickSession")}</p>
                 <p className="text-xs text-gray-400">
-                  {data.recommendation ? data.recommendation.label : "Start practicing"}
+                  {data.recommendation ? data.recommendation.label : t("dashboard.startPracticing")}
                 </p>
               </div>
             </button>
@@ -199,8 +201,8 @@ export default function DashboardPage() {
                 &#9654;
               </div>
               <div>
-                <p className="text-sm font-medium text-white">Continue</p>
-                <p className="text-xs text-gray-400">Resume where you left off</p>
+                <p className="text-sm font-medium text-white">{t("dashboard.continue")}</p>
+                <p className="text-xs text-gray-400">{t("dashboard.resumeWhereLeft")}</p>
               </div>
             </button>
             <button
@@ -211,8 +213,8 @@ export default function DashboardPage() {
                 &#128200;
               </div>
               <div>
-                <p className="text-sm font-medium text-white">Assessment</p>
-                <p className="text-xs text-gray-400">Determine your level</p>
+                <p className="text-sm font-medium text-white">{t("dashboard.assessment")}</p>
+                <p className="text-xs text-gray-400">{t("dashboard.determineLevel")}</p>
               </div>
             </button>
           </div>
@@ -220,7 +222,7 @@ export default function DashboardPage() {
           {/* Domain Progress Cards */}
           {data.domains.length > 1 && (
             <section>
-              <h2 className="mb-3 text-lg font-semibold text-white">Your Domains</h2>
+              <h2 className="mb-3 text-lg font-semibold text-white">{t("dashboard.yourDomains")}</h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {data.domains.map((d) => (
                   <div
@@ -238,15 +240,15 @@ export default function DashboardPage() {
                     <div className="grid grid-cols-3 gap-2 text-center text-xs">
                       <div>
                         <p className="font-bold text-white">{d.xp}</p>
-                        <p className="text-gray-400">XP</p>
+                        <p className="text-gray-400">{t("dashboard.xp")}</p>
                       </div>
                       <div>
                         <p className="font-bold text-white">{d.level}</p>
-                        <p className="text-gray-400">Level</p>
+                        <p className="text-gray-400">{t("dashboard.level")}</p>
                       </div>
                       <div>
                         <p className="font-bold text-white">{d.accuracy}%</p>
-                        <p className="text-gray-400">Accuracy</p>
+                        <p className="text-gray-400">{t("dashboard.accuracy")}</p>
                       </div>
                     </div>
                     <div className="mt-3 h-1.5 rounded-full bg-gray-700">
@@ -265,10 +267,10 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Weak Areas */}
             <section>
-              <h2 className="mb-3 text-lg font-semibold text-white">Weak Areas</h2>
+              <h2 className="mb-3 text-lg font-semibold text-white">{t("dashboard.weakAreas")}</h2>
               {data.weakAreas.length === 0 ? (
                 <div className="rounded-xl border border-gray-800 bg-gray-900 p-6 text-center text-sm text-gray-400">
-                  No weak areas detected yet.
+                  {t("dashboard.noWeakAreas")}
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -290,10 +292,10 @@ export default function DashboardPage() {
 
             {/* Recent Sessions */}
             <section>
-              <h2 className="mb-3 text-lg font-semibold text-white">Recent Sessions</h2>
+              <h2 className="mb-3 text-lg font-semibold text-white">{t("dashboard.recentSessions")}</h2>
               {data.recentSessions.length === 0 ? (
                 <div className="rounded-xl border border-gray-800 bg-gray-900 p-6 text-center text-sm text-gray-400">
-                  No sessions yet. Start practicing!
+                  {t("dashboard.noSessions")}
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -336,14 +338,14 @@ export default function DashboardPage() {
           {/* Recommendation */}
           {data.recommendation && (
             <div className="rounded-xl border border-blue-600/30 bg-blue-600/5 p-4">
-              <p className="text-xs font-semibold uppercase text-blue-400">Next Recommended</p>
+              <p className="text-xs font-semibold uppercase text-blue-400">{t("dashboard.nextRecommended")}</p>
               <p className="mt-1 text-sm text-white">{data.recommendation.label}</p>
               <p className="text-xs text-gray-400">{data.recommendation.reason}</p>
               <button
                 onClick={() => router.push("/dashboard/practice")}
                 className="mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
               >
-                Start Now
+                {t("dashboard.startNow")}
               </button>
             </div>
           )}

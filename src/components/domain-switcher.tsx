@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 interface Domain {
   id: string;
@@ -15,6 +16,7 @@ interface DomainSwitcherProps {
 }
 
 export function DomainSwitcher({ activeDomainId, onSwitch }: DomainSwitcherProps) {
+  const t = useTranslations("domains");
   const [domains, setDomains] = useState<Domain[]>([]);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -49,7 +51,7 @@ export function DomainSwitcher({ activeDomainId, onSwitch }: DomainSwitcherProps
         className="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-sm text-white transition-colors hover:border-gray-600"
       >
         {active?.icon && <span>{active.icon}</span>}
-        <span>{active?.name || "Select domain"}</span>
+        <span>{active?.name || t("selectDomain")}</span>
         <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>

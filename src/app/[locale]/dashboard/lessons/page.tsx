@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 interface Lesson {
@@ -39,6 +40,7 @@ interface EnrolledDomain {
 }
 
 export default function LessonsPage() {
+  const t = useTranslations();
   const [domains, setDomains] = useState<EnrolledDomain[]>([]);
   const [activeDomainId, setActiveDomainId] = useState<string>("");
   const [data, setData] = useState<LessonsResponse | null>(null);
@@ -80,7 +82,7 @@ export default function LessonsPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <h1 className="text-2xl font-bold text-white">Lessons</h1>
+      <h1 className="text-2xl font-bold text-white">{t("lessons.title")}</h1>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
@@ -102,7 +104,7 @@ export default function LessonsPage() {
             onChange={(e) => { setSubject(e.target.value); setPage(1); }}
             className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
           >
-            <option value="">All Subjects</option>
+            <option value="">{t("lessons.allSubjects")}</option>
             {data.filters.subjects.map((s) => (
               <option key={s} value={s}>{s}</option>
             ))}
@@ -115,9 +117,9 @@ export default function LessonsPage() {
             onChange={(e) => { setTopic(e.target.value); setPage(1); }}
             className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
           >
-            <option value="">All Topics</option>
-            {data.filters.topics.map((t) => (
-              <option key={t} value={t}>{t}</option>
+            <option value="">{t("lessons.allTopics")}</option>
+            {data.filters.topics.map((topicName) => (
+              <option key={topicName} value={topicName}>{topicName}</option>
             ))}
           </select>
         )}
@@ -125,9 +127,9 @@ export default function LessonsPage() {
 
       {/* Lessons grid */}
       {loading ? (
-        <div className="py-12 text-center text-gray-500">Loading...</div>
+        <div className="py-12 text-center text-gray-500">{t("common.loading")}</div>
       ) : !data || data.lessons.length === 0 ? (
-        <div className="py-12 text-center text-gray-500">No lessons available.</div>
+        <div className="py-12 text-center text-gray-500">{t("lessons.noLessons")}</div>
       ) : (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -143,7 +145,7 @@ export default function LessonsPage() {
                   </h3>
                   {lesson.difficulty && (
                     <span className="ml-2 shrink-0 rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-400">
-                      Lv.{lesson.difficulty}
+                      {t("lessons.level")}{lesson.difficulty}
                     </span>
                   )}
                 </div>
@@ -169,9 +171,9 @@ export default function LessonsPage() {
                   />
                 </div>
                 <div className="mt-1 flex justify-between text-xs text-gray-500">
-                  <span>{lesson.progress?.mastery ?? 0}% mastery</span>
+                  <span>{t("lessons.percentMastery", { n: lesson.progress?.mastery ?? 0 })}</span>
                   {lesson.progress?.accuracy !== undefined && (
-                    <span>{lesson.progress.accuracy}% accuracy</span>
+                    <span>{t("lessons.percentAccuracy", { n: lesson.progress.accuracy })}</span>
                   )}
                 </div>
               </Link>
@@ -186,7 +188,7 @@ export default function LessonsPage() {
                 disabled={page <= 1}
                 className="rounded-lg border border-gray-700 px-3 py-1.5 text-sm text-gray-400 hover:bg-gray-800 disabled:opacity-50"
               >
-                Previous
+                {t("lessons.previous")}
               </button>
               <span className="text-sm text-gray-500">
                 {data.page} / {data.totalPages}
@@ -196,7 +198,7 @@ export default function LessonsPage() {
                 disabled={page >= data.totalPages}
                 className="rounded-lg border border-gray-700 px-3 py-1.5 text-sm text-gray-400 hover:bg-gray-800 disabled:opacity-50"
               >
-                Next
+                {t("lessons.next")}
               </button>
             </div>
           )}

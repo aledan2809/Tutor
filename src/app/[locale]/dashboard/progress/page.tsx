@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { ProgressTabs } from "@/components/progress-tabs";
 
@@ -43,6 +44,7 @@ interface ProgressData {
 }
 
 export default function ProgressPage() {
+  const t = useTranslations();
   const searchParams = useSearchParams();
   const [data, setData] = useState<ProgressData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -78,13 +80,13 @@ export default function ProgressPage() {
   }, [domain]);
 
   if (loading) {
-    return <div className="py-12 text-center text-gray-500">Loading...</div>;
+    return <div className="py-12 text-center text-gray-500">{t("common.loading")}</div>;
   }
 
   if (!data) {
     return (
       <div className="py-12 text-center text-gray-500">
-        Could not load progress data.
+        {t("progress.couldNotLoad")}
       </div>
     );
   }
@@ -111,11 +113,11 @@ export default function ProgressPage() {
 
       {/* Overall Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard label="Total Attempts" value={data.overall.totalAttempts} />
-        <StatCard label="Accuracy" value={`${data.overall.accuracy}%`} />
-        <StatCard label="Topics Studied" value={data.overall.topicsStudied} />
+        <StatCard label={t("progress.totalAttempts")} value={data.overall.totalAttempts} />
+        <StatCard label={t("progress.accuracy")} value={`${data.overall.accuracy}%`} />
+        <StatCard label={t("progress.topicsStudied")} value={data.overall.topicsStudied} />
         <StatCard
-          label="Sessions"
+          label={t("progress.sessions")}
           value={data.overall.sessionsCompleted}
         />
       </div>
@@ -124,7 +126,7 @@ export default function ProgressPage() {
       {data.weakAreas.length > 0 && (
         <section>
           <h2 className="mb-3 text-lg font-semibold text-red-400">
-            Weak Areas
+            {t("progress.weakAreas")}
           </h2>
           <div className="space-y-2">
             {data.weakAreas.map((w) => (
@@ -151,7 +153,7 @@ export default function ProgressPage() {
 
       {/* Subject Breakdown */}
       <section>
-        <h2 className="mb-3 text-lg font-semibold text-white">By Subject</h2>
+        <h2 className="mb-3 text-lg font-semibold text-white">{t("progress.bySubject")}</h2>
         <div className="space-y-2">
           {data.subjects.map((s) => (
             <div
@@ -163,7 +165,7 @@ export default function ProgressPage() {
                   {s.subject}
                 </span>
                 <span className="text-sm text-gray-400">
-                  {s.accuracy}% accuracy
+                  {t("progress.percentAccuracy", { n: s.accuracy })}
                 </span>
               </div>
               <div className="h-2 rounded-full bg-gray-700">
@@ -179,7 +181,7 @@ export default function ProgressPage() {
                 />
               </div>
               <p className="mt-1 text-xs text-gray-500">
-                {s.totalAttempts} attempts · {s.topicCount} topics
+                {t("progress.attemptsTopics", { a: s.totalAttempts, topics: s.topicCount })}
               </p>
             </div>
           ))}
@@ -189,31 +191,31 @@ export default function ProgressPage() {
       {/* Topics */}
       <section>
         <h2 className="mb-3 text-lg font-semibold text-white">
-          Topic Details
+          {t("progress.topicDetails")}
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-gray-800 text-gray-500">
-                <th className="pb-2 font-medium">Topic</th>
-                <th className="pb-2 font-medium">Subject</th>
-                <th className="pb-2 font-medium">Accuracy</th>
-                <th className="pb-2 font-medium">Attempts</th>
-                <th className="pb-2 font-medium">Status</th>
+                <th className="pb-2 font-medium">{t("progress.topic")}</th>
+                <th className="pb-2 font-medium">{t("progress.subject")}</th>
+                <th className="pb-2 font-medium">{t("progress.accuracy")}</th>
+                <th className="pb-2 font-medium">{t("progress.attempts")}</th>
+                <th className="pb-2 font-medium">{t("progress.status")}</th>
               </tr>
             </thead>
             <tbody>
-              {data.topics.map((t) => (
+              {data.topics.map((topic) => (
                 <tr
-                  key={`${t.subject}-${t.topic}`}
+                  key={`${topic.subject}-${topic.topic}`}
                   className="border-b border-gray-800/50"
                 >
-                  <td className="py-2 text-white">{t.topic}</td>
-                  <td className="py-2 text-gray-400">{t.subject}</td>
-                  <td className="py-2 text-gray-300">{t.accuracy}%</td>
-                  <td className="py-2 text-gray-400">{t.totalAttempts}</td>
+                  <td className="py-2 text-white">{topic.topic}</td>
+                  <td className="py-2 text-gray-400">{topic.subject}</td>
+                  <td className="py-2 text-gray-300">{topic.accuracy}%</td>
+                  <td className="py-2 text-gray-400">{topic.totalAttempts}</td>
                   <td className="py-2">
-                    <StatusBadge status={t.status} />
+                    <StatusBadge status={topic.status} />
                   </td>
                 </tr>
               ))}
@@ -226,7 +228,7 @@ export default function ProgressPage() {
       {data.recentSessions.length > 0 && (
         <section>
           <h2 className="mb-3 text-lg font-semibold text-white">
-            Recent Sessions
+            {t("progress.recentSessions")}
           </h2>
           <div className="space-y-2">
             {data.recentSessions.map((s) => (
@@ -244,7 +246,7 @@ export default function ProgressPage() {
                 </div>
                 <div className="flex items-center gap-4 text-sm">
                   <span className="text-gray-400">
-                    {s.questionsAnswered} questions
+                    {s.questionsAnswered} {t("progress.questions")}
                   </span>
                   {s.score !== null ? (
                     <span
@@ -259,7 +261,7 @@ export default function ProgressPage() {
                       {s.score}%
                     </span>
                   ) : (
-                    <span className="text-gray-500">In progress</span>
+                    <span className="text-gray-500">{t("progress.inProgress")}</span>
                   )}
                 </div>
               </div>
@@ -291,15 +293,16 @@ function StatusBadge({
 }: {
   status: "not_enough_data" | "weak" | "good";
 }) {
+  const t = useTranslations("progress");
   const styles = {
     not_enough_data: "bg-gray-800 text-gray-400",
     weak: "bg-red-900/30 text-red-400",
     good: "bg-green-900/30 text-green-400",
   };
   const labels = {
-    not_enough_data: "Not enough data",
-    weak: "Weak",
-    good: "Good",
+    not_enough_data: t("notEnoughData"),
+    weak: t("weak"),
+    good: t("good"),
   };
 
   return (
