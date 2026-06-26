@@ -15,7 +15,7 @@
 
 ---
 
-## [ ] 🌟🔥 WOW first-run UX + Gamification "ca pe social-media" — PRIORITATE MARE (plan aprobat 2026-06-25, cod NEÎNCEPUT)
+## [x] 🌟🔥 WOW first-run UX + Gamification "ca pe social-media" — COMPLET 2026-06-26 (roadmap A1-A5+B+C live 2026-06-25; Gamification deepening `3b47702`+`515cd09` LIVE 2026-06-26)
 
 > **Decizie user 2026-06-25**: experiența primului contact trebuie să fie WOW, fără manual, auto-descoperită (model Facebook/Instagram/TikTok/Duolingo). Userii principali = **copiii** → gamification în prim-plan. „Pune în TODO acum, ne ocupăm mai încolo, dar e FOARTE IMPORTANT." Mockup viziune livrat în chat (feed de grile + feedback instant + streak + bară-jos).
 
@@ -50,7 +50,7 @@
 - [x] **B — bucla feed** DONE+LIVE (commit `8c55ce7`): „🔥 Continuă cu încă o serie" pe ecranul de rezultate → pornește o serie nouă în aceeași materie fără meniu (senzația de feed endless). Bucla 1-întrebare→feedback→next exista deja; A1 a scos frecușul de intrare, asta scoate fundătura de ieșire.
 - [x] **C — răspunzi-întâi-cont-la-urmă** DONE (pre-existent, verificat): `/try` → `SubjectQuizDemo` (alegi materie → răspunzi fără cont → scor cu CTA „Fă-ți cont gratuit ca să-ți salvezi progresul" → /auth/register). Polish opțional: ridică demo-ul ca CTA primar pe home (acum primar=register, secundar=/try).
 - **✅ Roadmap WOW (A1-A5 + B + C) COMPLET + LIVE 2026-06-25.** Verificat: build verde fiecare, smoke prod OK, A1 + family + feedback confirmate vizual via journey-audit, vecini VPS2 200. 502 tranzitoriu la /ro = blip de pm2 restart (200 stabil după).
-- [ ] 🔥 **Gamification deepening** (foc progresiv din Procu + remarci adaptive după vârstă/sex/profil + învățare din like/dislike + guardrail age-appropriate/parent-control) — **deferat per user**, prioritate mare, vezi blocul de sus.
+- [x] 🔥 **Gamification deepening** DONE+LIVE 2026-06-26 (commits `3b47702` + `515cd09` + a11y, etutor.ro): (1) **StreakFlame** — flacără CSS pură (zero deps) în feedback-ul de răspuns, intensitate progresivă cu seria (ember→flacără→blaze→albastru-incandescent), discretă; respectă `prefers-reduced-motion`. (2) **Motor remarci adaptive** (`src/lib/remarks.ts`, pur + 14/14 vitest): 3 tonuri (calm/cald/energic), trigger pe serie/revenire/corect, **învățare like/dislike** (păstrează ce-i place, scoate ce respinge). (3) **🔒 Guardrail-first**: TOT conținutul de remarci e age-appropriate pt orice vârstă — **tonul romantic/gendered NU e implementat** (cere verificare 18+ + review Legal înainte de a exista); părintele (guardian) poate limita copilul la tonurile calme (`resolveTone` clamp playful→cald). (4) Preferințe via `Setting` — **ZERO migrare**. (5) UI: picker ton în Setări, toggle per-copil pe Familia mea, remarcă + 👍/👎 subtil în feedback. (6) Review adversarial: autorizare etanșă (fără bypass copil / IDOR — `isGuardianOf` respinge self-link), SHIP. Verificat end-to-end pe prod: config + write-paths (PUT ton, POST vote) funcționale. NU s-a construit varianta romantic/gendered (decizie de siguranță minori — necesită semnătură user pe politică + Legal).
 - Referințe: mockup viziune (chat 2026-06-25) · memory `feedback-no-ai-in-user-copy` (zero „AI" în copy) · `feedback-ro-nontech-comms`.
 
 ---
@@ -520,7 +520,7 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 
 ---
 
-## [ ] 🧭 Restructurare meniuri elev/părinte/meditator — ascunde item-urile fără conținut (creat 2026-06-04, deferred → sesiune nouă)
+## [x] 🧭 Restructurare meniuri elev/părinte/meditator — COMPLETĂ 2026-06-04 (elev `3dd1a87` → părinte `e884255` → meditator `915f7a8`); marker era stale. Rămase = feature-uri per-rol în itemele dedicate (Referral CREDIT, Setări→Notificări) + decizia ELEV „merge Progres+Gamificare".
 
 **Cerere user (2026-06-04, cu poză sidebar)**: meniul afișează multe item-uri pentru care **nu avem conținut**; ascunde-le temporar + pune-le aici în TODO ca să decidem punctual ce facem cu fiecare într-o sesiune viitoare.
 
