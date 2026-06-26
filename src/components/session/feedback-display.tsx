@@ -100,7 +100,7 @@ export function FeedbackDisplay({
                 <button
                   type="button"
                   onClick={() => vote("like")}
-                  className="rounded px-1.5 py-0.5 text-sm opacity-60 transition-opacity hover:opacity-100"
+                  className="flex h-9 min-w-9 items-center justify-center rounded text-sm opacity-60 transition-opacity hover:opacity-100"
                   aria-label="👍"
                 >
                   👍
@@ -108,7 +108,7 @@ export function FeedbackDisplay({
                 <button
                   type="button"
                   onClick={() => vote("dislike")}
-                  className="rounded px-1.5 py-0.5 text-sm opacity-60 transition-opacity hover:opacity-100"
+                  className="flex h-9 min-w-9 items-center justify-center rounded text-sm opacity-60 transition-opacity hover:opacity-100"
                   title={tr("dislike")}
                   aria-label={tr("dislike")}
                 >
