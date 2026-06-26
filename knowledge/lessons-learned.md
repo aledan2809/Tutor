@@ -184,3 +184,23 @@ The parent-monitoring "no-reaction" alert never fired in the first live test. Ro
 **(b) A stuck-PENDING rung silently freezes everything downstream that keys off "chain done"** (here: parent monitoring). When adding a consumer that waits for terminal state, make sure no rung can hang non-terminally.
 **(c) "Stall" / inactivity windows must be measured from the last time you actually REACHED the user (last `sentAt`), not from `createdAt` of skipped/undeliverable rungs** — those are created "now" and reset the clock, hiding a hours-old lapse.
 **(d) Verify cross-component flows with the real prod config, not just unit tests** — the unit tests were green; the bug only showed with SMTP-absent prod + a multi-cron-pass cascade. A live cron run + DB inspection caught it.
+
+## L19 — 2026-06-25 — "Broken CSS" right after rapid redeploys is almost always a stale client cache, not a broken build — verify the live asset before touching code
+
+Rareș sent a screenshot of the homepage rendered as raw, unstyled HTML and asked "ai stricat CSS-ul?". The instinct is to assume the build broke Tailwind. The fast, correct first move is to interrogate the LIVE server: fetch the page HTML, extract the `/_next/static/css/<hash>.css` link, and curl it. It returned **200 and 87 KB with real utility classes** (`.bg-gray-`, `.text-white`, `--tw-`) → the build was fine; a fresh load is fully styled.
+
+**(a) The real cause was a stale service-worker/client cache.** The app is a PWA (`public/sw.js` precaches `/`). I'd done 5+ back-to-back deploys; each `next build` changes asset content-hashes and deletes the old chunks. A client holding a cached shell (or that loaded during a pm2-restart blip) referenced a now-deleted CSS hash → 404 → unstyled. Server HTML was `no-store`, so it was the SW, not the browser HTTP cache.
+**(b) Diagnose before prescribing: live-CSS byte-size + a few utility classes distinguishes "build broke" from "stale client" in one curl.** Don't rebuild/redeploy on a guess.
+**(c) Prevention = bump the SW cache version (`CACHE_NAME` v6→v7) so cached clients drop the stale precache + claim on next load; it ships as a static `public/` file (no rebuild/restart, no new blip). And don't deploy in rapid fire — batch.** The SW nav handler being network-first already protects fresh loads; the failure window is the cached shell + restart blips.
+**(d) "It resolved on its own" is expected here** — a network-first SW serves fresh HTML on the next navigation, so a refresh fixes the user regardless. The user noting "s-a rezolvat de mult" confirms stale-cache, not a server fault.
+
+## L20 — 2026-06-25 — Diagnose prod failures from the prod logs, not from plausible config assumptions
+
+A user reported Google account-creation failing on Android. I confidently blamed a missing Google Cloud Console redirect-URI/origin (it was even flagged "pending" in an old deploy note) and told the user to fix the console. The user checked: the URIs already existed. My diagnosis was wrong because I reasoned from a plausible story instead of evidence.
+
+`pm2 logs tutor --err` showed the actual cause in seconds: `CallbackRouteError — response parameter "iss" (issuer) missing` (provider google) — a known intermittent Auth.js/oauth4webapi edge case (4 occurrences → Google works *sometimes*), nothing to do with the console.
+
+**(a) For any "X doesn't work in prod", read the prod error log FIRST** (`pm2 logs <app> --err --nostream | grep`). The `[auth][cause]` / stack tells you the real failure; config theories waste the user's time and erode trust.
+**(b) Frequency in the log = severity signal.** 4 errors (not hundreds) meant intermittent, not "Google login is down" — which reframes the fix (a careful library bump) and the urgency.
+**(c) Verify server-side config with facts, not memory** — I confirmed AUTH_URL/client-id/callback-302/providers-list on prod before concluding it wasn't a server-config issue.
+**(d) For auth-critical changes with no staging, the regression test is non-negotiable:** after the `next-auth` upgrade I drove the real credentials flow on prod (csrf → POST callback → `/api/auth/session` returns the user + `__Secure-authjs.session-token`) to prove email/password login still worked, with the previous commit + `package.json` backup as instant rollback.

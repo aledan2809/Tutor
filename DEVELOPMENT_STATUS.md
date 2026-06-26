@@ -1,5 +1,20 @@
 # Project Status - Tutor
-Last Updated: 2026-06-25 #2 (Licență — proveniență verificabilă pe grile + fix leak quiz public)
+Last Updated: 2026-06-25 #3 (Pachete de familie + Feedback admin + WOW UX + 6 bug-uri user + auth upgrade)
+
+## Current State (Sesiunea 2026-06-25 #3 — mesh: family packages → feedback admin → WOW UX → bug-uri review)
+
+Sesiune foarte mare, totul LIVE pe etutor.ro, verificat pe prod la fiecare pas.
+
+### Done (LIVE)
+1. **Pachete de familie — Fazele 0-4** (migrări `0035`+`0036`): model (`Guardian.relation`, `FamilyInvite`) + `src/lib/family.ts` (plan→locuri→funcții pure) + `src/lib/family-invite.ts` (invite email/WhatsApp/cod + accept token/cod + creează-copil-direct + scoatere + seat math). UI `/dashboard/family` + public `/family/accept/[token]` + `/family/join`. Seat strict (advisory-lock per familie — dovedit sub concurrency `Promise.all`) + CTA upgrade/add-on. **Leak fix**: meditator = WATCHER + `relation=TUTOR`, never INSTRUCTOR. `/review` adversarial ×2 → 2 bug-uri reale fixate (P1 IDOR `removeFamilyMember` + P2 mutare-rol la accept). True E2E [10]: integration 12/12 pe prod + journey 4 roluri + concurrency. Raport `Reports/TRUE-E2E-family-packages-2026-06-25.md`.
+2. **Feedback admin** (cerere user): inbox bell separat de „Alerte" (`audience=self` + badge corect) + pagină `/dashboard/admin/feedback` (click pe fiecare 👎: întrebare+răspuns, problemă elev, decizie+justificare, proveniență pagină/secțiune/citat/link-document, **override**). Cron feedback confirmat funcțional (9/9 ale lui Rareș). Migrare `0036`. Doc-serve `GET /api/licenta/[id]/file`.
+3. **WOW first-run UX (A1-A5 + B + C)**: A1 fundătură Quizzes → picker inline (enroll+auto-start), A2 amână banner install/notif până după ~5 răspunsuri (`src/lib/engagement.ts`), A3 chip „🔥 N la rând", A4 bară-jos mobil (gated STUDENT), A5 coachmark unic, B „Continuă cu încă o serie" (feed endless), C = pre-existent (`/try` answer-first + signup-to-save). Gamification deepening (foc progresiv + remarci adaptive) = **deferat per user**, în TODO.
+4. **6 bug-uri din review user**: #2 leak domeniu Aviație închis la 3 surse (public/catalog/enroll); #5 demo arată acum explicație+sursă (citat curat); #3 „Ai uitat parola?" RO+vizibil; #4 tab „Grile"; #6 romgleză parțial (SessionResults+signin, sweep complet rămas); #1 Google Android = auth upgrade `next-auth beta.30→.31` + `@auth/core 0.41.2` (cauza reală din loguri: `iss missing`, intermitent) — login email+parolă verificat OK post-upgrade, Google de retestat pe Android de user.
+
+### Rămas
+- #6 sweep complet romgleză; #1 retest Google pe Android (user); Gamification deepening (deferat, prioritate mare).
+
+### Commits live (origin/master): `dec353e` → `c96184a` (~25 commits)
 
 ## Current State (Sesiunea 2026-06-25 #2 — Direct/mesh: Licență proveniență + securitate)
 
