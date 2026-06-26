@@ -158,7 +158,7 @@ export function PlanManager() {
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">{t("planPrice")} (USD)</label>
+              <label className="block text-sm text-gray-400 mb-1">{t("planPrice")} (RON)</label>
               <input
                 type="number"
                 value={form.price}
@@ -237,7 +237,7 @@ export function PlanManager() {
                 <div>
                   <h3 className="text-lg font-semibold text-white">{plan.name}</h3>
                   <p className="text-2xl font-bold text-green-400 mt-1">
-                    ${plan.price}
+                    {plan.price} lei
                     <span className="text-sm text-gray-400 font-normal">
                       /{plan.interval.toLowerCase()}
                     </span>
