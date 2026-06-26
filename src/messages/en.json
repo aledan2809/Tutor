@@ -62,7 +62,8 @@
     "tabSim": "Mock exams",
     "tabProgress": "Progress",
     "tabProfile": "Profile",
-    "generate": "Generate test"
+    "generate": "Generate test",
+    "packages": "Packages"
   },
   "results": {
     "complete": "Session complete",
@@ -783,5 +784,30 @@
     "calendar_sync": "Calendar sync",
     "advanced_progress": "Advanced progress analytics",
     "advancedSectionTitle": "Detailed analytics"
+  },
+  "packages": {
+    "loading": "Loading...",
+    "title": "Packages",
+    "subtitle": "Choose a package to unlock every function.",
+    "currentActive": "You have an active package.",
+    "currentTrial": "You're in the trial period.",
+    "currentPlan": "Your package",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "oneTime": "one-time",
+    "trial": "{n} days free",
+    "seats": "Seats",
+    "oneParent": "1 parent",
+    "nParents": "{n} parents",
+    "oneChild": "1 child",
+    "nChildren": "{n} children",
+    "oneTutor": "1 tutor",
+    "manageFamily": "Add members from the My Family section.",
+    "subscribe": "Choose package",
+    "preparing": "Preparing...",
+    "voucher": "Voucher code (optional)",
+    "voucherPlaceholder": "Have a code? Enter it here",
+    "noPlans": "No packages available right now.",
+    "checkoutError": "Could not start checkout. Try again."
   }
 }

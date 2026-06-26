@@ -5,11 +5,8 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { PlanFeature } from "@/lib/plan-features";
 
-/**
- * Where the upgrade CTA points. There is no public pricing page yet — the billing
- * layer owns it; centralized here so it's a one-line change when it ships.
- */
-const UPGRADE_PATH = "/dashboard/settings";
+/** Where the upgrade CTA points — the student-facing packages page. */
+const UPGRADE_PATH = "/dashboard/packages";
 
 type GateState = "loading" | "allowed" | "locked";
 

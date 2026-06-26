@@ -62,7 +62,8 @@
     "tabSim": "Simulări",
     "tabProgress": "Progres",
     "tabProfile": "Profil",
-    "generate": "Generează test"
+    "generate": "Generează test",
+    "packages": "Pachete"
   },
   "results": {
     "complete": "Sesiune terminată",
@@ -783,5 +784,30 @@
     "calendar_sync": "Sincronizare calendar",
     "advanced_progress": "Analiză de progres avansată",
     "advancedSectionTitle": "Analiză detaliată"
+  },
+  "packages": {
+    "loading": "Se încarcă...",
+    "title": "Pachete",
+    "subtitle": "Alege un pachet ca să deblochezi toate funcțiile.",
+    "currentActive": "Ai un pachet activ.",
+    "currentTrial": "Ești în perioada de probă.",
+    "currentPlan": "Pachetul tău",
+    "perMonth": "/lună",
+    "perYear": "/an",
+    "oneTime": "o singură dată",
+    "trial": "{n} zile gratis",
+    "seats": "Locuri",
+    "oneParent": "1 părinte",
+    "nParents": "{n} părinți",
+    "oneChild": "1 copil",
+    "nChildren": "{n} copii",
+    "oneTutor": "1 meditator",
+    "manageFamily": "Adaugi membrii din secțiunea Familia mea.",
+    "subscribe": "Alege pachetul",
+    "preparing": "Se pregătește...",
+    "voucher": "Cod voucher (opțional)",
+    "voucherPlaceholder": "Ai un cod? Scrie-l aici",
+    "noPlans": "Momentan nu sunt pachete disponibile.",
+    "checkoutError": "Nu am putut porni plata. Încearcă din nou."
   }
 }
