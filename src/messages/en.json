@@ -773,5 +773,15 @@
     "managedBody": "A parent handles your notification channels. To change them, talk to them.",
     "saved": "Saved",
     "paidOnly": "Available in paid packages"
+  },
+  "featureLock": {
+    "title": "Part of a package",
+    "body": "This function is part of a package. Activate a package to unlock it.",
+    "cta": "See packages",
+    "exam_simulations": "Full exam simulations",
+    "structured_lessons": "Structured lessons",
+    "calendar_sync": "Calendar sync",
+    "advanced_progress": "Advanced progress analytics",
+    "advancedSectionTitle": "Detailed analytics"
   }
 }

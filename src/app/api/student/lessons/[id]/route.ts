@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { requireFeature } from "@/lib/plan-gate";
 import { z } from "zod";
 
 const paramsSchema = z.object({
@@ -16,6 +17,11 @@ async function _GET(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const gate = await requireFeature(session.user.id, "structured_lessons", {
+    bypass: session.user.isSuperAdmin,
+  });
+  if (gate) return gate;
 
   const rawParams = await params;
   const parsed = paramsSchema.safeParse(rawParams);

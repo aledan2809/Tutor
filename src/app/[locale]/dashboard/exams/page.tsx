@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import { FeatureGate } from "@/components/plan/feature-lock";
 
 interface ExamFormat {
   id: string;
@@ -43,7 +44,7 @@ interface EnrolledDomain {
   slug: string;
 }
 
-export default function ExamsPage() {
+function ExamsBody() {
   const t = useTranslations();
   const router = useRouter();
   const [domains, setDomains] = useState<EnrolledDomain[]>([]);
@@ -390,5 +391,13 @@ export default function ExamsPage() {
         </section>
       )}
     </div>
+  );
+}
+
+export default function ExamsPage() {
+  return (
+    <FeatureGate feature="exam_simulations">
+      <ExamsBody />
+    </FeatureGate>
   );
 }

@@ -773,5 +773,15 @@
     "managedBody": "Un părinte se ocupă de canalele tale de notificare. Pentru schimbări, vorbește cu el.",
     "saved": "Salvat",
     "paidOnly": "Disponibil în pachetele plătite"
+  },
+  "featureLock": {
+    "title": "Funcție inclusă într-un pachet",
+    "body": "Această funcție face parte dintr-un pachet. Activează un pachet ca s-o deblochezi.",
+    "cta": "Vezi pachetele",
+    "exam_simulations": "Simulări de examen complete",
+    "structured_lessons": "Lecții structurate",
+    "calendar_sync": "Sincronizare calendar",
+    "advanced_progress": "Analiză de progres avansată",
+    "advancedSectionTitle": "Analiză detaliată"
   }
 }

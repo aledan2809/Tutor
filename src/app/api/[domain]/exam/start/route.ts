@@ -3,6 +3,7 @@ import { getSession, hasAnyRole } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { selectExamQuestions, sanitizeQuestions } from "@/lib/exam-engine";
 import { withErrorHandler } from "@/lib/api-handler";
+import { requireFeature } from "@/lib/plan-gate";
 
 async function _POST(
   req: NextRequest,
@@ -18,6 +19,11 @@ async function _POST(
   if (!hasAnyRole(session, domainSlug, ["STUDENT", "ADMIN", "INSTRUCTOR"])) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+
+  const gate = await requireFeature(session.user.id, "exam_simulations", {
+    bypass: session.user.isSuperAdmin,
+  });
+  if (gate) return gate;
 
   let body: Record<string, unknown> = {};
   try {

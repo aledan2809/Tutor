@@ -3,6 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { getCalendarClient } from "@/lib/calendar";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { requireFeature } from "@/lib/plan-gate";
 
 /**
  * POST /api/[domain]/calendar/connect
@@ -16,6 +17,11 @@ async function _POST(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const gate = await requireFeature(session.user.id, "calendar_sync", {
+    bypass: session.user.isSuperAdmin,
+  });
+  if (gate) return gate;
 
   const { domain: domainSlug } = await params;
   const domain = await prisma.domain.findUnique({

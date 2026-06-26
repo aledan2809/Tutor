@@ -8,8 +8,9 @@ import { ScheduleForm } from "@/components/calendar/schedule-form";
 import { EventList } from "@/components/calendar/event-list";
 import { FreeSlots } from "@/components/calendar/free-slots";
 import { CalendarGrid } from "@/components/calendar/calendar-grid";
+import { FeatureGate } from "@/components/plan/feature-lock";
 
-export default function CalendarPage() {
+function CalendarBody() {
   const t = useTranslations("calendar");
   const { data: session, status } = useSession();
   const [selectedDomain, setSelectedDomain] = useState<string>("");
@@ -212,5 +213,13 @@ export default function CalendarPage() {
         <p className="text-sm text-gray-500">{t("checkingConnection")}</p>
       )}
     </div>
+  );
+}
+
+export default function CalendarPage() {
+  return (
+    <FeatureGate feature="calendar_sync">
+      <CalendarBody />
+    </FeatureGate>
   );
 }

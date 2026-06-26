@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { FeatureGate } from "@/components/plan/feature-lock";
 
 interface Lesson {
   id: string;
@@ -39,7 +40,7 @@ interface EnrolledDomain {
   icon: string | null;
 }
 
-export default function LessonsPage() {
+function LessonsBody() {
   const t = useTranslations();
   const [domains, setDomains] = useState<EnrolledDomain[]>([]);
   const [activeDomainId, setActiveDomainId] = useState<string>("");
@@ -205,5 +206,13 @@ export default function LessonsPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function LessonsPage() {
+  return (
+    <FeatureGate feature="structured_lessons">
+      <LessonsBody />
+    </FeatureGate>
   );
 }

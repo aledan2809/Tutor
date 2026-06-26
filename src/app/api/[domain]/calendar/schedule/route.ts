@@ -3,6 +3,7 @@ import { getSession, hasRole } from "@/lib/authorization";
 import { getValidAccessToken, getCalendarClient } from "@/lib/calendar";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { requireFeature } from "@/lib/plan-gate";
 
 /**
  * POST /api/[domain]/calendar/schedule
@@ -24,6 +25,11 @@ async function _POST(
   if (!domain) {
     return NextResponse.json({ error: "Domain not found" }, { status: 404 });
   }
+
+  const gate = await requireFeature(session.user.id, "calendar_sync", {
+    bypass: session.user.isSuperAdmin || hasRole(session, domainSlug, "INSTRUCTOR"),
+  });
+  if (gate) return gate;
 
   const body = await req.json();
   const {

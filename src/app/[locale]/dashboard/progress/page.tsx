@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { ProgressTabs } from "@/components/progress-tabs";
+import { FeatureGate } from "@/components/plan/feature-lock";
 
 interface ProgressData {
   overall: {
@@ -151,6 +152,8 @@ export default function ProgressPage() {
         </section>
       )}
 
+      {/* Advanced analytics — paid */}
+      <FeatureGate feature="advanced_progress">
       {/* Subject Breakdown */}
       <section>
         <h2 className="mb-3 text-lg font-semibold text-white">{t("progress.bySubject")}</h2>
@@ -223,6 +226,7 @@ export default function ProgressPage() {
           </table>
         </div>
       </section>
+      </FeatureGate>
 
       {/* Recent Sessions */}
       {data.recentSessions.length > 0 && (
