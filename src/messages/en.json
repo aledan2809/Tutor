@@ -789,6 +789,8 @@
     "loading": "Loading...",
     "title": "Packages",
     "subtitle": "Choose a package to unlock every function.",
+    "perSubject": "price for the first subject",
+    "discounts": "Discounts: 2nd subject −15%, 3rd+ −25% · 2nd child −20%, 3rd+ −30% · annual = 2 months free.",
     "currentActive": "You have an active package.",
     "currentTrial": "You're in the trial period.",
     "currentPlan": "Your package",

@@ -137,6 +137,7 @@ export default function PackagesPage() {
                     <span className="text-2xl font-bold text-white">{plan.price} lei</span>
                     <span className="text-sm text-gray-400"> {intervalLabel(plan.interval)}</span>
                   </p>
+                  <p className="mb-1 text-xs text-gray-500">{t("perSubject")}</p>
                   {plan.trialDays ? (
                     <p className="mb-3 text-xs text-blue-400">{t("trial", { n: plan.trialDays })}</p>
                   ) : (
@@ -176,6 +177,10 @@ export default function PackagesPage() {
                 </div>
               );
             })}
+          </div>
+
+          <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-xs text-gray-400">
+            {t("discounts")}
           </div>
 
           <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">

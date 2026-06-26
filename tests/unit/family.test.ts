@@ -4,6 +4,7 @@ import {
   getFamilyPlan,
   resolveFamilyPlanKey,
   childDiscountPercent,
+  subjectDiscountPercent,
   canAddParent,
   canAddChild,
   canAddTutor,
@@ -41,6 +42,15 @@ describe("childDiscountPercent", () => {
     expect(childDiscountPercent(2)).toBe(20);
     expect(childDiscountPercent(3)).toBe(30);
     expect(childDiscountPercent(5)).toBe(30);
+  });
+});
+
+describe("subjectDiscountPercent", () => {
+  it("first subject = base price (0%), 2nd = 15%, 3rd+ = 25%", () => {
+    expect(subjectDiscountPercent(1)).toBe(0);
+    expect(subjectDiscountPercent(2)).toBe(15);
+    expect(subjectDiscountPercent(3)).toBe(25);
+    expect(subjectDiscountPercent(5)).toBe(25);
   });
 });
 

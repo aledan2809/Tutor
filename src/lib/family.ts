@@ -184,6 +184,17 @@ export function childDiscountPercent(childIndex: number): number {
   return 30;
 }
 
+/**
+ * Discount for the N-th subject (1-based). A plan's advertised price covers the
+ * FIRST subject; the 2nd subject is −15%, the 3rd and beyond −25%. Mirrors the
+ * /parinte pricing copy. The base price is per-subject/month, not a flat total.
+ */
+export function subjectDiscountPercent(subjectIndex: number): number {
+  if (subjectIndex <= 1) return 0;
+  if (subjectIndex === 2) return 15;
+  return 25;
+}
+
 export type SeatDenyReason =
   | "no_family_plan"
   | "parent_limit"

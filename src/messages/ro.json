@@ -789,6 +789,8 @@
     "loading": "Se încarcă...",
     "title": "Pachete",
     "subtitle": "Alege un pachet ca să deblochezi toate funcțiile.",
+    "perSubject": "preț pentru prima materie",
+    "discounts": "Reduceri: a 2-a materie −15%, a 3-a+ −25% · al 2-lea copil −20%, al 3-lea+ −30% · plată anuală = 2 luni gratuite.",
     "currentActive": "Ai un pachet activ.",
     "currentTrial": "Ești în perioada de probă.",
     "currentPlan": "Pachetul tău",
