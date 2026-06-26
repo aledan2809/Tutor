@@ -34,6 +34,14 @@ async function _PUT(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // If a parent has taken over this user's notifications, the user can't self-edit them.
+  const delegation = await prisma.setting.findUnique({
+    where: { userId_key: { userId: session.user.id, key: "notifDelegation" } },
+  });
+  if ((delegation?.value as { managedByParent?: boolean } | undefined)?.managedByParent === true) {
+    return NextResponse.json({ error: "Managed by parent" }, { status: 403 });
+  }
+
   const body = await req.json();
   const { push, whatsapp, sms, email, call, quietHoursStart, quietHoursEnd, timezone } = body;
 

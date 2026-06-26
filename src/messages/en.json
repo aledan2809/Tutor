@@ -759,5 +759,17 @@
     "saved": "Saved",
     "parentRestrict": "Calm encouragement only",
     "parentRestrictHint": "Limit the upbeat tone for this child"
+  },
+  "familyNotif": {
+    "delegate": "I manage notifications for this child",
+    "delegateHint": "When checked, you choose the child's channels; they can no longer change them.",
+    "channels": "Channels",
+    "push": "App (push)",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "sms": "SMS",
+    "managedTitle": "Your notifications are managed by a parent",
+    "managedBody": "A parent handles your notification channels. To change them, talk to them.",
+    "saved": "Saved"
   }
 }

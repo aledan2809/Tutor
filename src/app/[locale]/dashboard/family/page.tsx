@@ -15,6 +15,7 @@ import {
   type SeatCheck,
 } from "@/lib/family";
 import { ChildToneControl } from "@/components/gamification/child-tone-control";
+import { ChildNotifControl } from "@/components/gamification/child-notif-control";
 
 interface Member {
   userId: string;
@@ -241,6 +242,7 @@ function MemberSection({
               <RemoveButton memberId={m.userId} onDone={onRemove} />
             </div>
             {showToneControl && <ChildToneControl childId={m.userId} />}
+            {showToneControl && <ChildNotifControl childId={m.userId} />}
           </div>
         ))}
       </div>

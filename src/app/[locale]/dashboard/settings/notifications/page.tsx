@@ -1,11 +1,23 @@
+import { getTranslations } from "next-intl/server";
 import { NotificationPreferences } from "@/components/notifications/notification-preferences";
 import { TelegramConnectCard } from "@/components/notifications/telegram-connect-card";
 import { PushSubscribeButton } from "@/components/push-subscribe";
 import { InstallAppButton } from "@/components/install-app-button";
 import { PhoneCapture } from "@/components/phone-capture";
 import { Link } from "@/i18n/navigation";
+import { getSession } from "@/lib/authorization";
+import { prisma } from "@/lib/prisma";
 
-export default function NotificationSettingsPage() {
+export default async function NotificationSettingsPage() {
+  const session = await getSession();
+  const tn = await getTranslations("familyNotif");
+  let managedByParent = false;
+  if (session?.user) {
+    const setting = await prisma.setting.findUnique({
+      where: { userId_key: { userId: session.user.id, key: "notifDelegation" } },
+    });
+    managedByParent = (setting?.value as { managedByParent?: boolean } | undefined)?.managedByParent === true;
+  }
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-6">
@@ -48,7 +60,14 @@ export default function NotificationSettingsPage() {
 
       <TelegramConnectCard />
 
-      <NotificationPreferences />
+      {managedByParent ? (
+        <div className="rounded-lg border border-amber-700/50 bg-amber-950/30 px-4 py-4">
+          <h3 className="text-sm font-medium text-amber-200">{tn("managedTitle")}</h3>
+          <p className="mt-1 text-xs text-amber-300/80">{tn("managedBody")}</p>
+        </div>
+      ) : (
+        <NotificationPreferences />
+      )}
     </div>
   );
 }

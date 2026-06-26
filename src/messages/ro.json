@@ -759,5 +759,17 @@
     "saved": "Salvat",
     "parentRestrict": "Doar încurajări calme",
     "parentRestrictHint": "Limitează tonul energic pentru acest copil"
+  },
+  "familyNotif": {
+    "delegate": "Eu gestionez notificările pentru acest copil",
+    "delegateHint": "Când e bifat, tu alegi canalele copilului; el nu le mai schimbă singur.",
+    "channels": "Canale",
+    "push": "Aplicație (push)",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "sms": "SMS",
+    "managedTitle": "Notificările tale sunt gestionate de părinte",
+    "managedBody": "Un părinte se ocupă de canalele tale de notificare. Pentru schimbări, vorbește cu el.",
+    "saved": "Salvat"
   }
 }
