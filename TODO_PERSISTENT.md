@@ -327,7 +327,7 @@ Probleme de reformulat în secțiunea de proof + restul homepage-ului (RO+EN, `s
 **Plan (a) — build, sesiuni dedicate** (agreat user 2026-06-03): model legătură 1:1 + onboarding self-service + plan Family/Trio + parent-branded watcher view + WhatsApp.
 **Plan (b) — onest până atunci** (agreat user 2026-06-03): `/parinte` să NU promită self-service inexistent — CTA spre pas clar / „în curând" / waitlist, ca părintele să nu rămână blocat după signup.
 
-## [ ] 🧩 MagicQuiz text-generator — orfan după ce `/try` a devenit demo real (creat 2026-06-03)
+## [x] 🧩 MagicQuiz text-generator — REPURPOSAT 2026-06-26 (commit `a6abdfc`, LIVE): decizie user (a) — devine funcție pentru elevii logați „Generează test din materialul tău" la `/dashboard/genereaza` (variantă fără CTA de cont) + intrare nouă în meniu „Generează test" (nav.generate). Componenta + API `/api/magic-quiz` reactivate. (spec original mai jos)
 
 `/try` (URL-ul canonic „fără cont", referit din ~10 locuri) e acum **subject-picker pe grile reale** (`SubjectQuizDemo`), nu generatorul „text→test". Componenta `MagicQuizDemo` + API `/api/magic-quiz` **rămân** dar n-au pagină. De decis: (a) repurpose ca feature logat „Creează-ți propriul test din material"; (b) pagină separată `/genereaza`; (c) drop. Homepage nu mai promite generatorul (copy ajustat).
 
@@ -616,7 +616,19 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 
 ---
 
-## [ ] 🔔 Setări → Notificări — pachet + delegare (NU în meniul Notificări) — creat 2026-06-04
+## [~] 🔔 Setări → Notificări — pachet + delegare — SLICE 1+2 DONE+LIVE 2026-06-26 (commits `1ac9a38`+`981da8e`+`3f46403`)
+
+**LIVRAT + LIVE pe etutor.ro (fără migrare DB — totul pe `Setting` + stare abonament; decuplat intenționat de structura abonamentelor ca să nu se ciocnească cu sesiunea paralelă de billing):**
+- **Delegare părinte↔copil** (slice 1): pe *Familia mea*, părintele (guardian) bifează „Eu gestionez notificările pentru acest copil" + setează canalele copilului. Endpoint guardian-gated `/api/family/[childId]/notifications`. Copilul vede notiță read-only ȘI endpoint-ul self refuză scrierea (403) când e delegat — **binding, nu doar ascuns în UI**. `isGuardianOf` întărit (respinge self-link).
+- **Canale pe pachet** (slice 2): `src/lib/plan-channels.ts` (9 teste) — gratuit = push+email (canale fără cost), plătit (active/trialing) = +WhatsApp+SMS. **Server-enforced** în ambele endpoint-uri (self + parent): un cont gratuit nu poate ENABLE canal plătit nici prin apel direct; `clampChannelWrite` forțează OFF canalele excluse de pachet la orice scriere (verificat live: PUT whatsapp=true pe cont gratuit → whatsapp=false). UI: lacăt 🔒 „Disponibil în pachetele plătite". GET-urile întorc `allowedChannels`.
+
+**RĂMÂNE (slice 3+, coordonează cu sesiunea de billing ca să nu vă ciocniți pe `SubscriptionPlan`):**
+- [ ] **Compoziție pachet** (seat-uri: maxParinti/maxMeditatori + canale incluse stocate pe pachet, nu doar din stare) — necesită schema `SubscriptionPlan`.
+- [ ] **Deblocare funcții pe pachet** (modelul user: gratuit = toate materiile dar funcții limitate; plătit = funcții complete) — gating la nivel de FUNCȚIE, nu materie; aceeași logică pe `subscriptionStatus`. Mare, se suprapune cu billing-ul.
+- [ ] **Tranziție la upgrade** (copil-only → +părinți +meditator: provizionezi seat-uri + default prefs).
+- [ ] **Send-path**: motorul de trimitere notificări să intersecteze și el cu `allowedChannels` (acum gating-ul e pe scriere+UI; conturile cu valori default-true vechi se normalizează la prima salvare). De făcut cu sesiunea escaladare/billing.
+
+**Cerință user (verbatim, NU reformulată)** — spec original mai jos:
 
 **Cerință user (verbatim, NU reformulată)**:
 > extindere SubscriptionPlan cu compoziție (seat-uri: maxParinti/maxMeditatori + canale incluse per pachet);

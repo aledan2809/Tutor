@@ -204,3 +204,13 @@ A user reported Google account-creation failing on Android. I confidently blamed
 **(b) Frequency in the log = severity signal.** 4 errors (not hundreds) meant intermittent, not "Google login is down" — which reframes the fix (a careful library bump) and the urgency.
 **(c) Verify server-side config with facts, not memory** — I confirmed AUTH_URL/client-id/callback-302/providers-list on prod before concluding it wasn't a server-config issue.
 **(d) For auth-critical changes with no staging, the regression test is non-negotiable:** after the `next-auth` upgrade I drove the real credentials flow on prod (csrf → POST callback → `/api/auth/session` returns the user + `__Secure-authjs.session-token`) to prove email/password login still worked, with the previous commit + `package.json` backup as instant rollback.
+
+## L21 — 2026-06-26 — Two Claude sessions in one working tree: deploys sweep the other's pushed commits live; decouple to avoid collisions
+
+While building gamification + notification features on Tutor, a SECOND session was concurrently working on the Stripe checkout-broker billing migration in the same `~/Projects/Tutor` working directory. Their commits (`15d7739` billing, `1596f9c` docs) interleaved with mine in the linear history, and when I ran `git pull && build && pm2 restart` to deploy MY feature, the deploy also brought THEIR pushed billing change live — because Tutor deploys whatever is on `origin/master`.
+
+**(a) Before any deploy in a shared tree, check `git log <vps-head>..origin/master`** — know exactly which commits the deploy will push live, not just your own. A money-path change going live as a side-effect of an unrelated feature deploy is a real risk; here it was already a completed+pushed unit so it was fine, but verify (health + the affected path) rather than assume.
+**(b) Don't push the other session's UNPUSHED local commits.** Check `git log origin/master..HEAD` and `git status` — only your staged files. Their work-in-progress is theirs to push.
+**(c) Decouple new features from the area the other session owns.** The "channels per package" gating was deliberately keyed off `subscriptionStatus` in a NEW lib file (`plan-channels.ts`) instead of extending the `SubscriptionPlan` schema — so it never touched the billing session's files/migrations. Pick a seam that doesn't overlap.
+**(d) Use exact-string edits, not line numbers, on shared files** (e.g. `TODO_PERSISTENT.md`) — the other session shifts line numbers under you between reads.
+**(e) Surface the concurrency to the user.** They may not realize two sessions are live on the same repo; flag it so they can sequence the risky overlapping work (billing ↔ package feature-tiering) instead of racing on the same model.
