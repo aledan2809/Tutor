@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
 type Channels = { push: boolean; email: boolean; whatsapp: boolean; sms: boolean };
-type State = { managedByParent: boolean; channels: Channels };
+type State = { managedByParent: boolean; channels: Channels; allowedChannels?: string[] };
 
 /**
  * Parent control: choose whether the parent manages a child's notification channels,
@@ -71,18 +71,26 @@ export function ChildNotifControl({ childId }: { childId: string }) {
       {state.managedByParent && (
         <div className="mt-2 flex flex-wrap items-center gap-3 pl-6">
           <span className="text-xs text-gray-500">{t("channels")}:</span>
-          {CHANNELS.map((ch) => (
-            <label key={ch} className="flex cursor-pointer items-center gap-1 text-xs text-gray-300">
-              <input
-                type="checkbox"
-                checked={state.channels[ch]}
-                onChange={() => toggleChannel(ch)}
-                disabled={busy}
-                className="accent-blue-600"
-              />
-              {t(ch)}
-            </label>
-          ))}
+          {CHANNELS.map((ch) => {
+            const locked = state.allowedChannels ? !state.allowedChannels.includes(ch) : false;
+            return (
+              <label
+                key={ch}
+                className={`flex items-center gap-1 text-xs ${locked ? "cursor-not-allowed text-gray-600" : "cursor-pointer text-gray-300"}`}
+                title={locked ? t("paidOnly") : undefined}
+              >
+                <input
+                  type="checkbox"
+                  checked={locked ? false : state.channels[ch]}
+                  onChange={() => !locked && toggleChannel(ch)}
+                  disabled={busy || locked}
+                  className="accent-blue-600"
+                />
+                {t(ch)}
+                {locked && <span aria-hidden="true">🔒</span>}
+              </label>
+            );
+          })}
           {savedAt > 0 && <span className="text-xs text-gray-600">{t("saved")}</span>}
         </div>
       )}

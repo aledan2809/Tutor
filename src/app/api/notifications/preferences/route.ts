@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { allowedChannels, clampChannelWrite } from "@/lib/plan-channels";
 
 /**
- * GET /api/notifications/preferences — Get user's notification preferences
+ * GET /api/notifications/preferences — Get user's notification preferences.
+ * Also returns `allowedChannels` so the UI can gate the metered channels by plan.
  */
 async function _GET() {
   const session = await getSession();
@@ -22,7 +24,12 @@ async function _GET() {
     });
   }
 
-  return NextResponse.json(prefs);
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { subscriptionStatus: true },
+  });
+
+  return NextResponse.json({ ...prefs, allowedChannels: allowedChannels(user?.subscriptionStatus) });
 }
 
 /**
@@ -45,11 +52,15 @@ async function _PUT(req: NextRequest) {
   const body = await req.json();
   const { push, whatsapp, sms, email, call, quietHoursStart, quietHoursEnd, timezone } = body;
 
-  const data: Record<string, unknown> = {};
-  if (typeof push === "boolean") data.push = push;
-  if (typeof whatsapp === "boolean") data.whatsapp = whatsapp;
-  if (typeof sms === "boolean") data.sms = sms;
-  if (typeof email === "boolean") data.email = email;
+  // Clamp the metered channels to the user's plan (a free account can't ENABLE
+  // WhatsApp/SMS via a direct call — only disable them).
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { subscriptionStatus: true },
+  });
+  const { applied } = clampChannelWrite({ push, email, whatsapp, sms }, user?.subscriptionStatus);
+
+  const data: Record<string, unknown> = { ...applied };
   if (typeof call === "boolean") data.call = call;
   if (typeof quietHoursStart === "string") data.quietHoursStart = quietHoursStart;
   if (typeof quietHoursEnd === "string") data.quietHoursEnd = quietHoursEnd;
@@ -61,7 +72,7 @@ async function _PUT(req: NextRequest) {
     create: { userId: session.user.id, ...data },
   });
 
-  return NextResponse.json(prefs);
+  return NextResponse.json({ ...prefs, allowedChannels: allowedChannels(user?.subscriptionStatus) });
 }
 
 export const GET = withErrorHandler(_GET);

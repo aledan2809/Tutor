@@ -3,6 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { isGuardianOf } from "@/lib/guardian";
+import { allowedChannels, clampChannelWrite } from "@/lib/plan-channels";
 
 /**
  * Per-child notification delegation, set by a parent.
@@ -23,9 +24,10 @@ async function guard(childId: string) {
 }
 
 async function readState(childId: string) {
-  const [setting, prefs] = await Promise.all([
+  const [setting, prefs, child] = await Promise.all([
     prisma.setting.findUnique({ where: { userId_key: { userId: childId, key: "notifDelegation" } } }),
     prisma.notificationPreference.findUnique({ where: { userId: childId } }),
+    prisma.user.findUnique({ where: { id: childId }, select: { subscriptionStatus: true } }),
   ]);
   const managedByParent = (setting?.value as { managedByParent?: boolean } | undefined)?.managedByParent === true;
   return {
@@ -36,6 +38,7 @@ async function readState(childId: string) {
       whatsapp: prefs?.whatsapp ?? true,
       sms: prefs?.sms ?? true,
     },
+    allowedChannels: allowedChannels(child?.subscriptionStatus),
   };
 }
 
@@ -67,15 +70,18 @@ async function _PUT(req: NextRequest, ctx: { params: Promise<{ childId: string }
     });
   }
 
-  const channelData: Record<string, boolean> = {};
-  for (const ch of ["push", "email", "whatsapp", "sms"] as const) {
-    if (typeof body[ch] === "boolean") channelData[ch] = body[ch] as boolean;
-  }
-  if (Object.keys(channelData).length > 0) {
+  // Clamp the child's channels to the child's plan (a parent can't enable a metered
+  // channel the child's package doesn't include).
+  const child = await prisma.user.findUnique({ where: { id: childId }, select: { subscriptionStatus: true } });
+  const { applied } = clampChannelWrite(
+    { push: body.push, email: body.email, whatsapp: body.whatsapp, sms: body.sms },
+    child?.subscriptionStatus,
+  );
+  if (Object.keys(applied).length > 0) {
     await prisma.notificationPreference.upsert({
       where: { userId: childId },
-      update: channelData,
-      create: { userId: childId, ...channelData },
+      update: applied,
+      create: { userId: childId, ...applied },
     });
   }
 

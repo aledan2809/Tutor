@@ -12,7 +12,12 @@ interface Preferences {
   quietHoursStart: string;
   quietHoursEnd: string;
   timezone: string;
+  /** Channels included in the user's plan (server-provided); others are locked. */
+  allowedChannels?: string[];
 }
+
+/** Metered channels gated by plan; `push`/`email`/`call` are not plan-gated here. */
+const GATED_CHANNELS = new Set(["whatsapp", "sms"]);
 
 const TIMEZONES = [
   "Europe/Bucharest",
@@ -76,31 +81,40 @@ export function NotificationPreferences() {
         <h2 className="text-lg font-semibold text-white">{t("channels")}</h2>
         <p className="text-sm text-gray-500">{t("channelsDesc")}</p>
         <div className="mt-3 space-y-3">
-          {channels.map((ch) => (
-            <label
-              key={ch.key}
-              className="flex items-center justify-between rounded-lg border border-gray-800 px-4 py-3"
-            >
-              <span className="text-sm text-gray-300">{ch.label}</span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={prefs[ch.key]}
-                onClick={() =>
-                  setPrefs({ ...prefs, [ch.key]: !prefs[ch.key] })
-                }
-                className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${
-                  prefs[ch.key] ? "bg-blue-600" : "bg-gray-700"
-                }`}
+          {channels.map((ch) => {
+            const locked =
+              GATED_CHANNELS.has(ch.key) &&
+              Array.isArray(prefs.allowedChannels) &&
+              !prefs.allowedChannels.includes(ch.key);
+            const on = locked ? false : prefs[ch.key];
+            return (
+              <label
+                key={ch.key}
+                className={`flex items-center justify-between rounded-lg border border-gray-800 px-4 py-3 ${locked ? "opacity-60" : ""}`}
               >
-                <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
-                    prefs[ch.key] ? "translate-x-5.5" : "translate-x-0.5"
-                  } mt-0.5`}
-                />
-              </button>
-            </label>
-          ))}
+                <span className="flex items-center gap-2 text-sm text-gray-300">
+                  {ch.label}
+                  {locked && <span className="text-xs text-amber-400">🔒 {t("paidOnly")}</span>}
+                </span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={on}
+                  disabled={locked}
+                  onClick={() => !locked && setPrefs({ ...prefs, [ch.key]: !prefs[ch.key] })}
+                  className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${
+                    on ? "bg-blue-600" : "bg-gray-700"
+                  } ${locked ? "cursor-not-allowed" : ""}`}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                      on ? "translate-x-5.5" : "translate-x-0.5"
+                    } mt-0.5`}
+                  />
+                </button>
+              </label>
+            );
+          })}
         </div>
       </div>
 

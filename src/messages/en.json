@@ -459,7 +459,8 @@
     "saving": "Saving...",
     "saved": "Saved!",
     "audienceSelf": "Mine",
-    "audienceChild": "About child"
+    "audienceChild": "About child",
+    "paidOnly": "Available in paid packages"
   },
   "calendar": {
     "title": "Calendar",
@@ -770,6 +771,7 @@
     "sms": "SMS",
     "managedTitle": "Your notifications are managed by a parent",
     "managedBody": "A parent handles your notification channels. To change them, talk to them.",
-    "saved": "Saved"
+    "saved": "Saved",
+    "paidOnly": "Available in paid packages"
   }
 }
