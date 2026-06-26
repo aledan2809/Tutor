@@ -14,6 +14,7 @@ import {
   type InviteChannel,
   type SeatCheck,
 } from "@/lib/family";
+import { ChildToneControl } from "@/components/gamification/child-tone-control";
 
 interface Member {
   userId: string;
@@ -149,7 +150,7 @@ export default function FamilyPage() {
         />
       )}
 
-      <MemberSection title="Copii" members={data.children} onRemove={load} />
+      <MemberSection title="Copii" members={data.children} onRemove={load} showToneControl />
       <MemberSection title="Părinți" members={data.coParents} onRemove={load} />
       <MemberSection title="Meditatori" members={data.tutors} onRemove={load} />
 
@@ -215,10 +216,12 @@ function MemberSection({
   title,
   members,
   onRemove,
+  showToneControl = false,
 }: {
   title: string;
   members: Member[];
   onRemove: () => void;
+  showToneControl?: boolean;
 }) {
   if (members.length === 0) return null;
   return (
@@ -228,13 +231,16 @@ function MemberSection({
         {members.map((m) => (
           <div
             key={m.userId}
-            className="flex items-center justify-between rounded-lg border border-gray-700 bg-gray-800 px-4 py-3"
+            className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-3"
           >
-            <div>
-              <p className="text-white">{m.name ?? "(fără nume)"}</p>
-              {m.email && <p className="text-xs text-gray-400">{m.email}</p>}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white">{m.name ?? "(fără nume)"}</p>
+                {m.email && <p className="text-xs text-gray-400">{m.email}</p>}
+              </div>
+              <RemoveButton memberId={m.userId} onDone={onRemove} />
             </div>
-            <RemoveButton memberId={m.userId} onDone={onRemove} />
+            {showToneControl && <ChildToneControl childId={m.userId} />}
           </div>
         ))}
       </div>

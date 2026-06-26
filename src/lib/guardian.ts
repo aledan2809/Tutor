@@ -39,6 +39,9 @@ export async function getLinkedChildIds(parentId: string): Promise<string[]> {
 
 /** True when `parentId` is an active guardian of `childId`. */
 export async function isGuardianOf(parentId: string, childId: string): Promise<boolean> {
+  // Defense-in-depth: nobody is their own guardian (blocks a self-link from ever
+  // granting parent powers over one's own account, e.g. the tone-restriction control).
+  if (parentId === childId) return false;
   const link = await prisma.guardian.findUnique({
     where: { parentId_childId: { parentId, childId } },
     select: { status: true },

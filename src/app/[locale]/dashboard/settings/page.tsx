@@ -5,11 +5,13 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { CalendarConnect } from "@/components/calendar/calendar-connect";
 import { StudyHoursForm } from "@/components/calendar/study-hours-form";
+import { TonePreference } from "@/components/gamification/tone-preference";
 import { useEffect, useState } from "react";
 
 export default function SettingsPage() {
   const t = useTranslations("settings");
   const tCal = useTranslations("calendar");
+  const tRemarks = useTranslations("remarks");
   const { data: session, status } = useSession();
   const [selectedDomain, setSelectedDomain] = useState("");
   const [connected, setConnected] = useState(false);
@@ -107,6 +109,14 @@ export default function SettingsPage() {
           {t("studyHoursDescription")}
         </p>
         <StudyHoursForm />
+      </div>
+
+      {/* Encouragement tone */}
+      <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
+        <h2 className="mb-4 text-lg font-semibold text-white">
+          {tRemarks("tone")}
+        </h2>
+        <TonePreference />
       </div>
     </div>
   );

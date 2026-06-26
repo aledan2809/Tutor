@@ -9,6 +9,7 @@ import { FeedbackDisplay } from "@/components/session/feedback-display";
 import { bumpAnswered } from "@/lib/engagement";
 import { QuestionFeedback } from "@/components/session/question-feedback";
 import { SessionResults } from "@/components/session/session-results";
+import { DEFAULT_TONE, type RemarkTone } from "@/lib/remarks";
 
 interface QuestionData {
   id: string;
@@ -82,6 +83,33 @@ export default function ActiveSessionPage() {
   // A5: a single contextual coachmark on the very first question (no manual/tour).
   const [coachmarkSeen, setCoachmarkSeen] = useState(true);
   const questionStartTime = useRef<number>(Date.now());
+  // Adaptive-remarks config (tone resolved server-side: student pref ∩ parent restriction).
+  const [remarkTone, setRemarkTone] = useState<RemarkTone>(DEFAULT_TONE);
+  const [dislikedRemarks, setDislikedRemarks] = useState<string[]>([]);
+  // Whether this correct answer follows a wrong one — drives the "comeback" remark.
+  const lastWrong = useRef(false);
+  const [cameBack, setCameBack] = useState(false);
+
+  // Load the student's remark config once (best-effort; defaults stay if it fails).
+  useEffect(() => {
+    fetch("/api/student/remarks")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d) return;
+        if (d.tone) setRemarkTone(d.tone as RemarkTone);
+        if (Array.isArray(d.disliked)) setDislikedRemarks(d.disliked);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleRemarkVote = useCallback((key: string, signal: "like" | "dislike") => {
+    if (signal === "dislike") setDislikedRemarks((prev) => (prev.includes(key) ? prev : [...prev, key]));
+    fetch("/api/student/remarks/vote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key, signal }),
+    }).catch(() => {});
+  }, []);
 
   // Coachmark shows once, ever (read client-side to avoid an SSR flash).
   useEffect(() => {
@@ -167,6 +195,8 @@ export default function ActiveSessionPage() {
         setPhase("feedback");
         setAnsweredCount((c) => c + 1);
         setCorrectStreak((s) => (result.isCorrect ? s + 1 : 0));
+        setCameBack(result.isCorrect && lastWrong.current);
+        lastWrong.current = !result.isCorrect;
         bumpAnswered(); // first-value signal (gates the install/notifications banner)
         try {
           localStorage.setItem("tutor_coachmark_seen", "1");
@@ -331,6 +361,11 @@ export default function ActiveSessionPage() {
             source={feedback.source}
             sourceQuote={feedback.sourceQuote}
             streak={correctStreak}
+            cameBackFromWrong={cameBack}
+            remarkTone={remarkTone}
+            dislikedRemarks={dislikedRemarks}
+            remarkSeed={answeredCount}
+            onRemarkVote={handleRemarkVote}
             onNext={handleNext}
           />
           {feedback.xpAwarded !== undefined && feedback.xpAwarded > 0 && (
