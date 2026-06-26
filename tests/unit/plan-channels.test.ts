@@ -44,11 +44,11 @@ describe("isChannelAllowed", () => {
 });
 
 describe("clampChannelWrite", () => {
-  it("free account cannot ENABLE a paid channel (blocked), but can disable it", () => {
+  it("free account: a paid channel is forced off and an enable attempt is reported", () => {
     const r = clampChannelWrite({ whatsapp: true, sms: true, push: true }, null);
     expect(r.blocked.sort()).toEqual(["sms", "whatsapp"]);
-    expect(r.applied).toEqual({ push: true });
-    // disabling a paid channel is always fine
+    expect(r.applied).toEqual({ push: true, whatsapp: false, sms: false });
+    // disabling a paid channel is fine and not reported as blocked
     const off = clampChannelWrite({ whatsapp: false }, null);
     expect(off.blocked).toEqual([]);
     expect(off.applied).toEqual({ whatsapp: false });

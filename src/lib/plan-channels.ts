@@ -28,8 +28,9 @@ export function isChannelAllowed(channel: NotifChannel, subscriptionStatus: stri
 
 /**
  * Clamp a set of requested channel toggles to those the plan allows. A channel the
- * plan doesn't include can only ever be turned OFF, never ON — so a free account
- * can't enable WhatsApp/SMS via a direct API call.
+ * plan doesn't include is forced OFF on any write (so a free account can never have
+ * WhatsApp/SMS on, even from a stale default-true value), and an attempt to enable
+ * one is reported in `blocked`.
  */
 export function clampChannelWrite(
   requested: Partial<Record<NotifChannel, boolean>>,
@@ -40,8 +41,9 @@ export function clampChannelWrite(
   const blocked: NotifChannel[] = [];
   for (const ch of ALL_CHANNELS) {
     if (requested[ch] === undefined) continue;
-    if (requested[ch] === true && !allowed.has(ch)) {
-      blocked.push(ch); // refuse to enable a channel the plan doesn't include
+    if (!allowed.has(ch)) {
+      applied[ch] = false; // a plan-excluded channel is always written off
+      if (requested[ch] === true) blocked.push(ch);
     } else {
       applied[ch] = requested[ch];
     }
