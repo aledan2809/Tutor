@@ -61,7 +61,8 @@
     "tabLearn": "Grile",
     "tabSim": "Simulări",
     "tabProgress": "Progres",
-    "tabProfile": "Profil"
+    "tabProfile": "Profil",
+    "generate": "Generează test"
   },
   "results": {
     "complete": "Sesiune terminată",

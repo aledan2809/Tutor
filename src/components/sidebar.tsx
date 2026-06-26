@@ -46,6 +46,7 @@ export function Sidebar({ user }: SidebarProps) {
     { href: "/dashboard/lessons", label: t("lessons") },
     { href: "/dashboard/bibliography", label: t("bibliography") },
     { href: "/dashboard/practice", label: t("practice") },
+    { href: "/dashboard/genereaza", label: t("generate") },
     { href: "/dashboard/assessment", label: t("assessment") },
     { href: "/dashboard/exams", label: t("exams") },
     { href: "/dashboard/exam-bank", label: t("examBank") },

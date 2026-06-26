@@ -61,7 +61,8 @@
     "tabLearn": "Quizzes",
     "tabSim": "Mock exams",
     "tabProgress": "Progress",
-    "tabProfile": "Profile"
+    "tabProfile": "Profile",
+    "generate": "Generate test"
   },
   "results": {
     "complete": "Session complete",

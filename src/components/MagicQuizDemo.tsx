@@ -29,15 +29,19 @@ const MAX_CHARS = 6000;
 export default function MagicQuizDemo({
   variant = "full",
 }: {
-  variant?: "hero" | "full";
+  variant?: "hero" | "full" | "dashboard";
 }) {
   const hero = variant === "hero";
+  const dashboard = variant === "dashboard";
   const locale = useLocale();
   const ro = locale === "ro";
   const T = ro
     ? {
         badge: "Demo gratuit · fără cont",
         title: "Transformă orice text într-un test în 10 secunde",
+        titleLogged: "Generează un test din materialul tău",
+        subtitleLogged:
+          "Lipește o pagină din manual, notițe sau orice material — îți facem grile pe care le dai chiar aici.",
         subtitle:
           "Lipește o pagină din manual, un curs sau orice material. Generăm grile pe care le dai chiar aici. Asta facem pentru elevii noștri, în fiecare zi.",
         placeholder: "Lipește aici teoria din care vrei test (min. 50 de caractere)…",
@@ -64,6 +68,9 @@ export default function MagicQuizDemo({
     : {
         badge: "Free demo · no account",
         title: "Turn any text into a quiz in 10 seconds",
+        titleLogged: "Generate a quiz from your own material",
+        subtitleLogged:
+          "Paste a page from a textbook, your notes or any material — we make a quiz you take right here.",
         subtitle:
           "Paste a page from a textbook, lecture notes or any material. We generate a quiz you take right here. This is what we do for our students, every day.",
         placeholder: "Paste the theory you want a quiz from (min. 50 characters)…",
@@ -197,7 +204,7 @@ export default function MagicQuizDemo({
     <div className={hero ? "w-full text-left" : ""}>
       {phase === "input" && (
         <>
-          {!hero && (
+          {!hero && !dashboard && (
             <>
               <span className="inline-block rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-300">
                 {T.badge}
@@ -206,6 +213,12 @@ export default function MagicQuizDemo({
                 {T.title}
               </h1>
               <p className="mt-3 text-base text-gray-300">{T.subtitle}</p>
+            </>
+          )}
+          {dashboard && (
+            <>
+              <h1 className="text-2xl font-bold text-white">{T.titleLogged}</h1>
+              <p className="mt-2 text-sm text-gray-400">{T.subtitleLogged}</p>
             </>
           )}
 
@@ -328,17 +341,19 @@ export default function MagicQuizDemo({
                 </a>
               </div>
 
-              <div className="mt-6 border-t border-blue-500/30 pt-5">
-                <p className="text-lg font-semibold text-white">{T.ctaTitle}</p>
-                <p className="mt-1 text-sm text-gray-300">{T.ctaText}</p>
-                <button
-                  onClick={goSignup}
-                  disabled={busy}
-                  className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-lg bg-blue-600 px-8 py-3 text-base font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
-                >
-                  {T.ctaButton}
-                </button>
-              </div>
+              {!dashboard && (
+                <div className="mt-6 border-t border-blue-500/30 pt-5">
+                  <p className="text-lg font-semibold text-white">{T.ctaTitle}</p>
+                  <p className="mt-1 text-sm text-gray-300">{T.ctaText}</p>
+                  <button
+                    onClick={goSignup}
+                    disabled={busy}
+                    className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-lg bg-blue-600 px-8 py-3 text-base font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  >
+                    {T.ctaButton}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
