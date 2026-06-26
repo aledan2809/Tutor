@@ -4,6 +4,29 @@
 
 ---
 
+## [~] 💳 Billing migrat pe Stripe Checkout Broker — TEST DONE 2026-06-26 (commit `15d7739`)
+
+**Context**: Tutor avea checkout Stripe scaffold-at-dar-mort (`STRIPE_SECRET_KEY` unset pe prod, 0 customers, 0 plăți; cele 5 abonamente active = vouchere 100% gratis). Migrat să ruteze prin **broker-ul central** `stripe.knowbest.ro` → billing pe contul firmei **Class RDA** (biller decis de user). Tutor nu mai ține cheie Stripe.
+
+**Livrat (commit `15d7739`)**:
+- `/api/admin/stripe/checkout` → POST `{broker}/api/checkout` (inline price_data din `plan.price`, trial din `plan.trialDays`, voucher→coupon, metadata `{userId,planId,voucherId}`, currency RON).
+- `/api/stripe/callback` (nou) → verify HMAC `X-Broker-Signature` + anti-replay `t` + idempotency pe `stripeSessionId` → Payment + subscriptionStatus + comision referral (cheia pe `metadata.userId`, nu pe `stripeCustomerId` care acum e la broker).
+- Env `STRIPE_BROKER_URL/PROJECT_KEY/CALLBACK_SECRET` în `.env` (gitignored; synced Master/credentials/tutor.env). Mapping broker `tutor`→`class-rda` (brokerEnv **test**).
+- **Verificat E2E pe prod (test)**: checkout broker → URL valid; callback semnat → Payment creat + status active; idempotency (POST 2× → 1 Payment); tampered sig → 400. Build/tsc verzi.
+
+**Rămas pentru LIVE billing (acțiuni user în Stripe Dashboard, cont Class RDA)**:
+- [ ] Webhook endpoint pe contul Class RDA → `https://stripe.knowbest.ro/api/stripe/webhook/class-rda` cu evenimentele: `checkout.session.completed`, `checkout.session.expired`, `payment_intent.payment_failed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`.
+- [ ] Activează **Customer Portal** (Settings → Billing → Customer portal) pe contul Class RDA (pt portal self-service; altfel `/api/portal` → "No configuration provided").
+- [ ] Flip mapping `tutor` brokerEnv **test→live** (în broker /projects) când e gata de bani reali.
+- [ ] Confirmă prețul planului Bronze (cents) e intenționat pt RON.
+- [ ] (UI) buton "Gestionează abonamentul" → POST `{broker}/api/portal {sessionId\|subscriptionId, returnUrl}` (feature broker gata).
+
+**Follow-up tehnic (low priority)**: callback-ul broker nu cară un eventId unic per-factură → renewal-urile nu se dedup pe retry de broker (acceptabil cât timp Tutor n-are abonamente recurente live). De adăugat `eventId` (Stripe event.id) în payload-ul callback al broker-ului.
+
+**Dezactivat (dormant, nu șters)**: vechiul `/api/admin/stripe/webhook` (cere `STRIPE_WEBHOOK_SECRET` unset → nu se declanșează) + crearea Stripe customer din checkout. Curățare = sesiune separată.
+
+---
+
 ## [~] 🐛 Bug-uri din review user 2026-06-25 (6 raportate)
 
 - [x] **#2 SECURITATE — domeniu Aviație vizibil fără acces** DONE+LIVE (`6b5f58d`): scurgeri închise la sursă — `/api/domains/public` (dropdown register nelogat) + `/api/student/domains` `available` (catalog) filtrează acum domeniile restricționate (non-curriculum) dacă userul nu e admin/allowlist; POST enroll direct blocat (403) pe restricționate (defense-in-depth). Verificat prod: `/api/domains/public` întoarce doar curriculum (zero aviation/licenta). Enrolații existenți păstrează accesul.
