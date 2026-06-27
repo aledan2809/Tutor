@@ -16,10 +16,21 @@
 
 **Rămas pentru LIVE billing (acțiuni user în Stripe Dashboard, cont Class RDA)**:
 - [ ] Webhook endpoint pe contul Class RDA → `https://stripe.knowbest.ro/api/stripe/webhook/class-rda` cu evenimentele: `checkout.session.completed`, `checkout.session.expired`, `payment_intent.payment_failed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`.
-- [ ] Activează **Customer Portal** (Settings → Billing → Customer portal) pe contul Class RDA (pt portal self-service; altfel `/api/portal` → "No configuration provided").
-- [ ] Flip mapping `tutor` brokerEnv **test→live** (în broker /projects) când e gata de bani reali.
-- [ ] Confirmă prețul planului Bronze (cents) e intenționat pt RON.
+- [~] Activează **Customer Portal** (Settings → Billing → Customer portal) pe contul Class RDA (pt portal self-service; altfel `/api/portal` → "No configuration provided"). Doar dacă pui butonul de management (nu există încă).
+- [x] Flip mapping `tutor` brokerEnv **test→live** — **FĂCUT de user 2026-06-26** (broker /projects → tutor → Class RDA → LIVE). Webhook Class RDA LIVE → broker = deja pus (user confirmat „A e făcut deja").
+- [ ] Confirmă prețul planului Bronze e **15 lei** intenționat (display fixat $→lei, commit `55cb794`). Dacă voiai altă sumă → Planuri → Edit pe Bronze.
 - [ ] (UI) buton "Gestionează abonamentul" → POST `{broker}/api/portal {sessionId\|subscriptionId, returnUrl}` (feature broker gata).
+
+### 🧪 TEST LIVE Tutor — pași de făcut de TINE (Alex), GRATIS prin trial (proiect: **Tutor / etutor.ro**)
+> Scop: dovedește pe LIVE tot lanțul checkout → Class RDA → webhook → broker → activare în Tutor, FĂRĂ să miști bani (planul Bronze are 14 zile trial → 0 lei azi).
+1. Loghează-te pe **https://etutor.ro** cu **contul tău** (NU SuperAdmin — un cont de student normal, sau fă unul nou).
+2. Mergi la pagina de abonare (sidebar **„Activare acces"**) și alege planul **Bronze** → apasă abonează-te.
+3. La Stripe Checkout introdu cardul **real** (e trial → nu se ia nimic acum). Finalizează.
+4. Ar trebui să fii redirecționat înapoi pe `/dashboard?session_id=...` cu acces activ.
+5. **Spune-mi „am apăsat"** → verific eu în DB-ul prod dacă: `User.subscriptionStatus` = `trialing`/`active`, `subscriptionPlanId` setat, și s-a creat rândul în `Payment` cu `stripeSessionId`.
+6. Dacă apare totul → LIVE merge end-to-end. Dacă NU → webhook-ul Class RDA mai are nevoie de `checkout.session.completed` (de adăugat pe webhook-ul existent).
+7. **Anulează abonamentul înainte de 14 zile** (sau îl anulez eu din Stripe via broker) → zero bani mișcați.
+> Notă comision (din testul AVE): pe sume mici taxa fixă Stripe domină (~4.5% pe 22 AED); pe sume normale + card local ajunge ~3-4%. Pentru Tutor RON, charge în RON (deja setat) → fără taxă de conversie.
 
 **Follow-up tehnic (low priority)**: callback-ul broker nu cară un eventId unic per-factură → renewal-urile nu se dedup pe retry de broker (acceptabil cât timp Tutor n-are abonamente recurente live). De adăugat `eventId` (Stripe event.id) în payload-ul callback al broker-ului.
 
