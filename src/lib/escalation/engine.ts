@@ -18,6 +18,7 @@ import {
   isPaidSubscriber,
 } from "./segmentation";
 import { userIdsOnBreak } from "./breaks";
+import { scheduledTodayFilter } from "./scheduled-days";
 
 interface EscalationContext {
   userId: string;
@@ -354,10 +355,16 @@ export async function advancePendingEscalations(): Promise<number> {
   });
 
   const onBreak = await userIdsOnBreak();
+  // Zile fără program (weekend / nimic programat): lanțul se pune pe pauză și
+  // reia la următoarea zi programată — nu nag-uim copilul în off-days.
+  const scheduledAdvance = await scheduledTodayFilter(
+    completedEvents.map((e) => e.userId)
+  );
   let advanced = 0;
 
   for (const event of completedEvents) {
     if (onBreak.has(event.userId)) continue; // vacanță: nu escaladăm
+    if (!scheduledAdvance.has(event.userId)) continue; // zi fără program: pauză
     // Check if user has resumed activity (completed a session since escalation).
     // A late/resumed session has an old startedAt, so also count one that FINISHED
     // after the escalation — the completion is the real "studied" signal.
@@ -435,9 +442,11 @@ export async function advancePendingEscalations(): Promise<number> {
   const pending = await prisma.escalationEvent.findMany({
     where: { status: "PENDING" },
   });
+  const scheduledPending = await scheduledTodayFilter(pending.map((p) => p.userId));
 
   for (const p of pending) {
     if (onBreak.has(p.userId)) continue;
+    if (!scheduledPending.has(p.userId)) continue; // zi fără program: nu trimitem
     await processEscalationEvent(p.id);
   }
 
@@ -508,10 +517,17 @@ export async function detectMissedSessions(): Promise<string[]> {
   });
 
   const onBreak = await userIdsOnBreak(now);
+  // Zile fără program (weekend / nimic programat): nu deschidem lanț nou — altfel
+  // nudge-urile devin spam și copilul + părintele se desensibilizează.
+  const scheduledToday = await scheduledTodayFilter(
+    inactiveUsers.map((u) => u.id),
+    now
+  );
   const userIds: string[] = [];
 
   for (const user of inactiveUsers) {
     if (onBreak.has(user.id)) continue; // vacanță: nu deschidem lanț nou
+    if (!scheduledToday.has(user.id)) continue; // zi fără program: nu deschidem lanț nou
     await startEscalation({
       userId: user.id,
       reason: "missed_session",

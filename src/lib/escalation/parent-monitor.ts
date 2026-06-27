@@ -12,6 +12,7 @@
 import { prisma } from "@/lib/prisma";
 import { startEscalation } from "./engine";
 import { userIdsOnBreak } from "./breaks";
+import { scheduledTodayFilter } from "./scheduled-days";
 import { isQuietHours } from "./timing";
 import { webPushToUser, telegramAlertToUser } from "@/lib/notifications/service";
 import { sendAppEmail } from "@/lib/email";
@@ -221,8 +222,11 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
     if (e.status === "PENDING" || e.status === "ESCALATING") cur.active = true;
     byChild.set(e.userId, cur);
   }
+  // Zile fără program (weekend / nimic programat): nu deschidem alertă nouă către părinte.
+  const scheduledChildren = await scheduledTodayFilter([...byChild.keys()], now);
   for (const [childId, chain] of byChild) {
     if (onBreak.has(childId)) continue; // vacanță
+    if (!scheduledChildren.has(childId)) continue; // zi fără program: fără alertă nouă
     if (chain.active) continue; // chain still running
     const guardians = await prisma.guardian.findMany({
       where: { childId, status: "active" },
@@ -285,8 +289,13 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
     where: { status: "awaiting_parent" },
     include: { child: { select: { name: true } } },
   });
+  const scheduledAwaiting = await scheduledTodayFilter(
+    awaiting.map((e) => e.childId),
+    now
+  );
   for (const esc of awaiting) {
     if (onBreak.has(esc.childId)) continue; // vacanță
+    if (!scheduledAwaiting.has(esc.childId)) continue; // zi fără program: nu re-notificăm
     if (!shouldRenotifyParent(esc.lastParentNotifiedAt, now)) continue;
     await notifyGuardians(esc.childId, esc.child.name, {
       alertType: "no_reaction_reminder",
