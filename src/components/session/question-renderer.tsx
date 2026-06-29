@@ -73,10 +73,27 @@ export function QuestionRenderer({
   const [clockH, setClockH] = useState("");
   const [clockM, setClockM] = useState("");
   const cubeSpeech = `Start on ${cubeStart}. ${cubeMoves.join(". ")}.`;
-  // Try to read the cube moves aloud once on mount (a tap on 🔊 replays if the
-  // browser blocks auto-speech without a gesture).
+
+  // Student-controlled read-aloud speed (persisted in localStorage). Init to the
+  // default on the server + first render (avoids a hydration mismatch), then sync
+  // the stored value after mount.
+  const [ttsRate, setTtsRateState] = useState<number>(TTS_RATE_DEFAULT);
   useEffect(() => {
-    if (isCubeVoice) speak(cubeSpeech, "en-US", 0.85);
+    setTtsRateState(readTtsRate());
+  }, []);
+  const setTtsRate = (r: number) => {
+    setTtsRateState(r);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(TTS_RATE_KEY, String(r));
+      window.speechSynthesis?.cancel();
+    }
+  };
+
+  // Try to read the cube moves aloud once on mount (a tap on 🔊 replays if the
+  // browser blocks auto-speech without a gesture). Reads the stored rate directly
+  // so the auto-play honors the student's preference even before state syncs.
+  useEffect(() => {
+    if (isCubeVoice) speak(cubeSpeech, "en-US", readTtsRate());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.id]);
 
@@ -141,11 +158,12 @@ export function QuestionRenderer({
         <p className="whitespace-pre-line text-lg text-white">{question.content}</p>
         <button
           type="button"
-          onClick={() => speak(audioItems.join(", "), audioLang, 0.85)}
+          onClick={() => speak(audioItems.join(", "), audioLang, ttsRate)}
           className="rounded-lg border border-blue-700 bg-blue-950/30 px-4 py-2.5 text-sm font-medium text-blue-200 hover:bg-blue-900/40"
         >
           🔊 Ascultă numerele
         </button>
+        <TtsSpeedControl value={ttsRate} onChange={setTtsRate} />
         <div className="flex flex-wrap gap-2">
           {audioItems.map((_, i) => (
             <input
@@ -256,13 +274,16 @@ export function QuestionRenderer({
 
       {/* #3 Cube — replay the dictated start + 6 moves (English); answer = final face below. */}
       {isCubeVoice && (
-        <button
-          type="button"
-          onClick={() => speak(cubeSpeech, "en-US", 0.85)}
-          className="rounded-lg border border-blue-700 bg-blue-950/30 px-4 py-2.5 text-sm font-medium text-blue-200 hover:bg-blue-900/40"
-        >
-          🔊 Ascultă mișcările din nou
-        </button>
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => speak(cubeSpeech, "en-US", ttsRate)}
+            className="rounded-lg border border-blue-700 bg-blue-950/30 px-4 py-2.5 text-sm font-medium text-blue-200 hover:bg-blue-900/40"
+          >
+            🔊 Ascultă mișcările din nou
+          </button>
+          <TtsSpeedControl value={ttsRate} onChange={setTtsRate} />
+        </div>
       )}
 
       {/* Figure (geometry / chart items) — rendered on a white card so the black line
@@ -336,6 +357,51 @@ function speak(text: string, lang = "ro-RO", rate = 0.95) {
   u.lang = lang;
   u.rate = rate;
   window.speechSynthesis.speak(u);
+}
+
+// Student-controlled TTS playback speed (the voice that reads dictation/cube
+// exercises aloud). Persisted per-device in localStorage — a playback preference
+// like volume, not account data. Default 0.85 (the tuned pace for these tasks).
+// Surfaced because students reported the voice reading too fast.
+const TTS_RATE_KEY = "tutor-tts-rate";
+const TTS_RATE_DEFAULT = 0.85;
+const TTS_RATE_OPTIONS: { label: string; value: number }[] = [
+  { label: "🐢 Lent", value: 0.6 },
+  { label: "Normal", value: 0.85 },
+  { label: "🐇 Rapid", value: 1.05 },
+];
+
+function readTtsRate(): number {
+  if (typeof window === "undefined") return TTS_RATE_DEFAULT;
+  const v = Number(window.localStorage.getItem(TTS_RATE_KEY));
+  return Number.isFinite(v) && v >= 0.4 && v <= 1.3 ? v : TTS_RATE_DEFAULT;
+}
+
+/** Slow/Normal/Fast selector for the read-aloud voice. */
+function TtsSpeedControl({ value, onChange }: { value: number; onChange: (r: number) => void }) {
+  return (
+    <div className="flex items-center gap-1" role="group" aria-label="Viteza vocii">
+      <span className="text-xs text-gray-500">Viteză:</span>
+      {TTS_RATE_OPTIONS.map((o) => {
+        const active = Math.abs(value - o.value) < 0.001;
+        return (
+          <button
+            key={o.value}
+            type="button"
+            onClick={() => onChange(o.value)}
+            aria-pressed={active}
+            className={`rounded-md border px-2 py-0.5 text-xs ${
+              active
+                ? "border-blue-500 bg-blue-500/20 text-white"
+                : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white"
+            }`}
+          >
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 /** Read the question aloud (browser TTS, RO). */

@@ -14,12 +14,20 @@ import { callTextAI } from "@/lib/grila-generate";
 const PRIVATE_SLUGS = new Set(["aptitudini-aviatie", "licenta-rares"]);
 const MAX_PER_RUN = 20;
 
-interface Judgment {
+export interface Judgment {
   valid: boolean;
   issue: string;
   fixable: boolean;
   correctedAnswer: string | null;
   reason: string;
+  /**
+   * "question" = the complaint is about the question content (wrong answer,
+   * wording, options). "platform" = it's about the app/experience (the TTS voice
+   * reading too fast, audio, navigation, "I don't need this") — NOT the question.
+   * Platform complaints must never hide/correct the question; they route to admins
+   * as a product issue. Defaults to "question" if the judge omits it.
+   */
+  complaintType: "question" | "platform";
 }
 
 async function judge(q: {
@@ -39,12 +47,16 @@ EXPLICAȚIE: ${q.explanation ?? "(fără)"}
 COMENTARIU ELEV: ${q.comment ?? "(fără comentariu)"}
 
 Răspunde DOAR cu JSON:
-{"valid": true/false (întrebarea chiar are o problemă reală),
+{"complaintType": "question" sau "platform",
+ "valid": true/false (DOAR pentru complaintType=question: întrebarea chiar are o problemă reală),
  "issue": "scurtă descriere a problemei sau gol",
  "fixable": true/false (există o corecție SIGURĂ a cheii de răspuns),
  "correctedAnswer": "exact una dintre opțiuni dacă fixable, altfel null",
  "reason": "justificare scurtă"}
-Reguli: fixable=true DOAR dacă răspunsul corect e clar greșit și poți identifica cu certitudine opțiunea corectă dintre cele date (correctedAnswer trebuie să fie EXACT textul unei opțiuni). Dacă problema e de formulare/ambiguă, fixable=false.`;
+Reguli:
+- complaintType="platform" dacă reclamația e despre PLATFORMĂ/EXPERIENȚĂ — vocea/robotul care citește prea repede/încet, audio, navigare, viteză, „nu am nevoie de asta/de întrebarea asta", interfață. NU despre conținutul întrebării. Pune issue = reclamația de produs pe scurt.
+- complaintType="question" dacă reclamația e despre ÎNTREBARE — răspuns greșit, formulare ambiguă, opțiuni greșite, date incorecte.
+- fixable=true DOAR dacă (complaintType=question ȘI) răspunsul corect e clar greșit și poți identifica cu certitudine opțiunea corectă dintre cele date (correctedAnswer trebuie să fie EXACT textul unei opțiuni). Dacă problema e de formulare/ambiguă, fixable=false.`;
 
   try {
     const raw = (await callTextAI(prompt)).trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
@@ -55,6 +67,9 @@ Reguli: fixable=true DOAR dacă răspunsul corect e clar greșit și poți ident
       fixable: parsed.fixable === true,
       correctedAnswer: parsed.correctedAnswer ? String(parsed.correctedAnswer) : null,
       reason: String(parsed.reason ?? ""),
+      // Default to "question" so an omitted/garbled field can never silently turn a
+      // real question complaint into a no-op — only an explicit "platform" diverts.
+      complaintType: parsed.complaintType === "platform" ? "platform" : "question",
     };
   } catch {
     return null;
@@ -71,14 +86,61 @@ async function notify(userIds: string[], type: string, title: string, message: s
   }
 }
 
+export type ReviewAction =
+  | "corrected"
+  | "hidden"
+  | "flagged"
+  | "dismissed"
+  | "product_flagged";
+
+/**
+ * Pure decision: from the AI judgment (+ whether the bank is private + the
+ * question options), decide what to do and the human-readable resolution text.
+ * Side-effects (editing/hiding the question, notifications) are applied by the
+ * caller based on the returned action — so this stays unit-testable without a DB.
+ *
+ * A "platform" complaint (TTS too fast, navigation, "I don't need this") NEVER
+ * hides or corrects the question — it routes to admins as a product issue.
+ */
+export function decideReviewAction(
+  j: Judgment,
+  isPrivate: boolean,
+  options: string[],
+  comment: string | null,
+): { action: ReviewAction; decision: string } {
+  if (j.complaintType === "platform") {
+    return {
+      action: "product_flagged",
+      decision: `Reclamație de platformă/experiență (nu despre întrebare): ${j.issue || comment || "—"}. Întrebarea rămâne neschimbată; semnalat echipei de produs.`,
+    };
+  }
+  if (!j.valid) {
+    return { action: "dismissed", decision: `Reclamație respinsă: ${j.reason}` };
+  }
+  if (isPrivate && j.fixable && j.correctedAnswer && options.includes(j.correctedAnswer)) {
+    return {
+      action: "corrected",
+      decision: `Corectat automat (răspuns: „${j.correctedAnswer}"). Motiv: ${j.issue}`,
+    };
+  }
+  if (isPrivate) {
+    return { action: "hidden", decision: `Ascunsă din practică (necesită revizuire). Problemă: ${j.issue}` };
+  }
+  return {
+    action: "flagged",
+    decision: `Semnalată pentru admin (curriculum, fără editare automată). Problemă: ${j.issue}`,
+  };
+}
+
 export async function runFeedbackReview(): Promise<{
   reviewed: number;
   corrected: number;
   hidden: number;
   flagged: number;
   dismissed: number;
+  productFlagged: number;
 }> {
-  const stats = { reviewed: 0, corrected: 0, hidden: 0, flagged: 0, dismissed: 0 };
+  const stats = { reviewed: 0, corrected: 0, hidden: 0, flagged: 0, dismissed: 0, productFlagged: 0 };
 
   const items = await prisma.questionFeedback.findMany({
     where: { status: "new", rating: "down" },
@@ -117,27 +179,21 @@ export async function runFeedbackReview(): Promise<{
       stats.reviewed++;
       if (!j) continue; // AI unavailable — leave it "new" for the next run
 
-      let decision: string;
-      let action: "corrected" | "hidden" | "flagged" | "dismissed";
-
-      if (!j.valid) {
-        decision = `Reclamație respinsă: ${j.reason}`;
-        action = "dismissed";
-        stats.dismissed++;
-      } else if (isPrivate && j.fixable && j.correctedAnswer && options.includes(j.correctedAnswer)) {
-        await prisma.question.update({ where: { id: q.id }, data: { correctAnswer: j.correctedAnswer } });
-        decision = `Corectat automat (răspuns: „${j.correctedAnswer}"). Motiv: ${j.issue}`;
-        action = "corrected";
+      // Pure decision, then apply the side-effect for that action.
+      const { action, decision } = decideReviewAction(j, isPrivate, options, fb.comment);
+      if (action === "corrected") {
+        await prisma.question.update({ where: { id: q.id }, data: { correctAnswer: j.correctedAnswer! } });
         stats.corrected++;
-      } else if (isPrivate) {
+      } else if (action === "hidden") {
         await prisma.question.update({ where: { id: q.id }, data: { status: "DRAFT" } });
-        decision = `Ascunsă din practică (necesită revizuire). Problemă: ${j.issue}`;
-        action = "hidden";
         stats.hidden++;
-      } else {
-        decision = `Semnalată pentru admin (curriculum, fără editare automată). Problemă: ${j.issue}`;
-        action = "flagged";
+      } else if (action === "dismissed") {
+        stats.dismissed++;
+      } else if (action === "flagged") {
         stats.flagged++;
+      } else {
+        // product_flagged — no question edit; routed to admins as a product issue.
+        stats.productFlagged++;
       }
 
       await prisma.questionFeedback.update({
@@ -146,25 +202,34 @@ export async function runFeedbackReview(): Promise<{
           status: "resolved",
           resolution: decision,
           reviewAction: action,
-          reviewIssue: j.valid ? j.issue : j.reason,
+          reviewIssue:
+            action === "product_flagged"
+              ? j.issue || fb.comment || ""
+              : j.valid
+                ? j.issue
+                : j.reason,
           correctedAnswer: action === "corrected" ? j.correctedAnswer : null,
         },
       });
 
       const meta = { questionId: q.id, feedbackId: fb.id, action, domain: domain?.slug ?? null };
       // The user who complained
-      await notify(
-        [fb.userId],
-        "feedback_resolved",
-        action === "dismissed" ? "Feedback analizat" : "Feedback rezolvat ✅",
-        decision,
-        meta
-      );
+      const userTitle =
+        action === "product_flagged"
+          ? "Mulțumim! Am trimis sesizarea echipei 🛠️"
+          : action === "dismissed"
+            ? "Feedback analizat"
+            : "Feedback rezolvat ✅";
+      await notify([fb.userId], "feedback_resolved", userTitle, decision, meta);
       // Admins (skip the complaining user to avoid a duplicate)
+      const adminTitle =
+        action === "product_flagged"
+          ? `🛠️ Problemă de produs/UX semnalată (${domain?.name ?? "?"})`
+          : `Feedback la o întrebare (${domain?.name ?? "?"})`;
       await notify(
         adminIds.filter((id) => id !== fb.userId),
         "feedback_admin",
-        `Feedback la o întrebare (${domain?.name ?? "?"})`,
+        adminTitle,
         `${action.toUpperCase()} — ${decision}${fb.comment ? ` · comentariu: „${fb.comment}"` : ""}`,
         meta
       );
