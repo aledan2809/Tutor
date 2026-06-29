@@ -634,9 +634,9 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 - **Canale pe pachet** (slice 2): `src/lib/plan-channels.ts` (9 teste) — gratuit = push+email (canale fără cost), plătit (active/trialing) = +WhatsApp+SMS. **Server-enforced** în ambele endpoint-uri (self + parent): un cont gratuit nu poate ENABLE canal plătit nici prin apel direct; `clampChannelWrite` forțează OFF canalele excluse de pachet la orice scriere (verificat live: PUT whatsapp=true pe cont gratuit → whatsapp=false). UI: lacăt 🔒 „Disponibil în pachetele plătite". GET-urile întorc `allowedChannels`.
 
 **RĂMÂNE (slice 3+, coordonează cu sesiunea de billing ca să nu vă ciocniți pe `SubscriptionPlan`):**
-- [ ] **Compoziție pachet** (seat-uri: maxParinti/maxMeditatori + canale incluse stocate pe pachet, nu doar din stare) — necesită schema `SubscriptionPlan`.
-- [ ] **Deblocare funcții pe pachet** (modelul user: gratuit = toate materiile dar funcții limitate; plătit = funcții complete) — gating la nivel de FUNCȚIE, nu materie; aceeași logică pe `subscriptionStatus`. Mare, se suprapune cu billing-ul.
-- [ ] **Tranziție la upgrade** (copil-only → +părinți +meditator: provizionezi seat-uri + default prefs).
+- [x] **Deblocare funcții pe pachet** — DONE+LIVE 2026-06-26/27 (Slice 3, commits `872cc4a`+`575d2e9`+`ec16fac`): `plan-features.ts` (gating pur pe `subscriptionStatus`) + enforcement server (exam/start, lessons/[id], calendar connect+schedule) + soft-lock UI (FeatureGate) pe exams/lessons/calendar + secțiune avansat progress. 4 funcții paid: simulări, lecții, calendar, progres avansat. Materiile rămân gratis.
+- [x] **Pagina de pachete + tranziție upgrade** — DONE+LIVE (`575d2e9`): `/dashboard/packages` (5 planuri active: Self 19.9 / Family 24.9 / Duo 29.9 / Trio 39.9 / Family Trio 49.9), checkout broker funcțional, CTA upgrade din soft-lock → pagina reală. Preț = prima materie + reduceri (`ec16fac`).
+- [~] **Compoziție pachet (seat-uri)** — mașinăria de seat-uri (`family.ts` + invitații + checks) e LIVE și se activează automat la cumpărarea unui plan de familie; compoziția afișată pe pagina de pachete. **RĂMAS**: stocarea seat-urilor pe schema `SubscriptionPlan` (acum derivate din numele planului — funcțional, dar nu pe schemă).
 - [ ] **Send-path**: motorul de trimitere notificări să intersecteze și el cu `allowedChannels` (acum gating-ul e pe scriere+UI; conturile cu valori default-true vechi se normalizează la prima salvare). De făcut cu sesiunea escaladare/billing.
 
 **Cerință user (verbatim, NU reformulată)** — spec original mai jos:
@@ -852,32 +852,7 @@ Use Website Guru (`POST guru.techbiz.ae/api/fix`) to fix AGT-008 (a11y) + AGT-00
 |------|--------|
 | 2026-05-11 | Created. E2E [9] done (CODE 89/100, Journey 17/17 OK). Sidebar focus trap + touch targets + contrast + dangerouslySetInnerHTML + cookie Secure flag fixed. |
 | 2026-05-11 | True Full E2E [10] COMPLETE. 31/35 PASS (89%). Bugs: AGT-001 (PATCH 405), AGT-002 (Settings blank), AGT-003 (Calendar empty), AGT-004 (bibliography empty), AGT-007/009 (mobile touch targets). Reports/TRUE-E2E-FULL-2026-05-11.md + AUDIT_GAPS.md created. |
-
-## Tutor (`etutor.ro`) — ACTIVE (fix-urile așteaptă review-ul tău)
-Sursă: `Tutor/Reports/INTROSPECTION-2026-06-20/`
-
-- [ ] 🔴 **Leak date despre MINORI în portalul de părinte (A1)** — planurile Family/Duo/Trio vândute pe `/preturi`, dar lipsește modelul `Guardian`/`FamilyGroup` → un părinte vede TOȚI studenții dintr-un domeniu. Necesită model nou + migrare + rescriere autorizare watcher. **Prioritate maximă** înainte de a împinge planurile de familie. Aprobi designul legăturii părinte↔copil?
-- [ ] 🔴 **GDPR pe public cu minori** — banner cookie + GA consent-mode; posibil aviz juridic (risc ANSPDCP). Folosim Legal Hub?
-- [ ] 🔴 **Upgrade `next` (CVE critic — middleware bypass)** — upgrade + test build/auth (posibile breaking). Aprobi fereastra?
-- [ ] 🟡 **`npm audit fix`** (nodemailer/xmldom/postcss/next-intl, majoritatea non-breaking).
-- [ ] 🟡 **Întărire CSP** (elimină `unsafe-inline/unsafe-eval` via nonce) + **footer Privacy/Terms vizibil**.
-- [ ] 🟡 **Decizie `requireDomainAccess`** pe rutele `[domain]/*` — restrângi accesul per-înscriere acum sau la materii plătite?
-- _Notă produs (din 01, decizii nu blockere): motorul de escaladare e construit dar DORMANT (`ESCALATION_DETECT_ENABLED=false`, cron neprogramat) + payout real lipsă (nu poți onora comisionul 50% `/creatori`)._
-
----
-
-## Tutor (`etutor.ro`) — ACTIVE (fix-urile așteaptă review-ul tău)
-Sursă: `Tutor/Reports/INTROSPECTION-2026-06-20/`
-
-- [ ] 🔴 **Leak date despre MINORI în portalul de părinte (A1)** — planurile Family/Duo/Trio vândute pe `/preturi`, dar lipsește modelul `Guardian`/`FamilyGroup` → un părinte vede TOȚI studenții dintr-un domeniu. Necesită model nou + migrare + rescriere autorizare watcher. **Prioritate maximă** înainte de a împinge planurile de familie. Aprobi designul legăturii părinte↔copil?
-- [ ] 🔴 **GDPR pe public cu minori** — banner cookie + GA consent-mode; posibil aviz juridic (risc ANSPDCP). Folosim Legal Hub?
-- [ ] 🔴 **Upgrade `next` (CVE critic — middleware bypass)** — upgrade + test build/auth (posibile breaking). Aprobi fereastra?
-- [ ] 🟡 **`npm audit fix`** (nodemailer/xmldom/postcss/next-intl, majoritatea non-breaking).
-- [ ] 🟡 **Întărire CSP** (elimină `unsafe-inline/unsafe-eval` via nonce) + **footer Privacy/Terms vizibil**.
-- [ ] 🟡 **Decizie `requireDomainAccess`** pe rutele `[domain]/*` — restrângi accesul per-înscriere acum sau la materii plătite?
-- _Notă produs (din 01, decizii nu blockere): motorul de escaladare e construit dar DORMANT (`ESCALATION_DETECT_ENABLED=false`, cron neprogramat) + payout real lipsă (nu poți onora comisionul 50% `/creatori`)._
-
----
+| 2026-06-26/27 | Slice 3 feature-tiering (`872cc4a`) + pagină pachete (`575d2e9`) + preț-pe-materie (`ec16fac`). Notificări doar în zile programate — fără spam weekend/vacanță (`a5f0ee6`). Critice: nodemailer 6→9 (`d952938`), CSP hardening parțial — scos unsafe-eval + One Tap (`72765fc`), GDPR Legal Hub integration LIVE (`fddb00c`+`59b83bd`). next-CVE + A1-leak = stale (deja rezolvate). requireDomainAccess = decis (keep). Igienă: dedup bloc securitate triplat. |
 
 ## 🔍 Introspection Audit 2026-06-20
 > Audit complet (gap strategie↔cod · ghid per-pagină · deep research · funcțional + cyber).
@@ -888,17 +863,17 @@ Sursă: `Tutor/Reports/INTROSPECTION-2026-06-20/`
 ## Tutor (`etutor.ro`) — ACTIVE (fix-urile așteaptă review-ul tău)
 Sursă: `Tutor/Reports/INTROSPECTION-2026-06-20/`
 
-- [ ] 🔴 **Leak date despre MINORI în portalul de părinte (A1)** — planurile Family/Duo/Trio vândute pe `/preturi`, dar lipsește modelul `Guardian`/`FamilyGroup` → un părinte vede TOȚI studenții dintr-un domeniu. Necesită model nou + migrare + rescriere autorizare watcher. **Prioritate maximă** înainte de a împinge planurile de familie. Aprobi designul legăturii părinte↔copil?
+- [x] 🔴 ✅ **REZOLVAT/STALE 2026-06-27** — modelul `Guardian` + scoping watcher sunt LIVE (Pachete familie Faza 0-3); verificat în `src/app/api/dashboard/watcher/route.ts`: părintele pur vede DOAR copiii legați (`linkedChildIds`), instructor/admin = teaching legitim. [istoric] **Leak date despre MINORI în portalul de părinte (A1)** — planurile Family/Duo/Trio vândute pe `/preturi`, dar lipsea modelul `Guardian`/`FamilyGroup` → un părinte vedea TOȚI studenții dintr-un domeniu.
   - 🗣️ *Pe înțelesul tău:* Vinzi abonamente de familie, dar legătura părinte–copil nu e construită, deci un părinte vede TOȚI elevii de la o materie, nu doar copilul lui — date despre minori expuse. După fix, fiecare părinte vede strict propriul copil și poți lansa în siguranță planurile de familie.
-- [ ] 🔴 **GDPR pe public cu minori** — banner cookie + GA consent-mode; posibil aviz juridic (risc ANSPDCP). Folosim Legal Hub?
+- [x] 🔴 ✅ **DONE+LIVE 2026-06-27** (commits `fddb00c`+`59b83bd`) — **GDPR pe public cu minori** rezolvat via **Legal Hub** (controller Class RDA): banner cookie (consent anonim → 201), pagini Privacy/Terms/Cookies SSR din documentele MASTER (ro/en), DSR export/ștergere/corectare → coada DPO (`x-legal-api-key`). `AppEntityMapping tutor`→class-rda creat. (Nu există GA → fără consent-mode de tracking.)
   - 🗣️ *Pe înțelesul tău:* Urmărești vizitatorii (inclusiv minori) fără banner de acord — risc serios de amendă pe date despre copii. După fix, urmărirea pornește doar cu acordul lor și ești în regulă cu legea.
-- [ ] 🔴 **Upgrade `next` (CVE critic — middleware bypass)** — upgrade + test build/auth (posibile breaking). Aprobi fereastra?
+- [x] 🔴 ✅ **STALE 2026-06-27** — CVE middleware-bypass = CVE-2025-29927, reparat în Next **15.2.3**; suntem pe **15.5.19** → deja patch-uit. (Upgrade-ul la 16.x = major opțional, nu de securitate — separat.)
   - 🗣️ *Pe înțelesul tău:* Framework-ul site-ului are o gaură gravă prin care cineva poate ocoli protecțiile de acces. Aprobă o sesiune ca să-l urc la o versiune sigură, cu testare după.
-- [ ] 🟡 **`npm audit fix`** (nodemailer/xmldom/postcss/next-intl, majoritatea non-breaking).
+- [x] 🟡 ✅ **DONE 2026-06-27** (commit `d952938`) — **`npm audit fix`**: nodemailer 6→9 (vuln high SMTP/CRLF injection eliminat). Rămase = esbuild (doar dev-server Windows) + postcss transitiv — cer downgrade `next@9.3.3` via `--force` (capcană), deci ACCEPTATE (zero risc prod).
   - 🗣️ *Pe înțelesul tău:* Câteva biblioteci externe sunt învechite și au vulnerabilități. Le actualizez (majoritatea fără risc), ca să fie totul curat.
-- [ ] 🟡 **Întărire CSP** (elimină `unsafe-inline/unsafe-eval` via nonce) + **footer Privacy/Terms vizibil**.
+- [~] 🟡 **Întărire CSP** — PARȚIAL DONE 2026-06-27 (commit `72765fc`): scos `unsafe-eval` + adăugat `object-src 'none'`/`base-uri`/`form-action` + deblocat Google One Tap (`frame-src`/`connect-src`). **RĂMAS**: eliminarea `unsafe-inline` via nonce — cere migrare CSP în middleware-ul next-intl + verificare pe staging (prea riscant pe prod live cu auth). Footer Privacy/Terms vizibil = de adăugat.
   - 🗣️ *Pe înțelesul tău:* Întăresc apărarea site-ului împotriva codului injectat și pun linkurile de politici la vedere în subsol. Site-ul devine mai sigur și mai serios.
-- [ ] 🟡 **Decizie `requireDomainAccess`** pe rutele `[domain]/*` — restrângi accesul per-înscriere acum sau la materii plătite?
+- [x] 🟡 ✅ **DECIS 2026-06-27** — **`requireDomainAccess`**: păstrăm cum e (curriculum deschis tuturor, domenii RESTRICTED pe înscriere). Monetizarea rămâne pe funcții (Slice 3 feature-tiering) + preț pe materie, nu pe blocarea materiilor.
   - 🗣️ *Pe înțelesul tău:* Trebuie să decizi dacă un elev poate intra pe orice materie sau doar pe cele la care e înscris/le-a plătit. Decizia ta stabilește exact ce conținut e deschis și ce e blocat.
 - _Notă produs (din 01, decizii nu blockere): motorul de escaladare e construit dar DORMANT (`ESCALATION_DETECT_ENABLED=false`, cron neprogramat) + payout real lipsă (nu poți onora comisionul 50% `/creatori`)._
 
