@@ -1,11 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TTS_RATE_DEFAULT, TTS_RATE_OPTIONS, readTtsRate } from "@/lib/tts";
+import { TTS_RATE_DEFAULT, TTS_RATE_MIN, TTS_RATE_MAX, TTS_RATE_STEP, TTS_RATE_KEY, readTtsRate } from "@/lib/tts";
 
-// Re-export the pure helpers so existing call sites can keep importing from
-// "./tts" if they prefer; the implementations live in @/lib/tts (testable).
-export { speak, readTtsRate, ttsSupported, countAudioQuestions, TTS_RATE_KEY, TTS_RATE_DEFAULT, TTS_RATE_OPTIONS } from "@/lib/tts";
+// Re-export the pure helpers so call sites can keep importing from "./tts"; the
+// implementations live in @/lib/tts (testable).
+export {
+  speak,
+  speakItems,
+  cancelSpeech,
+  readTtsRate,
+  ttsSupported,
+  countAudioQuestions,
+  gapForRate,
+  TTS_RATE_KEY,
+  TTS_RATE_DEFAULT,
+  TTS_RATE_MIN,
+  TTS_RATE_MAX,
+  TTS_RATE_STEP,
+} from "@/lib/tts";
 
 /**
  * Student-controlled read-aloud speed. SSR-safe: starts at the default on the
@@ -20,36 +33,36 @@ export function useTtsRate(): [number, (r: number) => void] {
   const update = (r: number) => {
     setRate(r);
     if (typeof window !== "undefined") {
-      window.localStorage.setItem("tutor-tts-rate", String(r));
+      window.localStorage.setItem(TTS_RATE_KEY, String(r));
       window.speechSynthesis?.cancel();
     }
   };
   return [rate, update];
 }
 
-/** Slow / Normal / Fast selector for the read-aloud voice. */
+/**
+ * Read-aloud speed slider. A wide, fine scale (0.3–1.1) — the previous 3-button
+ * scale didn't go slow enough for students who needed the voice ~2× slower.
+ */
 export function TtsSpeedControl({ value, onChange }: { value: number; onChange: (r: number) => void }) {
+  const pct = Math.round((value / 1) * 100);
   return (
-    <div className="flex items-center gap-1" role="group" aria-label="Viteza vocii">
-      <span className="text-xs text-gray-500">Viteză:</span>
-      {TTS_RATE_OPTIONS.map((o) => {
-        const active = Math.abs(value - o.value) < 0.001;
-        return (
-          <button
-            key={o.value}
-            type="button"
-            onClick={() => onChange(o.value)}
-            aria-pressed={active}
-            className={`rounded-md border px-2 py-0.5 text-xs ${
-              active
-                ? "border-blue-500 bg-blue-500/20 text-white"
-                : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white"
-            }`}
-          >
-            {o.label}
-          </button>
-        );
-      })}
+    <div className="flex flex-col gap-1" role="group" aria-label="Viteza vocii">
+      <div className="flex items-center justify-between text-xs text-gray-500">
+        <span>🐢 Mai lent</span>
+        <span className="text-gray-400">Viteză: {pct}%</span>
+        <span>Mai rapid 🐇</span>
+      </div>
+      <input
+        type="range"
+        min={TTS_RATE_MIN}
+        max={TTS_RATE_MAX}
+        step={TTS_RATE_STEP}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        aria-label="Viteza vocii"
+        className="w-full accent-blue-500"
+      />
     </div>
   );
 }

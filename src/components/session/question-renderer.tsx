@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { speak, readTtsRate, useTtsRate, TtsSpeedControl } from "./tts";
+import { speak, speakItems, readTtsRate, useTtsRate, TtsSpeedControl } from "./tts";
 
 interface QuestionOption {
   label: string;
@@ -147,7 +147,7 @@ export function QuestionRenderer({
         <p className="whitespace-pre-line text-lg text-white">{question.content}</p>
         <button
           type="button"
-          onClick={() => speak(audioItems.join(", "), audioLang, ttsRate)}
+          onClick={() => speakItems(audioItems, audioLang, ttsRate)}
           className="rounded-lg border border-blue-700 bg-blue-950/30 px-4 py-2.5 text-sm font-medium text-blue-200 hover:bg-blue-900/40"
         >
           🔊 Ascultă numerele

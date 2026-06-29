@@ -1,6 +1,6 @@
 "use client";
 
-import { speak, useTtsRate, TtsSpeedControl, ttsSupported } from "./tts";
+import { speakItems, useTtsRate, TtsSpeedControl, ttsSupported } from "./tts";
 
 // Pre-test gate shown BEFORE the timer starts when the exam contains read-aloud
 // (TTS) questions. The student hears a sample, sets the cadence for the whole
@@ -8,7 +8,9 @@ import { speak, useTtsRate, TtsSpeedControl, ttsSupported } from "./tts";
 // Addresses the complaint that the voice read too fast (and that students hit
 // it mid-test with no warning).
 
-const SAMPLE_RO = "Trei, opt, cinci, doi, nouă, șapte, unu.";
+// Single digits read one-by-one with a pause — mirrors the real dictation cadence
+// so the student calibrates the exact pace they'll hear in the test.
+const SAMPLE_DIGITS = ["3", "8", "5", "2", "9", "7", "1"];
 
 export function TtsCalibration({
   onStart,
@@ -38,7 +40,7 @@ export function TtsCalibration({
             <div className="flex flex-col gap-3 rounded-lg border border-gray-700 bg-gray-950/40 p-4">
               <button
                 type="button"
-                onClick={() => speak(SAMPLE_RO, "ro-RO", rate)}
+                onClick={() => speakItems(SAMPLE_DIGITS, "ro-RO", rate)}
                 className="rounded-lg border border-blue-700 bg-blue-950/30 px-4 py-2.5 text-sm font-medium text-blue-200 hover:bg-blue-900/40"
               >
                 🔊 Ascultă un exemplu

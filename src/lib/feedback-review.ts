@@ -269,7 +269,17 @@ export async function runFeedbackReview(): Promise<{
           : action === "dismissed"
             ? "Feedback analizat"
             : "Feedback rezolvat ✅";
-      await deliverToStudent(fb.userId, userTitle, decision, url, meta, action !== "dismissed");
+      // A specific message: quote the student's own words + the concrete outcome,
+      // not a generic "resolved". (Students reported the notices were too vague.)
+      const outcomeText: Record<typeof action, string> = {
+        corrected: "am corectat răspunsul. Întrebarea e acum actualizată și o vei vedea corectată.",
+        hidden: "ai avut dreptate — am scos întrebarea din practică pentru revizuire, nu o vei mai primi.",
+        flagged: "am trimis-o unui profesor să o verifice; revenim dacă e nevoie de o corecție.",
+        dismissed: "am verificat-o cu atenție și răspunsul/întrebarea părea corect(ă), așa că rămâne neschimbată.",
+        product_flagged: "ține de aplicație (nu de întrebare) — am trimis sesizarea echipei ca să o rezolve.",
+      };
+      const studentMsg = `Referitor la feedback-ul tău${fb.comment ? `: „${fb.comment}”` : ""} — ${outcomeText[action]}`;
+      await deliverToStudent(fb.userId, userTitle, studentMsg, url, meta, action !== "dismissed");
       // Admins (skip the complaining user) — in-app + Telegram where linked.
       const adminTitle =
         action === "product_flagged"
