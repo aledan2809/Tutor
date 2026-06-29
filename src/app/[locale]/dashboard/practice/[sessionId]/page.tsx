@@ -9,6 +9,8 @@ import { FeedbackDisplay } from "@/components/session/feedback-display";
 import { bumpAnswered } from "@/lib/engagement";
 import { QuestionFeedback } from "@/components/session/question-feedback";
 import { SessionResults } from "@/components/session/session-results";
+import { TtsCalibration } from "@/components/session/tts-calibration";
+import { countAudioQuestions } from "@/components/session/tts";
 import { DEFAULT_TONE, type RemarkTone } from "@/lib/remarks";
 
 interface QuestionData {
@@ -58,7 +60,7 @@ interface CompletionResult {
   gamification?: GamificationData | null;
 }
 
-type Phase = "loading" | "answering" | "feedback" | "completed" | "not_found";
+type Phase = "loading" | "calibrate" | "answering" | "feedback" | "completed" | "not_found";
 
 export default function ActiveSessionPage() {
   const params = useParams<{ sessionId: string }>();
@@ -140,7 +142,14 @@ export default function ActiveSessionPage() {
           })
           .catch(() => {});
       }
-      setPhase("answering");
+      // If this session has read-aloud (TTS) questions, gate on a calibration
+      // screen BEFORE the timer — unless already calibrated for this session.
+      const audioN = countAudioQuestions(data.questions);
+      let calibrated = false;
+      try {
+        calibrated = localStorage.getItem(`calibrated_${sessionId}`) === "1";
+      } catch {}
+      setPhase(audioN > 0 && !calibrated ? "calibrate" : "answering");
       return;
     }
     fetch("/api/student/sessions/continue", { method: "POST" })
@@ -284,6 +293,20 @@ export default function ActiveSessionPage() {
           Începe o sesiune nouă
         </Link>
       </div>
+    );
+  }
+
+  if (phase === "calibrate" && sessionData) {
+    return (
+      <TtsCalibration
+        audioQuestionCount={countAudioQuestions(sessionData.questions)}
+        onStart={() => {
+          try {
+            localStorage.setItem(`calibrated_${sessionId}`, "1");
+          } catch {}
+          setPhase("answering");
+        }}
+      />
     );
   }
 
