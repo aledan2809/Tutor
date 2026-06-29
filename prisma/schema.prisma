@@ -972,6 +972,7 @@ model Payment {
   planId           String?
   stripeSessionId  String?  @unique
   stripeInvoiceId  String?
+  stripeEventId    String?  @unique // broker callback eventId (Stripe event.id) — dedups renewals on retry
   amount           Int      // Cents
   currency         String   @default("usd")
   status           String   // "pending", "succeeded", "failed", "refunded"

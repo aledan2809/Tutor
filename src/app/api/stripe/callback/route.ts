@@ -24,6 +24,8 @@ const MAX_AGE_SECONDS = 300; // anti-replay window (broker payload carries `t`)
 interface BrokerCallback {
   v?: number;
   t?: number;
+  /** Stripe event.id (broker callback v2+) — stable across retries; dedups renewals. */
+  eventId?: string;
   event: string;
   sessionId: string;
   projectSlug: string;
@@ -77,6 +79,42 @@ async function createPaymentForSession(data: {
   } catch (e) {
     if ((e as { code?: string })?.code === "P2002") {
       const existing = await prisma.payment.findUnique({ where: { stripeSessionId: data.sessionId } });
+      if (existing) return { payment: existing, isNew: false };
+    }
+    throw e;
+  }
+}
+
+/**
+ * Create a renewal Payment idempotently on the Stripe eventId (unique). Renewals
+ * reuse the original sessionId, so they key on eventId instead. A broker retry of
+ * the same event returns the existing Payment rather than creating a duplicate.
+ * When eventId is absent (legacy v1 broker), falls back to a plain insert — same
+ * non-deduped behavior as before, since NULL eventIds don't collide under UNIQUE.
+ */
+async function createRenewalPayment(data: {
+  userId: string;
+  planId?: string;
+  eventId?: string;
+  amount: number;
+  currency: string;
+}): Promise<{ payment: { id: string; userId: string; amount: number; currency: string }; isNew: boolean }> {
+  try {
+    const payment = await prisma.payment.create({
+      data: {
+        userId: data.userId,
+        planId: data.planId,
+        stripeEventId: data.eventId ?? null,
+        amount: data.amount,
+        currency: data.currency,
+        status: "succeeded",
+        type: "subscription",
+      },
+    });
+    return { payment, isNew: true };
+  } catch (e) {
+    if ((e as { code?: string })?.code === "P2002" && data.eventId) {
+      const existing = await prisma.payment.findUnique({ where: { stripeEventId: data.eventId } });
       if (existing) return { payment: existing, isNew: false };
     }
     throw e;
@@ -157,14 +195,12 @@ async function _POST(req: NextRequest) {
     case "subscription.renewed": {
       // Recurring charge. The broker skips the first (subscription_create) invoice,
       // so every renewed event is a distinct real charge → one Payment + commission.
-      // NOTE: the broker callback carries no per-invoice id, so renewals are not
-      // de-duped on a broker retry — acceptable while Tutor has no live recurring
-      // subscriptions yet (follow-up: add Stripe eventId to the broker callback).
-      const payment = await prisma.payment.create({
-        data: { userId, planId, amount, currency, status: "succeeded", type: "subscription" },
-      });
+      // Deduped on the broker callback's eventId (Stripe event.id, v2+): a broker
+      // retry of the same renewal returns the existing Payment instead of a
+      // duplicate. isNew guards the commission so a retry can't double-accrue.
+      const { payment, isNew } = await createRenewalPayment({ userId, planId, eventId: p.eventId, amount, currency });
       await prisma.user.update({ where: { id: userId }, data: { subscriptionStatus: "active" } });
-      await accrueReferral(payment);
+      if (isNew) await accrueReferral(payment);
       break;
     }
 
