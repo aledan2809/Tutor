@@ -4,6 +4,36 @@ import { NextRequest, NextResponse } from "next/server";
 
 const intlMiddleware = createMiddleware(routing);
 
+// ─── Content-Security-Policy (per-request nonce) ───
+// Moved here from next.config.ts headers() because a nonce must be unique per
+// request (a static header cannot carry one). The root layout is force-dynamic,
+// so every HTML response is rendered fresh — no stale-nonce caching risk.
+//
+// script-src: 'self' (Next chunk files) + per-request nonce (Next's own inline
+// bootstrap — Next 15 reads the nonce from the CSP *request* header and stamps
+// every <script> it emits) + accounts.google.com (the GSI client script that
+// GoogleOneTap injects at runtime via document.createElement). No 'unsafe-inline',
+// no 'strict-dynamic'. We have ZERO author-written inline <script> tags.
+//
+// style-src: keeps 'unsafe-inline' deliberately — Next inlines critical CSS as
+// <style> without a nonce, and style-injection XSS is low severity. Documented
+// compromise, widely used with the App Router.
+function buildCsp(nonce: string): string {
+  return (
+    "default-src 'self'; " +
+    `script-src 'self' 'nonce-${nonce}' https://accounts.google.com; ` +
+    "style-src 'self' 'unsafe-inline'; " +
+    "img-src 'self' data: https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://*.googleusercontent.com; " +
+    "font-src 'self'; " +
+    "connect-src 'self' https://accounts.google.com https://*.googleapis.com; " +
+    "frame-src 'self' https://accounts.google.com; " +
+    "frame-ancestors 'self'; " +
+    "base-uri 'self'; " +
+    "form-action 'self' https://accounts.google.com; " +
+    "object-src 'none';"
+  );
+}
+
 const publicPaths = ["/", "/try", "/scor", "/grile", "/auth/signin", "/auth/verify", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/terms", "/privacy", "/cookies", "/creatori", "/parinte", "/elev", "/preturi", "/ghid-bac", "/family/join"];
 // Public sections that carry a dynamic segment (e.g. /duel/<id>, /certificat/<id>, /grile/<slug>).
 // /family/accept/<token> must render for a logged-out invitee (the page itself
@@ -69,6 +99,10 @@ if (typeof globalThis !== "undefined") {
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Per-request CSP nonce. crypto.randomUUID is edge-runtime safe.
+  const nonce = btoa(crypto.randomUUID());
+  const csp = buildCsp(nonce);
+
   // Redirect routes without locale prefix to default locale
   if (
     !pathname.startsWith("/api/") &&
@@ -80,7 +114,9 @@ export default function middleware(request: NextRequest) {
   ) {
     const url = request.nextUrl.clone();
     url.pathname = `/${routing.defaultLocale}${pathname}`;
-    return NextResponse.redirect(url);
+    const redirect = NextResponse.redirect(url);
+    redirect.headers.set("Content-Security-Policy", csp);
+    return redirect;
   }
 
   // Rate limiting for API routes
@@ -95,6 +131,7 @@ export default function middleware(request: NextRequest) {
           "Content-Type": "application/json",
           "Retry-After": "60",
           "X-RateLimit-Remaining": "0",
+          "Content-Security-Policy": csp,
         },
       });
     }
@@ -103,14 +140,26 @@ export default function middleware(request: NextRequest) {
     if (pathname.startsWith("/api/auth")) {
       const response = NextResponse.next();
       response.headers.set("X-RateLimit-Remaining", String(remaining));
+      response.headers.set("Content-Security-Policy", csp);
       return response;
     }
 
-    return NextResponse.next();
+    const apiResponse = NextResponse.next();
+    apiResponse.headers.set("Content-Security-Policy", csp);
+    return apiResponse;
   }
 
+  // Propagate the nonce to the rendered document: Next 15 extracts the nonce from
+  // the Content-Security-Policy *request* header and stamps it on every <script>
+  // it emits. We forward the original request headers (cookies etc.) plus x-nonce
+  // and the CSP so next-intl's rewrite carries them through to the RSC render.
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("Content-Security-Policy", csp);
+  const intlRequest = new NextRequest(request, { headers: requestHeaders });
+
   // Run intl middleware for locale handling
-  const response = intlMiddleware(request);
+  const response = intlMiddleware(intlRequest);
 
   // Add Secure flag to NEXT_LOCALE cookie on HTTPS
   if (request.nextUrl.protocol === "https:") {
@@ -138,10 +187,13 @@ export default function middleware(request: NextRequest) {
       // Strip locale prefix from callbackUrl to prevent double-locale (/en/en/...)
       const callbackPath = pathname.replace(/^\/(en|ro)/, "") || "/dashboard";
       signInUrl.searchParams.set("callbackUrl", callbackPath);
-      return NextResponse.redirect(signInUrl);
+      const redirect = NextResponse.redirect(signInUrl);
+      redirect.headers.set("Content-Security-Policy", csp);
+      return redirect;
     }
   }
 
+  response.headers.set("Content-Security-Policy", csp);
   return response;
 }
 
