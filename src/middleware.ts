@@ -156,6 +156,9 @@ export default function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", csp);
+  // Expose the path to Server Components (so the layout can skip the minimal
+  // policy-footer on the landing page, which has its own rich footer).
+  requestHeaders.set("x-pathname", pathname);
   const intlRequest = new NextRequest(request, { headers: requestHeaders });
 
   // Run intl middleware for locale handling
