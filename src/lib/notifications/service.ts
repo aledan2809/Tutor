@@ -13,12 +13,30 @@ import { prisma } from "@/lib/prisma";
 import type { EscalationChannel } from "@prisma/client";
 import { getTelegramClient } from "@/lib/telegram/connect";
 import { sendAppEmail } from "@/lib/email";
+import { isPaidSubscriber } from "@/lib/escalation/segmentation";
 
 interface NotificationPayload {
   userId: string;
   channel: EscalationChannel;
   templateId: string;
   metadata: Record<string, unknown>;
+}
+
+/**
+ * Defense-in-depth plan gate (pure): should this metered-channel send be blocked?
+ * The metered channels (WhatsApp/SMS) are paid-only. Returns true (block) when the
+ * channel is metered, the send is not exempt (test account / parent-authorized),
+ * and the user is not a paid subscriber (status + non-expired). Free channels
+ * (PUSH/TELEGRAM/EMAIL/CALL) are never blocked here.
+ */
+export function meteredChannelBlocked(
+  channel: EscalationChannel,
+  metadata: Record<string, unknown>,
+  user: { subscriptionStatus: string | null; subscriptionEndsAt: Date | null } | null,
+): boolean {
+  if (channel !== "WHATSAPP" && channel !== "SMS") return false;
+  if (metadata?.isTest === true || metadata?.parentAuthorized === true) return false;
+  return !user || !isPaidSubscriber(user);
 }
 
 /**
@@ -29,6 +47,33 @@ export async function sendNotification(
   payload: NotificationPayload
 ): Promise<boolean> {
   try {
+    // Defense-in-depth plan gate: the metered channels (WhatsApp/SMS) are
+    // paid-only. The escalation engine already gates these, but enforce here at
+    // the single send chokepoint so NO caller (a retry-cron firing on a lapsed
+    // subscription, a parent nudge, an ad-hoc send) can leak a paid channel to a
+    // free account. Honors the same exemptions the engine applies — test
+    // accounts (journey-audit) and parent-authorized cascades — via metadata
+    // flags the callers pass through. Uses isPaidSubscriber (status + expiry) so
+    // a subscription that lapsed since the event was queued is caught live.
+    if (payload.channel === "WHATSAPP" || payload.channel === "SMS") {
+      const exempt =
+        payload.metadata?.isTest === true ||
+        payload.metadata?.parentAuthorized === true;
+      // Skip the DB lookup entirely for exempt sends (predicate short-circuits).
+      const user = exempt
+        ? null
+        : await prisma.user.findUnique({
+            where: { id: payload.userId },
+            select: { subscriptionStatus: true, subscriptionEndsAt: true },
+          });
+      if (meteredChannelBlocked(payload.channel, payload.metadata, user)) {
+        console.warn(
+          `[notif] blocked metered channel ${payload.channel} for non-paid user ${payload.userId}`
+        );
+        return false;
+      }
+    }
+
     switch (payload.channel) {
       case "PUSH":
         return await sendPushNotification(payload);

@@ -52,6 +52,10 @@ export async function fireNudge(
     message,
     url: url || "/dashboard/practice",
     templateId: "parent_nudge",
+    // A parent-initiated nudge is authorized to use metered channels regardless
+    // of the child's plan — exempts it from the send chokepoint's plan gate
+    // (mirrors the engine's parentAuthorized cascade).
+    parentAuthorized: true,
   };
   for (const ch of channels) {
     // Per-channel best-effort: one channel failing (e.g. no WhatsApp phone /

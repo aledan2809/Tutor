@@ -273,6 +273,11 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
       // Embedded in the web-push payload so the service worker can ACK this
       // event on tap (→ /api/escalation/ack → acknowledgedAt → skip paid escalation).
       escalationEventId: event.id,
+      // Pass the exemptions this engine already evaluated through to the send
+      // chokepoint's defense-in-depth plan gate (so it agrees with us instead of
+      // double-blocking a test / parent-authorized metered send).
+      isTest: event.isTest,
+      parentAuthorized,
     },
   });
 
