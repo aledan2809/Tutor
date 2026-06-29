@@ -10,8 +10,11 @@
  */
 import { prisma } from "@/lib/prisma";
 import { callTextAI } from "@/lib/grila-generate";
+import { telegramAlertToUser } from "@/lib/notifications/service";
+import { sendAppEmail } from "@/lib/email";
 
 const PRIVATE_SLUGS = new Set(["aptitudini-aviatie", "licenta-rares"]);
+const APP_URL = (process.env.AUTH_URL ?? "https://etutor.ro").replace(/\/$/, "");
 const MAX_PER_RUN = 20;
 
 export interface Judgment {
@@ -82,6 +85,50 @@ async function notify(userIds: string[], type: string, title: string, message: s
       await prisma.notification.create({ data: { userId, type, title, message, metadata } });
     } catch {
       /* best-effort */
+    }
+  }
+}
+
+/**
+ * Admin delivery: the in-app row (the bell) PLUS a Telegram alert to every admin
+ * who linked their chat (free, carries arbitrary text). All best-effort.
+ */
+async function notifyAdmins(adminIds: string[], title: string, body: string, url: string, metadata: object) {
+  await notify(adminIds, "feedback_admin", title, body, metadata);
+  for (const id of adminIds) {
+    await telegramAlertToUser(id, { text: `${title}\n\n${body}`, url, buttonLabel: "Deschide" });
+  }
+}
+
+/**
+ * Student delivery: the in-app row always; for ACTIONABLE outcomes (anything but a
+ * plain dismissal) ALSO fan out through the channels the parent enabled in the
+ * child's NotificationPreference — Telegram (if linked) + email (if `email` on).
+ * WhatsApp/SMS are intentionally skipped here: those senders are locked to the
+ * approved "study_reminder" template and can't carry free-text feedback (and are
+ * metered) — so feedback rides the free, text-capable channels the parent allows.
+ */
+async function deliverToStudent(
+  userId: string,
+  title: string,
+  decision: string,
+  url: string,
+  metadata: object,
+  actionable: boolean,
+) {
+  await notify([userId], "feedback_resolved", title, decision, metadata);
+  if (!actionable) return; // a dismissal stays in-app only — no extra channels
+  const prefs = await prisma.notificationPreference.findUnique({ where: { userId } });
+  // Telegram is opt-in by linking (not a NotificationPreference flag) + free.
+  await telegramAlertToUser(userId, { text: `${title}\n\n${decision}`, url, buttonLabel: "Deschide" });
+  if (prefs?.email !== false) {
+    const u = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, name: true } });
+    if (u?.email) {
+      await sendAppEmail({
+        to: u.email,
+        subject: title,
+        html: `<p>Salut ${u.name ?? ""},</p><p>${decision}</p><p><a href="${url}">Deschide eTutor</a></p><hr><p style="color:#888;font-size:12px">Mesaj automat de la eTutor despre feedback-ul tău.</p>`,
+      }).catch(() => false);
     }
   }
 }
@@ -213,24 +260,26 @@ export async function runFeedbackReview(): Promise<{
       });
 
       const meta = { questionId: q.id, feedbackId: fb.id, action, domain: domain?.slug ?? null };
-      // The user who complained
+      const url = `${APP_URL}/`;
+      // The student who complained — in-app always; actionable outcomes also fan
+      // out through the parent-configured channels (Telegram + email).
       const userTitle =
         action === "product_flagged"
           ? "Mulțumim! Am trimis sesizarea echipei 🛠️"
           : action === "dismissed"
             ? "Feedback analizat"
             : "Feedback rezolvat ✅";
-      await notify([fb.userId], "feedback_resolved", userTitle, decision, meta);
-      // Admins (skip the complaining user to avoid a duplicate)
+      await deliverToStudent(fb.userId, userTitle, decision, url, meta, action !== "dismissed");
+      // Admins (skip the complaining user) — in-app + Telegram where linked.
       const adminTitle =
         action === "product_flagged"
           ? `🛠️ Problemă de produs/UX semnalată (${domain?.name ?? "?"})`
           : `Feedback la o întrebare (${domain?.name ?? "?"})`;
-      await notify(
+      await notifyAdmins(
         adminIds.filter((id) => id !== fb.userId),
-        "feedback_admin",
         adminTitle,
         `${action.toUpperCase()} — ${decision}${fb.comment ? ` · comentariu: „${fb.comment}"` : ""}`,
+        url,
         meta
       );
     } catch (err) {
