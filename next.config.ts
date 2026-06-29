@@ -27,7 +27,21 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://lh3.googleusercontent.com https://avatars.githubusercontent.com; font-src 'self'; connect-src 'self'; frame-ancestors 'self';",
+            value:
+              "default-src 'self'; " +
+              // 'unsafe-eval' removed (Next.js production does not need it). 'unsafe-inline'
+              // kept until a dedicated nonce migration (next-intl middleware) — see TODO.
+              "script-src 'self' 'unsafe-inline'; " +
+              "style-src 'self' 'unsafe-inline'; " +
+              "img-src 'self' data: https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://*.googleusercontent.com; " +
+              "font-src 'self'; " +
+              // Google Identity Services (One Tap) — was silently blocked by default-src 'self'.
+              "connect-src 'self' https://accounts.google.com https://*.googleapis.com; " +
+              "frame-src 'self' https://accounts.google.com; " +
+              "frame-ancestors 'self'; " +
+              "base-uri 'self'; " +
+              "form-action 'self' https://accounts.google.com; " +
+              "object-src 'none';",
           },
         ],
       },
