@@ -15,9 +15,12 @@ interface SidebarProps {
     isSuperAdmin: boolean;
     enrollments?: { domainId: string; domainSlug: string; roles: string[] }[];
   };
+  /** True when the user holds an active family subscription plan (parent/child
+   *  seats), so the family section shows even without a WATCHER enrollment. */
+  hasFamilyPlan?: boolean;
 }
 
-export function Sidebar({ user }: SidebarProps) {
+export function Sidebar({ user, hasFamilyPlan = false }: SidebarProps) {
   const t = useTranslations("nav");
   const tAuth = useTranslations("auth");
   const pathname = usePathname();
@@ -65,6 +68,11 @@ export function Sidebar({ user }: SidebarProps) {
     user.isSuperAdmin ||
     user.enrollments?.some((e) => e.roles.includes("WATCHER"));
 
+  // A paying parent unlocks the family section even before a WATCHER enrollment
+  // exists (buying a Family/Trio plan grants seats, not a role) — fixes the
+  // "paid but the menu is locked" gap.
+  const showFamily = isWatcher || hasFamilyPlan;
+
   const isInstructor =
     user.isSuperAdmin ||
     user.enrollments?.some(
@@ -79,7 +87,7 @@ export function Sidebar({ user }: SidebarProps) {
   const isStudent =
     user.enrollments?.some((e) => e.roles.includes("STUDENT"));
 
-  if (isWatcher) {
+  if (showFamily) {
     navItems.push({ href: "/dashboard/family", label: t("family") });
     navItems.push({ href: "/dashboard/watcher", label: t("watcher") });
     navItems.push({ href: "/dashboard/watcher/notifications", label: t("watcherNotifications") });
@@ -111,7 +119,7 @@ export function Sidebar({ user }: SidebarProps) {
   // (knowledge/menu-restructure-mockups.md ROL 2): Panou · Monitorizare · Alerte ·
   // Invită un prieten · Notificări · Setări.
   const isParentView =
-    !user.isSuperAdmin && isWatcher && !isInstructor && !isStudent;
+    !user.isSuperAdmin && showFamily && !isInstructor && !isStudent;
   if (isParentView) {
     visibleNavItems = [
       { href: "/dashboard", label: t("dashboard") },

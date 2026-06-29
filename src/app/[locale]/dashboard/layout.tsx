@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { isPaidStatus } from "@/lib/plan-channels";
+import { resolveFamilyPlanFromRecord } from "@/lib/family";
 import { Sidebar } from "@/components/sidebar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { NotificationBell } from "@/components/notifications/notification-bell";
@@ -29,9 +32,25 @@ export default async function DashboardLayout({
     e.roles.includes("STUDENT" as never)
   );
 
+  // A paying parent unlocks the family section from their subscription plan, even
+  // before any WATCHER enrollment exists (buying a Family/Trio plan grants seats,
+  // not a role) — so the "Familia mea" nav follows the plan, not just the role.
+  const sub = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      subscriptionStatus: true,
+      subscriptionPlan: {
+        select: { name: true, familyPlanKey: true, maxParents: true, maxChildren: true, maxTutors: true },
+      },
+    },
+  });
+  const fam = resolveFamilyPlanFromRecord(sub?.subscriptionPlan);
+  const hasFamilyPlan =
+    isPaidStatus(sub?.subscriptionStatus) && !!fam && (fam.maxChildren > 0 || fam.maxParents > 0);
+
   return (
     <div className="flex min-h-screen">
-      <Sidebar user={session.user} />
+      <Sidebar user={session.user} hasFamilyPlan={hasFamilyPlan} />
       <div className="flex flex-1 flex-col">
         <header className="flex h-14 items-center justify-end border-b border-gray-800 px-4 sm:px-6">
           <SetupChecklist />
