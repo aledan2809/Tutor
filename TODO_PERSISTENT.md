@@ -32,7 +32,7 @@
 7. **Anulează abonamentul înainte de 14 zile** (sau îl anulez eu din Stripe via broker) → zero bani mișcați.
 > Notă comision (din testul AVE): pe sume mici taxa fixă Stripe domină (~4.5% pe 22 AED); pe sume normale + card local ajunge ~3-4%. Pentru Tutor RON, charge în RON (deja setat) → fără taxă de conversie.
 
-**Follow-up tehnic (low priority)**: callback-ul broker nu cară un eventId unic per-factură → renewal-urile nu se dedup pe retry de broker (acceptabil cât timp Tutor n-are abonamente recurente live). De adăugat `eventId` (Stripe event.id) în payload-ul callback al broker-ului.
+**Follow-up tehnic — DONE 2026-06-30** (commit Tutor `a2a4da9` + broker `85c2a03`, ambele LIVE): broker-ul trimite acum `eventId` (Stripe event.id) în callback (v2, aditiv). Tutor deduplichează `subscription.renewed` pe `Payment.stripeEventId @unique` (migrare `0038`, aplicată pe etutor.ro) — retry de broker → Payment existent, comision doar pe `isNew`. Fallback v1 (fără eventId) = insert simplu (NULL-uri nu coliziune sub UNIQUE). Verificat: coloană + index live, callback 400 fără sig, pm2 online.
 
 **Dezactivat (dormant, nu șters)**: vechiul `/api/admin/stripe/webhook` (cere `STRIPE_WEBHOOK_SECRET` unset → nu se declanșează) + crearea Stripe customer din checkout. Curățare = sesiune separată.
 
