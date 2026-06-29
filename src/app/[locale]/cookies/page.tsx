@@ -2,24 +2,24 @@ import { getTranslations } from "next-intl/server";
 import { getLegalDocument } from "@/lib/legal-doc";
 
 export const metadata = {
-  title: "Termeni și condiții · eTutor",
-  description: "Termenii și condițiile eTutor (etutor.ro).",
+  title: "Politica de cookie-uri · eTutor",
+  description: "Politica de cookie-uri eTutor (etutor.ro).",
 };
 
-export default async function TermsPage({
+export default async function CookiesPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
   const [doc, t] = await Promise.all([
-    getLegalDocument("tos", locale),
+    getLegalDocument("cookies", locale),
     getTranslations("legalPages"),
   ]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-16">
-      <h1 className="mb-8 text-3xl font-bold text-white">{t("termsTitle")}</h1>
+      <h1 className="mb-8 text-3xl font-bold text-white">{t("cookiesTitle")}</h1>
 
       {doc.ok ? (
         <>
@@ -36,12 +36,12 @@ export default async function TermsPage({
           <p>{t("unavailable")}</p>
           <p>
             <a
-              href="https://legal.knowbest.ro/terms/tutor"
+              href="https://legal.knowbest.ro/cookies/tutor"
               target="_blank"
               rel="noopener"
               className="text-blue-400 underline hover:text-blue-300"
             >
-              legal.knowbest.ro/terms/tutor
+              legal.knowbest.ro/cookies/tutor
             </a>
           </p>
         </div>

@@ -4,6 +4,7 @@ import { routing } from "@/i18n/routing";
 import { SessionProvider } from "@/components/session-provider";
 import WhatsAppCta from "@/components/WhatsAppCta";
 import GoogleOneTap from "@/components/GoogleOneTap";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 
 export default async function LocaleLayout({
   children,
@@ -25,6 +26,7 @@ export default async function LocaleLayout({
         {children}
         <WhatsAppCta />
         <GoogleOneTap clientId={process.env.AUTH_GOOGLE_ID} />
+        <CookieConsentBanner />
       </NextIntlClientProvider>
     </SessionProvider>
   );

@@ -811,5 +811,34 @@
     "voucherPlaceholder": "Ai un cod? Scrie-l aici",
     "noPlans": "Momentan nu sunt pachete disponibile.",
     "checkoutError": "Nu am putut porni plata. Încearcă din nou."
+  },
+  "cookieBanner": {
+    "aria": "Consimțământ cookie-uri",
+    "text": "Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în",
+    "cookiesLink": "Politica de cookie-uri",
+    "privacyLink": "Confidențialitate",
+    "reject": "Respinge",
+    "accept": "Accept"
+  },
+  "dsr": {
+    "intro": "Cere o copie, corectarea sau ștergerea datelor tale. Îți răspundem prin email (confirmare conform Art. 12 GDPR).",
+    "emailPlaceholder": "Email-ul tău",
+    "typeExport": "Export date",
+    "typeDelete": "Ștergere date",
+    "typeRectify": "Corectare date",
+    "descPlaceholder": "Detalii (opțional)",
+    "submit": "Trimite cererea",
+    "sending": "Se trimite...",
+    "ok": "Cererea a fost trimisă. Vei primi un email de confirmare.",
+    "error": "Nu am putut trimite cererea. Încearcă din nou."
+  },
+  "legalPages": {
+    "privacyTitle": "Confidențialitate",
+    "termsTitle": "Termeni și condiții",
+    "cookiesTitle": "Politica de cookie-uri",
+    "version": "Versiunea {v}",
+    "unavailable": "Documentul nu e disponibil momentan. Îl poți consulta aici:",
+    "dsrHeading": "Drepturile tale (GDPR)",
+    "dsrSubtitle": "Acces, portabilitate, corectare sau ștergerea datelor personale."
   }
 }

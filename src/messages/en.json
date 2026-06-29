@@ -811,5 +811,34 @@
     "voucherPlaceholder": "Have a code? Enter it here",
     "noPlans": "No packages available right now.",
     "checkoutError": "Could not start checkout. Try again."
+  },
+  "cookieBanner": {
+    "aria": "Cookie consent",
+    "text": "We use essential cookies to run your account. Details in the",
+    "cookiesLink": "Cookie Policy",
+    "privacyLink": "Privacy",
+    "reject": "Reject",
+    "accept": "Accept"
+  },
+  "dsr": {
+    "intro": "Request a copy, correction, or deletion of your data. We reply by email (Art. 12 GDPR confirmation).",
+    "emailPlaceholder": "Your email",
+    "typeExport": "Export data",
+    "typeDelete": "Delete data",
+    "typeRectify": "Correct data",
+    "descPlaceholder": "Details (optional)",
+    "submit": "Send request",
+    "sending": "Sending...",
+    "ok": "Your request was sent. You'll get a confirmation email.",
+    "error": "Could not send the request. Please try again."
+  },
+  "legalPages": {
+    "privacyTitle": "Privacy",
+    "termsTitle": "Terms & Conditions",
+    "cookiesTitle": "Cookie Policy",
+    "version": "Version {v}",
+    "unavailable": "The document is unavailable right now. You can read it here:",
+    "dsrHeading": "Your rights (GDPR)",
+    "dsrSubtitle": "Access, portability, correction, or deletion of your personal data."
   }
 }
