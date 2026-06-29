@@ -25,6 +25,10 @@ async function _GET() {
       interval: true,
       trialDays: true,
       features: true,
+      familyPlanKey: true,
+      maxParents: true,
+      maxChildren: true,
+      maxTutors: true,
     },
   });
 

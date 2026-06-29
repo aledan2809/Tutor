@@ -3,6 +3,8 @@ import {
   FAMILY_PLANS,
   getFamilyPlan,
   resolveFamilyPlanKey,
+  resolveFamilyPlanFromRecord,
+  isFamilyPlanKey,
   childDiscountPercent,
   subjectDiscountPercent,
   canAddParent,
@@ -133,5 +135,65 @@ describe("FAMILY_PLANS shape", () => {
     expect(elev.maxParents).toBe(0);
     expect(elev.maxChildren).toBe(0);
     expect(elev.features.tutorAccess).toBe(false);
+  });
+});
+
+describe("isFamilyPlanKey", () => {
+  it("accepts known keys, rejects everything else", () => {
+    expect(isFamilyPlanKey("FAMILY_TRIO")).toBe(true);
+    expect(isFamilyPlanKey("ELEV")).toBe(true);
+    expect(isFamilyPlanKey("family")).toBe(false); // case-sensitive key, not a name
+    expect(isFamilyPlanKey("BOGUS")).toBe(false);
+    expect(isFamilyPlanKey(null)).toBe(false);
+    expect(isFamilyPlanKey(undefined)).toBe(false);
+  });
+});
+
+describe("resolveFamilyPlanFromRecord", () => {
+  it("prefers the stored familyPlanKey over the name", () => {
+    // Name says Family, but the stored key is authoritative → Family Trio.
+    const plan = resolveFamilyPlanFromRecord({
+      name: "Family",
+      familyPlanKey: "FAMILY_TRIO",
+    });
+    expect(plan?.key).toBe("FAMILY_TRIO");
+    expect(plan?.maxTutors).toBe(FAMILY_PLANS.FAMILY_TRIO.maxTutors);
+  });
+
+  it("falls back to name derivation when familyPlanKey is null (legacy row)", () => {
+    const plan = resolveFamilyPlanFromRecord({ name: "Family Duo", familyPlanKey: null });
+    expect(plan?.key).toBe("FAMILY_DUO");
+    expect(plan?.maxParents).toBe(2);
+  });
+
+  it("inherits the key's canonical seats when override columns are null", () => {
+    const plan = resolveFamilyPlanFromRecord({ familyPlanKey: "TRIO" });
+    expect(plan).toMatchObject({
+      maxParents: FAMILY_PLANS.TRIO.maxParents,
+      maxChildren: FAMILY_PLANS.TRIO.maxChildren,
+      maxTutors: FAMILY_PLANS.TRIO.maxTutors,
+    });
+  });
+
+  it("applies per-seat overrides on top of the key composition", () => {
+    const plan = resolveFamilyPlanFromRecord({
+      familyPlanKey: "FAMILY",
+      maxChildren: 4,
+      maxParents: null, // null inherits canonical
+    });
+    expect(plan?.maxChildren).toBe(4); // overridden
+    expect(plan?.maxParents).toBe(FAMILY_PLANS.FAMILY.maxParents); // inherited
+    expect(plan?.features.tutorAccess).toBe(false); // features still from key
+  });
+
+  it("ignores a bogus familyPlanKey and falls back to the name", () => {
+    const plan = resolveFamilyPlanFromRecord({ name: "Trio", familyPlanKey: "NONSENSE" });
+    expect(plan?.key).toBe("TRIO");
+  });
+
+  it("returns null for a non-family record and for null input", () => {
+    expect(resolveFamilyPlanFromRecord({ name: "Random Add-on" })).toBeNull();
+    expect(resolveFamilyPlanFromRecord(null)).toBeNull();
+    expect(resolveFamilyPlanFromRecord({})).toBeNull();
   });
 });

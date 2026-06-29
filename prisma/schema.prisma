@@ -909,6 +909,16 @@ model SubscriptionPlan {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
+  // Family-plan seat composition (replaces fragile name-string derivation in
+  // src/lib/family.ts). All nullable + additive: a null familyPlanKey means
+  // "derive from name" (legacy rows); a null seat column means "use the
+  // canonical composition for the key". Stripe billing (stripeId/price) is
+  // untouched — these only drive how many parents/children/tutors a plan seats.
+  familyPlanKey String? // ELEV | FAMILY | FAMILY_DUO | TRIO | FAMILY_TRIO
+  maxParents    Int?
+  maxChildren   Int?
+  maxTutors     Int?
+
   users    User[]
   payments Payment[]
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { resolveFamilyPlanKey, getFamilyPlan, type FamilyPlan } from "@/lib/family";
+import { resolveFamilyPlanFromRecord, type FamilyPlan } from "@/lib/family";
 
 interface Plan {
   id: string;
@@ -11,6 +11,10 @@ interface Plan {
   interval: "MONTH" | "YEAR" | "ONE_TIME";
   trialDays: number | null;
   features: unknown;
+  familyPlanKey: string | null;
+  maxParents: number | null;
+  maxChildren: number | null;
+  maxTutors: number | null;
 }
 
 interface PlansResponse {
@@ -113,8 +117,7 @@ export default function PackagesPage() {
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {plans.map((plan) => {
-              const famKey = resolveFamilyPlanKey(plan.name);
-              const fam = famKey ? getFamilyPlan(famKey) : null;
+              const fam = resolveFamilyPlanFromRecord(plan);
               const isCurrent = current.subscriptionPlanId === plan.id;
               const features = planFeatures(plan.features);
               return (

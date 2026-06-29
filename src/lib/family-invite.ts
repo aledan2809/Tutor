@@ -28,8 +28,7 @@ import {
   GUARDIAN_RELATION,
   INVITE_TARGET_ROLE,
   INVITE_CHANNEL,
-  getFamilyPlan,
-  resolveFamilyPlanKey,
+  resolveFamilyPlanFromRecord,
   canAddParent,
   canAddChild,
   canAddTutor,
@@ -96,12 +95,25 @@ export async function resolveOwnerPlan(
 ): Promise<OwnerPlan> {
   const u = await db.user.findUnique({
     where: { id: ownerId },
-    select: { isSuperAdmin: true, subscriptionPlan: { select: { name: true } } },
+    select: {
+      isSuperAdmin: true,
+      subscriptionPlan: {
+        select: {
+          name: true,
+          familyPlanKey: true,
+          maxParents: true,
+          maxChildren: true,
+          maxTutors: true,
+        },
+      },
+    },
   });
-  const key = resolveFamilyPlanKey(u?.subscriptionPlan?.name);
+  // Prefer the seat composition stored on the plan record (familyPlanKey + seat
+  // columns); fall back to deriving from the plan name for legacy rows.
+  const plan = resolveFamilyPlanFromRecord(u?.subscriptionPlan);
   return {
-    key,
-    plan: key ? getFamilyPlan(key) : null,
+    key: plan?.key ?? null,
+    plan,
     isSuperAdmin: u?.isSuperAdmin ?? false,
   };
 }

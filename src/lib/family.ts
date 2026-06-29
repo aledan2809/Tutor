@@ -173,6 +173,46 @@ export function resolveFamilyPlanKey(
   return null;
 }
 
+/** Narrow an arbitrary string to a known FamilyPlanKey. */
+export function isFamilyPlanKey(
+  value: string | null | undefined
+): value is FamilyPlanKey {
+  return value != null && value in FAMILY_PLANS;
+}
+
+/** The SubscriptionPlan fields that drive seat composition. */
+export interface SubscriptionPlanSeatFields {
+  name?: string | null;
+  familyPlanKey?: string | null;
+  maxParents?: number | null;
+  maxChildren?: number | null;
+  maxTutors?: number | null;
+}
+
+/**
+ * Resolve a FamilyPlan from a SubscriptionPlan record. Prefers the stored
+ * `familyPlanKey` (+ optional per-seat overrides on the row); falls back to
+ * deriving the key from the plan name for legacy rows written before the schema
+ * columns existed. A null seat column inherits the key's canonical seat count.
+ * Returns null when the record is not a family plan (a plain learner).
+ */
+export function resolveFamilyPlanFromRecord(
+  rec: SubscriptionPlanSeatFields | null | undefined
+): FamilyPlan | null {
+  if (!rec) return null;
+  const key = isFamilyPlanKey(rec.familyPlanKey)
+    ? rec.familyPlanKey
+    : resolveFamilyPlanKey(rec.name);
+  if (!key) return null;
+  const base = FAMILY_PLANS[key];
+  return {
+    ...base,
+    maxParents: rec.maxParents ?? base.maxParents,
+    maxChildren: rec.maxChildren ?? base.maxChildren,
+    maxTutors: rec.maxTutors ?? base.maxTutors,
+  };
+}
+
 /**
  * Discount for the N-th child on a family plan (1-based child index). The first
  * child is the base seat (no discount); the 2nd is −20%, the 3rd and beyond −30%.
