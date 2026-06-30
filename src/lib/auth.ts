@@ -127,35 +127,58 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days — keep students signed in (was implicit default)
+    updateAge: 24 * 60 * 60, // refresh the cookie at most once a day
   },
   pages: {
     signIn: "/auth/signin",
     verifyRequest: "/auth/verify",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
       }
-      // Refresh roles from DB on every token refresh (not just login)
-      if (token.id) {
-        const dbUser = await prisma.user.findUnique({
-          where: { id: token.id as string },
-          include: {
-            enrollments: {
-              where: { isActive: true },
-              include: { domain: { select: { id: true, slug: true } } },
+      // Refresh roles from DB — but NOT on every single request. Re-query only on
+      // a fresh login, an explicit session update, or when the cached roles are
+      // older than 5 min. This cuts DB load drastically (the callback runs on
+      // every authenticated request) and, crucially, the query is now guarded:
+      // a transient DB error keeps the existing token instead of throwing, which
+      // previously invalidated the session and logged the user out unexpectedly
+      // ("delogat de fiecare dată"). The user stays signed in; roles refresh next tick.
+      const REFRESH_MS = 5 * 60 * 1000;
+      const last = typeof token.rolesAt === "number" ? token.rolesAt : 0;
+      const shouldRefresh =
+        !!user || trigger === "update" || Date.now() - last > REFRESH_MS;
+      if (token.id && shouldRefresh) {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            include: {
+              enrollments: {
+                where: { isActive: true },
+                include: { domain: { select: { id: true, slug: true } } },
+              },
             },
-          },
-        });
-        token.isSuperAdmin = dbUser?.isSuperAdmin ?? false;
-        token.enrollments =
-          dbUser?.enrollments.map((e) => ({
-            domainId: e.domain.id,
-            domainSlug: e.domain.slug,
-            roles: e.roles,
-          })) ?? [];
+          });
+          if (dbUser) {
+            token.isSuperAdmin = dbUser.isSuperAdmin ?? false;
+            token.enrollments = dbUser.enrollments.map((e) => ({
+              domainId: e.domain.id,
+              domainSlug: e.domain.slug,
+              roles: e.roles,
+            }));
+            token.rolesAt = Date.now();
+          }
+          // dbUser null (e.g. mid-deploy lookup miss) → keep prior token values.
+        } catch {
+          // Transient DB error → do NOT throw (that would drop the session).
+          // Keep whatever roles the token already carries.
+        }
       }
+      // Always-defined defaults so the session callback never sees undefined.
+      if (token.isSuperAdmin === undefined) token.isSuperAdmin = false;
+      if (token.enrollments === undefined) token.enrollments = [];
       return token;
     },
     async session({ session, token }) {
