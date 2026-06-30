@@ -18,7 +18,7 @@
 - [x] ✅ Webhook endpoint pe contul Class RDA → `https://stripe.knowbest.ro/api/stripe/webhook/class-rda` — **CONFIRMAT FĂCUT (verificat 2026-06-29):** broker-ul are pentru `class-rda` chei **live** (secret + publishable + **webhookSecret**), deci endpoint-ul e configurat în stripe.com. Cablaj E2E verificat: env Tutor (`STRIPE_BROKER_URL`+project key `pk_proj_2f0ae66c11…`+callback secret, fără `STRIPE_SECRET_KEY` direct) ↔ mapare broker `tutor→class-rda` LIVE (cheie identică) ↔ callback `/api/stripe/callback` activează abonamentul. **Stripe e funcțional end-to-end.**
 - [~] Activează **Customer Portal** (Settings → Billing → Customer portal) pe contul Class RDA (pt portal self-service; altfel `/api/portal` → "No configuration provided"). Doar dacă pui butonul de management (nu există încă).
 - [x] Flip mapping `tutor` brokerEnv **test→live** — **FĂCUT de user 2026-06-26** (broker /projects → tutor → Class RDA → LIVE). Webhook Class RDA LIVE → broker = deja pus (user confirmat „A e făcut deja").
-- [ ] Confirmă prețul planului Bronze e **15 lei** intenționat (display fixat $→lei, commit `55cb794`). Dacă voiai altă sumă → Planuri → Edit pe Bronze.
+- [x] ✅ Plan Bronze — **ȘTERS de user (verificat 2026-06-29):** nu mai există în DB (0 planuri Bronze / preț 15 lei) și nicio referință hardcodată în cod. Active rămase: Self/Family/Family Duo/Trio/Family Trio. Nu mai apare nicăieri.
 - [ ] (UI) buton "Gestionează abonamentul" → POST `{broker}/api/portal {sessionId\|subscriptionId, returnUrl}` (feature broker gata).
 
 ### 🧪 TEST LIVE Tutor — pași de făcut de TINE (Alex), GRATIS prin trial (proiect: **Tutor / etutor.ro**)
