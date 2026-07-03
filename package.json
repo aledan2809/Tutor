@@ -22,6 +22,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@aledan/analytics": "file:vendor/analytics.tgz",
     "@aledan/gcalendar": "file:../GCalendar",
     "@aledan/notify-ladder": "file:../notify-ladder",
     "@aledan/sms": "file:../SMS",
