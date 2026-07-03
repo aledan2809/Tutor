@@ -21,11 +21,11 @@ const intlMiddleware = createMiddleware(routing);
 function buildCsp(nonce: string): string {
   return (
     "default-src 'self'; " +
-    `script-src 'self' 'nonce-${nonce}' https://accounts.google.com https://analytics.techbiz.ae; ` +
+    `script-src 'self' 'nonce-${nonce}' https://accounts.google.com https://analytics.knowbest.ro; ` +
     "style-src 'self' 'unsafe-inline'; " +
     "img-src 'self' data: https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://*.googleusercontent.com; " +
     "font-src 'self'; " +
-    "connect-src 'self' https://accounts.google.com https://*.googleapis.com https://analytics.techbiz.ae; " +
+    "connect-src 'self' https://accounts.google.com https://*.googleapis.com https://analytics.knowbest.ro; " +
     "frame-src 'self' https://accounts.google.com; " +
     "frame-ancestors 'self'; " +
     "base-uri 'self'; " +

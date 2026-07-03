@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import type { Metadata, Viewport } from "next";
 import { PwaRegister } from "@/components/pwa-register";
 import { OfflineIndicator } from "@/components/offline-indicator";
-import { UmamiScript, UMAMI_TECHBIZ_SRC } from "@aledan/analytics/react";
+import { UmamiScript } from "@aledan/analytics/react";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -70,7 +70,7 @@ export default function RootLayout({
         <OfflineIndicator />
         {children}
         <PwaRegister />
-        <UmamiScript websiteId="7cc3296f-5e08-49ad-adca-b161dc7400d0" src={UMAMI_TECHBIZ_SRC} />
+        <UmamiScript websiteId="7cc3296f-5e08-49ad-adca-b161dc7400d0" />
       </body>
     </html>
   );
