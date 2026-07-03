@@ -890,3 +890,25 @@ Sursă: `Tutor/Reports/INTROSPECTION-2026-06-20/`
 ## [ ] 🧩 Module reuse gaps (adăugat 2026-06-24 din Master MODULE-PROJECT-MATRIX, aprobat user — necesită sesiune dedicată per item)
 - [x] ✅ **Stripe broker** — **DONE/stale** (verificat 2026-06-29): checkout-ul merge DEJA prin brokerul central (`/api/admin/stripe/checkout`→`stripe.knowbest.ro/api/checkout`, callback HMAC `/api/stripe/callback`); pe prod NU există `STRIPE_SECRET_KEY` direct (doar `src/lib/stripe.ts` legacy dormant, fără cheie). Mapare broker `tutor→class-rda` LIVE + chei live + webhookSecret prezente. Stripe e funcțional end-to-end.
 - [ ] **@aledan/ai-governance** — AIRouter fără harness guvernanță pe output AI.
+
+---
+
+## [~] 📊 Analytics — adoptă `@aledan/analytics` pe etutor.ro (propus 2026-07-01, modul ANL în /matrix)
+
+> ✅ **STRAT UMAMI (cookieless) — DONE + LIVE 2026-07-03** (commit `7a434bb`, deploy VPS2, sesiune mesh). websiteId `7cc3296f-5e08-49ad-adca-b161dc7400d0` provisionat în Umami central; `<UmamiScript src={UMAMI_TECHBIZ_SRC}>` în root layout (analytics.techbiz.ae — knowbest DNS încă pending); CSP `src/middleware.ts` += `analytics.techbiz.ae` pe script-src+connect-src (lecția techbiz); vendored tgz `file:vendor/analytics.tgz` + `transpilePackages`. tsc curat (0 erori din schimbări; 1 eroare pre-existentă în exam-engine.test = neatinsă). Verificare onestă 4/4: tag în HTML servit + CSP permite + script.js 200 + POST /api/send 200 (eveniment acceptat pt websiteId). **Rămas de confirmat manual**: o vizită browser real (UA normal) → hit vizibil în dashboard Umami (curl/headless sunt filtrate de Umami).
+>
+> **RĂMAS — GA4 (consent-gated) = follow-up separat**: cere o **proprietate GA4 NOUĂ în contul Google al business-ului Tutor** (Measurement ID `G-…`, NU refolosi techbiz). Tutor are deja cookie-banner propriu în `src/app/[locale]/layout.tsx` → NU monta `CookieConsent`; folosește README **case 3**: `loadGA4('G-<tutor>')` din calea de Accept a banner-ului + la mount dacă decizia salvată e granted. + GA4 origins în CSP (`GA4_CSP`). GoAccess VPS2 = sesiune separată opțională.
+
+**De ce**: etutor.ro e live cu trafic real dar fără vizibilitate pe vizitatori/surse. Modulul (extras din techbiz/AVE, LIVE acolo) dă: Umami cookieless (fără banner nou) + GA4 gated pe consimțământ + GoAccess.
+
+**Specific Tutor**: există DEJA un cookie-banner propriu în `src/app/[locale]/layout.tsx` → **NU monta `CookieConsent` din modul** (ar fi 2 bannere). Folosește cazul 3 din README: cheamă `loadGA4('G-<al-Tutor>')` din calea de Accept a banner-ului existent + la mount dacă decizia salvată e granted. Limba o ai din `[locale]` — nu e nevoie de detecție.
+
+**Mecanica (din modul — vezi `Projects/Analytics/README.md`):**
+1. Provisionează site-ul în Umami: `node Projects/Analytics/scripts/provision-umami.mjs --name "<domeniu>" --domain <domeniu>` → primești `websiteId`. (Dacă `analytics.knowbest.ro` nu are încă DNS, folosește `UMAMI_TECHBIZ_SRC`.)
+2. Vendored tgz: `cd Projects/Analytics && npm run build && npm pack` → copiază ca `<proiect>/vendor/analytics.tgz`; în package.json `"@aledan/analytics": "file:vendor/analytics.tgz"`; în next.config `transpilePackages: ["@aledan/analytics"]`.
+3. În root layout: `<UmamiScript websiteId="..."/>` (mereu, cookieless — NU cere consimțământ).
+4. **CSP obligatoriu** (lecția techbiz: CSP strict = zero date, silențios): adaugă originile din `umamiCsp()` + `GA4_CSP` în headerul CSP al proiectului (script-src/connect-src/img-src). Fără asta nu funcționează nimic.
+5. GA4: proprietate NOUĂ în contul Google al business-ului respectiv (NU refolosi G-WGNEF06DWS al techbiz) → un singur Measurement ID per business (subdomeniile aceluiași apex NU primesc stream-uri separate).
+6. Verificare onestă: vizită browser real (UA normal, nu headless) → hit în Umami dashboard; Accept → `gtag/js` 200 + `/g/collect` 204 → GA4 Realtime. Nu declara done pe build verde.
+
+**Extra Tutor**: GA4 property pe contul business-ului Tutor (etutor.ro). GoAccess: rulează `scripts/goaccess-vps-setup.sh` pe VPS2 (o dată, acoperă și celelalte domenii VPS2) — sesiune separată dacă vrei. Funnel in-app (`templates/funnel-dashboard.md`): trepte naturale = vizită → cont → abonament activ (Stripe).
