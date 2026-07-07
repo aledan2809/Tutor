@@ -59,23 +59,70 @@ export function FeatureGate({
   return <FeatureLockCard feature={feature} />;
 }
 
-/** The upgrade soft-lock card, on its own (e.g. to lock a section). */
+/**
+ * The upgrade soft-lock card, on its own (e.g. to lock a section).
+ *
+ * Contextual, not a wall: when the student has a known weak area, the card leads
+ * with THEIR problem ("you often miss X") and frames the paid feature as the fix
+ * for exactly that — and always offers a free way forward (practice) so hitting
+ * a lock never dead-ends. The weak-area lookup is best-effort; without it the
+ * card falls back to the generic copy.
+ */
 export function FeatureLockCard({ feature }: { feature: PlanFeature }) {
   const t = useTranslations("featureLock");
+  const [weak, setWeak] = useState<{ topic: string; errorRate: number } | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/student/dashboard")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!active) return;
+        const w = d?.weakAreas?.[0];
+        if (w?.topic) setWeak({ topic: w.topic, errorRate: w.errorRate ?? 0 });
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <div className="mx-auto max-w-md rounded-2xl border border-gray-800 bg-gray-900 p-8 text-center">
       <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gray-800 text-2xl">
-        🔒
+        {weak ? "🎯" : "🔒"}
       </div>
       <p className="mb-1 text-sm font-medium text-blue-400">{t(feature)}</p>
-      <h2 className="mb-2 text-lg font-semibold text-white">{t("title")}</h2>
-      <p className="mb-6 text-sm text-gray-400">{t("body")}</p>
-      <Link
-        href={UPGRADE_PATH}
-        className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-      >
-        {t("cta")}
-      </Link>
+      {weak ? (
+        <>
+          <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-red-400">
+            {t("observed")}
+          </p>
+          <h2 className="mb-2 text-lg font-semibold text-white">
+            {t("weakNote", { topic: weak.topic, rate: weak.errorRate })}
+          </h2>
+          <p className="mb-6 text-sm text-gray-400">{t("valueWeak", { topic: weak.topic })}</p>
+        </>
+      ) : (
+        <>
+          <h2 className="mb-2 text-lg font-semibold text-white">{t("title")}</h2>
+          <p className="mb-6 text-sm text-gray-400">{t("body")}</p>
+        </>
+      )}
+      <div className="flex flex-col gap-2">
+        <Link
+          href={UPGRADE_PATH}
+          className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+        >
+          {t("cta")}
+        </Link>
+        <Link
+          href="/dashboard/practice"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-gray-700 px-6 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-800"
+        >
+          {t("continueFree")}
+        </Link>
+      </div>
     </div>
   );
 }
