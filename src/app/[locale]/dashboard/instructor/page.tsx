@@ -22,16 +22,42 @@ interface DashboardData {
   }[];
 }
 
+interface AtRiskStudent {
+  id: string;
+  name: string | null;
+  email: string | null;
+  domain?: { name: string } | null;
+  risk?: {
+    failureProbability: number;
+    factors: string[];
+    recommendation: string;
+  } | null;
+}
+
 export default function InstructorDashboardPage() {
   const t = useTranslations("instructor");
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [atRisk, setAtRisk] = useState<AtRiskStudent[]>([]);
 
   useEffect(() => {
     fetch("/api/dashboard/instructor")
       .then((r) => r.json())
       .then(setData)
       .finally(() => setLoading(false));
+    // Daily triage: the students who need attention today, by failure risk.
+    // Best-effort — the hub renders fine without it.
+    fetch("/api/dashboard/instructor/students?limit=50")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const students: AtRiskStudent[] = d?.students ?? [];
+        const top = students
+          .filter((s) => (s.risk?.failureProbability ?? 0) >= 60)
+          .sort((a, b) => (b.risk?.failureProbability ?? 0) - (a.risk?.failureProbability ?? 0))
+          .slice(0, 3);
+        setAtRisk(top);
+      })
+      .catch(() => {});
   }, []);
 
   if (loading) return <p className="text-gray-500">{t("loading")}</p>;
@@ -39,6 +65,46 @@ export default function InstructorDashboardPage() {
   return (
     <div>
       <h1 className="mb-6 text-2xl font-bold text-white">{t("title")}</h1>
+
+      {/* Daily triage — who needs you today (risk-first, one action per student).
+          Rule-based on the existing per-student failure risk; hidden when clear. */}
+      {atRisk.length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-3 text-sm font-semibold text-gray-300">
+            {atRisk.length === 1
+              ? "1 elev are nevoie de atenție azi:"
+              : `${atRisk.length} elevi au nevoie de atenție azi:`}
+          </h2>
+          <div className="space-y-2">
+            {atRisk.map((s) => {
+              const p = s.risk?.failureProbability ?? 0;
+              return (
+                <Link
+                  key={s.id}
+                  href={`/dashboard/instructor/students/${s.id}`}
+                  className="flex items-center gap-3 rounded-xl border border-gray-800 bg-gray-900 px-4 py-3 hover:border-blue-600/50 hover:bg-gray-800"
+                >
+                  <span
+                    className={`h-9 w-1.5 shrink-0 rounded-full ${p >= 75 ? "bg-red-500" : "bg-yellow-500"}`}
+                    aria-hidden
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold text-white">
+                      {s.name ?? s.email}
+                    </span>
+                    <span className="block truncate text-xs text-gray-400">
+                      {s.risk?.factors?.[0] ?? s.risk?.recommendation ?? s.domain?.name ?? ""}
+                    </span>
+                  </span>
+                  <span className="shrink-0 text-xs font-semibold text-blue-400">
+                    Vezi profilul →
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Stats */}
       <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">

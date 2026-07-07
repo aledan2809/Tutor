@@ -218,6 +218,20 @@ export function ChildChapter({ child }: { child: ChildLite }) {
             </div>
           )}
 
+          {/* Narrative synthesis — the parent-facing conclusion + one action.
+              Rule-based over data already in `detail` (sessions, mistakes,
+              streak/accuracy); no extra fetch. */}
+          {detail && !loading && (
+            <ChildSynthesis
+              name={(child.name ?? "Copilul").split(/\s+/)[0]}
+              streak={streak}
+              accuracy={accuracy}
+              sessions={detail.sessionLog}
+              mistakes={(detail.byDomain ?? []).flatMap((d) => d.mistakes)}
+              onAct={() => setTab("remindere")}
+            />
+          )}
+
           {/* Sub-tabs (subcapitole) */}
           <div className="mb-4 flex flex-wrap gap-2">
             <TabBtn active={tab === "sesiuni"} onClick={() => setTab("sesiuni")}>
@@ -556,6 +570,73 @@ function RemindereTab({
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * Parent-facing narrative synthesis + one action. Rule-based over the data the
+ * detail API already returns — a human conclusion ("studied 3 of the last 7
+ * days, keeps missing X") instead of raw metric cards, plus a single suggested
+ * action (send a memento on the weak topic). No extra fetch, no external calls.
+ */
+function ChildSynthesis({
+  name,
+  streak,
+  accuracy,
+  sessions,
+  mistakes,
+  onAct,
+}: {
+  name: string;
+  streak: number;
+  accuracy: number;
+  sessions: SessionItem[];
+  mistakes: RecentMistake[];
+  onAct: () => void;
+}) {
+  const now = Date.now();
+  const DAY = 24 * 60 * 60 * 1000;
+  const days7 = new Set(
+    sessions
+      .filter((s) => now - new Date(s.startedAt).getTime() < 7 * DAY)
+      .map((s) => new Date(s.startedAt).toDateString())
+  );
+  const activeDays = days7.size;
+  const lastSession = sessions[0] ? new Date(sessions[0].startedAt).getTime() : null;
+  const idleDays = lastSession ? Math.floor((now - lastSession) / DAY) : null;
+
+  // The weak topic worth acting on: most wrong answers, at least 2.
+  const weak = [...mistakes].sort((a, b) => b.wrong - a.wrong).find((m) => m.wrong >= 2) ?? null;
+
+  // Lead line: activity first (it's what a parent asks first).
+  const lead =
+    activeDays > 0
+      ? `${name} a studiat ${activeDays} din ultimele 7 zile${streak > 0 ? ` — serie de ${streak} zile. 🔥` : "."}`
+      : idleDays != null
+        ? `${name} nu a mai studiat de ${idleDays} ${idleDays === 1 ? "zi" : "zile"}.`
+        : `${name} nu a început încă nicio sesiune.`;
+
+  // Support line: strength + the thing to fix, in plain words.
+  const good = accuracy >= 70 ? `Per total merge bine (${accuracy}% corect)` : null;
+  const fix = weak
+    ? `se împiedică repetat de „${weak.topic}” (${weak.wrong} din ${weak.total} greșite)`
+    : null;
+  const support =
+    good && fix ? `${good}, dar ${fix}.` : fix ? `Momentan ${fix}.` : good ? `${good}.` : null;
+
+  return (
+    <div className="mb-4 rounded-xl border border-blue-800/50 bg-gradient-to-br from-blue-950/60 to-gray-950 p-4">
+      <p className="text-sm font-semibold text-white">{lead}</p>
+      {support && <p className="mt-1 text-sm text-blue-200/80">{support}</p>}
+      {(weak || activeDays === 0) && (
+        <button
+          onClick={onAct}
+          className="mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 min-h-[40px]"
+        >
+          {weak ? `Trimite-i un memento pe „${weak.topic}” →` : "Trimite-i un memento →"}
+        </button>
+      )}
     </div>
   );
 }
