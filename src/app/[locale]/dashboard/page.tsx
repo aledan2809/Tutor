@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "@/i18n/navigation";
 import { DomainSwitcher } from "@/components/domain-switcher";
 import { DemoQuizCard } from "@/components/demo-quiz-card";
+import { OnboardingWizard } from "@/components/dashboard/onboarding-wizard";
 
 // Home view mode: "today" (proactive — one next action + guided path) or "full"
 // (the classic stats dashboard, kept as an option per product decision).
@@ -169,18 +170,9 @@ export default function DashboardPage() {
       {/* Lazy-save: surface a demo quiz claimed at signup (renders nothing otherwise) */}
       <DemoQuizCard />
 
-      {/* No enrollments */}
-      {data.domains.length === 0 && (
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-8 text-center">
-          <p className="mb-4 text-gray-400">{t("dashboard.noDomains")}</p>
-          <button
-            onClick={() => router.push("/dashboard/domains")}
-            className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 min-h-[44px]"
-          >
-            {t("dashboard.browseDomains")}
-          </button>
-        </div>
-      )}
+      {/* No enrollments → guided learning onboarding (subject → calibration test).
+          The old "browse domains" list stays reachable from inside the wizard. */}
+      {data.domains.length === 0 && <OnboardingWizard />}
 
       {/* TODAY view — one clear next action + guided path (proactive default) */}
       {data.domains.length > 0 && view === "today" && (

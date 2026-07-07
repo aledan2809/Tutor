@@ -226,6 +226,23 @@
     "certShort": "Cert",
     "noExamsFound": "No exams found."
   },
+  "onboarding": {
+    "welcome": "Welcome! 👋",
+    "intro": "Let's get to know you in 3 quick steps — then we give you exactly what you need.",
+    "step1Short": "Subject",
+    "step2Short": "Short test",
+    "step3Short": "Your plan",
+    "pickSubject": "What are you preparing for?",
+    "noSubjects": "No subjects available right now.",
+    "browseAll": "Browse all subjects →",
+    "enrollFailed": "Couldn't activate the subject. Please try again.",
+    "startFailed": "Couldn't start the test. Please try again.",
+    "step2Tag": "Step 2 of 3",
+    "calibrationTitle": "Calibration test · {subject}",
+    "calibrationWhy": "A few short questions — shows you from the start what you're good at and what's worth fixing.",
+    "startCalibration": "Start the test ▶",
+    "calibrationSkipNote": "90 seconds now saves you hours later."
+  },
   "dashboard": {
     "welcome": "Welcome back, {name}!",
     "yourDomains": "Your Domains",

@@ -226,6 +226,23 @@
     "certShort": "Cert",
     "noExamsFound": "Niciun examen găsit."
   },
+  "onboarding": {
+    "welcome": "Bine ai venit! 👋",
+    "intro": "Hai să te cunoaștem în 3 pași rapizi — apoi îți dăm exact ce ai nevoie.",
+    "step1Short": "Materia",
+    "step2Short": "Test scurt",
+    "step3Short": "Planul tău",
+    "pickSubject": "Ce pregătești?",
+    "noSubjects": "Nicio materie disponibilă momentan.",
+    "browseAll": "Vezi toate materiile în listă →",
+    "enrollFailed": "Nu am putut activa materia. Încearcă din nou.",
+    "startFailed": "Nu am putut porni testul. Încearcă din nou.",
+    "step2Tag": "Pasul 2 din 3",
+    "calibrationTitle": "Test de calibrare · {subject}",
+    "calibrationWhy": "Câteva grile scurte — îți arată din start la ce ești bun și ce merită reparat.",
+    "startCalibration": "Începe testul ▶",
+    "calibrationSkipNote": "90 de secunde acum îți economisesc ore mai târziu."
+  },
   "dashboard": {
     "welcome": "Bine ai revenit, {name}!",
     "yourDomains": "Domeniile tale",
