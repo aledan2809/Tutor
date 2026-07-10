@@ -4,6 +4,25 @@
 
 ---
 
+## [~] 🔔 Remindere & escaladare configurabile din UI (părinte + meditator) — Batch 1+2 LIVE 2026-07-10 (`c7fa557`)
+
+**Cerere user**: părintele ȘI meditatorul să-și stabilească singuri, din UI, modalitatea de comunicare a reminderelor (canalele + **ordinea** lor, pt copil și pt ei), frecvența, escaladarea automată. Mockup aprobat (acum vs propunere) + 4 decizii: presetări+reglaj-fin · doar părintele în cascadă (meditator pe praguri) · interval recurent SAU oră fixă · părintele are ultimul cuvânt pe copil.
+
+**[x] Batch 1+2 — LIVE 2026-07-10 (commit `c7fa557`, migrații 0039+0040 aplicate pe prod, verificat cu login real):**
+- `NotificationPreference.channelOrder[]` + `resolveLadder()` — cascada de escaladare respectă ordinea per-user în toate 3 punctele (fallback = ordinea default, byte-for-byte). WhatsApp-gate free → skip-la-următorul (nu închide lanțul, robust la reordonare).
+- Panou reordonabil (butoane ↑↓ accesibile) — elev (Setări→Notificări) + **părinte** (`/watcher/setari`, pagină nouă) + **meditator** (`/instructor/notificari`, pagină nouă). Părinte-setează-ordinea-copilului (card copil).
+- Alerta părintelui = cascadă pe treptele LUI (`parentAlertRung`), episoade doar PARENT (meditatorul stă pe praguri), + livrare WhatsApp părinte.
+- **Pragurile meditatorului chiar se evaluează acum** (cron `threshold-monitor`: streak/scor/sesiuni-ratate, dedup 1×/zi RO, livrare pe canalele lui + opțional părinți). Erau doar stocate.
+- Verificat: tsc 0 · vitest ladder 8/8 · 2 review-uri adversariale (Batch 2: 1 P1+4 P2 găsite → toate reparate: tipuri push/email, quiet-hours nu mai arde treptele noaptea, dedup zi-RO nu UTC, link corect părinte, wrap-around la eșec canal) · build prod · deploy + health L41 toți 200.
+
+**[ ] Batch 3 (următorul):**
+- Intervalul propriu al părintelui „la N ore / oră fixă 20:00" (acum e 30 min fix, dar pe cascada lui de canale) — câmpuri `selfAlertMode/EveryH/At` pe ParentEscalation + UI pe `/watcher/setari`.
+- Presetări Blând/Standard/Insistent + editor trepte (canal+minute) pt copil, setat de părinte.
+
+**📋 Acțiune user (opțional)**: template Meta „parent-alert" pt WhatsApp fiabil pe alerte părinte (fără el, WhatsApp-ul părinte livrează doar în fereastra 24h Meta; cascada face fall-through la alt canal). ~24-48h aprobare Meta.
+
+---
+
 ## [~] 💳 Billing migrat pe Stripe Checkout Broker — TEST DONE 2026-06-26 (commit `15d7739`)
 
 **Context**: Tutor avea checkout Stripe scaffold-at-dar-mort (`STRIPE_SECRET_KEY` unset pe prod, 0 customers, 0 plăți; cele 5 abonamente active = vouchere 100% gratis). Migrat să ruteze prin **broker-ul central** `stripe.knowbest.ro` → billing pe contul firmei **Class RDA** (biller decis de user). Tutor nu mai ține cheie Stripe.
