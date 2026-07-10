@@ -14,43 +14,151 @@ import { startEscalation } from "./engine";
 import { userIdsOnBreak } from "./breaks";
 import { scheduledTodayFilter } from "./scheduled-days";
 import { isQuietHours } from "./timing";
+import { resolveLadder } from "./config";
+import { isPaidStatus } from "@/lib/plan-channels";
 import { webPushToUser, telegramAlertToUser } from "@/lib/notifications/service";
 import { sendAppEmail } from "@/lib/email";
 
 const PARENT_ALERT_URL = "/dashboard/watcher/notifications";
 
 /**
- * Deliver a parent alert to the parent's real channels in real time (push +
- * Telegram + email), on top of the in-app feed row. Respects the parent's
- * enabled channels + quiet hours ("orele agreate, canalele agreate"). Best-effort
- * — never throws (alert delivery must not break the monitoring sweep).
+ * The alert channels this user can actually receive right now, in THEIR saved
+ * priority order (NotificationPreference.channelOrder, default order otherwise).
+ * A channel is kept only when it's enabled AND deliverable: PUSH needs the pref on,
+ * TELEGRAM needs a linked chat, EMAIL needs the pref + an address, WHATSAPP needs
+ * the pref + a phone + env config + a paid plan (metered). PUSH is the final
+ * fallback so the list is never empty.
  */
-async function deliverParentAlert(parentId: string, title: string, message: string): Promise<void> {
-  try {
-    const [parent, prefs] = await Promise.all([
-      prisma.user.findUnique({ where: { id: parentId }, select: { email: true } }),
-      prisma.notificationPreference.findUnique({ where: { userId: parentId } }),
-    ]);
-    const tz = prefs?.timezone ?? "Europe/Bucharest";
-    if (isQuietHours(tz, prefs?.quietHoursStart ?? "22:00", prefs?.quietHoursEnd ?? "07:00")) return;
-
-    const base = (process.env.AUTH_URL ?? "").replace(/\/$/, "");
-    const tasks: Promise<unknown>[] = [];
-    if (prefs?.push ?? true) tasks.push(webPushToUser(parentId, { title, body: message, url: PARENT_ALERT_URL }));
-    // Telegram has no per-channel pref toggle; deliver if the parent linked it.
-    tasks.push(
-      telegramAlertToUser(parentId, { text: `${title}\n${message}`, url: PARENT_ALERT_URL, buttonLabel: "Vezi alertele" })
-    );
-    if ((prefs?.email ?? true) && parent?.email) {
-      tasks.push(
-        sendAppEmail({
-          to: parent.email,
-          subject: title,
-          html: `<p>${message}</p><p><a href="${base}${PARENT_ALERT_URL}">Vezi alertele</a></p>`,
-        })
-      );
+export async function resolveUserAlertChannels(userId: string): Promise<string[]> {
+  const [user, prefs, phoneSetting] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true, telegramChatId: true, subscriptionStatus: true },
+    }),
+    prisma.notificationPreference.findUnique({ where: { userId } }),
+    prisma.setting.findUnique({ where: { userId_key: { userId, key: "phone" } } }),
+  ]);
+  const whatsappConfigured = Boolean(
+    process.env.WHATSAPP_PHONE_NUMBER_ID && process.env.WHATSAPP_ACCESS_TOKEN
+  );
+  const out: string[] = [];
+  for (const rung of resolveLadder(prefs?.channelOrder)) {
+    switch (rung.channel) {
+      case "PUSH":
+        if (prefs?.push ?? true) out.push("PUSH");
+        break;
+      case "TELEGRAM":
+        // Telegram has no per-channel pref toggle; deliver if the user linked it.
+        if (user?.telegramChatId) out.push("TELEGRAM");
+        break;
+      case "EMAIL":
+        if ((prefs?.email ?? true) && user?.email) out.push("EMAIL");
+        break;
+      case "WHATSAPP":
+        if (
+          (prefs?.whatsapp ?? true) &&
+          typeof phoneSetting?.value === "string" &&
+          phoneSetting.value &&
+          whatsappConfigured &&
+          isPaidStatus(user?.subscriptionStatus)
+        ) {
+          out.push("WHATSAPP");
+        }
+        break;
     }
-    await Promise.allSettled(tasks);
+  }
+  if (out.length === 0) out.push("PUSH"); // never leave the user unreachable
+  return out;
+}
+
+/** Send one alert on one concrete channel. Returns whether the send succeeded. */
+async function sendAlertOnChannel(
+  userId: string,
+  channel: string,
+  title: string,
+  message: string
+): Promise<boolean> {
+  const base = (process.env.AUTH_URL ?? "").replace(/\/$/, "");
+  switch (channel) {
+    case "PUSH":
+      // webPushToUser returns the delivered-subscription count.
+      return (await webPushToUser(userId, { title, body: message, url: PARENT_ALERT_URL })) > 0;
+    case "TELEGRAM":
+      return await telegramAlertToUser(userId, {
+        text: `${title}\n${message}`,
+        url: PARENT_ALERT_URL,
+        buttonLabel: "Vezi alertele",
+      });
+    case "EMAIL": {
+      const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+      if (!user?.email) return false;
+      // sendAppEmail reports provider failure — propagate it so the cascade can
+      // fall through to the next channel instead of silently "succeeding".
+      return await sendAppEmail({
+        to: user.email,
+        subject: title,
+        html: `<p>${message}</p><p><a href="${base}${PARENT_ALERT_URL}">Vezi alertele</a></p>`,
+      });
+    }
+    case "WHATSAPP": {
+      // Free-text WhatsApp only delivers inside Meta's 24h service window (the
+      // parent recently wrote to the business). Outside it, sendText fails and we
+      // fall through to the parent's next channel — the alert is never lost. A
+      // dedicated Meta-approved parent-alert template would make this rung reliable
+      // (template approval = owner action, ~24-48h at Meta).
+      const phoneSetting = await prisma.setting.findUnique({
+        where: { userId_key: { userId, key: "phone" } },
+      });
+      const phone = typeof phoneSetting?.value === "string" ? phoneSetting.value : undefined;
+      if (!phone) return false;
+      try {
+        const { WhatsAppClient, normalizePhone } = await import("@aledan/whatsapp");
+        const client = new WhatsAppClient({
+          phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID!,
+          accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
+        });
+        const res = await client.sendText(normalizePhone(phone), `${title}\n${message}`);
+        return res.success;
+      } catch (e) {
+        console.error("parent-alert WhatsApp send error:", e);
+        return false;
+      }
+    }
+    default:
+      return false;
+  }
+}
+
+/** Is this user inside their quiet hours right now? (default 22:00–07:00) */
+export async function userInQuietHours(userId: string): Promise<boolean> {
+  const prefs = await prisma.notificationPreference.findUnique({ where: { userId } });
+  const tz = prefs?.timezone ?? "Europe/Bucharest";
+  return isQuietHours(tz, prefs?.quietHoursStart ?? "22:00", prefs?.quietHoursEnd ?? "07:00");
+}
+
+/**
+ * Deliver an alert to ONE user on the rung-th channel of their own ordered cascade
+ * (rung 0 = most preferred; past the end stays on the last). If that channel's send
+ * fails, tries the remaining channels — wrapping around to the start — so every
+ * channel gets one attempt and the alert is never silently lost. Respects quiet
+ * hours. Best-effort — never throws (alert delivery must not break the monitoring
+ * sweep).
+ */
+async function deliverParentAlert(
+  parentId: string,
+  title: string,
+  message: string,
+  rung = 0
+): Promise<void> {
+  try {
+    if (await userInQuietHours(parentId)) return;
+
+    const channels = await resolveUserAlertChannels(parentId);
+    const start = Math.min(rung, channels.length - 1);
+    for (let k = 0; k < channels.length; k++) {
+      const i = (start + k) % channels.length;
+      if (await sendAlertOnChannel(parentId, channels[i], title, message)) return;
+    }
   } catch (e) {
     console.error("deliverParentAlert error:", e);
   }
@@ -71,33 +179,49 @@ export function shouldRenotifyParent(
   return now.getTime() - lastNotifiedAt.getTime() >= intervalMin * 60_000;
 }
 
-/** Create one in-app alert per active guardian of the child. */
+/** One in-app alert row + real-time delivery to ONE guardian (rung = their own cascade step). */
+async function notifyParent(
+  parentId: string,
+  childId: string,
+  childName: string | null,
+  alert: { alertType: string; title: string; message: string; channel?: string | null },
+  rung = 0
+): Promise<void> {
+  await prisma.notification.create({
+    data: {
+      userId: parentId,
+      type: "parent_alert",
+      title: alert.title,
+      message: alert.message,
+      metadata: {
+        childId,
+        childName,
+        alertType: alert.alertType,
+        channel: alert.channel ?? null,
+      },
+    },
+  });
+  // Real-time delivery to the parent's devices (not just the in-app feed).
+  await deliverParentAlert(parentId, alert.title, alert.message, rung);
+}
+
+/**
+ * Create one in-app alert per active guardian of the child. The no-reaction
+ * ESCALATION episodes go to PARENT-relation guardians only (the meditator stays on
+ * threshold alerts — decizia 02); informational updates go to all guardians.
+ */
 async function notifyGuardians(
   childId: string,
   childName: string | null,
-  alert: { alertType: string; title: string; message: string; channel?: string | null }
+  alert: { alertType: string; title: string; message: string; channel?: string | null },
+  opts?: { relation?: "PARENT" }
 ): Promise<number> {
   const links = await prisma.guardian.findMany({
-    where: { childId, status: "active" },
+    where: { childId, status: "active", ...(opts?.relation ? { relation: opts.relation } : {}) },
     select: { parentId: true },
   });
   for (const l of links) {
-    await prisma.notification.create({
-      data: {
-        userId: l.parentId,
-        type: "parent_alert",
-        title: alert.title,
-        message: alert.message,
-        metadata: {
-          childId,
-          childName,
-          alertType: alert.alertType,
-          channel: alert.channel ?? null,
-        },
-      },
-    });
-    // Real-time delivery to the parent's devices (not just the in-app feed).
-    await deliverParentAlert(l.parentId, alert.title, alert.message);
+    await notifyParent(l.parentId, childId, childName, alert);
   }
   return links.length;
 }
@@ -176,12 +300,18 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
         where: { id: esc.id },
         data: { status: "resolved_positive", childChannel: channel, resolvedAt: now },
       });
-      await notifyGuardians(esc.childId, esc.child.name, {
-        alertType: "reacted_positive",
-        title: "A reacționat ✅",
-        message: `${esc.child.name ?? "Copilul"} a reacționat (via ${chName(channel)}).`,
-        channel,
-      });
+      // Episode lifecycle stays PARENT-only (the TUTOR never saw its opening).
+      await notifyGuardians(
+        esc.childId,
+        esc.child.name,
+        {
+          alertType: "reacted_positive",
+          title: "A reacționat ✅",
+          message: `${esc.child.name ?? "Copilul"} a reacționat (via ${chName(channel)}).`,
+          channel,
+        },
+        { relation: "PARENT" }
+      );
       resolvedPositive++;
     }
   }
@@ -197,11 +327,16 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
       where: { id: esc.id },
       data: { status: "resolved_negative", resolvedAt: now },
     });
-    await notifyGuardians(esc.childId, esc.child.name, {
-      alertType: "reacted_negative",
-      title: "Nu a reacționat ❌",
-      message: `${esc.child.name ?? "Copilul"} nu a reacționat nici după mementoul suplimentar.`,
-    });
+    await notifyGuardians(
+      esc.childId,
+      esc.child.name,
+      {
+        alertType: "reacted_negative",
+        title: "Nu a reacționat ❌",
+        message: `${esc.child.name ?? "Copilul"} nu a reacționat nici după mementoul suplimentar.`,
+      },
+      { relation: "PARENT" }
+    );
     resolvedNegative++;
   }
 
@@ -228,8 +363,10 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
     if (onBreak.has(childId)) continue; // vacanță
     if (!scheduledChildren.has(childId)) continue; // zi fără program: fără alertă nouă
     if (chain.active) continue; // chain still running
+    // Episodes (and the authorize-extra-memento flow) belong to PARENT-relation
+    // guardians only; a TUTOR-relation guardian stays on threshold alerts.
     const guardians = await prisma.guardian.findMany({
-      where: { childId, status: "active" },
+      where: { childId, status: "active", relation: "PARENT" },
       select: { parentId: true },
     });
     if (guardians.length === 0) continue;
@@ -248,12 +385,17 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
       });
       if (!alreadyReported) {
         const c = await prisma.user.findUnique({ where: { id: childId }, select: { name: true } });
-        await notifyGuardians(childId, c?.name ?? null, {
-          alertType: "reacted_positive",
-          title: "A reacționat ✅",
-          message: `${c?.name ?? "Copilul"} a reacționat (via ${chName(reaction.channel)}).`,
-          channel: reaction.channel,
-        });
+        await notifyGuardians(
+          childId,
+          c?.name ?? null,
+          {
+            alertType: "reacted_positive",
+            title: "A reacționat ✅",
+            message: `${c?.name ?? "Copilul"} a reacționat (via ${chName(reaction.channel)}).`,
+            channel: reaction.channel,
+          },
+          { relation: "PARENT" }
+        );
       }
       continue;
     }
@@ -272,15 +414,23 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
           childId,
           status: "awaiting_parent",
           openedFor: chain.start,
+          // First alert (below) goes out on rung 0 = the parent's preferred
+          // channel; the next re-notify starts one rung down.
+          parentAlertRung: 1,
           lastParentNotifiedAt: now,
         },
       });
     }
-    await notifyGuardians(childId, child?.name ?? null, {
-      alertType: "no_reaction",
-      title: "Nu a reacționat la memento",
-      message: `${child?.name ?? "Copilul"} nu a reacționat la niciun canal. Poți autoriza un memento suplimentar.`,
-    });
+    await notifyGuardians(
+      childId,
+      child?.name ?? null,
+      {
+        alertType: "no_reaction",
+        title: "Nu a reacționat la memento",
+        message: `${child?.name ?? "Copilul"} nu a reacționat la niciun canal. Poți autoriza un memento suplimentar.`,
+      },
+      { relation: "PARENT" }
+    );
     opened++;
   }
 
@@ -297,14 +447,26 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
     if (onBreak.has(esc.childId)) continue; // vacanță
     if (!scheduledAwaiting.has(esc.childId)) continue; // zi fără program: nu re-notificăm
     if (!shouldRenotifyParent(esc.lastParentNotifiedAt, now)) continue;
-    await notifyGuardians(esc.childId, esc.child.name, {
-      alertType: "no_reaction_reminder",
-      title: "Încă nu a reacționat",
-      message: `${esc.child.name ?? "Copilul"} încă nu a reacționat. Autorizează un memento suplimentar?`,
-    });
+    // Quiet hours: skip the whole tick — no in-app row, no rung/timestamp consumed —
+    // so the parent's cascade resumes exactly where it left off in the morning
+    // (instead of burning ~18 silent rungs overnight).
+    if (await userInQuietHours(esc.parentId)) continue;
+    // Re-notify ONLY this episode's parent (not every guardian of the child), one
+    // rung further down THEIR own channel cascade each time.
+    await notifyParent(
+      esc.parentId,
+      esc.childId,
+      esc.child.name,
+      {
+        alertType: "no_reaction_reminder",
+        title: "Încă nu a reacționat",
+        message: `${esc.child.name ?? "Copilul"} încă nu a reacționat. Autorizează un memento suplimentar?`,
+      },
+      esc.parentAlertRung
+    );
     await prisma.parentEscalation.update({
       where: { id: esc.id },
-      data: { lastParentNotifiedAt: now },
+      data: { lastParentNotifiedAt: now, parentAlertRung: esc.parentAlertRung + 1 },
     });
     renotified++;
   }

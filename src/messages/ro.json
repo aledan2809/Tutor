@@ -494,7 +494,12 @@
     "saved": "Salvat!",
     "audienceSelf": "Ale mele",
     "audienceChild": "Despre copil",
-    "paidOnly": "Disponibil în pachetele plătite"
+    "paidOnly": "Disponibil în pachetele plătite",
+    "channelOrderTitle": "Ordinea canalelor",
+    "channelOrderDesc": "Te căutăm în această ordine — dacă nu răspunzi pe primul, trecem la următorul.",
+    "channelTelegram": "Telegram",
+    "moveUp": "Mută mai sus",
+    "moveDown": "Mută mai jos"
   },
   "calendar": {
     "title": "Calendar",
@@ -576,7 +581,14 @@
     "markRead": "Marchează ca citit",
     "allNotifications": "Toate",
     "unreadOnly": "Necitite",
-    "noNotifications": "Nicio notificare încă"
+    "noNotifications": "Nicio notificare încă",
+    "settings": "Setări",
+    "settingsTitle": "Notificările mele",
+    "settingsIntro": "Alege cum și în ce ordine vrei să fii anunțat tu când copilul are nevoie de un impuls.",
+    "pushTitle": "Notificări în browser",
+    "pushHint": "Primești alertele în timp real, chiar și cu aplicația închisă.",
+    "phoneLabel": "Numărul meu de telefon (WhatsApp)",
+    "phoneHint": "Adaugă un număr dacă vrei să primești alerte și pe WhatsApp."
   },
   "instructor": {
     "title": "Panou Instructor",
@@ -711,7 +723,14 @@
     "equalTo": "Egal cu",
     "notifyInstructor": "Notifică instructorul",
     "notifyWatcher": "Notifică observatorul",
-    "sessionsMissed": "Sesiuni ratate"
+    "sessionsMissed": "Sesiuni ratate",
+    "notificationsNav": "Notificări",
+    "notifTitle": "Notificările mele",
+    "notifIntro": "Alege cum și în ce ordine vrei să fii anunțat când un elev atinge un prag de alertă.",
+    "notifPushTitle": "Notificări în browser",
+    "notifPushHint": "Primești alertele în timp real, chiar și cu aplicația închisă.",
+    "notifPhoneLabel": "Numărul meu de telefon (WhatsApp)",
+    "notifPhoneHint": "Adaugă un număr dacă vrei să primești alerte și pe WhatsApp."
   },
   "landing": {
     "hero": "Învățare Adaptivă Bazată pe AI",
@@ -806,7 +825,11 @@
     "managedTitle": "Notificările tale sunt gestionate de părinte",
     "managedBody": "Un părinte se ocupă de canalele tale de notificare. Pentru schimbări, vorbește cu el.",
     "saved": "Salvat",
-    "paidOnly": "Disponibil în pachetele plătite"
+    "paidOnly": "Disponibil în pachetele plătite",
+    "telegram": "Telegram",
+    "orderTitle": "Ordinea canalelor copilului",
+    "moveUp": "Mută mai sus",
+    "moveDown": "Mută mai jos"
   },
   "featureLock": {
     "title": "Funcție inclusă într-un pachet",

@@ -10,6 +10,7 @@ export function WatcherNav() {
   const links = [
     { href: "/dashboard/watcher", label: t("title") },
     { href: "/dashboard/watcher/notifications", label: t("notifications") },
+    { href: "/dashboard/watcher/setari", label: t("settings") },
   ];
 
   return (

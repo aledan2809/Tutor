@@ -16,6 +16,7 @@ export function InstructorNav() {
     { href: "/dashboard/instructor/messages", label: t("messages") },
     { href: "/dashboard/instructor/analytics", label: t("analytics") },
     { href: "/dashboard/instructor/reports", label: t("reports") },
+    { href: "/dashboard/instructor/notificari", label: t("notificationsNav") },
     { href: "/dashboard/instructor/settings", label: t("settings") },
   ];
 

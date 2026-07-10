@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { isGuardianOf } from "@/lib/guardian";
 import { allowedChannels, clampChannelWrite } from "@/lib/plan-channels";
+import { sanitizeChannelOrder } from "@/lib/escalation/config";
 
 /**
  * Per-child notification delegation, set by a parent.
@@ -38,6 +39,7 @@ async function readState(childId: string) {
       whatsapp: prefs?.whatsapp ?? true,
       sms: prefs?.sms ?? true,
     },
+    channelOrder: prefs?.channelOrder ?? [],
     allowedChannels: allowedChannels(child?.subscriptionStatus),
   };
 }
@@ -60,6 +62,7 @@ async function _PUT(req: NextRequest, ctx: { params: Promise<{ childId: string }
     email?: boolean;
     whatsapp?: boolean;
     sms?: boolean;
+    channelOrder?: unknown;
   };
 
   if (typeof body.managedByParent === "boolean") {
@@ -77,11 +80,14 @@ async function _PUT(req: NextRequest, ctx: { params: Promise<{ childId: string }
     { push: body.push, email: body.email, whatsapp: body.whatsapp, sms: body.sms },
     child?.subscriptionStatus,
   );
-  if (Object.keys(applied).length > 0) {
+  const cleanOrder = sanitizeChannelOrder(body.channelOrder);
+  const prefUpdate: Record<string, unknown> = { ...applied };
+  if (cleanOrder) prefUpdate.channelOrder = cleanOrder;
+  if (Object.keys(prefUpdate).length > 0) {
     await prisma.notificationPreference.upsert({
       where: { userId: childId },
-      update: applied,
-      create: { userId: childId, ...applied },
+      update: prefUpdate,
+      create: { userId: childId, ...prefUpdate },
     });
   }
 

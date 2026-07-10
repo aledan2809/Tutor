@@ -12,12 +12,24 @@ interface Preferences {
   quietHoursStart: string;
   quietHoursEnd: string;
   timezone: string;
+  /** Priority order of the escalation cascade channels (upper-case), most-preferred first. */
+  channelOrder?: string[];
   /** Channels included in the user's plan (server-provided); others are locked. */
   allowedChannels?: string[];
 }
 
 /** Metered channels gated by plan; `push`/`email`/`call` are not plan-gated here. */
 const GATED_CHANNELS = new Set(["whatsapp", "sms"]);
+
+/** The escalation cascade channels the user can reorder (must match ORDERABLE_CHANNELS on the server). */
+const CASCADE_CHANNELS = ["PUSH", "TELEGRAM", "EMAIL", "WHATSAPP"] as const;
+
+/** Normalise a saved order to always contain all cascade channels exactly once (missing ones appended in default order). */
+function normalizeOrder(saved?: string[]): string[] {
+  const up = (saved ?? []).map((s) => s.toUpperCase()).filter((s) => (CASCADE_CHANNELS as readonly string[]).includes(s));
+  const seen = new Set(up);
+  return [...up, ...CASCADE_CHANNELS.filter((c) => !seen.has(c))];
+}
 
 const TIMEZONES = [
   "Europe/Bucharest",
@@ -75,8 +87,70 @@ export function NotificationPreferences() {
     { key: "call", label: t("channelCall") },
   ];
 
+  const CHANNEL_LABEL: Record<string, string> = {
+    PUSH: t("channelPush"),
+    TELEGRAM: t("channelTelegram"),
+    EMAIL: t("channelEmail"),
+    WHATSAPP: t("channelWhatsApp"),
+  };
+  const order = normalizeOrder(prefs.channelOrder);
+  function move(from: number, to: number) {
+    if (to < 0 || to >= order.length || !prefs) return;
+    const next = [...order];
+    const [x] = next.splice(from, 1);
+    next.splice(to, 0, x);
+    setPrefs({ ...prefs, channelOrder: next });
+  }
+
   return (
     <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold text-white">{t("channelOrderTitle")}</h2>
+        <p className="text-sm text-gray-500">{t("channelOrderDesc")}</p>
+        <ul className="mt-3 space-y-2">
+          {order.map((ch, i) => {
+            const locked =
+              GATED_CHANNELS.has(ch.toLowerCase()) &&
+              Array.isArray(prefs.allowedChannels) &&
+              !prefs.allowedChannels.includes(ch.toLowerCase());
+            return (
+              <li
+                key={ch}
+                className="flex items-center gap-3 rounded-lg border border-gray-800 bg-gray-900 px-3 py-2.5"
+              >
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-blue-600/15 text-xs font-bold text-blue-400">
+                  {i + 1}
+                </span>
+                <span className="flex-1 text-sm text-gray-200">
+                  {CHANNEL_LABEL[ch] ?? ch}
+                  {locked && <span className="ml-2 text-xs text-amber-400">🔒 {t("paidOnly")}</span>}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    aria-label={t("moveUp")}
+                    disabled={i === 0}
+                    onClick={() => move(i, i - 1)}
+                    className="flex h-7 w-7 items-center justify-center rounded-md border border-gray-700 text-gray-300 hover:bg-gray-800 disabled:opacity-30"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={t("moveDown")}
+                    disabled={i === order.length - 1}
+                    onClick={() => move(i, i + 1)}
+                    className="flex h-7 w-7 items-center justify-center rounded-md border border-gray-700 text-gray-300 hover:bg-gray-800 disabled:opacity-30"
+                  >
+                    ↓
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
       <div>
         <h2 className="text-lg font-semibold text-white">{t("channels")}</h2>
         <p className="text-sm text-gray-500">{t("channelsDesc")}</p>

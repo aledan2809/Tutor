@@ -494,7 +494,12 @@
     "saved": "Saved!",
     "audienceSelf": "Mine",
     "audienceChild": "About child",
-    "paidOnly": "Available in paid packages"
+    "paidOnly": "Available in paid packages",
+    "channelOrderTitle": "Channel order",
+    "channelOrderDesc": "We reach you in this order — if the first gets no reply, we move on to the next.",
+    "channelTelegram": "Telegram",
+    "moveUp": "Move up",
+    "moveDown": "Move down"
   },
   "calendar": {
     "title": "Calendar",
@@ -576,7 +581,14 @@
     "markRead": "Mark read",
     "allNotifications": "All",
     "unreadOnly": "Unread",
-    "noNotifications": "No notifications yet"
+    "noNotifications": "No notifications yet",
+    "settings": "Settings",
+    "settingsTitle": "My notifications",
+    "settingsIntro": "Choose how — and in what order — you want to be reached when your child needs a nudge.",
+    "pushTitle": "Browser notifications",
+    "pushHint": "Get real-time alerts even when the app is closed.",
+    "phoneLabel": "My phone number (WhatsApp)",
+    "phoneHint": "Add a number if you also want alerts on WhatsApp."
   },
   "instructor": {
     "title": "Instructor Dashboard",
@@ -711,7 +723,14 @@
     "equalTo": "Equal to",
     "notifyInstructor": "Notify Instructor",
     "notifyWatcher": "Notify Watcher",
-    "sessionsMissed": "Sessions Missed"
+    "sessionsMissed": "Sessions Missed",
+    "notificationsNav": "Notifications",
+    "notifTitle": "My notifications",
+    "notifIntro": "Choose how — and in what order — you want to be reached when a student hits an alert threshold.",
+    "notifPushTitle": "Browser notifications",
+    "notifPushHint": "Get real-time alerts even when the app is closed.",
+    "notifPhoneLabel": "My phone number (WhatsApp)",
+    "notifPhoneHint": "Add a number if you also want alerts on WhatsApp."
   },
   "landing": {
     "hero": "AI-Powered Adaptive Learning",
@@ -806,7 +825,11 @@
     "managedTitle": "Your notifications are managed by a parent",
     "managedBody": "A parent handles your notification channels. To change them, talk to them.",
     "saved": "Saved",
-    "paidOnly": "Available in paid packages"
+    "paidOnly": "Available in paid packages",
+    "telegram": "Telegram",
+    "orderTitle": "Child's channel order",
+    "moveUp": "Move up",
+    "moveDown": "Move down"
   },
   "featureLock": {
     "title": "Part of a package",

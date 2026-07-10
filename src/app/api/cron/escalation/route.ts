@@ -7,6 +7,7 @@ import {
 import { runDueReminders } from "@/lib/escalation/reminders";
 import { runParentMonitoring } from "@/lib/escalation/parent-monitor";
 import { runParentNudges } from "@/lib/escalation/parent-nudge";
+import { runThresholdChecks } from "@/lib/escalation/threshold-monitor";
 import { runFeedbackReview } from "@/lib/feedback-review";
 import { runWatcherReports } from "@/lib/escalation/watcher-reports";
 import { withErrorHandler } from "@/lib/api-handler";
@@ -45,6 +46,8 @@ async function _POST(req: NextRequest) {
   const feedbackReview = await runFeedbackReview();
   // Scheduled Watcher KPI reports (daily/weekly digest to parents).
   const watcherReports = await runWatcherReports();
+  // Instructor escalation thresholds (streak / score / missed sessions).
+  const thresholdAlerts = await runThresholdChecks();
 
   return NextResponse.json({
     success: true,
@@ -56,6 +59,7 @@ async function _POST(req: NextRequest) {
     parentNudges,
     feedbackReview,
     watcherReports,
+    thresholdAlerts,
     timestamp: new Date().toISOString(),
   });
 }

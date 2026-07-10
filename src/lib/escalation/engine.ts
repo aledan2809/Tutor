@@ -8,7 +8,7 @@
 
 import { shouldEscalate, nextStep, resolveGraceMs } from "@aledan/notify-ladder";
 import { prisma } from "@/lib/prisma";
-import { ESCALATION_LEVELS } from "./config";
+import { ESCALATION_LEVELS, resolveLadder } from "./config";
 import { isQuietHours, isOptimalNotificationTime } from "./timing";
 import { sendNotification } from "@/lib/notifications/service";
 import { resolveIsTest, resolveIsTestForUser } from "@/lib/notifications/test-account";
@@ -92,7 +92,13 @@ export async function startEscalation(ctx: EscalationContext): Promise<string> {
     return existing.id;
   }
 
-  const level = ESCALATION_LEVELS[0];
+  // First rung = the user's most-preferred channel (their saved order), or the
+  // code default when they never customised it.
+  const prefs = await prisma.notificationPreference.findUnique({
+    where: { userId: ctx.userId },
+    select: { channelOrder: true },
+  });
+  const level = resolveLadder(prefs?.channelOrder)[0];
   const event = await prisma.escalationEvent.create({
     data: {
       userId: ctx.userId,
@@ -204,9 +210,12 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     }
   }
 
-  // WhatsApp is PREMIUM-ONLY. A free (non-trialing) student's chain ends after
-  // email — no paid WhatsApp. Test accounts are exempt (journey-audit), and a
-  // parent-authorized extra cascade may use WhatsApp regardless of plan.
+  // WhatsApp is PREMIUM-ONLY for a free (non-trialing) student. Since users can now
+  // reorder their cascade, WhatsApp is no longer guaranteed to be the last rung — so
+  // skip it and continue down the ladder instead of ending the chain here. In the
+  // default order WhatsApp IS last, so skipping finds no next rung and the chain
+  // still ends after email — identical outcome to before. Test accounts are exempt
+  // (journey-audit), and a parent-authorized extra cascade may use WhatsApp regardless.
   const parentAuthorized =
     (event.metadata as Record<string, unknown> | null)?.parentAuthorized === true;
   if (
@@ -215,10 +224,7 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     !event.isTest &&
     !parentAuthorized
   ) {
-    await prisma.escalationEvent.update({
-      where: { id: event.id },
-      data: { status: "COMPLETED" },
-    });
+    await escalateToNextLevel(event.id, event.level);
     return;
   }
 
@@ -226,7 +232,9 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
 
   // Check SMS daily limit
   if (event.channel === "SMS") {
-    const levelConfig = ESCALATION_LEVELS.find((l) => l.level === event.level);
+    // Look up by channel, not ladder position — the per-day cap belongs to SMS
+    // wherever the user placed it in their order.
+    const levelConfig = ESCALATION_LEVELS.find((l) => l.channel === event.channel);
     if (levelConfig?.maxPerDay) {
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
@@ -315,6 +323,7 @@ async function escalateToNextLevel(
 ): Promise<void> {
   const current = await prisma.escalationEvent.findUnique({
     where: { id: currentEventId },
+    include: { user: { select: { notificationPreference: { select: { channelOrder: true } } } } },
   });
   if (!current) return;
 
@@ -324,7 +333,9 @@ async function escalateToNextLevel(
     data: { status: "COMPLETED" },
   });
 
-  const nextLevelConfig = ESCALATION_LEVELS.find(
+  // Advance along THIS user's ordered ladder (their channel priority), falling
+  // back to the code default order when they never customised it.
+  const nextLevelConfig = resolveLadder(current.user.notificationPreference?.channelOrder).find(
     (l) => l.level === currentLevel + 1
   );
   if (!nextLevelConfig) return; // No more levels
@@ -356,7 +367,7 @@ export async function advancePendingEscalations(): Promise<number> {
       level: { lt: 6 },
     },
     orderBy: { sentAt: "desc" },
-    include: { user: true },
+    include: { user: { include: { notificationPreference: { select: { channelOrder: true } } } } },
   });
 
   const onBreak = await userIdsOnBreak();
@@ -415,7 +426,7 @@ export async function advancePendingEscalations(): Promise<number> {
     // before escalating to the next.
     const currentIndex = event.level - 1;
     if (!nextStep(ESCALATION_LADDER, currentIndex)) continue; // terminal rung
-    const nextConfig = ESCALATION_LEVELS[currentIndex + 1];
+    const nextConfig = resolveLadder(event.user.notificationPreference?.channelOrder)[currentIndex + 1];
     if (!nextConfig) continue;
 
     const messageType =

@@ -3,6 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { allowedChannels, clampChannelWrite } from "@/lib/plan-channels";
+import { sanitizeChannelOrder } from "@/lib/escalation/config";
 
 /**
  * GET /api/notifications/preferences — Get user's notification preferences.
@@ -50,7 +51,7 @@ async function _PUT(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { push, whatsapp, sms, email, call, quietHoursStart, quietHoursEnd, timezone } = body;
+  const { push, whatsapp, sms, email, call, quietHoursStart, quietHoursEnd, timezone, channelOrder } = body;
 
   // Clamp the metered channels to the user's plan (a free account can't ENABLE
   // WhatsApp/SMS via a direct call — only disable them).
@@ -62,6 +63,8 @@ async function _PUT(req: NextRequest) {
 
   const data: Record<string, unknown> = { ...applied };
   if (typeof call === "boolean") data.call = call;
+  const cleanOrder = sanitizeChannelOrder(channelOrder);
+  if (cleanOrder) data.channelOrder = cleanOrder;
   if (typeof quietHoursStart === "string") data.quietHoursStart = quietHoursStart;
   if (typeof quietHoursEnd === "string") data.quietHoursEnd = quietHoursEnd;
   if (typeof timezone === "string") data.timezone = timezone;

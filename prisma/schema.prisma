@@ -134,6 +134,10 @@ model ParentEscalation {
   status               String    @default("awaiting_parent") // awaiting_parent | authorized | resolved_positive | resolved_negative
   childChannel         String? // channel that finally reached the child (attribution)
   openedFor            DateTime  @default(now()) // reference time the child's chain lapsed
+  // How many alerts we've already sent the parent for this episode — indexes into
+  // the parent's OWN ordered channel cascade (first alert on their preferred
+  // channel, each re-notify moves one rung down, stays on the last).
+  parentAlertRung      Int       @default(0)
   lastParentNotifiedAt DateTime?
   authorizedAt         DateTime?
   resolvedAt           DateTime?
@@ -567,6 +571,12 @@ model NotificationPreference {
   sms             Boolean @default(true)
   email           Boolean @default(true)
   call            Boolean @default(true)
+  // Priority order of the escalation cascade channels for THIS user, most-preferred
+  // first (e.g. ["WHATSAPP","EMAIL","TELEGRAM","PUSH"]). Empty = the code default
+  // order (push -> telegram -> email -> whatsapp). On/off still lives on the booleans
+  // above (+ Telegram linked-state); this only reorders the rungs. See resolveLadder()
+  // in src/lib/escalation/config.ts.
+  channelOrder    String[] @default([])
   quietHoursStart String  @default("22:00")
   quietHoursEnd   String  @default("07:00")
   timezone        String  @default("Europe/Bucharest")
@@ -865,6 +875,8 @@ model EscalationThreshold {
   value        Int
   action       String @default("notify_instructor") // notify_instructor, notify_watcher
   isActive     Boolean @default(true)
+  // Dedup for the cron evaluator: a breached threshold fires at most once per day.
+  lastFiredOn  DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
