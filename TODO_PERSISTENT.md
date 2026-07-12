@@ -4,7 +4,7 @@
 
 ---
 
-## [~] 🔔 Remindere & escaladare configurabile din UI (părinte + meditator) — Batch 1+2 LIVE 2026-07-10 (`c7fa557`)
+## [x] 🔔 Remindere & escaladare configurabile din UI (părinte + meditator) — COMPLET LIVE (Batch 1+2 2026-07-10 `c7fa557` · Batch 3 2026-07-12 `cc66fde`)
 
 **Cerere user**: părintele ȘI meditatorul să-și stabilească singuri, din UI, modalitatea de comunicare a reminderelor (canalele + **ordinea** lor, pt copil și pt ei), frecvența, escaladarea automată. Mockup aprobat (acum vs propunere) + 4 decizii: presetări+reglaj-fin · doar părintele în cascadă (meditator pe praguri) · interval recurent SAU oră fixă · părintele are ultimul cuvânt pe copil.
 
@@ -15,9 +15,12 @@
 - **Pragurile meditatorului chiar se evaluează acum** (cron `threshold-monitor`: streak/scor/sesiuni-ratate, dedup 1×/zi RO, livrare pe canalele lui + opțional părinți). Erau doar stocate.
 - Verificat: tsc 0 · vitest ladder 8/8 · 2 review-uri adversariale (Batch 2: 1 P1+4 P2 găsite → toate reparate: tipuri push/email, quiet-hours nu mai arde treptele noaptea, dedup zi-RO nu UTC, link corect părinte, wrap-around la eșec canal) · build prod · deploy + health L41 toți 200.
 
-**[ ] Batch 3 (următorul):**
-- Intervalul propriu al părintelui „la N ore / oră fixă 20:00" (acum e 30 min fix, dar pe cascada lui de canale) — câmpuri `selfAlertMode/EveryH/At` pe ParentEscalation + UI pe `/watcher/setari`.
-- Presetări Blând/Standard/Insistent + editor trepte (canal+minute) pt copil, setat de părinte.
+**[x] Batch 3 — LIVE 2026-07-12 (commit `cc66fde`, migrație 0041 aplicată pe prod, verificat cu login real):**
+- **F1 cadența părintelui** pe `/watcher/setari`: `Standard (30 min)` / `La fiecare N ore` / `Zilnic la HH:MM` / `O singură alertă`. Câmpuri `selfAlertMode/EveryH/At` pe **`NotificationPreference`** al părintelui (NU pe ParentEscalation — deviație aprobată de user: e o setare globală a părintelui, o singură sursă; `shouldRenotifyParentMode` o citește în step-4; prima alertă rămâne imediată). Decizia 02+03.
+- **F2 presetări + trepte copil**: chips Blând/Standard/Insistent + editor (canal+minute) pe cardul copilului. `NotificationPreference.escalationSteps Json?` pe rândul **COPILULUI** (NU pe Guardian — deviație aprobată: o singură sursă pt motor, refolosește endpoint-ul guardian-gated). Suprascrie `channelOrder` ȘI grace-ul pe fereastră (min ≥1 pe trepte non-lead); gol = default. Decizia 04.
+- Verificat: tsc app 0 · vitest 40+27 (22 pure noi: sanitize/resolveLadderFromSteps/resolveUserLadder/resolveUserGraceMs + shouldRenotifyParentMode) · build prod ✅ (×2) · **/review adversarial 0 P0** (aplicat: injecție `now` la quiet-hours pt consistență/testabilitate, precedență preset>clear în API, minute salvate pe blur/Enter nu per-tastă) · deploy VPS2 + `prisma migrate deploy` 0041 + backup DB `/root/backups/tutor-pre-batch3-2026-07-12.dump` + health L41 toți 200 · **F1 round-trip LIVE** (default→EVERY_H/4 persist→restore, login real) · F2 rută+guard live (403 non-guardian / 401 fără auth).
+- **F2 write-path pe parent+child REAL NEexercitat pe prod** — singurul guardian activ în DB = contul real al user-ului (`alexdanciulescu@gmail.com` + copil real) → nu am mutat date reale de familie; F2 acoperit de cele 27 teste pure + infra identică cu F1 (proven live). De exercitat cu un fixture parent+child test la nevoie.
+- **Notă pre-existentă (out-of-scope Batch 3)**: `npx tsc --noEmit` full raportează 1 eroare în `tests/unit/exam-engine.test.ts` (mock `Question` fără `passage`, de la `c7fa557`, scoasă la iveală de `prisma generate`). `next build` NU type-check testele → deploy neafectat. De reparat separat (adaugă `passage: null` + eventual `tags: []` în mock).
 
 **📋 Acțiune user (opțional)**: template Meta „parent-alert" pt WhatsApp fiabil pe alerte părinte (fără el, WhatsApp-ul părinte livrează doar în fereastra 24h Meta; cascada face fall-through la alt canal). ~24-48h aprobare Meta.
 
