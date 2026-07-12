@@ -1,5 +1,26 @@
 # Project Status - Tutor
-Last Updated: 2026-07-12 (Batch 3 remindere/escaladare configurabile — LIVE)
+Last Updated: 2026-07-12 (audit COMPLET /pa + True E2E [10] · Batch A securitate LIVE)
+
+## Current State (Sesiunea 2026-07-12 #2 — audit /pa + True E2E [10], regim mesh)
+
+**Audit COMPLET 7-persona** (vizitator/elev/părinte/meditator/admin/superadmin + cross-cutting E2E, 7 agenți paraleli read-only) → raport `Reports/AUDIT-PA-E2E-2026-07-12.md`. **Zero 404 + auth gating curat**, dar **10 × P0** (7 securitate + 3 money-path) + ~20 P1.
+
+**Batch A — 7 P0 securitate → LIVE pe etutor.ro** (commit `1808362`, backup DB `/root/backups/tutor-pre-batchA-2026-07-12.dump`, deploy verificat: rute 401/307 nu 500, health 200):
+- A1 ban enforcement (jwt→null = logout ≤5 min, verificat la sursă @auth/core@0.41.2) · A2 scos Impersonate mort · A3 scos rol Admin fals · A4 IDOR grupuri · A5 report scoping · A6 instructor QuestionList readOnly · A7 goals+sessions ownership.
+- tsc 0 · /review adversarial 0 buguri · smoke live OK.
+
+**Batch B (money-path) — pornit, NEdeployat:**
+- **B8** (prețuri→checkout continuity) — DONE, commit `64188a0` pushed dar **NEdeployat** (merge cu B9/B10). `?plan=` preturi→register→packages highlight+scroll. tsc 0.
+- **B9** (add-on per-copil) — decizie user: build Tutor-side (broker acceptă lineItem cu amount custom → **fără să ating broker-ul NO-TOUCH**). Necesită schemă+migrație+webhook+gating. Pass focusat separat.
+- **B10** (portal/anulare) — persist `stripeSubscriptionId` + `/api/stripe/portal` + buton. Pass focusat separat.
+- Decizii user: demo viral → **renunțăm** (fără showcase AI); reducere familie → **taxăm** (B9 add-on).
+
+**Model reality descoperit (B9):** toate planurile familie au `maxChildren:1` → al 2-lea copil e **mereu add-on** (niciun plan de upgrade); părinte/meditator au upgrade real (Family→Duo/Trio).
+
+## Lessons Learned (sesiunea 2026-07-12 #2)
+- **L23 — Auth.js v5 (`@auth/core@0.41.2`): un `jwt` callback care întoarce `null` face `sessionStore.clean()` = șterge cookie-ul de sesiune = logout curat, single-point.** Verificat la sursă (`node_modules/@auth/core/lib/actions/session.js`: `if (token !== null) {...} else { sessionStore.clean() }`). Ideal pentru enforcement de ban fără a atinge fiecare guard — dar prinde efect doar la refresh-ul de token (≤5 min aici), nu instant.
+- **L24 — Checkout-broker-ul (`stripe.knowbest.ro`) acceptă `lineItems` cu `amount` custom (major units).** Deci add-on-uri / prețuri dinamice se pot construi 100% pe partea consumatorului, fără să modifici broker-ul NO-TOUCH CRITIC. Confirmat în `src/app/api/admin/stripe/checkout/route.ts`.
+- **L25 — Cross-tenant IDOR pattern recurent: `requireInstructor()` dovedește DOAR că apelantul e instructor undeva, NU că resursa `[id]` e a lui.** Orice rută `.../instructor/<resursă>/[id]` + orice ramură `type=group/domain` cu `targetId` din query trebuie scopată explicit la `createdById === userId || domainId ∈ instructorDomainIds || isSuperAdmin`. Găsite 5 astfel de găuri într-o singură sesiune.
 
 ## Current State (Sesiunea 2026-07-12 — Batch 3, regim mesh: dev → /review → build → verify → deploy)
 

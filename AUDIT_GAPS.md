@@ -6,9 +6,19 @@
 
 ## Open Gaps
 
-*(no open gaps as of 2026-05-30)*
+> **Audit COMPLET /pa + True E2E [10] 2026-07-12** — 7-persona walk (vizitator/elev/părinte/meditator/admin/superadmin) + cross-cutting E2E. Full report: `Reports/AUDIT-PA-E2E-2026-07-12.md`. Zero 404s + clean auth gating; but **10 × P0** (7 security + 3 money-path) + ~20 P1. Batch A (7 security P0) **ELIMINATED + LIVE** (commit `1808362`, see below). Remaining open (batched for next passes):
 
-> Re-audit 2026-05-30 (TRUE-E2E-FULL after etutor.ro cutover): 0 real P0/P1. Login (L178 fix) + creatori page + admin CRUD role-gating + domain 301s all verified live. TRWG-GW "2 P0 + 2 P1" were 429 rate-limit artifacts (proven via clean cooldown login → 302). See `Reports/TRUE-E2E-FULL-2026-05-30.md`.
+| Gap ID | Description | Priority | Status |
+|--------|-------------|----------|--------|
+| G-TU-B9 | Extra child added FREE via invite (no billing) — build per-child Stripe add-on (custom lineItem, no broker touch) + schema migration + webhook activation + invite gating; wire parent/tutor upgrade-to-plan buttons | P0 money | OPEN (design in ST-2026-07-12-tutor-batchB) |
+| G-TU-B10 | No self-service cancel/manage subscription — persist `stripeSubscriptionId` in `stripe/callback` + `/api/stripe/portal` route (broker `POST /api/portal`) + button on packages | P0 money | OPEN |
+| G-TU-B8 | Pricing page → generic signup, no continuity | P0 money | **FIXED (commit `64188a0`, NOT deployed — ships with B9/B10 as Batch B)** |
+| G-TU-FUNNEL | Parent funnel discoverability chain broken (sidebar hides Family/Watcher for unpaid, no CTA; /parinte+/elev CTA→signin not register; bell no child-alerts; setup-checklist no "link child"; push banner can't fire watcher-only; assessment orphan) | P0/P1 | OPEN (Batch C, mockup-first) |
+| G-TU-VIRAL | Viral paste-text demo promised on /scor+/duel+/certificat but /try can't do it — DECIDED: drop the promise (no "AI" showcase), rewrite copy | P1 | OPEN (Batch D) |
+| G-TU-I18N | Two parallel i18n systems; landing + practice-session + assessment + auth reset bypass next-intl; `calendar.loading` missing key; instructor domain dropdown shows raw cuids; "AI" copy across admin | P1/P2 | OPEN (Batch E) |
+| G-TU-LEGAL | Persona/pricing pages no footer + /cookies /privacy /terms dead-ends → legal unreachable (GDPR) | P1 | OPEN (Batch E) |
+| G-TU-ADMIN | ingest-pdf full-book pipeline no UI; exam-bank no import; /superadmin/referrals missing (commission liability invisible); plan/ad mutations not audit-logged; overview cards inert | P1 | OPEN (Batch F) |
+| G-TU-STRATEGY | STRATEGY.md understates reality — FAZA 2/7 shipped but marked `[ ]`; Tier-5 mesh + ExamPaper + campaign-attribution undocumented; pricing model = per-composition (raise, don't cut) | P2 | OPEN (Batch G) |
 
 ---
 
@@ -28,6 +38,13 @@
 | AGT-004 | Aviation bibliography not seeded | Eliminated | direct DB (VPS2 Prisma script) | 2026-05-11 |
 | AGT-005 | admin-test Puppeteer login blocked — dedicated account created | Eliminated | direct DB (VPS2 Prisma script) | 2026-05-11 |
 | AGT-010 | Signin-page a11y/mobile — muted text-gray-500 contrast (3.5:1) + sub-44px tap targets on Forgot/magic-link/Create/ToS/Privacy | Eliminated | b4d5b23 | 2026-05-30 |
+| G-TU-A1 | "Ban User" cosmetic — no isBanned check in auth (banned user kept 30-day JWT). jwt callback returns null → Auth.js clears session cookie (≤5 min) | Eliminated | 1808362 | 2026-07-12 |
+| G-TU-A2 | Dead "Impersonate" button discarded the real signed token (only alert) — removed (full impersonation deferred as feature) | Eliminated | 1808362 | 2026-07-12 |
+| G-TU-A3 | Create-user "Admin" role silently made a powerless account — removed from enum + dropdown (admin = per-domain Enroll) | Eliminated | 1808362 | 2026-07-12 |
+| G-TU-A4 | Cross-tenant IDOR on instructor groups/[id] (GET/PATCH/DELETE + page) — ownership guard added | Eliminated | 1808362 | 2026-07-12 |
+| G-TU-A5 | Report generator group+domain branches unscoped (any instructor read any roster) — scoped to caller's domains | Eliminated | 1808362 | 2026-07-12 |
+| G-TU-A6 | Instructor saw admin question-mutation buttons → silent 403 — QuestionList readOnly unless admin | Eliminated | 1808362 | 2026-07-12 |
+| G-TU-A7 | Instructor goals+sessions POST no ownership check — verify domain + student enrollment | Eliminated | 1808362 | 2026-07-12 |
 | AGT-CSRF | Dormant CSRF system removed (route + lib + interceptor) — httpOnly cookie unreadable by JS + zero server validation = dead code (caused L178) | Eliminated | b4d5b23 | 2026-05-30 |
 
 ---
