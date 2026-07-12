@@ -8,7 +8,7 @@
 
 import { shouldEscalate, nextStep, resolveGraceMs } from "@aledan/notify-ladder";
 import { prisma } from "@/lib/prisma";
-import { ESCALATION_LEVELS, resolveLadder } from "./config";
+import { ESCALATION_LEVELS, resolveUserLadder, resolveUserGraceMs } from "./config";
 import { isQuietHours, isOptimalNotificationTime } from "./timing";
 import { sendNotification } from "@/lib/notifications/service";
 import { resolveIsTest, resolveIsTestForUser } from "@/lib/notifications/test-account";
@@ -96,9 +96,9 @@ export async function startEscalation(ctx: EscalationContext): Promise<string> {
   // code default when they never customised it.
   const prefs = await prisma.notificationPreference.findUnique({
     where: { userId: ctx.userId },
-    select: { channelOrder: true },
+    select: { channelOrder: true, escalationSteps: true },
   });
-  const level = resolveLadder(prefs?.channelOrder)[0];
+  const level = resolveUserLadder(prefs ?? {})[0];
   const event = await prisma.escalationEvent.create({
     data: {
       userId: ctx.userId,
@@ -323,7 +323,7 @@ async function escalateToNextLevel(
 ): Promise<void> {
   const current = await prisma.escalationEvent.findUnique({
     where: { id: currentEventId },
-    include: { user: { select: { notificationPreference: { select: { channelOrder: true } } } } },
+    include: { user: { select: { notificationPreference: { select: { channelOrder: true, escalationSteps: true } } } } },
   });
   if (!current) return;
 
@@ -333,9 +333,9 @@ async function escalateToNextLevel(
     data: { status: "COMPLETED" },
   });
 
-  // Advance along THIS user's ordered ladder (their channel priority), falling
-  // back to the code default order when they never customised it.
-  const nextLevelConfig = resolveLadder(current.user.notificationPreference?.channelOrder).find(
+  // Advance along THIS user's ladder — a parent's custom cascade if set, else their
+  // channel priority order, else the code default.
+  const nextLevelConfig = resolveUserLadder(current.user.notificationPreference ?? {}).find(
     (l) => l.level === currentLevel + 1
   );
   if (!nextLevelConfig) return; // No more levels
@@ -367,7 +367,7 @@ export async function advancePendingEscalations(): Promise<number> {
       level: { lt: 6 },
     },
     orderBy: { sentAt: "desc" },
-    include: { user: { include: { notificationPreference: { select: { channelOrder: true } } } } },
+    include: { user: { include: { notificationPreference: { select: { channelOrder: true, escalationSteps: true } } } } },
   });
 
   const onBreak = await userIdsOnBreak();
@@ -426,13 +426,22 @@ export async function advancePendingEscalations(): Promise<number> {
     // before escalating to the next.
     const currentIndex = event.level - 1;
     if (!nextStep(ESCALATION_LADDER, currentIndex)) continue; // terminal rung
-    const nextConfig = resolveLadder(event.user.notificationPreference?.channelOrder)[currentIndex + 1];
+    const nextConfig = resolveUserLadder(event.user.notificationPreference ?? {})[currentIndex + 1];
     if (!nextConfig) continue;
 
     const messageType =
       ((event.metadata as Record<string, unknown> | null)?.reason as string) ??
       "missed_session";
-    const grace = resolveGraceMs(ESCALATION_LADDER, currentIndex, messageType);
+    // A parent's custom cascade sets the wait to the next rung's own delayMinutes,
+    // overriding the window grace; otherwise fall back to the time-window grace.
+    const customGrace = resolveUserGraceMs(
+      event.user.notificationPreference?.escalationSteps,
+      currentIndex,
+    );
+    const grace =
+      customGrace !== undefined
+        ? customGrace
+        : resolveGraceMs(ESCALATION_LADDER, currentIndex, messageType);
     if (grace == null) continue;
     if (Date.now() - event.sentAt!.getTime() < grace) continue;
 

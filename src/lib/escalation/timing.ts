@@ -8,9 +8,9 @@ import { prisma } from "@/lib/prisma";
 export function isQuietHours(
   timezone: string,
   quietStart: string,
-  quietEnd: string
+  quietEnd: string,
+  now: Date = new Date()
 ): boolean {
-  const now = new Date();
   const timeStr = now.toLocaleTimeString("en-GB", {
     timeZone: timezone,
     hour: "2-digit",

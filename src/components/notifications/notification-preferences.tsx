@@ -16,6 +16,10 @@ interface Preferences {
   channelOrder?: string[];
   /** Channels included in the user's plan (server-provided); others are locked. */
   allowedChannels?: string[];
+  /** Parent-only re-alert cadence (see /watcher/setari). */
+  selfAlertMode?: string;
+  selfAlertEveryH?: number;
+  selfAlertAt?: string;
 }
 
 /** Metered channels gated by plan; `push`/`email`/`call` are not plan-gated here. */
@@ -43,7 +47,7 @@ const TIMEZONES = [
   "UTC",
 ];
 
-export function NotificationPreferences() {
+export function NotificationPreferences({ showSelfAlert = false }: { showSelfAlert?: boolean } = {}) {
   const t = useTranslations("notifications");
   const [prefs, setPrefs] = useState<Preferences | null>(null);
   const [saving, setSaving] = useState(false);
@@ -150,6 +154,82 @@ export function NotificationPreferences() {
           })}
         </ul>
       </div>
+
+      {showSelfAlert && (
+        <div>
+          <h2 className="text-lg font-semibold text-white">{t("selfAlertTitle")}</h2>
+          <p className="text-sm text-gray-500">{t("selfAlertDesc")}</p>
+          <div className="mt-3 space-y-2">
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-800 bg-gray-900 px-3 py-2.5">
+              <input
+                type="radio"
+                name="selfAlertMode"
+                checked={(prefs.selfAlertMode ?? "STANDARD_30") === "STANDARD_30"}
+                onChange={() => setPrefs({ ...prefs, selfAlertMode: "STANDARD_30" })}
+                className="accent-blue-600"
+              />
+              <span className="text-sm text-gray-200">{t("selfAlertStandard")}</span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-800 bg-gray-900 px-3 py-2.5">
+              <input
+                type="radio"
+                name="selfAlertMode"
+                checked={prefs.selfAlertMode === "EVERY_H"}
+                onChange={() => setPrefs({ ...prefs, selfAlertMode: "EVERY_H" })}
+                className="accent-blue-600"
+              />
+              <span className="flex items-center gap-2 text-sm text-gray-200">
+                {t("selfAlertEveryPre")}
+                <input
+                  type="number"
+                  min={1}
+                  max={24}
+                  value={prefs.selfAlertEveryH ?? 6}
+                  onChange={(e) =>
+                    setPrefs({
+                      ...prefs,
+                      selfAlertMode: "EVERY_H",
+                      selfAlertEveryH: Math.max(1, Math.min(24, Number(e.target.value) || 6)),
+                    })
+                  }
+                  className="w-14 rounded-md border border-gray-700 bg-gray-800 px-2 py-1 text-center text-sm text-white"
+                />
+                {t("selfAlertEveryPost")}
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-800 bg-gray-900 px-3 py-2.5">
+              <input
+                type="radio"
+                name="selfAlertMode"
+                checked={prefs.selfAlertMode === "FIXED_AT"}
+                onChange={() => setPrefs({ ...prefs, selfAlertMode: "FIXED_AT" })}
+                className="accent-blue-600"
+              />
+              <span className="flex items-center gap-2 text-sm text-gray-200">
+                {t("selfAlertFixedPre")}
+                <input
+                  type="time"
+                  value={prefs.selfAlertAt ?? "20:00"}
+                  onChange={(e) =>
+                    setPrefs({ ...prefs, selfAlertMode: "FIXED_AT", selfAlertAt: e.target.value })
+                  }
+                  className="rounded-md border border-gray-700 bg-gray-800 px-2 py-1 text-sm text-white"
+                />
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-800 bg-gray-900 px-3 py-2.5">
+              <input
+                type="radio"
+                name="selfAlertMode"
+                checked={prefs.selfAlertMode === "ONCE"}
+                onChange={() => setPrefs({ ...prefs, selfAlertMode: "ONCE" })}
+                className="accent-blue-600"
+              />
+              <span className="text-sm text-gray-200">{t("selfAlertOnce")}</span>
+            </label>
+          </div>
+        </div>
+      )}
 
       <div>
         <h2 className="text-lg font-semibold text-white">{t("channels")}</h2>

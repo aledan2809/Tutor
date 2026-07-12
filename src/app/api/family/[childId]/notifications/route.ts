@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { isGuardianOf } from "@/lib/guardian";
 import { allowedChannels, clampChannelWrite } from "@/lib/plan-channels";
-import { sanitizeChannelOrder } from "@/lib/escalation/config";
+import { sanitizeChannelOrder, sanitizeEscalationSteps, ESCALATION_PRESETS } from "@/lib/escalation/config";
 
 /**
  * Per-child notification delegation, set by a parent.
@@ -40,6 +41,7 @@ async function readState(childId: string) {
       sms: prefs?.sms ?? true,
     },
     channelOrder: prefs?.channelOrder ?? [],
+    escalationSteps: (prefs?.escalationSteps as unknown) ?? null,
     allowedChannels: allowedChannels(child?.subscriptionStatus),
   };
 }
@@ -63,6 +65,11 @@ async function _PUT(req: NextRequest, ctx: { params: Promise<{ childId: string }
     whatsapp?: boolean;
     sms?: boolean;
     channelOrder?: unknown;
+    // Feature 2: parent-set custom cascade. `preset` = a named preset to apply;
+    // `escalationSteps` = an explicit step list; either set to null clears it (back
+    // to the simple channelOrder). Absent = leave unchanged.
+    preset?: string | null;
+    escalationSteps?: unknown;
   };
 
   if (typeof body.managedByParent === "boolean") {
@@ -83,6 +90,21 @@ async function _PUT(req: NextRequest, ctx: { params: Promise<{ childId: string }
   const cleanOrder = sanitizeChannelOrder(body.channelOrder);
   const prefUpdate: Record<string, unknown> = { ...applied };
   if (cleanOrder) prefUpdate.channelOrder = cleanOrder;
+
+  // Custom cascade. A named preset wins (so it's never lost to a stray null); then an
+  // explicit null clears it (SQL NULL via Prisma.DbNull → engine falls back to
+  // channelOrder); then an explicit valid step list. Junk is ignored so a bad payload
+  // can't corrupt delivery.
+  if (typeof body.preset === "string") {
+    const preset = ESCALATION_PRESETS[body.preset.toUpperCase() as keyof typeof ESCALATION_PRESETS];
+    if (preset) prefUpdate.escalationSteps = preset;
+  } else if (body.preset === null || body.escalationSteps === null) {
+    prefUpdate.escalationSteps = Prisma.DbNull;
+  } else if (body.escalationSteps !== undefined) {
+    const steps = sanitizeEscalationSteps(body.escalationSteps);
+    if (steps) prefUpdate.escalationSteps = steps;
+  }
+
   if (Object.keys(prefUpdate).length > 0) {
     await prisma.notificationPreference.upsert({
       where: { userId: childId },

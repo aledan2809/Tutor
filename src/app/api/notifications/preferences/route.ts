@@ -69,6 +69,18 @@ async function _PUT(req: NextRequest) {
   if (typeof quietHoursEnd === "string") data.quietHoursEnd = quietHoursEnd;
   if (typeof timezone === "string") data.timezone = timezone;
 
+  // Parent-only re-alert cadence (a no-op on non-parent rows). Validated defensively.
+  const { selfAlertMode, selfAlertEveryH, selfAlertAt } = body;
+  if (["STANDARD_30", "EVERY_H", "FIXED_AT", "ONCE"].includes(selfAlertMode)) {
+    data.selfAlertMode = selfAlertMode;
+  }
+  if (Number.isInteger(selfAlertEveryH) && selfAlertEveryH >= 1 && selfAlertEveryH <= 24) {
+    data.selfAlertEveryH = selfAlertEveryH;
+  }
+  if (typeof selfAlertAt === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(selfAlertAt)) {
+    data.selfAlertAt = selfAlertAt;
+  }
+
   const prefs = await prisma.notificationPreference.upsert({
     where: { userId: session.user.id },
     update: data,

@@ -179,6 +179,58 @@ export function shouldRenotifyParent(
   return now.getTime() - lastNotifiedAt.getTime() >= intervalMin * 60_000;
 }
 
+// The parent's own re-alert cadence (only the RE-notify; the first alert always
+// fires immediately when the episode opens). Set from /watcher/setari (decizia 03),
+// parent-only (decizia 02).
+export type SelfAlertConfig = { mode: string; everyH: number; at: string };
+
+/** Local wall-clock minutes (H*60+M) of `d` in `tz`. */
+function localMinutes(d: Date, tz: string): number {
+  const s = d.toLocaleTimeString("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false });
+  const [h, m] = s.split(":").map(Number);
+  return h * 60 + m;
+}
+/** Local calendar date (YYYY-MM-DD) of `d` in `tz`. */
+function localDate(d: Date, tz: string): string {
+  return d.toLocaleDateString("en-CA", { timeZone: tz });
+}
+
+/**
+ * Pure: is it time to re-notify the parent again, per their chosen cadence?
+ * STANDARD_30 → every RENOTIFY_MIN (default); EVERY_H → every `everyH` hours;
+ * FIXED_AT → at most once a day at `at` (parent's local time); ONCE → never
+ * (only the first alert). Unknown mode falls back to STANDARD_30.
+ */
+export function shouldRenotifyParentMode(
+  config: SelfAlertConfig,
+  lastNotifiedAt: Date | null,
+  now: Date,
+  tz = "Europe/Bucharest"
+): boolean {
+  switch (config.mode) {
+    case "ONCE":
+      return false;
+    case "EVERY_H": {
+      const h = Number.isFinite(config.everyH) && config.everyH > 0 ? config.everyH : 6;
+      return shouldRenotifyParent(lastNotifiedAt, now, h * 60);
+    }
+    case "FIXED_AT": {
+      const [ah, am] = String(config.at ?? "20:00").split(":").map(Number);
+      const atMin = (Number.isFinite(ah) ? ah : 20) * 60 + (Number.isFinite(am) ? am : 0);
+      if (localMinutes(now, tz) < atMin) return false; // today's slot not reached yet
+      if (!lastNotifiedAt) return true;
+      // Fire once per day: skip if we already alerted today at/after the slot.
+      const firedTodaysSlot =
+        localDate(lastNotifiedAt, tz) === localDate(now, tz) &&
+        localMinutes(lastNotifiedAt, tz) >= atMin;
+      return !firedTodaysSlot;
+    }
+    case "STANDARD_30":
+    default:
+      return shouldRenotifyParent(lastNotifiedAt, now);
+  }
+}
+
 /** One in-app alert row + real-time delivery to ONE guardian (rung = their own cascade step). */
 async function notifyParent(
   parentId: string,
@@ -446,11 +498,21 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
   for (const esc of awaiting) {
     if (onBreak.has(esc.childId)) continue; // vacanță
     if (!scheduledAwaiting.has(esc.childId)) continue; // zi fără program: nu re-notificăm
-    if (!shouldRenotifyParent(esc.lastParentNotifiedAt, now)) continue;
+    // Cadence is the parent's own choice (decizia 03): every 30 min / every N hours /
+    // once a day at a fixed local time / a single alert. One prefs fetch covers both
+    // the cadence and the quiet-hours check below.
+    const pp = await prisma.notificationPreference.findUnique({ where: { userId: esc.parentId } });
+    const tz = pp?.timezone ?? "Europe/Bucharest";
+    const cadence: SelfAlertConfig = {
+      mode: pp?.selfAlertMode ?? "STANDARD_30",
+      everyH: pp?.selfAlertEveryH ?? 6,
+      at: pp?.selfAlertAt ?? "20:00",
+    };
+    if (!shouldRenotifyParentMode(cadence, esc.lastParentNotifiedAt, now, tz)) continue;
     // Quiet hours: skip the whole tick — no in-app row, no rung/timestamp consumed —
     // so the parent's cascade resumes exactly where it left off in the morning
     // (instead of burning ~18 silent rungs overnight).
-    if (await userInQuietHours(esc.parentId)) continue;
+    if (isQuietHours(tz, pp?.quietHoursStart ?? "22:00", pp?.quietHoursEnd ?? "07:00", now)) continue;
     // Re-notify ONLY this episode's parent (not every guardian of the child), one
     // rung further down THEIR own channel cascade each time.
     await notifyParent(

@@ -32,7 +32,7 @@ export default async function WatcherSettingsPage() {
 
       <TelegramConnectCard />
 
-      <NotificationPreferences />
+      <NotificationPreferences showSelfAlert />
     </div>
   );
 }

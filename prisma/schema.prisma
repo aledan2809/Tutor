@@ -577,6 +577,18 @@ model NotificationPreference {
   // above (+ Telegram linked-state); this only reorders the rungs. See resolveLadder()
   // in src/lib/escalation/config.ts.
   channelOrder    String[] @default([])
+  // Parent-only: how often to re-alert the parent while their child hasn't reacted.
+  // STANDARD_30 = every 30 min (default, pre-feature). EVERY_H = every selfAlertEveryH
+  // hours. FIXED_AT = once a day at selfAlertAt (local time). ONCE = first alert only.
+  // Only read by parent monitoring; a no-op on student/instructor rows.
+  selfAlertMode   String  @default("STANDARD_30")
+  selfAlertEveryH Int     @default(6)
+  selfAlertAt     String  @default("20:00")
+  // Parent-set custom escalation cascade for THIS child: an ordered list of
+  // { channel, delayMinutes } that overrides channelOrder AND the window grace.
+  // Null = default (channelOrder + window grace). Written only via the guardian-gated
+  // family endpoint. See resolveUserLadder() / resolveUserGraceMs() in escalation/config.ts.
+  escalationSteps Json?
   quietHoursStart String  @default("22:00")
   quietHoursEnd   String  @default("07:00")
   timezone        String  @default("Europe/Bucharest")

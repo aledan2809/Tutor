@@ -497,6 +497,13 @@
     "paidOnly": "Disponibil în pachetele plătite",
     "channelOrderTitle": "Ordinea canalelor",
     "channelOrderDesc": "Te căutăm în această ordine — dacă nu răspunzi pe primul, trecem la următorul.",
+    "selfAlertTitle": "Cât de des te anunțăm",
+    "selfAlertDesc": "Cât timp copilul nu reacționează, te re-anunțăm pe canalele tale astfel:",
+    "selfAlertStandard": "Standard — la 30 de minute",
+    "selfAlertEveryPre": "La fiecare",
+    "selfAlertEveryPost": "ore",
+    "selfAlertFixedPre": "Zilnic la ora",
+    "selfAlertOnce": "O singură alertă, fără renotificare",
     "channelTelegram": "Telegram",
     "moveUp": "Mută mai sus",
     "moveDown": "Mută mai jos"
@@ -829,7 +836,17 @@
     "telegram": "Telegram",
     "orderTitle": "Ordinea canalelor copilului",
     "moveUp": "Mută mai sus",
-    "moveDown": "Mută mai jos"
+    "moveDown": "Mută mai jos",
+    "cascadeTitle": "Cum insistăm cu copilul",
+    "cascadeImplicit": "(ordinea simplă, implicit)",
+    "cascadeReset": "Revino la ordinea simplă",
+    "presetBland": "Blând",
+    "presetStandard": "Standard",
+    "presetInsistent": "Insistent",
+    "presetCustom": "Personalizat",
+    "minShort": "min",
+    "removeStep": "Elimină treapta",
+    "stepMinutes": "Minute de așteptare"
   },
   "featureLock": {
     "title": "Funcție inclusă într-un pachet",

@@ -497,6 +497,13 @@
     "paidOnly": "Available in paid packages",
     "channelOrderTitle": "Channel order",
     "channelOrderDesc": "We reach you in this order — if the first gets no reply, we move on to the next.",
+    "selfAlertTitle": "How often we alert you",
+    "selfAlertDesc": "While your child isn't reacting, we re-alert you on your channels like this:",
+    "selfAlertStandard": "Standard — every 30 minutes",
+    "selfAlertEveryPre": "Every",
+    "selfAlertEveryPost": "hours",
+    "selfAlertFixedPre": "Daily at",
+    "selfAlertOnce": "A single alert, no re-notification",
     "channelTelegram": "Telegram",
     "moveUp": "Move up",
     "moveDown": "Move down"
@@ -829,7 +836,17 @@
     "telegram": "Telegram",
     "orderTitle": "Child's channel order",
     "moveUp": "Move up",
-    "moveDown": "Move down"
+    "moveDown": "Move down",
+    "cascadeTitle": "How we nudge your child",
+    "cascadeImplicit": "(simple order, default)",
+    "cascadeReset": "Back to the simple order",
+    "presetBland": "Gentle",
+    "presetStandard": "Standard",
+    "presetInsistent": "Insistent",
+    "presetCustom": "Custom",
+    "minShort": "min",
+    "removeStep": "Remove step",
+    "stepMinutes": "Wait minutes"
   },
   "featureLock": {
     "title": "Part of a package",
