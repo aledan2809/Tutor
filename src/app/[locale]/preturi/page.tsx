@@ -21,6 +21,12 @@ type Plan = {
   featured?: boolean;
 };
 
+// Stable plan identity per card, in the same order the RO and EN `plans` arrays
+// use (Elev → Family → Duo → Trio → Family Trio). Passed as `?plan=<key>` so the
+// visitor lands on /dashboard/packages with the chosen plan pre-highlighted after
+// signup — the pricing page must lead to checkout, not a generic signup dead end.
+const PLAN_KEYS = ["ELEV", "FAMILY", "FAMILY_DUO", "TRIO", "FAMILY_TRIO"] as const;
+
 type Copy = {
   hero: string;
   sub: string;
@@ -267,7 +273,7 @@ export default async function PreturiPage({ params }: { params: Promise<{ locale
           <div className="lg:col-span-2">
             <h2 className="mb-4 text-center text-xl font-bold text-white lg:text-left">{c.paidTitle}</h2>
             <div className="grid gap-5 sm:grid-cols-2">
-              {c.plans.map((p) => {
+              {c.plans.map((p, i) => {
                 const normal = normalFromPromo(p.amount);
                 return (
                 <div
@@ -304,7 +310,7 @@ export default async function PreturiPage({ params }: { params: Promise<{ locale
                     ))}
                   </ul>
                   <Link
-                    href="/auth/register"
+                    href={`/auth/register?plan=${PLAN_KEYS[i] ?? "ELEV"}`}
                     className="mt-5 block rounded-xl bg-blue-600 px-4 py-2.5 text-center font-semibold text-white hover:bg-blue-500"
                   >
                     {p.cta}

@@ -37,6 +37,23 @@ export default function PackagesPage() {
   const [voucher, setVoucher] = useState("");
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Plan the visitor picked on /preturi (?plan=<FamilyPlanKey>) — pre-highlight
+  // + scroll to it so the pricing→signup→packages hand-off keeps continuity.
+  const [preselect, setPreselect] = useState<string | null>(null);
+
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search).get("plan");
+    if (p) setPreselect(p);
+  }, []);
+
+  useEffect(() => {
+    if (!preselect || plans.length === 0) return;
+    const match = plans.find((pl) => resolveFamilyPlanFromRecord(pl)?.key === preselect);
+    if (match) {
+      const el = document.getElementById(`plan-card-${match.id}`);
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [preselect, plans]);
 
   useEffect(() => {
     fetch("/api/plans")
@@ -119,12 +136,18 @@ export default function PackagesPage() {
             {plans.map((plan) => {
               const fam = resolveFamilyPlanFromRecord(plan);
               const isCurrent = current.subscriptionPlanId === plan.id;
+              const isPreselected = !!preselect && !isCurrent && fam?.key === preselect;
               const features = planFeatures(plan.features);
               return (
                 <div
                   key={plan.id}
+                  id={`plan-card-${plan.id}`}
                   className={`flex flex-col rounded-2xl border bg-gray-900 p-6 ${
-                    isCurrent ? "border-green-700" : "border-gray-800"
+                    isCurrent
+                      ? "border-green-700"
+                      : isPreselected
+                        ? "border-blue-500 ring-2 ring-blue-500/40"
+                        : "border-gray-800"
                   }`}
                 >
                   <div className="mb-1 flex items-center justify-between">

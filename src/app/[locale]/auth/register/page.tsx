@@ -59,12 +59,17 @@ export default function RegisterPage() {
   const [voucherCode, setVoucherCode] = useState("");
   const [voucherApplied, setVoucherApplied] = useState(false);
   const [voucherDiscount, setVoucherDiscount] = useState<number | null>(null);
+  // Plan chosen on /preturi (?plan=<key>) — carried through so the new user lands
+  // on the packages page with that plan pre-selected instead of a generic dead end.
+  const [plan, setPlan] = useState<string | null>(null);
 
   // Read campaign params (?exam=, ?subjects=, ?voucher=) once on mount.
   // window.location is used instead of useSearchParams() to avoid the
   // Suspense-boundary requirement on this client page.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const planParam = params.get("plan");
+    if (planParam) setPlan(planParam);
     const exam = params.get("exam")?.toLowerCase();
     const preset = exam ? CAMPAIGNS[exam] : undefined;
     if (preset) {
@@ -189,7 +194,9 @@ export default function RegisterPage() {
               router.push(
                 voucherCode && !voucherApplied
                   ? `/auth/signin?callbackUrl=${encodeURIComponent(`/dashboard/activare?voucher=${voucherCode}`)}`
-                  : "/auth/signin"
+                  : plan
+                    ? `/auth/signin?callbackUrl=${encodeURIComponent(`/dashboard/packages?plan=${plan}`)}`
+                    : "/auth/signin"
               )
             }
             className="inline-block rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-500"
