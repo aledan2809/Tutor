@@ -11,14 +11,42 @@ const updateGroupSchema = z.object({
   removeStudentIds: z.array(z.string()).optional(),
 });
 
+// A group belongs to the instructor who created it, or to a domain the caller
+// teaches/administers. Without this check any instructor could view/rename/
+// delete/re-member ANY group by guessing its id (cross-tenant IDOR).
+type GroupSession = { user: { id: string; isSuperAdmin?: boolean; enrollments?: { domainId: string; roles: string[] }[] } };
+async function loadOwnedGroup(id: string, session: GroupSession) {
+  const group = await prisma.group.findUnique({
+    where: { id },
+    select: { id: true, createdById: true, domainId: true },
+  });
+  if (!group) return { group: null, forbidden: false };
+  const domainIds = (session.user.enrollments ?? [])
+    .filter((e) => e.roles.includes("INSTRUCTOR") || e.roles.includes("ADMIN"))
+    .map((e) => e.domainId);
+  const allowed =
+    session.user.isSuperAdmin ||
+    group.createdById === session.user.id ||
+    domainIds.includes(group.domainId);
+  return { group, forbidden: !allowed };
+}
+
 async function _GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireInstructor();
+  const { error, session } = await requireInstructor();
   if (error) return error;
 
   const { id } = await params;
+
+  const access = await loadOwnedGroup(id, session!);
+  if (!access.group) {
+    return NextResponse.json({ error: "Group not found" }, { status: 404 });
+  }
+  if (access.forbidden) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const group = await prisma.group.findUnique({
     where: { id },
@@ -44,10 +72,19 @@ async function _PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireInstructor();
+  const { error, session } = await requireInstructor();
   if (error) return error;
 
   const { id } = await params;
+
+  const access = await loadOwnedGroup(id, session!);
+  if (!access.group) {
+    return NextResponse.json({ error: "Group not found" }, { status: 404 });
+  }
+  if (access.forbidden) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const body = await req.json();
   const parsed = updateGroupSchema.safeParse(body);
   if (!parsed.success) {
@@ -87,10 +124,18 @@ async function _DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireInstructor();
+  const { error, session } = await requireInstructor();
   if (error) return error;
 
   const { id } = await params;
+
+  const access = await loadOwnedGroup(id, session!);
+  if (!access.group) {
+    return NextResponse.json({ error: "Group not found" }, { status: 404 });
+  }
+  if (access.forbidden) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   await prisma.group.update({
     where: { id },

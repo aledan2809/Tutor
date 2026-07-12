@@ -162,6 +162,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             },
           });
           if (dbUser) {
+            // Banned → invalidate the session. Auth.js v5 signs the user out
+            // when the jwt callback returns null. Takes effect on the next
+            // token refresh (≤5 min, per REFRESH_MS) and also blocks a fresh
+            // login outright (this block runs when `user` is set). Without this,
+            // a ban was cosmetic — the 30-day JWT kept working after "Ban".
+            if (dbUser.isBanned) {
+              return null;
+            }
             token.isSuperAdmin = dbUser.isSuperAdmin ?? false;
             token.enrollments = dbUser.enrollments.map((e) => ({
               domainId: e.domain.id,

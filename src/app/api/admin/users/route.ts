@@ -60,7 +60,11 @@ const createUserSchema = z.object({
   name: z.string().min(1).max(100),
   email: z.string().email(),
   password: z.string().min(6),
-  role: z.enum(["user", "admin", "superadmin"]).default("user"),
+  // Note: platform "admin" is granted per-domain via the Enroll flow (ADMIN
+  // enrollment role), NOT here — the create-user dialog has no domain picker, so
+  // an "admin" value would silently produce a powerless account. Only "user" vs
+  // "superadmin" are meaningful at account-creation time.
+  role: z.enum(["user", "superadmin"]).default("user"),
 });
 
 async function _POST(req: NextRequest) {

@@ -23,6 +23,26 @@ async function _POST(req: NextRequest) {
 
   const { studentIds, domainId, type, subject } = parsed.data;
 
+  // Ownership: only assign sessions in a domain the instructor teaches/administers,
+  // and only to students actually enrolled there. Without this, any instructor
+  // could push sessions + notifications to arbitrary users in foreign domains.
+  if (!session!.user.isSuperAdmin) {
+    const instructorDomainIds = session!.user.enrollments
+      .filter((e) => e.roles.includes("INSTRUCTOR") || e.roles.includes("ADMIN"))
+      .map((e) => e.domainId);
+    if (!instructorDomainIds.includes(domainId)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    const enrolled = await prisma.enrollment.findMany({
+      where: { userId: { in: studentIds }, domainId, roles: { hasSome: ["STUDENT"] } },
+      select: { userId: true },
+    });
+    const enrolledIds = new Set(enrolled.map((e) => e.userId));
+    if (studentIds.some((sid) => !enrolledIds.has(sid))) {
+      return NextResponse.json({ error: "One or more students are not enrolled in this domain" }, { status: 403 });
+    }
+  }
+
   // Create sessions for each student
   const sessions = await Promise.all(
     studentIds.map((studentId) =>

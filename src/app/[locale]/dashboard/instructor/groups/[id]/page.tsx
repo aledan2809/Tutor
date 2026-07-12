@@ -31,6 +31,15 @@ export default async function EditGroupPage({
     .filter((e) => e.roles.includes("INSTRUCTOR") || e.roles.includes("ADMIN"))
     .map((e) => e.domainId);
 
+  // Ownership guard — a group is editable only by its creator, a teacher/admin
+  // of its domain, or a superadmin. Without this, any instructor could open
+  // (and via GroupForm, mutate) any group by pasting its id (cross-tenant IDOR).
+  const canManage =
+    session.user.isSuperAdmin ||
+    group.createdById === session.user.id ||
+    instructorDomainIds.includes(group.domainId);
+  if (!canManage) redirect("/dashboard/instructor/groups");
+
   const [domains, students] = await Promise.all([
     prisma.domain.findMany({
       where: { id: { in: instructorDomainIds }, isActive: true },

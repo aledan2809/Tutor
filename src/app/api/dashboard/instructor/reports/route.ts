@@ -13,6 +13,7 @@ async function _GET(req: NextRequest) {
   const targetId = searchParams.get("id");
   const format = searchParams.get("format") ?? "json"; // json, csv
 
+  const isSuperAdmin = session!.user.isSuperAdmin;
   const instructorDomainIds = session!.user.enrollments
     .filter((e) =>
       e.roles.includes("INSTRUCTOR" as never) || e.roles.includes("ADMIN" as never)
@@ -46,6 +47,24 @@ async function _GET(req: NextRequest) {
   }
 
   if (type === "group" && targetId) {
+    // Scope: the group must belong to one of the caller's domains (or the caller
+    // created it / is superadmin). Without this, any instructor could pull any
+    // group's full student roster + progress by pasting its id.
+    const group = await prisma.group.findUnique({
+      where: { id: targetId },
+      select: { domainId: true, createdById: true },
+    });
+    if (!group) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    if (
+      !isSuperAdmin &&
+      group.createdById !== session!.user.id &&
+      !instructorDomainIds.includes(group.domainId)
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const members = await prisma.groupMember.findMany({
       where: { groupId: targetId },
       include: {
@@ -76,6 +95,10 @@ async function _GET(req: NextRequest) {
   }
 
   if (type === "domain" && targetId) {
+    // Scope: only domains the caller teaches/administers (or superadmin).
+    if (!isSuperAdmin && !instructorDomainIds.includes(targetId)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
     const enrollments = await prisma.enrollment.findMany({
       where: {
         domainId: targetId,

@@ -80,13 +80,10 @@ export function UserManagement() {
     fetchUsers();
   };
 
-  const handleImpersonate = async (userId: string) => {
-    const res = await fetch(`/api/admin/users/${userId}/impersonate`, { method: "POST" });
-    const data = await res.json();
-    if (data.targetUser) {
-      alert(`Impersonation logged for ${data.targetUser.email}`);
-    }
-  };
+  // Impersonation UI removed 2026-07-12: the button discarded the real signed
+  // token the endpoint returns and only showed an alert — misleading. Full
+  // login-as-user is a separate feature (set-cookie + un-impersonate + audit),
+  // deferred. The /api/admin/users/[id]/impersonate route stays (superadmin-gated).
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -221,7 +218,6 @@ export function UserManagement() {
                 className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-purple-500 focus:outline-none"
               >
                 <option value="user">{t("roleUser")}</option>
-                <option value="admin">{t("roleAdmin")}</option>
                 <option value="superadmin">{t("roleSuperadmin")}</option>
               </select>
             </div>
@@ -348,12 +344,6 @@ export function UserManagement() {
                           Ban
                         </button>
                       )}
-                      <button
-                        onClick={() => handleImpersonate(user.id)}
-                        className="rounded bg-yellow-600/20 px-2 py-1 text-xs text-yellow-400 hover:bg-yellow-600/30"
-                      >
-                        Impersonate
-                      </button>
                     </div>
                   </td>
                 </tr>

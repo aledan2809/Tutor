@@ -56,6 +56,25 @@ async function _POST(req: NextRequest) {
 
   const { studentId, domainId, title, description, targetDate } = parsed.data;
 
+  // Ownership: the instructor may only set goals in a domain they teach/administer,
+  // for a student actually enrolled there. Without this, any instructor could
+  // create goals + notifications on arbitrary students in domains they don't own.
+  const instructorDomainIds = session!.user.enrollments
+    .filter((e) => e.roles.includes("INSTRUCTOR") || e.roles.includes("ADMIN"))
+    .map((e) => e.domainId);
+  if (!session!.user.isSuperAdmin) {
+    if (!instructorDomainIds.includes(domainId)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    const enrolled = await prisma.enrollment.findFirst({
+      where: { userId: studentId, domainId, roles: { hasSome: ["STUDENT"] } },
+      select: { id: true },
+    });
+    if (!enrolled) {
+      return NextResponse.json({ error: "Student not enrolled in this domain" }, { status: 403 });
+    }
+  }
+
   const goal = await prisma.instructorGoal.create({
     data: {
       instructorId: session!.user.id,

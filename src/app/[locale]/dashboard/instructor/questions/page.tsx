@@ -19,6 +19,14 @@ export default async function InstructorQuestionsPage({
   const source = params.source;
   const limit = 20;
 
+  // Approve/Publish/Delete/Import/Generate on this list all POST to /api/admin/*
+  // which require ADMIN. A plain INSTRUCTOR must see the list read-only, else the
+  // mutation buttons render and silently 403. Only superadmins or ADMIN-enrolled
+  // users get the write controls.
+  const isAdmin =
+    session.user.isSuperAdmin ||
+    (session.user.enrollments ?? []).some((e) => e.roles.includes("ADMIN"));
+
   const allowedDomainIds = session.user.isSuperAdmin
     ? null
     : (session.user.enrollments ?? [])
@@ -74,6 +82,7 @@ export default async function InstructorQuestionsPage({
       page={page}
       limit={limit}
       filters={{ status, domainId, search, source }}
+      readOnly={!isAdmin}
     />
   );
 }
