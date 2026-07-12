@@ -1,5 +1,21 @@
 # Project Status - Tutor
-Last Updated: 2026-06-25 #3 (Pachete de familie + Feedback admin + WOW UX + 6 bug-uri user + auth upgrade)
+Last Updated: 2026-07-12 (Batch 3 remindere/escaladare configurabile — LIVE)
+
+## Current State (Sesiunea 2026-07-12 — Batch 3, regim mesh: dev → /review → build → verify → deploy)
+
+**LIVE pe etutor.ro** (commit cod `cc66fde` + docs `936b728`, migrație `0041` aplicată):
+- **F1 — cadența părintelui** pe `/watcher/setari`: Standard(30min) / La N ore / Zilnic la HH:MM / O singură alertă. Câmpuri `selfAlertMode/EveryH/At` pe `NotificationPreference` al părintelui; `shouldRenotifyParentMode` în step-4 din `runParentMonitoring`. Prima alertă rămâne imediată.
+- **F2 — presetări + trepte copil**: chips Blând/Standard/Insistent + editor canal+minute pe cardul copilului. `NotificationPreference.escalationSteps Json?` pe rândul copilului; `resolveUserLadder` + `resolveUserGraceMs` în engine suprascriu ordinea ȘI grace-ul pe fereastră; null = default.
+- Verificat: tsc app 0 · vitest 40+27 (22 pure noi) · build prod ✅ · /review adversarial 0 P0 (3 fix-uri aplicate) · migrate 0041 + backup DB · F1 round-trip LIVE (login real) · F2 rută+guard live (403/401) · L41 vecini 200.
+- F2 write-path pe parent+child real NEexercitat pe prod (singurul guardian = contul real user) — acoperit de teste + infra comună cu F1.
+
+## Lessons Learned (sesiunea 2026-07-12)
+- **L22** — `next build` nu type-check testele neimportate, dar `npx tsc --noEmit` (include `**/*.ts`) da; un `prisma generate` proaspăt poate scoate la iveală o eroare pre-existentă de client stale care apare doar la tsc full (nu blochează deploy). + nota de design storage-location (setare globală rol → rândul propriu; nu tabel per-episod / join ambiguu).
+
+## Rămas (queued, cerut de user — sesiune nouă)
+- Audit COMPLET `/pa` (toate rolurile) + True E2E [10] pe tot scope-ul (fluxuri/butoane/meniuri/ergonomie, „vreau să vând app-ul" → proactiv, zero 404, fără manual), cod-actual vs STRATEGY.md → propunere+mockups → aprobare → TWG.
+- Pre-existent (out-of-scope): fix mock `tests/unit/exam-engine.test.ts` (`passage: null` + eventual `tags: []`).
+- Opțional user: template Meta „parent-alert" pt WhatsApp fiabil pe alerte părinte.
 
 ## Current State (Sesiunea 2026-06-25 #3 — mesh: family packages → feedback admin → WOW UX → bug-uri review)
 
