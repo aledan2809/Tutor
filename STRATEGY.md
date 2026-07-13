@@ -1,8 +1,9 @@
 # Tutor — Strategie & Roadmap
-**Ultima actualizare:** 2026-06-01
-**Versiune:** 1.9
+**Ultima actualizare:** 2026-07-13
+**Versiune:** 2.0
 
 ## Changelog
+- [2026-07-13] v2.0: **Reconciliere post-audit `/pa`** (`feedback-audit-no-cut-when-code-ahead`) — ridic strategia la nivelul codului, nu tai features. (1) **FAZA 2 (Family/Watcher)** marcată LIVE + depășind specul (Guardian/FamilyInvite/escalationSteps/WatcherReportSchedule/ParentNudge + pachete compuse + add-on copil), backlog real re-scopat. (2) **FAZA 5 pricing**: sursa de adevăr = codul (per-compoziție-familie, preț=prima materie, discounturi materie/copil, anual=2 luni free, broker Stripe + portal); sezonier + planuri meditator = deferate, nu promisiuni. (3) **FAZA 7** majoritar LIVE. (4) **Tier 5** addendum: ingest-pdf full-book (backend LIVE, UI deferată), ExamPaper „Bancă examene" (viewer LIVE), campaign-attribution documentat. (5) **Tier 0**: pivot conștient — demo public paste-text NU se restaurează; `/try` = demo pe-materie, copy viral rescris (Batch D). Fără „AI" în copy (sweep admin). Batch-uri livrate în sesiune: A (securitate) → B (money-path) → C (funnel) → D (viral copy) → E (i18n/GDPR) → F (superadmin audit/liability).
 - [2026-06-02] v1.8: **Tier 3 WhatsApp CTA + Tier 4 fricțiune-zero** LIVE pe etutor.ro (commit `93b26b5`). (1) `<WhatsAppCta>` floating site-wide, RO/EN, **env-gated `NEXT_PUBLIC_SUPPORT_WHATSAPP`** (zero număr fals — apare la setarea env de owner); (2) Tier 4: link „încearcă fără cont ✨" pe signin + register (try-before-signup la toate intrările), PWA install prompt localizat RO/EN (era english-only). **Deja prezent, verificat (nu reconstruit):** PWA install prompt (beforeinstallprompt + delay 30s) + push opt-in (VAPID, în settings). **Owner-blocked (NU construit, ar fi rupt):** Google 1-tap — necesită redirect URI + Origin etutor.ro în OAuth console. **/review + TWG** pe ambele loturi (WOW + Tier3/4): toate findings = false-positives (groq), 0 fix-uri reale în codul dezvoltat; verificat behavioral live (toate rutele 200, zero regresie). Layer Tester-Vision skip conștient (credit Anthropic blocat).
 - [2026-06-01] v1.7: **Tier 3 — Homepage WOW** LIVE pe etutor.ro (commit `7517b1b`). Homepage-ul (era template generic „text + 1 buton → login") devine vitrina viral-first: (1) **demo interactiv above-the-fold** — Magic Quiz embeddat în hero cu sample pre-încărcat (un click până la momentul WOW), refolosit dintr-un component partajat nou `<MagicQuizDemo variant=hero|full>` (single source of truth; `/try` refactorizat să-l folosească, comportament neschimbat); (2) **social proof REAL** — counts din DB via `unstable_cache` (TTL 1h): banca de grile floored la „1.400+" (real 1409), counter „teste generate de vizitatori" care se auto-dezvăluie la ≥50 (fără „0" fals) + trust signals verificabile (examene RO, ~10s, gratuit-fără-card, GDPR); (3) how-it-works 3 pași + capability cards + footer/nav îmbogățit (/grile, /creatori, /try). Verificat live: RO/EN 200, demo generează 5 grile reale prin `/api/magic-quiz`, `/try` neschimbat 200. **Screenshot-uri reale + video 15s: NEfabricate** — slot de cod lăsat pentru owner (demo-ul live e preview-ul real).
 - [2026-06-01] v1.6: **Tier 3 SEO landings + hardening** LIVE (commit `f1cce84`). `/grile` index + 7 landing-uri SSG per materie (Bac/EN/Drept) cu meta keyword-leading + FAQ JSON-LD + sample quiz static + CTA → `/try`, toate în sitemap. Hardening `/api/magic-quiz`: global daily cost cap (env `MAGIC_QUIZ_DAILY_CAP=1000`) + `maxLength=6000` pe textarea `/try`. Verificat live: pagini 200, JSON-LD + canonical prezente, sitemap include /grile, 404 pe slug invalid.
@@ -141,6 +142,11 @@
 **Decizia strategică de luat conștient:** rămâi „premium family SaaS" (revenue bun, viral mic, achiziție plătită) SAU adaugi un **strat-unealtă gratuit viral** deasupra pâlniei care hrănește produsul plătit. „WOW + viral" cere a doua variantă. Faza 0 = stratul viral.
 
 **Tier 0 — Expune magia public (cel mai mare levier, ~1 săpt):** ✅ **LIVE 2026-05-30** (`etutor.ro/ro/try`)
+
+> **Pivot 2026-07-13 (decizie produs, audit `/pa` #12):** demo-ul public paste-text (any-document
+> → quiz) a fost mutat după login (commit `a6abdfc`) și **NU se restaurează**. `/try` oferă acum
+> demo **pe-materie** (grile reale, fără cont), iar copy-ul de pe `/scor`+`/duel`+`/certificat` vinde
+> quiz-pe-materie, nu paste-text (Batch D). Fără cuvântul „AI" în copy.
 - [x] **„Magic Quiz" public, fără cont** — lipești text → în ~10s primești quiz pe care-l dai chiar acolo. Refolosește AI content-gen (`src/lib/magic-quiz.ts`, cascade Gemini→Mistral→Groq, grounded). Pus ca **erou pe homepage** („Încearcă gratuit, fără cont ✨"). Pagina `/[locale]/try` + API public `/api/magic-quiz`. Commits `8c1f025` + `b10147f`. Verificat live: Mistral generează 5 grile RO corecte cu explicații.
 - [x] **Rate-limit + cap** — endpoint public cu throttle two-tier per IP (5/min burst + 25/h) + input 50..6000 char + ≤5 întrebări. `src/app/api/magic-quiz/route.ts`.
 - [ ] **Demo public pe materie populară** (BAC Mate / Evaluare Națională) — momentan sample = fotosinteză; de adăugat sample-uri pe materii RO + landing-uri dedicate (se leagă de Tier 3 SEO). Follow-up.
@@ -181,6 +187,16 @@
 ---
 
 ### Tier 5 — Content Quality Mesh (productizare pipeline generare grile) — `[x]` Track A DONE (2026-06-03)
+
+> **Addendum 2026-07-13 (reconciliere post-audit `/pa`):** trei livrabile lipseau din strategie:
+> (1) **`ingest-pdf` full-book** (`api/admin/questions/ingest-pdf`) — ingest chunked PDF/URL →
+> generare grounded → mesh 3-lentile → judge 2-etape. **Backend LIVE; UI dedicată = deferată**
+> (adminul folosește deocamdată `import-book`, mai slab).
+> (2) **ExamPaper / „Bancă examene"** (model + scoring `classifyPaperPoints`) — subiecte + bareme
+> oficiale, răspunsuri 100% corecte fără mesh, separate de grilele generate. **LIVE ca viewer**
+> (ecran de import = deferat; vezi `/dashboard/admin/exam-bank`, etichetat „(vizualizare)").
+> (3) **campaign-attribution** (`/superadmin/campaigns`, `campaign-attribution.ts`) — funnel
+> signup→conversie mai bogat decât orice din §8/§9; LIVE, documentat aici.
 
 **Origine:** sesiunea 2026-06-02 a validat (cu 2 rulări de mesh multi-agent pe text REAL din manuale.edu.ro — Istorie clasa V, PDF extras cu `pdf-parse`, calea de import a Tutor) că generarea de grile *grounded* poate atinge **97%+ teacher-quality ca pipeline cu poartă (gated), NU autonom**. Rezultate măsurate:
 - **v1 (15 întrebări reale, 3 pasaje factuale):** 100% curat (trec toate 3 lentilele), 0 runde de fix. Răspunsuri 15/15 corecte, 0 halucinații (grounding-ul previne halucinarea).
@@ -266,6 +282,18 @@ model Question {
 
 ### FAZA 2 — Family Pack & Watcher Dashboard (2-3 săptămâni)
 **Obiectiv:** Părintele devine client principal. Dashboard dedicat cu control total.
+
+> **STATUS 2026-07-13: LIVE — depășește specul.** Reconciliere post-audit `/pa`
+> (`feedback-audit-no-cut-when-code-ahead`). Realitatea NU folosește schema stub
+> `FamilyGroup/FamilyMember` de mai jos, ci un model mai bogat, LIVE pe etutor.ro:
+> `Guardian` (PARENT/TUTOR, per-copil) + `FamilyInvite` (email/WhatsApp/Telegram/cod/
+> direct, single-use + seat-check) + `NotificationPreference.escalationSteps` (cascadă
+> multi-canal drag-orderable + presetări + self-alert cadence) + `WatcherReportSchedule`
+> (digest zilnic/săptămânal per-copil) + `ParentNudge`. Pachete familie compuse
+> (Family/Duo/Trio/FamilyTrio) cu locuri părinte/copil/meditator + add-on plătit per-copil
+> (Batch B, 2026-07-13). Checkbox-urile de mai jos = livrate SAU depășite; le păstrăm ca
+> istoric. **Backlog real rămas** (nou-scopat): link Instructor↔familie, progress-sharing
+> public, parental controls granulare, rapoarte comparative/spending.
 
 **Features:**
 - [ ] **Family Account** — un părinte poate avea N copii linkuiți
@@ -383,6 +411,16 @@ model FamilyMember {
 ### FAZA 5 — Monetizare & Pricing (1-2 săptămâni)
 **Obiectiv:** Stripe live, planuri concrete, primii clienți.
 
+> **DECIZIE 2026-07-13 (sursă de adevăr = CODUL).** Post-audit `/pa`: modelul LIVE e
+> **per-compoziție-familie**, nu tabelul „per materie + sezonier" de mai jos. Sursa de
+> adevăr = `src/lib/family.ts`: planuri Elev / Family / Family Duo / Trio / Family Trio;
+> **prețul planului = prima materie/lună**, a 2-a materie −15% / a 3-a+ −25%
+> (`subjectDiscountPercent`), al 2-lea copil −20% / al 3-lea+ −30% (`childDiscountPercent`,
+> add-on plătit la checkout — Batch B), plată anuală = 2 luni gratuite. Checkout prin
+> brokerul Stripe (`stripe.knowbest.ro`, firma Class RDA) + portal self-service (Batch B).
+> **Sezonierul + planurile dedicate de meditator NU sunt în cod** → rămân idei deferate,
+> nu promisiuni. Tabelul de mai jos = aspirațional/istoric, NU starea live.
+
 **Pricing Strategy — PER MATERIE, NU PER LUNĂ:**
 
 Principiu: **Plătești per materie, schimbi oricând.** Flexibil, accesibil, adaptat la sezon.
@@ -473,6 +511,13 @@ Principiu: **Plătești per materie, schimbi oricând.** Flexibil, accesibil, ad
 
 ### FAZA 7 — Mobile & Engagement (2 săptămâni)
 **Obiectiv:** Experiență nativă pe mobil, notificări reale, offline learning.
+
+> **STATUS 2026-07-13: majoritar LIVE** (reconciliere post-audit `/pa`). Deja livrate pe
+> etutor.ro (documentate la Faza 0 Tier 1-4): PWA install prompt (localizat RO/EN, banner
+> gated pe first-value + role, Batch C), push web (VAPID, opt-in), bottom navigation
+> mobile, duel viral, streak, opt-in Telegram (canal gratuit în locul WhatsApp plătit).
+> Checkbox-urile de mai jos = livrate în bună parte. **Rămas real (nou-scopat):** offline
+> mode (cache + sync), avatare, badge-uri per-materie, seasonal events.
 
 **Features:**
 - [ ] **PWA optimizat** — deja există, dar:

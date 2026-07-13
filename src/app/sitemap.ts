@@ -15,6 +15,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // SEO subject index.
     { url: `${baseUrl}/ro/grile`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/en/grile`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
+    // High-intent conversion + funnel pages (RO primary — RO market).
+    { url: `${baseUrl}/ro/preturi`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/ro/parinte`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/ro/elev`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${baseUrl}/ro/creatori`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${baseUrl}/ro/ghid-bac`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/ro/cookies`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/en/cookies`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     { url: `${baseUrl}/en/auth/signin`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${baseUrl}/ro/auth/signin`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${baseUrl}/en/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
