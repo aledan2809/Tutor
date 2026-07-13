@@ -10,9 +10,9 @@
 
 | Gap ID | Description | Priority | Status |
 |--------|-------------|----------|--------|
-| G-TU-B9 | Extra child added FREE via invite (no billing) — build per-child Stripe add-on (custom lineItem, no broker touch) + schema migration + webhook activation + invite gating; wire parent/tutor upgrade-to-plan buttons | P0 money | OPEN (design in ST-2026-07-12-tutor-batchB) |
-| G-TU-B10 | No self-service cancel/manage subscription — persist `stripeSubscriptionId` in `stripe/callback` + `/api/stripe/portal` route (broker `POST /api/portal`) + button on packages | P0 money | OPEN |
-| G-TU-B8 | Pricing page → generic signup, no continuity | P0 money | **FIXED (commit `64188a0`, NOT deployed — ships with B9/B10 as Batch B)** |
+| G-TU-B9 | Extra child added FREE via invite (no billing) — per-child add-on (custom broker lineItem, broker untouched) + `paidExtraChildSeats` schema + callback grant/clamp + effective seat-gate on ALL 3 child-add paths + upgrade links | P0 money | **Eliminated — DEPLOYED + broker checkout live-verified 2026-07-13 (commit `68ee0b9`)** |
+| G-TU-B10 | No self-service cancel/manage subscription — persist `stripeSubscriptionId` in `stripe/callback` + `/api/stripe/portal` route (broker `POST /api/portal`) + button on packages | P0 money | **Eliminated — DEPLOYED 2026-07-13 (commit `68ee0b9`); broker project-key wiring verified. NOTE: no real Stripe subscribers in prod yet (5 "active" users are seeded/non-Stripe → graceful "no subscription to manage"). Customer-Portal config on Class RDA still to confirm before 1st real subscriber manages.** |
+| G-TU-B8 | Pricing page → generic signup, no continuity | P0 money | **Eliminated — DEPLOYED 2026-07-13 as Batch B (commit `64188a0`)** |
 | G-TU-FUNNEL | Parent funnel discoverability chain broken (sidebar hides Family/Watcher for unpaid, no CTA; /parinte+/elev CTA→signin not register; bell no child-alerts; setup-checklist no "link child"; push banner can't fire watcher-only; assessment orphan) | P0/P1 | OPEN (Batch C, mockup-first) |
 | G-TU-VIRAL | Viral paste-text demo promised on /scor+/duel+/certificat but /try can't do it — DECIDED: drop the promise (no "AI" showcase), rewrite copy | P1 | OPEN (Batch D) |
 | G-TU-I18N | Two parallel i18n systems; landing + practice-session + assessment + auth reset bypass next-intl; `calendar.loading` missing key; instructor domain dropdown shows raw cuids; "AI" copy across admin | P1/P2 | OPEN (Batch E) |
