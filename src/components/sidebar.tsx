@@ -44,7 +44,8 @@ export function Sidebar({ user, hasFamilyPlan = false }: SidebarProps) {
     return () => document.removeEventListener("keydown", onKey);
   }, [mobileOpen]);
 
-  const navItems = [
+  type NavItem = { href: string; label: string; locked?: boolean };
+  const navItems: NavItem[] = [
     { href: "/dashboard", label: t("dashboard") },
     { href: "/dashboard/lessons", label: t("lessons") },
     { href: "/dashboard/bibliography", label: t("bibliography") },
@@ -126,6 +127,7 @@ export function Sidebar({ user, hasFamilyPlan = false }: SidebarProps) {
       { href: "/dashboard/family", label: t("family") },
       { href: "/dashboard/watcher", label: t("watcher") },
       { href: "/dashboard/watcher/notifications", label: t("watcherNotifications") },
+      { href: "/dashboard/watcher/setari", label: t("watcherSettings") },
       { href: "/dashboard/referrals", label: t("referrals") },
       { href: "/dashboard/notifications", label: t("notifications") },
       { href: "/dashboard/settings", label: t("settings") },
@@ -164,6 +166,19 @@ export function Sidebar({ user, hasFamilyPlan = false }: SidebarProps) {
     visibleNavItems.push({ href: "/dashboard/licenta", label: t("licenta") });
   }
 
+  // A fresh account (register always grants STUDENT) has no family plan / WATCHER
+  // role, so the whole family section is hidden — a parent who signs up can't find
+  // it. Surface a locked entry that routes to Pachete, unlocking the upsell instead
+  // of a dead end. Excludes instructors/superadmins (not a parent funnel).
+  const showFamilyLocked = !showFamily && !isInstructor && !user.isSuperAdmin;
+  if (showFamilyLocked) {
+    visibleNavItems.push({
+      href: "/dashboard/packages",
+      label: t("family"),
+      locked: true,
+    });
+  }
+
   const sidebarContent = (
     <>
       <div className="flex h-16 items-center justify-between border-b border-gray-800 px-6">
@@ -184,18 +199,21 @@ export function Sidebar({ user, hasFamilyPlan = false }: SidebarProps) {
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-4">
         {visibleNavItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href && !item.locked;
           return (
             <Link
-              key={item.href}
+              key={item.locked ? `locked-${item.href}` : item.href}
               href={item.href}
               onClick={() => setMobileOpen(false)}
-              className={`flex min-h-[44px] items-center rounded-lg px-3 text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-blue-600/10 text-blue-500"
-                  : "text-gray-400 hover:bg-gray-800 hover:text-white"
+              className={`flex min-h-[44px] items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors ${
+                item.locked
+                  ? "text-amber-500/70 hover:bg-gray-800 hover:text-amber-400"
+                  : isActive
+                    ? "bg-blue-600/10 text-blue-500"
+                    : "text-gray-400 hover:bg-gray-800 hover:text-white"
               }`}
             >
+              {item.locked && <span aria-hidden>🔒</span>}
               {item.label}
             </Link>
           );

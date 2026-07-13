@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useLocale } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { isPushSupported, subscribeToPush } from "./push-subscribe";
 import {
   INSTALL_DONE_KEY,
@@ -40,11 +41,15 @@ const SKIP_PUSH = "tutor_setup_skip_push";
 const SKIP_TG = "tutor_setup_skip_tg";
 const ATTEMPT_THRESHOLD = 2; // after this many tries with no install → alt plan
 
-export function SetupChecklist() {
+export function SetupChecklist({ showLinkChild = false }: { showLinkChild?: boolean }) {
   const ro = useLocale() === "ro";
   const t = (r: string, e: string) => (ro ? r : e);
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [ready, setReady] = useState(false);
+  // For parent accounts: whether at least one child is already linked (drives the
+  // "add your child" step). null = not yet known.
+  const [childLinked, setChildLinked] = useState<boolean | null>(null);
 
   const [ios, setIos] = useState(false);
   const [mobile, setMobile] = useState(false);
@@ -109,6 +114,14 @@ export function SetupChecklist() {
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => d && setTg({ configured: !!d.configured, linked: !!d.linked }))
       .catch(() => {});
+
+    // Parent accounts: is a child already linked? Drives the "add your child" step.
+    if (showLinkChild) {
+      fetch("/api/dashboard/family")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => d && setChildLinked((d.children?.length ?? 0) > 0))
+        .catch(() => {});
+    }
 
     return () => {
       window.removeEventListener("beforeinstallprompt", onPrompt);
@@ -232,7 +245,7 @@ export function SetupChecklist() {
   const showAltPlan = !installed && attempts >= ATTEMPT_THRESHOLD;
 
   type Step = {
-    key: "install" | "push" | "tg";
+    key: "install" | "push" | "tg" | "child";
     done: boolean;
     title: string;
     sub: string;
@@ -240,6 +253,34 @@ export function SetupChecklist() {
     canSkip: boolean;
   };
   const all: Step[] = [
+    // Parent-only: link a child first — the whole family flow is pointless without it.
+    ...(showLinkChild
+      ? [
+          {
+            key: "child" as const,
+            done: childLinked === true,
+            title: t("Adaugă copilul", "Add your child"),
+            sub:
+              childLinked === true
+                ? t("Copil legat ✓", "Child linked ✓")
+                : t(
+                    "Leagă contul copilului ca să-i vezi progresul.",
+                    "Link your child's account to see their progress."
+                  ),
+            action:
+              childLinked === true
+                ? null
+                : {
+                    label: t("Adaugă", "Add"),
+                    on: () => {
+                      setOpen(false);
+                      router.push("/dashboard/family");
+                    },
+                  },
+            canSkip: false,
+          },
+        ]
+      : []),
     {
       key: "install",
       done: installed,
@@ -336,9 +377,9 @@ export function SetupChecklist() {
                         {busy === s.key ? "…" : s.action.label}
                       </button>
                     )}
-                    {s.canSkip && !s.done && (
+                    {s.canSkip && !s.done && s.key !== "child" && (
                       <button
-                        onClick={() => skip(s.key)}
+                        onClick={() => s.key !== "child" && skip(s.key)}
                         className="rounded-lg px-2 py-1 text-[11px] text-gray-500 hover:text-gray-300"
                         title={t("Ascunde acest pas", "Hide this step")}
                       >

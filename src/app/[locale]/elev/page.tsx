@@ -118,7 +118,7 @@ export default async function ElevPage({ params }: { params: Promise<{ locale: s
           <p className="mt-4 text-lg text-gray-400">{c.subtitle}</p>
           <div className="mt-7">
             <Link
-              href={`/${lp}/auth/signin`}
+              href={`/${lp}/auth/register`}
               className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-500"
             >
               {c.ctaButton}
@@ -183,7 +183,7 @@ export default async function ElevPage({ params }: { params: Promise<{ locale: s
           <h2 className="text-2xl font-semibold">{c.ctaTitle}</h2>
           <p className="mt-2 text-gray-400">{c.ctaSub}</p>
           <Link
-            href={`/${lp}/auth/signin`}
+            href={`/${lp}/auth/register`}
             className="mt-6 inline-block rounded-xl bg-blue-600 px-8 py-3 font-semibold text-white hover:bg-blue-500"
           >
             {c.ctaButton}

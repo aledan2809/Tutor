@@ -48,16 +48,31 @@ export default async function DashboardLayout({
   const hasFamilyPlan =
     isPaidStatus(sub?.subscriptionStatus) && !!fam && (fam.maxChildren > 0 || fam.maxParents > 0);
 
+  const isWatcher = session.user.enrollments?.some((e) =>
+    e.roles.includes("WATCHER" as never)
+  );
+  const isInstructor = session.user.enrollments?.some(
+    (e) => e.roles.includes("INSTRUCTOR" as never) || e.roles.includes("ADMIN" as never)
+  );
+  // A parent account that isn't itself a learner: the push banner must fire for them
+  // (they never answer questions) and the setup checklist should prompt linking a child.
+  const isWatcherOnly =
+    (!!isWatcher || hasFamilyPlan) &&
+    !isStudent &&
+    !isInstructor &&
+    !session.user.isSuperAdmin;
+  const showLinkChild = (!!isWatcher || hasFamilyPlan) && !session.user.isSuperAdmin;
+
   return (
     <div className="flex min-h-screen">
       <Sidebar user={session.user} hasFamilyPlan={hasFamilyPlan} />
       <div className="flex flex-1 flex-col">
         <header className="flex h-14 items-center justify-end border-b border-gray-800 px-4 sm:px-6">
-          <SetupChecklist />
+          <SetupChecklist showLinkChild={showLinkChild} />
           <NotificationBell />
         </header>
         <main className={`flex-1 p-4 pt-14 sm:p-6 lg:pt-6 ${isStudent ? "pb-20 lg:pb-6" : ""}`}>
-          <AppBanner />
+          <AppBanner isWatcherOnly={isWatcherOnly} />
           {children}
         </main>
       </div>

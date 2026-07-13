@@ -53,6 +53,7 @@
     "domains": "Domains",
     "watcher": "Watcher",
     "watcherNotifications": "Alerts",
+    "watcherSettings": "Alert cadence",
     "licenta": "Licență",
     "instructor": "Instructor",
     "gamification": "Gamification",
@@ -467,6 +468,8 @@
   "notifications": {
     "title": "Notification Center",
     "notifications": "Notifications",
+    "childAlert": "Child alert",
+    "viewAllChildAlerts": "View all alerts",
     "noNotifications": "No notifications yet",
     "markAllRead": "Mark all read",
     "markRead": "Mark as read",

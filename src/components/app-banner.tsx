@@ -31,7 +31,7 @@ interface BeforeInstallPromptEvent extends Event {
 const SNOOZE_KEY = "tutor_app_banner_snooze";
 const SNOOZE_MS = 7 * 24 * 60 * 60 * 1000;
 
-export function AppBanner() {
+export function AppBanner({ isWatcherOnly = false }: { isWatcherOnly?: boolean }) {
   const ro = useLocale() === "ro";
   const [installEvt, setInstallEvt] = useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
@@ -54,7 +54,9 @@ export function AppBanner() {
     setInstalled(standalone || readFlag(INSTALL_DONE_KEY));
     setManualSeen(readFlag(MANUAL_SEEN_KEY));
     // Already-installed users have clearly engaged → don't hide it from them.
-    setFeltValue(hasFeltValue() || standalone || readFlag(INSTALL_DONE_KEY));
+    // A watcher-only parent never answers questions, so gate on role too — else the
+    // free push channel stays off and their alerts fall back to paid WhatsApp.
+    setFeltValue(isWatcherOnly || hasFeltValue() || standalone || readFlag(INSTALL_DONE_KEY));
 
     const snoozedUntil = Number(localStorage.getItem(SNOOZE_KEY) ?? 0);
     setSnoozed(Date.now() < snoozedUntil);

@@ -53,6 +53,7 @@
     "domains": "Domenii",
     "watcher": "Monitorizare",
     "watcherNotifications": "Alerte",
+    "watcherSettings": "Cadență alerte",
     "licenta": "Licență",
     "instructor": "Instructor",
     "gamification": "Gamificare",
@@ -467,6 +468,8 @@
   "notifications": {
     "title": "Centru Notificări",
     "notifications": "Notificări",
+    "childAlert": "Alertă copil",
+    "viewAllChildAlerts": "Vezi toate alertele",
     "noNotifications": "Nicio notificare încă",
     "markAllRead": "Marchează toate ca citite",
     "markRead": "Marchează ca citit",
