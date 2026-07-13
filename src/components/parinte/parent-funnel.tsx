@@ -152,7 +152,7 @@ export function ParentFunnel({ lp }: { lp: "ro" | "en" }) {
           <p className="text-base font-semibold text-white">{c.ctaLead}</p>
           <p className="mt-3 text-sm text-gray-300">{c.ctaSub}</p>
           <Link
-            href={`/${lp}/auth/signin`}
+            href={`/${lp}/auth/register`}
             className="mt-6 inline-block rounded-xl bg-blue-600 px-8 py-3 font-semibold text-white hover:bg-blue-500"
           >
             {c.ctaButton}
