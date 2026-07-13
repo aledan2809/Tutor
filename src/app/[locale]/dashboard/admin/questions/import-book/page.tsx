@@ -67,7 +67,7 @@ export default function ImportScannedBookPage() {
         <h1 className="text-2xl font-bold text-white">Import Scanned Book</h1>
         <p className="mt-1 text-sm text-gray-400">
           Upload a scanned PDF (printed pages, not text-selectable), a DOCX, CSV, or image with quiz questions.
-          The system auto-detects the format, runs OCR if needed, AI-structures questions, and saves with{" "}
+          The system auto-detects the format, runs OCR if needed, structures questions automatically, and saves with{" "}
           <span className="text-amber-400">bookOrder</span> preserved for correct display sequence.
         </p>
       </div>
@@ -79,7 +79,7 @@ export default function ImportScannedBookPage() {
           </p>
           <ul className="mt-2 text-xs text-gray-400 space-y-0.5">
             {result.fromScannedPDF && <li>✓ Scanned PDF processed via OCR ({result.ocrPages || "?"} pages)</li>}
-            {result.fromImage && <li>✓ Image processed via 2-step AI Vision</li>}
+            {result.fromImage && <li>✓ Image processed via 2-step visual analysis</li>}
             <li>✓ Saved as DRAFT — review in Review Queue</li>
             <li>✓ bookOrder + qNumberInBook fields populated</li>
           </ul>
@@ -148,7 +148,7 @@ export default function ImportScannedBookPage() {
           <li>File is saved to <code>uploads/</code> for reprocessing safety</li>
           <li>PDF → parsed as text; if <strong>&lt; 200 chars</strong> extracted, flagged as <strong>scanned</strong></li>
           <li>Scanned PDF → sent to OCR service (4uPDF) for full-page transcription</li>
-          <li>OCR text → AI structures questions with Q number + page from book</li>
+          <li>OCR text → questions structured automatically with Q number + page from book</li>
           <li>Questions saved as <strong>DRAFT</strong> with <code>bookOrder</code>, <code>pdfPage</code>, <code>bookPage</code>, <code>qNumberInBook</code></li>
           <li>Instructor reviews in Review Queue, corrects pages if needed</li>
         </ol>

@@ -198,7 +198,7 @@ export default async function AdminOverviewPage() {
                 <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                   q.source === "AI_GENERATED" ? "bg-purple-900/50 text-purple-400" : "bg-gray-700 text-gray-400"
                 }`}>
-                  {q.source === "AI_GENERATED" ? "AI" : t("badgeManual")}
+                  {q.source === "AI_GENERATED" ? t("badgeAuto") : t("badgeManual")}
                 </span>
                 <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[q.status]}`}>
                   {q.status === "DRAFT" ? t("statusDraft") : q.status === "APPROVED" ? t("statusApproved") : t("statusPublished")}

@@ -52,7 +52,7 @@ export function AIGenerateForm({ domains }: Props) {
   return (
     <form onSubmit={handleSubmit} className="max-w-xl space-y-6">
       <div className="rounded-lg border border-blue-800/50 bg-blue-900/10 p-4 text-sm text-blue-300">
-        AI-generated questions will be saved as <strong>drafts</strong> and appear in the
+        Automatically generated questions will be saved as <strong>drafts</strong> and appear in the
         review queue for approval.
       </div>
 

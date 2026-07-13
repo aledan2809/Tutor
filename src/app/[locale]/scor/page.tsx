@@ -50,7 +50,7 @@ export default async function ScorPage({
         friend: "Cineva a luat",
         of: "din",
         beat: "Bați scorul?",
-        sub: "Lipești orice text — manual, curs, notițe — și primești un test pe care îl dai pe loc. Fără cont.",
+        sub: "Alegi o materie și primești pe loc un test cu grile reale. Fără cont.",
         cta: "Încearcă acum, gratuit ✨",
         home: "← etutor.ro",
       }
@@ -58,7 +58,7 @@ export default async function ScorPage({
         friend: "Someone scored",
         of: "of",
         beat: "Can you beat it?",
-        sub: "Paste any text — a textbook, notes, a course — and a quiz is built for you to take right away. No account.",
+        sub: "Pick a subject and get a quiz of real questions right away. No account.",
         cta: "Try now, free ✨",
         home: "← etutor.ro",
       };

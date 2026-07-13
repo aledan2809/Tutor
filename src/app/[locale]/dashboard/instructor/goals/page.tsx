@@ -65,9 +65,15 @@ export default function InstructorGoalsPage() {
       const domainMap = new Map<string, string>();
       (goalsData.goals ?? []).forEach((g: Goal) => domainMap.set(g.domain.id, g.domain.name));
       setDomains(Array.from(domainMap.entries()).map(([id, name]) => ({ id, name })));
-      // If no domains from goals, try from dashboard
-      if (domainMap.size === 0 && dashData.domains) {
-        setDomains(dashData.domains.map((id: string) => ({ id, name: id })));
+      // If no domains from goals, use the dashboard's named domain options (never
+      // the raw cuid as a display name).
+      if (domainMap.size === 0 && dashData.domainOptions?.length) {
+        setDomains(
+          dashData.domainOptions.map((d: { id: string; name: string }) => ({
+            id: d.id,
+            name: d.name,
+          }))
+        );
       }
       setLoading(false);
     });

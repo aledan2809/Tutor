@@ -14,7 +14,7 @@ async function _GET() {
     )
     .map((e) => e.domainId);
 
-  const [studentCount, groupCount, activeGoals, unreadMessages, recentSessions] =
+  const [studentCount, groupCount, activeGoals, unreadMessages, recentSessions, domainRows] =
     await Promise.all([
       prisma.enrollment.count({
         where: {
@@ -47,6 +47,12 @@ async function _GET() {
           user: { select: { id: true, name: true } },
         },
       }),
+      // Domain names for the instructor's domains so dropdowns don't fall back to
+      // raw cuids (non-admin instructors get 403 on /api/admin/domains).
+      prisma.domain.findMany({
+        where: { id: { in: instructorDomainIds } },
+        select: { id: true, name: true, slug: true },
+      }),
     ]);
 
   return NextResponse.json({
@@ -66,6 +72,7 @@ async function _GET() {
       endedAt: s.endedAt,
     })),
     domains: instructorDomainIds,
+    domainOptions: domainRows,
   });
 }
 

@@ -9,7 +9,7 @@ export default async function GeneratePage() {
 
   return (
     <div>
-      <h2 className="mb-6 text-xl font-semibold text-white">AI Question Generation</h2>
+      <h2 className="mb-6 text-xl font-semibold text-white">Automated Question Generation</h2>
       <AIGenerateForm domains={domains} />
     </div>
   );

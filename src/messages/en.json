@@ -381,6 +381,7 @@
     "viewAll": "View All",
     "typeOpen": "Open",
     "badgeManual": "Manual",
+    "badgeAuto": "Auto",
     "statusDraft": "Draft",
     "statusApproved": "Approved",
     "statusPublished": "Published",
@@ -513,6 +514,7 @@
   },
   "calendar": {
     "title": "Calendar",
+    "loading": "Loading...",
     "googleCalendar": "Google Calendar",
     "connected": "Google Calendar connected",
     "connectedSince": "Connected since {date}",
@@ -743,7 +745,7 @@
     "notifPhoneHint": "Add a number if you also want alerts on WhatsApp."
   },
   "landing": {
-    "hero": "AI-Powered Adaptive Learning",
+    "hero": "Adaptive learning, personalized for every student",
     "subtitle": "Master any subject with personalized learning paths, spaced repetition, and intelligent practice sessions.",
     "getStarted": "Get Started",
     "features": "Features",

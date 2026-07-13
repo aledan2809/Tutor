@@ -124,7 +124,7 @@ export function QuestionList({ questions, domains, total, page, limit, filters, 
               href="/dashboard/admin/questions/generate"
               className="rounded-lg border border-purple-700 px-4 py-2 text-sm text-purple-400 hover:bg-purple-900/20"
             >
-              AI Generate
+              Auto-generate
             </Link>
             <Link
               href="/dashboard/admin/questions/new"
@@ -265,7 +265,7 @@ export function QuestionList({ questions, domains, total, page, limit, filters, 
               <span className="rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-500">{q.topic}</span>
               <span className="rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-500">{q.difficulty}/5</span>
               <span className={`rounded-full px-1.5 py-0.5 text-xs ${q.source === "AI_GENERATED" ? "bg-purple-900/50 text-purple-400" : "bg-gray-700 text-gray-400"}`}>
-                {q.source === "AI_GENERATED" ? "AI" : "Manual"}
+                {q.source === "AI_GENERATED" ? "Auto" : "Manual"}
               </span>
               <span className="flex-1" />
               {!readOnly && q.status !== "PUBLISHED" && (

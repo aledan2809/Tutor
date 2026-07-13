@@ -74,10 +74,17 @@ export default function InstructorSettingsPage() {
           email: s.email,
         }))
       );
-      // Merge domain sources
+      // Merge domain sources. /api/admin/domains 403s for non-admin instructors →
+      // fall back to the dashboard's NAMED domain options, never the raw cuid.
       const allDomains = (domainsData.domains ?? []) as DomainOption[];
-      if (allDomains.length === 0 && dashData.domains) {
-        setDomains(dashData.domains.map((id: string) => ({ id, name: id, slug: id })));
+      if (allDomains.length === 0 && dashData.domainOptions?.length) {
+        setDomains(
+          dashData.domainOptions.map((d: { id: string; name: string; slug: string }) => ({
+            id: d.id,
+            name: d.name,
+            slug: d.slug,
+          }))
+        );
       } else {
         setDomains(allDomains);
       }

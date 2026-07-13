@@ -92,6 +92,7 @@ export default async function LandingPage() {
         footerCreatori: "Pentru profesori",
         footerPrivacy: "Confidențialitate",
         footerTerms: "Termeni",
+        footerCookies: "Cookie-uri",
         rights: "Toate drepturile rezervate.",
       }
     : {
@@ -140,6 +141,7 @@ export default async function LandingPage() {
         footerCreatori: "For teachers",
         footerPrivacy: "Privacy",
         footerTerms: "Terms",
+        footerCookies: "Cookies",
         rights: "All rights reserved.",
       };
 
@@ -378,6 +380,7 @@ export default async function LandingPage() {
               <ul className="mt-3 space-y-2 text-sm text-gray-400">
                 <li><Link href="/privacy" className="hover:text-white">{L.footerPrivacy}</Link></li>
                 <li><Link href="/terms" className="hover:text-white">{L.footerTerms}</Link></li>
+                <li><Link href="/cookies" className="hover:text-white">{L.footerCookies}</Link></li>
               </ul>
             </div>
           </div>

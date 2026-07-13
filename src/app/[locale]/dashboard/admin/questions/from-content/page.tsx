@@ -79,7 +79,7 @@ export default function FromContentPage() {
       <div>
         <h1 className="text-2xl font-bold text-white">Generate Questions from Content</h1>
         <p className="mt-1 text-sm text-gray-400">
-          Upload theory material (PDF, DOCX, TXT) or paste text. AI will generate exam questions based on the content.
+          Upload theory material (PDF, DOCX, TXT) or paste text. Exam questions are generated automatically from the content.
         </p>
       </div>
 

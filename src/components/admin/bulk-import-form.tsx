@@ -93,7 +93,7 @@ export function BulkImportForm({ domains }: Props) {
           <p className="mt-1 text-xs text-blue-400">{files.length} files selected</p>
         )}
         <p className="mt-1 text-xs text-gray-500">
-          CSV: content,correctAnswer,options. PDF/DOCX: numbered questions. Images (PNG/JPEG/JFIF/WebP): OCR + AI extraction.
+          CSV: content,correctAnswer,options. PDF/DOCX: numbered questions. Images (PNG/JPEG/JFIF/WebP): OCR + automatic extraction.
         </p>
       </div>
 
@@ -125,24 +125,24 @@ export function BulkImportForm({ domains }: Props) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm text-gray-400">Subject <span className="text-gray-600">— optional, AI detects</span></label>
+          <label className="mb-1 block text-sm text-gray-400">Subject <span className="text-gray-600">— optional, auto-detected</span></label>
           <input
             type="text"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
-            placeholder="Leave empty for AI detection"
+            placeholder="Leave empty for auto-detection"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm text-gray-400">Topic <span className="text-gray-600">— optional, AI detects</span></label>
+          <label className="mb-1 block text-sm text-gray-400">Topic <span className="text-gray-600">— optional, auto-detected</span></label>
           <input
             type="text"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
-            placeholder="Leave empty for AI detection"
+            placeholder="Leave empty for auto-detection"
           />
         </div>
       </div>

@@ -23,7 +23,7 @@ const COPY = {
   ro: {
     loading: "Se încarcă provocarea…",
     notFound: "Provocarea nu există sau a expirat.",
-    makeOwn: "Fă-ți propriul quiz",
+    makeOwn: "Încearcă și tu",
     intro: (who: string, s: number, t: number) => `${who} a luat ${s}/${t}. Bați?`,
     submit: "Vezi scorul",
     answerAll: "Răspunde la toate întrebările.",
@@ -40,7 +40,7 @@ const COPY = {
   en: {
     loading: "Loading the challenge…",
     notFound: "Challenge not found or expired.",
-    makeOwn: "Make your own quiz",
+    makeOwn: "Try it yourself",
     intro: (who: string, s: number, t: number) => `${who} scored ${s}/${t}. Can you beat it?`,
     submit: "See my score",
     answerAll: "Answer all questions.",

@@ -381,6 +381,7 @@
     "viewAll": "Vezi toate",
     "typeOpen": "Deschis",
     "badgeManual": "Manual",
+    "badgeAuto": "Automat",
     "statusDraft": "Ciornă",
     "statusApproved": "Aprobată",
     "statusPublished": "Publicată",
@@ -513,6 +514,7 @@
   },
   "calendar": {
     "title": "Calendar",
+    "loading": "Se încarcă...",
     "googleCalendar": "Google Calendar",
     "connected": "Google Calendar conectat",
     "connectedSince": "Conectat din {date}",
@@ -743,7 +745,7 @@
     "notifPhoneHint": "Adaugă un număr dacă vrei să primești alerte și pe WhatsApp."
   },
   "landing": {
-    "hero": "Învățare Adaptivă Bazată pe AI",
+    "hero": "Învățare adaptivă, personalizată pentru fiecare elev",
     "subtitle": "Stăpânește orice materie cu trasee de învățare personalizate, repetiție spațiată și sesiuni de practică inteligente.",
     "getStarted": "Începe acum",
     "features": "Funcționalități",

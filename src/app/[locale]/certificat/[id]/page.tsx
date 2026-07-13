@@ -18,8 +18,8 @@ export async function generateMetadata({
   const t = quiz?.total ?? 5;
   const title = ro ? `Certificat: ${s}/${t} la un quiz 🎓` : `Certificate: ${s}/${t} on a quiz 🎓`;
   const description = ro
-    ? `Quiz generat din propriile materiale pe etutor.ro.`
-    : `Quiz generated from your own materials on etutor.ro.`;
+    ? `Test cu grile reale pe etutor.ro. Alege o materie și încearcă și tu.`
+    : `A quiz of real questions on etutor.ro. Pick a subject and try it too.`;
   const ogUrl = `${BASE}/api/og/score?s=${s}&t=${t}`;
   return {
     title,
@@ -41,7 +41,7 @@ export default async function CertificatePage({
   const T = ro
     ? {
         notFound: "Certificatul nu există sau a expirat.",
-        makeOwn: "Fă-ți propriul quiz",
+        makeOwn: "Încearcă și tu",
         heading: "Certificat de rezultat",
         by: "Obținut de",
         anon: "un cursant",
@@ -52,7 +52,7 @@ export default async function CertificatePage({
       }
     : {
         notFound: "Certificate not found or expired.",
-        makeOwn: "Make your own quiz",
+        makeOwn: "Try it yourself",
         heading: "Result certificate",
         by: "Earned by",
         anon: "a learner",
