@@ -87,6 +87,12 @@ model User {
   subscriptionStatus  String?   // "trialing", "active", "canceled", "past_due"
   subscriptionEndsAt  DateTime?
   stripeCustomerId    String?   @unique
+  // Main plan's Stripe subscription id (persisted from the broker callback) — lets
+  // /api/stripe/portal open the Customer Portal / cancel without re-deriving it.
+  stripeSubscriptionId String?
+  // Child seats bought as a discounted add-on beyond the plan's base seat. The
+  // family-seat check honours base + this. 0 for everyone until they buy one.
+  paidExtraChildSeats Int       @default(0)
   isBanned            Boolean   @default(false)
   bannedReason        String?
   subscriptionPlan    SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])

@@ -29,7 +29,14 @@ interface BrokerCallback {
   event: string;
   sessionId: string;
   projectSlug: string;
-  metadata?: { userId?: string; planId?: string; voucherId?: string };
+  metadata?: {
+    userId?: string;
+    planId?: string;
+    voucherId?: string;
+    /** "child_addon" for a per-child add-on subscription (not the main plan). */
+    type?: string;
+    childIndex?: string;
+  };
   paymentStatus?: string;
   amountTotal?: number | null;
   currency?: string;
@@ -149,6 +156,7 @@ async function _POST(req: NextRequest) {
 
   const userId = p.metadata?.userId;
   const planId = p.metadata?.planId;
+  const isChildAddon = p.metadata?.type === "child_addon";
   const amount = typeof p.amountTotal === "number" ? p.amountTotal : 0;
   const currency = p.currency || "ron";
   if (!userId) {
@@ -173,19 +181,32 @@ async function _POST(req: NextRequest) {
     case "subscription.activated": {
       const { payment, isNew } = await createPaymentForSession({
         userId,
-        planId,
+        planId: isChildAddon ? undefined : planId,
         sessionId: p.sessionId,
         amount,
         currency,
         type: "subscription",
       });
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          subscriptionPlanId: planId,
-          subscriptionStatus: p.subscriptionStatus === "trialing" ? "trialing" : "active",
-        },
-      });
+      if (isChildAddon) {
+        // A per-child add-on is its own recurring line — grant a seat, but NEVER
+        // touch the main plan/status. isNew guards a broker retry from double-granting.
+        if (isNew) {
+          await prisma.user.update({
+            where: { id: userId },
+            data: { paidExtraChildSeats: { increment: 1 } },
+          });
+        }
+      } else {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            subscriptionPlanId: planId,
+            subscriptionStatus: p.subscriptionStatus === "trialing" ? "trialing" : "active",
+            // Persist the subscription id so /api/stripe/portal can open the portal.
+            ...(p.stripeSubscriptionId ? { stripeSubscriptionId: p.stripeSubscriptionId } : {}),
+          },
+        });
+      }
       // Accrue only on a real charge (a $0 trial activation carries no money);
       // recurring charges come back as subscription.renewed. isNew guards retries.
       if (isNew && amount > 0) await accrueReferral(payment);
@@ -198,18 +219,40 @@ async function _POST(req: NextRequest) {
       // Deduped on the broker callback's eventId (Stripe event.id, v2+): a broker
       // retry of the same renewal returns the existing Payment instead of a
       // duplicate. isNew guards the commission so a retry can't double-accrue.
-      const { payment, isNew } = await createRenewalPayment({ userId, planId, eventId: p.eventId, amount, currency });
-      await prisma.user.update({ where: { id: userId }, data: { subscriptionStatus: "active" } });
+      const { payment, isNew } = await createRenewalPayment({
+        userId,
+        planId: isChildAddon ? undefined : planId,
+        eventId: p.eventId,
+        amount,
+        currency,
+      });
+      // An add-on renewal is a real charge (Payment + commission) but must NOT
+      // reactivate the main plan's status.
+      if (!isChildAddon) {
+        await prisma.user.update({ where: { id: userId }, data: { subscriptionStatus: "active" } });
+      }
       if (isNew) await accrueReferral(payment);
       break;
     }
 
     case "subscription.payment_failed": {
-      await prisma.user.update({ where: { id: userId }, data: { subscriptionStatus: "past_due" } });
+      // An add-on payment failure doesn't put the whole account past_due.
+      if (!isChildAddon) {
+        await prisma.user.update({ where: { id: userId }, data: { subscriptionStatus: "past_due" } });
+      }
       break;
     }
 
     case "subscription.canceled": {
+      if (isChildAddon) {
+        // Free one add-on seat; leave the main subscription untouched. updateMany
+        // with a gt:0 guard clamps at zero if the broker re-delivers the cancel.
+        await prisma.user.updateMany({
+          where: { id: userId, paidExtraChildSeats: { gt: 0 } },
+          data: { paidExtraChildSeats: { decrement: 1 } },
+        });
+        break;
+      }
       await prisma.user.update({
         where: { id: userId },
         data: { subscriptionStatus: "canceled", subscriptionEndsAt: new Date() },

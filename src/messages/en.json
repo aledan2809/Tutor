@@ -887,7 +887,10 @@
     "voucher": "Voucher code (optional)",
     "voucherPlaceholder": "Have a code? Enter it here",
     "noPlans": "No packages available right now.",
-    "checkoutError": "Could not start checkout. Try again."
+    "checkoutError": "Could not start checkout. Try again.",
+    "manageSubscription": "Manage subscription",
+    "portalOpening": "Opening…",
+    "portalError": "Couldn't open the subscription portal. Try again."
   },
   "cookieBanner": {
     "aria": "Cookie consent",

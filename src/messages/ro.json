@@ -887,7 +887,10 @@
     "voucher": "Cod voucher (opțional)",
     "voucherPlaceholder": "Ai un cod? Scrie-l aici",
     "noPlans": "Momentan nu sunt pachete disponibile.",
-    "checkoutError": "Nu am putut porni plata. Încearcă din nou."
+    "checkoutError": "Nu am putut porni plata. Încearcă din nou.",
+    "manageSubscription": "Gestionează abonamentul",
+    "portalOpening": "Se deschide…",
+    "portalError": "Nu am putut deschide portalul de abonament. Încearcă din nou."
   },
   "cookieBanner": {
     "aria": "Consimțământ cookie-uri",

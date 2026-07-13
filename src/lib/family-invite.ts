@@ -86,6 +86,8 @@ export interface OwnerPlan {
   key: FamilyPlanKey | null;
   plan: FamilyPlan | null;
   isSuperAdmin: boolean;
+  /** Child seats bought as an add-on beyond the plan base (see canAddChild). */
+  paidExtraChildSeats: number;
 }
 
 /** Resolve the owner's family plan from their billing plan name (+ admin flag). */
@@ -97,6 +99,7 @@ export async function resolveOwnerPlan(
     where: { id: ownerId },
     select: {
       isSuperAdmin: true,
+      paidExtraChildSeats: true,
       subscriptionPlan: {
         select: {
           name: true,
@@ -115,6 +118,7 @@ export async function resolveOwnerPlan(
     key: plan?.key ?? null,
     plan,
     isSuperAdmin: u?.isSuperAdmin ?? false,
+    paidExtraChildSeats: u?.paidExtraChildSeats ?? 0,
   };
 }
 
@@ -149,6 +153,8 @@ export interface FamilyOverview {
   planKey: FamilyPlanKey | null;
   planLabel: string | null;
   isSuperAdmin: boolean;
+  /** Child seats bought as a paid add-on beyond the plan base. */
+  paidExtraChildSeats: number;
   children: FamilyMember[];
   coParents: FamilyMember[];
   tutors: FamilyMember[];
@@ -172,7 +178,10 @@ export async function getFamilyOverview(
   ownerId: string,
   db: Db = prisma
 ): Promise<FamilyOverview> {
-  const { key, plan, isSuperAdmin } = await resolveOwnerPlan(ownerId, db);
+  const { key, plan, isSuperAdmin, paidExtraChildSeats } = await resolveOwnerPlan(
+    ownerId,
+    db
+  );
 
   // Children directly held by the owner.
   const childLinks = await db.guardian.findMany({
@@ -240,7 +249,10 @@ export async function getFamilyOverview(
   });
 
   const maxParents = isSuperAdmin ? UNLIMITED : plan?.maxParents ?? 0;
-  const maxChildren = isSuperAdmin ? UNLIMITED : plan?.maxChildren ?? 0;
+  // Paid add-on child seats extend the base entitlement (only meaningful with a plan).
+  const maxChildren = isSuperAdmin
+    ? UNLIMITED
+    : (plan?.maxChildren ?? 0) + (plan ? paidExtraChildSeats : 0);
   const maxTutors = isSuperAdmin ? UNLIMITED : plan?.maxTutors ?? 0;
 
   return {
@@ -248,6 +260,7 @@ export async function getFamilyOverview(
     planKey: key,
     planLabel: plan?.label ?? null,
     isSuperAdmin,
+    paidExtraChildSeats: plan ? paidExtraChildSeats : 0,
     children,
     coParents,
     tutors,
@@ -270,11 +283,21 @@ export async function checkSeat(
   target: InviteTargetRole,
   db: Db = prisma
 ): Promise<SeatCheck> {
-  const { plan, isSuperAdmin } = await resolveOwnerPlan(ownerId, db);
+  const { plan, isSuperAdmin, paidExtraChildSeats } = await resolveOwnerPlan(
+    ownerId,
+    db
+  );
   if (isSuperAdmin) return { allowed: true };
   const overview = await getFamilyOverview(ownerId, db);
-  if (target === INVITE_TARGET_ROLE.CHILD)
-    return canAddChild(plan, overview.children.length);
+  if (target === INVITE_TARGET_ROLE.CHILD) {
+    // Already-paid add-on seats count toward the base entitlement, so linking a
+    // child into a paid seat is a free invite; only over base+paid does the add-on
+    // CTA fire again.
+    const effective = plan
+      ? { ...plan, maxChildren: plan.maxChildren + paidExtraChildSeats }
+      : plan;
+    return canAddChild(effective, overview.children.length);
+  }
   if (target === INVITE_TARGET_ROLE.TUTOR)
     return canAddTutor(plan, overview.tutors.length);
   return canAddParent(plan, overview.seats.parents.used);

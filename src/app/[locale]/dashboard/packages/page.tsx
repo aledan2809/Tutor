@@ -36,6 +36,7 @@ export default function PackagesPage() {
   const [loading, setLoading] = useState(true);
   const [voucher, setVoucher] = useState("");
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
+  const [portalBusy, setPortalBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Plan the visitor picked on /preturi (?plan=<FamilyPlanKey>) — pre-highlight
   // + scroll to it so the pricing→signup→packages hand-off keeps continuity.
@@ -89,6 +90,24 @@ export default function PackagesPage() {
     }
   };
 
+  const openPortal = async () => {
+    setPortalBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setError(data.error || t("portalError"));
+    } catch {
+      setError(t("portalError"));
+    } finally {
+      setPortalBusy(false);
+    }
+  };
+
   const isPaid =
     current.subscriptionStatus === "active" || current.subscriptionStatus === "trialing";
 
@@ -115,8 +134,17 @@ export default function PackagesPage() {
       </div>
 
       {isPaid && (
-        <div className="rounded-xl border border-green-900/50 bg-green-900/10 px-4 py-3 text-sm text-green-400">
-          {current.subscriptionStatus === "trialing" ? t("currentTrial") : t("currentActive")}
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-green-900/50 bg-green-900/10 px-4 py-3 text-sm text-green-400">
+          <span>
+            {current.subscriptionStatus === "trialing" ? t("currentTrial") : t("currentActive")}
+          </span>
+          <button
+            onClick={openPortal}
+            disabled={portalBusy}
+            className="min-h-[40px] rounded-lg border border-green-800/60 bg-green-900/20 px-4 py-2 text-sm font-medium text-green-200 transition-colors hover:bg-green-900/40 disabled:opacity-50"
+          >
+            {portalBusy ? t("portalOpening") : t("manageSubscription")}
+          </button>
         </div>
       )}
 

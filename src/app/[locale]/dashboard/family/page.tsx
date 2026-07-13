@@ -28,6 +28,7 @@ interface Overview {
   planKey: FamilyPlanKey | null;
   planLabel: string | null;
   isSuperAdmin: boolean;
+  paidExtraChildSeats: number;
   children: Member[];
   coParents: Member[];
   tutors: Member[];
@@ -58,6 +59,26 @@ export default function FamilyPage() {
   const [data, setData] = useState<Overview | null>(null);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState<InviteTargetRole | null>(null);
+  const [addonBusy, setAddonBusy] = useState(false);
+  const [addonError, setAddonError] = useState<string | null>(null);
+
+  const buyChildAddon = useCallback(async () => {
+    setAddonBusy(true);
+    setAddonError(null);
+    try {
+      const r = await fetch("/api/dashboard/family/addon-checkout", { method: "POST" });
+      const d = await r.json();
+      if (r.ok && d.url) {
+        window.location.href = d.url;
+        return;
+      }
+      setAddonError(d.error || "Nu am putut porni plata. Încearcă din nou.");
+    } catch {
+      setAddonError("Nu am putut porni plata. Încearcă din nou.");
+    } finally {
+      setAddonBusy(false);
+    }
+  }, []);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -78,10 +99,14 @@ export default function FamilyPage() {
   const plan = data.planKey ? getFamilyPlan(data.planKey) : null;
   const admin = data.isSuperAdmin;
 
-  // Pure seat checks (admin bypasses everything).
+  // Pure seat checks (admin bypasses everything). Paid add-on seats extend the base
+  // child entitlement, so a child linked into an already-paid seat is a free invite.
+  const effectiveChildPlan = plan
+    ? { ...plan, maxChildren: plan.maxChildren + data.paidExtraChildSeats }
+    : plan;
   const childCheck: SeatCheck = admin
     ? { allowed: true }
-    : canAddChild(plan, data.children.length);
+    : canAddChild(effectiveChildPlan, data.children.length);
   const parentCheck: SeatCheck = admin
     ? { allowed: true }
     : canAddParent(plan, data.seats.parents.used);
@@ -127,6 +152,8 @@ export default function FamilyPage() {
           label="Adaugă copil"
           check={childCheck}
           onClick={() => setAdding(INVITE_TARGET_ROLE.CHILD)}
+          onAddon={buyChildAddon}
+          addonBusy={addonBusy}
         />
         <AddButton
           label="Adaugă al 2-lea părinte"
@@ -139,6 +166,9 @@ export default function FamilyPage() {
           onClick={() => setAdding(INVITE_TARGET_ROLE.TUTOR)}
         />
       </div>
+      {addonError && (
+        <p className="-mt-6 mb-8 text-sm text-red-400">{addonError}</p>
+      )}
 
       {adding && (
         <AddMember
@@ -186,26 +216,48 @@ function AddButton({
   label,
   check,
   onClick,
+  onAddon,
+  addonBusy = false,
 }: {
   label: string;
   check: SeatCheck;
   onClick: () => void;
+  /** Extra-child add-on path: buy a seat first, then link the child. */
+  onAddon?: () => void;
+  addonBusy?: boolean;
 }) {
-  // Add-on (extra child) is still actionable — it just carries a discount note.
-  const blocked = !check.allowed && !check.addon;
+  // Over the base seat, an extra child is a paid add-on (checkout, not the free
+  // invite modal); an extra parent/tutor is a plan upgrade (link to packages).
+  const isAddon = !check.allowed && !!check.addon && !!onAddon;
+  const upgradeTo = !check.allowed && !check.addon ? check.upgradeTo : undefined;
+  const blocked = !check.allowed && !isAddon && !upgradeTo;
+
+  const btnClass =
+    "rounded-lg px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-500";
+
   return (
     <div className="flex flex-col">
-      <button
-        onClick={onClick}
-        disabled={blocked}
-        className={`rounded-lg px-4 py-2 text-sm font-medium ${
-          blocked
-            ? "cursor-not-allowed bg-gray-700 text-gray-500"
-            : "bg-blue-600 text-white hover:bg-blue-500"
-        }`}
-      >
-        {label}
-      </button>
+      {isAddon ? (
+        <button onClick={onAddon} disabled={addonBusy} className={`${btnClass} disabled:opacity-60`}>
+          {addonBusy ? "Se pregătește plata…" : label}
+        </button>
+      ) : upgradeTo ? (
+        <Link href={`/dashboard/packages?plan=${upgradeTo}`} className={`${btnClass} inline-block`}>
+          {label}
+        </Link>
+      ) : (
+        <button
+          onClick={onClick}
+          disabled={blocked}
+          className={
+            blocked
+              ? "cursor-not-allowed rounded-lg bg-gray-700 px-4 py-2 text-sm font-medium text-gray-500"
+              : btnClass
+          }
+        >
+          {label}
+        </button>
+      )}
       {!check.allowed && check.message && (
         <span className="mt-1 max-w-xs text-xs text-amber-400">{check.message}</span>
       )}
