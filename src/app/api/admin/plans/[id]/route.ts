@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import { withErrorHandler } from "@/lib/api-handler";
+import { logAudit } from "@/lib/audit";
 
 async function _GET(
   _req: NextRequest,
@@ -27,7 +28,7 @@ async function _PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireSuperAdmin();
+  const { error, session } = await requireSuperAdmin();
   if (error) return error;
 
   const { id } = await params;
@@ -47,6 +48,17 @@ async function _PATCH(
     data,
   });
 
+  // Toggling active state is distinct from a content edit (both change MRR-relevant
+  // config, so both are logged).
+  const changedKeys = Object.keys(data);
+  const onlyToggle = changedKeys.length === 1 && changedKeys[0] === "isActive";
+  await logAudit({
+    action: onlyToggle ? "TOGGLE_PLAN" : "EDIT_PLAN",
+    performedById: session!.user.id,
+    targetType: "SubscriptionPlan",
+    metadata: { planId: id, changes: changedKeys },
+  });
+
   return NextResponse.json({ ...plan, price: plan.price / 100 });
 }
 
@@ -54,7 +66,7 @@ async function _DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireSuperAdmin();
+  const { error, session } = await requireSuperAdmin();
   if (error) return error;
 
   const { id } = await params;
@@ -72,6 +84,14 @@ async function _DELETE(
   }
 
   await prisma.subscriptionPlan.delete({ where: { id } });
+
+  await logAudit({
+    action: "DELETE_PLAN",
+    performedById: session!.user.id,
+    targetType: "SubscriptionPlan",
+    metadata: { planId: id },
+  });
+
   return NextResponse.json({ success: true });
 }
 

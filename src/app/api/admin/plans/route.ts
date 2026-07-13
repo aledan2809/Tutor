@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import { getStripe } from "@/lib/stripe";
 import { withErrorHandler } from "@/lib/api-handler";
+import { logAudit } from "@/lib/audit";
 import { z } from "zod";
 import type Stripe from "stripe";
 
@@ -32,7 +33,7 @@ async function _GET() {
 }
 
 async function _POST(req: NextRequest) {
-  const { error } = await requireSuperAdmin();
+  const { error, session } = await requireSuperAdmin();
   if (error) return error;
 
   const body = await req.json();
@@ -78,6 +79,13 @@ async function _POST(req: NextRequest) {
       trialDays: parsed.data.trialDays ?? null,
       features: parsed.data.features ?? [],
     },
+  });
+
+  await logAudit({
+    action: "CREATE_PLAN",
+    performedById: session!.user.id,
+    targetType: "SubscriptionPlan",
+    metadata: { planId: plan.id, name: plan.name, price: plan.price, interval: plan.interval },
   });
 
   return NextResponse.json({ ...plan, price: plan.price / 100 }, { status: 201 });

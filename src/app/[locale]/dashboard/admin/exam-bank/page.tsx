@@ -15,7 +15,7 @@ export default async function ExamBankPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Bancă examene</h1>
+        <h1 className="text-2xl font-bold text-white">Bancă examene (vizualizare)</h1>
         <p className="mt-1 text-sm text-gray-400">
           Subiecte + bareme oficiale importate (răspunsuri 100% corecte, fără mesh). Doar citire —
           banca aceasta e separată de grilele generate și nu apare în demo-ul public.
@@ -24,7 +24,8 @@ export default async function ExamBankPage() {
 
       {papers.length === 0 ? (
         <p className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-6 text-center text-gray-400">
-          Nicio simulare importată încă.
+          Nicio simulare importată încă. Lucrările oficiale se adaugă prin scripturile de
+          import (nu există încă un ecran de import în interfață).
         </p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">

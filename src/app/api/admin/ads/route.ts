@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import { withErrorHandler } from "@/lib/api-handler";
+import { logAudit } from "@/lib/audit";
 import { z } from "zod";
 
 const createAdSchema = z.object({
@@ -24,7 +25,7 @@ async function _GET() {
 }
 
 async function _POST(req: NextRequest) {
-  const { error } = await requireSuperAdmin();
+  const { error, session } = await requireSuperAdmin();
   if (error) return error;
 
   const body = await req.json();
@@ -41,6 +42,13 @@ async function _POST(req: NextRequest) {
       clickUrl: parsed.data.clickUrl ?? null,
       priority: parsed.data.priority ?? 0,
     },
+  });
+
+  await logAudit({
+    action: "CREATE_AD",
+    performedById: session!.user.id,
+    targetType: "AdPlacement",
+    metadata: { adId: ad.id, name: ad.name, slot: ad.slot },
   });
 
   return NextResponse.json(ad, { status: 201 });
