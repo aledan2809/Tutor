@@ -1,8 +1,19 @@
 import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { SeedDemoButton } from "@/components/admin/seed-demo-button";
 
 export default async function SeedDemoPage() {
+  // The parent admin layout only requires ADMIN-or-superadmin; the seed action
+  // itself is superadmin-gated (`requireAdmin` + explicit `isSuperAdmin` check) and
+  // the nav link is hidden from plain admins client-side — but neither stops a
+  // per-domain ADMIN from hitting this URL directly and seeing the aviation
+  // domain's stats (question counts, enrolled students) before the button 403s.
+  // Server-gate the page itself, matching the SuperAdminLayout pattern.
+  const session = await auth();
+  if (!session?.user?.isSuperAdmin) redirect("/dashboard/admin");
+
   const t = await getTranslations("admin");
   const domain = await prisma.domain.findUnique({ where: { slug: "aviation" } });
 
