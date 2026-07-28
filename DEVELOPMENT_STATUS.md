@@ -1,5 +1,54 @@
 # Project Status - Tutor
-Last Updated: 2026-07-12 (audit COMPLET /pa + True E2E [10] · Batch A securitate LIVE)
+Last Updated: 2026-07-28 (Batch B–H /pa audit — regim mesh autonom, toate LIVE pe etutor.ro)
+
+## Current State (Sesiunea 2026-07-28 — Batch B→H /pa audit, regim mesh autonom)
+
+Continuare directă a Batch A (2026-07-12). Fiecare batch: dev → /review adversarial → tsc + `npm run build` gate → commit → push → deploy VPS2 → verificare live (curl + pm2 err). Toate deploy-urile confirmate cu OK explicit user înainte de execuție.
+
+**Batch B (money-path) — LIVE, commit `68ee0b9` (migrație `0042`):**
+- **B9** add-on per-copil: `User.paidExtraChildSeats` extinde locurile de copil pe **toate 3 căile** de adăugare (invite create/accept + direct create, sub advisory-lock) — nu se poate ocoli plata. Endpoint `/api/dashboard/family/addon-checkout` (broker `amount` custom, discount −20%/−30%). Callback grant/clamp idempotent, planul principal neatins la evenimente add-on.
+- **B10** portal self-service: persist `stripeSubscriptionId`, rută `/api/stripe/portal` (broker `POST /api/portal`), buton pe `/dashboard/packages`.
+- **Notă L21 confirmată în practică**: o sesiune Claude paralelă a deployat Batch B cât backup-ul DB rula în sesiunea curentă (commit ledger `cd593f2` nu al meu). Verificat post-fapt: VPS la `68ee0b9`, migrație aplicată, coloane prezente — nimic pierdut, istoria a rămas liniară.
+
+**Batch C (funnel părinte, audit #11,13,14,15,16,17) — LIVE, commits `1c10f49`+`ca5e297`:**
+- Sidebar: „🔒 Familia mea" pt cont neplătit → `/dashboard/packages`.
+- 4× CTA `/parinte`+`/elev`+ParentFunnel → `/auth/register` (nu `/auth/signin`). **Prins prin verificare pe output real** (nu doar pe fișierele editate): al 3-lea CTA („Începe proba gratuită", `parent-funnel.tsx:155`) tot ducea la signin — fix separat, commit `ca5e297`.
+- Clopoțel: alertele copilului (`audience=child`) afișate distinct (bandă amber) + badge combinat.
+- „Cadență alerte" adăugat în nav părinte; pas „Adaugă copilul" în SetupChecklist; push-banner pornește și pt watcher-only.
+
+**Batch D (viral copy, audit #12 decizie „drop") — LIVE, commit `7d95afa`:**
+- `/scor`+`/duel`+`/certificat`: promisiunea „lipești orice text" scoasă; copy vinde quiz-pe-materie (ce oferă `/try` real).
+
+**Batch E (i18n punctual + no-AI + GDPR) — LIVE, commit `7d95afa`:**
+- `calendar.loading` key, landmine „AI-Powered" din hero, **sweep complet „AI"→„Automat"/„Auto"** pe tot adminul (enum DB `AI_GENERATED` neatins, doar label-ul), instructor domain dropdowns cuid→nume (`/api/dashboard/instructor` întoarce acum `domainOptions`), `/cookies` adăugat în footer landing.
+- GDPR footer/legal-nav pe pagini persona: **deja livrat** în `d318f98` (cod înaintea auditului) — verificat live, nu re-făcut.
+
+**Batch F (superadmin) — LIVE, commit `67f772e`:**
+- Audit-log pe mutații plan+ad (CREATE/EDIT/TOGGLE/DELETE via `logAudit`, erau silențioase).
+- Cardurile overview → clicabile spre sub-pagini + card nou „Comisioane de plată".
+- `/dashboard/admin/superadmin/referrals` nou — vizibilitate read-only pe datoria de comisioane (PAYABLE/PENDING/PAID/VOID + top promotori). „Marchează plătit" **intenționat neconstruit** (mutație pe bani, cere review propriu).
+- exam-bank etichetat „(vizualizare)" + empty-state onest (fără UI de import).
+
+**Batch G (STRATEGY.md, doc-only) — commit `c02058b`:**
+- v1.9→v2.0. FAZA 2 (Family/Watcher) + FAZA 7 (Mobile) ridicate la LIVE/depășesc specul (per `feedback-audit-no-cut-when-code-ahead`, nu s-a tăiat nimic). Pricing: sursa de adevăr = codul (per-compoziție-familie), sezonier+planuri meditator = deferate explicit. Tier 5 addendum (ingest-pdf/ExamPaper/campaign-attribution). Pivot Tier 0: demo paste-text NU se restaurează.
+
+**Batch H (polish) — LIVE, commit `c02058b`:**
+- Eye-toggle show/hide pe ambele câmpuri parolă din `/auth/reset-password` (regulă user).
+- Sitemap: +6 pagini absente (`/preturi`,`/parinte`,`/elev`,`/creatori`,`/ghid-bac`,`/cookies`).
+
+**AUDIT_GAPS.md sincronizat** (commit `774010b`): G-TU-FUNNEL/VIRAL/LEGAL/STRATEGY → Eliminated; G-TU-I18N/ADMIN → Partial (deferate documentate).
+
+**Deferat explicit (sesiuni dedicate, motivat, nu uitat):**
+- #22 mutația „marchează PLĂTIT" (money-state, review propriu).
+- #20 ingest-book UI (feature mare), #6 metrici North-Star revenue.
+- i18n sistemic (pagina practică, reset-password RO complet, assessment EN, admin surface) — auditul însuși l-a scopat separat.
+- #18 assessment orphan wiring, §7 polish rămas (touch-targets, webhook Stripe legacy mort, pagina orfană `/watcher/[id]`, dedup import/import-book, gating aviation/seed-demo), §6 P3 mesagerie instructor WhatsApp/SMS false-promise.
+
+Toate 82/82 pagini build verde la fiecare batch; tsc curat pe fișierele atinse (singura eroare pre-existentă, neatinsă: fixture `tests/unit/exam-engine.test.ts`).
+
+## Lessons Learned (sesiunea 2026-07-28)
+- **L26** — `next build`'s ESLint (`@typescript-eslint/no-unused-vars`) fails the production build on an unused route-handler param even when prefixed `_` (e.g. `_req: NextRequest`) — `tsc --noEmit` doesn't catch this (it's a lint rule, not a type error), so a route can pass the tsc gate and still fail `npm run build`. Fix: drop the param entirely (`async function _POST()`), don't just prefix it — `withErrorHandler`'s wrapper still forwards the real request via `...args`, so Next's runtime is unaffected.
+- **L27** — `Prisma.InputJsonValue` rejects a plain `Record<string, unknown>` at the type level (TS can't resolve an indexed-signature object against the JSON union). For audit-log "what changed" metadata, pass a primitive/array instead (e.g. `Object.keys(data)`, a `string[]`) rather than the update-data object itself.
 
 ## Current State (Sesiunea 2026-07-12 #2 — audit /pa + True E2E [10], regim mesh)
 
