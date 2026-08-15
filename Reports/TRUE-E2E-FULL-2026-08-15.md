@@ -60,8 +60,17 @@ găleată de 20 intră două lucruri de naturi complet diferite:
 
 **Măsurat pe producție**, nu dedus: parcurgând 18 rute, s-au făcut **60 de cereri către
 `/api/auth/session`**; a **18-a a primit 429**, iar 23 din 60 au fost respinse. Când citirea
-sesiunii întoarce 429, NextAuth o interpretează ca „fără sesiune" → utilizatorul **pare delogat**
-și e trimis la ecranul de autentificare.
+sesiunii întoarce 429, clientul NextAuth îl tratează ca „fără sesiune".
+
+**Demonstrat în cod, nu presupus** (next-auth 5.0.0-beta.31): `lib/client.js:34` — corpul 429 e JSON
+valid, deci `res.json()` reușește, apoi `!res.ok` aruncă, se prinde la `:38` și funcția
+**întoarce `null`**; `react.js:273` pune `setSession(null)`; `react.js:331-335` calculează
+`status: "unauthenticated"`.
+
+**Nuanță importantă, măsurată**: sesiunea de pe server **NU** e distrusă — cu aceleași cookie-uri,
+`/api/admin/users` întoarce 200 în timp ce `/api/auth/session` dă 429. Deci e un fals-negativ pe
+client, nu o pierdere de sesiune. Efectul pentru utilizator e însă același: orice componentă care
+se bazează pe `useSession()` se comportă ca la delogare.
 
 **De ce contează aici mai mult decât în alte aplicații**: eTutor e o platformă școlară. Un
 laborator de informatică, o clasă sau o familie stau în spatele **unui singur IP public**. Bugetul
@@ -134,14 +143,21 @@ Deci se poate ieși din atribut. **Pe Tutor nu e exploatabil**: CSP-ul live e
 `script-src 'self' 'nonce-…'` fără `'unsafe-inline'`, iar browserul blochează atât handler-ele
 inline, cât și schema `javascript:`. Securitatea depinde însă **în întregime** de acel CSP.
 
-**Partea care depășește Tutor**: același ajutor e copiat în patru aplicații, cu protecție diferită.
+**Partea care depășește Tutor** (corectat 2026-08-15 după re-verificare — prima variantă a acestui
+tabel era greșită; o las consemnată ca atare):
 
-| App | CSP | Expunere |
-|---|---|---|
-| **Tutor** | nonce, fără `unsafe-inline` | ✅ blocat |
-| knowbest | are `unsafe-inline` | 🔴 nemitigat |
-| CONSJ | are `unsafe-inline` | 🔴 nemitigat |
-| utilajhub | domeniul nu rezolvă (SERVFAIL, item deschis în Master) | netestabil |
+| App | Locul de injectare există? | `script-src` | Expunere reală |
+|---|---|---|---|
+| **Tutor** | da (`legal-doc.ts` → 3 pagini) | nonce, **fără** `unsafe-inline` | ✅ blocat de browser |
+| **knowbest** | **NU — zero `dangerouslySetInnerHTML` în tot `src/app`** | are `unsafe-inline` | ✅ **neexpus** (nu e ce am scris inițial) |
+| **CONSJ** | da (`markdown.ts`, mesajul editorial + articole) | are `unsafe-inline` | ⚠️ path deschis, **dar conținutul e scris de admin** → auto-XSS, nu vector de atac |
+| utilajhub | probabil (6 fișiere cu injectare) | netestabil — domeniul nu rezolvă | ❓ neverificat |
+
+Ce a fost greșit în prima variantă: am dedus expunerea din simpla **prezență a ajutorului**, fără să
+verific că există și locul unde se injectează HTML. La knowbest nu există. Iar la CONSJ, deși
+defectul de escapare e identic, conținutul vine din panoul de administrare al unui singur autor —
+deci „cine ar putea introduce markdown ostil?" are răspunsul „doar proprietarul site-ului".
+Severitatea reală acolo e mult sub ce sugera tabelul inițial.
 
 Nu am modificat celelalte proiecte — fiecare cere sesiunea lui. **De ridicat la nivel de ecosistem.**
 
