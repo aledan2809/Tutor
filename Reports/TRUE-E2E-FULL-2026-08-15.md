@@ -213,6 +213,43 @@ faza Gateway nu poate produce semnal **niciodată** în această configurație. 
 
 ---
 
+## 8. 🟡 Un furnizor de autentificare e mort, și încarcă un script Google pe fiecare pagină
+
+**Găsit abia la final**, recuperând manual rezultatul pe care faza Gateway îl pierduse prin timeout.
+Tester-ul raportase 49 de scenarii picate din 62; grupate, motivele erau: **30× „erori de consolă pe
+pagină" (2 erori)**, 11× după submit (3), 8× erori netratate (10), 8× mesaj de eroare neafișat.
+
+Am verificat în browser, pe fereastră curată, ca să exclud ipoteza că ar fi tot §1 (NextAuth căzând
+pe 429). **Nu e**: o vizită anonimă pe pagina de start produce exact două erori:
+
+```
+Loading the stylesheet 'https://accounts.google.com/gsi/style' violates CSP: "style-src 'self' 'unsafe-inline'"
+Not signed in with the identity provider.
+```
+
+Pe `/auth/signin` se adaugă a treia: `[GSI_LOGGER]: FedCM get() rejects with NetworkError`.
+
+**Cauza**: hardening-ul CSP (`72765fc`, notat în TODO ca „scos unsafe-eval și One Tap") a eliminat
+permisiunea One Tap din `style-src` — dar a lăsat pe loc **și furnizorul înregistrat**
+(`/api/auth/providers` listează `google-one-tap`), **și scriptul** `accounts.google.com/gsi/client`,
+care se încarcă pe fiecare pagină și eșuează de fiecare dată.
+
+**Ce NU e afectat**: autentificarea Google obișnuită. Butonul „Continuă cu Google" e unul propriu
+(zero elemente GSI în DOM), iar `/api/auth/signin/google` întoarce 302 corect.
+
+**Ce e afectat**: unul din patru furnizori anunțați nu poate funcționa; fiecare vizitator încarcă
+un script terț inutil; iar scriptul pornește **înainte** de alegerea pe bannerul de cookie-uri —
+punct relevant pentru o platformă ai cărei utilizatori sunt minori.
+
+**Reparație**: ori permite `accounts.google.com` în `style-src` și repară One Tap, ori scoate
+furnizorul + scriptul. Starea de mijloc de acum e cea mai proastă dintre cele trei.
+
+**De reținut ca metodă**: nici auditul de cod, nici journey-ul nu au prins asta — journey-ul
+clasificase paginile drept OK fiindcă verifică titluri și conținut, nu consola. Semnalul a venit
+exclusiv din faza Gateway, adică fix stratul pe care loop-ul îl pierduse prin timeout (§7).
+
+---
+
 ## Ce a mers — enumerat, fiindcă și asta e rezultat
 
 - **Control de acces anonim**: 15/15 rute de administrare → `401`.
