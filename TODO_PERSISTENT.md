@@ -4,6 +4,25 @@
 
 ---
 
+## [x] 🧮 Sprint de calcul — lanțuri aritmetice cronometrate cu adaptare în timp real — LIVRAT 2026-08-15 (`a556bac`, LIVE pe etutor.ro)
+
+Sesiune nouă în domeniul privat **Aptitudini Aviație** (Rareș + admini), cerută de user pentru antrenarea gândirii rapide cu numere.
+
+**Ce face**: lanțuri de operații (+ − × ÷) cu precedență standard, rezultat final mereu în 1..30 deși intermediarele pot fi mult mai mari (`25 × 5 − 40 ÷ 8 − 95`), împărțiri exacte prin construcție. 20 de exerciții, ceas per întrebare 45s→12s. La expirare: marcat greșit + arată răspunsul corect + explicația. Debrief obligatoriu de 2 întrebări la final (dificultate + timp) care reglează sesiunea următoare.
+
+**Adaptare în timp real**: întrebările se generează una câte una din cum au mers cele dinainte. Semnal = cât din bugetul de timp consumă (corect sub 50% = prea ușor). Timpul reacționează la fiecare răspuns, dificultatea pe serii (3 rapide urcă / 2 ratări coboară). Starea NU se stochează — fold pur peste istoric, deci idempotent la cereri reluate. Vezi **L440** în `Master/knowledge/lessons-learned.md`.
+
+**Fișiere**: `src/lib/{mental-chain,sprint-live,sprint-adapt,sprint-session}.ts`, `src/app/api/[domain]/session/{start,answer,complete,next,sprint-next,sprint-feedback}`, `src/components/session/{question-timer,sprint-card,sprint-feedback-form}.tsx`, migrație `0043_sprint_profile`.
+
+**Verificat**: 2 review-uri adversariale (19 probleme reale reparate), 492 teste, tsc + build, rulare end-to-end pe instanță reală cu 3 profiluri de elev, verificare live pe prod.
+
+### [ ] Rămas — de făcut la nevoie, nu blocant
+- **Credențiale de test pentru Tutor lipsesc din seif** (`JOURNEY_EMAIL`/`JOURNEY_PASSWORD`). Parolele conturilor `test_student@test.com` etc. veneau din `/tmp/.tutor-*-pw`, care nu mai există. Consecință: journey-audit și TWG nu se pot autentifica pe etutor.ro. Sprintul e oricum inaccesibil oricărui tester automat (domeniu restricționat la contul lui Rareș), dar restul materiilor ar fi testabile.
+- **Reglaj fin după uz real**: pragurile (50% = rapid, 3 rapide urcă, 2 ratări coboară, ×0.9/×1.15 pe timp) sunt alese, nu măsurate pe Rareș. De ajustat după câteva sesiuni reale dacă urcă/coboară prea repede.
+
+---
+
+
 ## [x] 🔔 Remindere & escaladare configurabile din UI (părinte + meditator) — COMPLET LIVE (Batch 1+2 2026-07-10 `c7fa557` · Batch 3 2026-07-12 `cc66fde`)
 
 **Cerere user**: părintele ȘI meditatorul să-și stabilească singuri, din UI, modalitatea de comunicare a reminderelor (canalele + **ordinea** lor, pt copil și pt ei), frecvența, escaladarea automată. Mockup aprobat (acum vs propunere) + 4 decizii: presetări+reglaj-fin · doar părintele în cascadă (meditator pe praguri) · interval recurent SAU oră fixă · părintele are ultimul cuvânt pe copil.

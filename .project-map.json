@@ -1,0 +1,77 @@
+{
+  "$schema": "project-map/v1",
+  "project": "Tutor",
+  "path": "/Users/danciulescu/Projects/Tutor",
+  "aliases": [
+    "Tutor"
+  ],
+  "generatedAt": "2026-07-28T08:35:55.103Z",
+  "structureFingerprint": "2962468a61f2681e",
+  "classification": "ACTIVE",
+  "deploy": "12 | tutor | 3013 | etutor.ro (www→apex) · tutor.knowbest.ro 301→etutor.ro | cd /var/www/tutor && git pull && npm install && npx prisma migrate deploy && npm run build && pm2 restart tutor --update-env (npm install + mig",
+  "entryPoints": [],
+  "importantFiles": [
+    "CLAUDE.md",
+    "TODO_PERSISTENT.md",
+    "DEVELOPMENT_STATUS.md",
+    "AUDIT_GAPS.md",
+    "prisma/schema.prisma",
+    ".env.example",
+    "knowledge/lessons-learned.md"
+  ],
+  "scripts": [
+    "dev",
+    "build",
+    "start",
+    "test",
+    "test:watch",
+    "test:coverage",
+    "test:e2e",
+    "test:e2e:report"
+  ],
+  "dependencies": [
+    "@aledan/analytics",
+    "@aledan/gcalendar",
+    "@aledan/notify-ladder",
+    "@aledan/sms",
+    "@aledan/telegram",
+    "@aledan/whatsapp",
+    "@prisma/client",
+    "ai-router",
+    "next",
+    "next-auth",
+    "next-intl",
+    "react",
+    "react-dom",
+    "react-markdown",
+    "react-syntax-highlighter"
+  ],
+  "modules": {
+    "AIR": "dep",
+    "WA": "dep",
+    "SMS": "dep",
+    "TG": "dep",
+    "NL": "dep",
+    "GCAL": "dep",
+    "STR": "direct",
+    "BROKER": "src",
+    "LEGAL": "src",
+    "OCR": "src",
+    "ANL": "dep"
+  },
+  "coupledFiles": [
+    [
+      "prisma/schema.prisma",
+      "prisma/migrations/"
+    ]
+  ],
+  "todo": {
+    "path": "TODO_PERSISTENT.md",
+    "openCount": 13
+  },
+  "lastSession": {
+    "path": "DEVELOPMENT_STATUS.md",
+    "lastUpdated": "2026-07-28 (Batch B–H /pa audit — regim mesh autonom, toate "
+  },
+  "recentLessons": 0
+}
