@@ -91,7 +91,7 @@ sarcinii de test.
 
 ---
 
-## 2. 🟡 Ținte de atins prea mici pe mobil — regresie față de măsurătoarea anterioară
+## 2. 🟡 Ținte de atins prea mici pe mobil — 63/100, sub pragul de 44×44 px
 
 `mobile-tester` **63/100 (FAIL)** — singurul plugin picat.
 
@@ -111,7 +111,7 @@ Corespunde gap-urilor deja deschise **AGT-007 / AGT-009**.
 
 ---
 
-## 3. 🟡 Șase pagini afișează titluri în română indiferent de limba aleasă
+## 3. 🟡 Cinci pagini afișează titluri în română indiferent de limba aleasă
 
 Journey-ul a semnalat pe locale-ul **`/en/`**: `h1="Bibliografie"`, `h1="Statistici"`.
 
@@ -135,7 +135,7 @@ nu e defect de traducere. Numărasem greșit.
 
 ---
 
-## 4. 🔵 Escapare incompletă în randarea documentelor legale — la noi e blocată de CSP, la vecini nu
+## 4. 🔵 Escapare incompletă în randarea documentelor legale — blocată azi de CSP
 
 `src/lib/legal-doc.ts` transformă markdown-ul primit de la Legal Hub în HTML și îl injectează cu
 `dangerouslySetInnerHTML`. `escapeHtml` acoperă `&`, `<`, `>` — **dar nu ghilimelele**, iar
