@@ -47,7 +47,7 @@ async function callTextAI(prompt) {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${groqKey}` },
         body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
+          model: "openai/gpt-oss-120b",
           messages: [{ role: "user", content: prompt }],
           temperature: 0.4,
           response_format: { type: "json_object" },
@@ -95,7 +95,7 @@ async function callVerifyAI(prompt) {
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${groqKey}` },
-        body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{ role: "user", content: prompt }], temperature: 0, response_format: { type: "json_object" } }),
+        body: JSON.stringify({ model: "openai/gpt-oss-120b", messages: [{ role: "user", content: prompt }], temperature: 0, response_format: { type: "json_object" } }),
       });
       if (res.ok) return (await res.json()).choices?.[0]?.message?.content || "";
     } catch { /* fall through */ }
