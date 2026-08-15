@@ -5,6 +5,9 @@ import { sm2, gradeResponse } from "@/lib/sm2";
 import { awardAnswerXp } from "@/lib/gamification";
 import { withErrorHandler } from "@/lib/api-handler";
 import { LICENTA_DOMAIN_SLUG } from "@/lib/licenta-constants";
+import { SPRINT_TOPIC } from "@/lib/mental-chain";
+import { SPRINT_SESSION_TYPE, getOrCreateNextSprintQuestion } from "@/lib/sprint-session";
+import { liveSignalMessage } from "@/lib/sprint-live";
 
 async function _POST(
   req: NextRequest,
@@ -81,10 +84,20 @@ async function _POST(
     },
   });
 
+  // The timed sprint is a speed drill, not spaced-repetition material: its
+  // questions are generated fresh every run, so there is nothing to schedule a
+  // review of, and a clock that runs out grades wrong. Feeding that into
+  // Progress/WeakArea made the whole domain look like a weakness — which in turn
+  // put the topic on the parent's report, dragged the escalation monitor's
+  // 7-day score down, and made the "exam ready" achievement (every Progress row
+  // ≥ 90%) permanently unreachable. Attempts are still recorded and still earn
+  // XP; only the mastery bookkeeping is skipped.
+  const isSprintQuestion = question.topic === SPRINT_TOPIC;
+
   // Update progress with SM-2 (domain-scoped)
   const quality = gradeResponse(isCorrect, timeSpent || 30000);
 
-  const existingProgress = await prisma.progress.findUnique({
+  const existingProgress = isSprintQuestion ? null : await prisma.progress.findUnique({
     where: {
       userId_domainId_subject_topic: {
         userId: session.user.id,
@@ -102,7 +115,7 @@ async function _POST(
     repetitions: existingProgress?.repetitions ?? 0,
   });
 
-  await prisma.progress.upsert({
+  if (!isSprintQuestion) await prisma.progress.upsert({
     where: {
       userId_domainId_subject_topic: {
         userId: session.user.id,
@@ -188,6 +201,51 @@ async function _POST(
     }
   }
 
+  // Sprint only: hand back the NEXT question with this answer's result.
+  //
+  // A sprint's questions are generated one at a time from how the run is going,
+  // so the client would otherwise have to make a second round trip after every
+  // answer. In a drill whose whole point is speed — and where the student often
+  // taps "next" the instant the tick appears — that shows up as a visible stall.
+  // Folding it in also halves the request rate against the 60/min API limit.
+  //
+  // Strictly additive and fail-soft: if this throws, the answer result is
+  // returned as before and the client falls back to POST /session/sprint-next
+  // (which is idempotent and returns this same question).
+  let sprintNext: unknown = undefined;
+  if (learningSession.type === SPRINT_SESSION_TYPE) {
+    try {
+      const next = await getOrCreateNextSprintQuestion(learningSession);
+      sprintNext = next.done
+        ? { done: true, answered: next.answered, total: next.total }
+        : {
+            done: false,
+            answered: next.answered,
+            total: next.total,
+            index: next.index,
+            seconds: next.seconds,
+            signal: liveSignalMessage(next.live),
+            question: next.question && {
+              id: next.question.id,
+              subject: next.question.subject,
+              topic: next.question.topic,
+              difficulty: next.question.difficulty,
+              type: next.question.type,
+              content: next.question.content,
+              options: next.question.options,
+              imageUrl: null,
+              passage: null,
+            },
+          };
+    } catch (err) {
+      // Client falls back to POST /session/sprint-next. Logged because this is
+      // otherwise invisible from both ends: the response looks normal and the
+      // student just sees the next-question load fail.
+      console.error("[sprint] failed to prepare the next question", err);
+      sprintNext = undefined;
+    }
+  }
+
   return NextResponse.json({
     attemptId: attempt.id,
     isCorrect,
@@ -198,6 +256,7 @@ async function _POST(
     quality,
     nextReview: sm2Result.nextReview,
     xpAwarded,
+    ...(sprintNext ? { sprintNext } : {}),
   });
 }
 

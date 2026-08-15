@@ -56,6 +56,7 @@ model User {
   attempts      Attempt[]
   progress      Progress[]
   weakAreas     WeakArea[]
+  sprintProfiles SprintProfile[]
   notifications Notification[]
   escalationEvents EscalationEvent[]
   notificationPreference NotificationPreference?
@@ -301,6 +302,7 @@ model Domain {
   // Phase 3: Learning Engine
   progress        Progress[]
   weakAreas       WeakArea[]
+  sprintProfiles  SprintProfile[]
   // Phase 9: Watcher & Instructor relations
   groups               Group[]
   instructorGoals      InstructorGoal[]
@@ -471,6 +473,31 @@ model Progress {
 
   @@unique([userId, domainId, subject, topic])
   @@index([userId, domainId])
+}
+
+// Adaptive state for the timed "Sprint de calcul" sessions (chained mental
+// arithmetic). Written only by the mandatory end-of-session feedback: the
+// student says whether the difficulty and the pace felt right, and that moves
+// `level` (which tier band the next session spans) and `timeFactor` (a
+// multiplier on the per-question clock).
+model SprintProfile {
+  id         String   @id @default(cuid())
+  userId     String
+  domainId   String
+  /// 1..5 — the centre of the tier band the next session ramps across.
+  level      Int      @default(1)
+  /// Multiplier on the per-question time ramp (0.5..2.5).
+  timeFactor Float    @default(1)
+  /// How many sprints have been completed WITH feedback.
+  sessions   Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, domainId])
+  @@index([userId])
 }
 
 model WeakArea {

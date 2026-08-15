@@ -25,12 +25,20 @@ interface QuestionRendererProps {
   question: QuestionData;
   onAnswer: (answer: string) => void;
   disabled?: boolean;
+  /**
+   * Answer on a single tap instead of select-then-Submit. Used by the timed
+   * calculation sprint, where the last questions allow ~12 seconds and a second
+   * tap is a meaningful share of the budget. Off everywhere else, so no existing
+   * session changes behaviour.
+   */
+  instantAnswer?: boolean;
 }
 
 export function QuestionRenderer({
   question,
   onAnswer,
   disabled = false,
+  instantAnswer = false,
 }: QuestionRendererProps) {
   const t = useTranslations("grile");
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -292,7 +300,11 @@ export function QuestionRenderer({
           {options.map((opt, idx) => (
             <button
               key={idx}
-              onClick={() => !disabled && setSelectedOption(opt.value)}
+              onClick={() => {
+                if (disabled) return;
+                setSelectedOption(opt.value);
+                if (instantAnswer) onAnswer(opt.value);
+              }}
               disabled={disabled}
               className={`w-full rounded-lg border px-4 py-3 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 ${
                 selectedOption === opt.value
@@ -321,7 +333,8 @@ export function QuestionRenderer({
         />
       )}
 
-      {/* Submit button */}
+      {/* Submit button — redundant when a tap on an option already answers. */}
+      {!(instantAnswer && question.type === "MULTIPLE_CHOICE") && (
       <button
         onClick={handleSubmit}
         disabled={
@@ -333,6 +346,7 @@ export function QuestionRenderer({
       >
         Submit Answer
       </button>
+      )}
     </div>
   );
 }

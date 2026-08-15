@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import { useRouter } from "@/i18n/navigation";
 import { SessionSelector } from "@/components/session/session-selector";
+import { SprintCard, type SprintInfo } from "@/components/session/sprint-card";
 import { EXAM_LEVELS, classifyDomainSlug, stripLevelSuffix, type ExamLevel } from "@/lib/exam-level";
 import { canSeeRestrictedDomains } from "@/lib/domain-access";
 
@@ -25,6 +26,8 @@ interface SessionNextResponse {
     duration: number;
     questionCount: number;
   }[];
+  /** Present only on the aptitude domain — describes the next timed sprint. */
+  sprint?: SprintInfo | null;
   stats: {
     totalQuestions: number;
     topicsStudied: number;
@@ -137,16 +140,28 @@ export default function PracticePage() {
         body: JSON.stringify({ type }),
       });
       const session = await res.json();
+      // The sprint route refuses to start a new run while the previous one's
+      // mandatory debrief is outstanding — send the student there instead.
+      if (res.status === 409 && session.pendingFeedbackSessionId) {
+        goToSprintFeedback(session.pendingFeedbackSessionId);
+        return;
+      }
       if (session.sessionId) {
         localStorage.setItem(
           `session_${session.sessionId}`,
           JSON.stringify({ ...session, domainSlug: selectedDomain })
         );
         router.push(`/dashboard/practice/${session.sessionId}`);
+      } else {
+        setStarting(false);
       }
     } catch {
       setStarting(false);
     }
+  };
+
+  const goToSprintFeedback = (pendingSessionId: string) => {
+    router.push(`/dashboard/practice/${pendingSessionId}?feedback=1`);
   };
 
   // A1: enroll in a picked subject + start practicing immediately (one tap → question).
@@ -269,18 +284,35 @@ export default function PracticePage() {
 
           {loading ? (
             <div className="py-12 text-center text-gray-500">{t("grile.loading")}</div>
-          ) : data && data.stats.totalQuestions > 0 ? (
-            <SessionSelector
-              availableTypes={data.availableTypes}
-              recommended={data.recommended}
-              stats={data.stats}
-              onSelect={handleSelect}
-              loading={starting}
-            />
-          ) : data ? (
-            <div className="py-12 text-center text-gray-500">{t("grile.noGrile")}</div>
           ) : (
-            <div className="py-12 text-center text-gray-500">{t("grile.loadError")}</div>
+            <>
+              {/* The sprint generates its own questions, so it stays available
+                  even when the ordinary bank for this subject is empty — it is
+                  deliberately outside the totalQuestions gate below. */}
+              {data?.sprint && (
+                <SprintCard
+                  sprint={data.sprint}
+                  onStart={() => handleSelect("sprint")}
+                  onResolveFeedback={goToSprintFeedback}
+                  loading={starting}
+                />
+              )}
+              {data && data.stats.totalQuestions > 0 ? (
+              <SessionSelector
+                availableTypes={data.availableTypes.filter((t) => t.type !== "sprint")}
+                recommended={data.recommended}
+                stats={data.stats}
+                onSelect={handleSelect}
+                loading={starting}
+              />
+              ) : data ? (
+                !data.sprint && (
+                  <div className="py-12 text-center text-gray-500">{t("grile.noGrile")}</div>
+                )
+              ) : (
+                <div className="py-12 text-center text-gray-500">{t("grile.loadError")}</div>
+              )}
+            </>
           )}
         </>
       )}

@@ -2,12 +2,14 @@ import { describe, it, expect } from "vitest";
 import { SESSION_TYPES, type SessionType } from "@/lib/session-engine";
 
 describe("Session Types", () => {
-  it("should have 6 session types", () => {
-    expect(Object.keys(SESSION_TYPES)).toHaveLength(6);
+  it("should have 7 session types", () => {
+    expect(Object.keys(SESSION_TYPES)).toHaveLength(7);
   });
 
   it("should have all expected types", () => {
-    const types: SessionType[] = ["micro", "quick", "deep", "repair", "recovery", "intensive"];
+    // "sprint" is the timed chained-arithmetic drill — offered only in the
+    // aptitude domain, but it lives in the same registry as the rest.
+    const types: SessionType[] = ["micro", "quick", "deep", "repair", "recovery", "intensive", "sprint"];
     for (const t of types) {
       expect(SESSION_TYPES).toHaveProperty(t);
     }

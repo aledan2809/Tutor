@@ -5,6 +5,11 @@ import { updateWeakAreas } from "@/lib/session-engine";
 import { awardSessionCompleteXp } from "@/lib/gamification";
 import { withErrorHandler } from "@/lib/api-handler";
 import { cancelEscalation } from "@/lib/escalation/engine";
+import {
+  SPRINT_SESSION_TYPE,
+  SPRINT_TIMEOUT_ANSWER,
+  hasSprintFeedback,
+} from "@/lib/sprint-session";
 
 async function _POST(
   req: NextRequest,
@@ -73,8 +78,13 @@ async function _POST(
   // catches this, but this makes it instant so no further nudges go out).
   await cancelEscalation(session.user.id);
 
-  // Update weak areas (domain-scoped)
-  await updateWeakAreas(session.user.id, domain.id);
+  // Update weak areas (domain-scoped). Skipped for sprints — see the note in the
+  // answer route: the drill writes no Progress rows, so there is nothing to
+  // re-derive, and running the sweep would only re-evaluate other topics on the
+  // back of a session that says nothing about them.
+  if (learningSession.type !== SPRINT_SESSION_TYPE) {
+    await updateWeakAreas(session.user.id, domain.id);
+  }
 
   // Award gamification XP for session completion
   let gamification = null;
@@ -87,11 +97,19 @@ async function _POST(
     );
   }
 
+  // A sprint isn't finished until the student says how it felt — that answer is
+  // what sets the next session's difficulty and clock. The results screen holds
+  // the debrief in front of the score when this flag comes back true.
+  const sprintFeedbackRequired =
+    learningSession.type === SPRINT_SESSION_TYPE && !hasSprintFeedback(learningSession.metadata);
+
   return NextResponse.json({
     sessionId: completedSession.id,
     score: Math.round(score * 10) / 10,
     totalQuestions: totalAttempts,
     correctAnswers: correctAttempts,
+    sprintFeedbackRequired,
+    timedOut: learningSession.attempts.filter((a) => a.answer === SPRINT_TIMEOUT_ANSWER).length,
     duration: completedSession.endedAt
       ? Math.round(
           (completedSession.endedAt.getTime() -

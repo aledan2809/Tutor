@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma, type Question } from "@prisma/client";
+import { SPRINT_QUESTION_COUNT, SPRINT_TOPIC } from "@/lib/mental-chain";
 
 // ─── Session Type Definitions ───
 
@@ -10,9 +11,31 @@ export const SESSION_TYPES = {
   repair: { label: "Repair Session", duration: 15 * 60, questionCount: 20 },
   recovery: { label: "Recovery Session", duration: 10 * 60, questionCount: 15 },
   intensive: { label: "Intensive Session", duration: 20 * 60, questionCount: 30 },
+  // Timed chained-arithmetic drill. Questions are generated per run rather than
+  // drawn from the bank, and the real clock is per question — `duration` here is
+  // only a fallback ceiling; the start route computes the true sum.
+  sprint: { label: "Sprint de calcul", duration: 10 * 60, questionCount: SPRINT_QUESTION_COUNT },
 } as const;
 
 export type SessionType = keyof typeof SESSION_TYPES;
+
+/**
+ * Sprint questions are generated fresh per session and only make sense under
+ * their per-question clock, so every generic selector below skips them.
+ *
+ * Expressed as `AND` rather than a bare `topic` key ON PURPOSE: these selectors
+ * already set `topic: <the topic being revised>`, and spreading a second `topic`
+ * key into the same object literal silently REPLACES that targeting — spaced
+ * repetition and weak-area repair would quietly start returning any topic in the
+ * subject. `AND` composes instead of colliding, whatever the caller passes.
+ *
+ * Belt-and-braces: generated rows are also stored as APPROVED rather than
+ * PUBLISHED (see sprint-session.ts), which keeps them out of every other
+ * question query in the app. This filter guards the session engine specifically.
+ */
+const EXCLUDE_SPRINT: Prisma.QuestionWhereInput = {
+  AND: [{ topic: { not: SPRINT_TOPIC } }],
+};
 
 // ─── Per-question time norm (official EN VIII reference: 120 min / 18 items) ───
 // For the Grile (Capacitate) bank the session timer is the SUM of per-question
@@ -135,7 +158,13 @@ async function pickRandom(
 ): Promise<Question[]> {
   if (count <= 0) return [];
   const ids = await prisma.question.findMany({
-    where: { domainId, status: "PUBLISHED", ...extra, id: { notIn: [...exclude] } },
+    where: {
+      domainId,
+      status: "PUBLISHED",
+      ...EXCLUDE_SPRINT,
+      ...extra,
+      id: { notIn: [...exclude] },
+    },
     select: { id: true },
   });
   const chosen = shuffle(ids.map((x) => x.id)).slice(0, count);
@@ -214,6 +243,7 @@ async function selectAdaptiveQuestions(
         subject: dt.subject,
         topic: dt.topic,
         status: "PUBLISHED",
+        ...EXCLUDE_SPRINT,
         id: { notIn: [...reviewQuestions.map((rq) => rq.id), ...exclude] },
       },
     });
@@ -248,6 +278,7 @@ async function selectRepairQuestions(
         subject: wa.subject,
         topic: wa.topic,
         status: "PUBLISHED",
+        ...EXCLUDE_SPRINT,
         id: { notIn: [...questions.map((q) => q.id), ...exclude] },
       },
       take: Math.ceil(count / Math.max(weakAreas.length, 1)),
@@ -297,6 +328,7 @@ async function selectRecoveryQuestions(
         topic: p.topic,
         status: "PUBLISHED",
         difficulty: { lte: 3 },
+        ...EXCLUDE_SPRINT,
         id: { notIn: [...questions.map((rq) => rq.id), ...exclude] },
       },
     });

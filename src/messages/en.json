@@ -109,7 +109,8 @@
       "deep": "Deep session",
       "repair": "Repair session",
       "recovery": "Recovery session",
-      "intensive": "Intensive session"
+      "intensive": "Intensive session",
+      "sprint": "Calculation sprint"
     },
     "infoLabel": "Details",
     "cascade": {
@@ -129,7 +130,8 @@
       "deep": "20 min · 30 questions — a longer workout when you have time.",
       "repair": "15 min · 20 questions — focuses on your weak areas.",
       "recovery": "10 min · 15 questions — ease back in after a break: due reviews + easy questions (NOT mistakes — those are 'repair').",
-      "intensive": "20 min · 30 questions — higher pace and difficulty for intense practice."
+      "intensive": "20 min · 30 questions — higher pace and difficulty for intense practice.",
+      "sprint": "Chained operations (+ − × ÷) solved in your head, with a time limit per exercise. Difficulty rises and the clock tightens as the session goes on."
     },
     "reasons": {
       "regular": "Regular practice",

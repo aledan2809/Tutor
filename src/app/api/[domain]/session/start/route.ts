@@ -11,6 +11,21 @@ import {
 import { withErrorHandler } from "@/lib/api-handler";
 import { canAccessDomain } from "@/lib/domain-access";
 import { LICENTA_DOMAIN_SLUG } from "@/lib/licenta-constants";
+import {
+  SPRINT_DOMAIN_SLUG,
+  SPRINT_SESSION_TYPE,
+  findSprintAwaitingFeedback,
+  getOrCreateNextSprintQuestion,
+  loadSprintProfile,
+  pruneOrphanSprintQuestions,
+} from "@/lib/sprint-session";
+import {
+  SPRINT_QUESTION_COUNT,
+  TIER_LABELS,
+  secondsForIndex,
+  tierForIndex,
+  type Tier,
+} from "@/lib/mental-chain";
 
 async function _POST(
   req: NextRequest,
@@ -48,6 +63,106 @@ async function _POST(
   // by admins/superadmins, allowlisted users, or users enrolled in that domain.
   if (!canAccessDomain(session.user, domainSlug, domain.id)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // ── Sprint de calcul: generated fresh, clocked per question ──
+  if (sessionType === SPRINT_SESSION_TYPE) {
+    if (domainSlug !== SPRINT_DOMAIN_SLUG) {
+      return NextResponse.json(
+        { error: "Sprint sessions are only available in the aptitude domain" },
+        { status: 400 }
+      );
+    }
+
+    // The feedback at the end of a sprint is what tunes the next one, so a
+    // finished sprint that never got it blocks the next start (recent ones only
+    // — see FEEDBACK_BLOCK_DAYS, so a stale session can't lock the drill).
+    const pending = await findSprintAwaitingFeedback(session.user.id, domain.id);
+    if (pending) {
+      return NextResponse.json(
+        {
+          error: "Feedback required",
+          pendingFeedbackSessionId: pending.id,
+          message:
+            "Spune-ne întâi cum a fost sesiunea anterioară — de asta depinde cât de grea o facem pe următoarea.",
+        },
+        { status: 409 }
+      );
+    }
+
+    // Best-effort housekeeping: rows left behind by abandoned sprints.
+    await pruneOrphanSprintQuestions(domain.id).catch(() => 0);
+
+    const profile = await loadSprintProfile(session.user.id, domain.id);
+    const total = SPRINT_QUESTION_COUNT;
+
+    // Only the PLAN is fixed up front. The questions themselves are generated
+    // one at a time as the sprint runs, because each one's difficulty and clock
+    // depend on how the previous answers went — see getOrCreateNextSprintQuestion.
+    const plannedDuration = Array.from({ length: total }, (_, i) =>
+      secondsForIndex(i, total, profile.timeFactor)
+    ).reduce((a, b) => a + b, 0);
+
+    const newSprint = await prisma.session.create({
+      data: {
+        userId: session.user.id,
+        domainId: domain.id,
+        type: SPRINT_SESSION_TYPE,
+        metadata: {
+          duration: plannedDuration,
+          totalQuestions: total,
+          questionIds: [],
+          questionSeconds: [],
+          level: profile.level,
+          timeFactor: profile.timeFactor,
+        },
+      },
+    });
+
+    const first = await getOrCreateNextSprintQuestion({
+      id: newSprint.id,
+      userId: session.user.id,
+      domainId: domain.id,
+      metadata: {
+        duration: plannedDuration,
+        totalQuestions: total,
+        questionIds: [],
+        questionSeconds: [],
+        level: profile.level,
+        timeFactor: profile.timeFactor,
+      } as unknown as object,
+    });
+
+    if (!first.question || first.seconds === undefined) {
+      return NextResponse.json({ error: "Could not generate the first question" }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      sessionId: newSprint.id,
+      type: SPRINT_SESSION_TYPE,
+      // Planned total, for display only — the real limit is per question, and
+      // the live adaptation moves it as the session goes.
+      duration: plannedDuration,
+      level: profile.level,
+      levelLabel: TIER_LABELS[tierForIndex(0, total, profile.level) as Tier],
+      totalQuestions: total,
+      // One question at a time: the client asks for the next after each answer.
+      adaptive: true,
+      questionSeconds: [first.seconds],
+      questions: [
+        {
+          id: first.question.id,
+          subject: first.question.subject,
+          topic: first.question.topic,
+          difficulty: first.question.difficulty,
+          type: first.question.type,
+          content: first.question.content,
+          options: first.question.options,
+          imageUrl: null,
+          passage: null,
+        },
+      ],
+    });
   }
 
   const config = SESSION_TYPES[sessionType];
