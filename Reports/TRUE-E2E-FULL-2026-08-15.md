@@ -29,15 +29,15 @@ Un singur defect merită atenție reală și e descris primul.
 | 2 | `[7]` E2E Audit CODE | ✅ pe prod | **95/100**, 1 plugin FAIL |
 | 3 | `[8]` Journey audit | ✅ 19 rute, autentificat | **18 OK / 1 fals pozitiv** |
 | 4 | TRWG-GW (Tester-Gateway) | ✅ config îmbogățit + 2 rulări | FAILED — **o singură cauză-rădăcină** |
-| 5 | TWG loop pe P0/P1 | ⏭️ nerulat — vezi §Blocaje (L340) | fix propus, neaplicat |
+| 5 | TWG loop pe P0/P1 | ✅ rulat (autorizat de user) | 1 iterație — `/review` 3 constatări **toate false**, Vision 42/100 onest, Gateway expirat |
 | 6 | Scenarii workflow multi-rol | ✅ 16 scenarii | **13 PASS**, 2 erori de probă, 1 real |
 | 7 | Concurență | ✅ F1 | PASS (200/200, 155 ms) |
 | 8 | Browser real headed | ✅ prin [8] + TG (32 capturi) | PASS |
 | 9 | Paritate RO↔EN | ✅ | **defect găsit** (§3) |
 | 10 | Stres + audit trail | ✅ I1 | PASS (10 paralel, 0×5xx, 310 ms) |
 
-**Acoperire pe roluri**: SuperAdmin ✅ · Instructor ✅ · Admin ✅ · Student ✅ (prin contul superadmin,
-înrolat STUDENT în `matematica-v-viii` + `romana-cl-viii`) · **Watcher ❌** (parolă invalidă).
+**Acoperire pe roluri — completă, 5/5**: SuperAdmin ✅ · Instructor ✅ · Admin ✅ · Student ✅ ·
+**Watcher ✅** (provisionat prin `POST /api/admin/users` + `/[id]/enroll`, 10/10 PASS — vezi §6).
 
 ---
 
@@ -152,6 +152,64 @@ Nu am modificat celelalte proiecte — fiecare cere sesiunea lui. **De ridicat l
 `register/route.ts:17` și `reset-password/route.ts:10` cer `min(8)` fără `.max()`. Verificat empiric:
 o parolă de 87 de caractere se autentifică cu primele 72. Efect practic mic (nu se exploatează de la
 distanță fără a ști începutul parolei), dar e un plafon tăcut pe entropie. Un `.max(72)` îl închide.
+
+---
+
+## 6. Rolul WATCHER — 10/10, iar promisiunea din cod se ține
+
+Provisionat **prin suprafețele aplicației**, nu prin scriere în baza de date (aceea a rămas
+blocată): `POST /api/admin/users` → `POST /api/admin/users/[id]/enroll` cu `roles:["WATCHER"]`.
+
+Codul promite, într-un comentariu, că *„un watcher pur (părinte) vede DOAR copiii lui asociați"*.
+Verificat pe producție:
+
+| Test | Rezultat |
+|---|---|
+| Watcher fără niciun copil asociat → câți elevi vede | **0** |
+| Citirea unui elev nelegat (IDOR) | **403** |
+| Rute de administrare | **3/3 refuzate** |
+| Panou watcher + rapoarte | 200 |
+
+Conturile de test create pe parcurs au fost dezactivate prin `PATCH /api/admin/users/[id]`.
+
+---
+
+## 7. TWG loop — rulat, cu două straturi din patru neproductive
+
+Loop `loop_trwg_msue6js7_d8ynry`, oprit deliberat după prima iterație (vezi mai jos de ce).
+
+| Strat | Rezultat |
+|---|---|
+| `/review` (AIRouter) | 3 constatări, scor static 71 — **toate trei verificate ca false** |
+| Tester Vision | **42/100 — a funcționat**, contrar avertismentului din preflight |
+| Website Guru | **SĂRIT** (`nested-session-hook-conflict`) → zero fix-uri aplicate |
+| Gateway (Tester) | **INCONCLUSIVE** — expirat la 240 s |
+
+**Cele 3 constatări `/review`, verificate una câte una:**
+1. *„Dependență `domain` lipsă în `useEffect`, provoacă re-fetch infinit"* (bibliography:30, **high**) —
+   afirmația e pe dos: `[]` **previne** re-fetch-ul; adăugarea dependenței l-ar provoca. Intenția
+   („o dată la montare") e corectă. Fals.
+2. Aceeași clasă pe progress:50. Fals.
+3. *„Cheia compusă `verificationToken` ar putea eșua"* (reset-password) — schema are
+   `@@unique([identifier, token])`, iar Prisma generează exact numele `identifier_token` folosit
+   în cod. Fals.
+
+**Vision merită remarcat**: 42/100 cu motivarea *„pagina publică randează corect, dar toate cele 4
+constatări ale auditului sunt neverificabile dintr-o captură a paginii de start"*. Verdict corect —
+unealta a fost onestă despre ce poate și ce nu poate vedea. **Preflight-ul prezisese că Vision va
+eșua; nu a eșuat.** Presupunerea din L340 se aplică la Guru, nu la Vision.
+
+**De ce am oprit loop-ul după o iterație**: cu Guru sărit nu se aplică niciun fix, deci iterațiile
+2-3 ar fi repetat identic aceleași constatări. Iterația 2 confirmase deja: Gateway a primit
+`429 Server busy — a test is already running`.
+
+**Constatare de unealtă (Master, nu Tutor)**: plafonul de 240 s al fazei Gateway e mai scurt decât o
+rulare Tester reală pe acest proiect. Măsurat direct pe API-ul Tester: `status:"running"`,
+`"Executing 62 test scenarios..."`, `durationMs: 299624` — **~5 minute și încă în curs**. Efect în
+lanț: rularea expirată rămâne activă pe Tester-ul partajat, iar iterația următoare ia 429, deci
+faza Gateway nu poate produce semnal **niciodată** în această configurație. Ocolire imediată:
+`--gateway-poll-timeout 900000`. (Am verificat întâi ipoteza greșită că s-ar interoga un endpoint
+404 — nu: `trwg-loop.mjs:267` folosește corect `/api/test/:id/status`, iar fix-ul L342 e la locul lui.)
 
 ---
 
