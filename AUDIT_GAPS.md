@@ -49,4 +49,18 @@
 
 ---
 
-*Last updated: 2026-05-30 (re-audit TRUE-E2E-FULL etutor.ro cutover)*
+## Gaps deschise — True E2E Full Audit [10], 2026-08-15
+
+Raport complet: `Reports/TRUE-E2E-FULL-2026-08-15.md`.
+
+| ID | Gap | Severitate | Status | Dovadă |
+|---|---|---|---|---|
+| AGT-011 | Rate-limit `/api/auth` numără `/api/auth/session` (citire făcută de NextAuth la fiecare pagină) în aceeași găleată de 20/min ca tentativele de login, iar cheia e doar IP-ul → o clasă/familie în spatele unui NAT împarte bugetul și elevii sunt delogați în timpul exersării | P1 | **OPEN** | 60 cereri `/api/auth/session` în 18 rute, 23×429, primul la #18 — `Tester-Gateway/reports/tutor/2026-08-15T12-53-07-796Z-k5y0/network.json`; cod `src/middleware.ts:66-72` |
+| AGT-012 | Ținte de atins sub 44×44 px pe mobil — regresie 75→**63/100**; pe `/dashboard` 14 din 18 butoane sunt sub prag, pe 3 dispozitive | P2 | **OPEN** | `Reports/AUDIT_E2E_2026-08-15.md` §mobile-tester (înlocuiește AGT-007/009, marcate Eliminated dar reapărute) |
+| AGT-013 | Șase pagini randează titluri hardcodate în română indiferent de limbă (`bibliography`, `progress`, `gamification`, `exam-bank`, `admin/exam-bank`, `licenta`). Traducerile NU lipsesc — 859↔859 chei, zero diferențe; paginile nu le folosesc | P2 | **OPEN** | `src/app/[locale]/dashboard/bibliography/page.tsx:66` |
+| AGT-014 | `escapeHtml` din `src/lib/legal-doc.ts` nu escapează ghilimelele, iar linkul markdown intră direct în `href="$2"` → evadare din atribut. Pe Tutor blocat de CSP (fără `unsafe-inline`), dar același cod e copiat în knowbest + CONSJ, care AU `unsafe-inline` | P3 (Tutor) / **ecosistem** | **OPEN** | rulat pe funcția reală: `[x](" onmouseover="alert(1))` → `<a href="" onmouseover="alert(1"` |
+| AGT-015 | Parola n-are `.max()`; bcrypt taie tăcut la 72 de octeți → o parolă de 87 de caractere se autentifică cu primele 72 | P3 | **OPEN** | `register/route.ts:17`, `reset-password/route.ts:10`; verificat empiric cu bcryptjs |
+| AGT-016 | Parolele a 3 conturi de test din `TODO_PERSISTENT.md` sunt invalide (`test_student`, `test_instructor`, `test_watcher`) → **rolul WATCHER a rămas netestat**. Resetarea cere scriere în baza de producție, blocată de clasificator | proces | **OPEN — decizie user** | 3/6 login-uri reușite, 2026-08-15 |
+| AGT-017 | Accesibilitatea paginilor `/` și `/dashboard` e **nemăsurată** — `a11y-scanner` raportează 100/100 dar CSP i-a blocat injectarea scriptului fix pe cele două pagini principale | proces | **OPEN** | `Reports/AUDIT_E2E_2026-08-15.md` §a11y-scanner |
+
+*Last updated: 2026-08-15 (True E2E Full Audit [10] — 95/100 CODE, 18/19 journey, izolare pe domenii verificată)*

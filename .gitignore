@@ -48,3 +48,6 @@ scripts/_rollback/
 # Master [7] plugin audit artifacts (screenshots/auth state — regenerable)
 .tester/
 .tester-screenshots/
+
+# cache generat de e2e-audit-runner
+.e2e-plugin-cache.json

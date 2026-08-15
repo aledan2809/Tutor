@@ -764,6 +764,34 @@ Plan complet în `knowledge/creator-program-plan.md`. Recrutăm creatori de con�
 
 ---
 
+## [x] 🔍 True E2E Full Audit [10] — RE-RULAT 2026-08-15 (raport `Reports/TRUE-E2E-FULL-2026-08-15.md`)
+
+Auditul din 2026-05-11 devenise stale: între timp au intrat **456 commit-uri / 313 fișiere / +32k linii**.
+Matricea a fost re-rulată integral, nu preluată.
+
+**Rezultat**: CODE **95/100** — cel mai bun din istoric (89→40→91→95) · Journey **18/19 OK**
+(a 19-a = fals pozitiv de clasificator) · scenarii **13/16** · concurență + stres PASS
+(10 sesiuni paralele, zero 5xx, 310 ms).
+
+**Ce s-a confirmat că ține**: anonimul refuzat 15/15 cu 401 · granița ADMIN→SuperAdmin 5/5 cu 403 ·
+**izolarea pe domenii exactă** (instructorul din `aviation` vede 24 din 24 ale lui, zero din cele
+540 ale altui domeniu) · fluxul pedagogic complet (întrebare → verdict + explicație + sursă) ·
+Sprintul livrat în aceeași zi funcționează pe prod.
+
+**Ce s-a găsit** → `AUDIT_GAPS.md` AGT-011…017. Cel important: **AGT-011** — rate-limit-ul pe
+`/api/auth` bagă citirea de sesiune (pe care NextAuth o face la fiecare pagină) în aceeași găleată
+de 20/minut-pe-IP cu tentativele de login. O clasă în spatele unui NAT împarte bugetul → elevii
+sunt delogați în timpul exersării. Măsurat: 60 cereri în 18 rute, 23 respinse.
+
+**Ce NU s-a putut executa**: rolul WATCHER (parole de test invalide, resetarea în baza de producție
+blocată de clasificator — AGT-016) · TWG loop (L340: Guru+Vision nu merg din sesiune interactivă) ·
+accesibilitatea pe `/` și `/dashboard` (CSP a blocat scanerul — AGT-017).
+
+**Bonus**: config-ul Tester-Gateway `apps/tutor.json` a fost îmbogățit de la 0 la **5 fluxuri
+critice** + 6 rute publice / 9 protejate / 3 admin.
+
+---
+
 ## 🎯 TRUE FULL E2E — multi-role business workflows
 
 **Invocare**: [10] True Full E2E Audit — scope complet per CLAUDE.md §10.

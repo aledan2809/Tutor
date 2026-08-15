@@ -1,0 +1,233 @@
+# True E2E Full Audit [10] — Tutor / etutor.ro — 2026-08-15
+
+**Țintă**: `https://etutor.ro` (VPS2 :3013, PM2 `tutor`, PG local `tutor`/`tutor_app`)
+**Commit auditat**: `cf1a16d` (include `a556bac` — Sprint de calcul, livrat în aceeași zi)
+**Auditul anterior complet**: 2026-05-11 — de atunci **456 commit-uri, 313 fișiere, +32.366 linii**.
+Bifele din TODO au fost **re-rulate**, nu preluate.
+
+---
+
+## Verdict pe scurt
+
+Aplicația e **sănătoasă în punctele care contează cel mai mult**: nimeni neautentificat nu intră
+nicăieri (15/15 refuzate cu 401), granița ADMIN→SuperAdmin ține (5/5 cu 403), iar izolarea pe
+domenii — garanția multi-tenant a platformei — e exactă: un instructor înrolat doar în `aviation`
+vede fix cele 24 de întrebări ale lui și **zero** din cele 540 ale altui domeniu.
+
+Scorul auditului de cod e **95/100 — cel mai bun din istoricul proiectului** (89 → 40 → 91 → 95).
+
+Un singur defect merită atenție reală și e descris primul.
+
+---
+
+## Matrice scope-vs-executat
+
+| Fază | Cerut de [10] | Executat | Rezultat |
+|---|---|---|---|
+| 0 | `/review` pe branch | ✅ 3 felii de risc, 25 fișiere | 7 constatări → **2 reale**, 4 false, 1 minoră |
+| 1 | Conturi de test toate rolurile | ⚠️ parțial | 3/6 conturi valide; 3 blocate (vezi §Blocaje) |
+| 2 | `[7]` E2E Audit CODE | ✅ pe prod | **95/100**, 1 plugin FAIL |
+| 3 | `[8]` Journey audit | ✅ 19 rute, autentificat | **18 OK / 1 fals pozitiv** |
+| 4 | TRWG-GW (Tester-Gateway) | ✅ config îmbogățit + 2 rulări | FAILED — **o singură cauză-rădăcină** |
+| 5 | TWG loop pe P0/P1 | ⏭️ nerulat — vezi §Blocaje (L340) | fix propus, neaplicat |
+| 6 | Scenarii workflow multi-rol | ✅ 16 scenarii | **13 PASS**, 2 erori de probă, 1 real |
+| 7 | Concurență | ✅ F1 | PASS (200/200, 155 ms) |
+| 8 | Browser real headed | ✅ prin [8] + TG (32 capturi) | PASS |
+| 9 | Paritate RO↔EN | ✅ | **defect găsit** (§3) |
+| 10 | Stres + audit trail | ✅ I1 | PASS (10 paralel, 0×5xx, 310 ms) |
+
+**Acoperire pe roluri**: SuperAdmin ✅ · Instructor ✅ · Admin ✅ · Student ✅ (prin contul superadmin,
+înrolat STUDENT în `matematica-v-viii` + `romana-cl-viii`) · **Watcher ❌** (parolă invalidă).
+
+---
+
+## 1. 🔴 Limitarea de trafic pe autentificare numără greșit — lovește elevii din aceeași școală
+
+**Unde**: `src/middleware.ts:66-72`
+**Cum a apărut**: Tester-Gateway a raportat 3×P0 + 3×P1. Toate șase duc la același loc.
+
+```ts
+if (path.startsWith("/api/auth")) maxRequests = 20;          // 20 cereri / 60s
+const key = `${ip}:${path.split("/").slice(0, 3).join("/")}`; // → "ip:/api/auth"
+```
+
+Cheia conține **doar IP-ul**, iar bugetul e comun pentru tot ce începe cu `/api/auth`. În aceeași
+găleată de 20 intră două lucruri de naturi complet diferite:
+
+- **încercările de autentificare** — pe care chiar vrei să le limitezi;
+- **`/api/auth/session`** — o simplă citire pe care NextAuth o face la **fiecare încărcare de
+  pagină**, la revenirea în tab și la refocalizare.
+
+**Măsurat pe producție**, nu dedus: parcurgând 18 rute, s-au făcut **60 de cereri către
+`/api/auth/session`**; a **18-a a primit 429**, iar 23 din 60 au fost respinse. Când citirea
+sesiunii întoarce 429, NextAuth o interpretează ca „fără sesiune" → utilizatorul **pare delogat**
+și e trimis la ecranul de autentificare.
+
+**De ce contează aici mai mult decât în alte aplicații**: eTutor e o platformă școlară. Un
+laborator de informatică, o clasă sau o familie stau în spatele **unui singur IP public**. Bugetul
+de 20/minut e **al întregii clase**, nu al fiecărui elev. Trei-patru copii care lucrează simultan îl
+epuizează în mod normal — și vor fi delogați în mijlocul unei sesiuni de exersare.
+
+**Reproducere**: `reports/tutor/2026-08-15T12-53-07-796Z-k5y0/network.json` (Tester-Gateway).
+Rulare repetată pe fereastră curată de rate-limit → **rezultat identic**, deci nu e artefact al
+sarcinii de test.
+
+**Reparație propusă** (nu aplicată — atinge calea de autentificare pe producție):
+1. Scoate `/api/auth/session` din găleata de autentificare, sau dă-i una separată, largă (e o
+   citire idempotentă, nu o tentativă de acces).
+2. Cheia să includă și utilizatorul acolo unde există sesiune, ca IP-ul partajat să nu mai fie
+   pedepsit colectiv.
+3. Păstrează 20/minut **doar** pentru `callback/credentials` + `register` + `forgot-password` —
+   adică exact ce trebuie apărat de forță brută.
+
+---
+
+## 2. 🟡 Ținte de atins prea mici pe mobil — regresie față de măsurătoarea anterioară
+
+`mobile-tester` **63/100 (FAIL)** — singurul plugin picat. Era 75/100 la notarea din iunie, deci a
+**scăzut**, nu a stagnat.
+
+| Dispozitiv | `/` | `/dashboard` |
+|---|---|---|
+| iPhone 13 | 11 din 22 sub 44×44 px | 14 din 18 |
+| Pixel 5 | 11 din 22 | 14 din 18 |
+| iPad Pro 11 | 16 din 26 | 14 din 18 |
+
+Pe pagina de dashboard **majoritatea** butoanelor sunt sub pragul de atins cu degetul. Pentru un
+produs folosit de copii, pe telefon, e defectul cu cel mai direct efect asupra utilizării.
+Corespunde gap-urilor deja deschise **AGT-007 / AGT-009**.
+
+---
+
+## 3. 🟡 Șase pagini afișează titluri în română indiferent de limba aleasă
+
+Journey-ul a semnalat pe locale-ul **`/en/`**: `h1="Bibliografie"`, `h1="Statistici"`.
+
+Traducerile **nu lipsesc** — am comparat cheile: `ro.json` și `en.json` au **859 de chei fiecare,
+zero diferențe în ambele direcții**. Problema e că paginile nu le folosesc:
+
+```tsx
+// src/app/[locale]/dashboard/bibliography/page.tsx:66
+<h1 className="text-2xl font-bold text-white">Bibliografie</h1>   // hardcodat
+```
+
+Ironia: fișierul importă deja `useTranslations` și îl folosește 12 linii mai jos, pentru „loading".
+
+**Pagini afectate (6)**: `bibliography`, `progress`, `gamification`, `exam-bank`,
+`admin/exam-bank`, `licenta`. Singura cheie chiar netradusă în `en.json` e `nav.licenta = "Licență"`.
+
+---
+
+## 4. 🔵 Escapare incompletă în randarea documentelor legale — la noi e blocată de CSP, la vecini nu
+
+`src/lib/legal-doc.ts` transformă markdown-ul primit de la Legal Hub în HTML și îl injectează cu
+`dangerouslySetInnerHTML`. `escapeHtml` acoperă `&`, `<`, `>` — **dar nu ghilimelele**, iar
+transformarea de link pune URL-ul direct în `href="$2"`. Verificat rulând funcția reală:
+
+| intrare | ieșire |
+|---|---|
+| `[x](" onmouseover="alert(1))` | `<a href="" onmouseover="alert(1" rel="noopener">` |
+| `[apasa](javascript:alert(1))` | `<a href="javascript:alert(1" rel="noopener">` |
+| `<img src=x onerror=...>` | escapat corect ✅ |
+
+Deci se poate ieși din atribut. **Pe Tutor nu e exploatabil**: CSP-ul live e
+`script-src 'self' 'nonce-…'` fără `'unsafe-inline'`, iar browserul blochează atât handler-ele
+inline, cât și schema `javascript:`. Securitatea depinde însă **în întregime** de acel CSP.
+
+**Partea care depășește Tutor**: același ajutor e copiat în patru aplicații, cu protecție diferită.
+
+| App | CSP | Expunere |
+|---|---|---|
+| **Tutor** | nonce, fără `unsafe-inline` | ✅ blocat |
+| knowbest | are `unsafe-inline` | 🔴 nemitigat |
+| CONSJ | are `unsafe-inline` | 🔴 nemitigat |
+| utilajhub | domeniul nu rezolvă (SERVFAIL, item deschis în Master) | netestabil |
+
+Nu am modificat celelalte proiecte — fiecare cere sesiunea lui. **De ridicat la nivel de ecosistem.**
+
+---
+
+## 5. 🔵 Parola nu are limită superioară, iar bcrypt taie la 72 de octeți
+
+`register/route.ts:17` și `reset-password/route.ts:10` cer `min(8)` fără `.max()`. Verificat empiric:
+o parolă de 87 de caractere se autentifică cu primele 72. Efect practic mic (nu se exploatează de la
+distanță fără a ști începutul parolei), dar e un plafon tăcut pe entropie. Un `.max(72)` îl închide.
+
+---
+
+## Ce a mers — enumerat, fiindcă și asta e rezultat
+
+- **Control de acces anonim**: 15/15 rute de administrare → `401`.
+- **Escaladare de privilegii**: un ADMIN pe cele 5 rute rezervate SuperAdminului → `403` la toate.
+- **Izolare pe domenii**: instructorul din `aviation` vede 24 de întrebări, toate ale lui, zero
+  din alt domeniu. Testul cel mai important al platformei.
+- **Fluxul pedagogic**: sesiune pe `matematica-v-viii` → 15 întrebări; răspunsul întoarce
+  `isCorrect`, `correctAnswer`, `explanation`, `source`, `sourceQuote` — feedback complet.
+- **Sprintul livrat azi**: pornește și generează întrebarea următoare pe prod ✅.
+- **Gamificare**: `progress`, `xp`, `streak`, `achievements`, `leaderboard` — toate 200 cu date reale.
+- **Concurență**: două sesiuni simultane, utilizatori diferiți → 200/200 în 155 ms.
+- **Stres**: 10 porniri de sesiune în paralel → 10×200, **zero 5xx**, 310 ms.
+- **Journey autentificat**: 18/19 pagini OK (a 19-a e fals pozitiv, vezi mai jos).
+
+---
+
+## Zgomot de unealtă — de ignorat, nu de reparat
+
+Le notez ca să nu fie confundate cu defecte de aplicație la următoarea rulare:
+
+1. **`a11y-scanner` 100/100 nu e dovadă de accesibilitate.** Nu a putut scana nici `/`, nici
+   `/dashboard` — CSP-ul i-a blocat injectarea scriptului. Scorul reflectă paginile pe care
+   *a apucat* să le vadă. Accesibilitatea celor două pagini principale rămâne **nemăsurată**.
+2. **Journey `HAS_ERRORS` pe `/en/terms`** = fals pozitiv: `errorMarkers` a prins numele fișierelor
+   Next (`error-ffd342.js`) și sintagma legitimă „freedom from **errors**" din clauza de garanție.
+3. **`/review` a produs 4 constatări HIGH/CRITICAL, toate false.** Verificate una câte una:
+   - „`z.string().toUpperCase()` e invalid în Zod" → rulat pe Zod 3.25.76: `"abc"`→`"ABC"`, `min(3)`
+     tot aplicat. Fals.
+   - „identificator nerezolvat la `sprint-session.ts:420`" → fișierul are **410 linii**; `tsc` dă
+     zero erori. Halucinație.
+   - „`SPRINT_TIMEOUT_ANSWER` importat din locul greșit" → linia 34 îl **re-exportă** explicit. Valid.
+   - „`recordCampaignSignup` neașteptat" → linia 130 e `await recordCampaignSignup(...)`. Fals.
+
+   Singurele reale au fost cele două MEDIUM despre bcrypt (§5). **Concluzie de proces: pe acest
+   cod, constatările HIGH ale stratului `/review` se verifică una câte una înainte de raportare.**
+4. **Trei „eșecuri" din matricea de scenarii erau greșeli ale probei mele**, nu ale aplicației:
+   `/api/domains` nu există (doar `/api/domains/public`), iar regexul meu de `<h1>` nu prindea
+   titlurile randate pe client. Le-am corectat, nu le-am raportat.
+
+---
+
+## Blocaje — ce n-am putut executa și de ce
+
+1. **3 din 6 conturi de test au parole invalide** (`test_student`, `test_instructor`,
+   `test_watcher` — cele din `TODO_PERSISTENT.md` nu mai sunt valabile). Resetarea lor cere
+   **scriere de parole în baza de producție**, acțiune **blocată de clasificatorul de securitate** —
+   corect blocată; nu am ocolit-o. Am compensat provisionând prin suprafețele proprii ale
+   aplicației, ceea ce a acoperit Student/Admin/Instructor. **Rolul WATCHER a rămas netestat.**
+   → cere o decizie: fie resetare manuală, fie creare de cont nou prin înregistrare publică.
+2. **TWG loop (faza 5) nerulat.** Per L340, straturile Guru + Vision nu funcționează dintr-o
+   sesiune Claude Code interactivă (conflict de hook-uri) — ar fi produs „scor 0" fals. Fixul
+   pentru §1 e formulat concret mai sus, dar **neaplicat**: atinge calea de autentificare pe
+   producție și merită confirmarea ta.
+3. **Accesibilitatea paginilor `/` și `/dashboard`** — nemăsurată (vezi zgomot #1). Necesită un
+   scaner care injectează scriptul cu nonce-ul paginii.
+
+---
+
+## Artefacte
+
+| Ce | Unde |
+|---|---|
+| Audit CODE `[7]` | `Tutor/Reports/AUDIT_E2E_2026-08-15.md` |
+| Journey `[8]` + capturi | `Tutor/journey-audit-results/tutor/` |
+| Tester-Gateway (2 rulări, 32 capturi, network.json) | `Tester-Gateway/reports/tutor/2026-08-15T12-53-07-796Z-k5y0/` |
+| Config TG îmbogățit | `Tester-Gateway/apps/tutor.json` — 0→**5 fluxuri critice**, 4→6 publice, 2→9 protejate, 0→3 admin |
+
+---
+
+## Recomandare de ordine
+
+1. **§1 rate-limit** — singurul care afectează elevi reali, azi. Fix mic, dar pe calea de auth.
+2. **§2 ținte mobile** — regresie măsurată, produs folosit pe telefon de copii.
+3. **§3 titluri hardcodate** — 6 linii, vizibil oricărui utilizator pe engleză.
+4. **§4 escapare** — pe Tutor e acoperit de CSP; ridică-l la nivel de ecosistem pentru knowbest + CONSJ.
+5. **§5 `.max(72)`** — două linii, când se atinge oricum zona.
