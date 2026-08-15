@@ -27,7 +27,7 @@ Un singur defect merită atenție reală și e descris primul.
 | 0 | `/review` pe branch | ✅ 3 felii de risc, 25 fișiere | 7 constatări → **2 reale**, 4 false, 1 minoră |
 | 1 | Conturi de test toate rolurile | ⚠️ parțial | 3/6 conturi valide; 3 blocate (vezi §Blocaje) |
 | 2 | `[7]` E2E Audit CODE | ✅ pe prod | **95/100**, 1 plugin FAIL |
-| 3 | `[8]` Journey audit | ✅ 19 rute, autentificat | **18 OK / 1 fals pozitiv** |
+| 3 | `[8]` Journey audit | ⚠️ 19 rute, **doar ca superadmin** | **18 OK / 1 fals pozitiv** — nu spune ce vede un elev |
 | 4 | TRWG-GW (Tester-Gateway) | ✅ config îmbogățit + 2 rulări | FAILED — **o singură cauză-rădăcină** |
 | 5 | TWG loop pe P0/P1 | ✅ rulat (autorizat de user) | 1 iterație — `/review` 3 constatări **toate false**, Vision 42/100 onest, Gateway expirat |
 | 6 | Scenarii workflow multi-rol | ✅ 16 scenarii | **13 PASS**, 2 erori de probă, 1 real |
@@ -93,8 +93,11 @@ sarcinii de test.
 
 ## 2. 🟡 Ținte de atins prea mici pe mobil — regresie față de măsurătoarea anterioară
 
-`mobile-tester` **63/100 (FAIL)** — singurul plugin picat. Era 75/100 la notarea din iunie, deci a
-**scăzut**, nu a stagnat.
+`mobile-tester` **63/100 (FAIL)** — singurul plugin picat.
+
+**Precizare de onestitate**: TODO-ul nota 75/100 în iunie. Cifra aceea vine din text, nu dintr-o
+măsurătoare pe care s-o pot compara direct (posibil altă versiune de plugin, alt set de pagini).
+Ce **este** măsurat azi: 63/100 și numerele din tabel. Că *a scăzut* e plauzibil, nu demonstrat.
 
 | Dispozitiv | `/` | `/dashboard` |
 |---|---|---|
@@ -122,8 +125,13 @@ zero diferențe în ambele direcții**. Problema e că paginile nu le folosesc:
 
 Ironia: fișierul importă deja `useTranslations` și îl folosește 12 linii mai jos, pentru „loading".
 
-**Pagini afectate (6)**: `bibliography`, `progress`, `gamification`, `exam-bank`,
-`admin/exam-bank`, `licenta`. Singura cheie chiar netradusă în `en.json` e `nav.licenta = "Licență"`.
+**Pagini afectate: 5** — `bibliography`, `progress`, `gamification`, `exam-bank`, `admin/exam-bank`.
+Pentru fiecare există traducere engleză reală și diferită (`Bibliography`, `My Progress`,
+`Gamification`, `Simulations`), pe care pagina n-o folosește.
+
+**Corectat de la 6 la 5 după re-verificare**: `licenta` are `nav.licenta = "Licență"` **și** în
+`en.json`, **și** în `ro.json` — e numele propriu al examenului românesc, deci hardcodarea lui acolo
+nu e defect de traducere. Numărasem greșit.
 
 ---
 
@@ -143,23 +151,9 @@ Deci se poate ieși din atribut. **Pe Tutor nu e exploatabil**: CSP-ul live e
 `script-src 'self' 'nonce-…'` fără `'unsafe-inline'`, iar browserul blochează atât handler-ele
 inline, cât și schema `javascript:`. Securitatea depinde însă **în întregime** de acel CSP.
 
-**Partea care depășește Tutor** (corectat 2026-08-15 după re-verificare — prima variantă a acestui
-tabel era greșită; o las consemnată ca atare):
-
-| App | Locul de injectare există? | `script-src` | Expunere reală |
-|---|---|---|---|
-| **Tutor** | da (`legal-doc.ts` → 3 pagini) | nonce, **fără** `unsafe-inline` | ✅ blocat de browser |
-| **knowbest** | **NU — zero `dangerouslySetInnerHTML` în tot `src/app`** | are `unsafe-inline` | ✅ **neexpus** (nu e ce am scris inițial) |
-| **CONSJ** | da (`markdown.ts`, mesajul editorial + articole) | are `unsafe-inline` | ⚠️ path deschis, **dar conținutul e scris de admin** → auto-XSS, nu vector de atac |
-| utilajhub | probabil (6 fișiere cu injectare) | netestabil — domeniul nu rezolvă | ❓ neverificat |
-
-Ce a fost greșit în prima variantă: am dedus expunerea din simpla **prezență a ajutorului**, fără să
-verific că există și locul unde se injectează HTML. La knowbest nu există. Iar la CONSJ, deși
-defectul de escapare e identic, conținutul vine din panoul de administrare al unui singur autor —
-deci „cine ar putea introduce markdown ostil?" are răspunsul „doar proprietarul site-ului".
-Severitatea reală acolo e mult sub ce sugera tabelul inițial.
-
-Nu am modificat celelalte proiecte — fiecare cere sesiunea lui. **De ridicat la nivel de ecosistem.**
+**Notă de scop**: ajutorul `mdToHtml` are copii și în alte proiecte. Le-am verificat inițial și am
+inclus un tabel comparativ — **greșit ca scop**: auditul acesta e despre Tutor. Materialul a fost
+scos. Dacă vrei evaluarea celorlalte, e o sesiune separată, în proiectul respectiv.
 
 ---
 
@@ -340,5 +334,5 @@ Le notez ca să nu fie confundate cu defecte de aplicație la următoarea rulare
 1. **§1 rate-limit** — singurul care afectează elevi reali, azi. Fix mic, dar pe calea de auth.
 2. **§2 ținte mobile** — regresie măsurată, produs folosit pe telefon de copii.
 3. **§3 titluri hardcodate** — 6 linii, vizibil oricărui utilizator pe engleză.
-4. **§4 escapare** — pe Tutor e acoperit de CSP; ridică-l la nivel de ecosistem pentru knowbest + CONSJ.
+4. **§4 escapare** — acoperit de CSP azi; de reparat când se atinge zona, ca protecția să nu depindă de o singură directivă.
 5. **§5 `.max(72)`** — două linii, când se atinge oricum zona.
