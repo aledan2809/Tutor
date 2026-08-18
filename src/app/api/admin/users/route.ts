@@ -59,7 +59,7 @@ async function _GET(req: NextRequest) {
 const createUserSchema = z.object({
   name: z.string().min(1).max(100),
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(6).max(72),
   // Note: platform "admin" is granted per-domain via the Enroll flow (ADMIN
   // enrollment role), NOT here — the create-user dialog has no domain picker, so
   // an "admin" value would silently produce a powerless account. Only "user" vs

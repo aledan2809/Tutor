@@ -14,7 +14,7 @@ import { logger } from "@/lib/logger";
 const schema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters").max(72, "Password must be at most 72 characters"),
   domainSlug: z.string().optional(), // legacy single-select
   domainSlugs: z.array(z.string()).optional(), // multi-select
   voucherCode: z.string().min(1).max(50).optional(), // campaign links (?voucher=)

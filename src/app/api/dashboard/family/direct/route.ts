@@ -8,7 +8,7 @@ import { createChildDirectly, FamilySeatError } from "@/lib/family-invite";
 const schema = z.object({
   name: z.string().min(2, "Numele trebuie să aibă cel puțin 2 caractere"),
   email: z.string().email("Email invalid"),
-  password: z.string().min(8, "Parola trebuie să aibă cel puțin 8 caractere"),
+  password: z.string().min(8, "Parola trebuie să aibă cel puțin 8 caractere").max(72, "Parola trebuie să aibă cel mult 72 de caractere"),
   domainSlugs: z.array(z.string()).optional(),
 });
 

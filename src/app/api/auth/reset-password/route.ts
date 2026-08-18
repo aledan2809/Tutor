@@ -7,7 +7,7 @@ import { z } from "zod";
 const schema = z.object({
   email: z.string().email(),
   token: z.string().min(1),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters").max(72, "Password must be at most 72 characters"),
 });
 
 async function _POST(req: NextRequest) {
