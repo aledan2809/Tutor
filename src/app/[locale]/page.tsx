@@ -370,17 +370,17 @@ export default async function LandingPage() {
             <div>
               <h4 className="text-sm font-semibold text-white">{L.footerProduct}</h4>
               <ul className="mt-3 space-y-2 text-sm text-gray-400">
-                <li><Link href="/try" className="hover:text-white">{L.footerTry}</Link></li>
-                <li><Link href="/grile" className="hover:text-white">{L.footerGrile}</Link></li>
-                <li><Link href="/creatori" className="hover:text-white">{L.footerCreatori}</Link></li>
+                <li><Link href="/try" className="inline-flex min-h-[44px] items-center hover:text-white">{L.footerTry}</Link></li>
+                <li><Link href="/grile" className="inline-flex min-h-[44px] items-center hover:text-white">{L.footerGrile}</Link></li>
+                <li><Link href="/creatori" className="inline-flex min-h-[44px] items-center hover:text-white">{L.footerCreatori}</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="text-sm font-semibold text-white">{L.footerCompany}</h4>
               <ul className="mt-3 space-y-2 text-sm text-gray-400">
-                <li><Link href="/privacy" className="hover:text-white">{L.footerPrivacy}</Link></li>
-                <li><Link href="/terms" className="hover:text-white">{L.footerTerms}</Link></li>
-                <li><Link href="/cookies" className="hover:text-white">{L.footerCookies}</Link></li>
+                <li><Link href="/privacy" className="inline-flex min-h-[44px] items-center hover:text-white">{L.footerPrivacy}</Link></li>
+                <li><Link href="/terms" className="inline-flex min-h-[44px] items-center hover:text-white">{L.footerTerms}</Link></li>
+                <li><Link href="/cookies" className="inline-flex min-h-[44px] items-center hover:text-white">{L.footerCookies}</Link></li>
               </ul>
             </div>
           </div>

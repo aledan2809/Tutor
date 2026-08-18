@@ -147,7 +147,7 @@ export default function DashboardPage() {
             <button
               onClick={() => setView("today")}
               aria-pressed={view === "today"}
-              className={`rounded-md px-3 py-1.5 text-xs font-semibold min-h-[32px] ${
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold min-h-[44px] ${
                 view === "today" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
               }`}
             >
@@ -156,7 +156,7 @@ export default function DashboardPage() {
             <button
               onClick={() => setView("full")}
               aria-pressed={view === "full"}
-              className={`rounded-md px-3 py-1.5 text-xs font-semibold min-h-[32px] ${
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold min-h-[44px] ${
                 view === "full" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
               }`}
             >
@@ -396,7 +396,7 @@ export default function DashboardPage() {
               <p className="text-xs text-gray-400">{data.recommendation.reason}</p>
               <button
                 onClick={() => router.push("/dashboard/practice")}
-                className="mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
               >
                 {t("dashboard.startNow")}
               </button>
@@ -476,7 +476,7 @@ function TodayView({
         <p className="mt-1 text-sm text-blue-200/80">{heroWhy}</p>
         <button
           onClick={onContinue}
-          className="mt-4 w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white hover:bg-blue-700 sm:w-auto sm:px-8 min-h-[44px]"
+          className="mt-4 inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white hover:bg-blue-700 sm:w-auto sm:px-8 min-h-[44px]"
         >
           {t("dashboard.todayStart")} ▶
         </button>
