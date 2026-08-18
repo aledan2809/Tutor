@@ -96,7 +96,7 @@ export default function ProgressPage() {
     <div className="mx-auto max-w-4xl space-y-8">
       <ProgressTabs />
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Statistici</h1>
+        <h1 className="text-2xl font-bold text-white">{t("dashboard.progressTitle")}</h1>
         {domains.length > 1 && (
           <select
             value={domain}

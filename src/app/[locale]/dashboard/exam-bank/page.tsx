@@ -1,10 +1,12 @@
 import { prisma } from "@/lib/prisma";
+import { getTranslations } from "next-intl/server";
 import { EXAM_LEVELS, EXAM_LEVEL_LABEL, stripLevelSuffix } from "@/lib/exam-level";
 import { ExamBankBrowser, type SubjectGroup } from "@/components/exam-bank/exam-bank-browser";
 
 // Simulări (elev) — examene oficiale. Categorie (nivel) → Subcategorie (materie) prin dropdown,
 // ca la Grile, ca să nu se scroleze o listă lungă. O singură materie afișată o dată.
 export default async function ExamBankStudentPage() {
+  const tPage = await getTranslations("dashboard");
   const papers = await prisma.examPaper.findMany({
     where: { isActive: true },
     orderBy: [{ subjectName: "asc" }, { year: "desc" }, { variant: "asc" }],
@@ -57,7 +59,7 @@ export default async function ExamBankStudentPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-4">
       <div>
-        <h1 className="text-2xl font-bold text-white">Simulări — examene oficiale</h1>
+        <h1 className="text-2xl font-bold text-white">{tPage("examBankTitle")}</h1>
         <p className="mt-1 text-sm text-gray-400">
           Subiecte reale, corectate după baremul oficial. Răspunzi, trimiți și vezi nota estimată pe
           10. Itemii cu rezolvare îi notezi tu, după barem.

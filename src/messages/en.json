@@ -293,7 +293,11 @@
     "todayStep2": "Fix weak area: {topic}",
     "todayStep2Generic": "Fix a weak area",
     "todayStep3": "Full simulation",
-    "todayStreakDays": "{n} days in a row"
+    "todayStreakDays": "{n} days in a row",
+    "bibliographyTitle": "Bibliography",
+    "progressTitle": "Statistics",
+    "gamificationTitle": "Achievements",
+    "examBankTitle": "Simulations — official exams"
   },
   "admin": {
     "overview": "Overview",
@@ -412,7 +416,8 @@
     "enrollUser": "Enroll User",
     "userFallback": "User",
     "edit": "Edit",
-    "domainsRoles": "Domains & Roles"
+    "domainsRoles": "Domains & Roles",
+    "examBankViewTitle": "Exam bank (view only)"
   },
   "session": {
     "practice": "Practice",

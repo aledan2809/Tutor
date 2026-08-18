@@ -1,9 +1,11 @@
 import { prisma } from "@/lib/prisma";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { classifyPaperPoints, type ExamItemForScoring } from "@/lib/exam-bank/score";
 
 // Banca de examene — listă (doar citire). Subiecte + bareme oficiale importate (ground-truth).
 export default async function ExamBankPage() {
+  const tPage = await getTranslations("admin");
   const papers = await prisma.examPaper.findMany({
     orderBy: [{ subjectName: "asc" }, { year: "desc" }, { variant: "asc" }],
     include: {
@@ -15,7 +17,7 @@ export default async function ExamBankPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Bancă examene (vizualizare)</h1>
+        <h1 className="text-2xl font-bold text-white">{tPage("examBankViewTitle")}</h1>
         <p className="mt-1 text-sm text-gray-400">
           Subiecte + bareme oficiale importate (răspunsuri 100% corecte, fără mesh). Doar citire —
           banca aceasta e separată de grilele generate și nu apare în demo-ul public.

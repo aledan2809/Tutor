@@ -21,6 +21,7 @@ interface Domain { slug: string; name: string; }
 
 export default function StudentBibliographyPage() {
   const t = useTranslations("common");
+  const tPage = useTranslations("dashboard");
   const searchParams = useSearchParams();
   const [domains, setDomains] = useState<Domain[]>([]);
   const [domain, setDomain] = useState(searchParams?.get("domain") || "");
@@ -63,7 +64,7 @@ export default function StudentBibliographyPage() {
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Bibliografie</h1>
+          <h1 className="text-2xl font-bold text-white">{tPage("bibliographyTitle")}</h1>
           <p className="mt-1 text-sm text-gray-400">Surse bibliografice pentru acest domeniu</p>
         </div>
         {domains.length > 1 && (

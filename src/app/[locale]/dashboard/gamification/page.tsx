@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { DomainSwitcher } from "@/components/domain-switcher";
 import { XpProgressBar } from "@/components/gamification/xp-progress-bar";
 import { AchievementGrid } from "@/components/gamification/achievement-card";
@@ -63,6 +64,7 @@ interface DailyChallengeData {
 }
 
 export default function GamificationPage() {
+  const tPage = useTranslations("dashboard");
   const [activeDomainSlug, setActiveDomainSlug] = useState<string | null>(null);
   const [activeDomainId, setActiveDomainId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string>("");
@@ -160,7 +162,7 @@ export default function GamificationPage() {
       <ProgressTabs />
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-white">Realizări</h1>
+        <h1 className="text-2xl font-bold text-white">{tPage("gamificationTitle")}</h1>
         <DomainSwitcher activeDomainId={activeDomainId} onSwitch={handleDomainSwitch} />
       </div>
 

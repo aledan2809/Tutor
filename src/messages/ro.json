@@ -293,7 +293,11 @@
     "todayStep2": "Repară zona slabă: {topic}",
     "todayStep2Generic": "Repară o zonă slabă",
     "todayStep3": "Simulare completă",
-    "todayStreakDays": "{n} zile la rând"
+    "todayStreakDays": "{n} zile la rând",
+    "bibliographyTitle": "Bibliografie",
+    "progressTitle": "Statistici",
+    "gamificationTitle": "Realizări",
+    "examBankTitle": "Simulări — examene oficiale"
   },
   "admin": {
     "overview": "Prezentare generală",
@@ -412,7 +416,8 @@
     "enrollUser": "Înscrie utilizatorul",
     "userFallback": "Utilizator",
     "edit": "Editează",
-    "domainsRoles": "Domenii și roluri"
+    "domainsRoles": "Domenii și roluri",
+    "examBankViewTitle": "Bancă examene (vizualizare)"
   },
   "session": {
     "practice": "Practică",
