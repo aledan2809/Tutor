@@ -29,13 +29,36 @@ export type LegalDoc = {
 };
 
 function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  // Quotes matter as much as angle brackets here: the link rule below drops the
+  // URL straight into an href="..." attribute, so an unescaped " lets authored
+  // markdown break out of the attribute and add its own (e.g. onmouseover=).
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
+
+// Only these schemes may appear in a link. Anything else — javascript:, data:,
+// vbscript: — is rendered as inert text instead of a live href.
+const SAFE_LINK = /^(?:https?:\/\/|mailto:|tel:|\/|#)/i;
+
+function safeHref(raw: string): string | null {
+  const url = raw.trim();
+  return SAFE_LINK.test(url) ? url : null;
+}
+
 function inline(s: string): string {
   return escapeHtml(s)
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/\*([^*]+)\*/g, "<em>$1</em>")
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" rel="noopener">$1</a>');
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_m, text: string, url: string) => {
+      const href = safeHref(url);
+      return href
+        ? `<a href="${href}" rel="noopener">${text}</a>`
+        : `${text} (${url})`;
+    });
 }
 export function mdToHtml(md: string): string {
   const lines = md.replace(/\r/g, "").split("\n");
