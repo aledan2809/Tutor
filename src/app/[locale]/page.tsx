@@ -384,10 +384,10 @@ export default async function LandingPage() {
               </ul>
             </div>
           </div>
-          <p className="mt-10 border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
+          <p className="mt-10 border-t border-gray-800 pt-6 text-center text-sm text-gray-400">
             &copy; {new Date().getFullYear()} <Brand className="text-sm" />. {L.rights}
           </p>
-          <p className="mt-2 text-center text-xs text-gray-600">🔒 {L.proofGdpr} · {L.proofGdprLabel}</p>
+          <p className="mt-2 text-center text-xs text-gray-400">🔒 {L.proofGdpr} · {L.proofGdprLabel}</p>
         </div>
       </footer>
     </div>
