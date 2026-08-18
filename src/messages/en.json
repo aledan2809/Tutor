@@ -417,7 +417,9 @@
     "userFallback": "User",
     "edit": "Edit",
     "domainsRoles": "Domains & Roles",
-    "examBankViewTitle": "Exam bank (view only)"
+    "examBankViewTitle": "Exam bank (view only)",
+    "panelTitle": "Admin Dashboard",
+    "superadminTitle": "SuperAdmin Panel"
   },
   "session": {
     "practice": "Practice",
@@ -447,7 +449,8 @@
     "deep": "Deep Session",
     "repair": "Repair Session",
     "recovery": "Recovery Session",
-    "intensive": "Intensive Session"
+    "intensive": "Intensive Session",
+    "sprintFeedbackTitle": "How did it go?"
   },
   "progress": {
     "title": "Progress",

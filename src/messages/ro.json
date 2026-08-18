@@ -417,7 +417,9 @@
     "userFallback": "Utilizator",
     "edit": "Editează",
     "domainsRoles": "Domenii și roluri",
-    "examBankViewTitle": "Bancă examene (vizualizare)"
+    "examBankViewTitle": "Bancă examene (vizualizare)",
+    "panelTitle": "Administrare",
+    "superadminTitle": "Panou SuperAdmin"
   },
   "session": {
     "practice": "Practică",
@@ -447,7 +449,8 @@
     "deep": "Sesiune Aprofundată",
     "repair": "Sesiune Reparare",
     "recovery": "Sesiune Recuperare",
-    "intensive": "Sesiune Intensivă"
+    "intensive": "Sesiune Intensivă",
+    "sprintFeedbackTitle": "Cum a fost?"
   },
   "progress": {
     "title": "Progres",

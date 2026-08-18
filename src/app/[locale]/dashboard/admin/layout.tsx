@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AdminNav } from "@/components/admin/admin-nav";
@@ -14,6 +15,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const tAdmin = await getTranslations("admin");
   const session = await auth();
   if (!session?.user) redirect("/auth/signin");
 
@@ -26,7 +28,7 @@ export default async function AdminLayout({
   return (
     <div className="space-y-6">
       <div className="border-b border-gray-800 pb-4">
-        <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
+        <h1 className="text-2xl font-bold text-white">{tAdmin("panelTitle")}</h1>
         <AdminNav />
       </div>
       {children}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type { DifficultyAnswer, TimeAnswer } from "@/lib/sprint-adapt";
 
 interface SprintFeedbackFormProps {
@@ -28,6 +29,7 @@ const TIME_OPTIONS: { value: TimeAnswer; emoji: string; label: string }[] = [
  * behind it rather than offered alongside it.
  */
 export function SprintFeedbackForm({ sessionId, domainSlug, onDone }: SprintFeedbackFormProps) {
+  const tS = useTranslations("session");
   const [difficulty, setDifficulty] = useState<DifficultyAnswer | null>(null);
   const [time, setTime] = useState<TimeAnswer | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -70,7 +72,7 @@ export function SprintFeedbackForm({ sessionId, domainSlug, onDone }: SprintFeed
   return (
     <div className="mx-auto max-w-md space-y-6">
       <div className="text-center">
-        <h1 className="text-xl font-semibold text-white">Cum a fost?</h1>
+        <h1 className="text-xl font-semibold text-white">{tS("sprintFeedbackTitle")}</h1>
         <p className="mt-1 text-sm text-gray-400">
           Două întrebări — după ele reglăm dificultatea și timpul pentru data viitoare.
         </p>

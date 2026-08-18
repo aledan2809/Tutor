@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { SuperAdminNav } from "@/components/admin/superadmin-nav";
@@ -14,6 +15,7 @@ export default async function SuperAdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const tAdmin = await getTranslations("admin");
   const session = await auth();
   if (!session?.user) redirect("/auth/signin");
   if (!session.user.isSuperAdmin) redirect("/dashboard");
@@ -21,7 +23,7 @@ export default async function SuperAdminLayout({
   return (
     <div className="space-y-6">
       <div className="border-b border-gray-800 pb-4">
-        <h1 className="text-2xl font-bold text-white">SuperAdmin Panel</h1>
+        <h1 className="text-2xl font-bold text-white">{tAdmin("superadminTitle")}</h1>
         <SuperAdminNav />
       </div>
       {children}
