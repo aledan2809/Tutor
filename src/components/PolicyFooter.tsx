@@ -14,7 +14,7 @@ export function PolicyFooter({ locale }: { locale: string }) {
   const L = LABELS[locale === "en" ? "en" : "ro"];
   return (
     <footer className="border-t border-gray-800 bg-gray-950 py-4">
-      <nav className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-4 gap-y-2 px-4 text-xs text-gray-500">
+      <nav className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-4 gap-y-2 px-4 text-xs text-gray-400">
         <Link href="/privacy" className="hover:text-gray-300">{L.privacy}</Link>
         <span aria-hidden="true">·</span>
         <Link href="/terms" className="hover:text-gray-300">{L.terms}</Link>

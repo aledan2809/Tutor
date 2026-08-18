@@ -238,7 +238,7 @@ export default async function LandingPage() {
                 <div className="mt-1 text-sm text-gray-400">{L.proofFreeLabel}</div>
               </div>
             </div>
-            <p className="mt-4 text-center text-xs text-gray-500">{L.freeFootnote}</p>
+            <p className="mt-4 text-center text-xs text-gray-400">{L.freeFootnote}</p>
           </div>
         </section>
 
@@ -305,7 +305,7 @@ export default async function LandingPage() {
                   href={a.href}
                   className={`rounded-xl border bg-gray-900 p-6 transition-colors ${a.border}`}
                 >
-                  <p className="text-xs text-gray-500">{ro ? "Ești" : "I'm a"}</p>
+                  <p className="text-xs text-gray-400">{ro ? "Ești" : "I'm a"}</p>
                   <p className={`text-xl font-extrabold tracking-wide ${a.text}`}>{a.label}</p>
                   <p className="mt-2 text-sm text-gray-400">{a.desc}</p>
                   <span className={`mt-3 inline-block text-sm font-medium ${a.text}`}>→</span>

@@ -26,7 +26,7 @@ export function SiteHeader({ locale }: { locale?: string }) {
         <nav className="flex items-center gap-3 sm:gap-5">
           {audiences.map((a) => (
             <Link key={a.href} href={a.href} className="hidden flex-col items-start leading-none sm:flex">
-              <span className="text-[10px] text-gray-500">{esti}</span>
+              <span className="text-[10px] text-gray-400">{esti}</span>
               <span className={`text-sm font-extrabold tracking-wide ${a.color}`}>{a.label}</span>
             </Link>
           ))}

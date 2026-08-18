@@ -118,6 +118,7 @@ export default function SubjectQuizDemo({ locale }: { locale?: string }) {
         ) : (
           <div className="flex flex-col gap-3">
             <select
+              aria-label={L.pick}
               value={selected}
               onChange={(e) => setSelected(e.target.value)}
               className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
