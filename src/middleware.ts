@@ -59,17 +59,48 @@ function purgeExpiredEntries() {
   }
 }
 
-function checkRateLimit(ip: string, path: string): { allowed: boolean; remaining: number } {
-  let maxRequests = 60;
+// Read-only auth endpoints. NextAuth's client hits /api/auth/session on every
+// page load, tab refocus and periodic refetch — that is a READ, not an access
+// attempt. Sharing one budget with credential submission meant a normal browsing
+// session exhausted it; the client then reports the user as signed out even
+// though the server session is still valid (measured: 60 session reads across 18
+// pages, first 429 at the 18th). For a school platform a whole classroom sits
+// behind one NAT, so the budget was effectively per-classroom.
+const AUTH_READ_PATHS = new Set([
+  "/api/auth/session",
+  "/api/auth/providers",
+  "/api/auth/csrf",
+  "/api/auth/error",
+  "/api/auth/_log",
+]);
+
+function rateLimitBucket(path: string): { bucket: string; maxRequests: number } {
+  if (path.startsWith("/api/admin/stripe") || path.startsWith("/api/stripe")) {
+    return { bucket: "/api/stripe", maxRequests: 3 };
+  }
+  if (path.startsWith("/api/auth")) {
+    return AUTH_READ_PATHS.has(path)
+      ? { bucket: "/api/auth:read", maxRequests: 300 }
+      : { bucket: "/api/auth:write", maxRequests: 20 };
+  }
+  return { bucket: path.split("/").slice(0, 3).join("/"), maxRequests: 60 };
+}
+
+// Per-session bucketing where a session exists, so one shared public IP is not
+// punished collectively. Sign-in attempts carry NO session cookie, so they keep
+// falling back to the IP key — brute-force protection is unchanged.
+function clientKeyFor(request: NextRequest, ip: string): string {
+  for (const c of request.cookies.getAll()) {
+    if (c.name.includes("session-token") && c.value) return `s:${c.value.slice(-24)}`;
+  }
+  return `ip:${ip}`;
+}
+
+function checkRateLimit(clientKey: string, path: string): { allowed: boolean; remaining: number } {
+  const { bucket, maxRequests } = rateLimitBucket(path);
   const windowMs = 60_000;
 
-  if (path.startsWith("/api/auth")) {
-    maxRequests = 20;
-  } else if (path.startsWith("/api/admin/stripe") || path.startsWith("/api/stripe")) {
-    maxRequests = 3;
-  }
-
-  const key = `${ip}:${path.split("/").slice(0, 3).join("/")}`;
+  const key = `${clientKey}:${bucket}`;
   const now = Date.now();
   const entry = rateLimitStore.get(key);
 
@@ -122,7 +153,7 @@ export default function middleware(request: NextRequest) {
   // Rate limiting for API routes
   if (pathname.startsWith("/api/")) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-    const { allowed, remaining } = checkRateLimit(ip, pathname);
+    const { allowed, remaining } = checkRateLimit(clientKeyFor(request, ip), pathname);
 
     if (!allowed) {
       return new NextResponse(JSON.stringify({ error: "Too many requests" }), {
