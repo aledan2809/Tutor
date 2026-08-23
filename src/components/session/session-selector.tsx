@@ -59,21 +59,21 @@ export function SessionSelector({
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
           <p className="text-2xl font-bold text-white">{stats.totalQuestions}</p>
           <div className="flex items-center justify-center gap-1">
-            <p className="text-xs text-gray-500">{t("statsQuestions")}</p>
+            <p className="text-xs text-gray-400">{t("statsQuestions")}</p>
             <InfoTooltip text={t("tip.statsQuestions")} label={t("infoLabel")} />
           </div>
         </div>
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
           <p className="text-2xl font-bold text-white">{stats.topicsStudied}</p>
           <div className="flex items-center justify-center gap-1">
-            <p className="text-xs text-gray-500">{t("statsTopics")}</p>
+            <p className="text-xs text-gray-400">{t("statsTopics")}</p>
             <InfoTooltip text={t("tip.statsTopics")} label={t("infoLabel")} />
           </div>
         </div>
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
           <p className="text-2xl font-bold text-red-400">{stats.weakAreas}</p>
           <div className="flex items-center justify-center gap-1">
-            <p className="text-xs text-gray-500">{t("statsWeak")}</p>
+            <p className="text-xs text-gray-400">{t("statsWeak")}</p>
             <InfoTooltip text={t("tip.statsWeak")} label={t("infoLabel")} />
           </div>
         </div>
@@ -124,7 +124,7 @@ export function SessionSelector({
                   <h4 className="font-medium text-white">
                     {SESSION_ICONS[st.type]} {typeLabel(st.type)}
                   </h4>
-                  <div className="mt-1 flex gap-3 text-xs text-gray-500">
+                  <div className="mt-1 flex gap-3 text-xs text-gray-400">
                     <span>{Math.round(st.duration / 60)} min</span>
                     <span>{st.questionCount} {t("questions")}</span>
                   </div>

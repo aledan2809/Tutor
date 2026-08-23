@@ -249,8 +249,9 @@ export default function PracticePage() {
           {/* Subject selector — only the subjects in the student's package */}
           {domains.length > 1 && (
             <div className="mb-6">
-              <label className="mb-2 block text-sm text-gray-400">{t("grile.subject")}</label>
+              <label htmlFor="practice-subject" className="mb-2 block text-sm text-gray-400">{t("grile.subject")}</label>
               <select
+                id="practice-subject"
                 value={selectedDomain}
                 onChange={(e) => setSelectedDomain(e.target.value)}
                 className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
