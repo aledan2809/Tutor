@@ -13,6 +13,7 @@ const mockQuestion: Question = {
   options: ["A", "B", "C", "D"],
   correctAnswer: "A",
   explanation: "VOR stands for VHF Omnidirectional Range",
+  passage: null,
   sourceReference: null,
   bookOrder: null,
   pdfPage: null,

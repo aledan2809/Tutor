@@ -147,9 +147,9 @@ describe("robustețe la intrare stricată (istoricul va veni din DB/JSON)", () =
     const zero = { balance: 0, charged: 0, unrecovered: 0 };
     // @ts-expect-error — exact cazul pe care tipul îl exclude, dar runtime-ul nu
     expect(foldCreditBalance(null)).toEqual(zero);
-    // @ts-expect-error
+    // @ts-expect-error — la fel: tipul exclude undefined, runtime-ul îl poate primi
     expect(foldCreditBalance(undefined)).toEqual(zero);
-    // @ts-expect-error
+    // @ts-expect-error — un obiect în loc de tablou, cum ar veni dintr-un JSON stricat
     expect(foldCreditBalance({ kind: "earn", amount: 100 })).toEqual(zero);
   });
 });
