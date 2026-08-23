@@ -99,7 +99,7 @@ export function NotificationBell() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="relative rounded-lg p-2 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+        className="relative inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
         aria-label={t("notifications")}
       >
         <svg

@@ -19,7 +19,7 @@ export function ProgressTabs() {
           <Link
             key={tab.href}
             href={tab.href}
-            className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium transition ${
+            className={`-mb-px inline-flex min-h-[44px] items-center border-b-2 px-4 py-2 text-sm font-medium transition ${
               active
                 ? "border-blue-500 text-white"
                 : "border-transparent text-gray-400 hover:text-gray-200"

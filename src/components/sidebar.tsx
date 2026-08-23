@@ -182,7 +182,7 @@ export function Sidebar({ user, hasFamilyPlan = false }: SidebarProps) {
   const sidebarContent = (
     <>
       <div className="flex h-16 items-center justify-between border-b border-gray-800 px-6">
-        <Link href="/dashboard" className="text-xl font-bold text-blue-500">
+        <Link href="/dashboard" className="inline-flex min-h-[44px] items-center text-xl font-bold text-blue-500">
           Tutor
         </Link>
         {/* Close button on mobile */}
