@@ -28,7 +28,7 @@ export function InfoTooltip({ text, label = "Info" }: { text: string; label?: st
         onMouseLeave={() => setOpen(false)}
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
-        className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-gray-600 text-[11px] leading-none text-gray-400 transition-colors hover:border-gray-400 hover:text-white focus:border-gray-400 focus:text-white focus:outline-none"
+        className="relative inline-flex h-5 w-5 items-center justify-center rounded-full border border-gray-600 before:absolute before:left-1/2 before:top-1/2 before:h-11 before:w-11 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] text-[11px] leading-none text-gray-400 transition-colors hover:border-gray-400 hover:text-white focus:border-gray-400 focus:text-white focus:outline-none"
       >
         ⓘ
       </button>

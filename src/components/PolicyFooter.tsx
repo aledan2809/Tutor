@@ -15,11 +15,11 @@ export function PolicyFooter({ locale }: { locale: string }) {
   return (
     <footer className="border-t border-gray-800 bg-gray-950 py-4">
       <nav className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-4 gap-y-2 px-4 text-xs text-gray-400">
-        <Link href="/privacy" className="hover:text-gray-300">{L.privacy}</Link>
+        <Link href="/privacy" className="inline-flex min-h-[44px] items-center hover:text-gray-300">{L.privacy}</Link>
         <span aria-hidden="true">·</span>
-        <Link href="/terms" className="hover:text-gray-300">{L.terms}</Link>
+        <Link href="/terms" className="inline-flex min-h-[44px] items-center hover:text-gray-300">{L.terms}</Link>
         <span aria-hidden="true">·</span>
-        <Link href="/cookies" className="hover:text-gray-300">{L.cookies}</Link>
+        <Link href="/cookies" className="inline-flex min-h-[44px] items-center hover:text-gray-300">{L.cookies}</Link>
       </nav>
     </footer>
   );
