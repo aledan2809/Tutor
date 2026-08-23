@@ -658,7 +658,35 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 
 ---
 
-## [ ] 🎁 Referral — model CREDIT pentru ELEV (înlocuiește comisionul) — creat 2026-06-04
+## [~] 🎁 Referral — model CREDIT — MOTOR CONSTRUIT 2026-08-15; cablarea la plăți rămâne
+
+**Livrat**: `src/lib/referral-credit.ts` — nucleu **pur** (fără DB, fără rețea, fără stare) +
+21 teste (`src/lib/__tests__/referral-credit.test.ts`). Suita completă 512/512, zero regresie.
+
+Implementează modelul decis de user (2026-06-04, „MODEL FINAL UNIFICAT"), cu exact **două**
+tipuri de câștig, așa cum cere decizia:
+- **RECOMANDARE** — 50% din abonamentul ACTUAL al invitatului, doar pe **primele 3 plăți
+  încasate**. Clienții primesc **credit**, meditatorii/creatorii primesc **bani**.
+- **CONȚINUT** — 50% perpetuu, mereu în bani (un creator poate să nu fie abonat, deci creditul
+  n-ar avea unde să se consume).
+
+**Partea grea, cea pe care ai ridicat-o ca risc legal — clawback-ul la refund**: creditul deja
+CONSUMAT nu devine sold negativ. Soldul merge la zero, iar restul se raportează separat ca
+`alreadyConsumed` — adică o **datorie explicită**, care rămâne decizie de business (o recuperezi
+la factura următoare? o anulezi?), nu un efect tăcut ascuns într-un număr. Pentru bani, storno-ul
+separă ce e încă în reținere (se anulează curat) de ce s-a plătit deja afară (devine recuperabil).
+
+Soldul e un **fold pur peste istoric**, deci se poate recalcula oricând din evenimente — nu depinde
+de un contor ținut pe undeva care se poate desincroniza.
+
+### [ ] Ce NU s-a făcut, și de ce
+- **Cablarea la facturare** (model Prisma pentru sold, aplicare la checkout, hook pe refund din
+  Stripe). Cere **politica exactă de refund din Legal** (`legal.knowbest.ro`, NO-TOUCH CRITIC) —
+  în special ce se întâmplă cu creditul deja consumat. Nu se ghicește o regulă cu efect financiar.
+- **Migrarea modelului vechi**: `referral.ts` + `ReferralEarning` implementează comisionul perpetuu
+  în bani, care e ÎNCĂ în producție. Nucleul nou e separat tocmai ca să poată fi revizuit înainte
+  să atingă ceva viu. Trecerea cere decis ce se întâmplă cu recomandările deja active.
+- **Pagina de detalii** pentru promotor (sold, istoric, cât mai are).
 
 **Decizie user 2026-06-04** (în restructurare meniuri): comisionul 50% perpetuu pare schemă piramidală → **doar Creatorii (§286) îl păstrează**; elevii/părinții primesc **credit**.
 
