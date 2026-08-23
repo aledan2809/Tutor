@@ -156,7 +156,7 @@ export function QuestionRenderer({
         <button
           type="button"
           onClick={() => speakItems(audioItems, audioLang, ttsRate)}
-          className="rounded-lg border border-blue-700 bg-blue-950/30 px-4 py-2.5 text-sm font-medium text-blue-200 hover:bg-blue-900/40"
+          className="inline-flex min-h-[44px] items-center rounded-lg border border-blue-700 bg-blue-950/30 px-4 py-2.5 text-sm font-medium text-blue-200 hover:bg-blue-900/40"
         >
           🔊 Ascultă numerele
         </button>
@@ -182,7 +182,7 @@ export function QuestionRenderer({
         <button
           onClick={submitAudio}
           disabled={disabled || filled < audioItems.length}
-          className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="min-h-[44px] w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Submit Answer
         </button>
@@ -228,7 +228,7 @@ export function QuestionRenderer({
         <button
           onClick={submitClock}
           disabled={disabled || !clockH || !clockM}
-          className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="min-h-[44px] w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Submit Answer
         </button>
@@ -249,7 +249,7 @@ export function QuestionRenderer({
             type="button"
             onClick={() => setShowPassage((v) => !v)}
             aria-expanded={showPassage}
-            className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-blue-400 hover:text-blue-300"
+            className="flex min-h-[44px] w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-blue-400 hover:text-blue-300"
           >
             <span aria-hidden="true">📖</span>
             {showPassage ? t("hideText") : t("showText")}
@@ -275,7 +275,7 @@ export function QuestionRenderer({
           <button
             type="button"
             onClick={() => speak(cubeSpeech, "en-US", ttsRate)}
-            className="rounded-lg border border-blue-700 bg-blue-950/30 px-4 py-2.5 text-sm font-medium text-blue-200 hover:bg-blue-900/40"
+            className="inline-flex min-h-[44px] items-center rounded-lg border border-blue-700 bg-blue-950/30 px-4 py-2.5 text-sm font-medium text-blue-200 hover:bg-blue-900/40"
           >
             🔊 Ascultă mișcările din nou
           </button>
@@ -306,7 +306,7 @@ export function QuestionRenderer({
                 if (instantAnswer) onAnswer(opt.value);
               }}
               disabled={disabled}
-              className={`w-full rounded-lg border px-4 py-3 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 ${
+              className={`min-h-[44px] w-full rounded-lg border px-4 py-3 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 ${
                 selectedOption === opt.value
                   ? "border-blue-500 bg-blue-600/10 text-blue-400"
                   : "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
@@ -342,7 +342,7 @@ export function QuestionRenderer({
           (question.type === "MULTIPLE_CHOICE" && !selectedOption) ||
           (question.type === "OPEN" && !openAnswer.trim())
         }
-        className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="min-h-[44px] w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         Submit Answer
       </button>
