@@ -188,7 +188,7 @@ export function Sidebar({ user, hasFamilyPlan = false }: SidebarProps) {
         {/* Close button on mobile */}
         <button
           onClick={() => setMobileOpen(false)}
-          className="text-gray-400 hover:text-white lg:hidden"
+          className="-m-2 flex min-h-[44px] min-w-[44px] items-center justify-center text-gray-400 hover:text-white lg:hidden"
           aria-label="Close menu"
         >
           <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -254,7 +254,7 @@ export function Sidebar({ user, hasFamilyPlan = false }: SidebarProps) {
       {/* Mobile hamburger button */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="fixed left-4 top-4 z-40 rounded-lg border border-gray-700 bg-gray-900 p-2 text-gray-400 hover:text-white lg:hidden"
+        className="fixed left-4 top-4 z-40 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-gray-700 bg-gray-900 p-2 text-gray-400 hover:text-white lg:hidden"
         aria-label="Open menu"
       >
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

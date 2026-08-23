@@ -34,7 +34,8 @@
     "forgotPassword": "Ai uitat parola?",
     "useMagicLink": "Folosește magic link",
     "usePassword": "Folosește parola",
-    "invalidCredentials": "Email sau parolă incorectă"
+    "invalidCredentials": "Email sau parolă incorectă",
+    "networkError": "Nu am putut trimite cererea. Verifică conexiunea și încearcă din nou."
   },
   "nav": {
     "dashboard": "Panou de control",

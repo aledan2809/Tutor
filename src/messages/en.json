@@ -34,7 +34,8 @@
     "forgotPassword": "Forgot password?",
     "useMagicLink": "Use magic link instead",
     "usePassword": "Use password instead",
-    "invalidCredentials": "Invalid email or password"
+    "invalidCredentials": "Invalid email or password",
+    "networkError": "We could not send the request. Check your connection and try again."
   },
   "nav": {
     "dashboard": "Dashboard",

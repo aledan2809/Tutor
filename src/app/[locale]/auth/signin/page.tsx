@@ -30,11 +30,16 @@ export default function SignInPage() {
   const handleCredentialsSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    // signIn() intoarce {error} pentru credentiale gresite, dar ARUNCA la esec de
+    // retea (offline, server picat, 429). Fara catch, butonul ramanea mort si
+    // utilizatorul nu vedea nimic.
+    let res;
+    try {
+      res = await signIn("credentials", { email, password, redirect: false });
+    } catch {
+      setError(t("networkError"));
+      return;
+    }
     if (res?.error) {
       setError(t("invalidCredentials") || "Invalid email or password");
     } else {
@@ -44,7 +49,18 @@ export default function SignInPage() {
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    await signIn("resend", { email, redirect: false });
+    setError("");
+    // Nu anunta „verifica-ti emailul" decat daca trimiterea chiar a reusit.
+    try {
+      const res = await signIn("resend", { email, redirect: false });
+      if (res?.error) {
+        setError(t("networkError"));
+        return;
+      }
+    } catch {
+      setError(t("networkError"));
+      return;
+    }
     setEmailSent(true);
   };
 
@@ -72,7 +88,7 @@ export default function SignInPage() {
         {/* Google OAuth */}
         <button
           onClick={() => signIn("google", { callbackUrl: postLoginUrl() })}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-700 transition-colors"
+          className="min-h-[44px] flex w-full items-center justify-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-700 transition-colors"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -119,7 +135,7 @@ export default function SignInPage() {
                 placeholder="you@example.com"
                 title="Enter your email address"
                 required
-                className="mb-3 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="min-h-[44px] mb-3 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
               <label
                 htmlFor="password"
@@ -136,7 +152,7 @@ export default function SignInPage() {
                   placeholder="••••••••"
                   title="Enter your password"
                   required
-                  className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 pr-10 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="min-h-[44px] w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 pr-10 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
                 <button
                   type="button"
@@ -163,7 +179,7 @@ export default function SignInPage() {
               )}
               <button
                 type="submit"
-                className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                className="min-h-[44px] w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
               >
                 {t("signInButton") || "Sign In"}
               </button>
@@ -201,11 +217,11 @@ export default function SignInPage() {
                 placeholder="you@example.com"
                 title="Enter your email address"
                 required
-                className="mb-4 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="min-h-[44px] mb-4 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
               <button
                 type="submit"
-                className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                className="min-h-[44px] w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
               >
                 {t("continueWithEmail")}
               </button>
