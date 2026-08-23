@@ -22,6 +22,10 @@ type Copy = {
   plansLead: string;
   plans: Plan[];
   priceNote: string;
+  valueAnchorTitle: string;
+  valueAnchorLead: string;
+  valueAnchorItems: string[];
+  valueAnchorClose: string;
   promoNote: string;
   trialTitle: string;
   trialPoints: string[];
@@ -101,6 +105,17 @@ const RO: Copy = {
       ],
     },
   ],
+  valueAnchorTitle: "Cât face, de fapt, o lună?",
+  valueAnchorLead:
+    "Gândește-te ce plătești pe o singură ședință de meditații. Acum uite ce primești, în fiecare zi, pentru mai puțin de-atât:",
+  valueAnchorItems: [
+    "Copilul e împins de la spate pe WhatsApp să-și facă exercițiile — nu tu.",
+    "Dacă tot nu le face, afli tu. La pachetul cu meditator, află și el.",
+    "Duminică primești un raport scurt: ce a lucrat, unde stă bine, unde s-a împotmolit. Îl poți primi și zilnic, dacă vrei.",
+    "Vezi exact la ce capitol greșește — deci ședința de meditații nu se mai duce pe recapitulat la nimereală.",
+  ],
+  valueAnchorClose:
+    "Nu înlocuiește meditațiile. Le face să conteze — pentru că se lucrează pe ce nu știe copilul, nu pe ce se presupune că nu știe.",
   priceNote:
     "O singură factură pe familie. Reduceri: al 2-lea copil −20%, al 3-lea+ −30%; a 2-a materie −15%, a 3-a+ −25%; plată anuală = 2 luni gratuite (plătești 10 luni).",
   promoNote:
@@ -188,6 +203,17 @@ const EN: Copy = {
       ],
     },
   ],
+  valueAnchorTitle: "What does a month actually buy?",
+  valueAnchorLead:
+    "Think what one tutoring session costs you. Now look at what you get, every day, for less than that:",
+  valueAnchorItems: [
+    "Your child gets nudged on WhatsApp to do the exercises — so you don't have to.",
+    "If they still don't, you find out. On the plan with a tutor, so does the tutor.",
+    "On Sunday you get a short report: what they worked on, where they're solid, where they got stuck. Daily too, if you prefer.",
+    "You see exactly which topic they get wrong — so the tutoring session isn't spent revising at random.",
+  ],
+  valueAnchorClose:
+    "It doesn't replace tutoring. It makes it count — because the session works on what your child actually doesn't know, not on what someone assumes they don't.",
   priceNote:
     "One bill per family. Discounts: 2nd child −20%, 3rd+ −30%; 2nd subject −15%, 3rd+ −25%; annual = 2 months free (you pay 10 months).",
   promoNote:
@@ -313,7 +339,24 @@ export default async function ParintePage({ params }: { params: Promise<{ locale
               </div>
             ))}
           </div>
-          <p className="mt-4 text-center text-xs text-gray-500 max-w-2xl mx-auto">{c.priceNote}</p>
+          <p className="mt-4 text-center text-xs text-gray-400 max-w-2xl mx-auto">{c.priceNote}</p>
+
+          {/* Ancora de valoare — convingerea 3: pretul se citeste fata de ce
+              plateste deja parintele pe meditatii. Fara cifra inventata de piata:
+              comparatia o face el, cu suma lui. */}
+          <div className="mt-10 mx-auto max-w-2xl rounded-2xl border border-gray-800 bg-gray-900/60 p-6">
+            <h3 className="text-lg font-bold text-white">{c.valueAnchorTitle}</h3>
+            <p className="mt-2 text-sm text-gray-300">{c.valueAnchorLead}</p>
+            <ul className="mt-4 space-y-2.5">
+              {c.valueAnchorItems.map((it) => (
+                <li key={it} className="flex gap-2.5 text-sm text-gray-300">
+                  <span aria-hidden="true" className="mt-0.5 text-blue-400">•</span>
+                  <span>{it}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 border-t border-gray-800 pt-4 text-sm font-medium text-gray-200">{c.valueAnchorClose}</p>
+          </div>
           {promoActive && (
             <div className="mt-4 mx-auto max-w-2xl rounded-xl border border-amber-500/40 bg-amber-500/5 p-3 text-center text-sm font-medium text-amber-200">
               {c.promoNote}
