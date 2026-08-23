@@ -146,7 +146,11 @@ Sesiune nouă în domeniul privat **Aptitudini Aviație** (Rareș + admini), cer
 
 ---
 
-## [~] 👨‍👩‍👧 Pachete de familie — Fazele 0-3 DONE + LIVE 2026-06-25 (commits `dec353e`+`e750b6d`+`246e2fb`); Faza 4 (True E2E full) rămâne
+## [x] 👨‍👩‍👧 Pachete de familie — TOATE FAZELE DONE (0-3 LIVE 2026-06-25; Faza 4 închisă 2026-08-15)
+
+**Antetul era stale**: corpul itemului arata deja Faza 4 ca `True E2E [10] — COMPLET pt scope aplicabil (8/8 faze, 0 P0/P1)`, cu /review, E2E 12/12, journey pe 4 roluri, concurenta si billing→roluri toate `[x]`. Singurele doua puncte deschise sunt **blocate pe user** (template Meta WhatsApp, DNS Resend) — nu pe cod.
+
+**Re-verificat 2026-08-15** dupa ce sesiunea de accesibilitate a atins `sidebar.tsx` si clopotelul (ambele pe calea meniului „Familia mea"): `/ro/dashboard/family` randeaza corect, h1 „Familia mea", fara eroare. Nicio regresie.
 
 **Rezolvă „CE LIPSEȘTE" #1+#2+#3 de mai jos** (legătură 1:1, onboarding self-service, scaffold pachete) — wiring real, nu doar marketing. Plan (a) agreat 2026-06-03, executat acum.
 
@@ -244,7 +248,13 @@ Pe `/dashboard/practice` (pagina cu „Întrebări disponibile / Capitole studia
 
 ---
 
-## [~] 🎓 BAC — Matematică → GRILE + SIMULĂRI (creat 2026-06-10)
+## [x] 🎓 BAC — Matematică → GRILE + SIMULĂRI — DONE (conținut 2026-06-10; verificarea UI închisă 2026-08-15)
+
+**Ce mai lipsea**: nota repetata pe fiecare fază — „**TODO verif autentificat UI walk**". Adica nimeni nu confirmase ca lucrarile chiar se **randeaza** pentru un utilizator logat; DB-ul era autoritativ, UI-ul nu fusese privit.
+
+**Facut 2026-08-15**, autentificat pe prod: `/dashboard/exam-bank` listeaza toate trei programele cu numere care se potrivesc exact cu ce declara itemul — **M1=14 · M2=16 · M3=17** lucrari. O lucrare M1 deschisa direct: h1 „Matematică M1 (Mate-Info) · BAC 2024", 11 marcaje de punctaj, continut matematic real, fara eroare.
+
+**Nu mai e nimic de transcris**: 281 grile (M1=83, M2=96, M3=102) + 47 lucrari full-paper, toate verificate prin re-derivare independenta. Orice extindere viitoare cere **subiectele oficiale in PDF** — nu exista local, si nu se fabrica.
 
 **3 programe naționale DISTINCTE, NICIODATĂ mixate** (cerere user): **M1 (Mate-Info)**, **M2 (Științele naturii)**, **M3 (Tehnologic)**. Fiecare program = domeniu propriu (`matematica-{m1,m2,m3}-ix-xii`, slug `-ix-xii` → grupul „Bacalaureat") + `subjectKey` propriu pentru Simulări (`matematica_m1/m2/m3` — altfel unique constraint `(examType,year,subjectKey,variant)` s-ar ciocni între programe) + tag grile propriu (`bac-grile-mate-m{n}:`).
 
