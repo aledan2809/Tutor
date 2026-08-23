@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
 import { useLocale } from "next-intl";
+import { readConsent, subscribeConsent, type ConsentChoice } from "@/lib/cookie-consent";
 
 // Google One Tap (Tier 4 — zero-friction entry). Shows the floating "Continue as
 // <name>" prompt for unauthenticated visitors who have a Google session in the
@@ -14,6 +15,11 @@ import { useLocale } from "next-intl";
 //
 // Gated on a real clientId (passed from AUTH_GOOGLE_ID by the layout) — renders
 // nothing without it. The client ID is public (it travels in every OAuth URL).
+//
+// Also gated on cookie consent: GSI is a non-essential third party (it sets its
+// own cookies and talks to Google on page load), so the script is not fetched
+// at all until the visitor accepts on the banner. Accepting dispatches an event
+// this component listens for, so One Tap starts without a reload.
 
 interface CredentialResponse {
   credential?: string;
@@ -43,8 +49,19 @@ export default function GoogleOneTap({ clientId }: { clientId?: string }) {
   const { status } = useSession();
   const locale = useLocale();
   const initialized = useRef(false);
+  const [consent, setConsent] = useState<ConsentChoice | null>(null);
+
+  // Read the stored choice after mount (localStorage is client-only) and keep
+  // following it, so accepting the banner starts One Tap on the same page view.
+  useEffect(() => {
+    setConsent(readConsent());
+    return subscribeConsent(setConsent);
+  }, []);
 
   useEffect(() => {
+    // No consent, no third-party script. Anything other than an explicit
+    // "accepted" — absent, rejected, corrupt — means we do nothing.
+    if (consent !== "accepted") return;
     // Only prompt unauthenticated visitors, once, and only with a real clientId.
     if (!clientId || status !== "unauthenticated" || initialized.current) return;
     initialized.current = true;
@@ -92,7 +109,7 @@ export default function GoogleOneTap({ clientId }: { clientId?: string }) {
     script.defer = true;
     script.onload = startOneTap;
     document.head.appendChild(script);
-  }, [clientId, status, locale]);
+  }, [clientId, status, locale, consent]);
 
   return null;
 }

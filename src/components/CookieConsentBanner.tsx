@@ -3,8 +3,12 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-
-const KEY = "etutor_cookie_consent_v1";
+import {
+  COOKIE_CONSENT_KEY,
+  parseStoredConsent,
+  writeConsent,
+  type ConsentChoice,
+} from "@/lib/cookie-consent";
 
 /**
  * GDPR cookie consent banner. Records the visitor's choice locally and notifies
@@ -20,18 +24,16 @@ export function CookieConsentBanner() {
 
   useEffect(() => {
     try {
-      if (!localStorage.getItem(KEY)) setShow(true);
+      if (!parseStoredConsent(localStorage.getItem(COOKIE_CONSENT_KEY))) setShow(true);
     } catch {
       /* ignore */
     }
   }, []);
 
-  const decide = (choice: "accepted" | "rejected") => {
-    try {
-      localStorage.setItem(KEY, JSON.stringify({ choice, at: new Date().toISOString() }));
-    } catch {
-      /* ignore */
-    }
+  const decide = (choice: ConsentChoice) => {
+    // Persists + notifies this tab, so a consent-gated third party (One Tap)
+    // can start without a reload.
+    writeConsent(choice);
     fetch("/api/v1/consent/record", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

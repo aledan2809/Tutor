@@ -17,12 +17,14 @@ const intlMiddleware = createMiddleware(routing);
 //
 // style-src: keeps 'unsafe-inline' deliberately — Next inlines critical CSS as
 // <style> without a nonce, and style-injection XSS is low severity. Documented
-// compromise, widely used with the App Router.
+// compromise, widely used with the App Router. accounts.google.com is required
+// by One Tap: the GSI client fetches its own stylesheet from there, and without
+// the origin the prompt is blocked and the feature is dead (AGT-018).
 function buildCsp(nonce: string): string {
   return (
     "default-src 'self'; " +
     `script-src 'self' 'nonce-${nonce}' https://accounts.google.com https://analytics.knowbest.ro; ` +
-    "style-src 'self' 'unsafe-inline'; " +
+    "style-src 'self' 'unsafe-inline' https://accounts.google.com; " +
     "img-src 'self' data: https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://*.googleusercontent.com; " +
     "font-src 'self'; " +
     "connect-src 'self' https://accounts.google.com https://*.googleapis.com https://analytics.knowbest.ro; " +
