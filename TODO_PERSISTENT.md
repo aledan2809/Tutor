@@ -877,11 +877,35 @@ critice** + 6 rute publice / 9 protejate / 3 admin.
 
 ---
 
-## [ ] Mobile touch targets — dashboard content pages
+## [x] Mobile touch targets — dashboard content pages — DONE 2026-08-15
 
-**Status**: sidebar.tsx fixed (min-h-[44px] on nav links). Dashboard page content needs per-page audit.
-**Scope**: mobile-tester currently 75/100. Likely affected: buttons on practice, exam, assessment pages.
-**Gap**: AGT-007 + AGT-009 in AUDIT_GAPS.md
+Masurat pe prod la 375px, logat, pe fiecare pagina ceruta de item. Rezultat:
+
+| pagina | inainte | dupa |
+|---|---|---|
+| practice | 22/53 | **4** |
+| exams | 13/38 | **4** |
+| assessment | 13/39 | **4** |
+| progress | 15/40 | **4** |
+| gamification | 20/45 | **9** |
+| settings | 20/53 | **11** |
+
+Cel mai important lucru gasit: **butoanele de raspuns la grile** aveau 42px — doua
+sub prag. Sunt controalele pe care un elev le apasa de sute de ori pe telefon.
+
+Reparate, in ordinea efectului: cadrul comun (hamburger 38x38, inchidere 24x24,
+comutator de limba, brand, clopotel, tab-uri) → apare pe toate paginile ·
+tooltip-urile de informatii (component partajat, 9 instante doar pe /practice) ·
+butoanele de raspuns si de actiune · pagina de autentificare (6 controale la 42px).
+
+Lectie din parcurs: prima varianta a tooltip-ului marea zona de atins printr-un
+pseudo-element. Corect pentru degete, dar `getBoundingClientRect()` ignora
+pseudo-elementele — deci invizibil pentru orice scaner, inclusiv mobile-tester,
+care e chiar criteriul din AGT-012. Refacut ca butonul sa aiba 44x44 real.
+
+Ce ramane: controale specifice de pagina pe gamification si settings, plus
+link-urile din propozitii, care au **exceptie explicita** in WCAG 2.2 si au fost
+lasate intentionat.
 
 ---
 
@@ -910,10 +934,26 @@ Run POST /api/admin/bibliography to add items for aviation domain.
 
 ---
 
-## [ ] WG Fixes — a11y 55/100 + mobile-tester 75/100 — DEFERRED 2026-06-13
+## [x] WG Fixes — a11y + mobile touch targets — DONE 2026-08-15 (fara Website Guru)
 
-Use Website Guru (`POST guru.techbiz.ae/api/fix`) to fix AGT-008 (a11y) + AGT-009 (mobile touch targets).
-> Deferred from the quick-wins batch: this is a multi-page audit + WG-driven loop, best run as a focused TWG-GW session (not a single quick fix). Pairs with the "Mobile touch targets" item above.
+Facut direct, nu prin Website Guru: WG nu functioneaza dintr-o sesiune interactiva
+(L340), iar problema nu era ca lipsea unealta — era ca nimeni nu masurase.
+
+a11y masurat cu Playwright + bypassCSP + axe-core (CSP-ul blocase scanerul obisnuit,
+de-aia raporta 100/100 fals):
+
+| pagina | inainte | dupa |
+|---|---|---|
+| /ro | 10 noduri (1 CRITIC) | **0** |
+| /ro/dashboard | 4 noduri | **0** |
+| /ro/dashboard/practice | 16 noduri (1 CRITIC) | **2** |
+
+Doua defecte critice, ambele `select` fara nume accesibil — unul pe pagina de start,
+altul pe ecranul de exersare, unde eticheta exista vizual dar nu era legata de
+control. Restul: contrast `text-gray-500` = 4.16:1, sub pragul AA de 4.5 (calculat,
+nu estimat) → `gray-400` = 7.93:1.
+
+Ting-urile mobile: vezi itemul de mai sus.
 
 ---
 
