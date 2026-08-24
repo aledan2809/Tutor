@@ -963,6 +963,7 @@
     "year11": "a XI-a",
     "year12": "a XII-a",
     "lagBadge": "{count} în urmă",
-    "lagBanner": "Programa a avansat cu {count} lecții peste bifele salvate — bifează ce s-a predat sau confirmă că la clasă nu s-au făcut."
+    "lagBanner": "Programa a avansat cu {count} lecții peste bifele salvate — bifează ce s-a predat sau confirmă că la clasă nu s-au făcut.",
+    "conflictReloaded": "Altcineva a salvat lista între timp — am reîncărcat-o. Verifică bifele și salvează din nou."
   }
 }

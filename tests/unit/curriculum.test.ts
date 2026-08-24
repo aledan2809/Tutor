@@ -135,6 +135,41 @@ describe("schoolWeekAt — structura multi-an", () => {
     const labels = SCHOOL_YEARS.map((s) => s.label);
     expect(new Set(labels).size).toBe(labels.length);
   });
+
+  it("modulele fiecărei structuri se leagă în lanț (firstWeek următor = ultimul + 1)", () => {
+    // Invarianta care a prins slip-ul 2026-2027 (sumă 35, dedup mut în ianuarie):
+    // firstWeek e derivabil din date prin ancorarea la luni; îl declarăm, deci
+    // îl verificăm contra propriei aritmetici pe TOATE structurile.
+    const MS_DAY = 86_400_000;
+    const day = (iso: string) => new Date(iso + "T00:00:00Z");
+    const monday = (d: Date) => new Date(d.getTime() - (((d.getUTCDay() + 6) % 7) * MS_DAY));
+    for (const st of SCHOOL_YEARS) {
+      let expectedFirst = 1;
+      for (const m of st.modules) {
+        expect(m.firstWeek, `${st.label} ${m.start}`).toBe(expectedFirst);
+        const weeks =
+          Math.floor((monday(day(m.end)).getTime() - monday(day(m.start)).getTime()) / (7 * MS_DAY)) + 1;
+        expectedFirst = m.firstWeek + weeks;
+      }
+      // Ambele ordine dau 36 de săptămâni de cursuri.
+      expect(expectedFirst - 1, st.label).toBe(36);
+    }
+  });
+
+  it("prima luni de predare din ianuarie 2027 are săptămână NOUĂ față de decembrie (dedup-ul respiră)", () => {
+    const decWeek = schoolWeekAt(new Date("2026-12-21T10:00:00+02:00"));
+    const janWeek = schoolWeekAt(new Date("2027-01-11T10:00:00+02:00"));
+    expect(janWeek).toBeGreaterThan(decWeek);
+  });
+
+  it("domainSlugsForBand e inversul exact al lui bandForDomainSlug", async () => {
+    const { domainSlugsForBand } = await import("@/lib/curriculum");
+    for (const band of Object.keys(BAND_YEARS) as (keyof typeof BAND_YEARS)[]) {
+      const slugs = domainSlugsForBand(band);
+      expect(slugs.length, band).toBeGreaterThan(0);
+      for (const slug of slugs) expect(bandForDomainSlug(slug)).toBe(band);
+    }
+  });
 });
 
 describe("expectedByWeek — rândul programei", () => {

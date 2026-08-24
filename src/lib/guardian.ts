@@ -37,7 +37,23 @@ export async function getLinkedChildIds(parentId: string): Promise<string[]> {
   return links.map((l) => l.childId);
 }
 
-/** True when `parentId` is an active guardian of `childId`. */
+/**
+ * True when `parentId` is an active PARENT of `childId`. Deliberately excludes
+ * TUTOR-relation family links: everywhere the codebase grants parent powers it
+ * filters `relation: PARENT` (threshold-monitor, parent-monitor, family-invite)
+ * — a hired tutor accepted into the family must not pass as the parent, and a
+ * write they make must not be stamped GUARDIAN (finding review 2026-08-25).
+ */
+export async function isParentOf(parentId: string, childId: string): Promise<boolean> {
+  if (parentId === childId) return false;
+  const link = await prisma.guardian.findUnique({
+    where: { parentId_childId: { parentId, childId } },
+    select: { status: true, relation: true },
+  });
+  return link?.status === "active" && link?.relation === "PARENT";
+}
+
+/** True when `parentId` is an active guardian of `childId` (any relation). */
 export async function isGuardianOf(parentId: string, childId: string): Promise<boolean> {
   // Defense-in-depth: nobody is their own guardian (blocks a self-link from ever
   // granting parent powers over one's own account, e.g. the tone-restriction control).

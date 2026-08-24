@@ -3,38 +3,54 @@ import { getSession } from "@/lib/authorization";
 import { withErrorHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
 import { canAccessDomain } from "@/lib/domain-access";
-import { isGuardianOf } from "@/lib/guardian";
+import { isParentOf } from "@/lib/guardian";
 import { bandForDomainSlug, BAND_YEARS, unitsForStudent } from "@/lib/curriculum";
 import { getCurriculumState, saveChecklist } from "@/lib/curriculum-service";
 
-// Cine poate citi/scrie checklistul unui COPIL (?childId=): părintele legat
-// (Guardian activ → markedBy GUARDIAN) sau meditatorul (rol INSTRUCTOR/ADMIN
-// pe domeniul respectiv + elevul are enrollment STUDENT activ acolo →
-// markedBy INSTRUCTOR — aceeași regulă de acces ca restul dashboardului de
-// instructor). Decizia user 2026-08-24: bifa poate veni de la elev SAU de la
-// meditator/părinte — ambele în paralel.
+// Cine poate citi/scrie checklistul unui COPIL (?childId=). Reguli întărite
+// după review-ul de securitate (2026-08-25):
+//  - PĂRINTE = legătură Guardian activă cu relation PARENT (un TUTOR de
+//    familie NU trece drept părinte — ar fi scris cross-domeniu cu eticheta
+//    GUARDIAN falsă);
+//  - MEDITATOR = rol INSTRUCTOR/ADMIN pe domeniu, verificat LIVE în DB (nu
+//    doar din JWT-ul care poate fi vechi de până la 5 min — prima scriere
+//    cross-user din codebase merită verificarea proaspătă);
+//  - superadmin = echivalent INSTRUCTOR (consistent cu toate celelalte gate-uri;
+//    fără asta, exact paginile montate pentru el îi arătau un gol tăcut);
+//  - în TOATE cazurile copilul trebuie să aibă enrollment STUDENT ACTIV pe
+//    domeniu — fără el, un adult putea "iniția" o bandă pe care copilul n-o
+//    folosea și poarta îl bloca la zero când ajungea acolo.
 async function resolveChildAccess(
-  requester: { id: string; enrollments?: { domainId: string; roles: readonly string[] }[] },
+  requester: { id: string; isSuperAdmin?: boolean },
   childId: string,
   domainSlug: string
 ): Promise<"GUARDIAN" | "INSTRUCTOR" | null> {
   if (childId === requester.id) return null; // self nu e "child path"
-  if (await isGuardianOf(requester.id, childId)) return "GUARDIAN";
   const domain = await prisma.domain.findUnique({ where: { slug: domainSlug }, select: { id: true } });
   if (!domain) return null;
-  const teaches = requester.enrollments?.some(
-    (e) => e.domainId === domain.id && (e.roles.includes("INSTRUCTOR") || e.roles.includes("ADMIN"))
-  );
-  if (!teaches) return null;
   const childEnrolled = await prisma.enrollment.findFirst({
     where: { userId: childId, domainId: domain.id, isActive: true, roles: { hasSome: ["STUDENT"] } },
     select: { id: true },
   });
-  return childEnrolled ? "INSTRUCTOR" : null;
+  if (!childEnrolled) return null;
+
+  if (await isParentOf(requester.id, childId)) return "GUARDIAN";
+  if (requester.isSuperAdmin) return "INSTRUCTOR";
+  const teaches = await prisma.enrollment.findFirst({
+    where: {
+      userId: requester.id,
+      domainId: domain.id,
+      isActive: true,
+      roles: { hasSome: ["INSTRUCTOR", "ADMIN"] },
+    },
+    select: { id: true },
+  });
+  return teaches ? "INSTRUCTOR" : null;
 }
 
 // Aceeași poartă de acces ca session/start — checklistul unui domeniu nu e
-// vizibil cuiva care nu poate exersa domeniul (consistență, finding review).
+// vizibil cuiva care nu poate exersa domeniul (self-path; child-path-ul are
+// propriile reguli în resolveChildAccess).
 async function domainAccessError(
   user: { id: string } & Record<string, unknown>,
   domainSlug: string
@@ -46,10 +62,6 @@ async function domainAccessError(
   }
   return null;
 }
-
-// Checklistul programei parcurse pentru un domeniu: GET = starea celor două
-// rânduri (programa la zi + bifele elevului), PUT = flow-ul de inițiere sau o
-// editare ulterioară. Doar domeniile cu bandă de curriculum răspund aici.
 
 async function _GET(
   _req: NextRequest,
@@ -90,6 +102,7 @@ async function _GET(
     initiated: state.initiated,
     schoolYear: state.schoolYear,
     week: state.week,
+    revision: state.revision,
     bandYears: BAND_YEARS[state.band],
     rows: state.rows.map((r) => ({
       key: r.unit.key,
@@ -163,7 +176,24 @@ async function _PUT(
     taught.set(k, v);
   }
 
-  const res = await saveChecklist(subjectUserId, band, schoolYear, taught, markedBy);
+  // Revizia optimistă: clientul trimite ce a văzut la încărcare; nepotrivirea
+  // înseamnă că elevul/celălalt adult a salvat între timp → 409, se reîncarcă.
+  const expectedRevision =
+    "revision" in body ? ((body as { revision?: unknown }).revision as string | null) : undefined;
+  if (expectedRevision !== undefined && expectedRevision !== null && typeof expectedRevision !== "string") {
+    return NextResponse.json({ error: "revision must be a string or null" }, { status: 400 });
+  }
+
+  const res = await saveChecklist(subjectUserId, band, schoolYear, taught, markedBy, {
+    markedById: session.user.id,
+    expectedRevision,
+  });
+  if (res.conflict) {
+    return NextResponse.json(
+      { error: "Checklist changed since load", conflict: true },
+      { status: 409 }
+    );
+  }
   if (res.error) {
     return NextResponse.json({ error: res.error }, { status: 400 });
   }

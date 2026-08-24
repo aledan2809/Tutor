@@ -963,6 +963,7 @@
     "year11": "11th",
     "year12": "12th",
     "lagBadge": "{count} behind",
-    "lagBanner": "The plan is {count} lessons ahead of the saved ticks — tick what was taught, or confirm your class hasn't covered them."
+    "lagBanner": "The plan is {count} lessons ahead of the saved ticks — tick what was taught, or confirm your class hasn't covered them.",
+    "conflictReloaded": "Someone else saved this list in the meantime — it has been reloaded. Check the ticks and save again."
   }
 }

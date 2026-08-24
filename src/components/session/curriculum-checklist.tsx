@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { CURRICULUM_LAG_THRESHOLD } from "@/lib/curriculum";
 
 // Checklistul programei parcurse — cele două rânduri în paralel (cerință user):
 //   rândul 1 (●/○) = programa cu calendar: ce ar fi trebuit predat până azi;
@@ -25,6 +26,7 @@ type ApiState = {
   initiated: boolean;
   schoolYear: number | null;
   week: number;
+  revision: string | null;
   bandYears: number[];
   rows: Row[];
 };
@@ -70,8 +72,11 @@ export function CurriculumChecklist({
       const params = new URLSearchParams();
       if (year !== undefined) params.set("schoolYear", String(year));
       if (childId) params.set("childId", childId);
-      const q = params.size ? `?${params}` : "";
-      const res = await fetch(`/api/${domainSlug}/curriculum${q}`);
+      // NU .size: e API din 2023 (Safari 17+); pe un browser mai vechi ar fi
+      // undefined → falsy → query-ul ar dispărea și componenta ar încărca (și
+      // la salvare AR SUPRASCRIE) checklistul ADULTULUI în locul copilului.
+      const qs = params.toString();
+      const res = await fetch(`/api/${domainSlug}/curriculum${qs ? `?${qs}` : ""}`);
       if (!res.ok) {
         // 404 = domeniu fără programă; alte erori — componenta tace, sesiunile
         // pe domenii fără bandă nu depind de ea.
@@ -114,17 +119,27 @@ export function CurriculumChecklist({
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch(
-        `/api/${domainSlug}/curriculum${childId ? `?childId=${childId}` : ""}`,
-        {
+      const params = new URLSearchParams();
+      if (childId) params.set("childId", childId);
+      const qs = params.toString();
+      const res = await fetch(`/api/${domainSlug}/curriculum${qs ? `?${qs}` : ""}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           schoolYear,
           taught: Object.fromEntries(taught),
+          // Revizia văzută la încărcare — checklistul are trei scriitori
+          // (elev/părinte/meditator); serverul refuză cu 409 dacă altcineva a
+          // salvat între timp, ca ultimul Salvează să nu-i șteargă tăcut bifele.
+          revision: state?.revision ?? null,
         }),
-        }
-      );
+      });
+      if (res.status === 409) {
+        await load(schoolYear ?? undefined);
+        setOpen(true);
+        setError(t("conflictReloaded"));
+        return;
+      }
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         setError(body.error ?? t("saveError"));
@@ -147,6 +162,7 @@ export function CurriculumChecklist({
   // Decalajul programă↔bife (starea SALVATĂ, nu editarea în curs): aceeași
   // regulă ca atenționarea săptămânală — vizibil aici oricând, nu doar lunea.
   const lag = state.rows.filter((r) => r.expectedByNow && !r.taught).length;
+  const lagVisible = lag > CURRICULUM_LAG_THRESHOLD;
   const years = [...new Set(visibleRows.map((r) => r.year))].sort((a, b) => a - b);
 
   // Card compact după inițiere — permanent vizibil, click = editare.
@@ -159,7 +175,7 @@ export function CurriculumChecklist({
       >
         <span className="text-sm text-gray-300">
           📚 {t("summary", { count: taughtCount, total: visibleRows.length })}
-          {lag > 2 && (
+          {lagVisible && (
             <span className="ml-2 rounded bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-400">
               {t("lagBadge", { count: lag })}
             </span>
@@ -183,7 +199,7 @@ export function CurriculumChecklist({
     <div className="mb-6 rounded-lg border border-gray-700 bg-gray-900 p-4 sm:p-5">
       <h2 className="text-base font-semibold text-white">{t("title")}</h2>
       <p className="mt-1 text-sm text-gray-400">{t("intro")}</p>
-      {lag > 2 && (
+      {lagVisible && (
         <p className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
           ⚠️ {t("lagBanner", { count: lag })}
         </p>

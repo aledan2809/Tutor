@@ -22,6 +22,14 @@ export type CurriculumState = {
   schoolYear: number | null;
   /** Săptămâna de școală curentă (0 = în afara oricărui an configurat). */
   week: number;
+  /**
+   * Revizia stării salvate (max updatedAt, ISO) — checklistul are acum TREI
+   * scriitori (elev, părinte, meditator); PUT-ul o trimite înapoi, iar o
+   * nepotrivire înseamnă că altcineva a salvat între timp → 409, clientul
+   * reîncarcă. Fără ea, ultimul care apasă Salvează ștergea tăcut bifele
+   * celuilalt (lost update — finding review 2026-08-25). null = bandă goală.
+   */
+  revision: string | null;
   rows: ChecklistRow[];
 };
 
@@ -68,32 +76,51 @@ export async function getCurriculumState(
   const week = schoolWeekAt(new Date());
   const initiated = savedBandYear !== null && checks.length > 0;
 
+  const revision =
+    checks.length > 0
+      ? new Date(Math.max(...checks.map((c) => c.updatedAt.getTime()))).toISOString()
+      : null;
+
   const overrides = new Map(checks.map((c) => [c.unitKey, c.taught]));
   const rows =
     schoolYear !== null ? buildChecklist(band, schoolYear, week, overrides) : [];
 
-  return { band, initiated, schoolYear, week, rows };
+  return { band, initiated, schoolYear, week, revision, rows };
 }
 
 /**
- * Salvează flow-ul de inițiere / o editare a checklistului: clasa + toate
- * bifele explicit. Starea completă trăiește în DB (delete + createMany), nu
- * împrăștiată între calendar și override-uri.
+ * Salvează checklistul: clasa + bifele. NU mai e delete-all + createMany:
+ * scrierea e un MERGE per unitate care păstrează proveniența —
+ *  - rândurile a căror valoare NU se schimbă rămân neatinse (markedBy/By-Id
+ *    ale autorului original supraviețuiesc; înainte, o corectură de meditator
+ *    ștampila INSTRUCTOR pe toate cele ~28 de rânduri și următoarea salvare a
+ *    elevului le flip-uia pe toate înapoi la SELF — coloana de audit nu spunea
+ *    niciodată adevărul; finding review 2026-08-25);
+ *  - rândurile schimbate + cele noi primesc actorul curent (rol + id);
+ *  - rândurile devenite invalide la schimbarea clasei se șterg țintit.
+ *
+ * Concurență: `expectedRevision` = revizia văzută de client la încărcare.
+ * Nepotrivire cu starea curentă → { conflict: true }, nimic scris.
+ *
+ * Politici (review 2026-08-25):
+ *  - schimbarea CLASEI e permisă doar SELF și GUARDIAN (părintele face
+ *    inițierea; meditatorul corectează bife, nu declară clasa copilului);
+ *  - User.schoolYear (fallback informativ global) se actualizează doar pe
+ *    SELF/GUARDIAN — un meditator care atinge banda BAC nu mută clasa
+ *    globală a copilului.
  */
 export async function saveChecklist(
   userId: string,
   band: SubjectBand,
   schoolYear: number,
   taughtByUnitKey: ReadonlyMap<string, boolean>,
-  markedBy: "SELF" | "GUARDIAN" | "INSTRUCTOR" = "SELF"
-): Promise<{ error?: string }> {
+  markedBy: "SELF" | "GUARDIAN" | "INSTRUCTOR" = "SELF",
+  opts: { markedById?: string; expectedRevision?: string | null } = {}
+): Promise<{ error?: string; conflict?: boolean }> {
   if (!BAND_YEARS[band].includes(schoolYear)) {
     return { error: "schoolYear outside band" };
   }
   const validUnits = unitsForStudent(band, schoolYear);
-  // Gardă absolută: o salvare cu zero unități ar șterge banda și ar lăsa
-  // userul neinițiabil. unitsForStudent nu mai poate întoarce gol pentru un an
-  // valid, dar invarianta merită păzită aici, la scriere, nu doar acolo.
   if (validUnits.length === 0) {
     return { error: "band has no units for this schoolYear" };
   }
@@ -102,23 +129,57 @@ export async function saveChecklist(
     if (!validKeys.has(key)) return { error: `unknown unit: ${key}` };
   }
 
-  await prisma.$transaction([
-    prisma.user.update({ where: { id: userId }, data: { schoolYear } }),
-    // Starea benzii se rescrie integral: mai simplu și mai ieftin decât N
-    // upserturi, și elimină din construcție rândurile orfane la schimbarea
-    // clasei (nu mai există notIn cu semantica lui capcană pe listă goală).
-    prisma.curriculumCheck.deleteMany({ where: { userId, band } }),
-    prisma.curriculumCheck.createMany({
-      data: validUnits.map((u) => ({
-        userId,
-        band,
-        unitKey: u.key,
-        schoolYear,
-        taught: taughtByUnitKey.get(u.key) ?? false,
-        markedBy,
-      })),
-    }),
-  ]);
+  const existing = await prisma.curriculumCheck.findMany({ where: { userId, band } });
+  const currentRevision =
+    existing.length > 0
+      ? new Date(Math.max(...existing.map((c) => c.updatedAt.getTime()))).toISOString()
+      : null;
+  if (
+    opts.expectedRevision !== undefined &&
+    opts.expectedRevision !== currentRevision
+  ) {
+    return { conflict: true };
+  }
+
+  const savedYear = existing[0]?.schoolYear ?? null;
+  if (savedYear !== null && savedYear !== schoolYear && markedBy === "INSTRUCTOR") {
+    return { error: "instructors correct ticks, not the declared class" };
+  }
+
+  const byKey = new Map(existing.map((c) => [c.unitKey, c]));
+  const markedById = opts.markedById ?? (markedBy === "SELF" ? userId : undefined);
+
+  const writes = [];
+  // Rândurile devenite invalide (an schimbat) — șterse țintit, pe chei.
+  const staleKeys = existing.filter((c) => !validKeys.has(c.unitKey)).map((c) => c.unitKey);
+  if (staleKeys.length > 0) {
+    writes.push(
+      prisma.curriculumCheck.deleteMany({ where: { userId, band, unitKey: { in: staleKeys } } })
+    );
+  }
+  const toCreate = [];
+  for (const u of validUnits) {
+    const want = taughtByUnitKey.get(u.key) ?? false;
+    const have = byKey.get(u.key);
+    if (!have) {
+      toCreate.push({ userId, band, unitKey: u.key, schoolYear, taught: want, markedBy, markedById });
+    } else if (have.taught !== want || have.schoolYear !== schoolYear) {
+      writes.push(
+        prisma.curriculumCheck.update({
+          where: { id: have.id },
+          data: { taught: want, schoolYear, markedBy, markedById },
+        })
+      );
+    }
+    // valoare identică + an identic → rândul rămâne neatins (proveniența ține)
+  }
+  if (toCreate.length > 0) {
+    writes.push(prisma.curriculumCheck.createMany({ data: toCreate }));
+  }
+  if (markedBy !== "INSTRUCTOR") {
+    writes.push(prisma.user.update({ where: { id: userId }, data: { schoolYear } }));
+  }
+  if (writes.length > 0) await prisma.$transaction(writes);
   return {};
 }
 

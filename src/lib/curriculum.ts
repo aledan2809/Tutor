@@ -210,6 +210,18 @@ export function bandForDomainSlug(slug: string | null | undefined): SubjectBand 
   return DOMAIN_BAND[slug] ?? null;
 }
 
+/**
+ * Slug-urile domeniilor unei benzi — DERIVATE din aceeași hartă pe care o
+ * folosește bandForDomainSlug, ca un domeniu adăugat acolo să intre automat și
+ * aici. Prima versiune ținea inversul scris de mână în curriculum-lag și un
+ * domeniu nou ar fi primit poartă dar nu și atenționări (finding review).
+ */
+export function domainSlugsForBand(band: SubjectBand): string[] {
+  return Object.entries(DOMAIN_BAND)
+    .filter(([, b]) => b === band)
+    .map(([slug]) => slug);
+}
+
 // ── Structura anului școlar (module datate → săptămâna curentă) ─────────────
 //
 // Din planificările Sigma 2025-2026 (OM 3463/04.03.2025). Se actualizează la
@@ -245,12 +257,19 @@ export const SCHOOL_YEARS: readonly SchoolYearStructure[] = [
     // Încă un motiv pentru care rândul elevului comandă, nu calendarul.
     // PDF-ul ordinului: ~/Downloads/temp/tutor eval nat/programa-calendar/.
     label: "2026-2027",
+    // firstWeek per modul e DERIVABIL din date (ancorare la luni) și trebuie
+    // să se lege în lanț: prima versiune avea 15/20/29 la modulele 3-5 (sumă
+    // 35, nu 36 ca ordinul) — modulul 2 ține S8-S15 (22 dec e marți), deci
+    // ianuarie începe la S16. Cu slip-ul, patru luni consecutive produceau
+    // aceeași săptămână "15" și dedup-ul atenționărilor tăcea exact în prima
+    // săptămână de predare din ianuarie (finding review 2026-08-25). Testul
+    // "modulele se leagă în lanț" ține acum invarianta pe TOATE structurile.
     modules: [
       { start: "2026-09-07", end: "2026-10-23", firstWeek: 1 },
       { start: "2026-11-02", end: "2026-12-22", firstWeek: 8 },
-      { start: "2027-01-11", end: "2027-02-12", firstWeek: 15 },
-      { start: "2027-02-22", end: "2027-04-23", firstWeek: 20 },
-      { start: "2027-05-05", end: "2027-06-18", firstWeek: 29 },
+      { start: "2027-01-11", end: "2027-02-12", firstWeek: 16 },
+      { start: "2027-02-22", end: "2027-04-23", firstWeek: 21 },
+      { start: "2027-05-05", end: "2027-06-18", firstWeek: 30 },
     ],
   },
 ];
@@ -396,11 +415,6 @@ export function buildChecklist(
 }
 
 /**
- * Capitolele vizibile în bazinul de grile = capitolele atinse de cel puțin o
- * unitate BIFATĂ de elev (rândul 2 comandă — decizia userului). Fără nicio
- * bifă → nimic vizibil; poarta e închisă implicit.
- */
-/**
  * Decalajul dintre programă și bifele elevului: unitățile pe care calendarul
  * le arată predate (rândul 1) dar elevul NU le-a bifat (rândul 2) — scenariul
  * "elevul a uitat să bifeze" (cerință user 2026-08-24). Peste prag, elevul,
@@ -417,6 +431,11 @@ export function curriculumLag(rows: readonly ChecklistRow[]): {
 /** Pragul: notificăm doar la MAI MULT de atâtea bife lipsă (decizie user). */
 export const CURRICULUM_LAG_THRESHOLD = 2;
 
+/**
+ * Capitolele vizibile în bazinul de grile = capitolele atinse de cel puțin o
+ * unitate BIFATĂ de elev (rândul 2 comandă — decizia userului). Fără nicio
+ * bifă → nimic vizibil; poarta e închisă implicit.
+ */
 export function visibleChaptersFromChecklist(rows: readonly ChecklistRow[]): string[] {
   const out = new Set<string>();
   for (const r of rows) {

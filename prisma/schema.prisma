@@ -743,6 +743,10 @@ model CurriculumCheck {
   schoolYear Int
   taught    Boolean
   markedBy  String   @default("SELF") // SELF | GUARDIAN | INSTRUCTOR
+  // CINE anume a atins ultima oară rândul — id-ul actorului, nu doar rolul.
+  // Fără el, "markedBy: INSTRUCTOR" pe o scriere cross-user nu spune CARE
+  // dintre instructorii domeniului a modificat (finding review 2026-08-25).
+  markedById String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
