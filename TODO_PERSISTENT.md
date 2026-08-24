@@ -428,6 +428,67 @@ Paginile sunt LIVE (200) și se leagă între ele, dar **nu-s în meniul de sus*
 
 **Note:** prețurile per-materie + multi-copil înseamnă engine real (nu preț fix). De clarificat: „materie" la nivel de copil sau de familie? Promo-ul are dată de expirare hard (31.08.2026) — pune-l data-driven, nu hardcodat în UI fără logică de expirare.
 
+## [~] 🎒 Bazin de grile pe programa parcursă — nucleu scris + MĂSURAT (creat 2026-08-24)
+
+**Cererea (user, 2026-08-24)**: începe școala; elevul care intră în clasa a VIII-a (și cel de a XII-a)
+n-a făcut încă materia anului curent, deci primește grile din lecții nepredate. Bazinul să pornească
+de la ce a apucat să învețe și să crească pe măsură ce bifează lecții.
+
+**Decizii user (AskUserQuestion)**: bifa vine de la **elev SAU de la meditator/părinte** (ambele
+acceptate) · granularitate **pe capitol** · mapare **deterministă** capitol→an, fără model · ce nu e
+bifat **nu se vede**. Apoi, după prima măsurătoare: **capitol × an** (același capitol o dată per an
+în care se predă), cu anul grilei luat din semnalul per-întrebare, nu din capitol.
+
+**Livrat**: `src/lib/curriculum.ts` — nucleu pur, zero IO (`CHAPTER_YEAR` scris de mână pentru cele
+8 capitole Mate + 6 Română, `bandForDomainSlug`, `chapterYear`, `chaptersForBand`,
+`defaultCoveredChapters`, `visibleChapters`; fail-closed: capitol necunoscut → null, fără bifă →
+nimic vizibil). 13 aserțiuni (`tests/unit/curriculum.test.ts`), inclusiv verificarea **literală** că
+numele capitolelor coincid cu cele produse de `scripts/lib/macro-topic.mjs` — o divergență de un
+caracter ar bloca tăcut un capitol întreg. **NEcablat încă** în schemă/motor/UI, deliberat: vezi mai jos.
+
+### 🔴 Măsurătoarea infirmă premisa — de citit ÎNAINTE de a construi mai departe
+
+Rulat pe baza de producție, pe cele 540 de grile Mate + 104 Română publicate:
+
+| elev care INTRĂ în... | Matematică disponibil | Română |
+|---|---|---|
+| clasa a VI-a | 94 (17%) | 93 (89%) |
+| clasa a VII-a | 422 (78%) | 104 (100%) |
+| **clasa a VIII-a** | **496 (92%)** | **104 (100%)** |
+
+Deci poarta blochează **8% la Mate și 0% la Română** exact pentru elevul care a motivat cererea.
+Cauza imediată: „Geometrie plană" ține singură **225 din 540 (42%)** și, începând în clasa a VI-a,
+se deblochează în bloc — cu Pitagora (VII) și arii (VIII) în ea.
+
+**Încercarea de reparație a eșuat, și motivul contează.** Planul era să luăm anul din micro-topicul
+oficial de pe `ExamItem`. Verificat: **toate cele 540 de `ExamItem` de matematică au `topic` gol** —
+cele 333 de micro-topicuri din itemul de Topics erau pe alte domenii; la matematică
+`macro-topic.mjs` a clasificat din CONȚINUT. Am scris atunci reguli conținut→an (aceeași tehnică):
+**271 din 540 (50%) rămân neclasificate**, fiindcă enunțurile oficiale sunt terse — „Rezultatul
+calculului 36 : 4 − 4 · 2 este egal cu:". Substanța e în figură și în numere, nu în vocabular.
+Efect net: **92% → 90%**. Nu merită.
+
+**Concluzia onestă**: banca EN VIII chiar ESTE ~90% materie de clasele V–VII, fiindcă asta testează
+examenul. Elevul care intră în a VIII-a poate, pe drept, să încerce aproape tot. Singurul bloc
+autentic de a VIII-a e „Geometrie în spațiu" (44) plus câteva ecuații/funcții.
+**Poarta are valoare reală, dar pentru alt elev decât cel avut în minte**: cel care intră în a VI-a
+(17%) și în a VII-a (78%).
+
+### Ce rămâne de decis (user)
+- Construim poarta pentru elevii de a VI-a/a VII-a (valoare reală, măsurată) și acceptăm că pentru
+  a VIII-a schimbă puțin? Sau o abandonăm la gimnaziu?
+- **BAC (IX-XII) NU a fost măsurat** — acolo proporția de materie de clasa a XII-a e probabil mult
+  mai mare, deci poarta ar putea muşca serios. De măsurat înainte de orice decizie: domeniile
+  `matematica-m1/m2/m3-ix-xii` (83/96/102 grile) + `romana-ix-xii` (75).
+
+### Ce ar mai cere cablarea completă (când se decide)
+`User.schoolYear Int?` (azi **nici `User`, nici `Enrollment` nu știu în ce clasă e elevul**) ·
+model `CurriculumCoverage(userId, domainId, chapter, year, markedBy: SELF|GUARDIAN|INSTRUCTOR)` ·
+filtru în motorul de sesiune · ecran de bifat + drept de bifare pentru părinte/meditator (tiparul
+„părintele are ultimul cuvânt" există deja din Batch 3 al reminderelor).
+
+---
+
 ## [ ] 🎓 Banding domenii pe clase — roadmap (creat 2026-06-03)
 
 Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **Evaluare Națională**, apoi **Bacalaureat**.
@@ -460,6 +521,7 @@ Benzi: **V-VIII** + **IX-XII** (BAC separat ulterior dacă e nevoie). Focus: **E
 **UPDATE 2026-06-08**: (a) **sursa la corectare DONE** (commit `4a377c0`) — la fiecare răspuns, corectarea afișează proveniența (ex. „EN VIII 2022 Testul 4 — antrenament (CNPEE) · Subiectul I"), din `sourceReference` + secțiune; feedback-ul făcut bilingv. (b) **Mate VI/VII/VIII = acoperit** — cele 540 grile oficiale vin din examenele EN VIII care testează TOATĂ materia V-VIII; generarea AI per-an nu mai e necesară pentru Capacitate.
 **UPDATE 2026-06-08 — grile Română passage-dependent DONE** (varianta (c), migrare `0019` + commit `2805143`): `Question.passage` nou; toate cele 56 MCQ Română oficiale sunt acum în Grile (din care **24 cu text-suport** atașat din `passageRef`→`ExamPassage`); renderer-ul arată un **drawer pliabil „📖 Vezi textul"** (on-demand, fără repetiție, intră în fluxul drill). Verificat: 24/56 cu passage, payload duce textul, /review curat. Backup `/root/backups/tutor-pre-passage-2026-06-08.dump`.
 **RĂMÂNE (opțional)**: ~~cele **8 grile A/F (TF_GRID)** Română rămân în Simulări~~ → **DONE 2026-06-09 (commit `69149e3`)**: în loc să adaug un tip TF_GRID în fluxul Question (migrare + render + scoring, risc pe toate domeniile pt 8 itemi), am **expandat** fiecare grilă A/F în câte un MCQ Adevărat/Fals (8 grids × 6 enunțuri = **48 grile noi**, RO 56→104). content=enunțul verbatim (L07a), options=[Adevărat,Fals], correctAnswer din rubric, passage atașat (drawer „📖 Vezi textul"), topic=Înțelegerea textului. Reutilizează complet fluxul MCQ+passage; un-enunț-pe-rând = ideal pentru drill. Idempotent (`exam-bank:<id>#<i>`). Rămân ȘI în Simulări (suprafață separată). Verificat autentificat: 4 A/F/sesiune, answer „Adevărat"→isCorrect:true, scored. **RĂMÂNE**: restul materialelor pe alte materii.
+**UPDATE 2026-08-24 — sursele pentru extinderea Românei sunt DESCĂRCATE, transcrierea rămâne**: măsurat pe prod, corpusul e puternic dezechilibrat — Matematică **45 lucrări oficiale** (2021-2026, 540 grile) vs Română **8** (2024-2026, 104 grile), deși Româna e jumătate din notă. Tot ce era pe disc era deja importat (inclusiv 2026 Mate model+simulare), deci nu era nimic de cules gratis. Descărcate cu acordul userului **22 PDF-uri oficiale** (11 lucrări × subiect+barem) pentru **2021, 2022, 2023** — model, simulare, examen, rezervă, sesiune specială — în `~/Downloads/temp/tutor eval nat/edu-ro-romana-2021-2023/` (+ text extras cu `pdftotext -layout` în `txt/`). Ar duce Româna de la 8 la **19 lucrări**. **Rămâne transcrierea verbatim** (regula L07a: conținut oficial literal, niciodată regenerat) în tiparul `import-exam-ro-*.mjs`; repo-ul are deja tipar de import în lot (`import-exam-ro-bac-batch.mjs`) — de folosit acela, nu 11 scripturi separate. `sourceUrl` se citează la portalul oficial `subiecte.edu.ro/<an>/evaluareanationala/` (heiprofu.ro a fost doar oglinda de descărcare), consistent cu scripturile existente.
 
 ---
 
