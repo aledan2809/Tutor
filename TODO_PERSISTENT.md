@@ -467,6 +467,19 @@ Paginile sunt LIVE (200) și se leagă între ele, dar **nu-s în meniul de sus*
 >   filtrat pe bife — cosmetic, de aliniat.
 > - **Drept de bifare pentru părinte/meditator** (`markedBy` GUARDIAN/INSTRUCTOR există în schemă;
 >   UI-ul lor = itemul Flux Părinte↔Copil↔Meditator).
+>
+> **➕ 2026-08-24 (aceeași zi, commit `a52f8ec`) — atenționare la DECALAJ programă↔bife (cerință
+> user)**: dacă programa a avansat cu **mai mult de 2 lecții** peste bifele elevului („a uitat să
+> bifeze"), primesc atenționare **elevul + părinții (Guardian activ) + meditatorii** (creatorii
+> grupurilor active pe domeniile benzii), prin cascada existentă a alertelor de prag (in-app +
+> PUSH→TELEGRAM→EMAIL pe canalele proprii, cu quiet-hours; `deliverThresholdAlert` exportat cu tip
+> parametrizabil). Dedup per (destinatar, elev, bandă, săptămână). Cron VPS2 **lunea 06:27**
+> (`npx tsx scripts/curriculum-lag-notify.mjs`, cu `--at YYYY-MM-DD` pt. verificare). **Verificat
+> LIVE pe prod**: data reală → zero (vară); `--at 2027-01-25` (S16) → lag=6, notificare creată în
+> DB (văzută + curățată); a doua rulare → destinatari-noi=0 (dedup ține). `/review` rulat la
+> cererea userului pe toate modulele: 6 constatări, 5 refutate pe cod, **1 reală reparată** (PUT cu
+> body JSON `null` → 500 în loc de 400); Guru-ul TWG nu rulează din sesiune interactivă (L340) —
+> fix aplicat direct.
 > - Ramura quick-route pe cont ÎNSCRIS neexercitată live (contul de test admin nu e enrolled →
 >   403 înainte de poartă); cod identic cu start-route, care E verificat live.
 
