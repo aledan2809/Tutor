@@ -474,6 +474,43 @@ autentic de a VIII-a e „Geometrie în spațiu" (44) plus câteva ecuații/func
 **Poarta are valoare reală, dar pentru alt elev decât cel avut în minte**: cel care intră în a VI-a
 (17%) și în a VII-a (78%).
 
+### ✅ 2026-08-24 — programa CU CALENDAR există, și corectează maparea (idee user)
+
+Userul a întrebat dacă există online o programă cu calendar atașat pentru clasele terminale. **Există.**
+Editurile publică **planificări calendaristice** construite pe programa oficială (OMEN 3393/2017) +
+structura anului școlar aprobată prin ordin (2025-2026: OME nr. 3463/4.03.2025, 35 de săptămâni).
+Salvate local în `~/Downloads/temp/tutor eval nat/programa-calendar/` (PDF + text extras):
+`Planificare_calendaristica_MATEMATICA-VIII_2025-2026_Sigma.pdf` + `Programa_scolara_matematica_V-VIII_OMEN_3393-2017.pdf`.
+
+**Clasa a VIII-a, matematică — 11 unități legate de săptămâni** (A=algebră, G=geometrie, predate în paralel):
+
+| Unitate | Săptămâni | Conținut |
+|---|---|---|
+| 1A / 1G | S2-S7 | Mulțimi de numere reale · Puncte, drepte, plane; piramida |
+| 2A / 2G | S8-S13 | Calcul algebric în ℝ · Perpendicularitate în spațiu (I) |
+| 3A / 3G | S15-S20 | Operații cu numere reale; ecuații `ax²+bx+c` · Unghi dreaptă-plan, unghi a două plane |
+| 4A / 4G | S21-S25 | Fracții algebrice; ecuații reductibile · Distanțe; arie și volum cub/paralelipiped |
+| 5A · 5G | S27-S32 · S27-S28 | Funcții · Arii și volume ale poliedrelor (II) |
+| 6G | S29-S32 | Corpuri rotunde: cilindru, con, sferă |
+
+Module datate: 8 sept-24 oct = săpt. 1-7 · 3 nov-19 dec = 8-14 · 8 ian-13 feb = 15-20 · 23 feb-3 apr = 21-26.
+Deci se poate calcula din data curentă „ce ar fi trebuit predat până acum" → checklist pre-completat,
+pe care elevul îl **confirmă sau îl corectează** (mecanismul cerut de user).
+
+**🔴 Consecință: maparea capitol→an scrisă din memorie era GREȘITĂ.** Pusesem „Numere reale și radicali"
+și „Ecuații, inecuații și mulțimi" la clasa a VII-a. Programa oficială le dă la **a VIII-a** (U1 mulțimi
+de numere reale, U3 ecuații de gradul II, U4 fracții algebrice). Recalculat, blocat în septembrie pentru
+elevul de a VIII-a: **8% (din memorie) → ~22% (118/540, din programă)**, crescând săptămânal până se
+deschide tot în S32. **Poarta redevine viabilă** — sursa corectă nu era memoria mea, ci documentul.
+`CHAPTER_YEAR` din `src/lib/curriculum.ts` TREBUIE rescris după programă înainte de cablare.
+
+**Limite de reținut**: planificarea e pentru 2025-2026 — ordinea unităților e stabilă an de an, dar
+**numerele săptămânilor se mută**, deci pentru 2026-2027 trebuie ordinul nou de structură a anului;
+iar fiecare profesor deviază, de unde necesitatea confirmării de la elev.
+
+**Rămâne de cules la fel**: programa + planificarea pentru **Limba română cl. VIII** și pentru
+**clasa a XII-a** (M1/M2/M3 + română). Doar matematica de gimnaziu e strânsă.
+
 ### Ce rămâne de decis (user)
 - Construim poarta pentru elevii de a VI-a/a VII-a (valoare reală, măsurată) și acceptăm că pentru
   a VIII-a schimbă puțin? Sau o abandonăm la gimnaziu?
