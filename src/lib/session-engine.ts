@@ -178,29 +178,36 @@ export async function selectQuestions(
   domainId: string,
   sessionType: SessionType,
   count: number,
-  opts: { excludeRecent?: boolean } = {}
+  opts: { excludeRecent?: boolean; topicIn?: string[] | null } = {}
 ): Promise<Question[]> {
   // Cram materials (e.g. licență — exam within days, small bank meant to be
   // drilled repeatedly) opt out of the no-repeat rule.
-  const { excludeRecent = true } = opts;
+  const { excludeRecent = true, topicIn = null } = opts;
+  // Curriculum gate (programa parcursă): when set, every selection path only
+  // sees questions whose topic the student has covered. An empty array is a
+  // legitimate closed gate — no chapters ticked yet — and yields an empty
+  // session, which the start route reports honestly instead of papering over.
+  const topicWhere: Prisma.QuestionWhereInput = topicIn ? { topic: { in: topicIn } } : {};
   const recent = excludeRecent
     ? await recentlyAttemptedIds(userId, domainId, RECENT_DAYS)
     : new Set<string>();
 
   let questions: Question[];
   if (sessionType === "repair") {
-    questions = await selectRepairQuestions(userId, domainId, count, recent);
+    questions = await selectRepairQuestions(userId, domainId, count, recent, topicWhere);
   } else if (sessionType === "recovery") {
-    questions = await selectRecoveryQuestions(userId, domainId, count, recent);
+    questions = await selectRecoveryQuestions(userId, domainId, count, recent, topicWhere);
   } else {
-    questions = await selectAdaptiveQuestions(userId, domainId, count, recent);
+    questions = await selectAdaptiveQuestions(userId, domainId, count, recent, topicWhere);
   }
 
   // Top-up: if excluding recents left the session short (small question bank),
   // backfill ignoring the recency filter so the session is never under-filled.
   if (questions.length < count) {
     const have = new Set(questions.map((q) => q.id));
-    const topUp = await pickRandom(domainId, count - questions.length, have);
+    // The curriculum filter is NOT relaxed on top-up — an under-filled session
+    // must never leak questions from chapters the student has not covered.
+    const topUp = await pickRandom(domainId, count - questions.length, have, topicWhere);
     questions = [...questions, ...topUp];
   }
 
@@ -215,7 +222,8 @@ async function selectAdaptiveQuestions(
   userId: string,
   domainId: string,
   count: number,
-  exclude: Set<string>
+  exclude: Set<string>,
+  topicWhere: Prisma.QuestionWhereInput = {}
 ): Promise<Question[]> {
   // Get user progress to find due reviews for this domain
   const dueProgress = await prisma.progress.findMany({
@@ -244,6 +252,10 @@ async function selectAdaptiveQuestions(
         topic: dt.topic,
         status: "PUBLISHED",
         ...EXCLUDE_SPRINT,
+        // AND, nu spread: un spread ar SUPRASCRIE `topic: dt.topic` de mai sus
+        // (exact capcana documentată la EXCLUDE_SPRINT) și repetiția spațiată
+        // ar înceta tăcut să țintească capitolul due (finding review).
+        AND: [topicWhere],
         id: { notIn: [...reviewQuestions.map((rq) => rq.id), ...exclude] },
       },
     });
@@ -253,7 +265,7 @@ async function selectAdaptiveQuestions(
   // Fill remaining with random fresh questions (not recently seen).
   const remaining = count - reviewQuestions.length;
   const existing = new Set([...reviewQuestions.map((q) => q.id), ...exclude]);
-  const newQuestions = await pickRandom(domainId, remaining, existing);
+  const newQuestions = await pickRandom(domainId, remaining, existing, topicWhere);
 
   return shuffle([...reviewQuestions, ...newQuestions]);
 }
@@ -262,7 +274,8 @@ async function selectRepairQuestions(
   userId: string,
   domainId: string,
   count: number,
-  exclude: Set<string>
+  exclude: Set<string>,
+  topicWhere: Prisma.QuestionWhereInput = {}
 ): Promise<Question[]> {
   const weakAreas = await prisma.weakArea.findMany({
     where: { userId, domainId },
@@ -279,6 +292,7 @@ async function selectRepairQuestions(
         topic: wa.topic,
         status: "PUBLISHED",
         ...EXCLUDE_SPRINT,
+        AND: [topicWhere], // nu spread — ar suprascrie `topic: wa.topic`
         id: { notIn: [...questions.map((q) => q.id), ...exclude] },
       },
       take: Math.ceil(count / Math.max(weakAreas.length, 1)),
@@ -291,7 +305,8 @@ async function selectRepairQuestions(
     const fill = await pickRandom(
       domainId,
       count - questions.length,
-      new Set([...questions.map((q) => q.id), ...exclude])
+      new Set([...questions.map((q) => q.id), ...exclude]),
+      topicWhere
     );
     questions.push(...fill);
   }
@@ -303,7 +318,8 @@ async function selectRecoveryQuestions(
   userId: string,
   domainId: string,
   count: number,
-  exclude: Set<string>
+  exclude: Set<string>,
+  topicWhere: Prisma.QuestionWhereInput = {}
 ): Promise<Question[]> {
   // For recovery: mix of easy questions + overdue reviews
   const overdueProgress = await prisma.progress.findMany({
@@ -329,6 +345,7 @@ async function selectRecoveryQuestions(
         status: "PUBLISHED",
         difficulty: { lte: 3 },
         ...EXCLUDE_SPRINT,
+        AND: [topicWhere], // nu spread — ar suprascrie `topic: p.topic`
         id: { notIn: [...questions.map((rq) => rq.id), ...exclude] },
       },
     });
@@ -340,7 +357,7 @@ async function selectRecoveryQuestions(
     domainId,
     count - questions.length,
     new Set([...questions.map((q) => q.id), ...exclude]),
-    { difficulty: { lte: 2 } }
+    { difficulty: { lte: 2 }, ...topicWhere }
   );
   questions.push(...easy);
 
@@ -349,7 +366,8 @@ async function selectRecoveryQuestions(
     const fill = await pickRandom(
       domainId,
       count - questions.length,
-      new Set([...questions.map((q) => q.id), ...exclude])
+      new Set([...questions.map((q) => q.id), ...exclude]),
+      topicWhere
     );
     questions.push(...fill);
   }

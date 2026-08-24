@@ -936,5 +936,31 @@
     "unavailable": "Documentul nu e disponibil momentan. Îl poți consulta aici:",
     "dsrHeading": "Drepturile tale (GDPR)",
     "dsrSubtitle": "Acces, portabilitate, corectare sau ștergerea datelor personale."
+  },
+  "curriculum": {
+    "title": "Materia parcursă la școală",
+    "intro": "Bulina arată ce ar fi trebuit predat până azi, după programă. Bifează în dreptul fiecărei lecții dacă s-a predat efectiv la clasa ta — grilele se potrivesc pe ce ai bifat.",
+    "whichClass": "În ce clasă ești?",
+    "pickClass": "Alege clasa",
+    "classLabel": "Clasa",
+    "currentYear": "· anul curent",
+    "legendExpected": "în programă până azi",
+    "legendTaught": "predat la clasa ta",
+    "expectedYes": "În programă până în săptămâna curentă",
+    "expectedNo": "Încă neatins în programă",
+    "summary": "Materia parcursă: {count} din {total} lecții bifate",
+    "edit": "Actualizează",
+    "save": "Salvează și continuă",
+    "saving": "Se salvează…",
+    "cancel": "Renunță",
+    "saveError": "Nu s-a putut salva. Încearcă din nou.",
+    "year5": "a V-a",
+    "year6": "a VI-a",
+    "year7": "a VII-a",
+    "year8": "a VIII-a",
+    "year9": "a IX-a",
+    "year10": "a X-a",
+    "year11": "a XI-a",
+    "year12": "a XII-a"
   }
 }

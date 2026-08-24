@@ -7,6 +7,8 @@ import {
   SESSION_TYPES,
 } from "@/lib/session-engine";
 import { withErrorHandler } from "@/lib/api-handler";
+import { bandForDomainSlug } from "@/lib/curriculum";
+import { visibleTopicsFor } from "@/lib/curriculum-service";
 import { z } from "zod";
 
 const quickSessionSchema = z.object({
@@ -51,6 +53,24 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: "Not enrolled in this domain" }, { status: 403 });
   }
 
+  // Poarta programei parcurse — ACEEAȘI ca în [domain]/session/start. Ruta
+  // asta era al doilea apelant al lui selectQuestions și, negardată, oferea
+  // bazinul întreg exact elevului blocat dincolo (finding review 2026-08-24).
+  const domain = await prisma.domain.findUnique({
+    where: { id: domainId },
+    select: { slug: true },
+  });
+  let topicIn: string[] | null = null;
+  if (domain && bandForDomainSlug(domain.slug)) {
+    topicIn = await visibleTopicsFor(session.user.id, domain.slug);
+    if (topicIn === null) {
+      return NextResponse.json(
+        { error: "Curriculum setup required", needsCurriculumSetup: true },
+        { status: 409 }
+      );
+    }
+  }
+
   // Get recommended session type
   const recommendation = await recommendSessionType(session.user.id, domainId);
   const sessionType = recommendation.type;
@@ -60,10 +80,17 @@ async function _POST(req: NextRequest) {
     session.user.id,
     domainId,
     sessionType,
-    config.questionCount
+    config.questionCount,
+    { topicIn }
   );
 
   if (questions.length === 0) {
+    if (topicIn !== null) {
+      return NextResponse.json(
+        { error: "No questions in covered chapters", emptyBecauseCurriculum: true },
+        { status: 409 }
+      );
+    }
     return NextResponse.json(
       { error: "No published questions available" },
       { status: 404 }

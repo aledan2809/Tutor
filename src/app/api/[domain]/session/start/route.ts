@@ -10,6 +10,8 @@ import {
 } from "@/lib/session-engine";
 import { withErrorHandler } from "@/lib/api-handler";
 import { canAccessDomain } from "@/lib/domain-access";
+import { bandForDomainSlug } from "@/lib/curriculum";
+import { visibleTopicsFor } from "@/lib/curriculum-service";
 import { LICENTA_DOMAIN_SLUG } from "@/lib/licenta-constants";
 import {
   SPRINT_DOMAIN_SLUG,
@@ -165,6 +167,24 @@ async function _POST(
     });
   }
 
+  // ── Poarta programei parcurse (doar domeniile cu bandă de curriculum) ──
+  // Cerință user (2026-08-24): checklistul celor două rânduri trebuie completat
+  // în UI ÎNAINTE de orice test pe anul curent. Fără inițiere → 409 cu semnal
+  // explicit; UI-ul deschide flow-ul, nu pornește sesiunea.
+  let topicIn: string[] | null = null;
+  if (bandForDomainSlug(domainSlug)) {
+    topicIn = await visibleTopicsFor(session.user.id, domainSlug);
+    if (topicIn === null) {
+      return NextResponse.json(
+        {
+          error: "Curriculum setup required",
+          needsCurriculumSetup: true,
+        },
+        { status: 409 }
+      );
+    }
+  }
+
   const config = SESSION_TYPES[sessionType];
   const questions = await selectQuestions(
     session.user.id,
@@ -173,10 +193,22 @@ async function _POST(
     config.questionCount,
     // Licență is a short-window cram with a small bank → allow repeats so the
     // whole material can be drilled every session.
-    { excludeRecent: domainSlug !== LICENTA_DOMAIN_SLUG }
+    { excludeRecent: domainSlug !== LICENTA_DOMAIN_SLUG, topicIn }
   );
 
   if (questions.length === 0) {
+    // Cu poartă activă, sesiunea goală înseamnă "nimic bifat încă" — mesajul
+    // trimite la checklist, nu pretinde că banca e goală.
+    if (topicIn !== null) {
+      return NextResponse.json(
+        {
+          error: "No questions in covered chapters",
+          needsCurriculumSetup: false,
+          emptyBecauseCurriculum: true,
+        },
+        { status: 409 }
+      );
+    }
     return NextResponse.json(
       { error: "No published questions available" },
       { status: 404 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { CurriculumChecklist } from "@/components/session/curriculum-checklist";
 import { useSession } from "next-auth/react";
 import { useRouter } from "@/i18n/navigation";
 import { SessionSelector } from "@/components/session/session-selector";
@@ -42,6 +43,7 @@ export default function PracticePage() {
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<string>("");
+  const [curriculumSetupNeeded, setCurriculumSetupNeeded] = useState(false);
   const [domains, setDomains] = useState<DomainOpt[]>([]);
   // A1: when the student has no practiceable subject, offer the catalog inline so
   // they pick + start on the spot instead of being sent "to your account".
@@ -123,6 +125,9 @@ export default function PracticePage() {
 
   useEffect(() => {
     if (!selectedDomain) return;
+    // Semnalul de "deschide checklistul" e al domeniului care a dat 409 — nu-l
+    // purtăm peste alt domeniu din dropdown (finding review).
+    setCurriculumSetupNeeded(false);
     setLoading(true);
     fetch(`/api/${selectedDomain}/session/next`)
       .then((r) => r.json())
@@ -144,6 +149,14 @@ export default function PracticePage() {
       // mandatory debrief is outstanding — send the student there instead.
       if (res.status === 409 && session.pendingFeedbackSessionId) {
         goToSprintFeedback(session.pendingFeedbackSessionId);
+        return;
+      }
+      // Curriculum gate: the start route refuses until the two-row checklist
+      // (programa parcursă) is filled in — open it instead of starting.
+      if (res.status === 409 && (session.needsCurriculumSetup || session.emptyBecauseCurriculum)) {
+        setCurriculumSetupNeeded(true);
+        setStarting(false);
+        window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
       if (session.sessionId) {
@@ -281,6 +294,17 @@ export default function PracticePage() {
                 )}
               </select>
             </div>
+          )}
+
+          {/* Programa parcursă — checklistul celor două rânduri; obligatoriu
+              înaintea primei sesiuni pe domeniile cu programă (EN VIII / BAC). */}
+          {selectedDomain && (
+            <CurriculumChecklist
+              key={selectedDomain}
+              domainSlug={selectedDomain}
+              forceOpen={curriculumSetupNeeded}
+              onSaved={() => setCurriculumSetupNeeded(false)}
+            />
           )}
 
           {loading ? (

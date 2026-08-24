@@ -936,5 +936,31 @@
     "unavailable": "The document is unavailable right now. You can read it here:",
     "dsrHeading": "Your rights (GDPR)",
     "dsrSubtitle": "Access, portability, correction, or deletion of your personal data."
+  },
+  "curriculum": {
+    "title": "Material covered in school",
+    "intro": "The dot shows what should have been taught by now, per the official plan. Tick each lesson that was actually taught in your class — quizzes match what you tick.",
+    "whichClass": "Which grade are you in?",
+    "pickClass": "Pick your grade",
+    "classLabel": "Grade",
+    "currentYear": "· current year",
+    "legendExpected": "in the plan by now",
+    "legendTaught": "taught in your class",
+    "expectedYes": "In the plan by the current week",
+    "expectedNo": "Not yet reached in the plan",
+    "summary": "Covered material: {count} of {total} lessons ticked",
+    "edit": "Update",
+    "save": "Save and continue",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "saveError": "Could not save. Try again.",
+    "year5": "5th",
+    "year6": "6th",
+    "year7": "7th",
+    "year8": "8th",
+    "year9": "9th",
+    "year10": "10th",
+    "year11": "11th",
+    "year12": "12th"
   }
 }
