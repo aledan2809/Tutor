@@ -428,7 +428,52 @@ Paginile sunt LIVE (200) și se leagă între ele, dar **nu-s în meniul de sus*
 
 **Note:** prețurile per-materie + multi-copil înseamnă engine real (nu preț fix). De clarificat: „materie" la nivel de copil sau de familie? Promo-ul are dată de expirare hard (31.08.2026) — pune-l data-driven, nu hardcodat în UI fără logică de expirare.
 
-## [~] 🎒 Bazin de grile pe programa parcursă — nucleu scris + MĂSURAT (creat 2026-08-24)
+## [~] 🎒 Bazin de grile pe programa parcursă — LIVE pe etutor.ro (creat + livrat 2026-08-24, commits `e7bd2da`+`d3e59e1`-echiv)
+
+> ✅ **CABLAT COMPLET + DEPLOYAT + VERIFICAT PE PROD 2026-08-24** (regim mesh: dev → review
+> adversarial cu 5 finderi paraleli → 10 constatări CONFIRMATE toate reparate → 553/553 teste →
+> deploy → migrare 0044 → **15/15 verificări live pe etutor.ro** cu login real + captură vizuală).
+>
+> **Design final (decizii user, AskUserQuestion)**: DOUĂ RÂNDURI ÎN PARALEL — rândul 1 = programa
+> cu calendar (● „în programă până azi", calculat din planificările oficiale + structura anului),
+> rândul 2 = bifele elevului „predat/nepredat" care COMANDĂ bazinul; pre-completat din calendar;
+> flow separat de inițiere („În ce clasă ești?") obligatoriu înaintea oricărei sesiuni de Grile pe
+> domeniile cu programă; Simulările rămân întregi; verificare automată SĂPTĂMÂNALĂ sept-mai
+> (cron VPS2 lunea 06:17, `npx tsx scripts/curriculum-watch.mjs`) care notifică superadminii
+> (dedup pe amprentă) și NU modifică nimic singură.
+>
+> **Date**: unități cu săptămâni din planificările Sigma (VII: 36 săpt., VIII: 35) pe OMEN
+> 3393/2017; structura anului multi-an: 2025-2026 (OM 3463) + **2026-2027 (OM 3.194/2026, MO
+> 126/16.02.2026 — cursuri din 7 sept)**; BAC: 46 capitole extrase din scripturile de import
+> (test de sincronizare citește chiar importerele). V+VI: unități din programă fără săptămâni
+> (fail-closed: anul curent al unui elev de V/VI nu se pre-completează). Azi (vară) săptămâna=0.
+>
+> **Review-ul a prins 10 defecte reale înainte de livrare** (toate reparate + test-gardă): spread
+> care suprascria topic-ul spaced-repetition; lista BAC 21/46 (jumătate din bancă ar fi devenit
+> invizibilă); lockout elev nou (checklist gol salvat gol); anul expirat dădea săpt. 36 azi (totul
+> pre-bifat exact pentru cohorta-țintă); lockout elev de a IX-a la BAC; `notIn:[]` care ștergea
+> banda la un misclick; ruta `student/sessions/quick` negardată (ocolea poarta); `schoolYear`
+> global (gimnaziu↔BAC se de-inițiau reciproc — acum per bandă pe CurriculumCheck); săptămâni
+> desincronizate pe modulele care încep joi (acum zile românești prin Intl, ancorate la luni);
+> ordinale RO hardcodate în EN.
+>
+> **Rămâne (follow-up, nu blochează)**:
+> - **Planificări săptămânale pentru V, VI (mate), Română V-VIII, liceu** — azi doar VII+VIII mate
+>   au săptămâni; restul au unități pe an (pre-completarea anilor anteriori merge, a anului curent nu).
+> - **Numerotarea săptămânilor 2026-2027** e derivată din ordinul-cadru; planificările editurilor
+>   (apar în sept) pot renumerota ±1 — de reconciliat când apar. Modulele 3-4 au margini la decizia
+>   ISJ (folosită prima variantă) — încă un motiv pentru care rândul elevului comandă.
+> - **Cardul „540 Întrebări disponibile"** de pe pagina Grile arată totalul băncii, nu bazinul
+>   filtrat pe bife — cosmetic, de aliniat.
+> - **Drept de bifare pentru părinte/meditator** (`markedBy` GUARDIAN/INSTRUCTOR există în schemă;
+>   UI-ul lor = itemul Flux Părinte↔Copil↔Meditator).
+> - Ramura quick-route pe cont ÎNSCRIS neexercitată live (contul de test admin nu e enrolled →
+>   403 înainte de poartă); cod identic cu start-route, care E verificat live.
+
+## [archive] 🎒 Bazin de grile — istoricul măsurătorilor din aceeași zi (context păstrat)
+
+### (formularea de la prânz, înaintea cablării)
+
 
 **Cererea (user, 2026-08-24)**: începe școala; elevul care intră în clasa a VIII-a (și cel de a XII-a)
 n-a făcut încă materia anului curent, deci primește grile din lecții nepredate. Bazinul să pornească
