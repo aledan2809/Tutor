@@ -477,9 +477,20 @@ autentic de a VIII-a e „Geometrie în spațiu" (44) plus câteva ecuații/func
 ### Ce rămâne de decis (user)
 - Construim poarta pentru elevii de a VI-a/a VII-a (valoare reală, măsurată) și acceptăm că pentru
   a VIII-a schimbă puțin? Sau o abandonăm la gimnaziu?
-- **BAC (IX-XII) NU a fost măsurat** — acolo proporția de materie de clasa a XII-a e probabil mult
-  mai mare, deci poarta ar putea muşca serios. De măsurat înainte de orice decizie: domeniile
-  `matematica-m1/m2/m3-ix-xii` (83/96/102 grile) + `romana-ix-xii` (75).
+- **BAC (IX-XII) — MĂSURAT 2026-08-24, aceeași concluzie.** Capitolele sunt deja fine (M1 35 de
+  capitole, M2 28, M3 16, deci nu e nevoie de reclasificare), DAR conținutul e aproape integral de
+  **clasele IX-X**: Progresii, Funcții, Trigonometrie, Vectori, Geometrie analitică (IX) +
+  Combinatorică, Probabilități, Numere complexe, Ecuații exponențiale/logaritmice (X). **Zero**
+  capitole de clasa a XI-a (matrici, determinanți, limite, derivate) sau a XII-a (primitive,
+  integrale, structuri algebrice) în tot topul. Explicația e structurală: grilele importate sunt
+  **Subiectul I**, care la BAC chiar e materie de IX-X; XI-XII stau în Subiectele II-III, care nu
+  sunt grile. Deci elevul care intră în a XII-a are din nou ~totul deblocat, din același motiv ca
+  la Capacitate. `romana-ix-xii` are doar 2 capitole (Înțelegerea textului 52, Vocabular 23) —
+  cumulative, poarta nu poate mușca.
+- **Tiparul se confirmă pe ambele examene**: poarta e utilă elevului care se pregătește DEVREME
+  (intră în a VI-a / a VII-a, respectiv a X-a / a XI-a), nu celui din anul de examen.
+- Efect secundar util al măsurătorii, de urmărit separat: **banca de BAC n-are deloc grile de
+  clasele XI-XII** — nu e un defect al porții, e un gol de conținut.
 
 ### Ce ar mai cere cablarea completă (când se decide)
 `User.schoolYear Int?` (azi **nici `User`, nici `Enrollment` nu știu în ce clasă e elevul**) ·
