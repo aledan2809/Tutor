@@ -3,8 +3,35 @@ import { getSession } from "@/lib/authorization";
 import { withErrorHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
 import { canAccessDomain } from "@/lib/domain-access";
+import { isGuardianOf } from "@/lib/guardian";
 import { bandForDomainSlug, BAND_YEARS, unitsForStudent } from "@/lib/curriculum";
 import { getCurriculumState, saveChecklist } from "@/lib/curriculum-service";
+
+// Cine poate citi/scrie checklistul unui COPIL (?childId=): părintele legat
+// (Guardian activ → markedBy GUARDIAN) sau meditatorul (rol INSTRUCTOR/ADMIN
+// pe domeniul respectiv + elevul are enrollment STUDENT activ acolo →
+// markedBy INSTRUCTOR — aceeași regulă de acces ca restul dashboardului de
+// instructor). Decizia user 2026-08-24: bifa poate veni de la elev SAU de la
+// meditator/părinte — ambele în paralel.
+async function resolveChildAccess(
+  requester: { id: string; enrollments?: { domainId: string; roles: readonly string[] }[] },
+  childId: string,
+  domainSlug: string
+): Promise<"GUARDIAN" | "INSTRUCTOR" | null> {
+  if (childId === requester.id) return null; // self nu e "child path"
+  if (await isGuardianOf(requester.id, childId)) return "GUARDIAN";
+  const domain = await prisma.domain.findUnique({ where: { slug: domainSlug }, select: { id: true } });
+  if (!domain) return null;
+  const teaches = requester.enrollments?.some(
+    (e) => e.domainId === domain.id && (e.roles.includes("INSTRUCTOR") || e.roles.includes("ADMIN"))
+  );
+  if (!teaches) return null;
+  const childEnrolled = await prisma.enrollment.findFirst({
+    where: { userId: childId, domainId: domain.id, isActive: true, roles: { hasSome: ["STUDENT"] } },
+    select: { id: true },
+  });
+  return childEnrolled ? "INSTRUCTOR" : null;
+}
 
 // Aceeași poartă de acces ca session/start — checklistul unui domeniu nu e
 // vizibil cuiva care nu poate exersa domeniul (consistență, finding review).
@@ -33,8 +60,20 @@ async function _GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { domain: domainSlug } = await params;
-  const accessErr = await domainAccessError(session.user, domainSlug);
-  if (accessErr) return accessErr;
+
+  // ?childId= — părintele/meditatorul citește checklistul copilului. Accesul
+  // vine din RELAȚIE (guardian / predă domeniul), nu din enrollmentul propriu:
+  // părintele tipic nu e înscris la materia copilului.
+  const childId = _req.nextUrl.searchParams.get("childId");
+  let subjectUserId = session.user.id;
+  if (childId && childId !== session.user.id) {
+    const rel = await resolveChildAccess(session.user, childId, domainSlug);
+    if (!rel) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    subjectUserId = childId;
+  } else {
+    const accessErr = await domainAccessError(session.user, domainSlug);
+    if (accessErr) return accessErr;
+  }
 
   // ?schoolYear= — flow-ul de inițiere cere rândurile pentru anul ABIA ales,
   // înainte de orice salvare. Fără asta, un user nou (fără an în DB) ar primi
@@ -42,7 +81,7 @@ async function _GET(
   const rawYear = _req.nextUrl.searchParams.get("schoolYear");
   const previewYear = rawYear !== null ? Number(rawYear) : undefined;
 
-  const state = await getCurriculumState(session.user.id, domainSlug, previewYear);
+  const state = await getCurriculumState(subjectUserId, domainSlug, previewYear);
   if (!state) {
     return NextResponse.json({ error: "Domain has no curriculum band" }, { status: 404 });
   }
@@ -76,8 +115,19 @@ async function _PUT(
   if (!band) {
     return NextResponse.json({ error: "Domain has no curriculum band" }, { status: 404 });
   }
-  const accessErr = await domainAccessError(session.user, domainSlug);
-  if (accessErr) return accessErr;
+
+  const childId = req.nextUrl.searchParams.get("childId");
+  let subjectUserId = session.user.id;
+  let markedBy: "SELF" | "GUARDIAN" | "INSTRUCTOR" = "SELF";
+  if (childId && childId !== session.user.id) {
+    const rel = await resolveChildAccess(session.user, childId, domainSlug);
+    if (!rel) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    subjectUserId = childId;
+    markedBy = rel;
+  } else {
+    const accessErr = await domainAccessError(session.user, domainSlug);
+    if (accessErr) return accessErr;
+  }
 
   let body: { schoolYear?: unknown; taught?: unknown };
   try {
@@ -113,7 +163,7 @@ async function _PUT(
     taught.set(k, v);
   }
 
-  const res = await saveChecklist(session.user.id, band, schoolYear, taught);
+  const res = await saveChecklist(subjectUserId, band, schoolYear, taught, markedBy);
   if (res.error) {
     return NextResponse.json({ error: res.error }, { status: 400 });
   }

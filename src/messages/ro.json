@@ -961,6 +961,8 @@
     "year9": "a IX-a",
     "year10": "a X-a",
     "year11": "a XI-a",
-    "year12": "a XII-a"
+    "year12": "a XII-a",
+    "lagBadge": "{count} în urmă",
+    "lagBanner": "Programa a avansat cu {count} lecții peste bifele salvate — bifează ce s-a predat sau confirmă că la clasă nu s-au făcut."
   }
 }

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
+import { CurriculumChecklist } from "@/components/session/curriculum-checklist";
 
 interface DomainSummary {
   domain: { id: string; name: string; slug: string; icon: string | null };
@@ -154,6 +155,13 @@ export default function WatcherStudentDetailPage({
               <StatCard label="XP" value={String(ds.gamification.totalXp)} />
               <StatCard label={t("topics")} value={String(ds.progress.topicsStudied)} />
               <StatCard label={t("level")} value={ds.gamification.level} />
+            </div>
+
+            {/* Programa parcursă a copilului — părintele vede cele două rânduri
+                și poate corecta bifele (markedBy GUARDIAN, verificat server-side
+                pe legătura Guardian). Componenta tace pe domeniile fără programă. */}
+            <div className="mt-4">
+              <CurriculumChecklist domainSlug={ds.domain.slug} childId={student.id} />
             </div>
 
             {/* Weak Areas */}

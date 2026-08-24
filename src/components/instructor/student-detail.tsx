@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { PredictiveCard } from "./predictive-card";
+import { CurriculumChecklist } from "@/components/session/curriculum-checklist";
 
 interface StudentDetailProps {
   studentId: string;
@@ -122,6 +123,13 @@ export function StudentDetail({ studentId }: StudentDetailProps) {
           <h3 className="text-lg font-semibold text-white mb-4">
             {dp.domain.icon} {dp.domain.name}
           </h3>
+
+          {/* Programa parcursă a elevului — meditatorul vede cele două rânduri
+              și poate corecta bifele (markedBy INSTRUCTOR; serverul cere rol
+              INSTRUCTOR/ADMIN pe domeniu + enrollment STUDENT activ al elevului). */}
+          <div className="mb-4">
+            <CurriculumChecklist domainSlug={dp.domain.slug} childId={studentId} />
+          </div>
 
           {/* Stats grid */}
           <div className="grid grid-cols-2 gap-4 md:grid-cols-5 mb-4">

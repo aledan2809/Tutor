@@ -961,6 +961,8 @@
     "year9": "9th",
     "year10": "10th",
     "year11": "11th",
-    "year12": "12th"
+    "year12": "12th",
+    "lagBadge": "{count} behind",
+    "lagBanner": "The plan is {count} lessons ahead of the saved ticks — tick what was taught, or confirm your class hasn't covered them."
   }
 }

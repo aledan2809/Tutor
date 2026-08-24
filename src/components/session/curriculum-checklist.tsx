@@ -34,10 +34,17 @@ type ApiState = {
 
 export function CurriculumChecklist({
   domainSlug,
+  childId,
   forceOpen,
   onSaved,
 }: {
   domainSlug: string;
+  /**
+   * Checklistul unui COPIL, editat de părinte (Guardian) sau meditator
+   * (instructor pe domeniu) — decizia user: bifa poate veni de la oricare,
+   * în paralel cu elevul. Serverul verifică relația și stampează markedBy.
+   */
+  childId?: string;
   /** Pagina o setează când start-ul a răspuns 409 needsCurriculumSetup. */
   forceOpen?: boolean;
   onSaved?: () => void;
@@ -60,7 +67,10 @@ export function CurriculumChecklist({
       setError(null);
       // ?schoolYear= cere serverului rândurile pentru anul abia ales — un user
       // nou n-are an salvat, iar fără parametru ar primi rows:[] (lockout).
-      const q = year !== undefined ? `?schoolYear=${year}` : "";
+      const params = new URLSearchParams();
+      if (year !== undefined) params.set("schoolYear", String(year));
+      if (childId) params.set("childId", childId);
+      const q = params.size ? `?${params}` : "";
       const res = await fetch(`/api/${domainSlug}/curriculum${q}`);
       if (!res.ok) {
         // 404 = domeniu fără programă; alte erori — componenta tace, sesiunile
@@ -72,9 +82,13 @@ export function CurriculumChecklist({
       setState(data);
       setSchoolYear(data.schoolYear ?? null);
       setTaught(new Map(data.rows.map((r) => [r.key, r.taught])));
-      if (!data.initiated && data.schoolYear !== null) setOpen(true);
+      // Auto-deschidere: elevul neinițiat cu clasă cunoscută; iar pe paginile
+      // părintelui/meditatorului (childId) și copilul FĂRĂ clasă declarată —
+      // altfel un copil neinițiat n-ar arăta nimic acolo și adultul n-ar putea
+      // face inițierea în locul lui (exact dreptul decis de user).
+      if (!data.initiated && (data.schoolYear !== null || childId)) setOpen(true);
     },
-    [domainSlug]
+    [domainSlug, childId]
   );
 
   useEffect(() => {
@@ -100,14 +114,17 @@ export function CurriculumChecklist({
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch(`/api/${domainSlug}/curriculum`, {
+      const res = await fetch(
+        `/api/${domainSlug}/curriculum${childId ? `?childId=${childId}` : ""}`,
+        {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           schoolYear,
           taught: Object.fromEntries(taught),
         }),
-      });
+        }
+      );
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         setError(body.error ?? t("saveError"));
@@ -127,6 +144,9 @@ export function CurriculumChecklist({
 
   const visibleRows = schoolYear === null ? [] : rows.filter((r) => r.year <= schoolYear);
   const taughtCount = visibleRows.filter((r) => taught.get(r.key)).length;
+  // Decalajul programă↔bife (starea SALVATĂ, nu editarea în curs): aceeași
+  // regulă ca atenționarea săptămânală — vizibil aici oricând, nu doar lunea.
+  const lag = state.rows.filter((r) => r.expectedByNow && !r.taught).length;
   const years = [...new Set(visibleRows.map((r) => r.year))].sort((a, b) => a - b);
 
   // Card compact după inițiere — permanent vizibil, click = editare.
@@ -139,6 +159,11 @@ export function CurriculumChecklist({
       >
         <span className="text-sm text-gray-300">
           📚 {t("summary", { count: taughtCount, total: visibleRows.length })}
+          {lag > 2 && (
+            <span className="ml-2 rounded bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-400">
+              {t("lagBadge", { count: lag })}
+            </span>
+          )}
           {state.schoolYear !== null && (
             <span className="ml-2 text-gray-500">
               · {t("classLabel")} {t(`year${state.schoolYear}`)}
@@ -158,6 +183,11 @@ export function CurriculumChecklist({
     <div className="mb-6 rounded-lg border border-gray-700 bg-gray-900 p-4 sm:p-5">
       <h2 className="text-base font-semibold text-white">{t("title")}</h2>
       <p className="mt-1 text-sm text-gray-400">{t("intro")}</p>
+      {lag > 2 && (
+        <p className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
+          ⚠️ {t("lagBanner", { count: lag })}
+        </p>
+      )}
 
       {/* Pasul 1: clasa */}
       <div className="mt-4">
