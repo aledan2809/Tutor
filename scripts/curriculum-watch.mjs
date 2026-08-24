@@ -11,8 +11,9 @@
 //   node scripts/curriculum-watch.mjs            (respectă fereastra sept-mai)
 //   node scripts/curriculum-watch.mjs --force    (rulează oricând — test)
 //
-// Cron VPS2 (săptămânal, lunea 06:17):
-//   17 6 * * 1 cd /var/www/tutor && node scripts/curriculum-watch.mjs >> /var/log/tutor-curriculum-watch.log 2>&1
+// Cron VPS2 (săptămânal, lunea 06:17) — prin tsx, ca verificarea băncii de
+// întrebări (import al nucleului TS) să ruleze, nu doar amprentele PDF:
+//   17 6 * * 1 cd /var/www/tutor && npx tsx scripts/curriculum-watch.mjs >> /var/log/tutor-curriculum-watch.log 2>&1
 //
 // Exit: 0 = nicio schimbare / în afara ferestrei · 1 = schimbare detectată ·
 //       2 = sursă inaccesibilă (semnal separat: documentul s-a MUTAT, nu doar
@@ -112,18 +113,26 @@ async function checkDbAndYear() {
   const { PrismaClient } = await import("@prisma/client");
   // Nucleul e TypeScript; îl încărcăm prin tsx dacă e disponibil, altfel
   // sărim verificarea (a) cu avertisment — mai bine parțial decât fals-verde.
+  // Sub `npx tsx` importul TS merge direct; sub node simplu încercăm register.
+  // Cronul rulează prin tsx tocmai ca ramura asta să nu fie sărită.
   let curriculum = null;
   try {
-    const { register } = await import("tsx/esm/api");
-    register();
     curriculum = await import("../src/lib/curriculum.ts");
-  } catch (e) {
-    console.log(`[warn]      nucleul curriculum nu s-a putut încărca (${e.message}) — sar verificarea topicurilor`);
+  } catch {
+    try {
+      const { register } = await import("tsx/esm/api");
+      register();
+      curriculum = await import("../src/lib/curriculum.ts");
+    } catch (e) {
+      console.log(`[warn]      nucleul curriculum nu s-a putut încărca (${e.message}) — sar verificarea topicurilor`);
+    }
   }
+  let dbCheckRan = false;
 
   const prisma = new PrismaClient();
   try {
     if (curriculum) {
+      dbCheckRan = true;
       const { CURRICULUM, SCHOOL_YEARS, schoolYearStructureAt } = curriculum;
       const bandBySlug = {
         "matematica-v-viii": "mate-gimnaziu",
@@ -158,7 +167,7 @@ async function checkDbAndYear() {
   } finally {
     await prisma.$disconnect();
   }
-  return problems;
+  return { problems, dbCheckRan };
 }
 
 const now = new Date();
@@ -185,8 +194,9 @@ for (const src of SOURCES) {
 }
 
 let dbProblems = [];
+let dbCheckRan = false;
 try {
-  dbProblems = await checkDbAndYear();
+  ({ problems: dbProblems, dbCheckRan } = await checkDbAndYear());
   for (const line of dbProblems) console.log(line);
 } catch (e) {
   console.error(`[curriculum-watch] verificarea DB a eșuat: ${e.message}`);
@@ -209,5 +219,9 @@ if (changed.length || dead.length || dbProblems.length) {
   }
   process.exit(dead.length && !changed.length && !dbProblems.length ? 2 : 1);
 }
-console.log(`[curriculum-watch] ${now.toISOString()} — toate sursele neschimbate, banca acoperită, anul configurat`);
+console.log(
+  dbCheckRan
+    ? `[curriculum-watch] ${now.toISOString()} — toate sursele neschimbate, banca acoperită, anul configurat`
+    : `[curriculum-watch] ${now.toISOString()} — sursele neschimbate; verificarea băncii SĂRITĂ (rulează prin tsx pentru acoperire completă)`
+);
 process.exit(0);
