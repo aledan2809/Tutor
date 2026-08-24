@@ -400,6 +400,23 @@ export function buildChecklist(
  * unitate BIFATĂ de elev (rândul 2 comandă — decizia userului). Fără nicio
  * bifă → nimic vizibil; poarta e închisă implicit.
  */
+/**
+ * Decalajul dintre programă și bifele elevului: unitățile pe care calendarul
+ * le arată predate (rândul 1) dar elevul NU le-a bifat (rândul 2) — scenariul
+ * "elevul a uitat să bifeze" (cerință user 2026-08-24). Peste prag, elevul,
+ * părinții și meditatorii primesc o atenționare.
+ */
+export function curriculumLag(rows: readonly ChecklistRow[]): {
+  lag: number;
+  missing: CurriculumUnit[];
+} {
+  const missing = rows.filter((r) => r.expectedByNow && !r.taught).map((r) => r.unit);
+  return { lag: missing.length, missing };
+}
+
+/** Pragul: notificăm doar la MAI MULT de atâtea bife lipsă (decizie user). */
+export const CURRICULUM_LAG_THRESHOLD = 2;
+
 export function visibleChaptersFromChecklist(rows: readonly ChecklistRow[]): string[] {
   const out = new Set<string>();
   for (const r of rows) {

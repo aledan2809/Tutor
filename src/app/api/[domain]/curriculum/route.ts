@@ -85,6 +85,11 @@ async function _PUT(
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
+  // `null` e JSON valid — parse-ul reușește și abia body.schoolYear ar arunca
+  // (500 în loc de 400 pe input degenerat; găsit de /review, 2026-08-24).
+  if (typeof body !== "object" || body === null) {
+    return NextResponse.json({ error: "Body must be a JSON object" }, { status: 400 });
+  }
 
   const schoolYear = Number(body.schoolYear);
   if (!Number.isInteger(schoolYear) || !BAND_YEARS[band].includes(schoolYear)) {

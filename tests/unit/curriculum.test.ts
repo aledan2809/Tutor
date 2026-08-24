@@ -280,3 +280,36 @@ describe("BAC — sincronizarea cu banca reală", () => {
     }
   });
 });
+
+describe("curriculumLag — decalajul programă↔bife", () => {
+  it("numără doar unitățile cerute de programă și nebifate", async () => {
+    const { curriculumLag, CURRICULUM_LAG_THRESHOLD } = await import("@/lib/curriculum");
+    // Elev de a VIII-a în S16, care n-a bifat nimic din anul curent: programa
+    // a ajuns la unitățile cu weeks[0] <= 16 → decalaj real, peste prag.
+    const rows = buildChecklist(
+      "mate-gimnaziu",
+      8,
+      16,
+      new Map(CURRICULUM["mate-gimnaziu"].map((u) => [u.key, u.year < 8]))
+    );
+    const { lag, missing } = curriculumLag(rows);
+    expect(lag).toBeGreaterThan(CURRICULUM_LAG_THRESHOLD);
+    expect(missing.every((u) => u.year === 8)).toBe(true);
+    // Corpuri rotunde (S29+) NU e în decalaj la S16.
+    expect(missing.map((u) => u.key)).not.toContain("viii-rotunde");
+  });
+
+  it("bifele la zi = decalaj zero", async () => {
+    const { curriculumLag } = await import("@/lib/curriculum");
+    const rows = buildChecklist("mate-gimnaziu", 8, 16); // pre-completat din calendar
+    expect(curriculumLag(rows).lag).toBe(0);
+  });
+
+  it("un elev care a debifat anii anteriori intră și el în decalaj (nu doar anul curent)", async () => {
+    const { curriculumLag } = await import("@/lib/curriculum");
+    const allFalse = new Map(CURRICULUM["mate-gimnaziu"].map((u) => [u.key, false]));
+    const rows = buildChecklist("mate-gimnaziu", 8, 1, allFalse);
+    // În S1, programa cere toți anii anteriori (17 unități) — toate nebifate.
+    expect(curriculumLag(rows).lag).toBeGreaterThanOrEqual(17);
+  });
+});

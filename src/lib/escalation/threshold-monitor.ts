@@ -88,16 +88,19 @@ async function computeMetric(
  * `dest` points the recipient at a page THEY can open (instructor → roster,
  * parent → watcher view) with a matching button label.
  */
-async function deliverThresholdAlert(
+export async function deliverThresholdAlert(
   userId: string,
   title: string,
   message: string,
   metadata: Record<string, unknown>,
-  dest: { url: string; label: string }
+  dest: { url: string; label: string },
+  // Reused by the curriculum-lag notifier (same in-app row + own-channel
+  // cascade semantics); the default keeps every existing caller unchanged.
+  type: string = "threshold_alert"
 ): Promise<void> {
   try {
     await prisma.notification.create({
-      data: { userId, type: "threshold_alert", title, message, metadata },
+      data: { userId, type, title, message, metadata },
     });
     if (await userInQuietHours(userId)) return;
     for (const channel of await resolveUserAlertChannels(userId)) {
