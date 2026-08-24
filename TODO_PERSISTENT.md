@@ -371,7 +371,35 @@ Probleme de reformulat în secțiunea de proof + restul homepage-ului (RO+EN, `s
 
 **Fișiere:** `src/app/[locale]/parinte/page.tsx` (+ hero/`page.tsx` dacă mutăm cârligul pe homepage). RO+EN. Coordonează cu item-ul 🏠 Homepage (proof-points) — același mesaj, fără contradicții.
 
-## [ ] 👪 Flux Părinte↔Copil↔Meditator (Faza C/D/E) — specializare a infra Watcher (verificat 2026-06-03)
+## [~] 👪 Flux Părinte↔Copil↔Meditator — stratul CURRICULUM LIVE 2026-08-24 (commit `ebbd984`); spec-ul de mai jos era STALE
+
+> ✅ **2026-08-24 — părintele și meditatorul văd și CORECTEAZĂ checklistul programei copilului**
+> (continuarea firească a porții pe programa parcursă livrate în aceeași zi; decizia user: bifa
+> poate veni de la elev SAU de la părinte/meditator, în paralel).
+> - API `/api/[domain]/curriculum?childId=` (GET+PUT): acces din RELAȚIE, nu din enrollmentul
+>   propriu — Guardian activ → `markedBy=GUARDIAN`; rol INSTRUCTOR/ADMIN pe domeniu + enrollment
+>   STUDENT activ al elevului → `markedBy=INSTRUCTOR`; altfel 403.
+> - Montat pe pagina copilului la părinte (`watcher/[id]`, per domeniu) și pe fișa elevului la
+>   meditator (`StudentDetail`). Copil neinițiat → panoul se deschide la adult (poate face el
+>   inițierea). Decalajul programă↔bife e vizibil permanent (badge + banner la lag>2), nu doar în
+>   atenționarea de luni.
+> - **Verificat LIVE pe prod** (conturi de test, instructor-test înrolat INSTRUCTOR pe
+>   matematica-v-viii prin API-ul admin): GET copil 200/28 rânduri · PUT bifă → `markedBy=INSTRUCTOR`
+>   confirmat în DB · fără rol pe domeniu → 403 · childId fără relație → 403 · restaurare self →
+>   `markedBy=SELF` (căile coexistă). **Limită onestă**: calea GUARDIAN pozitivă nu a fost
+>   exercitată live (nu se ating datele reale de familie; nu există pereche părinte-copil de test cu
+>   seat) — predicatul `isGuardianOf` are teste unitare, iar codul căii e identic cu cel INSTRUCTOR
+>   verificat live. De exercitat cu un fixture familie-test când se construiește unul.
+>
+> **⚠️ AUDIT 2026-08-24: spec-ul de mai jos (3 iunie) era DEPĂȘIT.** „CE LIPSEȘTE" pct. 1-3 s-au
+> construit în iulie: `Guardian` + `src/lib/guardian.ts` (scoping watcher pe copiii legați,
+> `watcherSeesAllStudents` doar pt instructor/admin) · family-invite COMPLET
+> (`src/lib/family-invite.ts`: invite/accept/lookup/createChildDirectly/revoke/remove + seats cu
+> `checkSeat`+`addon-checkout`, G-TU-B9) · tone per copil + notificări per copil + `parent-monitor`.
+> Rămas real din planul (a): branding dedicat de părinte peste watcher (culoarea emerald din
+> itemul Logo) — cosmetic; restul e construit.
+
+## [archive] 👪 Flux Părinte↔Copil↔Meditator — spec original 2026-06-03 (STALE — vezi auditul de mai sus)
 
 **Esența proiectului.** Verificat în cod 2026-06-03 (corectează un „nu există" greșit anterior).
 
