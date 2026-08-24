@@ -391,6 +391,25 @@ Probleme de reformulat în secțiunea de proof + restul homepage-ului (RO+EN, `s
 >   seat) — predicatul `isGuardianOf` are teste unitare, iar codul căii e identic cu cel INSTRUCTOR
 >   verificat live. De exercitat cu un fixture familie-test când se construiește unul.
 >
+> **➕ 2026-08-25 — review adversarial + pachet de reparații pe stratul familie+decalaj (commit
+> `5c65c86`, LIVE)**: 3 finderi paraleli + /review mesh au găsit **17 constatări confirmate; 16
+> reparate** — printre ele: TUTOR-ul de familie trecea drept PARENT (scriere cross-domeniu cu
+> etichetă falsă); calea de părinte nu cerea înscrierea copilului (putea „iniția" o bandă care îl
+> bloca); **lost-update** între cei 3 scriitori (acum revizie optimistă → 409 + reîncărcare);
+> `markedBy` se ștampila uniform pe toată banda (acum MERGE per unitate + `markedById`, migrarea
+> 0045); **firstWeek 2026-2027 greșite** (dedup-ul atenționărilor ar fi tăcut în prima săptămână
+> din ianuarie; acum test care derivă lanțul modulelor din date); `URLSearchParams.size` pica pe
+> WebKit vechi (adultul și-ar fi suprascris PROPRIUL checklist drept al copilului); destinatarii
+> notificatorului reautorizați live + fără N+1. **Verificat pe prod 7/7** (409 conflict real,
+> interdicția schimbării clasei de către meditator, 403 pe copil neînscris, proveniența per rând
+> dovedită în DB: 1×INSTRUCTOR+actor, 27×SELF neatinse). Incident pe drum, reparat în ~2 min:
+> deploy-ul fără `npm install` a sărit `prisma generate` → build fail + 502 scurt; rețeta oficială
+> din DEPLOY_REGISTRY era corectă, scurtătura a fost greșită.
+> **DECIZIE DESCHISĂ (user)**: accesul de scriere al meditatorului e pe DOMENIU (orice instructor
+> înrolat, consistent cu restul dashboardului), dar atenționările merg doar la creatorii de grupuri
+> cu elevul — meditatorul 1:1 fără grup poate corecta dar nu primește alerte. Aliniem sau rămâne
+> asimetric deliberat?
+
 > **⚠️ AUDIT 2026-08-24: spec-ul de mai jos (3 iunie) era DEPĂȘIT.** „CE LIPSEȘTE" pct. 1-3 s-au
 > construit în iulie: `Guardian` + `src/lib/guardian.ts` (scoping watcher pe copiii legați,
 > `watcherSeesAllStudents` doar pt instructor/admin) · family-invite COMPLET
