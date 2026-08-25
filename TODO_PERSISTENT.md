@@ -441,6 +441,18 @@ Probleme de reformulat în secțiunea de proof + restul homepage-ului (RO+EN, `s
 
 `/try` (URL-ul canonic „fără cont", referit din ~10 locuri) e acum **subject-picker pe grile reale** (`SubjectQuizDemo`), nu generatorul „text→test". Componenta `MagicQuizDemo` + API `/api/magic-quiz` **rămân** dar n-au pagină. De decis: (a) repurpose ca feature logat „Creează-ți propriul test din material"; (b) pagină separată `/genereaza`; (c) drop. Homepage nu mai promite generatorul (copy ajustat).
 
+## [ ] 🔎 Scoping: `watcherSeesAllStudents` e GLOBAL, nu per domeniu (găsit 2026-08-25)
+
+Un user cu rol ADMIN/INSTRUCTOR **pe orice domeniu** primește `seesAll=true` în
+`src/app/api/dashboard/watcher/route.ts` → vede TOȚI elevii din TOATE domeniile lui vizibile,
+inclusiv cele unde e doar părinte-WATCHER. Descoperit punând-o pe Antonia (ADMIN pe aviation)
+ca mamă a lui Rareș: pe domeniile unde e doar părinte, scoping-ul de părinte nu se mai aplică.
+
+**Azi inofensiv** (pe domeniile lui Rareș el e singurul elev), dar semantic greșit: un rol de
+predare pe un domeniu nu trebuie să relaxeze confidențialitatea pe altul. Fix: `seesAll` per
+domeniu (rolul se evaluează contra domeniului iterat), nu global pe user. Atinge o rută cu date
+de minori — merită test înainte/după pe un cont cu roluri mixte.
+
 ## [ ] 🎨 Logo eTUTOR.ro (creat 2026-06-03)
 
 Brandul e acum wordmark text (`<Brand>`: **e** mic + **TUTOR** caps + **.ro** mic, albastru). De făcut un **logo grafic** dedicat (favicon + header). Nu acum — doar marcat ca să nu se uite. Culori audiență de reținut: ELEV/STUDENT=albastru, PĂRINTE=emerald, PROFESOR=ambră.

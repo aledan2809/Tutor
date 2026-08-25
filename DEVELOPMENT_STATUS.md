@@ -1,5 +1,44 @@
 # Project Status - Tutor
-Last Updated: 2026-07-28 (Batch B–H /pa audit — regim mesh autonom, toate LIVE pe etutor.ro)
+Last Updated: 2026-08-25 (poarta pe programa parcursă + familie + review-fix — toate LIVE pe etutor.ro)
+
+## Current State (Sesiunea 2026-08-24/25 — programa parcursă, familie, review-fix; regim mesh)
+
+Sesiune lungă, pe două zile calendaristice, în regim mesh (dev → /review → verificare REALĂ pe prod → commit → deploy). **11 commit-uri, toate LIVE pe etutor.ro.**
+
+### Livrat
+
+**1. AGT-018 — Google One Tap** (`64d3d7a`, `b13893d`). Hardening-ul CSP din `72765fc` scosese `accounts.google.com` din `style-src`, iar clientul GSI își aduce foaia de stil de acolo → funcția moartă + 2 erori de consolă pe FIECARE pagină. Reparat CSP + **scriptul terț mutat în spatele bannerului de cookie-uri** (nou `src/lib/cookie-consent.ts`, sursă unică pentru cheie/formă/eveniment; `parseStoredConsent` eșuează închis pe 14 intrări nefolosibile). Verificat pe tab curat: înainte de consimțământ **0 mesaje de consolă** (erau 2) + niciun script Google; după Accept scriptul pornește fără reîncărcare; după Respinge — nimic.
+
+**2. Build-ul de producție era RUPT pe HEAD** (`05e832c`) — nu de mine: 3 directive `@ts-expect-error` fără descriere din commit-ul de referral de pe 23 aug. Deci motorul de referral fusese comis fără ca `next build` să fi trecut vreodată. Reparat + mock stale `passage` → `tsc --noEmit` iese acum 0.
+
+**3. Poarta pe programa parcursă** (`e7bd2da`, `ba7ef46`, `456ade6`) — cerință user: elevul care intră în septembrie în clasa terminală primea grile din lecții nepredate.
+- **Două rânduri în paralel** (decizie user): ● programa cu calendar (informativ, se mișcă săptămânal) + ☑ bifele elevului (COMANDĂ bazinul). Flow de inițiere obligatoriu înaintea oricărei sesiuni de Grile pe domeniile cu programă. Simulările rămân întregi.
+- Date din documente oficiale: planificări Sigma cl. VII (36 săpt.) + VIII (35) pe OMEN 3393/2017; structura anului **multi-an** 2025-2026 (OM 3463) + 2026-2027 (OM 3.194/2026). Salvate în `~/Downloads/temp/tutor eval nat/programa-calendar/`.
+- `scripts/curriculum-watch.mjs` — cron VPS2 **lunea 06:17** (`npx tsx`): amprente pe surse + topicuri din bancă neacoperite + an neconfigurat → notifică superadminii, NU modifică nimic.
+
+**4. Atenționare la decalaj programă↔bife** (`a52f8ec`) — cerință user: peste 2 lecții diferență, primesc atenționare **elevul + părinții + meditatorii**, pe cascada existentă a alertelor de prag (in-app + PUSH→Telegram→email, quiet-hours), dedup per (destinatar, elev, bandă, săptămână). Cron **lunea 06:27**.
+
+**5. Flux Părinte↔Copil↔Meditator — stratul curriculum** (`ebbd984`, `94a8cb3`). `?childId=` pe GET+PUT, acces din RELAȚIE (nu din înscrierea proprie), montat pe pagina copilului la părinte și pe fișa elevului la meditator. Decalajul vizibil permanent (badge + banner).
+
+**6. Pachetul de reparații din review-ul adversarial** (`5c65c86`, `440af2e`) — 3 finderi paraleli + /review mesh: **17 constatări confirmate, 16 reparate**. Detalii în TODO_PERSISTENT.
+
+### Configurație de test familie (date REALE, la cererea userului)
+- Elev: **`raresdanciulescu9@`** (contul ACTIV — 8 sesiuni/116 răspunsuri în 7 zile; `2004@` e inactiv din 15 apr).
+- Părinți: **Alex + Anto**, ambii `PARENT/active`. Antonia are WATCHER pe aptitudini-aviatie/aviatie-cunostinte/licenta-rares (oglindă a tatălui) + rolurile ei pe aviation.
+- **Rămas**: confirmarea userului că amândoi părinții văd corect → apoi Alina ca meditator.
+
+### Verificări pe producție (nu doar local)
+15/15 poarta · 7/7 pachetul de fixuri (409 conflict real, interdicția schimbării clasei de meditator, 403 pe copil neînscris) · proveniența per rând dovedită în DB (1×INSTRUCTOR+actor, 27×SELF neatinse) · atenționarea declanșată la S16 simulat (lag=6, notificare în DB) + dedup 0 la a doua rulare · watch rulat live pe VPS.
+
+### Incidente (ambele reparate în aceeași sesiune)
+- **502 ~2 min pe prod**: am deployat sărind `npm install` → `prisma generate` n-a rulat → clientul Prisma nu știa `markedById` → build fail. Rețeta din DEPLOY_REGISTRY era corectă; scurtătura mea, nu.
+- Cascada `/review` mesh pică pe payload mare (groq 413) → rulare per fișier.
+
+## Lessons Learned (sesiunea 2026-08-24/25)
+- **L476** — un API modern folosit într-o CONDIȚIE poate șterge tăcut o cerere întreagă
+- **L477** — un resurse cu al doilea scriitor cere altă strategie de scriere, nu doar altă poartă
+- **L478** — datele derivate declarate de mână trebuie verificate contra propriei derivări
+- **L479** — auditează codul înainte de a crede propriul backlog
 
 ## Current State (Sesiunea 2026-07-28 — Batch B→H /pa audit, regim mesh autonom)
 
