@@ -4,6 +4,43 @@
 
 ---
 
+## [ ] 📲 Telegram ca implicit, cu reducere de 10% legată de costul real (decis 2026-08-26)
+
+**De ce acum**: Rareș și-a făcut cont de Telegram, dar tot nu e conectat la bot. Linkul
+trimis nu s-a deschis. **Telegram NU permite scrisul după numărul de telefon** — botul poate
+scrie doar cui a pornit el conversația, deci nu există scurtătură: îi trebuie o acțiune a lui.
+Blocajul e frecarea, nu motivația.
+
+### Conectarea (rezolvă cazul concret)
+- **ȘI link, ȘI cod QR — alegerea utilizatorului.** QR-ul singur NU merge: cine își face
+  contul de pe telefon n-are cu ce scana. Linkul singur nu merge dacă e deschis pe laptop,
+  unde nu e Telegramul. Ambele, unul lângă altul.
+- Termen mai lung decât 15 min + buton „retrimite".
+- Ghidaj pas cu pas în onboarding, nu un link aruncat.
+
+### Reducerea (decizie user, peste propunerea mea de răsplată unică)
+- **10% permanent** cât timp comunicarea merge pe Telegram ȘI WhatsApp nu e selectat ca flux
+  suplimentar. Legată de un **cost real evitat** (Telegram = gratuit, WhatsApp = per mesaj),
+  deci se poate explica cinstit — ăsta e testul.
+- **Părintele decide și plătește.** O reducere perpetuă îl face să-și împingă copilul spre
+  Telegram și să-l ajute la setări — asta e pârghia de adopție, nu recompensa copilului.
+- La selectarea WhatsApp: flux de avertizare („pierzi reducerea") → până la debitarea
+  diferenței pro-rata pe luna curentă (tipar upgrade Revolut).
+
+### 🔴 Două riscuri de rezolvat ÎNAINTE de implementare
+1. **Comutatorul WhatsApp trebuie să stea în contul PLĂTITORULUI, nu al elevului.** Altfel un
+   click al copilului devine debitare pe cardul părintelui. Copilul cel mult *cere*.
+2. **Debitarea pro-rata cere consimțământ dat în avans.** În UE nu poți încasa la o schimbare
+   făcută în aplicație fără să fi spus la înscriere, explicit și acceptat: „dacă activezi
+   WhatsApp, ți se reține diferența". Trece prin Legal Hub + termeni, nu doar prin cod.
+
+### Anti-tipare
+- ❌ Doar QR (pică pe telefon) sau doar link (pică pe laptop).
+- ❌ Reducere pe care o poate pierde copilul, cu factura la părinte.
+- ❌ Debitare pro-rata fără clauză acceptată la înscriere.
+
+---
+
 ## [ ] 🔴 Verdictul pe feedback-ul elevului nu mai are voie să fie final fără om (creat 2026-08-26)
 
 **De ce**: Rareș a raportat răspunsuri greșite din **29 iunie**. Verificate manual pe
