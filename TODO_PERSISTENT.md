@@ -4,6 +4,46 @@
 
 ---
 
+## [ ] 🔴 Verdictul pe feedback-ul elevului nu mai are voie să fie final fără om (creat 2026-08-26)
+
+**De ce**: Rareș a raportat răspunsuri greșite din **29 iunie**. Verificate manual pe
+2026-08-26: avea dreptate în **7 din 9** reclamații pe conținut. Una i-a fost **respinsă**
+(energia cinetică, greșită de 1000×), restul „semnalate pentru admin" — și au stat
+publicate două luni.
+
+**Cauza-rădăcină nu e că nimeni nu se uita.** Reviewer-ul automat scrie
+`status = 'resolved'` **inclusiv pe verdictele unde declară singur că nu poate decide**
+(`flagged`, „Semnalată pentru admin"). Un semnal care se auto-închide e invizibil în orice
+listă filtrată pe stare. Pagina `/dashboard/admin/feedback` există; **0 intervenții de admin,
+vreodată**.
+
+**Reparat deja (2026-08-26)**: 11 întrebări defecte scoase din practică, 10 încercări
+recreditate, 15 anulate, 6 rânduri de progres recalculate. Copie de siguranță:
+`VPS2:/root/backups/tutor-pre-question-remediation-2026-08-26.dump`.
+
+### De construit
+
+1. **`dismissed` și `flagged` nu mai închid firul.** Stare nouă de așteptare; `resolved`
+   doar după confirmare umană. `dismissed` e cel periculos — îi spune unui copil că se
+   înșeală — deci **nu ajunge la elev înainte de confirmare**.
+2. **A doua judecată = re-rezolvare independentă**, nu recitire a primului verdict (altfel
+   doar îl confirmă). Refolosește `JUDGE_A` din `src/lib/content-quality-mesh.ts`, care deja
+   rezolvă singur întrebarea și compară cu răspunsul marcat. NU construi verificator nou.
+3. **Coadă vizibilă pentru SuperAdmin + părinte**, cu: ce a scris elevul, verdictul automat
+   + motivarea lui, întrebarea, acțiunea propusă, și de câte zile așteaptă.
+4. **Reminder zilnic pe Telegram către SuperAdmin până la zero.** ⚠️ Mesajul trebuie să
+   conțină **decizia**, nu numărul: „ai 7 în așteptare" repetat zilnic devine zgomot și e
+   ignorat — exact mecanismul care a produs incidentul. Confirmare/respingere dintr-o apăsare.
+5. **Bază de pornire**: 39 de feedback-uri istorice. NU le deschide pe toate deodată (zid
+   necitit) — pornește coada cu cele nedecise real.
+
+### Anti-tipare
+- ❌ A lăsa verdictul automat să spună elevului că se înșeală, fără om la mijloc.
+- ❌ A doua opinie care citește prima opinie — ajunge un „de acord" scump.
+- ❌ Reminder care numără în loc să arate ce e de decis.
+
+---
+
 ## [x] 🧮 Sprint de calcul — lanțuri aritmetice cronometrate cu adaptare în timp real — LIVRAT 2026-08-15 (`a556bac`, LIVE pe etutor.ro)
 
 Sesiune nouă în domeniul privat **Aptitudini Aviație** (Rareș + admini), cerută de user pentru antrenarea gândirii rapide cu numere.
