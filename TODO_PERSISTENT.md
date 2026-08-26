@@ -27,12 +27,14 @@ Blocajul e frecarea, nu motivația.
 - La selectarea WhatsApp: flux de avertizare („pierzi reducerea") → până la debitarea
   diferenței pro-rata pe luna curentă (tipar upgrade Revolut).
 
-### 🔴 Două riscuri de rezolvat ÎNAINTE de implementare
-1. **Comutatorul WhatsApp trebuie să stea în contul PLĂTITORULUI, nu al elevului.** Altfel un
-   click al copilului devine debitare pe cardul părintelui. Copilul cel mult *cere*.
-2. **Debitarea pro-rata cere consimțământ dat în avans.** În UE nu poți încasa la o schimbare
-   făcută în aplicație fără să fi spus la înscriere, explicit și acceptat: „dacă activezi
-   WhatsApp, ți se reține diferența". Trece prin Legal Hub + termeni, nu doar prin cod.
+### Cele două riscuri — REZOLVATE prin decizie user (2026-08-27)
+1. **Cerere → notificare → aprobare.** Elevul nu poate porni WhatsApp singur: el *cere*,
+   părintele **e notificat de cerere** și o **aprobă** explicit. Abia aprobarea părintelui
+   declanșează pierderea reducerii și debitarea pro-rata. Un click al copilului nu poate
+   ajunge niciodată factură pe cardul părintelui.
+2. **Consimțământ deschis, cerut explicit.** Clauza „dacă activezi WhatsApp ți se reține
+   diferența pro-rata" se prezintă și se acceptă **la înscriere**, nu în momentul debitării.
+   Prin Legal Hub (ConsentRecord), ca orice consimțământ — nu îngropat în termeni.
 
 ### Anti-tipare
 - ❌ Doar QR (pică pe telefon) sau doar link (pică pe laptop).
