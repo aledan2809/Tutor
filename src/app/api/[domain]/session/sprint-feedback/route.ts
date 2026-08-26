@@ -8,13 +8,16 @@ import {
   SPRINT_DOMAIN_SLUG,
   SPRINT_SESSION_TYPE,
   SPRINT_TIMEOUT_ANSWER,
-  buildSprintEvents,
+  buildChainEvents,
+  buildFamilyEvents,
   hasSprintFeedback,
   loadSprintProfile,
   readSprintMetadata,
   saveSprintProfile,
 } from "@/lib/sprint-session";
 import { computeLiveState } from "@/lib/sprint-live";
+import { computeFamilyState, foldFamilyBaselines } from "@/lib/sprint-families";
+import { FAMILY_LABELS, SINGLE_FAMILIES } from "@/lib/mental-single";
 import {
   adaptSprintProfile,
   isDifficultyAnswer,
@@ -101,7 +104,13 @@ async function _POST(
   const meta = readSprintMetadata(learningSession.metadata);
   // Where the in-session adaptation ended up — the signal that actually carries
   // information once the engine is steering toward a constant success rate.
-  const live = meta ? computeLiveState(buildSprintEvents(meta, learningSession.attempts)) : null;
+  const live = meta ? computeLiveState(buildChainEvents(meta, learningSession.attempts)) : null;
+  // How each operation went, held apart from the overall numbers: one accuracy
+  // for the whole session describes a student who is instant on additions and
+  // stuck on two-digit products no better than it describes either half.
+  const families = meta
+    ? computeFamilyState(buildFamilyEvents(meta, learningSession.attempts), meta.familyBaselines ?? {})
+    : null;
   const outcome = {
     total: meta?.totalQuestions ?? learningSession.attempts.length,
     correct: learningSession.attempts.filter((a) => a.isCorrect).length,
@@ -145,13 +154,31 @@ async function _POST(
     outcome
   );
 
-  await saveSprintProfile(session.user.id, domain.id, next);
+  await saveSprintProfile(session.user.id, domain.id, {
+    ...next,
+    // Carry the per-family progress forward. Without this the drill would
+    // rediscover which operation he is slow at from scratch every session,
+    // which is exactly the thing it is supposed to remember.
+    ...(families ? { families: foldFamilyBaselines(current.families, families) } : {}),
+  });
 
   return NextResponse.json({
     level: next.level,
     timeFactor: next.timeFactor,
     notes: next.notes,
     nextStartLabel: TIER_LABELS[tierForIndex(0, outcome.total || 20, next.level) as Tier],
+    // Per-operation breakdown for the results screen — only the operations that
+    // actually came up, so nothing is reported on that was never measured.
+    familyBreakdown: families
+      ? SINGLE_FAMILIES.filter((f) => families[f].seen > 0).map((f) => ({
+          family: f,
+          label: FAMILY_LABELS[f],
+          seen: families[f].seen,
+          correct: families[f].correct,
+          fast: families[f].fast,
+          level: families[f].level,
+        }))
+      : [],
     outcome,
   });
 }

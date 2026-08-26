@@ -29,6 +29,31 @@ import {
   type LiveState,
   type SprintEvent,
 } from "@/lib/sprint-live";
+import {
+  baseSecondsFor,
+  generateSingleQuestion,
+  singlePressure,
+  SINGLE_FAMILIES,
+  SINGLE_TOPIC,
+  type SingleFamily,
+} from "@/lib/mental-single";
+import {
+  computeFamilyState,
+  familyTier,
+  pickFamily,
+  readFamilyBaselines,
+  FAMILY_TIME_MAX,
+  type FamilyBaselines,
+  type FamilyEvent,
+  type FamilyState,
+} from "@/lib/sprint-families";
+import {
+  countOfKind,
+  ordinalWithinKind,
+  planSlots,
+  remainingOfKind,
+  type SlotKind,
+} from "@/lib/sprint-plan";
 
 // Re-exported so the server modules keep a single import site for sprint bits.
 export { SPRINT_TIMEOUT_ANSWER, SPRINT_DOMAIN_SLUG } from "@/lib/mental-chain";
@@ -58,9 +83,28 @@ export interface SprintMetadata {
   questionIds: string[];
   /** Per-question clock actually given, index-aligned with `questionIds`. */
   questionSeconds: number[];
+  /**
+   * Which kind each generated question was — index-aligned with `questionIds`.
+   * Absent on sessions started before direct operations existed; those are read
+   * as all-chain, which is what they were.
+   */
+  questionKinds?: SlotKind[];
+  /**
+   * Operation family per generated question (`null` for chains) — index-aligned
+   * with `questionIds`. This, not the Question row, is what the per-family
+   * adaptation reads: the row can be pruned or edited, the plan cannot.
+   */
+  questionFamilies?: (SingleFamily | null)[];
   /** Profile the session STARTED from — what the debrief then adjusts. */
   level: number;
   timeFactor: number;
+  /**
+   * Per-family carry-over the session started from. Recorded here, not re-read
+   * from the profile mid-session: the profile is rewritten by the debrief, and a
+   * session that is still running must keep computing against the numbers it
+   * actually began with or its clock would jump under the student.
+   */
+  familyBaselines?: FamilyBaselines;
   sprintFeedback?: {
     difficulty: string;
     time: string;
@@ -74,9 +118,20 @@ export interface SprintProfileValues {
   level: number;
   timeFactor: number;
   sessions: number;
+  /**
+   * Per-operation-family carry-over for the direct half of the drill. Empty for
+   * a student who has never done one — `computeFamilyState` then starts every
+   * family at the gentlest setting.
+   */
+  families: FamilyBaselines;
 }
 
-const DEFAULT_PROFILE: SprintProfileValues = { level: LEVEL_MIN, timeFactor: 1, sessions: 0 };
+const DEFAULT_PROFILE: SprintProfileValues = {
+  level: LEVEL_MIN,
+  timeFactor: 1,
+  sessions: 0,
+  families: {},
+};
 
 /**
  * Current adaptive state, defaulting to the gentlest setting for a student who
@@ -90,25 +145,41 @@ export async function loadSprintProfile(
   const row = await prisma.sprintProfile.findUnique({
     where: { userId_domainId: { userId, domainId } },
   });
-  if (!row) return { ...DEFAULT_PROFILE };
+  if (!row) return { ...DEFAULT_PROFILE, families: {} };
   return {
     level: Math.min(LEVEL_MAX, Math.max(LEVEL_MIN, Math.round(row.level))),
     timeFactor: Math.min(TIME_FACTOR_MAX, Math.max(TIME_FACTOR_MIN, row.timeFactor)),
     sessions: row.sessions,
+    families: readFamilyBaselines(row.families),
   };
 }
 
 export async function saveSprintProfile(
   userId: string,
   domainId: string,
-  next: { level: number; timeFactor: number }
+  next: { level: number; timeFactor: number; families?: FamilyBaselines }
 ): Promise<void> {
   const level = Math.min(LEVEL_MAX, Math.max(LEVEL_MIN, Math.round(next.level)));
   const timeFactor = Math.min(TIME_FACTOR_MAX, Math.max(TIME_FACTOR_MIN, next.timeFactor));
+  // Re-read through the same guard the load path uses, so a caller cannot write
+  // a shape the reader would later reject.
+  const families = next.families ? readFamilyBaselines(next.families) : undefined;
   await prisma.sprintProfile.upsert({
     where: { userId_domainId: { userId, domainId } },
-    create: { userId, domainId, level, timeFactor, sessions: 1 },
-    update: { level, timeFactor, sessions: { increment: 1 } },
+    create: {
+      userId,
+      domainId,
+      level,
+      timeFactor,
+      sessions: 1,
+      ...(families ? { families: families as unknown as object } : {}),
+    },
+    update: {
+      level,
+      timeFactor,
+      sessions: { increment: 1 },
+      ...(families ? { families: families as unknown as object } : {}),
+    },
   });
 }
 
@@ -145,15 +216,55 @@ export function resolveQuestionShape(
 }
 
 /**
+ * The family, difficulty and clock for the next DIRECT operation.
+ *
+ * Deliberately not routed through `resolveQuestionShape`. A chain's budget comes
+ * off the session's 45s→12s ramp, i.e. from WHERE the question sits; a direct
+ * operation's comes from the operation itself — `7 × 8` and `73 × 46` are both
+ * "one multiplication" and are not remotely the same amount of work, so handing
+ * them the ramp's current value would make one a formality and the other
+ * impossible, and neither would measure anything.
+ *
+ * The global `timeFactor` is NOT applied here either: the per-family clock
+ * multiplier already carries this student's personal pacing for that operation,
+ * both what previous sessions settled on and what this one has done so far.
+ * Multiplying by both would count the same personalisation twice.
+ */
+export function resolveSingleShape(
+  singleIndex: number,
+  singleTotal: number,
+  families: FamilyState,
+  family: SingleFamily
+): { tier: Tier; seconds: number } {
+  const tier = familyTier(families, family);
+  const base = baseSecondsFor(family, tier);
+  const scaled = base * singlePressure(singleIndex, singleTotal) * families[family].timeScale;
+  // Bounded by what this operation is worth at its hardest personal setting, so
+  // a bad patch cannot turn a tier-1 addition into a 40-second question.
+  return {
+    tier,
+    seconds: Math.min(
+      Math.round(base * FAMILY_TIME_MAX),
+      Math.max(SPRINT_MIN_SECONDS, Math.round(scaled))
+    ),
+  };
+}
+
+/**
  * Generate and persist ONE question for a running sprint.
  */
 async function createSprintQuestion(
   domainId: string,
   createdById: string,
   tier: Tier,
-  index: number
+  index: number,
+  kind: SlotKind,
+  family: SingleFamily | null
 ): Promise<Question> {
-  const generated = generateChainQuestion(tier);
+  const generated =
+    kind === "single" && family
+      ? generateSingleQuestion(family, tier)
+      : generateChainQuestion(tier);
 
   // A per-question tag lets us read the row back without depending on createMany
   // returning ids (and gives pruning a precise handle).
@@ -167,7 +278,10 @@ async function createSprintQuestion(
     data: {
       domainId,
       subject: SPRINT_SUBJECT,
-      topic: SPRINT_TOPIC,
+      // Direct operations carry their own topic so a later reader (reports, the
+      // debrief, anything that samples the bank) can tell the two drills apart
+      // without re-parsing the expression.
+      topic: kind === "single" ? SINGLE_TOPIC : SPRINT_TOPIC,
       difficulty: generated.difficulty,
       type: "MULTIPLE_CHOICE" as const,
       content: generated.content,
@@ -218,54 +332,156 @@ export async function pruneOrphanSprintQuestions(domainId: string): Promise<numb
  * Rebuild the live-adaptation input from what actually happened: each answered
  * question paired with the clock it was given.
  */
-export function buildSprintEvents(
-  meta: SprintMetadata,
-  attempts: readonly { questionId: string; isCorrect: boolean; answer: string; timeSpent: number | null }[]
-): SprintEvent[] {
-  const budgetOf = new Map<string, number>();
-  const plannedTierOf = new Map<string, number>();
+/**
+ * Which kind each generated question was.
+ *
+ * A session started before direct operations existed has no `questionKinds`;
+ * every question in it was a chain, and it is read that way so the numbers an
+ * old debrief produces do not change under it.
+ */
+export function slotKindsOf(meta: SprintMetadata): SlotKind[] {
+  if (!Array.isArray(meta.questionKinds)) return meta.questionIds.map(() => "chain" as SlotKind);
+  const plan = planSlots(meta.totalQuestions);
+  return meta.questionIds.map((_, i) => meta.questionKinds?.[i] ?? plan[i] ?? "chain");
+}
+
+export function isLegacyAllChain(meta: SprintMetadata): boolean {
+  return !Array.isArray(meta.questionKinds);
+}
+
+/** How many chain slots the session's plan contains. */
+export function chainTotalOf(meta: SprintMetadata): number {
+  if (isLegacyAllChain(meta)) return meta.totalQuestions;
+  return Math.max(1, countOfKind(planSlots(meta.totalQuestions), "chain"));
+}
+
+/** How many direct-operation slots the session's plan contains. */
+export function singleTotalOf(meta: SprintMetadata): number {
+  if (isLegacyAllChain(meta)) return 0;
+  return countOfKind(planSlots(meta.totalQuestions), "single");
+}
+
+interface SlotInfo {
+  kind: SlotKind;
+  family: SingleFamily | null;
+  budgetSeconds: number;
+  /** 0-based position among the slots of its own kind. */
+  ordinal: number;
+}
+
+function slotIndex(meta: SprintMetadata): Map<string, SlotInfo> {
+  const kinds = slotKindsOf(meta);
+  const counters: Record<SlotKind, number> = { single: 0, chain: 0 };
+  const out = new Map<string, SlotInfo>();
   meta.questionIds.forEach((id, i) => {
-    budgetOf.set(id, meta.questionSeconds[i] ?? 0);
-    plannedTierOf.set(id, tierForIndex(i, meta.totalQuestions, meta.level));
+    const kind = kinds[i] ?? "chain";
+    out.set(id, {
+      kind,
+      family: meta.questionFamilies?.[i] ?? null,
+      budgetSeconds: meta.questionSeconds[i] ?? 0,
+      ordinal: counters[kind]++,
+    });
   });
-  // ONE event per question, first attempt wins.
-  //
-  // There is no unique constraint on (sessionId, questionId), and the client
-  // deliberately allows re-submitting a question whose response was lost. A
-  // second row for the same question is not a second answer — counting it would
-  // promote the student a tier early and tighten the clock again off a single
-  // dropped response. The fold being pure is worth nothing if its input can
-  // contain a phantom event.
+  return out;
+}
+
+/**
+ * First attempt per question, in answer order.
+ *
+ * There is no unique constraint on (sessionId, questionId), and the client
+ * deliberately allows re-submitting a question whose response was lost. A
+ * second row for the same question is not a second answer — counting it would
+ * promote the student a tier early and tighten the clock again off a single
+ * dropped response. Both folds are pure, which is worth nothing if their input
+ * can contain a phantom event.
+ */
+function firstAttempts<T extends { questionId: string }>(attempts: readonly T[]): T[] {
   const seen = new Set<string>();
-  const out: SprintEvent[] = [];
+  const out: T[] = [];
   for (const a of attempts) {
     if (seen.has(a.questionId)) continue;
     seen.add(a.questionId);
+    out.push(a);
+  }
+  return out;
+}
+
+export interface SprintAttemptRow {
+  questionId: string;
+  isCorrect: boolean;
+  answer: string;
+  timeSpent: number | null;
+}
+
+/**
+ * Rebuild the CHAIN adaptation's input: each answered chain paired with the
+ * clock it was given.
+ *
+ * Direct operations are excluded on purpose. This fold drives the chain ramp —
+ * its `plannedTier` is a chain tier — and a fast answer on `47 + 38` says
+ * nothing about whether the next `25 × 5 − 40 ÷ 8 − 95` should be harder. The
+ * two drills are adapted by the two folds that actually govern them.
+ */
+export function buildChainEvents(
+  meta: SprintMetadata,
+  attempts: readonly SprintAttemptRow[]
+): SprintEvent[] {
+  const slots = slotIndex(meta);
+  const chainTotal = chainTotalOf(meta);
+  const lastOrdinal = Math.max(0, chainTotal - 1);
+  const maxPlannedTier = tierForIndex(lastOrdinal, chainTotal, meta.level);
+
+  const out: SprintEvent[] = [];
+  for (const a of firstAttempts(attempts)) {
+    const slot = slots.get(a.questionId);
+    if (!slot || slot.kind !== "chain") continue;
     out.push({
       correct: a.isCorrect,
       timedOut: a.answer === SPRINT_TIMEOUT_SENTINEL,
       timeSpentMs: a.timeSpent ?? 0,
-      budgetSeconds: budgetOf.get(a.questionId) ?? 0,
-      plannedTier: plannedTierOf.get(a.questionId) ?? 1,
-      nextPlannedTier: 0, // filled below, once the order is settled
-      maxPlannedTier: 0,
+      budgetSeconds: slot.budgetSeconds,
+      plannedTier: tierForIndex(slot.ordinal, chainTotal, meta.level),
+      // The offset applies to the question about to be generated, so each step
+      // is clamped against THAT question's planned tier, not the one just
+      // answered.
+      nextPlannedTier: tierForIndex(
+        Math.min(slot.ordinal + 1, lastOrdinal),
+        chainTotal,
+        meta.level
+      ),
+      maxPlannedTier,
     });
   }
-  // The offset applies to the question about to be generated, so each step is
-  // clamped against THAT question's planned tier, not the one just answered.
-  const lastIndex = Math.max(0, meta.totalQuestions - 1);
-  // The plan is monotonic non-decreasing, so its highest tier is its last one.
-  const maxPlannedTier = tierForIndex(lastIndex, meta.totalQuestions, meta.level);
-  out.forEach((e, i) => {
-    e.nextPlannedTier = tierForIndex(
-      Math.min(i + 1, lastIndex),
-      meta.totalQuestions,
-      meta.level
-    );
-    e.maxPlannedTier = maxPlannedTier;
-  });
   return out;
 }
+
+/** Rebuild the PER-FAMILY adaptation's input: each answered direct operation. */
+export function buildFamilyEvents(
+  meta: SprintMetadata,
+  attempts: readonly SprintAttemptRow[]
+): FamilyEvent[] {
+  const slots = slotIndex(meta);
+  const out: FamilyEvent[] = [];
+  for (const a of firstAttempts(attempts)) {
+    const slot = slots.get(a.questionId);
+    if (!slot || slot.kind !== "single" || !slot.family) continue;
+    if (!SINGLE_FAMILIES.includes(slot.family)) continue;
+    out.push({
+      family: slot.family,
+      correct: a.isCorrect,
+      timedOut: a.answer === SPRINT_TIMEOUT_SENTINEL,
+      timeSpentMs: a.timeSpent ?? 0,
+      budgetSeconds: slot.budgetSeconds,
+    });
+  }
+  return out;
+}
+
+/**
+ * Back-compat alias — the chain fold was the only one before direct operations
+ * existed, and the debrief route still asks for "the sprint events".
+ */
+export const buildSprintEvents = buildChainEvents;
 
 export interface NextSprintQuestion {
   done: boolean;
@@ -276,6 +492,12 @@ export interface NextSprintQuestion {
   answered: number;
   total: number;
   live: LiveState;
+  /** Direct operation or chain. */
+  kind?: SlotKind;
+  /** Which operation family, when this is a direct operation. */
+  family?: SingleFamily | null;
+  /** Per-family state as it stands right now — what the debrief reports on. */
+  families: FamilyState;
 }
 
 /**
@@ -309,20 +531,25 @@ export async function getOrCreateNextSprintQuestion(
   const attempts = await prisma.attempt.findMany({
     where: { sessionId: learningSession.id },
     // Tie-broken by id: two attempts in the same millisecond would otherwise let
-    // Postgres return either order, and the fold IS order-sensitive (streaks).
+    // Postgres return either order, and both folds ARE order-sensitive (streaks).
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     select: { questionId: true, isCorrect: true, answer: true, timeSpent: true },
   });
 
-  const events = buildSprintEvents(meta, attempts);
-  const live = computeLiveState(events);
+  const live = computeLiveState(buildChainEvents(meta, attempts));
+  const families = computeFamilyState(
+    buildFamilyEvents(meta, attempts),
+    meta.familyBaselines ?? {}
+  );
   const answeredIds = new Set(attempts.map((a) => a.questionId));
   const answered = answeredIds.size;
   const total = meta.totalQuestions;
 
   if (answered >= total) {
-    return { done: true, answered, total, live };
+    return { done: true, answered, total, live, families };
   }
+
+  const kinds = slotKindsOf(meta);
 
   // Resume: a question was handed out but never answered.
   const pendingIdx = meta.questionIds.findIndex((id) => !answeredIds.has(id));
@@ -334,9 +561,12 @@ export async function getOrCreateNextSprintQuestion(
         question: existing,
         seconds: meta.questionSeconds[pendingIdx],
         index: pendingIdx,
+        kind: kinds[pendingIdx] ?? "chain",
+        family: meta.questionFamilies?.[pendingIdx] ?? null,
         answered,
         total,
         live,
+        families,
       };
     }
     // The row is gone (pruned, manual delete) — fall through and generate a
@@ -344,18 +574,48 @@ export async function getOrCreateNextSprintQuestion(
   }
 
   const index = meta.questionIds.length;
-  const { tier, seconds } = resolveQuestionShape(
-    index,
-    total,
-    { level: meta.level, timeFactor: meta.timeFactor },
-    live
-  );
+  const plan = planSlots(total);
+  const kind: SlotKind = plan[index] ?? "chain";
+
+  let tier: Tier;
+  let seconds: number;
+  let family: SingleFamily | null = null;
+
+  if (kind === "single") {
+    family = pickFamily(
+      families,
+      Math.random,
+      // Lets the picker force a family that has not come up yet when the slots
+      // left have run down to the ones still unmeasured — a family that was
+      // never asked cannot be reported on afterwards.
+      remainingOfKind(plan, index, "single")
+    );
+    const shape = resolveSingleShape(
+      ordinalWithinKind(plan, index),
+      Math.max(1, countOfKind(plan, "single")),
+      families,
+      family
+    );
+    tier = shape.tier;
+    seconds = shape.seconds;
+  } else {
+    const shape = resolveQuestionShape(
+      ordinalWithinKind(plan, index),
+      Math.max(1, countOfKind(plan, "chain")),
+      { level: meta.level, timeFactor: meta.timeFactor },
+      live
+    );
+    tier = shape.tier;
+    seconds = shape.seconds;
+  }
 
   const question = await createSprintQuestion(
     domainId,
     learningSession.userId,
     tier,
-    index
+    index,
+    kind,
+    family
   );
 
   await prisma.session.update({
@@ -365,11 +625,19 @@ export async function getOrCreateNextSprintQuestion(
         ...meta,
         questionIds: [...meta.questionIds, question.id],
         questionSeconds: [...meta.questionSeconds, seconds],
+        // Written as full arrays rather than appended to a possibly-absent one,
+        // so a session that started before these fields existed still ends up
+        // with entries aligned to every id it holds.
+        questionKinds: [...kinds, kind],
+        questionFamilies: [
+          ...meta.questionIds.map((_, i) => meta.questionFamilies?.[i] ?? null),
+          family,
+        ],
       } as unknown as object,
     },
   });
 
-  return { done: false, question, seconds, index, answered, total, live };
+  return { done: false, question, seconds, index, kind, family, answered, total, live, families };
 }
 
 // ─── Mandatory feedback gate ───

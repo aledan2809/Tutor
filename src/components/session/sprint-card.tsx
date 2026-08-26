@@ -42,8 +42,9 @@ export function SprintCard({ sprint, onStart, onResolveFeedback, loading = false
 
       <h3 className="mb-1 text-lg font-semibold text-white">🧮 Sprint de calcul</h3>
       <p className="mb-4 text-sm text-gray-400">
-        Lanțuri de operații (+ − × ÷) în cap, cu timp la fiecare. Devin mai grele și
-        timpul scade pe parcurs.
+        Jumătate operații directe (22 × 34, 84 ÷ 12), jumătate lanțuri de operații,
+        cu timp la fiecare. Timpul se strânge unde mergi repede și se lărgește unde
+        te încurci — separat pentru înmulțiri, împărțiri, adunări și scăderi.
       </p>
 
       <dl className="mb-4 grid grid-cols-3 gap-3 text-center">

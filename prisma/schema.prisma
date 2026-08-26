@@ -494,6 +494,12 @@ model SprintProfile {
   timeFactor Float    @default(1)
   /// How many sprints have been completed WITH feedback.
   sessions   Int      @default(0)
+  /// Per-operation-family carry-over for the direct ("operatii directe") half of
+  /// the drill: { mul: { level, timeFactor }, div: {...}, add: {...}, sub: {...} }.
+  /// Held per family rather than as one number because a student is routinely
+  /// quick at one operation and stalled on another, and a single average is
+  /// wrong for both. Nullable: a profile from before this existed reads as {}.
+  families   Json?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
