@@ -41,13 +41,6 @@ const MINUS = "−"; // U+2212, not a hyphen — matches the aptitudini bank
 const TIMES = "×";
 const DIVIDE = "÷";
 
-const SYMBOL: Record<SingleFamily, string> = {
-  mul: TIMES,
-  div: DIVIDE,
-  add: "+",
-  sub: MINUS,
-};
-
 /** Human labels — used on the results screen and in the per-family debrief. */
 export const FAMILY_LABELS: Record<SingleFamily, string> = {
   mul: "Înmulțiri",
@@ -70,8 +63,6 @@ export const FAMILY_BASE_WEIGHT: Record<SingleFamily, number> = {
   add: 1,
   sub: 1,
 };
-
-export type Rng2 = Rng;
 
 // ─── RNG helpers (local copies — `mental-chain` keeps its own private) ───
 
