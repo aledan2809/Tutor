@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { speak, speakItems, readTtsRate, useTtsRate, TtsSpeedControl } from "./tts";
+import { speak, speakItems, cancelSpeech, readTtsRate, useTtsRate, TtsSpeedControl } from "./tts";
 
 interface QuestionOption {
   label: string;
@@ -86,11 +86,29 @@ export function QuestionRenderer({
   // Student-controlled read-aloud speed (shared hook, persisted in localStorage).
   const [ttsRate, setTtsRate] = useTtsRate();
 
+  /**
+   * True while the numbers (or cube moves) are being read out.
+   *
+   * The answer inputs are locked for exactly this long. Without it the student
+   * can write each number down as it is spoken, and the exercise stops
+   * measuring memory and starts measuring transcription speed — which is what
+   * the student himself reported: "trebuie să nu ai voie să scrii în timp ce
+   * dictează, ca să pot reține numerele".
+   */
+  const [dictating, setDictating] = useState(false);
+  const speechHooks = {
+    onStart: () => setDictating(true),
+    onEnd: () => setDictating(false),
+  };
+  // Leaving the question mid-dictation must not strand the lock on.
+  useEffect(() => () => cancelSpeech(), []);
+  useEffect(() => { setDictating(false); }, [question.id]);
+
   // Try to read the cube moves aloud once on mount (a tap on 🔊 replays if the
   // browser blocks auto-speech without a gesture). Reads the stored rate directly
   // so the auto-play honors the student's preference even before state syncs.
   useEffect(() => {
-    if (isCubeVoice) speak(cubeSpeech, "en-US", readTtsRate());
+    if (isCubeVoice) speak(cubeSpeech, "en-US", readTtsRate(), speechHooks);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.id]);
 
@@ -155,12 +173,17 @@ export function QuestionRenderer({
         <p className="whitespace-pre-line text-lg text-white">{question.content}</p>
         <button
           type="button"
-          onClick={() => speakItems(audioItems, audioLang, ttsRate)}
+          onClick={() => speakItems(audioItems, audioLang, ttsRate, undefined, speechHooks)}
           className="inline-flex min-h-[44px] items-center rounded-lg border border-blue-700 bg-blue-950/30 px-4 py-2.5 text-sm font-medium text-blue-200 hover:bg-blue-900/40"
         >
           🔊 Ascultă numerele
         </button>
         <TtsSpeedControl value={ttsRate} onChange={setTtsRate} />
+        {dictating && (
+          <p className="rounded-lg border border-amber-700/60 bg-amber-900/20 px-3 py-2 text-sm text-amber-200">
+            🔒 Ascultă. Poți scrie după ce se termină dictarea — asta e exercițiul.
+          </p>
+        )}
         <div className="flex flex-wrap gap-2">
           {audioItems.map((_, i) => (
             <input
@@ -173,7 +196,7 @@ export function QuestionRenderer({
               }}
               inputMode="numeric"
               maxLength={3}
-              disabled={disabled}
+              disabled={disabled || dictating}
               aria-label={`Numărul ${i + 1}`}
               className="w-14 rounded-lg border border-gray-700 bg-gray-800 px-2 py-2 text-center text-lg text-white focus:border-blue-500 focus:outline-none"
             />
@@ -181,7 +204,7 @@ export function QuestionRenderer({
         </div>
         <button
           onClick={submitAudio}
-          disabled={disabled || filled < audioItems.length}
+          disabled={disabled || dictating || filled < audioItems.length}
           className="min-h-[44px] w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Submit Answer
@@ -270,11 +293,16 @@ export function QuestionRenderer({
       </div>
 
       {/* #3 Cube — replay the dictated start + 6 moves (English); answer = final face below. */}
+      {isCubeVoice && dictating && (
+        <p className="rounded-lg border border-amber-700/60 bg-amber-900/20 px-3 py-2 text-sm text-amber-200">
+          🔒 Ascultă mișcările. Poți răspunde după ce se termină dictarea.
+        </p>
+      )}
       {isCubeVoice && (
         <div className="flex flex-col gap-2">
           <button
             type="button"
-            onClick={() => speak(cubeSpeech, "en-US", ttsRate)}
+            onClick={() => speak(cubeSpeech, "en-US", ttsRate, speechHooks)}
             className="inline-flex min-h-[44px] items-center rounded-lg border border-blue-700 bg-blue-950/30 px-4 py-2.5 text-sm font-medium text-blue-200 hover:bg-blue-900/40"
           >
             🔊 Ascultă mișcările din nou
@@ -301,16 +329,19 @@ export function QuestionRenderer({
             <button
               key={idx}
               onClick={() => {
-                if (disabled) return;
+                // `dictating` matters for the cube-voice item, where the moves
+                // are spoken and the faces are on screen: answerable mid-speech,
+                // it is a listening test with the answer already visible.
+                if (disabled || dictating) return;
                 setSelectedOption(opt.value);
                 if (instantAnswer) onAnswer(opt.value);
               }}
-              disabled={disabled}
+              disabled={disabled || dictating}
               className={`min-h-[44px] w-full rounded-lg border px-4 py-3 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 ${
                 selectedOption === opt.value
                   ? "border-blue-500 bg-blue-600/10 text-blue-400"
                   : "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
-              } ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+              } ${disabled || dictating ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
             >
               <span className="mr-3 font-semibold text-gray-500">
                 {String.fromCharCode(65 + idx)}.

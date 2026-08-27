@@ -24,6 +24,20 @@ export function readTtsRate(): number {
   return Number.isFinite(v) && v >= TTS_RATE_MIN && v <= TTS_RATE_MAX ? v : TTS_RATE_DEFAULT;
 }
 
+/**
+ * Lifecycle hooks for a dictation.
+ *
+ * They exist so the answer inputs can be LOCKED while the numbers are being
+ * read out. Without that, the exercise measures how fast a student can write,
+ * not what he can hold in his head — which is the whole point of a memory
+ * drill, and was the student's own complaint.
+ */
+export interface SpeechHooks {
+  onStart?: () => void;
+  /** Fires once, when the whole sequence has finished, been cut short, or failed. */
+  onEnd?: () => void;
+}
+
 // Sequence token: bumped on every speak/speakItems/cancel so a stale item-by-item
 // sequence (its onend chain) stops itself when something new starts.
 let speakSeq = 0;
@@ -34,12 +48,28 @@ export function cancelSpeech() {
 }
 
 /** Browser TTS, single utterance. No-op if unsupported. */
-export function speak(text: string, lang = "ro-RO", rate = 0.95) {
-  if (typeof window === "undefined" || !window.speechSynthesis) return;
+export function speak(
+  text: string,
+  lang = "ro-RO",
+  rate = 0.95,
+  hooks?: SpeechHooks
+) {
+  if (typeof window === "undefined" || !window.speechSynthesis) {
+    // Never leave a caller that disabled its inputs waiting for an `onEnd` that
+    // can no longer come — a memory drill that locks the keyboard forever is
+    // worse than one with no voice at all.
+    hooks?.onEnd?.();
+    return;
+  }
   cancelSpeech();
+  const mySeq = speakSeq;
   const u = new SpeechSynthesisUtterance(text);
   u.lang = lang;
   u.rate = rate;
+  const finish = () => { if (mySeq === speakSeq) hooks?.onEnd?.(); };
+  u.onend = finish;
+  u.onerror = finish;
+  hooks?.onStart?.();
   window.speechSynthesis.speak(u);
 }
 
@@ -49,22 +79,43 @@ export function speak(text: string, lang = "ro-RO", rate = 0.95) {
  * Each item is its own utterance; the next starts `gapMs` after the previous ends.
  * A new speak()/speakItems()/cancelSpeech() invalidates a running sequence.
  */
-export function speakItems(items: string[], lang = "ro-RO", rate = TTS_RATE_DEFAULT, gapMs?: number) {
-  if (typeof window === "undefined" || !window.speechSynthesis) return;
+export function speakItems(
+  items: string[],
+  lang = "ro-RO",
+  rate = TTS_RATE_DEFAULT,
+  gapMs?: number,
+  hooks?: SpeechHooks
+) {
+  if (typeof window === "undefined" || !window.speechSynthesis) {
+    hooks?.onEnd?.();
+    return;
+  }
   cancelSpeech();
   const mySeq = speakSeq;
+  hooks?.onStart?.();
   const gap = gapMs ?? gapForRate(rate);
   let i = 0;
   const next = () => {
-    if (mySeq !== speakSeq || i >= items.length) return;
+    // A superseded sequence must NOT fire onEnd: whoever superseded it has
+    // already started its own, and releasing the lock here would unlock the
+    // inputs in the middle of the new dictation.
+    if (mySeq !== speakSeq) return;
+    if (i >= items.length) {
+      hooks?.onEnd?.();
+      return;
+    }
     const u = new SpeechSynthesisUtterance(String(items[i]));
     u.lang = lang;
     u.rate = rate;
-    u.onend = () => {
+    const advance = () => {
       if (mySeq !== speakSeq) return;
       i++;
       setTimeout(next, gap);
     };
+    u.onend = advance;
+    // A voice that errors mid-list must still advance, or the drill stays
+    // locked on a number that will never be spoken.
+    u.onerror = advance;
     window.speechSynthesis.speak(u);
   };
   next();
