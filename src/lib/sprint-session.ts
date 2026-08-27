@@ -183,6 +183,36 @@ export async function saveSprintProfile(
   });
 }
 
+/**
+ * The metadata a fresh sprint starts with.
+ *
+ * A function, not an object literal inlined in the route, because two of these
+ * fields are load-bearing in a way that is invisible at the call site: without
+ * `familyBaselines` the engine reads `{}` and every operation restarts at the
+ * gentlest level, so the drill forgets between sessions everything it learned
+ * within them; and the PRESENCE of `questionKinds` is what distinguishes a
+ * session that knows about direct operations from one that predates them.
+ * Both were omitted the first time this was wired, and neither failure is
+ * visible from the outside — the sprint runs, it just quietly does not learn.
+ */
+export function buildInitialSprintMetadata(
+  profile: SprintProfileValues,
+  total: number,
+  plannedDuration: number
+): SprintMetadata {
+  return {
+    duration: plannedDuration,
+    totalQuestions: total,
+    questionIds: [],
+    questionSeconds: [],
+    questionKinds: [],
+    questionFamilies: [],
+    level: profile.level,
+    timeFactor: profile.timeFactor,
+    familyBaselines: profile.families,
+  };
+}
+
 // ─── Generation ───
 
 /**
@@ -575,7 +605,13 @@ export async function getOrCreateNextSprintQuestion(
 
   const index = meta.questionIds.length;
   const plan = planSlots(total);
-  const kind: SlotKind = plan[index] ?? "chain";
+  // A sprint that was already running when direct operations shipped has no
+  // `questionKinds`. Giving it one now would flip it mid-run from "20 chains"
+  // to "10 chains + 10 singles", and the chain ramp is indexed by the total —
+  // so its clock and difficulty would jump between two questions, under a
+  // student who is being timed. It finishes as the drill it started as.
+  const legacy = isLegacyAllChain(meta) && meta.questionIds.length > 0;
+  const kind: SlotKind = legacy ? "chain" : (plan[index] ?? "chain");
 
   let tier: Tier;
   let seconds: number;
@@ -600,8 +636,8 @@ export async function getOrCreateNextSprintQuestion(
     seconds = shape.seconds;
   } else {
     const shape = resolveQuestionShape(
-      ordinalWithinKind(plan, index),
-      Math.max(1, countOfKind(plan, "chain")),
+      legacy ? index : ordinalWithinKind(plan, index),
+      legacy ? total : Math.max(1, countOfKind(plan, "chain")),
       { level: meta.level, timeFactor: meta.timeFactor },
       live
     );
@@ -628,11 +664,17 @@ export async function getOrCreateNextSprintQuestion(
         // Written as full arrays rather than appended to a possibly-absent one,
         // so a session that started before these fields existed still ends up
         // with entries aligned to every id it holds.
-        questionKinds: [...kinds, kind],
-        questionFamilies: [
-          ...meta.questionIds.map((_, i) => meta.questionFamilies?.[i] ?? null),
-          family,
-        ],
+        // A legacy session is left legacy — writing these fields is exactly
+        // what would flip its shape mid-run.
+        ...(legacy
+          ? {}
+          : {
+              questionKinds: [...kinds, kind],
+              questionFamilies: [
+                ...meta.questionIds.map((_, i) => meta.questionFamilies?.[i] ?? null),
+                family,
+              ],
+            }),
       } as unknown as object,
     },
   });

@@ -18,6 +18,7 @@ import {
   SPRINT_SESSION_TYPE,
   findSprintAwaitingFeedback,
   getOrCreateNextSprintQuestion,
+  buildInitialSprintMetadata,
   loadSprintProfile,
   pruneOrphanSprintQuestions,
 } from "@/lib/sprint-session";
@@ -110,14 +111,7 @@ async function _POST(
         userId: session.user.id,
         domainId: domain.id,
         type: SPRINT_SESSION_TYPE,
-        metadata: {
-          duration: plannedDuration,
-          totalQuestions: total,
-          questionIds: [],
-          questionSeconds: [],
-          level: profile.level,
-          timeFactor: profile.timeFactor,
-        },
+        metadata: buildInitialSprintMetadata(profile, total, plannedDuration) as unknown as object,
       },
     });
 
@@ -125,14 +119,7 @@ async function _POST(
       id: newSprint.id,
       userId: session.user.id,
       domainId: domain.id,
-      metadata: {
-        duration: plannedDuration,
-        totalQuestions: total,
-        questionIds: [],
-        questionSeconds: [],
-        level: profile.level,
-        timeFactor: profile.timeFactor,
-      } as unknown as object,
+      metadata: buildInitialSprintMetadata(profile, total, plannedDuration) as unknown as object,
     });
 
     if (!first.question || first.seconds === undefined) {
