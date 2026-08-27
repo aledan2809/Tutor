@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { generateQuestions } from "@/lib/ai-tutor";
 import { withErrorHandler } from "@/lib/api-handler";
+import { gateGeneratedQuestions } from "@/lib/question-gate";
 import { z } from "zod";
 import { SUBJECT_TOPICS } from "@/../prisma/aviation-questions";
 
@@ -35,6 +36,8 @@ async function _POST(req: NextRequest) {
   const { subjects, countPerTopic, difficulty, language } = parsed.data;
   const results: { subject: string; topic: string; generated: number; errors?: string }[] = [];
   let totalGenerated = 0;
+  let totalRejected = 0;
+  const rejectedSamples: Array<{ subject: string; topic: string; defect: string; reason: string; content: string }> = [];
 
   for (const subject of subjects) {
     const topics = SUBJECT_TOPICS[subject as keyof typeof SUBJECT_TOPICS];
@@ -78,8 +81,18 @@ async function _POST(req: NextRequest) {
 
           if (!Array.isArray(generated) || generated.length === 0) continue;
 
+          // Independent judge before storage — see `question-gate`. DRAFT was
+          // never the safety net it reads as: 265 questions from this route
+          // reached PUBLISHED, and a sweep found 24 of them defective.
+          const gate = await gateGeneratedQuestions(generated);
+          totalRejected += gate.rejected.length;
+          for (const r of gate.rejected) {
+            rejectedSamples.push({ subject, topic, defect: r.defect, reason: r.reason, content: r.content });
+          }
+          if (gate.kept.length === 0) continue;
+
           const created = await prisma.question.createMany({
-            data: generated.map((q) => ({
+            data: gate.kept.map((q) => ({
               domainId: domain.id,
               subject,
               topic,
@@ -111,8 +124,14 @@ async function _POST(req: NextRequest) {
 
   return NextResponse.json({
     totalGenerated,
+    totalRejected,
+    // Named, not just counted: discarding work silently is how a bad generator
+    // stays invisible.
+    rejected: rejectedSamples.slice(0, 50),
     results,
-    note: "All AI-generated questions are in DRAFT status and require admin review before publishing.",
+    note:
+      "Fiecare întrebare a fost rezolvată independent de un verificator înainte de salvare; " +
+      "cele care nu au trecut NU au fost salvate. Cele păstrate sunt în DRAFT și cer tot revizuire umană.",
   });
 }
 

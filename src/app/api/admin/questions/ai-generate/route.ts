@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { generateQuestions } from "@/lib/ai-tutor";
 import { withErrorHandler } from "@/lib/api-handler";
+import { describeGateOutcome, gateGeneratedQuestions } from "@/lib/question-gate";
 import { z } from "zod";
 
 const generateSchema = z.object({
@@ -64,6 +65,21 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: "AI returned empty results" }, { status: 500 });
   }
 
+  // Every generated question is re-solved by an independent judge before it is
+  // stored — see `question-gate`. DRAFT status alone was never a safety net:
+  // 265 of these reached PUBLISHED and 24 of them were wrong.
+  const gate = await gateGeneratedQuestions(generated);
+  if (gate.kept.length === 0) {
+    return NextResponse.json(
+      {
+        generated: 0,
+        rejected: gate.rejected,
+        message: describeGateOutcome(gate),
+      },
+      { status: 422 }
+    );
+  }
+
   // AI-generated content → DRAFT status
   const maxOrder = await prisma.question.aggregate({
     where: { domainId },
@@ -72,7 +88,7 @@ async function _POST(req: NextRequest) {
   const baseOrder = (maxOrder._max.bookOrder ?? -1) + 1;
 
   const created = await prisma.question.createMany({
-    data: generated.map((q, idx) => ({
+    data: gate.kept.map((q, idx) => ({
       domainId,
       subject,
       topic,
@@ -92,6 +108,8 @@ async function _POST(req: NextRequest) {
 
   return NextResponse.json({
     generated: created.count,
+    rejected: gate.rejected,
+    message: describeGateOutcome(gate),
     provider: response.provider,
     model: response.model,
   });
