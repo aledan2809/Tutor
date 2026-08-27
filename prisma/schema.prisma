@@ -446,6 +446,11 @@ model Attempt {
   answer     String   @db.Text
   isCorrect  Boolean
   timeSpent  Int?
+  /// Excluded from scoring: the question turned out to have no correct option,
+  /// so the student could not possibly have answered it. The row is kept — the
+  /// history is real — but it must not sit in his accuracy as a miss.
+  voided     Boolean  @default(false)
+  voidReason String?  @db.Text
   createdAt  DateTime @default(now())
 
   session  Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
