@@ -67,7 +67,10 @@ function ActionBadge({ action }: { action: string | null }) {
 export default function AdminFeedbackPage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"all" | "flagged" | "new">("all");
+  // Opens on the queue, not on everything. The whole failure this page exists to
+  // prevent was a list where the items needing a decision looked identical to
+  // the ones already finished.
+  const [filter, setFilter] = useState<"pending" | "all" | "flagged" | "new">("pending");
   const [openId, setOpenId] = useState<string | null>(null);
 
   const load = useCallback(() => {
@@ -82,13 +85,33 @@ export default function AdminFeedbackPage() {
     load();
   }, [load]);
 
-  const filtered = rows.filter((r) =>
-    filter === "all"
-      ? true
-      : filter === "flagged"
-      ? r.reviewAction === "flagged"
-      : r.status === "new"
+  const daysWaiting = (iso: string) =>
+    Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+
+  const isPending = (r: Row) => r.status === "pending_review";
+  const pendingCount = rows.filter(isPending).length;
+  const oldestPending = rows.filter(isPending).reduce(
+    (max, r) => Math.max(max, daysWaiting(r.createdAt)),
+    0
   );
+
+  const filtered = rows
+    .filter((r) =>
+      filter === "all"
+        ? true
+        : filter === "pending"
+        ? isPending(r)
+        : filter === "flagged"
+        ? r.reviewAction === "flagged"
+        : r.status === "new"
+    )
+    // Oldest first inside the queue: what has been waiting longest is what a
+    // student has been living with longest.
+    .sort((a, b) =>
+      filter === "pending"
+        ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        : 0
+    );
 
   return (
     <div>
@@ -98,8 +121,18 @@ export default function AdminFeedbackPage() {
         și de ce. Poți confirma sau suprascrie decizia.
       </p>
 
+      {pendingCount > 0 && (
+        <p className="mb-4 rounded-lg border border-amber-700/60 bg-amber-900/20 px-3 py-2 text-sm text-amber-200">
+          ⏳ <strong>{pendingCount}</strong>{" "}
+          {pendingCount === 1 ? "reclamație așteaptă" : "reclamații așteaptă"} confirmarea ta
+          {oldestPending > 0 && <> — cea mai veche de <strong>{oldestPending}</strong> {oldestPending === 1 ? "zi" : "zile"}</>}.
+          Până confirmi o respingere, elevul nu e anunțat că nu are dreptate.
+        </p>
+      )}
+
       <div className="mb-4 flex gap-2 text-sm">
         {([
+          ["pending", pendingCount > 0 ? `De confirmat (${pendingCount})` : "De confirmat"],
           ["all", "Toate"],
           ["flagged", "Necesită admin"],
           ["new", "Neprocesate"],

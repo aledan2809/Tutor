@@ -149,6 +149,41 @@ export type ReviewAction =
  * A "platform" complaint (TTS too fast, navigation, "I don't need this") NEVER
  * hides or corrects the question — it routes to admins as a product issue.
  */
+/**
+ * Verdicts an automated reviewer is not allowed to close by itself.
+ *
+ * `dismissed` tells a child he was wrong — the most expensive thing this system
+ * can say, and the one it got wrong. Between June and August a student reported
+ * nine defective questions; seven were real, and the verdicts that were right to
+ * doubt themselves ("flagged for admin") were written with status `resolved`,
+ * so they looked finished in every list an admin might open. Nobody looked for
+ * two months. A signal that closes itself is not a signal.
+ *
+ * `flagged` is here for the same reason, from the other direction: the reviewer
+ * itself declares it cannot decide, and then marks the thread done.
+ */
+export const NEEDS_HUMAN_CONFIRMATION: readonly ReviewAction[] = ["dismissed", "flagged"];
+
+export function needsHumanConfirmation(action: ReviewAction): boolean {
+  return NEEDS_HUMAN_CONFIRMATION.includes(action);
+}
+
+/** Status written for a verdict — open until a person closes the ones above. */
+export function statusForAction(action: ReviewAction): "resolved" | "pending_review" {
+  return needsHumanConfirmation(action) ? "pending_review" : "resolved";
+}
+
+/**
+ * Whether the student is told the outcome now.
+ *
+ * A dismissal waits for a human. Being told "your complaint was rejected" by a
+ * machine that is itself unsure is exactly what happened to this student, five
+ * times, while he was right.
+ */
+export function tellsStudentNow(action: ReviewAction): boolean {
+  return action !== "dismissed";
+}
+
 export function decideReviewAction(
   j: Judgment,
   isPrivate: boolean,
@@ -246,7 +281,7 @@ export async function runFeedbackReview(): Promise<{
       await prisma.questionFeedback.update({
         where: { id: fb.id },
         data: {
-          status: "resolved",
+          status: statusForAction(action),
           resolution: decision,
           reviewAction: action,
           reviewIssue:
@@ -279,10 +314,17 @@ export async function runFeedbackReview(): Promise<{
         product_flagged: "ține de aplicație (nu de întrebare) — am trimis sesizarea echipei ca să o rezolve.",
       };
       const studentMsg = `Referitor la feedback-ul tău${fb.comment ? `: „${fb.comment}”` : ""} — ${outcomeText[action]}`;
-      await deliverToStudent(fb.userId, userTitle, studentMsg, url, meta, action !== "dismissed");
+      // A dismissal is NOT sent to the student yet. Telling a child "we checked
+      // and you were wrong" is the most expensive sentence here, and it is the
+      // one this reviewer got wrong five times while he was right. It waits for
+      // a person to confirm it; the thread stays `pending_review` until then.
+      if (tellsStudentNow(action)) {
+        await deliverToStudent(fb.userId, userTitle, studentMsg, url, meta, true);
+      }
       // Admins (skip the complaining user) — in-app + Telegram where linked.
-      const adminTitle =
-        action === "product_flagged"
+      const adminTitle = needsHumanConfirmation(action)
+        ? `⏳ DE CONFIRMAT — ${action === "dismissed" ? "urmează să-i spunem elevului că nu are dreptate" : "reviewerul nu a putut decide"} (${domain?.name ?? "?"})`
+        : action === "product_flagged"
           ? `🛠️ Problemă de produs/UX semnalată (${domain?.name ?? "?"})`
           : `Feedback la o întrebare (${domain?.name ?? "?"})`;
       await notifyAdmins(
