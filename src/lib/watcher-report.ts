@@ -195,6 +195,9 @@ export async function buildChildReport(
 
 export { TYPE_RO };
 
+/** Where a report can be re-read on demand, next to the previous five. */
+const REPORTS_URL = `${(process.env.AUTH_URL ?? "https://etutor.ro").replace(/\/$/, "")}/dashboard/rapoarte`;
+
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 /** Render one or more child reports as an HTML email body. */
@@ -205,6 +208,14 @@ export function renderReportHtml(reports: ChildReport[], sections: ReportSection
       <h1 style="font-size:20px;margin:0 0 4px">Raport eTutor</h1>
       <p style="color:#6b7280;font-size:13px;margin:0 0 20px">Rezumat ${esc(reports[0]?.periodLabel ?? "")}.</p>
       ${blocks}
+      <p style="margin:20px 0 0">
+        <a href="${REPORTS_URL}" style="display:inline-block;background:#2563eb;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-size:14px">
+          Vezi raportul complet și ultimele 5
+        </a>
+      </p>
+      <p style="color:#6b7280;font-size:12px;margin:8px 0 0">
+        Acolo găsești și perioada în curs, chiar înainte să-ți trimitem raportul ei.
+      </p>
       <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0">
       <p style="color:#9ca3af;font-size:12px">Raport automat de la eTutor. Modifică programul rapoartelor din panoul Watcher.</p>
     </div>`;
@@ -268,6 +279,8 @@ function renderChildHtml(r: ChildReport, sections: ReportSection[]): string {
 /** Compact plain-text summary for push / Telegram. */
 export function renderReportText(reports: ChildReport[], sections: ReportSection[]): string {
   const lines: string[] = [];
+  // Telegram gets the link as a button, but push and any other plain-text
+  // surface would otherwise be a dead end.
   for (const r of reports) {
     lines.push(`📊 ${r.childName} — ${r.periodLabel}`);
     if (!r.hasActivity) {

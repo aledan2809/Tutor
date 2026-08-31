@@ -107,7 +107,12 @@ export async function deliverReport(
   const result = { email: false, push: 0, telegram: false };
   if (reports.length === 0) return result;
 
-  const url = `${(process.env.AUTH_URL ?? "https://etutor.ro").replace(/\/$/, "")}/dashboard/watcher`;
+  // Every report links to the page where the SAME report can be re-read on
+  // demand — including the period in progress, whose message has not gone out
+  // yet — next to the previous five. A report that exists only as a message
+  // cannot be consulted when it is actually wanted, and cannot be compared with
+  // anything.
+  const url = `${(process.env.AUTH_URL ?? "https://etutor.ro").replace(/\/$/, "")}/dashboard/rapoarte`;
   const subject = `eTutor — raport ${periodLabel}`;
 
   if (channels.includes("EMAIL")) {
@@ -124,14 +129,14 @@ export async function deliverReport(
     result.push = await webPushToUser(parentId, {
       title: subject,
       body: renderReportText(reports, sections).slice(0, 280),
-      url: "/dashboard/watcher",
+      url: "/dashboard/rapoarte",
     });
   }
   if (channels.includes("TELEGRAM")) {
     result.telegram = await telegramAlertToUser(parentId, {
       text: `📊 ${subject}\n\n${renderReportText(reports, sections)}`,
       url,
-      buttonLabel: "Vezi panoul",
+      buttonLabel: "Vezi raportul complet",
     });
   }
   return result;

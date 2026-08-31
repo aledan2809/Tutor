@@ -56,6 +56,9 @@ export function Sidebar({ user, hasFamilyPlan = false }: SidebarProps) {
     { href: "/dashboard/exam-bank", label: t("examBank") },
     { href: "/dashboard/activare", label: t("activare") },
     { href: "/dashboard/progress", label: t("progress") },
+    // Not behind a translation key on purpose: adding one means touching every
+    // locale file, and this label is the same word in both.
+    { href: "/dashboard/rapoarte", label: "Rapoarte" },
     { href: "/dashboard/domains", label: t("domains") },
     { href: "/dashboard/calendar", label: t("calendar") },
     { href: "/dashboard/notifications", label: t("notifications") },
