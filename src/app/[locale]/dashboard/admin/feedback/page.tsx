@@ -223,6 +223,10 @@ function FeedbackDetailModal({
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
   const [reply, setReply] = useState("");
+  // The verdict is SELECTED, not submitted. Pressing it used to send instantly
+  // and close the panel, so there was no moment in which to write the reply —
+  // which is the part the student actually reads.
+  const [verdict, setVerdict] = useState<"approved" | "rejected" | null>(null);
   const [answer, setAnswer] = useState("");
   const [err, setErr] = useState<string | null>(null);
 
@@ -368,7 +372,7 @@ function FeedbackDetailModal({
                   ))}
                 </select>
                 <button
-                  onClick={() => override("set_answer", answer, "approved")}
+                  onClick={() => override("set_answer", answer, verdict ?? "approved")}
                   disabled={busy}
                   className="rounded bg-blue-600 px-3 py-1 text-white hover:bg-blue-500 disabled:opacity-50"
                 >
@@ -389,24 +393,54 @@ function FeedbackDetailModal({
                   placeholder="Scrie-i direct — ajunge la el în aplicație și pe Telegram."
                   className="mb-2 w-full rounded border border-gray-700 bg-gray-900 px-2 py-1 text-white placeholder-gray-500"
                 />
-                <div className="flex flex-wrap gap-2">
+                <div className="mb-2 flex flex-wrap gap-2">
                   <button
-                    onClick={() => override("dismiss", undefined, "approved")}
+                    onClick={() => setVerdict(verdict === "approved" ? null : "approved")}
                     disabled={busy}
-                    className="rounded bg-emerald-600 px-3 py-1 text-white hover:bg-emerald-500 disabled:opacity-50"
+                    className={`rounded px-3 py-1 disabled:opacity-50 ${
+                      verdict === "approved"
+                        ? "bg-emerald-600 text-white ring-2 ring-emerald-300"
+                        : "border border-emerald-700 text-emerald-300 hover:bg-emerald-900/30"
+                    }`}
                   >
                     ✅ Avea dreptate
                   </button>
                   <button
-                    onClick={() => override("dismiss", undefined, "rejected")}
+                    onClick={() => setVerdict(verdict === "rejected" ? null : "rejected")}
                     disabled={busy}
-                    className="rounded bg-gray-700 px-3 py-1 text-white hover:bg-gray-600 disabled:opacity-50"
+                    className={`rounded px-3 py-1 disabled:opacity-50 ${
+                      verdict === "rejected"
+                        ? "bg-gray-600 text-white ring-2 ring-gray-300"
+                        : "border border-gray-600 text-gray-300 hover:bg-gray-800"
+                    }`}
                   >
                     Nu avea dreptate
                   </button>
                 </div>
+
+                <button
+                  onClick={() => override("dismiss", undefined, verdict ?? undefined)}
+                  disabled={busy || !verdict}
+                  className="w-full rounded bg-blue-600 px-3 py-2 text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {busy
+                    ? "Se trimite…"
+                    : !verdict
+                      ? "Alege întâi verdictul"
+                      : reply.trim()
+                        ? "Trimite verdictul și răspunsul"
+                        : "Trimite verdictul (fără răspuns scris)"}
+                </button>
+                {verdict && !reply.trim() && (
+                  <p className="mt-2 text-xs text-amber-300/80">
+                    {verdict === "rejected"
+                      ? "Îi spui că nu avea dreptate fără să-i explici de ce. Un rând ar ajuta."
+                      : "Un rând de la tine contează mai mult decât verdictul."}
+                  </p>
+                )}
                 <p className="mt-2 text-xs text-gray-500">
-                  Verdictul îl anunță pe elev. Butoanele de mai jos schimbă întrebarea.
+                  Verdictul + răspunsul ajung la elev în aplicație și pe Telegram.
+                  Butoanele de mai jos schimbă întrebarea.
                 </p>
               </div>
 
@@ -418,12 +452,12 @@ function FeedbackDetailModal({
               />
               <div className="flex flex-wrap gap-2">
                 {d.question.status !== "PUBLISHED" && (
-                  <button onClick={() => override("publish", undefined, "rejected")} disabled={busy} className="rounded bg-green-600 px-3 py-1 text-white hover:bg-green-500 disabled:opacity-50">
+                  <button onClick={() => override("publish", undefined, verdict ?? "rejected")} disabled={busy} className="rounded bg-green-600 px-3 py-1 text-white hover:bg-green-500 disabled:opacity-50">
                     Repune în practică
                   </button>
                 )}
                 {d.question.status === "PUBLISHED" && (
-                  <button onClick={() => override("hide", undefined, "approved")} disabled={busy} className="rounded bg-amber-600 px-3 py-1 text-white hover:bg-amber-500 disabled:opacity-50">
+                  <button onClick={() => override("hide", undefined, verdict ?? "approved")} disabled={busy} className="rounded bg-amber-600 px-3 py-1 text-white hover:bg-amber-500 disabled:opacity-50">
                     Ascunde din practică
                   </button>
                 )}

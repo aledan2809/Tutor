@@ -35,13 +35,23 @@ function dayKey(d: Date): string {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }
 
-/** Build a KPI report for one child over [since, now]. */
+/**
+ * Build a KPI report for one child over [since, until] — `until` defaults to now.
+ *
+ * The upper bound exists so the same builder can produce a PAST period, which is
+ * what makes a trend possible: the last five reports are recomputed from the
+ * underlying activity rather than read from whatever happened to be sent. That
+ * way the history is right even for periods where no report went out, and it
+ * stays right if a scoring rule changes.
+ */
 export async function buildChildReport(
   childId: string,
   since: Date,
   periodLabel: string,
-  sections: ReportSection[] = ALL_SECTIONS
+  sections: ReportSection[] = ALL_SECTIONS,
+  until?: Date
 ): Promise<ChildReport> {
+  const upper = until ? { lte: until } : {};
   const child = await prisma.user.findUnique({
     where: { id: childId },
     select: { name: true, email: true },
@@ -50,7 +60,7 @@ export async function buildChildReport(
 
   // Sessions in period (used by both session stats + discipline matching).
   const sessions = await prisma.session.findMany({
-    where: { userId: childId, startedAt: { gte: since } },
+    where: { userId: childId, startedAt: { gte: since, ...upper } },
     select: { id: true, startedAt: true, endedAt: true, score: true },
     orderBy: { startedAt: "asc" },
   });
@@ -63,7 +73,7 @@ export async function buildChildReport(
   const discipline = { onTime: 0, late: 0, ignored: 0 };
   if (sections.includes("discipline")) {
     const events = await prisma.escalationEvent.findMany({
-      where: { userId: childId, createdAt: { gte: since } },
+      where: { userId: childId, createdAt: { gte: since, ...upper } },
       orderBy: { createdAt: "asc" },
       select: { createdAt: true, acknowledgedAt: true, metadata: true },
     });
