@@ -73,6 +73,16 @@ export default function AdminFeedbackPage() {
   const [filter, setFilter] = useState<"pending" | "all" | "flagged" | "new">("pending");
   const [openId, setOpenId] = useState<string | null>(null);
 
+  // Deep link: a Telegram alert links to ONE complaint, and landing on the list
+  // instead of on that complaint is the friction this whole queue exists to
+  // remove. Read from `window.location` rather than `useSearchParams` so the
+  // page needs no Suspense boundary for a single query string.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const wanted = new URLSearchParams(window.location.search).get("id");
+    if (wanted) setOpenId(wanted);
+  }, []);
+
   const load = useCallback(() => {
     setLoading(true);
     fetch("/api/admin/feedback")
@@ -184,7 +194,12 @@ export default function AdminFeedbackPage() {
       {openId && (
         <FeedbackDetailModal
           id={openId}
-          onClose={() => setOpenId(null)}
+          onClose={() => {
+            setOpenId(null);
+            if (typeof window !== "undefined" && window.location.search) {
+              window.history.replaceState({}, "", window.location.pathname);
+            }
+          }}
           onChanged={() => {
             setOpenId(null);
             load();
@@ -207,6 +222,7 @@ function FeedbackDetailModal({
   const [d, setD] = useState<Detail | null>(null);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
+  const [reply, setReply] = useState("");
   const [answer, setAnswer] = useState("");
   const [err, setErr] = useState<string | null>(null);
 
@@ -219,13 +235,23 @@ function FeedbackDetailModal({
       });
   }, [id]);
 
-  async function override(action: string, correctAnswer?: string) {
+  async function override(
+    action: string,
+    correctAnswer?: string,
+    verdict?: "approved" | "rejected",
+  ) {
     setBusy(true);
     setErr(null);
     const r = await fetch(`/api/admin/feedback/${id}/override`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action, correctAnswer, note: note || undefined }),
+      body: JSON.stringify({
+        action,
+        correctAnswer,
+        note: note || undefined,
+        verdict,
+        reply: reply.trim() || undefined,
+      }),
     });
     setBusy(false);
     if (r.ok) onChanged();
@@ -342,27 +368,62 @@ function FeedbackDetailModal({
                   ))}
                 </select>
                 <button
-                  onClick={() => override("set_answer", answer)}
+                  onClick={() => override("set_answer", answer, "approved")}
                   disabled={busy}
                   className="rounded bg-blue-600 px-3 py-1 text-white hover:bg-blue-500 disabled:opacity-50"
                 >
                   Setează răspuns corect
                 </button>
               </div>
+              {/* The decision the student is actually waiting on, and the words
+                  that go back to him. A verdict with no explanation is what he
+                  got five times while he was right about the questions. */}
+              <div className="mb-3 rounded-lg border border-blue-800/60 bg-blue-950/20 p-3">
+                <p className="mb-2 text-sm font-medium text-blue-200">
+                  Răspunsul tău către {d.student.name ?? "elev"}
+                </p>
+                <textarea
+                  value={reply}
+                  onChange={(e) => setReply(e.target.value)}
+                  rows={3}
+                  placeholder="Scrie-i direct — ajunge la el în aplicație și pe Telegram."
+                  className="mb-2 w-full rounded border border-gray-700 bg-gray-900 px-2 py-1 text-white placeholder-gray-500"
+                />
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => override("dismiss", undefined, "approved")}
+                    disabled={busy}
+                    className="rounded bg-emerald-600 px-3 py-1 text-white hover:bg-emerald-500 disabled:opacity-50"
+                  >
+                    ✅ Avea dreptate
+                  </button>
+                  <button
+                    onClick={() => override("dismiss", undefined, "rejected")}
+                    disabled={busy}
+                    className="rounded bg-gray-700 px-3 py-1 text-white hover:bg-gray-600 disabled:opacity-50"
+                  >
+                    Nu avea dreptate
+                  </button>
+                </div>
+                <p className="mt-2 text-xs text-gray-500">
+                  Verdictul îl anunță pe elev. Butoanele de mai jos schimbă întrebarea.
+                </p>
+              </div>
+
               <input
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Notă (opțional)"
+                placeholder="Notă internă (opțional)"
                 className="mb-2 w-full rounded border border-gray-700 bg-gray-900 px-2 py-1 text-white placeholder-gray-500"
               />
               <div className="flex flex-wrap gap-2">
                 {d.question.status !== "PUBLISHED" && (
-                  <button onClick={() => override("publish")} disabled={busy} className="rounded bg-green-600 px-3 py-1 text-white hover:bg-green-500 disabled:opacity-50">
+                  <button onClick={() => override("publish", undefined, "rejected")} disabled={busy} className="rounded bg-green-600 px-3 py-1 text-white hover:bg-green-500 disabled:opacity-50">
                     Repune în practică
                   </button>
                 )}
                 {d.question.status === "PUBLISHED" && (
-                  <button onClick={() => override("hide")} disabled={busy} className="rounded bg-amber-600 px-3 py-1 text-white hover:bg-amber-500 disabled:opacity-50">
+                  <button onClick={() => override("hide", undefined, "approved")} disabled={busy} className="rounded bg-amber-600 px-3 py-1 text-white hover:bg-amber-500 disabled:opacity-50">
                     Ascunde din practică
                   </button>
                 )}

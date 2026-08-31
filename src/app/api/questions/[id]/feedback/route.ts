@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { alertAdminsOfNegativeFeedback } from "@/lib/feedback-admin";
 import { withErrorHandler } from "@/lib/api-handler";
 
 const feedbackInput = z.object({
@@ -23,7 +24,7 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ id: strin
   if (!q) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   // One feedback per (user, question); a new one re-opens it for the review agent.
-  await prisma.questionFeedback.upsert({
+  const saved = await prisma.questionFeedback.upsert({
     where: { userId_questionId: { userId: session.user.id, questionId } },
     create: {
       userId: session.user.id,
@@ -41,6 +42,22 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ id: strin
       resolution: null,
     },
   });
+
+  // A negative report reaches a human NOW, with a link straight to it.
+  //
+  // The automated reviewer runs on a schedule and, until today, closed its own
+  // verdicts — so a student's complaint could sit unseen for two months. This
+  // does not wait for the reviewer and does not summarise: it names the
+  // question, quotes the student, and links to the one screen where the
+  // decision is made.
+  if (parsed.data.rating === "down") {
+    void alertAdminsOfNegativeFeedback({
+      feedbackId: saved.id,
+      studentName: session.user.name ?? "Un elev",
+      comment: parsed.data.comment ?? null,
+      questionId,
+    }).catch(() => {});
+  }
 
   return NextResponse.json({ ok: true });
 }

@@ -1465,6 +1465,13 @@ model QuestionFeedback {
   reviewAction    String? // corrected | hidden | flagged | dismissed | overridden
   reviewIssue     String? @db.Text // the problem the reviewer identified
   correctedAnswer String? // the answer the reviewer set, when action=corrected
+  /// Verdictul OMULUI asupra reclamatiei elevului: "approved" (avea dreptate) sau
+  /// "rejected" (nu avea). Distinct de `reviewAction`, care e decizia masinii.
+  adminVerdict   String?
+  /// Raspunsul scris de admin catre elev. Un verdict fara explicatie e exact
+  /// ce a primit elevul de cinci ori cat timp avea dreptate.
+  adminReply     String?   @db.Text
+  adminRepliedAt DateTime?
   // Admin override of the reviewer's decision. Fără FK pe User (nu atingem modelul User).
   overriddenById String?
   overrideNote   String?   @db.Text

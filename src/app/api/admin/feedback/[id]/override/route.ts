@@ -9,6 +9,10 @@ const schema = z.object({
   action: z.enum(["publish", "hide", "set_answer", "dismiss"]),
   correctAnswer: z.string().optional(),
   note: z.string().max(1000).optional(),
+  /** The human's call on the student's complaint. */
+  verdict: z.enum(["approved", "rejected"]).optional(),
+  /** Free text sent back to the student, in-app and on Telegram. */
+  reply: z.string().max(2000).optional(),
 });
 
 /** POST: admin overrides the automated decision on a feedback (domain-scoped). */
@@ -44,6 +48,8 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ id: strin
     action: parsed.data.action,
     correctAnswer: parsed.data.correctAnswer ?? null,
     note: parsed.data.note ?? null,
+    verdict: parsed.data.verdict ?? null,
+    reply: parsed.data.reply ?? null,
   });
   if (!result.ok) {
     const code = result.error === "answer_not_an_option" ? 400 : 404;

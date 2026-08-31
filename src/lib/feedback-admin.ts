@@ -7,6 +7,7 @@
  * `Question.sourceReference` as `licenta-gen: "..."` and the page in `pdfPage`.
  */
 import { prisma } from "@/lib/prisma";
+import { telegramAlertToUser } from "@/lib/notifications/service";
 
 const LICENTA_QUOTE_RE = /^licenta-gen:\s*"([\s\S]*)"\s*$/;
 
@@ -158,12 +159,73 @@ export interface OverrideResult {
  * log + a notification to the student. `adminId` must already be authorized
  * (and, for non-superadmins, scoped to the question's domain) by the caller.
  */
+/** Base URL the deep links point at. */
+const APP_URL = (process.env.AUTH_URL ?? "https://etutor.ro").replace(/\/$/, "");
+
+/**
+ * Link straight to ONE complaint in the admin queue.
+ *
+ * An alert that only says "you have feedback" costs the reader the work of
+ * finding which one — and that friction is how seven valid reports sat unread
+ * for two months. The link lands on the item that needs the decision.
+ */
+export function feedbackDeepLink(feedbackId: string): string {
+  return `${APP_URL}/dashboard/admin/feedback?id=${encodeURIComponent(feedbackId)}`;
+}
+
+/**
+ * Tell the admins, immediately, that a student reported a question.
+ *
+ * Carries the student's own words and a link to that exact complaint. An alert
+ * that only counts ("you have 3 pending") is the kind that gets skimmed and
+ * then ignored — which is how seven valid reports went unread for two months.
+ * Best-effort by design: a Telegram outage must never fail the student's
+ * submission.
+ */
+export async function alertAdminsOfNegativeFeedback(input: {
+  feedbackId: string;
+  studentName: string;
+  comment: string | null;
+  questionId: string;
+}): Promise<void> {
+  const q = await prisma.question.findUnique({
+    where: { id: input.questionId },
+    select: { content: true, domain: { select: { name: true } } },
+  });
+  const admins = await prisma.user.findMany({
+    where: { isSuperAdmin: true },
+    select: { id: true },
+  });
+  if (admins.length === 0) return;
+
+  const preview = (q?.content ?? "").replace(/\s+/g, " ").slice(0, 120);
+  const text =
+    `👎 ${input.studentName} a semnalat o întrebare` +
+    (q?.domain?.name ? ` (${q.domain.name})` : "") +
+    `\n\n„${input.comment?.trim() || "(fără comentariu)"}"` +
+    `\n\nÎntrebarea: ${preview}`;
+
+  await Promise.all(
+    admins.map((a) =>
+      telegramAlertToUser(a.id, {
+        text,
+        url: feedbackDeepLink(input.feedbackId),
+        buttonLabel: "Decide acum",
+      }).catch(() => {})
+    )
+  );
+}
+
 export async function applyOverride(params: {
   feedbackId: string;
   adminId: string;
   action: OverrideAction;
   correctAnswer?: string | null;
   note?: string | null;
+  /** The human's call on the STUDENT's complaint, distinct from the machine's. */
+  verdict?: "approved" | "rejected" | null;
+  /** Free text the admin writes back to the student. */
+  reply?: string | null;
 }): Promise<OverrideResult> {
   const fb = await prisma.questionFeedback.findUnique({
     where: { id: params.feedbackId },
@@ -199,11 +261,15 @@ export async function applyOverride(params: {
   }
 
   const note = params.note?.trim() || null;
+  const reply = params.reply?.trim() || null;
   await prisma.questionFeedback.update({
     where: { id: fb.id },
     data: {
       status: "resolved",
       reviewAction: "overridden",
+      adminVerdict: params.verdict ?? null,
+      adminReply: reply,
+      adminRepliedAt: reply ? new Date() : null,
       overriddenById: params.adminId,
       overriddenAt: new Date(),
       overrideNote: note,
@@ -223,17 +289,35 @@ export async function applyOverride(params: {
       },
     })
     .catch(() => {});
+  const verdictLine =
+    params.verdict === "approved"
+      ? "Am verificat și aveai dreptate — mulțumim că ne-ai semnalat."
+      : params.verdict === "rejected"
+        ? "Am verificat împreună cu un profesor, iar de data asta răspunsul întrebării era corect."
+        : changeLabel;
+  // The admin's own words come first when there are any: a verdict without an
+  // explanation is exactly what this student received five times while he was
+  // right about the questions.
+  const studentMessage = reply ? `${reply}\n\n(${verdictLine})` : verdictLine;
+
   await prisma.notification
     .create({
       data: {
         userId: fb.userId,
         type: "feedback_resolved",
-        title: "Feedback revizuit ✅",
-        message: changeLabel,
-        metadata: { feedbackId: fb.id, questionId: q.id, action: "overridden" },
+        title: params.verdict === "approved" ? "Aveai dreptate ✅" : "Feedback revizuit",
+        message: studentMessage,
+        metadata: { feedbackId: fb.id, questionId: q.id, action: "overridden", verdict: params.verdict ?? null },
       },
     })
     .catch(() => {});
+
+  // …and on Telegram too, where he actually reads things.
+  await telegramAlertToUser(fb.userId, {
+    text: `${params.verdict === "approved" ? "✅ Aveai dreptate" : "Răspuns la feedback-ul tău"}\n\n${studentMessage}`,
+    url: `${APP_URL}/`,
+    buttonLabel: "Deschide eTutor",
+  }).catch(() => {});
 
   return { ok: true };
 }
