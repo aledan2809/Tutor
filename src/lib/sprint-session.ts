@@ -195,6 +195,29 @@ export async function saveSprintProfile(
  * Both were omitted the first time this was wired, and neither failure is
  * visible from the outside — the sprint runs, it just quietly does not learn.
  */
+export function seedFamilyBaselines(profile: SprintProfileValues): FamilyBaselines {
+  const out: FamilyBaselines = {};
+  for (const f of SINGLE_FAMILIES) {
+    const stored = profile.families?.[f];
+    out[f] = stored ?? {
+      // NOT 1. A student who has already told us the pace is too tight — and
+      // whose profile carries a 2.06× clock because of it — must not be handed
+      // the stingiest possible budget the first time he meets a new exercise
+      // type. Measured on production: he timed out on `46 + 27` at 5.0s and
+      // `32 − 17` at 6.0s, two-digit sums he can plainly do, purely because the
+      // per-family clock restarted at 1 while the rest of the drill gave him 2×.
+      // What he earned on one exercise is what he starts the next one with.
+      timeFactor: profile.timeFactor,
+      // One tier below his chain level, floored at 1. Tier-1 singles are
+      // `5 × 2` — recall, not calculation — and asking them of someone working
+      // through `25 × 5 − 40 ÷ 8 − 95` measures nothing. A tier below leaves
+      // room to be wrong without starting at the insulting end.
+      level: Math.max(1, Math.round(profile.level) - 1),
+    };
+  }
+  return out;
+}
+
 export function buildInitialSprintMetadata(
   profile: SprintProfileValues,
   total: number,
@@ -209,7 +232,7 @@ export function buildInitialSprintMetadata(
     questionFamilies: [],
     level: profile.level,
     timeFactor: profile.timeFactor,
-    familyBaselines: profile.families,
+    familyBaselines: seedFamilyBaselines(profile),
   };
 }
 

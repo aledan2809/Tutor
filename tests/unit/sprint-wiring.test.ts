@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   buildInitialSprintMetadata,
+  seedFamilyBaselines,
   chainTotalOf,
   isLegacyAllChain,
   singleTotalOf,
@@ -24,8 +25,13 @@ describe("the metadata a sprint starts with", () => {
     // the route never wrote it, so every session silently restarted every
     // operation at level 1. The drill adapted within a run and forgot between
     // runs — indistinguishable from working, unless you look here.
-    expect(meta.familyBaselines).toEqual(profile.families);
-    expect(meta.familyBaselines?.mul?.level).toBe(4);
+    // The stored families arrive untouched…
+    expect(meta.familyBaselines?.mul).toEqual({ level: 4, timeFactor: 0.9 });
+    expect(meta.familyBaselines?.div).toEqual({ level: 2, timeFactor: 1.4 });
+    // …and the ones he has never been asked are seeded from what he earned
+    // elsewhere, rather than left at the stingiest default (see below).
+    expect(meta.familyBaselines?.add?.timeFactor).toBe(profile.timeFactor);
+    expect(meta.familyBaselines?.sub?.timeFactor).toBe(profile.timeFactor);
   });
 
   it("marks itself as a session that knows about direct operations", () => {
@@ -45,6 +51,42 @@ describe("the metadata a sprint starts with", () => {
     expect(meta.level).toBe(3);
     expect(meta.timeFactor).toBe(1.2);
     expect(meta.questionIds).toEqual([]);
+  });
+});
+
+describe("what a student has already earned carries into a new exercise type", () => {
+  // Measured on production 2026-08-27: a student whose profile held a 2.06×
+  // clock (earned by telling us repeatedly that the pace was too tight) was
+  // handed 5 seconds for `46 + 27` and timed out on it. The per-family clock
+  // had restarted at 1, so he was paying timeouts to re-earn what he already had.
+  const earned = { level: 3, timeFactor: 2.06, sessions: 9, families: {} };
+
+  it("starts every unseen family at the pace he already earned, not at 1", () => {
+    const seeded = seedFamilyBaselines(earned);
+    for (const f of ["mul", "div", "add", "sub"] as const) {
+      expect(seeded[f]?.timeFactor).toBe(2.06);
+    }
+  });
+
+  it("starts a tier below his chain level, not at the trivial floor", () => {
+    // Tier 1 singles are `5 × 2`. For someone working through
+    // `25 × 5 − 40 ÷ 8 − 95` that measures nothing.
+    expect(seedFamilyBaselines(earned).mul?.level).toBe(2);
+    expect(seedFamilyBaselines({ ...earned, level: 1 }).mul?.level).toBe(1);
+    expect(seedFamilyBaselines({ ...earned, level: 5 }).sub?.level).toBe(4);
+  });
+
+  it("never overwrites a family that already has its own history", () => {
+    const withHistory = { ...earned, families: { mul: { level: 4, timeFactor: 0.8 } } };
+    const seeded = seedFamilyBaselines(withHistory);
+    expect(seeded.mul).toEqual({ level: 4, timeFactor: 0.8 });
+    // …while the families never met still inherit the earned pace.
+    expect(seeded.div?.timeFactor).toBe(2.06);
+  });
+
+  it("puts the seeded values where the engine actually reads them", () => {
+    const meta = buildInitialSprintMetadata(earned, 20, 600);
+    expect(meta.familyBaselines?.add?.timeFactor).toBe(2.06);
   });
 });
 
