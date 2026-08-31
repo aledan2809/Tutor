@@ -3,6 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { createConnectLink, telegramConfigured } from "@/lib/telegram/connect";
+import QRCode from "qrcode";
 
 /**
  * GET /api/telegram/link — current link status for the signed-in user.
@@ -40,7 +41,28 @@ async function _POST() {
   if (!link) {
     return NextResponse.json({ error: "Bot username not configured" }, { status: 503 });
   }
-  return NextResponse.json(link);
+
+  // The QR is rendered HERE, never by an outside service.
+  //
+  // The link carries a single-use connect token; handing it to a public QR
+  // generator would hand that token to a third party. It also has to exist at
+  // all: a link alone is useless to someone who opened the page on a laptop,
+  // where Telegram is not installed — which is exactly how the first attempt
+  // failed. Link for the phone, QR for the laptop; the user picks.
+  let qrSvg: string | null = null;
+  try {
+    qrSvg = await QRCode.toString(link.url, {
+      type: "svg",
+      margin: 1,
+      width: 200,
+      color: { dark: "#111827", light: "#ffffff" },
+    });
+  } catch {
+    // A missing QR must not cost the user the link.
+    qrSvg = null;
+  }
+
+  return NextResponse.json({ ...link, qrSvg });
 }
 
 /**

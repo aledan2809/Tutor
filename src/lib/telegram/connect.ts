@@ -21,10 +21,20 @@ import {
 /** The app's extended Prisma client type (injectable for tests). */
 type Db = typeof prisma;
 
-/** TTL for a connect deep link (default 15 min). */
+/**
+ * TTL for a connect deep link (default 1 hour).
+ *
+ * Was 15 minutes, and that is what broke the first real attempt: the link was
+ * passed to a student, who opened it later and met an expiry message. The token
+ * is still single-use and still bound to the account that minted it — the only
+ * thing a longer window costs is a wider period in which a LEAKED link could be
+ * redeemed, and redeeming it only ever binds that person's Telegram to the
+ * account they were already given a link for. Against that: a link that expires
+ * before it is used produces no adoption at all.
+ */
 export const CONNECT_TOKEN_TTL_SEC = Math.max(
   60,
-  parseInt(process.env.TELEGRAM_LINK_TTL_SEC || "900", 10) || 900,
+  parseInt(process.env.TELEGRAM_LINK_TTL_SEC || "3600", 10) || 3600,
 );
 
 export function telegramConfigured(): boolean {
