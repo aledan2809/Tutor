@@ -118,23 +118,56 @@ export function TelegramConnectCard() {
       </p>
 
       {!invite ? (
-        <button
-          onClick={connect}
-          disabled={busy}
-          className="mt-3 min-h-[44px] w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
-        >
-          {busy ? "Se pregătește…" : "Conectează Telegram"}
-        </button>
+        <>
+          {/* What happens, BEFORE anything is generated. Someone who is told the
+              steps first knows to pick up their phone; someone who finds out
+              afterwards has already opened a link on the wrong device. */}
+          <div className="mt-3 rounded-lg border border-gray-800 bg-gray-900/60 p-3">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Cum decurge — 3 pași, o singură dată
+            </p>
+            <ol className="space-y-1.5 text-sm text-gray-300">
+              <li>
+                <strong className="text-white">1.</strong> Apeși butonul de mai jos. Îți dăm
+                un link și un cod QR.
+              </li>
+              <li>
+                <strong className="text-white">2.</strong>{" "}
+                <strong className="text-white">De pe telefon</strong> apeși linkul;{" "}
+                <strong className="text-white">de pe calculator</strong> scanezi codul QR cu
+                telefonul pe care ai Telegram.
+              </li>
+              <li>
+                <strong className="text-white">3.</strong> În Telegram apeși{" "}
+                <strong className="text-white">START</strong>. Gata — pagina asta se schimbă
+                singură.
+              </li>
+            </ol>
+            <p className="mt-3 text-xs text-gray-500">
+              Ai nevoie de telefonul pe care e instalat Telegram. Nu-ți cerem parola și nu
+              vedem conversațiile tale — botul îți poate doar trimite mesaje.
+            </p>
+          </div>
+
+          <button
+            onClick={connect}
+            disabled={busy}
+            className="mt-3 min-h-[44px] w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+          >
+            {busy ? "Se pregătește…" : "Începe conectarea"}
+          </button>
+        </>
       ) : (
         <div className="mt-3 space-y-3">
           <ol className="space-y-2 text-sm text-gray-300">
             <li>
-              <strong className="text-white">1.</strong> Ești pe telefon? S-a deschis
-              Telegram — apasă <strong className="text-white">START</strong> și gata.
+              <strong className="text-white">Pe telefon:</strong> ar fi trebuit să se
+              deschidă Telegram. Apasă <strong className="text-white">START</strong> acolo.
+              Dacă nu s-a deschis, folosește linkul de mai jos.
             </li>
             <li>
-              <strong className="text-white">2.</strong> Ești pe calculator? Scanează codul
-              de mai jos cu telefonul pe care ai Telegram.
+              <strong className="text-white">Pe calculator:</strong> scanează codul cu
+              telefonul, apoi apasă <strong className="text-white">START</strong> în Telegram.
             </li>
           </ol>
 
