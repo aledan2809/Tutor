@@ -4,7 +4,21 @@
 
 ---
 
-## [ ] 📲 Telegram ca implicit, cu reducere de 10% legată de costul real (decis 2026-08-26)
+## [~] 📲 Telegram ca implicit, cu reducere de 10% legată de costul real (decis 2026-08-26)
+
+> **Stare 2026-09-01** — **conectarea e LIVRATĂ ȘI FUNCȚIONEAZĂ; partea de bani NU e construită.**
+> Livrat 31 aug: card de onboarding cu **link ȘI cod QR** (QR generat server-side, ca tokenul de
+> unică folosință să nu ajungă la un terț), 3 pași înaintea generării, TTL 15 min → **60 min**.
+> Verificat pe om real: Rareș s-a legat 31 aug 09:44.
+> Livrat 1 sep (`341e685`): treapta TELEGRAM din cascadă **nu se trimisese niciodată** — hartă de
+> preferințe fără cheia `telegram` → `undefined` citit ca „dezactivat". Reparat structural
+> (`isChannelEnabled` totală peste enum + coloană `telegram`). Verificat pe cascada organică din
+> producție: `14:15 · nivel 2 · TELEGRAM · sentAt 14:15`. Vezi **L28**.
+> **RĂMÂNE, și e o discrepanță de spus pe față**: cardul PROMITE deja reducerea de 10%, dar nimic
+> nu o acordă. Nu există: cerere copil → notificare părinte → aprobare, aplicarea efectivă pe
+> abonament, debitarea pro-rata la trecerea pe WhatsApp. Sesiune dedicată (atinge Stripe + Legal
+> Hub). Cele două constrângeri decise de user rămân valabile: comutatorul WhatsApp stă în contul
+> **plătitorului**, iar clauza de pro-rata se acceptă **la înscriere**, nu la debitare.
 
 **De ce acum**: Rareș și-a făcut cont de Telegram, dar tot nu e conectat la bot. Linkul
 trimis nu s-a deschis. **Telegram NU permite scrisul după numărul de telefon** — botul poate
@@ -62,15 +76,16 @@ recreditate, 15 anulate, 6 rânduri de progres recalculate. Copie de siguranță
 
 ### De construit
 
-1. **`dismissed` și `flagged` nu mai închid firul.** Stare nouă de așteptare; `resolved`
+1. [x] **LIVRAT 2026-08-31** — **`dismissed` și `flagged` nu mai închid firul.** Stare nouă de așteptare; `resolved`
    doar după confirmare umană. `dismissed` e cel periculos — îi spune unui copil că se
    înșeală — deci **nu ajunge la elev înainte de confirmare**.
-2. **A doua judecată = re-rezolvare independentă**, nu recitire a primului verdict (altfel
+2. [ ] **NEÎNCEPUT** — **A doua judecată = re-rezolvare independentă**, nu recitire a primului verdict (altfel
    doar îl confirmă). Refolosește `JUDGE_A` din `src/lib/content-quality-mesh.ts`, care deja
    rezolvă singur întrebarea și compară cu răspunsul marcat. NU construi verificator nou.
-3. **Coadă vizibilă pentru SuperAdmin + părinte**, cu: ce a scris elevul, verdictul automat
+3. [x] **LIVRAT 2026-08-31** (+ alertă Telegram cu link direct la firul respectiv, verdict în
+   doi pași și răspuns scris către elev) — **Coadă vizibilă pentru SuperAdmin + părinte**, cu: ce a scris elevul, verdictul automat
    + motivarea lui, întrebarea, acțiunea propusă, și de câte zile așteaptă.
-4. **Reminder zilnic pe Telegram către SuperAdmin până la zero.** ⚠️ Mesajul trebuie să
+4. [ ] **NEÎNCEPUT** — **Reminder zilnic pe Telegram către SuperAdmin până la zero.** ⚠️ Mesajul trebuie să
    conțină **decizia**, nu numărul: „ai 7 în așteptare" repetat zilnic devine zgomot și e
    ignorat — exact mecanismul care a produs incidentul. Confirmare/respingere dintr-o apăsare.
 5. **Bază de pornire**: 39 de feedback-uri istorice. NU le deschide pe toate deodată (zid

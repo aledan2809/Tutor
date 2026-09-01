@@ -1,5 +1,74 @@
 # Project Status - Tutor
-Last Updated: 2026-08-25 (poarta pe programa parcursă + familie + review-fix — toate LIVE pe etutor.ro)
+Last Updated: 2026-09-01 (treapta Telegram din cascadă — sărită tăcut pentru TOȚI utilizatorii; reparată, deployată, verificată pe date de producție)
+
+## Current State (Sesiunea 2026-09-01 — treapta Telegram nu se trimisese niciodată; regim mesh)
+
+Sesiune pornită de la o reclamație a lui Rareș: „singura notificare e din email, deși știu că
+am adăugat și Telegram". **1 commit (`341e685`), LIVE pe etutor.ro.**
+
+### Ce era
+
+Nu ținea de contul lui și nu ținea de configurare. **Treapta TELEGRAM din cascadă nu se
+trimisese niciodată, pentru niciun utilizator, de când canalul a fost adăugat.**
+
+Motorul citea comutatorul canalului după numele lui în litere mici, dintr-o hartă fără cheia
+`telegram` (`engine.ts`):
+
+    const channelKey = event.channel.toLowerCase() as keyof typeof channelMap;
+    const channelMap = { push, whatsapp, sms, email, call };   // fara telegram
+    if (!channelMap[channelKey]) { escalateToNextLevel(); return; }
+
+`undefined` se citea ca „utilizatorul a dezactivat canalul", iar treapta era sărită **înainte**
+de garda de livrabilitate. `NotificationPreference` chiar nu avea coloană `telegram`, deși
+comentariul schemei promitea că on/off-ul stă pe booleene. Cast-ul `as keyof typeof` e ce a
+ținut compilatorul tăcut.
+
+**Invizibil prin construcție**: evenimentul se închidea oricum ca `COMPLETED`. Singurul semn
+era `sentAt` NULL pe rândurile TELEGRAM — care arată la fel ca o sărire legitimă (cont gratuit
+pe WhatsApp), deci nimic nu ieșea în evidență.
+
+### Reparație (structurală, nu punctuală)
+
+- `NotificationPreference.telegram` (aditiv, implicit `true`) — migrare `0049`.
+- Garda mutată în `isChannelEnabled()` (`config.ts`), pură și **TOTALĂ** peste
+  `EscalationChannel`: un canal adăugat în enum fără comutator devine **eroare de tip**, nu
+  treaptă sărită în tăcere.
+- Ambele endpointuri de preferințe acceptă `telegram` (canal gratuit → fără plafonare de plan,
+  aceeași formă ca `call`), altfel coloana rămânea moartă.
+
+### Verificat (nu presupus)
+
+- **8 aserțiuni noi, probate prin mutație**: cu bug-ul original reintrodus, toate 8 pică.
+  Suita **664 → 672**; `tsc --noEmit` 0.
+- **Pe date de producție, cascada organică pornită de cron**, nu test manual:
+  `14:15 · nivel 2 · TELEGRAM · sentAt=14:15`. Comparativ, lanțul de dimineață dinaintea
+  fixului: TELEGRAM `sentAt` NULL → EMAIL trimis 07:45.
+- Confirmare vizuală din captura lui Rareș: mesajul cascadei la 13:06 + proba la 13:10.
+- `/review`: prima rulare a plecat pe **ollama** (interzis pentru clasa `review`) și a produs
+  2 defecte inventate, verificate în cod ca false. Reluat forțat pe hosted → 0 probleme pe
+  schimbare. Cele 3 constatări rămase sunt pe cod pre-existent, una greșită factual
+  (`[]` e *truthy* în JS); lăsate, în afara scopului.
+
+### De ce n-a fost prins ieri
+
+Testul de ieri a folosit `telegramAlertToUser` — **altă funcție**. Cea pe care o cheamă
+cascada (`sendTelegramNotification`) nu se executase niciodată cu succes. Vezi **L28**.
+
+### Rest deschis (neatins azi)
+
+Partea de bani a reducerii de 10% (cerere copil → aprobare părinte → aplicare pe abonament →
+debitare pro-rata la trecerea pe WhatsApp): cardul o **promite** deja, dar nimic nu o acordă.
+Plus memento zilnic către SuperAdmin pe coada de feedback + livrarea programată a raportului
+către elev.
+
+**Observație de teren**: Rareș are **12 memento-uri active**, multe la câteva minute unul de
+altul (13:55, 14:00, 14:03, 14:15, 14:25, 14:30, 14:45, apoi 21:30-22:30). Arată a rămășițe
+din testări. Decizie user 2026-09-01: **se lasă așa deocamdată.**
+
+## Lessons Learned (sesiunea 2026-09-01)
+- **L28** — o cale verificată nu spune nimic despre o cale vecină; plus: un cast care minte
+  compilatorul poate ascunde o hartă incompletă, iar lipsa se citește ca „dezactivat".
+
 
 ## Current State (Sesiunea 2026-08-24/25 — programa parcursă, familie, review-fix; regim mesh)
 
