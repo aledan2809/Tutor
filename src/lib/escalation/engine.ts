@@ -8,7 +8,12 @@
 
 import { shouldEscalate, nextStep, resolveGraceMs } from "@aledan/notify-ladder";
 import { prisma } from "@/lib/prisma";
-import { ESCALATION_LEVELS, resolveUserLadder, resolveUserGraceMs } from "./config";
+import {
+  ESCALATION_LEVELS,
+  isChannelEnabled,
+  resolveUserLadder,
+  resolveUserGraceMs,
+} from "./config";
 import { isQuietHours, isOptimalNotificationTime } from "./timing";
 import { sendNotification } from "@/lib/notifications/service";
 import { resolveIsTest, resolveIsTestForUser } from "@/lib/notifications/test-account";
@@ -165,17 +170,10 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     }
   }
 
-  // Check channel preference
-  const channelKey = event.channel.toLowerCase() as keyof typeof channelMap;
-  const channelMap = {
-    push: prefs?.push ?? true,
-    whatsapp: prefs?.whatsapp ?? true,
-    sms: prefs?.sms ?? true,
-    email: prefs?.email ?? true,
-    call: prefs?.call ?? true,
-  };
-
-  if (!channelMap[channelKey]) {
+  // Check channel preference. The map lives in config.ts as a pure, total function so it
+  // can be tested — see isChannelEnabled() there for why that matters (a silently skipped
+  // TELEGRAM rung shipped for months behind an inline, untestable lookup).
+  if (!isChannelEnabled(event.channel, prefs)) {
     // User disabled this channel — skip to next level
     await escalateToNextLevel(event.id, event.level);
     return;

@@ -615,6 +615,7 @@ model NotificationPreference {
   id              String  @id @default(cuid())
   userId          String  @unique
   push            Boolean @default(true)
+  telegram        Boolean @default(true)
   whatsapp        Boolean @default(true)
   sms             Boolean @default(true)
   email           Boolean @default(true)

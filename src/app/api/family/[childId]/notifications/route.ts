@@ -68,6 +68,7 @@ async function _PUT(req: NextRequest, ctx: { params: Promise<{ childId: string }
     // Feature 2: parent-set custom cascade. `preset` = a named preset to apply;
     // `escalationSteps` = an explicit step list; either set to null clears it (back
     // to the simple channelOrder). Absent = leave unchanged.
+    telegram?: boolean;
     preset?: string | null;
     escalationSteps?: unknown;
   };
@@ -89,6 +90,8 @@ async function _PUT(req: NextRequest, ctx: { params: Promise<{ childId: string }
   );
   const cleanOrder = sanitizeChannelOrder(body.channelOrder);
   const prefUpdate: Record<string, unknown> = { ...applied };
+  // Telegram is free, so it skips the plan clamp — a parent may still switch it off.
+  if (typeof body.telegram === "boolean") prefUpdate.telegram = body.telegram;
   if (cleanOrder) prefUpdate.channelOrder = cleanOrder;
 
   // Custom cascade. A named preset wins (so it's never lost to a stray null); then an

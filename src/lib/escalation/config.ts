@@ -204,3 +204,43 @@ export function resolveUserGraceMs(
   const next = steps[currentIndex + 1];
   return next ? next.delayMinutes * 60_000 : null;
 }
+
+/**
+ * Preference fields the cascade consults for a channel's on/off switch.
+ * Loose (all optional) so callers can pass a partial row or `null`.
+ */
+export interface ChannelPrefs {
+  push?: boolean;
+  telegram?: boolean;
+  whatsapp?: boolean;
+  sms?: boolean;
+  email?: boolean;
+  call?: boolean;
+}
+
+/**
+ * Is this cascade rung enabled for the user? Absent preference = enabled.
+ *
+ * The map is TOTAL over `EscalationChannel` by construction, so adding a channel to the
+ * enum without a switch here is a compile error rather than a silently skipped rung. That
+ * is not hypothetical: the engine used to look this up as
+ * `map[channel.toLowerCase() as keyof typeof map]` against a map with no `telegram` key —
+ * the lookup returned `undefined`, `undefined` read as "the user turned it off", and the
+ * TELEGRAM rung was skipped for every user on every cascade from the day the channel was
+ * added. The event still closed COMPLETED, so nothing surfaced. The `as keyof typeof` cast
+ * was what kept the compiler quiet.
+ */
+export function isChannelEnabled(
+  channel: EscalationChannel,
+  prefs: ChannelPrefs | null | undefined
+): boolean {
+  const enabled: Record<EscalationChannel, boolean> = {
+    PUSH: prefs?.push ?? true,
+    TELEGRAM: prefs?.telegram ?? true,
+    WHATSAPP: prefs?.whatsapp ?? true,
+    SMS: prefs?.sms ?? true,
+    EMAIL: prefs?.email ?? true,
+    CALL: prefs?.call ?? true,
+  };
+  return enabled[channel];
+}

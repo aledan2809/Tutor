@@ -51,7 +51,7 @@ async function _PUT(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { push, whatsapp, sms, email, call, quietHoursStart, quietHoursEnd, timezone, channelOrder } = body;
+  const { push, telegram, whatsapp, sms, email, call, quietHoursStart, quietHoursEnd, timezone, channelOrder } = body;
 
   // Clamp the metered channels to the user's plan (a free account can't ENABLE
   // WhatsApp/SMS via a direct call — only disable them).
@@ -62,6 +62,8 @@ async function _PUT(req: NextRequest) {
   const { applied } = clampChannelWrite({ push, email, whatsapp, sms }, user?.subscriptionStatus);
 
   const data: Record<string, unknown> = { ...applied };
+  // Telegram is free, so it takes no plan clamp — same shape as `call`.
+  if (typeof telegram === "boolean") data.telegram = telegram;
   if (typeof call === "boolean") data.call = call;
   const cleanOrder = sanitizeChannelOrder(channelOrder);
   if (cleanOrder) data.channelOrder = cleanOrder;
