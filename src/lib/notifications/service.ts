@@ -12,6 +12,7 @@
 import { prisma } from "@/lib/prisma";
 import type { EscalationChannel } from "@prisma/client";
 import { getTelegramClient } from "@/lib/telegram/connect";
+import { buildTelegramButtonUrl } from "@/lib/escalation/tap-link";
 import { sendAppEmail } from "@/lib/email";
 import { isPaidSubscriber } from "@/lib/escalation/segmentation";
 
@@ -310,6 +311,13 @@ async function sendTelegramChannel(
  * reminder, same words, whichever rung reaches him.
  *
  * The encouragement is optional and positive-only; a broken streak says nothing.
+ *
+ * ESCAPES ITS OWN INPUTS. It emits `<b>` and the result is sent with parseMode HTML,
+ * so the escaping has to live with the markup it protects, not in the caller. Pass
+ * RAW values. `StudyReminder.label` is user-supplied (real ones today: "Quiz de
+ * autobuz -2 min"), and a caller that forgot to escape would send malformed HTML →
+ * Telegram 400 → the rung recorded as a failed send → the cascade escalates for a
+ * message that was merely mis-escaped.
  */
 export function buildTelegramReminderText(input: {
   userName: string;
@@ -317,20 +325,26 @@ export function buildTelegramReminderText(input: {
   message: string | null;
   encouragement: string | null;
 }): string {
-  const lines: string[] = [`📚 Salut ${input.userName}!`, ""];
+  const esc = (v: string) =>
+    v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const title = input.title ? esc(input.title) : null;
+  const message = input.message ? esc(input.message) : null;
+  const encouragement = input.encouragement ? esc(input.encouragement) : null;
 
-  if (input.title && input.message) {
-    lines.push(`<b>${input.title}</b>`, input.message);
-  } else if (input.message) {
-    lines.push(input.message);
-  } else if (input.title) {
-    lines.push(`<b>${input.title}</b>`);
+  const lines: string[] = [`📚 Salut ${esc(input.userName)}!`, ""];
+
+  if (title && message) {
+    lines.push(`<b>${title}</b>`, message);
+  } else if (message) {
+    lines.push(message);
+  } else if (title) {
+    lines.push(`<b>${title}</b>`);
   } else {
     // Nicio copie de memento (cascadă pornită din alt motiv) — text generic, ca înainte.
     lines.push("E timpul pentru un quiz scurt — hai să-ți păstrezi seria de studiu.");
   }
 
-  if (input.encouragement) lines.push("", input.encouragement);
+  if (encouragement) lines.push("", encouragement);
   return lines.join("\n");
 }
 
@@ -355,27 +369,28 @@ async function sendTelegramNotification(
   const client = getTelegramClient();
   if (!client) return false;
 
-  // sendText/sendInlineKeyboard default to parseMode HTML — escape interpolated
-  // values so a name/stat containing < > & can't break parsing.
-  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  // Raw values in — buildTelegramReminderText escapes them itself, next to the
+  // `<b>` markup it has to protect (it used to be the caller's job, one refactor
+  // away from silently sending malformed HTML).
   const text = buildTelegramReminderText({
-    userName: esc((payload.metadata.userName as string) ?? "Student"),
-    title: payload.metadata.title ? esc(String(payload.metadata.title)) : null,
-    message: payload.metadata.message ? esc(String(payload.metadata.message)) : null,
+    userName: (payload.metadata.userName as string) ?? "Student",
+    title: payload.metadata.title ? String(payload.metadata.title) : null,
+    message: payload.metadata.message ? String(payload.metadata.message) : null,
     encouragement: payload.metadata.encouragement
-      ? esc(String(payload.metadata.encouragement))
+      ? String(payload.metadata.encouragement)
       : null,
   });
 
-  // Absolute https URL for the Telegram button (relative paths aren't allowed).
-  const base = (process.env.AUTH_URL ?? "").replace(/\/$/, "");
+  // Absolute https URL for the Telegram button (relative paths aren't allowed),
+  // routed through the ack endpoint so a TAP counts as an acknowledgement — a plain
+  // link left `acknowledgedAt` null and the cascade escalated to the next rung even
+  // though the student had answered on the free channel.
   const rawUrl = payload.metadata.url as string | undefined;
-  const buttonUrl =
-    rawUrl && rawUrl.startsWith("http")
-      ? rawUrl
-      : base
-        ? `${base}${rawUrl && rawUrl.startsWith("/") ? rawUrl : "/"}`
-        : null;
+  const buttonUrl = buildTelegramButtonUrl({
+    base: process.env.AUTH_URL ?? "",
+    rawUrl,
+    escalationEventId: payload.metadata.escalationEventId as string | undefined,
+  });
 
   try {
     if (buttonUrl) {

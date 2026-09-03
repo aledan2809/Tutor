@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { safeRedirectPath } from "@/lib/escalation/tap-link";
 
 /**
  * POST /api/escalation/ack — record that the user tapped the push notification
@@ -46,3 +47,38 @@ async function _POST(req: NextRequest) {
 }
 
 export const POST = withErrorHandler(_POST);
+
+/**
+ * GET /api/escalation/ack?e=<escalationEventId>&to=<relative path>
+ *
+ * The Telegram (and any future link-only channel) equivalent of the push tap.
+ * A push carries `escalationEventId` into the service worker, which POSTs here;
+ * a Telegram inline button is just a URL, so a tap left `acknowledgedAt` null and
+ * the cascade escalated to the next rung ANYWAY — the student answered on the free
+ * channel and still got the paid/next nudge. This route closes that gap: it records
+ * the acknowledgement, then redirects on to the session the button promised.
+ *
+ * Same auth posture as POST above, and for the same reasons (unguessable cuid, the
+ * only effect is suppressing a follow-up nudge). Redirects even when the ack fails,
+ * so a stale link never strands the student on an error page.
+ */
+async function _GET(req: NextRequest) {
+  const url = new URL(req.url);
+  const escalationEventId = url.searchParams.get("e");
+  const to = safeRedirectPath(url.searchParams.get("to"));
+
+  if (escalationEventId) {
+    try {
+      await prisma.escalationEvent.updateMany({
+        where: { id: escalationEventId, acknowledgedAt: null },
+        data: { acknowledgedAt: new Date() },
+      });
+    } catch {
+      // Getting the student into the session matters more than the bookkeeping.
+    }
+  }
+
+  return NextResponse.redirect(new URL(to, url.origin), 302);
+}
+
+export const GET = withErrorHandler(_GET);
