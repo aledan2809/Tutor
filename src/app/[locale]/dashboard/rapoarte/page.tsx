@@ -1,6 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { ProgressTabs } from "@/components/progress-tabs";
+import { HowItWorks } from "@/components/ui/how-it-works";
+import { HOW_IT_WORKS } from "@/content/help";
+import { useLocale } from "next-intl";
 
 /**
  * The progress report, on demand.
@@ -29,6 +34,8 @@ interface Delta extends Metric {
 }
 interface Payload {
   period: "daily" | "weekly";
+  childId: string;
+  children: { id: string; name: string | null }[];
   childName: string;
   conclusion: string;
   current: { label: string; metrics: Metric[] } | null;
@@ -50,16 +57,33 @@ const TONE: Record<Delta["direction"], string> = {
 };
 
 export default function ReportsPage() {
+  const locale = useLocale();
+  const { data: session } = useSession();
+  // A parent has no Statistici/Realizari in their own menu, so those tabs would be
+  // dead ends for them.
+  const isLearner = !!session?.user?.enrollments?.some((e) =>
+    (e.roles as unknown as string[]).includes("STUDENT")
+  );
+
   const [period, setPeriod] = useState<"daily" | "weekly">("daily");
+  const [childId, setChildId] = useState<string>("");
   const [data, setData] = useState<Payload | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+
+  // The report email links straight to a specific child.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("childId");
+    if (q) setChildId(q);
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
     setErr(null);
     try {
-      const r = await fetch(`/api/reports/trend?period=${period}`);
+      const qs = new URLSearchParams({ period });
+      if (childId) qs.set("childId", childId);
+      const r = await fetch(`/api/reports/trend?${qs.toString()}`);
       if (!r.ok) throw new Error(String(r.status));
       setData(await r.json());
     } catch {
@@ -67,7 +91,7 @@ export default function ReportsPage() {
     } finally {
       setLoading(false);
     }
-  }, [period]);
+  }, [period, childId]);
 
   useEffect(() => {
     load();
@@ -75,11 +99,36 @@ export default function ReportsPage() {
 
   return (
     <div>
-      <h2 className="mb-1 text-xl font-bold text-white">Raport de progres</h2>
+      <ProgressTabs showStudentTabs={isLearner} />
+      <h2 className="mb-1 mt-4 text-xl font-bold text-white">
+        Raport de progres{!isLearner && data?.childName ? ` — ${data.childName}` : ""}
+      </h2>
       <p className="mb-4 text-sm text-gray-400">
         Perioada în curs — chiar dacă raportul ei nu a fost încă trimis — și cum arată
         față de ultimele cinci.
       </p>
+
+      {data && data.children.length > 1 && (
+        <div className="mb-3">
+          <label className="mr-2 text-sm text-gray-400" htmlFor="child">
+            Copil
+          </label>
+          <select
+            id="child"
+            value={data.childId}
+            onChange={(e) => setChildId(e.target.value)}
+            className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-sm text-white"
+          >
+            {data.children.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name ?? "Copil"}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      <HowItWorks storageKey="rapoarte" steps={HOW_IT_WORKS.rapoarte[locale as "ro" | "en"].steps} moreHref={`/dashboard/ajutor#${HOW_IT_WORKS.rapoarte[locale as "ro" | "en"].more}`} />
 
       <div className="mb-5 flex gap-2 text-sm">
         {([

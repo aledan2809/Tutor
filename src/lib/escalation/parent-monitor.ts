@@ -14,6 +14,7 @@ import { startEscalation } from "./engine";
 import { userIdsOnBreak } from "./breaks";
 import { scheduledTodayFilter } from "./scheduled-days";
 import { isQuietHours } from "./timing";
+import { PARENT_RENOTIFY_MIN } from "./config";
 import { resolveLadder } from "./config";
 import { isPaidStatus } from "@/lib/plan-channels";
 import { webPushToUser, telegramAlertToUser } from "@/lib/notifications/service";
@@ -164,7 +165,7 @@ async function deliverParentAlert(
   }
 }
 
-export const RENOTIFY_MIN = 30; // re-nag the parent at this interval
+export const RENOTIFY_MIN = PARENT_RENOTIFY_MIN; // re-nag the parent at this interval
 export const STALL_MIN = 45; // child chain considered lapsed after last touch
 export const AUTH_EXHAUST_MIN = 60; // authorized cascade considered lapsed after this
 const LOOKBACK_HOURS = 12;

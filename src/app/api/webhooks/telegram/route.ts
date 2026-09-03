@@ -6,6 +6,7 @@ import {
   getBotUsername,
 } from "@/lib/telegram/connect";
 import { handleConnectUpdate } from "@aledan/telegram";
+import { telegramHelpReply } from "@/content/help";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +62,10 @@ async function _POST(req: NextRequest) {
       reply =
         "Linkul de conectare a expirat sau a fost deja folosit. " +
         (bot ? "Generează unul nou din setările eTutor (Notificări)." : "Generează unul nou din setările eTutor.");
+    } else if (isHelpRequest(update.message?.text)) {
+      // The bot only ever answered about linking, so anyone who typed anything else
+      // got silence — including someone wondering why a reminder had arrived at all.
+      reply = telegramHelpReply();
     }
     if (reply) {
       await client.sendText(chatId, reply).catch(() => {});
@@ -68,6 +73,13 @@ async function _POST(req: NextRequest) {
   }
 
   return NextResponse.json({ ok: true });
+}
+
+/** `/help`, or a bare `/start` with no connect payload (which links nothing). */
+function isHelpRequest(text: string | undefined): boolean {
+  const t = text?.trim().toLowerCase();
+  if (!t) return false;
+  return t === "/help" || t.startsWith("/help@") || t === "/start";
 }
 
 export const POST = withErrorHandler(_POST);

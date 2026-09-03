@@ -5,6 +5,7 @@ import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { LocaleSwitcher } from "./locale-switcher";
+import { buildNavSections } from "@/lib/nav-sections";
 import Image from "next/image";
 
 interface SidebarProps {
@@ -13,6 +14,7 @@ interface SidebarProps {
     email?: string | null;
     image?: string | null;
     isSuperAdmin: boolean;
+    accountRole?: "STUDENT" | "PARENT" | "TUTOR" | null;
     enrollments?: { domainId: string; domainSlug: string; roles: string[] }[];
   };
   /** True when the user holds an active family subscription plan (parent/child
@@ -44,143 +46,7 @@ export function Sidebar({ user, hasFamilyPlan = false }: SidebarProps) {
     return () => document.removeEventListener("keydown", onKey);
   }, [mobileOpen]);
 
-  type NavItem = { href: string; label: string; locked?: boolean };
-  const navItems: NavItem[] = [
-    { href: "/dashboard", label: t("dashboard") },
-    { href: "/dashboard/lessons", label: t("lessons") },
-    { href: "/dashboard/bibliography", label: t("bibliography") },
-    { href: "/dashboard/practice", label: t("practice") },
-    { href: "/dashboard/genereaza", label: t("generate") },
-    { href: "/dashboard/assessment", label: t("assessment") },
-    { href: "/dashboard/exams", label: t("exams") },
-    { href: "/dashboard/exam-bank", label: t("examBank") },
-    { href: "/dashboard/activare", label: t("activare") },
-    { href: "/dashboard/progress", label: t("progress") },
-    // Not behind a translation key on purpose: adding one means touching every
-    // locale file, and this label is the same word in both.
-    { href: "/dashboard/rapoarte", label: "Rapoarte" },
-    { href: "/dashboard/domains", label: t("domains") },
-    { href: "/dashboard/calendar", label: t("calendar") },
-    { href: "/dashboard/notifications", label: t("notifications") },
-    { href: "/dashboard/gamification", label: t("gamification") },
-    { href: "/dashboard/referrals", label: t("referrals") },
-    { href: "/dashboard/packages", label: t("packages") },
-    { href: "/dashboard/settings", label: t("settings") },
-  ];
-
-  const isWatcher =
-    user.isSuperAdmin ||
-    user.enrollments?.some((e) => e.roles.includes("WATCHER"));
-
-  // A paying parent unlocks the family section even before a WATCHER enrollment
-  // exists (buying a Family/Trio plan grants seats, not a role) — fixes the
-  // "paid but the menu is locked" gap.
-  const showFamily = isWatcher || hasFamilyPlan;
-
-  const isInstructor =
-    user.isSuperAdmin ||
-    user.enrollments?.some(
-      (e) => e.roles.includes("INSTRUCTOR") || e.roles.includes("ADMIN")
-    );
-
-  const isAdmin =
-    user.isSuperAdmin ||
-    user.enrollments?.some((e) => e.roles.includes("ADMIN"));
-
-  // §213 rol 2 — un cont WATCHER pur (părinte) monitorizează un copil; nu e el însuși elev.
-  const isStudent =
-    user.enrollments?.some((e) => e.roles.includes("STUDENT"));
-
-  if (showFamily) {
-    navItems.push({ href: "/dashboard/family", label: t("family") });
-    navItems.push({ href: "/dashboard/watcher", label: t("watcher") });
-    navItems.push({ href: "/dashboard/watcher/notifications", label: t("watcherNotifications") });
-  }
-  if (isInstructor) {
-    navItems.push({ href: "/dashboard/instructor", label: t("instructor") });
-  }
-  if (isAdmin) {
-    navItems.push({ href: "/dashboard/admin", label: t("admin") });
-  }
-
-  // HIDDEN 2026-06-04 (§213 restructurare meniuri) — item-uri goale/niche ascunse
-  // temporar din nav; rutele rămân funcționale. Decizie ulterioară (populăm / unificăm /
-  // scoatem) în Projects/Tutor/TODO_PERSISTENT.md §213.
-  const HIDDEN_NAV = new Set([
-    "/dashboard/lessons", // Lesson = 0
-    "/dashboard/assessment", // Assessment = 0
-    "/dashboard/exams", // ExamSimulation = 1 (~gol; exam-bank/Simulări rămâne)
-    "/dashboard/bibliography", // Bibliography = 11 (niche juridic/aviation)
-    "/dashboard/gamification", // MERGE → „Progresul meu" (tab Realizări) — §213
-  ]);
-  let visibleNavItems = navItems.filter((item) => !HIDDEN_NAV.has(item.href));
-
-  // §213 rol 2 — PĂRINTE: un cont WATCHER pur (nu și elev/instructor/superadmin) primește
-  // meniul focalizat pe monitorizarea copilului. Fluxul de învățare al elevului
-  // (Practică/Simulări/Progresul meu/Domenii/Calendar) e ascuns din nav — rutele rămân
-  // funcționale (conditional render, reversibil). SuperAdmin + instructor + elev păstrează
-  // meniul actual (instructor = rol 3, restructurat ulterior). Ordine per mockup design
-  // (knowledge/menu-restructure-mockups.md ROL 2): Panou · Monitorizare · Alerte ·
-  // Invită un prieten · Notificări · Setări.
-  const isParentView =
-    !user.isSuperAdmin && showFamily && !isInstructor && !isStudent;
-  if (isParentView) {
-    visibleNavItems = [
-      { href: "/dashboard", label: t("dashboard") },
-      { href: "/dashboard/family", label: t("family") },
-      { href: "/dashboard/watcher", label: t("watcher") },
-      { href: "/dashboard/watcher/notifications", label: t("watcherNotifications") },
-      { href: "/dashboard/watcher/setari", label: t("watcherSettings") },
-      { href: "/dashboard/referrals", label: t("referrals") },
-      { href: "/dashboard/notifications", label: t("notifications") },
-      { href: "/dashboard/settings", label: t("settings") },
-    ];
-  }
-
-  // §213 rol 3 — MEDITATOR: un cont INSTRUCTOR pur (nu admin/superadmin/elev/părinte) primește
-  // hub-ul Instructor + preview conținut (Practică/Simulări). Conceptele de elev (Progresul meu/
-  // Domenii/Calendar) sunt ascunse din nav — rutele rămân funcționale. Sub-funcțiile Studenți/
-  // Grupuri/Obiective/Mesaje/Analiză/Rapoarte trăiesc în pagina /dashboard/instructor. „Invită un
-  // prieten" rămâne vizibil (meditatorul câștigă din referral — decizie user 2026-06-04). Ordine
-  // per mockup design (knowledge/menu-restructure-mockups.md ROL 3).
-  const isInstructorRole =
-    user.enrollments?.some((e) => e.roles.includes("INSTRUCTOR"));
-  const isMeditatorView =
-    !user.isSuperAdmin && !isAdmin && isInstructorRole && !isStudent && !isWatcher;
-  if (isMeditatorView) {
-    visibleNavItems = [
-      { href: "/dashboard", label: t("dashboard") },
-      { href: "/dashboard/instructor", label: t("instructor") },
-      { href: "/dashboard/practice", label: t("practice") },
-      { href: "/dashboard/exam-bank", label: t("examBank") },
-      { href: "/dashboard/referrals", label: t("referrals") },
-      { href: "/dashboard/notifications", label: t("notifications") },
-      { href: "/dashboard/settings", label: t("settings") },
-    ];
-  }
-
-  // Licență — private study material, visible only to admins + the allowlisted
-  // student (mirrors src/lib/licenta canUseLicenta / domain-access allowlist).
-  const canLicenta =
-    user.isSuperAdmin ||
-    user.enrollments?.some((e) => e.roles.includes("ADMIN")) ||
-    user.email === "raresdanciulescu9@gmail.com";
-  if (canLicenta && !visibleNavItems.some((i) => i.href === "/dashboard/licenta")) {
-    visibleNavItems.push({ href: "/dashboard/licenta", label: t("licenta") });
-  }
-
-  // A fresh account (register always grants STUDENT) has no family plan / WATCHER
-  // role, so the whole family section is hidden — a parent who signs up can't find
-  // it. Surface a locked entry that routes to Pachete, unlocking the upsell instead
-  // of a dead end. Excludes instructors/superadmins (not a parent funnel).
-  const showFamilyLocked = !showFamily && !isInstructor && !user.isSuperAdmin;
-  if (showFamilyLocked) {
-    visibleNavItems.push({
-      href: "/dashboard/packages",
-      label: t("family"),
-      locked: true,
-    });
-  }
+  const sections = buildNavSections(user, hasFamilyPlan);
 
   const sidebarContent = (
     <>
@@ -200,27 +66,39 @@ export function Sidebar({ user, hasFamilyPlan = false }: SidebarProps) {
         </button>
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto p-4">
-        {visibleNavItems.map((item) => {
-          const isActive = pathname === item.href && !item.locked;
-          return (
-            <Link
-              key={item.locked ? `locked-${item.href}` : item.href}
-              href={item.href}
-              onClick={() => setMobileOpen(false)}
-              className={`flex min-h-[44px] items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors ${
-                item.locked
-                  ? "text-amber-500/70 hover:bg-gray-800 hover:text-amber-400"
-                  : isActive
-                    ? "bg-blue-600/10 text-blue-500"
-                    : "text-gray-400 hover:bg-gray-800 hover:text-white"
-              }`}
-            >
-              {item.locked && <span aria-hidden>🔒</span>}
-              {item.label}
-            </Link>
-          );
-        })}
+      <nav className="flex-1 overflow-y-auto p-4">
+        {sections.map((section) => (
+          <div key={section.id} className="space-y-1">
+            {section.labelKey && (
+              <p
+                className="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wider text-gray-500"
+                aria-hidden
+              >
+                {t(section.labelKey)}
+              </p>
+            )}
+            {section.items.map((item) => {
+              const isActive = pathname === item.href && !item.locked;
+              return (
+                <Link
+                  key={item.locked ? `locked-${item.href}` : item.href}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex min-h-[44px] items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors ${
+                    item.locked
+                      ? "text-amber-500/70 hover:bg-gray-800 hover:text-amber-400"
+                      : isActive
+                        ? "bg-blue-600/10 text-blue-500"
+                        : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                  }`}
+                >
+                  {item.locked && <span aria-hidden>🔒</span>}
+                  {t(item.labelKey)}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       <div className="border-t border-gray-800 p-4">

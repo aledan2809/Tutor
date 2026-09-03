@@ -28,6 +28,20 @@ export const CASCADE_GRACE_MINUTES = {
 } as const;
 
 export const QUIET_HOURS_DEFAULT = { start: "22:00", end: "07:00" };
+
+/**
+ * How soon after a reminder a finished session still counts as "on time" — the
+ * same window feeds the points bonus and the report's „la timp" column, which is
+ * why it lives here rather than as a literal in each.
+ */
+export const ON_TIME_WINDOW_MIN = 90;
+
+/** How often a parent is re-notified while the child has not reacted. */
+export const PARENT_RENOTIFY_MIN = 30;
+
+/** Safety caps on a parent-triggered nudge series. */
+export const NUDGE_MAX_FIRES = 12;
+export const NUDGE_MAX_AGE_HOURS = 24;
 export const DEFAULT_TIMEZONE = "Europe/Bucharest";
 
 /** Cascade channels a user is allowed to reorder (the rungs that actually exist). */

@@ -7,8 +7,12 @@ import { PhoneCapture } from "@/components/phone-capture";
 import { Link } from "@/i18n/navigation";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { HowItWorks } from "@/components/ui/how-it-works";
+import { HOW_IT_WORKS } from "@/content/help";
+import { getLocale } from "next-intl/server";
 
 export default async function NotificationSettingsPage() {
+  const locale = (await getLocale()) as "ro" | "en";
   const session = await getSession();
   const tn = await getTranslations("familyNotif");
   let managedByParent = false;
@@ -28,6 +32,8 @@ export default async function NotificationSettingsPage() {
           &larr; Settings
         </Link>
       </div>
+
+      <HowItWorks storageKey="notifSettings" steps={HOW_IT_WORKS.notifSettings[locale].steps} moreHref={`/dashboard/ajutor#${HOW_IT_WORKS.notifSettings[locale].more}`} />
 
       <div className="mb-6 flex items-center justify-between rounded-lg border border-gray-800 bg-gray-900 px-4 py-3">
         <div>

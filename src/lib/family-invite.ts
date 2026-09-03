@@ -38,6 +38,7 @@ import {
   getTelegramClient,
   telegramConfigured,
 } from "@/lib/telegram/connect";
+import { inviteBlurb } from "@/content/help";
 
 const DEFAULT_TTL_SEC = 7 * 24 * 3600; // 7 days
 
@@ -501,6 +502,9 @@ async function deliverInvite(params: {
       const html = `
         <p>Bună!</p>
         <p>${who}te invită pe etutor.ro ca <strong>${roleRo}</strong>.</p>
+        ${inviteBlurb(params.target)
+          .map((line) => `<p>${line}</p>`)
+          .join("")}
         <p><a href="${params.acceptUrl}">Acceptă invitația</a></p>
         <p>Sau deschide linkul: ${params.acceptUrl}</p>
         <p style="color:#888;font-size:12px">Linkul expiră în 7 zile.</p>`;

@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { ParentAlertActions } from "@/components/watcher/parent-alert-actions";
+import { HowItWorks } from "@/components/ui/how-it-works";
+import { HOW_IT_WORKS } from "@/content/help";
+import { useLocale } from "next-intl";
 
 interface WatcherNotification {
   id: string;
@@ -15,6 +18,7 @@ interface WatcherNotification {
 }
 
 export default function WatcherNotificationsPage() {
+  const locale = useLocale();
   const t = useTranslations("watcher");
   const [notifications, setNotifications] = useState<WatcherNotification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,6 +89,8 @@ export default function WatcherNotificationsPage() {
 
   return (
     <div>
+      <HowItWorks storageKey="cascade" steps={HOW_IT_WORKS.cascade[locale as "ro" | "en"].steps} moreHref={`/dashboard/ajutor#${HOW_IT_WORKS.cascade[locale as "ro" | "en"].more}`} />
+
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">{t("notifications")}</h1>

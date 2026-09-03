@@ -3,6 +3,9 @@ import { NotificationPreferences } from "@/components/notifications/notification
 import { TelegramConnectCard } from "@/components/notifications/telegram-connect-card";
 import { PushSubscribeButton } from "@/components/push-subscribe";
 import { PhoneCapture } from "@/components/phone-capture";
+import { HowItWorks } from "@/components/ui/how-it-works";
+import { HOW_IT_WORKS } from "@/content/help";
+import { getLocale } from "next-intl/server";
 
 /**
  * A parent's OWN notification settings — the channels + priority order in which THEY
@@ -11,12 +14,15 @@ import { PhoneCapture } from "@/components/phone-capture";
  */
 export default async function WatcherSettingsPage() {
   const t = await getTranslations("watcher");
+  const locale = (await getLocale()) as "ro" | "en";
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-6">
         <h1 className="text-lg font-semibold text-white">{t("settingsTitle")}</h1>
         <p className="mt-1 text-sm text-gray-500">{t("settingsIntro")}</p>
       </div>
+
+      <HowItWorks storageKey="cascade" steps={HOW_IT_WORKS.cascade[locale].steps} moreHref={`/dashboard/ajutor#${HOW_IT_WORKS.cascade[locale].more}`} />
 
       <div className="mb-6 flex items-center justify-between rounded-lg border border-gray-800 bg-gray-900 px-4 py-3">
         <div>

@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { ChildChapter } from "@/components/watcher/child-chapter";
 import { ReportsManager } from "@/components/watcher/reports-manager";
+import { HowItWorks } from "@/components/ui/how-it-works";
+import { HOW_IT_WORKS } from "@/content/help";
+import { useLocale } from "next-intl";
 
 interface StudentSummary {
   id: string;
@@ -16,6 +19,7 @@ interface StudentSummary {
 }
 
 export default function WatcherDashboardPage() {
+  const locale = useLocale();
   const t = useTranslations("watcher");
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +45,8 @@ export default function WatcherDashboardPage() {
       <p className="mb-6 text-sm text-gray-400">
         Fiecare copil are un capitol. Deschide-l pentru program, sesiuni și remindere.
       </p>
+
+      <HowItWorks storageKey="watcher" steps={HOW_IT_WORKS.watcher[locale as "ro" | "en"].steps} moreHref={`/dashboard/ajutor#${HOW_IT_WORKS.watcher[locale as "ro" | "en"].more}`} />
 
       <ReportsManager />
 

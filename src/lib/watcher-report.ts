@@ -6,6 +6,7 @@
  */
 
 import { prisma } from "@/lib/prisma";
+import { ON_TIME_WINDOW_MIN } from "@/lib/escalation/config";
 
 export type ReportSection = "sessions" | "discipline" | "weaknesses" | "results";
 export const ALL_SECTIONS: ReportSection[] = ["sessions", "discipline", "weaknesses", "results"];
@@ -99,7 +100,10 @@ export async function buildChildReport(
       });
       const done = ep.reacted || match != null;
       if (!done) discipline.ignored++;
-      else if (match != null && match.startedAt.getTime() - ep.firstAt.getTime() > 90 * 60_000)
+      else if (
+        match != null &&
+        match.startedAt.getTime() - ep.firstAt.getTime() > ON_TIME_WINDOW_MIN * 60_000
+      )
         discipline.late++;
       else discipline.onTime++;
     }

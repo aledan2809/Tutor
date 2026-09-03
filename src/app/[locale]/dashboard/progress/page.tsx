@@ -5,6 +5,9 @@ import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { ProgressTabs } from "@/components/progress-tabs";
 import { FeatureGate } from "@/components/plan/feature-lock";
+import { HowItWorks } from "@/components/ui/how-it-works";
+import { HOW_IT_WORKS } from "@/content/help";
+import { useLocale } from "next-intl";
 
 interface ProgressData {
   overall: {
@@ -45,6 +48,7 @@ interface ProgressData {
 }
 
 export default function ProgressPage() {
+  const locale = useLocale();
   const t = useTranslations();
   const searchParams = useSearchParams();
   const [data, setData] = useState<ProgressData | null>(null);
@@ -95,6 +99,7 @@ export default function ProgressPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       <ProgressTabs />
+      <HowItWorks storageKey="progress" steps={HOW_IT_WORKS.progress[locale as "ro" | "en"].steps} moreHref={`/dashboard/ajutor#${HOW_IT_WORKS.progress[locale as "ro" | "en"].more}`} />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white">{t("dashboard.progressTitle")}</h1>
         {domains.length > 1 && (

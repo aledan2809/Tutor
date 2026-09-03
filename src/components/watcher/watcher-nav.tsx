@@ -4,13 +4,16 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 
 export function WatcherNav() {
-  const t = useTranslations("watcher");
+  // Aceleasi cuvinte ca in sidebar. Etichetele erau generice si repetau exact
+  // numele altor doua destinatii din acelasi meniu: trei intrari citeau
+  // "Notificari" si trei citeau "Setari".
+  const t = useTranslations("nav");
   const pathname = usePathname();
 
   const links = [
-    { href: "/dashboard/watcher", label: t("title") },
-    { href: "/dashboard/watcher/notifications", label: t("notifications") },
-    { href: "/dashboard/watcher/setari", label: t("settings") },
+    { href: "/dashboard/watcher", label: t("watcher") },
+    { href: "/dashboard/watcher/notifications", label: t("watcherNotifications") },
+    { href: "/dashboard/watcher/setari", label: t("watcherSettings") },
   ];
 
   return (

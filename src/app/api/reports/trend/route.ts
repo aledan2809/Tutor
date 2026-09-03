@@ -28,10 +28,17 @@ async function _GET(req: NextRequest) {
 
   const url = new URL(req.url);
   const period: ReportPeriod = url.searchParams.get("period") === "weekly" ? "weekly" : "daily";
-  const childId = url.searchParams.get("childId") || session.user.id;
+  // A parent asking for "the report" means their child's. Defaulting to the caller
+  // handed them their OWN empty report - the page was in the parent's menu and
+  // showed nothing, which reads as "no data" rather than "wrong person".
+  const linked = await getLinkedChildIds(session.user.id);
+  const isLearner = !!session.user.enrollments?.some((e) =>
+    (e.roles as string[]).includes("STUDENT")
+  );
+  const requested = url.searchParams.get("childId");
+  const childId = requested || (!isLearner && linked[0]) || session.user.id;
 
   if (childId !== session.user.id) {
-    const linked = await getLinkedChildIds(session.user.id);
     const me = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { isSuperAdmin: true },
@@ -50,9 +57,17 @@ async function _GET(req: NextRequest) {
   }
 
   const [current, previous] = reports;
+  const children = linked.length
+    ? await prisma.user.findMany({
+        where: { id: { in: linked } },
+        select: { id: true, name: true },
+      })
+    : [];
+
   return NextResponse.json({
     period,
     childId,
+    children,
     childName: current?.childName ?? "",
     conclusion: concludeTrend(reports),
     // The period in progress — the report that has NOT been sent yet, which is

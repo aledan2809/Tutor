@@ -172,6 +172,18 @@ export function SetupChecklist({ showLinkChild = false }: { showLinkChild?: bool
     if (key === "push") setSkipPush(true);
     if (key === "tg") setSkipTg(true);
   };
+  // Pagina de Ajutor cere redeschiderea pasilor: butonul ei trimite evenimentul, iar
+  // header-ul cu checklist-ul e prezent pe orice pagina din dashboard, deci nu e nevoie
+  // de navigare. Se reafiseaza si cand totul e bifat — de asta exista "reia".
+  useEffect(() => {
+    const onOpen = () => {
+      resetSkips();
+      setOpen(true);
+    };
+    window.addEventListener("tutor:open-setup", onOpen);
+    return () => window.removeEventListener("tutor:open-setup", onOpen);
+  });
+
   const resetSkips = () => {
     try {
       [SKIP_INSTALL, SKIP_PUSH, SKIP_TG].forEach((k) => localStorage.removeItem(k));

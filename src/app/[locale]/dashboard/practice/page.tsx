@@ -38,12 +38,14 @@ interface SessionNextResponse {
 
 export default function PracticePage() {
   const t = useTranslations();
+  const tCur = useTranslations("curriculum");
   const router = useRouter();
   const [data, setData] = useState<SessionNextResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<string>("");
   const [curriculumSetupNeeded, setCurriculumSetupNeeded] = useState(false);
+  const [gateReason, setGateReason] = useState<"setup" | "empty" | null>(null);
   const [domains, setDomains] = useState<DomainOpt[]>([]);
   // A1: when the student has no practiceable subject, offer the catalog inline so
   // they pick + start on the spot instead of being sent "to your account".
@@ -154,6 +156,9 @@ export default function PracticePage() {
       // Curriculum gate: the start route refuses until the two-row checklist
       // (programa parcursă) is filled in — open it instead of starting.
       if (res.status === 409 && (session.needsCurriculumSetup || session.emptyBecauseCurriculum)) {
+        // Say WHY. The checklist used to just appear: the session did not start and
+        // nothing explained that it could not, which reads as the app being broken.
+        setGateReason(session.needsCurriculumSetup ? "setup" : "empty");
         setCurriculumSetupNeeded(true);
         setStarting(false);
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -298,12 +303,27 @@ export default function PracticePage() {
 
           {/* Programa parcursă — checklistul celor două rânduri; obligatoriu
               înaintea primei sesiuni pe domeniile cu programă (EN VIII / BAC). */}
+          {/* Above the checklist, not inside it: the checklist renders null until it
+              has state, so a message placed inside would be invisible exactly when
+              it is needed. */}
+          {gateReason && (
+            <div
+              role="status"
+              className="mb-3 rounded-lg border border-amber-800 bg-amber-950/20 px-3 py-2 text-sm text-amber-200"
+            >
+              {tCur(gateReason === "setup" ? "gateSetup" : "gateEmpty")}
+            </div>
+          )}
+
           {selectedDomain && (
             <CurriculumChecklist
               key={selectedDomain}
               domainSlug={selectedDomain}
               forceOpen={curriculumSetupNeeded}
-              onSaved={() => setCurriculumSetupNeeded(false)}
+              onSaved={() => {
+                setCurriculumSetupNeeded(false);
+                setGateReason(null);
+              }}
             />
           )}
 

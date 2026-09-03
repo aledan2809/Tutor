@@ -60,10 +60,21 @@
     "gamification": "Gamificare",
     "referrals": "Invită un prieten",
     "family": "Familia mea",
+    "sectionLearn": "Învață",
+    "sectionProgress": "Progres",
+    "sectionAccount": "Cont",
+    "sectionMyChild": "Copilul meu",
+    "sectionMyStudents": "Elevii mei",
+    "sectionContent": "Conținut",
+    "subscription": "Abonament",
+    "reports": "Rapoarte",
+    "progressStats": "Statistici",
+    "progressAchievements": "Realizări",
+    "help": "Ajutor",
     "tabLearn": "Grile",
     "tabSim": "Simulări",
     "tabProgress": "Progres",
-    "tabProfile": "Profil",
+    "tabProfile": "Setări",
     "generate": "Generează test",
     "packages": "Pachete"
   },
@@ -906,7 +917,8 @@
     "checkoutError": "Nu am putut porni plata. Încearcă din nou.",
     "manageSubscription": "Gestionează abonamentul",
     "portalOpening": "Se deschide…",
-    "portalError": "Nu am putut deschide portalul de abonament. Încearcă din nou."
+    "portalError": "Nu am putut deschide portalul de abonament. Încearcă din nou.",
+    "activateLink": "Ai un cod de acces 100%? Activează-l aici"
   },
   "cookieBanner": {
     "aria": "Consimțământ cookie-uri",
@@ -964,6 +976,21 @@
     "year12": "a XII-a",
     "lagBadge": "{count} în urmă",
     "lagBanner": "Programa a avansat cu {count} lecții peste bifele salvate — bifează ce s-a predat sau confirmă că la clasă nu s-au făcut.",
-    "conflictReloaded": "Altcineva a salvat lista între timp — am reîncărcat-o. Verifică bifele și salvează din nou."
+    "conflictReloaded": "Altcineva a salvat lista între timp — am reîncărcat-o. Verifică bifele și salvează din nou.",
+    "gateSetup": "Înainte de prima sesiune, bifează ce s-a predat la clasă — grilele se aleg după bifele tale. Durează un minut.",
+    "gateEmpty": "Nu există încă grile pentru lecțiile bifate. Bifează și alte lecții predate sau revino după ce avansează programa."
+  },
+  "help": {
+    "title": "Ajutor",
+    "subtitle": "Cum funcționează platforma pentru tine, pe scurt.",
+    "tabStudent": "Elev",
+    "tabParent": "Părinte",
+    "tabTutor": "Meditator",
+    "resumeSetup": "Reia configurarea",
+    "telegramLink": "Conectează Telegram"
+  },
+  "howItWorks": {
+    "title": "Cum funcționează",
+    "more": "Detalii în Ajutor"
   }
 }

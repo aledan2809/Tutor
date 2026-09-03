@@ -1,30 +1,21 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import { wasScheduledDayMissed } from "@/lib/streak";
+import { ON_TIME_WINDOW_MIN } from "@/lib/escalation/config";
 
 // ─── XP Constants ───
+// Moved to a prisma-free module so the UI can quote the same numbers the engine
+// awards, instead of retyping them. Re-exported: existing importers are unchanged.
 
-export const XP_REWARDS = {
-  CORRECT_ANSWER: 10,
-  FAST_ANSWER_BONUS: 5, // < 5 seconds
-  SESSION_COMPLETE: 50,
-  PERFECT_SCORE: 100,
-  DAILY_CHALLENGE_MULTIPLIER: 2,
-  EXAM_COMPLETE: 75,
-  EXAM_PASS_BONUS: 150,
-  EXAM_ACE_BONUS: 250, // 95%+
-} as const;
+import {
+  XP_REWARDS,
+  FAST_ANSWER_THRESHOLD_MS,
+  ON_TIME_BONUS,
+  DEFAULT_LEVELS,
+  STREAK_RECOVERY,
+} from "@/lib/gamification-constants";
 
-const FAST_ANSWER_THRESHOLD_MS = 5000;
-
-// ─── Default Level Thresholds ───
-
-const DEFAULT_LEVELS = [
-  { name: "Cadet", minXp: 0, rank: 1 },
-  { name: "Co-pilot", minXp: 500, rank: 2 },
-  { name: "Captain", minXp: 2000, rank: 3 },
-  { name: "Instructor", minXp: 5000, rank: 4 },
-] as const;
+export { XP_REWARDS };
 
 // ─── Achievement Definitions ───
 
@@ -147,7 +138,6 @@ export async function awardSessionCompleteXp(
   // Discipline: reward finishing a SCHEDULED session ON TIME (within ~90 min of the
   // reminder firing). Late completions get no bonus (implicit cost); a missed
   // scheduled day already resets the streak below.
-  const ON_TIME_BONUS = 15;
   const nowD = new Date();
   const dayStartD = new Date(nowD.getFullYear(), nowD.getMonth(), nowD.getDate());
   const fires = await prisma.escalationEvent.findMany({
@@ -160,7 +150,7 @@ export async function awardSessionCompleteXp(
     const r = (e.metadata as Record<string, unknown> | null)?.reason;
     return typeof r === "string" && (r.startsWith("morning") || r.startsWith("evening"));
   });
-  if (sched && (nowD.getTime() - sched.createdAt.getTime()) / 60_000 <= 90) {
+  if (sched && (nowD.getTime() - sched.createdAt.getTime()) / 60_000 <= ON_TIME_WINDOW_MIN) {
     xp += ON_TIME_BONUS;
   }
 
@@ -411,8 +401,11 @@ export async function startRecoverySession(
   if (diffDays <= 1) {
     return { canRecover: false, reason: "Streak is active, no recovery needed" };
   }
-  if (diffDays > 3) {
-    return { canRecover: false, reason: "Too many days missed (max 3)" };
+  if (diffDays > STREAK_RECOVERY.maxMissedDays) {
+    return {
+      canRecover: false,
+      reason: `Too many days missed (max ${STREAK_RECOVERY.maxMissedDays})`,
+    };
   }
 
   // Pick 5 random published questions from this domain
@@ -428,8 +421,8 @@ export async function startRecoverySession(
   return {
     canRecover: true,
     questions: shuffled,
-    timeLimitMs: 120000, // 2 minutes
-    requiredCorrect: 3,  // Need 3/5 correct
+    timeLimitMs: STREAK_RECOVERY.timeLimitMs,
+    requiredCorrect: STREAK_RECOVERY.requiredCorrect,
   };
 }
 
@@ -488,7 +481,7 @@ export async function completeRecoverySession(
     }
   }
 
-  const requiredCorrect = 3;
+  const requiredCorrect = STREAK_RECOVERY.requiredCorrect;
   if (correctCount < requiredCorrect) {
     return { success: false, streak: 0, correctCount, totalCount: answers.length };
   }

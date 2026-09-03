@@ -9,9 +9,10 @@ import type { EscalationChannel } from "@prisma/client";
 import { sendNotification } from "@/lib/notifications/service";
 import { userIdsOnBreak } from "./breaks";
 import { reminderImminent } from "./reminders";
+import { NUDGE_MAX_FIRES, NUDGE_MAX_AGE_HOURS } from "./config";
 
-const MAX_FIRES = 12; // safety cap on repeats
-const MAX_AGE_HOURS = 24; // auto-stop a nudge after a day
+const MAX_FIRES = NUDGE_MAX_FIRES; // safety cap on repeats
+const MAX_AGE_HOURS = NUDGE_MAX_AGE_HOURS; // auto-stop a nudge after a day
 const OVERLAP_GUARD_MIN = 25; // stop a series when a scheduled session is this close
 
 async function childReactedSince(childId: string, since: Date): Promise<boolean> {

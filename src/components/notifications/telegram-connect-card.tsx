@@ -88,7 +88,7 @@ export function TelegramConnectCard() {
 
   if (status.linked) {
     return (
-      <div className="mb-6 flex items-center justify-between rounded-lg border border-emerald-800 bg-emerald-950/20 px-4 py-3">
+      <div id="telegram" className="mb-6 flex items-center justify-between rounded-lg border border-emerald-800 bg-emerald-950/20 px-4 py-3">
         <div>
           <h3 className="text-sm font-medium text-white">
             ✅ Telegram conectat{status.username ? ` — @${status.username}` : ""}
@@ -109,7 +109,7 @@ export function TelegramConnectCard() {
   }
 
   return (
-    <div className="mb-6 rounded-lg border border-blue-800 bg-blue-950/20 p-4">
+    <div id="telegram" className="mb-6 rounded-lg border border-blue-800 bg-blue-950/20 p-4">
       <h3 className="text-sm font-medium text-white">Primește notificările pe Telegram</h3>
       <p className="mt-1 text-xs text-gray-400">
         E gratuit și ajunge instant. WhatsApp costă la fiecare mesaj — de asta abonamentul

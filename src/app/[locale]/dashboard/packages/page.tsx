@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { resolveFamilyPlanFromRecord, type FamilyPlan } from "@/lib/family";
+import { Link } from "@/i18n/navigation";
 
 interface Plan {
   id: string;
@@ -249,6 +250,15 @@ export default function PackagesPage() {
               placeholder={t("voucherPlaceholder")}
               className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
             />
+            {/* "Activare acces" and "Pachete" were two menu entries for one intention.
+                They merged into Abonament (this page); the per-subject 100% voucher
+                flow stays a live route and is reachable from here. */}
+            <Link
+              href="/dashboard/activare"
+              className="mt-2 inline-block text-xs text-blue-400 hover:text-blue-300"
+            >
+              {t("activateLink")}
+            </Link>
           </div>
         </>
       )}

@@ -6,6 +6,9 @@ import { useTranslations } from "next-intl";
 // A4: a social-app style bottom tab bar on mobile so the core student actions are
 // one tap away (no hamburger hunting). Desktop keeps the sidebar (lg:hidden here).
 // Shown only to learners (a STUDENT enrollment) — parents/instructors keep the menu.
+// tabProgress stays the short form of the sidebar's progress entry (a 10px tab
+// label) and is now also the section heading, so it no longer collides.
+// tabProfile did collide: it read Profil while linking to /dashboard/settings.
 
 type Tab = { href: string; key: string; icon: React.ReactNode };
 

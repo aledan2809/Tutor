@@ -60,10 +60,21 @@
     "gamification": "Gamification",
     "referrals": "Invite a friend",
     "family": "My family",
+    "sectionLearn": "Learn",
+    "sectionProgress": "Progress",
+    "sectionAccount": "Account",
+    "sectionMyChild": "My child",
+    "sectionMyStudents": "My students",
+    "sectionContent": "Content",
+    "subscription": "Subscription",
+    "reports": "Reports",
+    "progressStats": "Statistics",
+    "progressAchievements": "Achievements",
+    "help": "Help",
     "tabLearn": "Quizzes",
     "tabSim": "Mock exams",
     "tabProgress": "Progress",
-    "tabProfile": "Profile",
+    "tabProfile": "Settings",
     "generate": "Generate test",
     "packages": "Packages"
   },
@@ -906,7 +917,8 @@
     "checkoutError": "Could not start checkout. Try again.",
     "manageSubscription": "Manage subscription",
     "portalOpening": "Opening…",
-    "portalError": "Couldn't open the subscription portal. Try again."
+    "portalError": "Couldn't open the subscription portal. Try again.",
+    "activateLink": "Have a 100% access code? Activate it here"
   },
   "cookieBanner": {
     "aria": "Cookie consent",
@@ -964,6 +976,21 @@
     "year12": "12th",
     "lagBadge": "{count} behind",
     "lagBanner": "The plan is {count} lessons ahead of the saved ticks — tick what was taught, or confirm your class hasn't covered them.",
-    "conflictReloaded": "Someone else saved this list in the meantime — it has been reloaded. Check the ticks and save again."
+    "conflictReloaded": "Someone else saved this list in the meantime — it has been reloaded. Check the ticks and save again.",
+    "gateSetup": "Before your first session, tick what was taught in class — questions are picked from your ticks. It takes a minute.",
+    "gateEmpty": "No questions yet for the ticked lessons. Tick more taught lessons, or come back as the syllabus advances."
+  },
+  "help": {
+    "title": "Help",
+    "subtitle": "How the platform works for you, in short.",
+    "tabStudent": "Student",
+    "tabParent": "Parent",
+    "tabTutor": "Tutor",
+    "resumeSetup": "Redo setup",
+    "telegramLink": "Connect Telegram"
+  },
+  "howItWorks": {
+    "title": "How it works",
+    "more": "Details in Help"
   }
 }
