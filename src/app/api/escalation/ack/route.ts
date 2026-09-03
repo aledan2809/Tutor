@@ -78,7 +78,12 @@ async function _GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(new URL(to, url.origin), 302);
+  // Location RELATIV, dinadins. `new URL(to, url.origin)` pare corect și e greșit în
+  // producție: în spatele nginx `url.origin` e originea INTERNĂ (https://localhost:3013),
+  // deci butonul din Telegram trimitea telefonul elevului către localhost. O cale
+  // relativă o rezolvă browserul față de originea publică, oricare ar fi ea — și e
+  // sigură fiindcă `safeRedirectPath` a garantat deja un singur slash inițial.
+  return new NextResponse(null, { status: 302, headers: { Location: to } });
 }
 
 export const GET = withErrorHandler(_GET);
