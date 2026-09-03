@@ -300,6 +300,50 @@ async function sendTelegramChannel(
 }
 
 /**
+ * The Telegram nudge's text — PURE, so the copy is testable without a bot.
+ *
+ * Uses the reminder's OWN `title`/`message`, which are Romanian and name the session
+ * and its time (`reminders.ts:reminderCopy`). Push (rung 1) already did this; the
+ * Telegram rung threw both away and printed an English stats blob instead, so the
+ * child was told "64 sessions this week | 3-day streak at risk | 61 reminders sent"
+ * and never what to actually study. Title + body mirrors push on purpose — same
+ * reminder, same words, whichever rung reaches him.
+ *
+ * The encouragement is optional and positive-only; a broken streak says nothing.
+ */
+export function buildTelegramReminderText(input: {
+  userName: string;
+  title: string | null;
+  message: string | null;
+  encouragement: string | null;
+}): string {
+  const lines: string[] = [`📚 Salut ${input.userName}!`, ""];
+
+  if (input.title && input.message) {
+    lines.push(`<b>${input.title}</b>`, input.message);
+  } else if (input.message) {
+    lines.push(input.message);
+  } else if (input.title) {
+    lines.push(`<b>${input.title}</b>`);
+  } else {
+    // Nicio copie de memento (cascadă pornită din alt motiv) — text generic, ca înainte.
+    lines.push("E timpul pentru un quiz scurt — hai să-ți păstrezi seria de studiu.");
+  }
+
+  if (input.encouragement) lines.push("", input.encouragement);
+  return lines.join("\n");
+}
+
+/**
+ * Button label. A reminder deep-link starts a specific session
+ * (`/dashboard/practice?start=<type>`), so say that instead of "open the app" —
+ * the whole point of the rung is one tap into the right session.
+ */
+export function buttonLabelFor(url: string | undefined): string {
+  return url && /[?&]start=/.test(url) ? "Începe sesiunea" : "Deschide eTutor";
+}
+
+/**
  * Telegram notification — free nudge for opted-in users. No template approval
  * (bot can message freely after /start), so we send localized text + a button
  * back into the app.
@@ -314,11 +358,14 @@ async function sendTelegramNotification(
   // sendText/sendInlineKeyboard default to parseMode HTML — escape interpolated
   // values so a name/stat containing < > & can't break parsing.
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  const userName = esc((payload.metadata.userName as string) ?? "Student");
-  const stats = payload.metadata.stats ? esc(String(payload.metadata.stats)) : "";
-  const text = stats
-    ? `📚 Salut ${userName}! ${stats}\n\nDeschide eTutor și păstrează-ți seria de studiu.`
-    : `📚 Salut ${userName}! E timpul pentru un quiz scurt — hai să-ți păstrezi seria de studiu.`;
+  const text = buildTelegramReminderText({
+    userName: esc((payload.metadata.userName as string) ?? "Student"),
+    title: payload.metadata.title ? esc(String(payload.metadata.title)) : null,
+    message: payload.metadata.message ? esc(String(payload.metadata.message)) : null,
+    encouragement: payload.metadata.encouragement
+      ? esc(String(payload.metadata.encouragement))
+      : null,
+  });
 
   // Absolute https URL for the Telegram button (relative paths aren't allowed).
   const base = (process.env.AUTH_URL ?? "").replace(/\/$/, "");
@@ -333,7 +380,7 @@ async function sendTelegramNotification(
   try {
     if (buttonUrl) {
       const res = await client.sendInlineKeyboard(chatId, text, [
-        [{ text: "Deschide eTutor", url: buttonUrl }],
+        [{ text: buttonLabelFor(rawUrl), url: buttonUrl }],
       ]);
       return res.success;
     }

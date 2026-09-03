@@ -257,11 +257,13 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     data: { status: "ESCALATING" },
   });
 
-  // Telegram nudge can carry a short progress line (streak/XP at risk).
+  // The Telegram nudge carries the reminder's OWN copy (title/message, Romanian,
+  // session-specific — exactly what push already uses) plus at most one encouraging
+  // line. It used to carry an English pressure blob instead; see encouragementFor().
   const metadata = (event.metadata as Record<string, unknown>) ?? {};
   if (event.channel === "TELEGRAM") {
-    const stats = await generateUserStats(event.userId);
-    metadata.stats = stats;
+    const encouragement = await studentEncouragement(event.userId);
+    if (encouragement) metadata.encouragement = encouragement;
   }
 
   // Send notification
@@ -563,8 +565,41 @@ export async function detectMissedSessions(): Promise<string[]> {
 }
 
 /**
- * Generate student stats for L3 WhatsApp pressure message.
- * Includes weekly progress, missed sessions count, streak status.
+ * One short, POSITIVE line for the gentle rungs (Telegram). Romanian.
+ *
+ * Replaces the old `generateUserStats`, whose own docstring said it produced the
+ * "L3 WhatsApp pressure message" — an English blob of "0 sessions this week |
+ * streak lost | N reminders sent". It had drifted onto the TELEGRAM rung, i.e. the
+ * FIRST and gentlest nudge, so a child got a guilt-trip instead of a reminder. Two
+ * of its numbers had no business reaching a student at all: `reminders sent` counts
+ * how many times we nagged him (our metric, not his progress), and the gamification
+ * LEVEL name read as if he were an instructor.
+ *
+ * (WhatsApp never consumed this — it sends the Meta-approved `study_reminder`
+ * template in `ro`. The docstring was stale, not the routing.)
+ *
+ * Returns null when there is nothing encouraging to say. A broken streak stays
+ * SILENT on purpose: "streak lost" on a reminder is discouragement, and the point
+ * of this rung is to get the child to start, not to score him.
+ */
+export function encouragementFor(streak: number): string | null {
+  if (!Number.isFinite(streak) || streak <= 0) return null;
+  if (streak === 1) return "🔥 Prima zi din serie — hai să facem a doua.";
+  return `🔥 ${streak} zile la rând — nu rupe seria azi.`;
+}
+
+async function studentEncouragement(userId: string): Promise<string | null> {
+  const gamification = await prisma.userGamification.findFirst({
+    where: { userId },
+    orderBy: { updatedAt: "desc" },
+  });
+  return encouragementFor(gamification?.streak ?? 0);
+}
+
+/**
+ * @deprecated Kept only so nothing silently loses the weekly-progress query if a
+ * paid-tier message ever needs it. NOT wired to any channel — see
+ * `studentEncouragement` above for what the cascade actually sends.
  */
 async function generateUserStats(userId: string): Promise<string> {
   const now = new Date();
