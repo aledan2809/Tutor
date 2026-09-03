@@ -46,6 +46,7 @@ model User {
   image         String?
   password      String?
   isSuperAdmin  Boolean   @default(false)
+  accountRole   AccountRole?
   locale        String    @default("en")
   // Clasa în care e elevul (5-12), declarată în flow-ul de inițiere al Grilelor.
   // Comandă checklistul programei parcurse; null = neîntrebat încă.
@@ -314,6 +315,23 @@ model Domain {
   escalationThresholds EscalationThreshold[]
   dashboardAnalytics   DashboardAnalytics[]
   bibliography         Bibliography[]
+}
+
+/// What the account IS, as declared at signup — distinct from EnrollmentRole,
+/// which is per-domain and grants access.
+///
+/// Needed because a parent had no representation: registering with a subject always
+/// granted STUDENT, so a parent got the learner menu, and a parent with no subject
+/// had no enrollment at all and fell into the student onboarding, which then
+/// enrolled them as a student. Nullable = every account created before this keeps
+/// the old, enrollment-derived behaviour until it is reclassified.
+///
+/// TUTOR is never self-assigned at signup: an INSTRUCTOR enrollment grants a
+/// domain-wide view of every student in it, so it stays admin-granted.
+enum AccountRole {
+  STUDENT
+  PARENT
+  TUTOR
 }
 
 enum EnrollmentRole {

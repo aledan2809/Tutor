@@ -28,9 +28,14 @@ export default async function DashboardLayout({
   }
 
   // Bottom tab bar is for the learners (kids) — parents/instructors keep the menu.
-  const isStudent = session.user.enrollments?.some((e) =>
+  // An explicit PARENT/TUTOR account is not a learner even if a legacy STUDENT
+  // enrollment is still attached (registering with a subject always granted one).
+  const hasStudentEnrollment = session.user.enrollments?.some((e) =>
     e.roles.includes("STUDENT" as never)
   );
+  const isStudent =
+    session.user.accountRole === "STUDENT" ||
+    (session.user.accountRole == null && hasStudentEnrollment);
 
   // A paying parent unlocks the family section from their subscription plan, even
   // before any WATCHER enrollment exists (buying a Family/Trio plan grants seats,
@@ -56,12 +61,16 @@ export default async function DashboardLayout({
   );
   // A parent account that isn't itself a learner: the push banner must fire for them
   // (they never answer questions) and the setup checklist should prompt linking a child.
+  const isParentAccount = session.user.accountRole === "PARENT";
   const isWatcherOnly =
-    (!!isWatcher || hasFamilyPlan) &&
+    (!!isWatcher || hasFamilyPlan || isParentAccount) &&
     !isStudent &&
     !isInstructor &&
     !session.user.isSuperAdmin;
-  const showLinkChild = (!!isWatcher || hasFamilyPlan) && !session.user.isSuperAdmin;
+  // A parent who registered as one has no child linked yet — that is exactly who
+  // the "add your child" step is for.
+  const showLinkChild =
+    (!!isWatcher || hasFamilyPlan || isParentAccount) && !session.user.isSuperAdmin;
 
   return (
     <div className="flex min-h-screen">

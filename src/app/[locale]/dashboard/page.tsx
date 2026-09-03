@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { DomainSwitcher } from "@/components/domain-switcher";
 import { DemoQuizCard } from "@/components/demo-quiz-card";
 import { OnboardingWizard } from "@/components/dashboard/onboarding-wizard";
@@ -172,7 +172,27 @@ export default function DashboardPage() {
 
       {/* No enrollments → guided learning onboarding (subject → calibration test).
           The old "browse domains" list stays reachable from inside the wizard. */}
-      {data.domains.length === 0 && <OnboardingWizard />}
+      {data.domains.length === 0 && session?.user?.accountRole !== "PARENT" && (
+        <OnboardingWizard />
+      )}
+
+      {/* A parent with nothing linked yet: the student wizard would have enrolled
+          them in a subject as a LEARNER, which is how parents ended up with the
+          student menu in the first place. */}
+      {data.domains.length === 0 && session?.user?.accountRole === "PARENT" && (
+        <div className="mb-6 rounded-xl border border-blue-800 bg-blue-950/20 p-4">
+          <h3 className="text-sm font-medium text-white">Leagă contul copilului</h3>
+          <p className="mt-1 text-sm text-gray-400">
+            Ca să-i vezi progresul și să primești alerte, adaugă-l din Familia mea.
+          </p>
+          <Link
+            href="/dashboard/family"
+            className="mt-2 inline-block text-sm text-blue-400 hover:text-blue-300"
+          >
+            Familia mea →
+          </Link>
+        </div>
+      )}
 
       {/* TODAY view — one clear next action + guided path (proactive default) */}
       {data.domains.length > 0 && view === "today" && (

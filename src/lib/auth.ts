@@ -5,7 +5,7 @@ import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import type { EnrollmentRole } from "@prisma/client";
+import type { AccountRole, EnrollmentRole } from "@prisma/client";
 
 declare module "next-auth" {
   interface Session {
@@ -15,6 +15,8 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       isSuperAdmin: boolean;
+      /** Declared at signup; null on every account created before the column. */
+      accountRole: AccountRole | null;
       enrollments: {
         domainId: string;
         domainSlug: string;
@@ -171,6 +173,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               return null;
             }
             token.isSuperAdmin = dbUser.isSuperAdmin ?? false;
+            token.accountRole = dbUser.accountRole ?? null;
             token.enrollments = dbUser.enrollments.map((e) => ({
               domainId: e.domain.id,
               domainSlug: e.domain.slug,
@@ -186,12 +189,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       // Always-defined defaults so the session callback never sees undefined.
       if (token.isSuperAdmin === undefined) token.isSuperAdmin = false;
+      if (token.accountRole === undefined) token.accountRole = null;
       if (token.enrollments === undefined) token.enrollments = [];
       return token;
     },
     async session({ session, token }) {
       session.user.id = token.id as string;
       session.user.isSuperAdmin = token.isSuperAdmin as boolean;
+      session.user.accountRole = (token.accountRole as AccountRole | null) ?? null;
       session.user.enrollments = token.enrollments as {
         domainId: string;
         domainSlug: string;

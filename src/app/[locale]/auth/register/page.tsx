@@ -50,6 +50,9 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  // Cine isi face contul. Fara asta, inscrierea acorda STUDENT oricui alegea o
+  // materie, deci un parinte primea meniul de elev si nu-l vedea niciodata pe al lui.
+  const [role, setRole] = useState<"STUDENT" | "PARENT">("STUDENT");
   const [domainSlugs, setDomainSlugs] = useState<string[]>([]);
   const [domains, setDomains] = useState<Domain[]>([]);
   const [loading, setLoading] = useState(false);
@@ -138,6 +141,7 @@ export default function RegisterPage() {
           name,
           email,
           password,
+          role,
           domainSlugs,
           ...(voucherCode ? { voucherCode } : {}),
         }),
@@ -232,6 +236,44 @@ export default function RegisterPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-3">
+          {/* Ascuns pe linkurile de campanie (?exam=): acelea duc elevi la o materie
+              anume, iar intrebarea ar fi zgomot pe drumul lor. */}
+          {!campaign && (
+            <div>
+              <label className="mb-1 block text-sm text-gray-400">
+                {ro ? "Sunt" : "I am"}
+              </label>
+              <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={ro ? "Sunt" : "I am"}>
+                {([
+                  ["STUDENT", ro ? "Elev" : "Student"],
+                  ["PARENT", ro ? "Părinte" : "Parent"],
+                ] as const).map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    role="radio"
+                    aria-checked={role === value}
+                    onClick={() => setRole(value)}
+                    className={`min-h-[44px] rounded-lg border px-3 text-sm transition ${
+                      role === value
+                        ? "border-blue-500 bg-blue-600/10 text-white"
+                        : "border-gray-700 bg-gray-800 text-gray-300 hover:text-white"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {role === "PARENT" && (
+                <p className="mt-1 text-xs text-gray-500">
+                  {ro
+                    ? "Îți vei lega copilul după ce intri în cont."
+                    : "You will link your child once you are signed in."}
+                </p>
+              )}
+            </div>
+          )}
+
           <div>
             <label className="mb-1 block text-sm text-gray-400">{ro ? "Nume" : "Name"}</label>
             <input
@@ -329,7 +371,13 @@ export default function RegisterPage() {
               <label className="mb-1 block text-sm text-gray-400">
                 {campaign
                   ? "Materiile tale"
-                  : ro ? "Materii (poți alege mai multe, opțional)" : "Subjects (pick one or more, optional)"}
+                  : role === "PARENT"
+                    ? ro
+                      ? "Materiile copilului (opțional — le poți alege și mai târziu)"
+                      : "Your child's subjects (optional — you can pick them later)"
+                    : ro
+                      ? "Materii (poți alege mai multe, opțional)"
+                      : "Subjects (pick one or more, optional)"}
               </label>
               <div className="max-h-44 space-y-1 overflow-y-auto rounded-lg border border-gray-700 bg-gray-800 p-2">
                 {(campaign ? domains.filter((d) => campaign.slugs.includes(d.slug)) : domains).map((d) => {

@@ -10,6 +10,7 @@ import {
   recordCampaignSignup,
 } from "@/lib/campaign-attribution";
 import { logger } from "@/lib/logger";
+import { SIGNUP_ROLES, accountRoleForSignup, enrollmentsForSignup } from "@/lib/signup-role";
 
 const schema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -18,6 +19,8 @@ const schema = z.object({
   domainSlug: z.string().optional(), // legacy single-select
   domainSlugs: z.array(z.string()).optional(), // multi-select
   voucherCode: z.string().min(1).max(50).optional(), // campaign links (?voucher=)
+  // No TUTOR here on purpose — see SIGNUP_ROLES.
+  role: z.enum(SIGNUP_ROLES).default("STUDENT"),
 });
 
 async function _POST(req: NextRequest) {
@@ -36,7 +39,7 @@ async function _POST(req: NextRequest) {
     );
   }
 
-  const { name, email, password, domainSlug, domainSlugs, voucherCode } = parsed.data;
+  const { name, email, password, domainSlug, domainSlugs, voucherCode, role } = parsed.data;
 
   // Check if user already exists
   const existing = await prisma.user.findUnique({ where: { email } });
@@ -54,11 +57,14 @@ async function _POST(req: NextRequest) {
       name,
       email,
       password: hashedPassword,
+      accountRole: accountRoleForSignup(role),
       emailVerified: new Date(), // Auto-verify for credentials signup
     },
   });
 
-  // Auto-enroll in selected domain(s) as STUDENT. Supports multi-select
+  // Auto-enroll in the selected domain(s): STUDENT for a learner, WATCHER for a
+  // parent (who picks their CHILD's subjects — WATCHER is per-domain, so without
+  // one the child never shows up in their monitoring list). Supports multi-select
   // (domainSlugs[]) and the legacy single domainSlug.
   const slugs = Array.from(
     new Set([...(domainSlugs ?? []), ...(domainSlug ? [domainSlug] : [])])
@@ -71,7 +77,10 @@ async function _POST(req: NextRequest) {
     });
     if (found.length) {
       await prisma.enrollment.createMany({
-        data: found.map((d) => ({ userId: user.id, domainId: d.id, roles: ["STUDENT"] as const })),
+        data: enrollmentsForSignup(
+          role,
+          found.map((d) => d.id)
+        ).map((e) => ({ userId: user.id, ...e })),
         skipDuplicates: true,
       });
       enrolledCount = found.length;

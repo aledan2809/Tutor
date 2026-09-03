@@ -71,11 +71,18 @@ async function _POST(req: NextRequest) {
       data: { usedCount: { increment: 1 } },
     });
 
-    // Enroll in chosen subjects (idempotent via composite unique)
+    // Enroll in chosen subjects (idempotent via composite unique).
+    // A parent activating their child's subject must NOT be turned into a learner:
+    // one STUDENT row is enough to flip them back to the student menu.
+    const me = await tx.user.findUnique({
+      where: { id: userId },
+      select: { accountRole: true },
+    });
+    const role = me?.accountRole === "PARENT" ? "WATCHER" : "STUDENT";
     for (const d of domains) {
       await tx.enrollment.upsert({
         where: { userId_domainId: { userId, domainId: d.id } },
-        create: { userId, domainId: d.id, roles: ["STUDENT"], isActive: true },
+        create: { userId, domainId: d.id, roles: [role], isActive: true },
         update: { isActive: true },
       });
     }

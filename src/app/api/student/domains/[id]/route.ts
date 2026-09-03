@@ -84,11 +84,13 @@ async function _POST(
     }, { status: 200 });
   }
 
+  // Same guard as /api/activate: joining a domain must not turn a parent account
+  // into a learner one.
   const enrollment = await prisma.enrollment.create({
     data: {
       userId: session.user.id,
       domainId,
-      roles: ["STUDENT"],
+      roles: [session.user.accountRole === "PARENT" ? "WATCHER" : "STUDENT"],
     },
     include: { domain: true },
   });
