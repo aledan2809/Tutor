@@ -24,7 +24,26 @@ Am păstrat funcția moartă `@deprecated` „ca să nu pierdem interogarea". `t
 `etutor.ro` → 502. Remediat prin ștergerea funcției (`906376a`); 200 + 0 restarturi instabile după.
 Vezi **L29** — e **L26 repetată**, lecție scrisă de mine cu o sesiune înainte.
 
+### Findings /review, toate trei reparate (`5cd4949`, `d4e0c76`)
+1. **Tap-ul din Telegram nu confirma memento-ul** (medium) — `acknowledgedAt` rămânea null, deci
+   cascada urca la treapta următoare chiar dacă elevul răspunsese pe canalul gratuit. Rută nouă
+   `GET /api/escalation/ack?e=&to=` care confirmă + redirectează, fără JavaScript. `safeRedirectPath`
+   respinge protocol-relativ (`//evil.com`), absolut și CR/LF — altfel devenea redirect deschis
+   apelabil din orice mesaj Telegram.
+2. **Builder-ul emitea HTML fără să escapeze** (low) — escaparea mutată înăuntru, lângă `<b>`.
+3. **Aserțiune vidă scrisă de mine** (low) — `trimEnd()` ștergea exact ce căuta regexul.
+
+Verificat pe producție cu date reale: butonul → `https://etutor.ro/api/escalation/ack?e=<id real>&to=…`;
+`//evil.test` și `https://evil.test` → ambele `/dashboard`. Suita 685 → 695.
+
+### 🔴 Al doilea incident, prins de verificarea live
+Redirectul întorcea `https://localhost:3013/...` — `url.origin` în spatele nginx e originea INTERNĂ.
+Butonul ar fi dus telefonul elevului nicăieri. Prins de un `curl -w '%{redirect_url}'` pe prod la
+minute după deploy; nimic nu dădea eroare. Vezi **L30**.
+
 ## Lessons Learned (sesiunea 2026-09-03)
+- **L30** — `url.origin` e originea internă în spatele unui proxy; un redirect pentru browserul
+  utilizatorului se face cu `Location` RELATIV, iar clasa asta se prinde doar cu curl pe prod.
 - **L29** — cod mort ținut „pentru orice eventualitate" pică `next build` pe lint; `tsc` nu te
   avertizează; iar un restart necondiționat de build transformă o eroare prinsă în avarie.
 

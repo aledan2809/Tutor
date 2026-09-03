@@ -263,3 +263,12 @@ Wiring `logAudit({ metadata: { planId, changes: data } })` where `data: Record<s
 - **Never keep dead code as documentation.** If the reason to keep it is "we might want this later", the comment explaining *why it went away* is the artifact worth keeping; git holds the rest.
 - **Gate the restart on the build**: `npm run build && [ -d .next/server ] && pm2 restart …`. A restart that runs after a failed build converts a caught error into an outage.
 
+## L30 — 2026-09-03 — Behind a reverse proxy, `url.origin` is the INTERNAL origin — never build a user-facing redirect from it
+**Symptom**: The new `GET /api/escalation/ack?e=…&to=…` (which records a Telegram tap, then forwards the student to the session) returned `Location: https://localhost:3013/dashboard/practice?start=quick` in production. A tap from Telegram would have sent the student's phone to an address that does not exist off the server.
+**Root cause**: `NextResponse.redirect(new URL(to, url.origin))`. `url` comes from `req.url`, and behind nginx that is the **internal** upstream address (`localhost:3013`), not the public host. It looks right locally — where internal and public origin are the same — and only diverges in production, i.e. exactly where the link is used.
+**Fix**: return a **relative** `Location` instead — `new NextResponse(null, { status: 302, headers: { Location: to } })`. The browser resolves it against whatever origin it actually reached, so the answer is right on every host, and it is safe here because `safeRedirectPath` has already guaranteed a single leading slash. (`process.env.AUTH_URL` would also work — it is the canonical public origin — but a relative Location needs no configuration to be correct.) Commit `d4e0c76`.
+**Prevention**:
+- For a redirect the **user's browser** follows, prefer a relative `Location`. Reach for an absolute URL only when you must cross origins, and then build it from the configured public origin (`AUTH_URL`), never from `req.url`.
+- `req.url` / `url.origin` / `req.headers.host` are all upstream-facing behind a proxy. Treat them as transport details, not as identity.
+- **Curl the deployed route and read `redirect_url`.** Unit tests cannot see this class: the origin only becomes wrong once nginx is in front. The bug was caught by one `curl -w '%{redirect_url}'` against production minutes after deploy — and would otherwise have shipped silently, since nothing errors.
+
