@@ -596,64 +596,6 @@ async function studentEncouragement(userId: string): Promise<string | null> {
   return encouragementFor(gamification?.streak ?? 0);
 }
 
-/**
- * @deprecated Kept only so nothing silently loses the weekly-progress query if a
- * paid-tier message ever needs it. NOT wired to any channel — see
- * `studentEncouragement` above for what the cascade actually sends.
- */
-async function generateUserStats(userId: string): Promise<string> {
-  const now = new Date();
-  const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-  const [weekSessions, gamification, recentEscalations] = await Promise.all([
-    prisma.session.count({
-      where: {
-        userId,
-        startedAt: { gte: oneWeekAgo },
-        endedAt: { not: null },
-      },
-    }),
-    prisma.userGamification.findFirst({
-      where: { userId },
-      orderBy: { updatedAt: "desc" },
-    }),
-    prisma.escalationEvent.count({
-      where: {
-        userId,
-        createdAt: { gte: oneWeekAgo },
-        status: "COMPLETED",
-        sentAt: { not: null },
-      },
-    }),
-  ]);
-
-  const streak = gamification?.streak ?? 0;
-  const xp = gamification?.xp ?? 0;
-  const level = gamification?.level ?? "Cadet";
-
-  const parts: string[] = [];
-
-  if (weekSessions === 0) {
-    parts.push("0 sessions this week");
-  } else {
-    parts.push(`${weekSessions} session${weekSessions > 1 ? "s" : ""} this week`);
-  }
-
-  if (streak === 0) {
-    parts.push("streak lost");
-  } else {
-    parts.push(`${streak}-day streak at risk`);
-  }
-
-  parts.push(`${xp} XP (${level})`);
-
-  if (recentEscalations > 1) {
-    parts.push(`${recentEscalations} reminders sent`);
-  }
-
-  return parts.join(" | ");
-}
-
 function getEscalationTitle(level: number): string {
   const titles: Record<number, string> = {
     1: "Time to study!",
