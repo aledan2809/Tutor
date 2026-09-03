@@ -251,3 +251,15 @@ Wiring `logAudit({ metadata: { planId, changes: data } })` where `data: Record<s
 - When a lookup miss means "disabled", ask what an *unknown* key should mean. Here "unknown → off" silently disabled a whole channel; "unknown → on" would have been noisy and correct.
 - A step that closes as `COMPLETED` without doing its work is unobservable. If a skip and a success share a terminal state, record the reason for the skip.
 - **Before claiming a delivery path works, call the function production calls.** Name the exact entry point in the verification, not the feature ("Telegram works"). Sibling helpers that end in the same API call are not the same path.
+
+## L29 — 2026-09-03 — Dead code kept "just in case" fails `next build` on lint and takes production down; `tsc` won't warn you
+**Symptom**: After replacing the Telegram nudge's text source, I kept the old `generateUserStats` marked `@deprecated`, "so we don't silently lose the weekly-progress query". `tsc --noEmit` passed, tests passed, I pushed and deployed. On the VPS `next build` **failed** — `'generateUserStats' is defined but never used @typescript-eslint/no-unused-vars` — and the `pm2 restart` that followed put the process into a crash loop against a half-written `.next`. **etutor.ro returned 502.**
+**Root cause**: two mistakes compounding.
+1. `next build` runs ESLint; `tsc --noEmit` does not. An unused module-level function is a *build error* in this project but invisible to the local typecheck I trusted. This is **L26 restated** — I wrote that lesson about an unused route-handler param and then walked into the same wall from a different direction, one session later.
+2. The deploy chained `npm run build && pm2 restart` in a single command whose earlier steps had already succeeded, so the restart ran on the wreckage of a failed build instead of being gated on it.
+**Fix**: deleted the function (commit `906376a`). The query is five minutes of git archaeology if it is ever wanted again; keeping it cost a production outage. Rebuilt, restarted, verified `200` on `/api/auth/session` and `0` unstable restarts.
+**Prevention**:
+- **Run `npx next lint --file <each changed file>` before pushing.** `tsc --noEmit` is necessary and not sufficient — they check different things, and only one of them gates the build.
+- **Never keep dead code as documentation.** If the reason to keep it is "we might want this later", the comment explaining *why it went away* is the artifact worth keeping; git holds the rest.
+- **Gate the restart on the build**: `npm run build && [ -d .next/server ] && pm2 restart …`. A restart that runs after a failed build converts a caught error into an outage.
+

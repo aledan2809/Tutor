@@ -1,5 +1,32 @@
 # Project Status - Tutor
-Last Updated: 2026-09-01 (treapta Telegram din cascadă — sărită tăcut pentru TOȚI utilizatorii; reparată, deployată, verificată pe date de producție)
+Last Updated: 2026-09-03 (conținutul memento-ului Telegram reparat; incident 502 provocat de mine, remediat în ~4 min)
+<!-- anterior: 2026-09-01 (treapta Telegram din cascadă -->
+<!--  — sărită tăcut pentru TOȚI utilizatorii; reparată, deployată, verificată pe date de producție) -->
+
+## Current State (Sesiunea 2026-09-03 — conținutul memento-ului + un 502 provocat de mine)
+
+Rareș tot nu primea remindere utile, deși ele AJUNGEAU: treapta Telegram arunca textul propriu al
+memento-ului și tipărea în loc un bloc englezesc de presiune — „64 sessions this week | 3-day streak
+at risk | 6170 XP (Instructor) | 61 reminders sent" — construit pentru treapta WhatsApp plătită.
+Push (treapta 1) folosea corect `title`/`message`; doar Telegram le ignora.
+
+**Reparat** (`7d2bb75`): `buildTelegramReminderText` (pură, exportată) folosește copia memento-ului ca
+push-ul + `encouragementFor(streak)` — o singură linie română, pozitivă, care **tace** pe serie ruptă
++ `buttonLabelFor` → „Începe sesiunea" când linkul chiar pornește una. 13 aserțiuni, probate prin
+mutație. Suita 672 → 685. Verificat live: mesajul nou livrat lui Rareș, cu seria reală (4 zile).
+
+**Corecție la propriul diagnostic**: blocul NU ajungea pe WhatsApp — acela trimite șablonul Meta
+`study_reminder` în `ro`. Comentariul funcției era învechit, nu rutarea.
+
+### 🔴 Incident: am pus producția pe 502 (~4 minute)
+Am păstrat funcția moartă `@deprecated` „ca să nu pierdem interogarea". `tsc` trece, **eslint nu** →
+`next build` a eșuat pe VPS, iar `pm2 restart` din același lanț a repornit peste un `.next` rupt.
+`etutor.ro` → 502. Remediat prin ștergerea funcției (`906376a`); 200 + 0 restarturi instabile după.
+Vezi **L29** — e **L26 repetată**, lecție scrisă de mine cu o sesiune înainte.
+
+## Lessons Learned (sesiunea 2026-09-03)
+- **L29** — cod mort ținut „pentru orice eventualitate" pică `next build` pe lint; `tsc` nu te
+  avertizează; iar un restart necondiționat de build transformă o eroare prinsă în avarie.
 
 ## Current State (Sesiunea 2026-09-01 — treapta Telegram nu se trimisese niciodată; regim mesh)
 
