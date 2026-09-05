@@ -56,6 +56,20 @@ neighbouring subjects, however related — if the material does not cover it, it
 not a question for this test. Where the material gives figures, scripts or named
 steps, prefer questions that check those.
 
+Each question must STAND ALONE. The student sees only the question and its options —
+never this material. So:
+- do NOT write "conform materialului", "potrivit lecției", "în textul de mai sus", or
+  any phrase that points at something the student cannot see;
+- do NOT rely on a figure, list or example being visible;
+- spell out the context inside the question itself. Instead of "Care este ținta
+  zilnică recomandată?", write "Câte conversații noi pe zi recomandă programul, ca
+  țintă în primele șase luni?".
+- exactly one option may be defensible as correct, and the correct one must not be
+  conspicuously longer or more detailed than the others.
+
+A question that fails any of these is discarded by an independent judge before it is
+stored, so writing them that way wastes the attempt.
+
 --- MATERIAL ---
 ${material.slice(0, 12000)}
 --- END MATERIAL ---`

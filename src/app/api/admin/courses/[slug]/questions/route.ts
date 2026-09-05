@@ -27,8 +27,16 @@ const bodySchema = z.object({
   perModule: z.number().int().min(1).max(15).default(8),
   /** Which modules to do now (1-based). Omitted = all of them. */
   moduleOrders: z.array(z.number().int().min(1)).max(20).optional(),
-  /** Skip modules that already have questions, so a re-run resumes instead of duplicating. */
-  onlyEmpty: z.boolean().default(true),
+  /**
+   * What to do with a module that already has questions.
+   *   "skip"  — leave it alone; a re-run resumes where it stopped
+   *   "topUp" — generate only the difference up to perModule
+   *   "add"   — generate perModule more regardless
+   * "topUp" is the default because yields vary: one module came back with eight
+   * usable questions and its neighbour with two, and skipping the second would
+   * leave the course permanently lopsided.
+   */
+  existingPolicy: z.enum(["skip", "topUp", "add"]).default("topUp"),
   difficulty: z.number().int().min(1).max(5).default(3),
   language: z.enum(["ro", "en"]).default("ro"),
 });
@@ -42,7 +50,7 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
-  const { perModule, moduleOrders, onlyEmpty, difficulty, language } = parsed.data;
+  const { perModule, moduleOrders, existingPolicy, difficulty, language } = parsed.data;
 
   const course = await prisma.course.findUnique({
     where: { slug },
@@ -87,10 +95,21 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
     const existing = await prisma.question.count({ where: { domainId: course.domain.id, topic } });
     const row = { order: m.order, module: m.title, existing, generated: 0, kept: 0, rejected: 0 } as (typeof report)[number];
 
-    if (onlyEmpty && existing > 0) {
-      row.note = "sărit — are deja întrebări";
-      report.push(row);
-      continue;
+    let want = perModule;
+    if (existing > 0) {
+      if (existingPolicy === "skip") {
+        row.note = "sărit — are deja întrebări";
+        report.push(row);
+        continue;
+      }
+      if (existingPolicy === "topUp") {
+        want = perModule - existing;
+        if (want <= 0) {
+          row.note = `sărit — are deja ${existing}, cât s-a cerut`;
+          report.push(row);
+          continue;
+        }
+      }
     }
 
     try {
@@ -111,7 +130,7 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
         domain: course.domain.name,
         subject: course.title,
         topic,
-        count: perModule,
+        count: want,
         difficulty,
         type: "MULTIPLE_CHOICE",
         language,
