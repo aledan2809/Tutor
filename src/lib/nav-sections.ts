@@ -40,7 +40,9 @@ export interface NavUser extends ClientRoleUser {
  * and reversible. To bring one back, put it in a section AND remove it here.
  */
 const HIDDEN_NAV = new Set([
-  "/dashboard/lessons", // Lesson = 0
+  // "/dashboard/lessons" — was hidden while Lesson had 0 rows AND the student list
+  // read a different table (ContentSource), so nothing written could ever show up.
+  // Both are fixed; courses put lessons back in front of the learner.
   "/dashboard/assessment", // Assessment = 0
   "/dashboard/exams", // ExamSimulation = 1 (~empty; exam-bank/Simulări stays)
   "/dashboard/bibliography", // Bibliography = 11 (niche juridic/aviation)

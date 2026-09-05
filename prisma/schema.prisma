@@ -364,6 +364,7 @@ model Domain {
   studySessions   StudySession[]
   // Phase 4: Student Dashboard & Learning UX
   lessons         Lesson[]
+  courses         Course[]
   assessments     Assessment[]
   // Phase 3: Learning Engine
   progress        Progress[]
@@ -1188,6 +1189,62 @@ model EscalationTemplate {
 
 // ─── Phase 4: Student Dashboard & Learning UX ───
 
+/// A course: an ordered path through a subject.
+///
+/// Until now a "chapter" was a free string on each question (`Question.topic`),
+/// checked against a list written by hand in src/lib/curriculum.ts. That works for
+/// school subjects, where the order is the school's. It does not work for a course
+/// written from scratch, where Module 1 must come before Module 8 and the test at
+/// the end of a module has to know which module it belongs to.
+///
+/// Added alongside, not instead of: the 4.179 existing questions and the whole
+/// practice engine are untouched. A subject with no course behaves exactly as before.
+model Course {
+  id          String   @id @default(cuid())
+  domainId    String
+  title       String
+  slug        String   @unique
+  description String?  @db.Text
+  /// Order among several courses in the same subject.
+  order       Int      @default(0)
+  /// Draft until someone publishes it — same meaning as everywhere else here.
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  domain  Domain         @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  modules CourseModule[]
+
+  @@index([domainId, isPublished])
+}
+
+/// One module of a course: the unit a learner finishes before the next one.
+model CourseModule {
+  id        String   @id @default(cuid())
+  courseId  String
+  /// 1-based position. Unique per course, so two modules cannot claim the same seat.
+  order     Int
+  title     String
+  summary   String?  @db.Text
+  /// The value of `Question.topic` that belongs to this module.
+  ///
+  /// Stored rather than inferred from the title. The practice engine already
+  /// filters questions by `topic`, so this is what lets a module have a test
+  /// without giving every one of the 4.179 existing questions a new foreign key.
+  /// But a match by title alone would be a coincidence: one edited title, one
+  /// stray diacritic, and the module's test silently returns nothing. Written
+  /// once, at creation, by whoever writes both sides.
+  questionTopic String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@unique([courseId, order])
+  @@index([courseId])
+}
+
 model Lesson {
   id          String   @id @default(cuid())
   domainId    String
@@ -1200,14 +1257,20 @@ model Lesson {
   difficulty  Int      @default(1) // 1-5 scale
   order       Int      @default(0) // Sort order within topic
   isPublished Boolean  @default(false)
+  /// The module this lesson belongs to. Null = a standalone lesson, which is what
+  /// every lesson written before courses existed is.
+  moduleId    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   domain   Domain           @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  module   CourseModule?    @relation(fields: [moduleId], references: [id], onDelete: SetNull)
   progress LessonProgress[]
 
   @@index([domainId, subject, topic])
   @@index([isPublished])
+
+  @@index([moduleId, order])
 }
 
 model LessonProgress {

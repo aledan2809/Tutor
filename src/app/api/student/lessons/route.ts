@@ -50,22 +50,25 @@ async function _GET(req: NextRequest) {
     return NextResponse.json({ error: "Not enrolled in this domain" }, { status: 403 });
   }
 
-  // Get content sources as lessons
+  // Lessons come from the Lesson table — the one the admin form writes into.
+  // Until 2026-09-05 this read ContentSource instead, a parallel table nothing in
+  // the app writes to (one seeded row), so a lesson written from admin was
+  // invisible here and reachable only by typing its URL. Drafts stay out.
   const where = {
     domainId,
-    isActive: true,
-    ...(subject ? { metadata: { path: ["subject"], equals: subject } } : {}),
-    ...(topic ? { metadata: { path: ["topic"], equals: topic } } : {}),
+    isPublished: true,
+    ...(subject ? { subject } : {}),
+    ...(topic ? { topic } : {}),
   };
 
   const [lessons, total] = await Promise.all([
-    prisma.contentSource.findMany({
+    prisma.lesson.findMany({
       where,
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ subject: "asc" }, { topic: "asc" }, { order: "asc" }],
     }),
-    prisma.contentSource.count({ where }),
+    prisma.lesson.count({ where }),
   ]);
 
   // Get user progress for topics in these lessons
@@ -78,35 +81,33 @@ async function _GET(req: NextRequest) {
   );
 
   // Get distinct subjects and topics for filters
-  const allSources = await prisma.contentSource.findMany({
-    where: { domainId, isActive: true },
-    select: { metadata: true },
+  const allSources = await prisma.lesson.findMany({
+    where: { domainId, isPublished: true },
+    select: { subject: true, topic: true },
   });
 
   const subjects = new Set<string>();
   const topics = new Set<string>();
   for (const src of allSources) {
-    const meta = src.metadata as Record<string, unknown> | null;
-    if (meta?.subject) subjects.add(meta.subject as string);
-    if (meta?.topic) topics.add(meta.topic as string);
+    if (src.subject) subjects.add(src.subject);
+    if (src.topic) topics.add(src.topic);
   }
 
   return NextResponse.json({
     lessons: lessons.map((l) => {
-      const meta = l.metadata as Record<string, unknown> | null;
-      const lessonSubject = (meta?.subject as string) || "";
-      const lessonTopic = (meta?.topic as string) || "";
-      const progress = progressMap.get(`${lessonSubject}:${lessonTopic}`);
+      const progress = progressMap.get(`${l.subject}:${l.topic}`);
 
       return {
         id: l.id,
-        name: l.name,
-        type: l.type,
-        subject: lessonSubject,
-        topic: lessonTopic,
-        description: (meta?.description as string) || null,
-        difficulty: (meta?.difficulty as number) || null,
-        estimatedMinutes: (meta?.estimatedMinutes as number) || null,
+        name: l.title,
+        type: "lesson",
+        slug: l.slug,
+        subject: l.subject,
+        topic: l.topic,
+        moduleId: l.moduleId,
+        description: l.summary,
+        difficulty: l.difficulty,
+        estimatedMinutes: null,
         progress: progress
           ? {
               mastery: Math.round(progress.masteryLevel),
