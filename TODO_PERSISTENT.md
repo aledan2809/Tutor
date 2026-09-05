@@ -17,7 +17,13 @@ acces = admin înscrie + cod la nevoie · coloană vertebrală Curs → Modul �
   + poartă unică `resolveDomainOrForbid` pe toate 29 rute `/api/[domain]/*` + 3 căi de auto-înscriere închise + IDOR
   `session/answer` + admin radio/confirm/audit + `Domain.joinCode` (emite/rotește/retrage; elevul introduce în Domenii).
   Verificat pe prod ca atacator (cont `leak-test-2026-09-05@tutor.app`): 9/9 + IDOR. Detalii: DEVELOPMENT_STATUS 2026-09-05, L31.
-- [ ] **W4 — coloana vertebrală Curs → Modul → Lecție** (aditiv). Modele noi `Course` (domainId, title, slug, description,
+- [x] **W4 — coloana vertebrală Curs → Modul → Lecție** — DONE + LIVE 2026-09-05 (`4033691`, migrarea 0054). Include reparația blocantului: `/api/student/lessons` citea `ContentSource`, nu `Lesson`; `/dashboard/lessons` readus în meniu.
+- [x] **W5 — generator de curs din prompt** — DONE + LIVE 2026-09-05 (`13e1c6d` + `94b5e3a` + `59f8716`). plan → revizuire → build; grilele prin `question-gate`. Plus calea `import` pentru proză scrisă în altă parte.
+- [x] **W6 — cursul „Agent imobiliar"** — 8 module importate ca ciorne 2026-09-05 (`1128b61`), în organizația REAL, materia privată `agent-imobiliar`. Raport `Reports/CURS-agent-imobiliar-2026-09-05.md`.
+- [x] **Cele 3 cereri din 2026-09-05** — termeni EN reparați ecosistem-wide (17 aplicații) · restricția de vârstă schimbată pentru elevi · două tipuri de admin (Merchant/Super), verificate pe producție.
+- [ ] **W6 rest** — grilele celor 8 module (cod gata, așteaptă un furnizor cu cotă); publicarea cursului după verificarea juridică a celor 70+ puncte; UI de curs pentru elev; înscrierea agenților REAL prin cod de acces.
+- [ ] **Ecosistem — `gemini-2.5-flash` retras de Google pentru chei noi** (404 „no longer available to new users"). Diferit de itemul cunoscut din Master despre `gemini-flash-latest` + 429. Afectează orice consumator AIRouter care cere modelul. De propus în AIRouter (§6.1, are consumatori NO-TOUCH).
+- [ ] (istoric) **W4 — descrierea inițială** (aditiv). Modele noi `Course` (domainId, title, slug, description,
   order, isPublished) → `CourseModule` (courseId, order, title, summary) → `Lesson` primește `moduleId?` + `order`; test de
   modul = `ExamSimulation` legat de modul (sau set de grile filtrat pe `Question.topic = modul`). Progres pe curs =
   agregare `LessonProgress` + attempts pe modul. **Blocant descoperit**: lista de lecții a elevului (`/api/student/lessons`)

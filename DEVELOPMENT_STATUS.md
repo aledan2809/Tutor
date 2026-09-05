@@ -1,8 +1,83 @@
 # Project Status - Tutor
-Last Updated: 2026-09-05 (bariera public/privat + cod de acces LIVE; True E2E [10] rulat după — 7 defecte reale reparate)
+Last Updated: 2026-09-05 (termeni legali reparați ecosistem-wide · două tipuri de admin · cursuri W4-W6)
 <!-- anterior: 2026-09-03 (conținutul memento-ului Telegram reparat; incident 502 provocat de mine, remediat în ~4 min) -->
 <!-- anterior: 2026-09-01 (treapta Telegram din cascadă -->
 <!--  — sărită tăcut pentru TOȚI utilizatorii; reparată, deployată, verificată pe date de producție) -->
+
+## Current State (Sesiunea 2026-09-05 partea 3 — cele 3 cereri + W4/W5/W6)
+
+### 1. Termenii în engleză — reparați pentru TOT ecosistemul, nu doar pentru Tutor
+Diagnoza mea de dimineață era greșită și am corectat-o: nu era o copiere din eat.
+`tutor` **n-avea documente proprii** și cădea pe **master**; master RO trecuse la
+vL2.2, **master EN rămăsese la v2.1**, cu secțiunea „Health and Nutrition Data".
+Măsurat pe toate 22 de aplicații: **17** primeau textul greșit din API; **una singură**
+îl arăta unui om (etutor.ro/en). Reparat prin master EN vL2.2 (traducere fidelă) →
+**0/22 documente structural greșite**. Ledger: `Legal/Reports/DIRECT-CHANGES-2026-09.md`.
+
+### 2. Restricția de vârstă — schimbată, nu ștearsă
+Textul vechi („nu colectăm cu bună știință date de la minori sub 16 ani") era **fals**:
+materiile principale pregătesc un examen dat la 14 ani. Documente proprii `tutor`
+vE1.0 (RO+EN): fără vârstă minimă pentru a învăța; sub 16 contul e al părintelui
+(art. 8 GDPR + Legea 190/2018); peste 16 elevul singur, cu părintele ca observator;
+abonamentul cere un adult. Fără re-consimțământ, per decizia userului. Verificat live
+pe toate patru paginile. **10 întrebări rămân pentru consilierul juridic** (colectăm
+vârsta la înregistrare? cum verificăm acordul parental? conturile deja create? DPIA?).
+
+### 3. Două tipuri de administrator (`b639bfa`, migrarea 0053)
+Exista unul singur: `requireAdmin` și `requireSuperAdmin` verifică amândouă
+`isSuperAdmin` — duplicate identice — deci 41 de rute erau superadmin-only, iar rolul
+ADMIN de materie producea un panou fantomă (intra, apoi 403 la aproape tot).
+Acum: `Organization` + `Domain.organizationId` + `User.organizationId`/`isOrgAdmin`,
+toate nullable → inert pentru cele 16 materii existente. Regula e pură și testată
+(`merchant-scope.ts`): PLATFORM primește filtru gol (superadminul neschimbat), ORG
+primește exact organizația lui. Aplicat pe 11 rute, review sceptic per grup: 11/11 OK.
+Rute noi `/api/org/*`, **deliberat separate** de `/api/admin/users` (acela poate seta
+`isSuperAdmin`), cu plafon de escaladare în zod: un merchant admin acordă cel mult
+INSTRUCTOR. **Verificat pe producție**: merchant adminul REAL vede o materie, creează
+întrebări în ea (201), și primește 403/404 la organizații, planuri, venituri,
+utilizatorii platformei, materia platformei, materia privată a lui Rareș, plus 400 la
+încercarea de a-și face un complice cu rol ADMIN.
+
+### W4 — coloana vertebrală Curs → Modul → Lecție (`4033691`, migrarea 0054)
+Aditivă. Legătura modul↔test e `CourseModule.questionTopic`, **stocată**, nu dedusă
+din titlu — o potrivire după titlu ar fi o coincidență pe care o diacritică o rupe în
+tăcere. Progresul se **calculează** (`course-progress.ts`, pur, 16 teste): un modul e
+gata când e și citit, și trecut (prag 80%, rotunjit în sus); modulele goale se numără
+la procentul cursului, altfel un curs cu un modul scris din opt ar arăta 100%.
+**Blocantul reparat**: `/api/student/lessons` citea `ContentSource` (tabel în care nu
+scrie nimic din aplicație) în timp ce adminul scrie în `Lesson` — o lecție scrisă din
+admin era invizibilă în listă. `/dashboard/lessons` iese din HIDDEN_NAV.
+
+### W5 — generator de curs din prompt (`13e1c6d`, `94b5e3a`, `59f8716`)
+Două apeluri: `plan` (structura, scrisă nicăieri) → revizuire umană → `build` (lecții
++ grile, toate ciorne). Grilele trec prin **aceeași poartă fail-closed**
+(`question-gate.ts`) ca generatorul existent; nu există un al doilea drum mai permisiv.
+La prima rulare pe prod a picat, iar cauza e a ecosistemului, măsurată nu presupusă:
+**`gemini-2.5-flash` a fost retras de Google pentru chei noi** (404 „no longer
+available to new users" — constatare NOUĂ, diferită de itemul din TODO-ul Master
+despre `gemini-flash-latest` + 429), claude-cli iese cu 1, mistral 429. Doar groq
+răspunde, și doar în mod text (`json_object` dă 400). Deci: groq primul, fără
+`jsonMode`, plus un extractor JSON propriu care numără acolade **în afara șirurilor**
+(o acoladă într-un enunț de grilă ar fi rupt un regex lacom). Apoi groq a atins și el
+cota zilnică (199.814 din 200.000 de tokeni).
+
+### W6 — cursul „Agent imobiliar" (`1128b61`)
+Organizația **REAL** + materia privată `agent-imobiliar`, create pe prod. Cursul:
+8 module, ~10.400 de cuvinte, scrise din promptul de trainer, cu scripturi cuvânt cu
+cuvânt și cifre marcate explicit ca ordine de mărime, nu ca statistici. **Peste 70 de
+puncte semnalate pentru verificare** la notar/avocat/contabil. Importat prin
+`action:"import"`, cale adăugată azi pentru proză scrisă în altă parte — dar **grilele
+NU au intrat pe acolo**: poarta e exact ce le desparte de bancă și nu se ocolește
+alegând altă ușă. Raport: `Reports/CURS-agent-imobiliar-2026-09-05.md`.
+
+**Rămas**: grilele celor 8 module (cod gata, așteaptă un furnizor cu cotă); publicarea
+cursului după verificarea juridică; UI de curs pentru elev; înscrierea agenților REAL
+prin cod de acces.
+
+## Lessons Learned (sesiunea 2026-09-05 partea 3)
+- L33 — „reparăm textul de pe site-ul X" poate însemna „textul e al tuturor"; măsoară
+  cine îl servește înainte de a-l repara, și raportează două cifre, nu una: câți îl
+  primesc și câți îl arată. Vezi `knowledge/lessons-learned.md`.
 
 ## Current State (Sesiunea 2026-09-05 partea 2 — True E2E Full Audit [10] pe livrarea din aceeași zi)
 
