@@ -4,8 +4,11 @@ import type { AIRequest, AIResponse } from "ai-router";
 const tutorPreset = {
   ...getProjectPreset("default"),
   projectName: "Tutor",
-  defaultProvider: "claude" as const,
-  providers: ["claude" as const, "gemini" as const, "mistral" as const],
+  // groq-first: measured 2026-09-05 on the VPS — claude-cli exits 1, gemini 404s
+  // (gemini-2.5-flash retired for new keys), mistral is rate-limited, groq answers.
+  // The rest stay listed so the router picks them up again when they recover.
+  defaultProvider: "groq" as const,
+  providers: ["groq" as const, "mistral" as const, "gemini" as const, "claude" as const],
 };
 
 const router = new AIRouter(tutorPreset);
@@ -59,12 +62,13 @@ ${
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ],
-    jsonMode: true,
     taskHint: "generation",
     speedVsQuality: 0.1,
     languageHint: language === "ro" ? "ro" : "en",
     temperature: 0.7,
-    maxTokens: 4000,
+    // gpt-oss spends the first slice of the budget reasoning; a small cap returns
+    // an empty string rather than an error.
+    maxTokens: 6000,
   };
 
   return router.chat(request);

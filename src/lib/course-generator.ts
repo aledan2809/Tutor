@@ -17,12 +17,25 @@
 
 import { AIRouter, getProjectPreset } from "ai-router";
 import type { AIRequest } from "ai-router";
+import { extractJson } from "@/lib/json-from-model";
 
+/**
+ * Provider order is groq-first, and that is a measurement, not a preference:
+ * on this deployment (2026-09-05) claude goes through the claude-cli subprocess and
+ * exits 1, gemini answers 404 because `gemini-2.5-flash` was retired for new keys,
+ * and mistral is rate-limited. groq answers. The others stay in the list so the
+ * router uses them again the moment they work.
+ *
+ * `jsonMode` is deliberately NOT set: groq's json_object mode rejects prompts it
+ * cannot satisfy with a 400, so the answer is parsed out of the text instead
+ * (src/lib/json-from-model.ts). maxTokens is generous because gpt-oss spends the
+ * first slice of the budget reasoning — at 200 it returns an empty string.
+ */
 const router = new AIRouter({
   ...getProjectPreset("default"),
   projectName: "Tutor",
-  defaultProvider: "claude" as const,
-  providers: ["claude" as const, "gemini" as const, "mistral" as const],
+  defaultProvider: "groq" as const,
+  providers: ["groq" as const, "mistral" as const, "gemini" as const, "claude" as const],
 });
 
 export interface PlannedModule {
@@ -42,11 +55,6 @@ export interface CoursePlan {
 /** Lower and upper bounds on what a course may be, so a bad answer fails loudly. */
 const MIN_MODULES = 2;
 const MAX_MODULES = 20;
-
-function parseJson(raw: string): unknown {
-  const cleaned = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
-  return JSON.parse(cleaned);
-}
 
 /** Step 1 — the outline. Throws rather than returning a half-plan. */
 export async function planCourse(params: {
@@ -81,7 +89,6 @@ BRIEF:
 ${prompt}`,
       },
     ],
-    jsonMode: true,
     taskHint: "generation",
     speedVsQuality: 0.1,
     languageHint: language,
@@ -90,7 +97,7 @@ ${prompt}`,
   };
 
   const res = await router.chat(request);
-  const parsed = parseJson(res.content ?? "") as Partial<CoursePlan>;
+  const parsed = extractJson(res.content ?? "") as Partial<CoursePlan>;
 
   if (!parsed || typeof parsed.title !== "string" || !Array.isArray(parsed.modules)) {
     throw new Error("Planul întors nu are forma așteptată (title + modules).");
@@ -163,7 +170,6 @@ ${coursePrompt.slice(0, 3000)}
 Răspunde cu: {"title":"...","summary":"o propoziție","contentMarkdown":"..."}`,
       },
     ],
-    jsonMode: true,
     taskHint: "generation",
     speedVsQuality: 0.1,
     languageHint: language,
@@ -172,7 +178,7 @@ Răspunde cu: {"title":"...","summary":"o propoziție","contentMarkdown":"..."}`
   };
 
   const res = await router.chat(request);
-  const parsed = parseJson(res.content ?? "") as { title?: string; summary?: string; contentMarkdown?: string };
+  const parsed = extractJson(res.content ?? "") as { title?: string; summary?: string; contentMarkdown?: string };
 
   const content = String(parsed?.contentMarkdown ?? "").trim();
   if (content.length < 400) {
