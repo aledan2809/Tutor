@@ -3,6 +3,7 @@ import { getSession, hasRole } from "@/lib/authorization";
 import { getValidAccessToken, getCalendarClient } from "@/lib/calendar";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import { requireFeature } from "@/lib/plan-gate";
 
 /**
@@ -19,12 +20,9 @@ async function _POST(
   }
 
   const { domain: domainSlug } = await params;
-  const domain = await prisma.domain.findUnique({
-    where: { slug: domainSlug },
-  });
-  if (!domain) {
-    return NextResponse.json({ error: "Domain not found" }, { status: 404 });
-  }
+  const domainGate = await resolveDomainOrForbid(domainSlug, session.user);
+  if (!domainGate.ok) return domainGate.response;
+  const domain = domainGate.domain;
 
   const gate = await requireFeature(session.user.id, "calendar_sync", {
     bypass: session.user.isSuperAdmin || hasRole(session, domainSlug, "INSTRUCTOR"),

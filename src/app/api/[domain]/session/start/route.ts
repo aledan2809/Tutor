@@ -9,7 +9,7 @@ import {
   type SessionType,
 } from "@/lib/session-engine";
 import { withErrorHandler } from "@/lib/api-handler";
-import { canAccessDomain } from "@/lib/domain-access";
+import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import { bandForDomainSlug } from "@/lib/curriculum";
 import { visibleTopicsFor } from "@/lib/curriculum-service";
 import { LICENTA_DOMAIN_SLUG } from "@/lib/licenta-constants";
@@ -55,18 +55,9 @@ async function _POST(
     );
   }
 
-  const domain = await prisma.domain.findUnique({
-    where: { slug: domainSlug },
-  });
-  if (!domain) {
-    return NextResponse.json({ error: "Domain not found" }, { status: 404 });
-  }
-
-  // Restricted (non-curriculum) domains — e.g. aviation — are practiceable only
-  // by admins/superadmins, allowlisted users, or users enrolled in that domain.
-  if (!canAccessDomain(session.user, domainSlug, domain.id)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const gate = await resolveDomainOrForbid(domainSlug, session.user);
+  if (!gate.ok) return gate.response;
+  const domain = gate.domain;
 
   // ── Sprint de calcul: generated fresh, clocked per question ──
   if (sessionType === SPRINT_SESSION_TYPE) {

@@ -9,6 +9,7 @@ interface Domain {
   slug: string;
   description: string | null;
   isActive: boolean;
+  visibility: "PUBLIC" | "PRIVATE";
   _count: { questions: number; enrollments: number };
   examConfig: { questionCount: number; timeLimit: number | null } | null;
 }
@@ -45,15 +46,31 @@ export function DomainList({ domains }: { domains: Domain[] }) {
                 <h3 className="text-lg font-semibold text-white">{d.name}</h3>
                 <p className="text-xs text-gray-500">/{d.slug}</p>
               </div>
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs ${
-                  d.isActive
-                    ? "bg-green-900/50 text-green-400"
-                    : "bg-gray-800 text-gray-500"
-                }`}
-              >
-                {d.isActive ? "Active" : "Inactive"}
-              </span>
+              <div className="flex flex-col items-end gap-1">
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs ${
+                    d.isActive
+                      ? "bg-green-900/50 text-green-400"
+                      : "bg-gray-800 text-gray-500"
+                  }`}
+                >
+                  {d.isActive ? "Active" : "Inactive"}
+                </span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs ${
+                    d.visibility === "PUBLIC"
+                      ? "bg-blue-900/50 text-blue-300"
+                      : "bg-amber-900/40 text-amber-300"
+                  }`}
+                  title={
+                    d.visibility === "PUBLIC"
+                      ? "Listed to everyone; anyone can enroll"
+                      : "Invisible unless enrolled by an admin or via access code"
+                  }
+                >
+                  {d.visibility === "PUBLIC" ? "Public" : "Private"}
+                </span>
+              </div>
             </div>
 
             {d.description && (

@@ -71,8 +71,11 @@ async function _POST(req: NextRequest) {
   );
   let enrolledCount = 0;
   if (slugs.length) {
+    // Only PUBLIC, active domains can be self-joined. A private slug sent here
+    // is dropped silently, exactly as an unknown one is: the picker never offers
+    // it, so a real form never sends it.
     const found = await prisma.domain.findMany({
-      where: { slug: { in: slugs } },
+      where: { slug: { in: slugs }, isActive: true, visibility: "PUBLIC" },
       select: { id: true },
     });
     if (found.length) {

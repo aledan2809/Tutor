@@ -7,14 +7,20 @@
  * bootstrap + the access predicate.
  */
 import { prisma } from "@/lib/prisma";
-import { canSeeRestrictedDomains, type DomainAccessUser } from "@/lib/domain-access";
+import { canSeePrivateDomains, type DomainAccessUser } from "@/lib/domain-access";
 import { LICENTA_DOMAIN_SLUG, LICENTA_STUDENT_EMAIL } from "@/lib/licenta-constants";
 
 export { LICENTA_DOMAIN_SLUG, LICENTA_STUDENT_EMAIL };
 
-/** Who may upload/generate/see the licență material: admins + the allowlisted student. */
+/**
+ * Who may upload/generate/see the licență material: admins + the one student it
+ * was built for. This used to ride on a global email allowlist that also opened
+ * EVERY private domain to that address; the allowlist is gone, the student's
+ * grant is now explicit and scoped to this feature.
+ */
 export function canUseLicenta(user: DomainAccessUser | null | undefined): boolean {
-  return canSeeRestrictedDomains(user);
+  if (canSeePrivateDomains(user)) return true;
+  return user?.email === LICENTA_STUDENT_EMAIL;
 }
 
 /**

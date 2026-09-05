@@ -3,6 +3,7 @@ import { getSession, hasAnyRole } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { selectExamQuestions, sanitizeQuestions } from "@/lib/exam-engine";
 import { withErrorHandler } from "@/lib/api-handler";
+import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import { requireFeature } from "@/lib/plan-gate";
 
 async function _POST(
@@ -15,6 +16,10 @@ async function _POST(
   }
 
   const { domain: domainSlug } = await params;
+
+  const domainGate = await resolveDomainOrForbid(domainSlug, session.user);
+  if (!domainGate.ok) return domainGate.response;
+  const domain = domainGate.domain;
 
   if (!hasAnyRole(session, domainSlug, ["STUDENT", "ADMIN", "INSTRUCTOR"])) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -48,13 +53,6 @@ async function _POST(
       { error: "Invalid mode. Must be PRACTICE or REAL" },
       { status: 400 }
     );
-  }
-
-  const domain = await prisma.domain.findUnique({
-    where: { slug: domainSlug },
-  });
-  if (!domain) {
-    return NextResponse.json({ error: "Domain not found" }, { status: 404 });
   }
 
   const format = await prisma.examSimulation.findFirst({

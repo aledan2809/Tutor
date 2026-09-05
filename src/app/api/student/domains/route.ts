@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
-import { isRestrictedDomainSlug, canSeeRestrictedDomains } from "@/lib/domain-access";
+import { canListDomain } from "@/lib/domain-access";
 
 async function _GET() {
   const session = await getSession();
@@ -112,15 +112,16 @@ async function _GET() {
     },
   });
 
-  // Restricted/non-curriculum domains (e.g. aviation) must not appear in the
-  // "available to enroll" catalog unless the user is allowed to see them.
-  const seeRestricted = canSeeRestrictedDomains({
+  // A private domain must not appear in the "available to enroll" catalog unless
+  // the user is an admin — this list is by definition what they are NOT enrolled
+  // in, so for everyone else only PUBLIC domains survive the filter.
+  const listUser = {
     isSuperAdmin: (session.user as { isSuperAdmin?: boolean }).isSuperAdmin,
     email: session.user.email,
     enrollments: enrollments.map((e) => ({ domainId: e.domainId, roles: e.roles })),
-  });
+  };
   const availableMapped = availableDomains
-    .filter((d) => seeRestricted || !isRestrictedDomainSlug(d.slug))
+    .filter((d) => canListDomain(listUser, d))
     .map((d) => ({
       id: d.id,
       name: d.name,

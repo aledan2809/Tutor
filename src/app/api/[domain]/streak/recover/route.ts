@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
-import { prisma } from "@/lib/prisma";
 import {
   startRecoverySession,
   completeRecoverySession,
 } from "@/lib/gamification";
 import { withErrorHandler } from "@/lib/api-handler";
+import { resolveDomainOrForbid } from "@/lib/domain-gate";
 
 // GET: Start a recovery session (returns questions)
 async function _GET(
@@ -19,12 +19,9 @@ async function _GET(
 
   const { domain: domainSlug } = await params;
 
-  const domain = await prisma.domain.findUnique({
-    where: { slug: domainSlug },
-  });
-  if (!domain) {
-    return NextResponse.json({ error: "Domain not found" }, { status: 404 });
-  }
+  const gate = await resolveDomainOrForbid(domainSlug, session.user);
+  if (!gate.ok) return gate.response;
+  const domain = gate.domain;
 
   const result = await startRecoverySession(session.user.id, domain.id);
   return NextResponse.json(result);
@@ -42,12 +39,9 @@ async function _POST(
 
   const { domain: domainSlug } = await params;
 
-  const domain = await prisma.domain.findUnique({
-    where: { slug: domainSlug },
-  });
-  if (!domain) {
-    return NextResponse.json({ error: "Domain not found" }, { status: 404 });
-  }
+  const gate = await resolveDomainOrForbid(domainSlug, session.user);
+  if (!gate.ok) return gate.response;
+  const domain = gate.domain;
 
   const body = await req.json();
   const { answers, startedAtMs } = body;

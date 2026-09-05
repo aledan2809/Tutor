@@ -794,7 +794,15 @@
     "noDomains": "No domains available.",
     "enrollFailed": "Enrollment failed",
     "networkError": "Network error",
-    "selectDomain": "Select domain"
+    "selectDomain": "Select domain",
+    "joinTitle": "Have an access code?",
+    "joinHint": "A code from your teacher or the administrator enrolls you in a subject that is not listed.",
+    "joinPlaceholder": "XXXX-XXXX",
+    "joinButton": "Enroll me",
+    "joining": "Checking...",
+    "joinInvalid": "That code is not valid.",
+    "joinSuccess": "You are now enrolled in {name}.",
+    "joinAlready": "You are already enrolled in {name}."
   },
   "lessons": {
     "noLessons": "No lessons available.",

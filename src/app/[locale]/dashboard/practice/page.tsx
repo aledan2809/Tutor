@@ -8,7 +8,6 @@ import { useRouter } from "@/i18n/navigation";
 import { SessionSelector } from "@/components/session/session-selector";
 import { SprintCard, type SprintInfo } from "@/components/session/sprint-card";
 import { EXAM_LEVELS, classifyDomainSlug, stripLevelSuffix, type ExamLevel } from "@/lib/exam-level";
-import { canSeeRestrictedDomains } from "@/lib/domain-access";
 
 type DomainOpt = { slug: string; name: string; level: ExamLevel | null; count: number };
 type AvailOpt = { id: string; slug: string; name: string; level: ExamLevel | null; count: number };
@@ -53,9 +52,7 @@ export default function PracticePage() {
   const [enrolling, setEnrolling] = useState<string | null>(null);
   const [pendingStart, setPendingStart] = useState(false);
 
-  const { data: session, status } = useSession();
-  // Admins/superadmins + allowlisted users may practice non-curriculum domains.
-  const canSeeRestricted = canSeeRestrictedDomains(session?.user);
+  const { status } = useSession();
 
   // Deep-link from a reminder: ?start=<sessionType>&domain=<slug> auto-starts.
   const [autoStartType, setAutoStartType] = useState<string | null>(null);
@@ -79,7 +76,7 @@ export default function PracticePage() {
   }, [autoStartDomain, domains]);
 
   useEffect(() => {
-    // Wait until the session resolves so the restricted-domain gate is known.
+    // Wait until the session resolves so the fetch runs as the signed-in user.
     if (status === "loading") return;
     fetch("/api/student/domains")
       .then((r) => r.json())
@@ -92,12 +89,13 @@ export default function PracticePage() {
                 level: classifyDomainSlug(e.slug),
                 count: e.stats?.questionsAvailable ?? 0,
               }))
-              // School-curriculum subjects (grouped by exam level) always; non-curriculum
-              // verticals (level null, e.g. aviation) only for allowed users.
-              .filter((e) => e.count > 0 && (e.level !== null || canSeeRestricted))
+              // Everything the server returned is already ours to see — enrolled
+              // domains by definition, the catalog after its own visibility filter.
+              // A missing exam level only decides the GROUP a subject renders in.
+              .filter((e) => e.count > 0)
           : [];
         setDomains(list);
-        // Catalog of subjects the student could pick (same curriculum/allowed gate).
+        // Catalog of subjects the student could pick (server-filtered by visibility).
         const avail: AvailOpt[] = Array.isArray(d?.available)
           ? (d.available as { id: string; slug: string; name: string; questionsAvailable?: number }[])
               .map((e) => ({
@@ -107,7 +105,7 @@ export default function PracticePage() {
                 level: classifyDomainSlug(e.slug),
                 count: e.questionsAvailable ?? 0,
               }))
-              .filter((e) => e.count > 0 && (e.level !== null || canSeeRestricted))
+              .filter((e) => e.count > 0)
           : [];
         setAvailable(avail);
         if (list.length > 0) {
@@ -122,7 +120,6 @@ export default function PracticePage() {
         }
       })
       .catch(() => setLoading(false));
-    // canSeeRestricted derives from the session, which is stable once status resolves.
   }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -285,7 +282,7 @@ export default function PracticePage() {
                       ))}
                   </optgroup>
                 ))}
-                {/* Non-curriculum domains (level null, e.g. aviation) — only present for allowed users. */}
+                {/* Domains with no exam level (e.g. aviation) — grouped apart, not gated here. */}
                 {domains.some((d) => d.level === null) && (
                   <optgroup label={t("grile.otherSubjects")}>
                     {domains

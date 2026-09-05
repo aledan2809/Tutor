@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { isRestrictedDomainSlug } from "@/lib/domain-access";
 
 // Public: a short quiz of real PUBLISHED questions for a chosen subject.
 // correctIndex is computed server-side (options + correctAnswer are stored
@@ -18,17 +17,15 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "subject required" }, { status: 400 });
   }
   try {
-    // Only PUBLIC curriculum domains may surface in the no-auth demo. Restricted
-    // domains (e.g. a student's private licență grile, the Rareș-only aviație
-    // domains) must NEVER leak here — they share generic subjects ("Licență",
-    // "Mathematics") so a subject-only filter would expose them.
+    // Only PUBLIC domains may surface in the no-auth demo. Private domains (a
+    // student's licență grile, the aviație domains) share generic subjects
+    // ("Licență", "Mathematics") with public ones, so a subject-only filter
+    // would expose them — the domain filter is what keeps them out.
     const domains = await prisma.domain.findMany({
-      where: { isActive: true },
-      select: { id: true, slug: true },
+      where: { isActive: true, visibility: "PUBLIC" },
+      select: { id: true },
     });
-    const publicDomainIds = domains
-      .filter((d) => !isRestrictedDomainSlug(d.slug))
-      .map((d) => d.id);
+    const publicDomainIds = domains.map((d) => d.id);
 
     const rows = await prisma.question.findMany({
       where: {

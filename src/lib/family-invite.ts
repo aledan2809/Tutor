@@ -711,8 +711,10 @@ export async function createChildDirectly(params: {
 
     const slugs = Array.from(new Set(params.domainSlugs ?? []));
     if (slugs.length) {
+      // PUBLIC + active only: a parent picks from the same catalog a student sees.
+      // Enrolling a child into a private subject is an admin action.
       const domains = await tx.domain.findMany({
-        where: { slug: { in: slugs } },
+        where: { slug: { in: slugs }, isActive: true, visibility: "PUBLIC" },
         select: { id: true },
       });
       if (domains.length) {

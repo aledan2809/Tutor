@@ -3,7 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { recommendSessionType, SESSION_TYPES } from "@/lib/session-engine";
 import { withErrorHandler } from "@/lib/api-handler";
-import { canAccessDomain } from "@/lib/domain-access";
+import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import {
   SPRINT_DOMAIN_SLUG,
   SPRINT_SESSION_TYPE,
@@ -29,18 +29,9 @@ async function _GET(
 
   const { domain: domainSlug } = await params;
 
-  const domain = await prisma.domain.findUnique({
-    where: { slug: domainSlug },
-  });
-  if (!domain) {
-    return NextResponse.json({ error: "Domain not found" }, { status: 404 });
-  }
-
-  // Restricted (non-curriculum) domains are gated to admins/superadmins,
-  // allowlisted users, or users enrolled in that domain.
-  if (!canAccessDomain(session.user, domainSlug, domain.id)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const gate = await resolveDomainOrForbid(domainSlug, session.user);
+  if (!gate.ok) return gate.response;
+  const domain = gate.domain;
 
   const recommendation = await recommendSessionType(
     session.user.id,

@@ -10,6 +10,8 @@ const domainSchema = z.object({
   description: z.string().optional(),
   icon: z.string().optional(),
   isActive: z.boolean().default(true),
+  // Absent = PRIVATE (the column default): a domain nobody chose to publish must not leak.
+  visibility: z.enum(["PUBLIC", "PRIVATE"]).optional(),
 });
 
 async function _GET() {

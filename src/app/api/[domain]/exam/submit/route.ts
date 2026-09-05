@@ -6,6 +6,7 @@ import { generateCertificate } from "@/lib/certificate";
 import { awardExamCompleteXp } from "@/lib/gamification";
 import type { Prisma } from "@prisma/client";
 import { withErrorHandler } from "@/lib/api-handler";
+import { resolveDomainOrForbid } from "@/lib/domain-gate";
 
 async function _POST(
   req: NextRequest,
@@ -17,6 +18,10 @@ async function _POST(
   }
 
   const { domain: domainSlug } = await params;
+
+  const gate = await resolveDomainOrForbid(domainSlug, session.user);
+  if (!gate.ok) return gate.response;
+  const domain = gate.domain;
 
   const body = await req.json();
   const { sessionId, answers } = body;
@@ -48,12 +53,6 @@ async function _POST(
   }
 
   // C04: Validate exam session belongs to this domain
-  const domain = await prisma.domain.findUnique({
-    where: { slug: domainSlug },
-  });
-  if (!domain) {
-    return NextResponse.json({ error: "Domain not found" }, { status: 404 });
-  }
   if (examSession.domainId !== domain.id) {
     return NextResponse.json({ error: "Domain mismatch" }, { status: 403 });
   }

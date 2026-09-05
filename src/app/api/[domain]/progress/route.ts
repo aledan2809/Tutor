@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { resolveDomainOrForbid } from "@/lib/domain-gate";
 
 async function _GET(
   _req: Request,
@@ -14,12 +15,9 @@ async function _GET(
 
   const { domain: domainSlug } = await params;
 
-  const domain = await prisma.domain.findUnique({
-    where: { slug: domainSlug },
-  });
-  if (!domain) {
-    return NextResponse.json({ error: "Domain not found" }, { status: 404 });
-  }
+  const gate = await resolveDomainOrForbid(domainSlug, session.user);
+  if (!gate.ok) return gate.response;
+  const domain = gate.domain;
 
   // Get progress records for this domain
   const progressRecords = await prisma.progress.findMany({

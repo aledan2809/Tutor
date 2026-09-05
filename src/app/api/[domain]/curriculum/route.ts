@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { withErrorHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
-import { canAccessDomain } from "@/lib/domain-access";
+import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import { isParentOf } from "@/lib/guardian";
 import { bandForDomainSlug, BAND_YEARS, unitsForStudent } from "@/lib/curriculum";
 import { getCurriculumState, saveChecklist } from "@/lib/curriculum-service";
@@ -55,11 +55,8 @@ async function domainAccessError(
   user: { id: string } & Record<string, unknown>,
   domainSlug: string
 ): Promise<NextResponse | null> {
-  const domain = await prisma.domain.findUnique({ where: { slug: domainSlug } });
-  if (!domain) return NextResponse.json({ error: "Domain not found" }, { status: 404 });
-  if (!canAccessDomain(user as Parameters<typeof canAccessDomain>[0], domainSlug, domain.id)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const gate = await resolveDomainOrForbid(domainSlug, user);
+  if (!gate.ok) return gate.response;
   return null;
 }
 

@@ -41,9 +41,10 @@ async function _POST(req: NextRequest) {
   const code = parsed.data.voucherCode.toUpperCase();
   const userId = session.user.id;
 
-  // Resolve chosen subjects to real, active domains
+  // Resolve chosen subjects to real, active, PUBLIC domains. A voucher opens a
+  // paid tier, not a private subject — that stays admin-granted.
   const domains = await prisma.domain.findMany({
-    where: { slug: { in: parsed.data.domainSlugs }, isActive: true },
+    where: { slug: { in: parsed.data.domainSlugs }, isActive: true, visibility: "PUBLIC" },
     select: { id: true, slug: true, name: true },
   });
   if (domains.length === 0) {

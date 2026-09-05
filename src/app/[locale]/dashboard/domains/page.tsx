@@ -52,6 +52,42 @@ export default function DomainsPage() {
 
   const [enrollError, setEnrollError] = useState("");
 
+  // Access code → a private subject that is not (and must not be) in the catalog.
+  const [joinCode, setJoinCode] = useState("");
+  const [joining, setJoining] = useState(false);
+  const [joinMsg, setJoinMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  const handleJoin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!joinCode.trim()) return;
+    setJoining(true);
+    setJoinMsg(null);
+    try {
+      const res = await fetch("/api/domains/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: joinCode }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setJoinMsg({
+          ok: true,
+          text: t(data.alreadyEnrolled ? "domains.joinAlready" : "domains.joinSuccess", {
+            name: data.domain?.name ?? "",
+          }),
+        });
+        setJoinCode("");
+        fetchDomains();
+      } else {
+        setJoinMsg({ ok: false, text: t("domains.joinInvalid") });
+      }
+    } catch {
+      setJoinMsg({ ok: false, text: t("domains.networkError") });
+    } finally {
+      setJoining(false);
+    }
+  };
+
   const handleEnroll = async (domainId: string) => {
     setEnrolling(domainId);
     setEnrollError("");
@@ -181,6 +217,40 @@ export default function DomainsPage() {
       {enrolled.length === 0 && available.length === 0 && (
         <div className="py-12 text-center text-gray-500">{t("domains.noDomains")}</div>
       )}
+
+      {/* Access code — the only self-service way into a private subject */}
+      <section className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+        <h2 className="mb-1 text-lg font-semibold text-white">{t("domains.joinTitle")}</h2>
+        <p className="mb-3 text-xs text-gray-400">{t("domains.joinHint")}</p>
+        <form onSubmit={handleJoin} className="flex flex-wrap items-center gap-2">
+          <input
+            type="text"
+            value={joinCode}
+            onChange={(e) => setJoinCode(e.target.value)}
+            placeholder={t("domains.joinPlaceholder")}
+            autoCapitalize="characters"
+            autoComplete="off"
+            spellCheck={false}
+            aria-label={t("domains.joinTitle")}
+            className="min-h-[44px] w-40 rounded-lg border border-gray-700 bg-gray-800 px-3 font-mono uppercase tracking-widest text-white focus:border-blue-500 focus:outline-none"
+          />
+          <button
+            type="submit"
+            disabled={joining || !joinCode.trim()}
+            className="min-h-[44px] rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            {joining ? t("domains.joining") : t("domains.joinButton")}
+          </button>
+        </form>
+        {joinMsg && (
+          <p
+            role="status"
+            className={`mt-2 text-sm ${joinMsg.ok ? "text-green-400" : "text-red-400"}`}
+          >
+            {joinMsg.text}
+          </p>
+        )}
+      </section>
     </div>
   );
 }

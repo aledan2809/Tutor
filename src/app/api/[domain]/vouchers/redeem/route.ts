@@ -2,17 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import { z } from "zod";
 
 const redeemSchema = z.object({
   code: z.string().min(1).max(50),
 });
 
-async function _POST(req: NextRequest) {
+async function _POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ domain: string }> }
+) {
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const { domain: domainSlug } = await params;
+
+  const gate = await resolveDomainOrForbid(domainSlug, session.user);
+  if (!gate.ok) return gate.response;
 
   const body = await req.json();
   const parsed = redeemSchema.safeParse(body);

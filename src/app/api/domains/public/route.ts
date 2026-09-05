@@ -1,17 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
-import { isRestrictedDomainSlug } from "@/lib/domain-access";
 
 async function _GET() {
-  const all = await prisma.domain.findMany({
-    where: { isActive: true },
+  // Public (no-account) pickers list PUBLIC domains only. A private domain must
+  // not appear here by name, icon or count — "private" means invisible.
+  const domains = await prisma.domain.findMany({
+    where: { isActive: true, visibility: "PUBLIC" },
     select: { slug: true, name: true, icon: true },
     orderBy: { name: "asc" },
   });
-  // Public (no-account) pickers must NEVER list restricted/non-curriculum domains
-  // (e.g. aviation, a student's private licență grile).
-  const domains = all.filter((d) => !isRestrictedDomainSlug(d.slug));
 
   return NextResponse.json({ domains });
 }

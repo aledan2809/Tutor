@@ -13,7 +13,6 @@ import { callTextAI } from "@/lib/grila-generate";
 import { telegramAlertToUser } from "@/lib/notifications/service";
 import { sendAppEmail } from "@/lib/email";
 
-const PRIVATE_SLUGS = new Set(["aptitudini-aviatie", "licenta-rares"]);
 const APP_URL = (process.env.AUTH_URL ?? "https://etutor.ro").replace(/\/$/, "");
 const MAX_PER_RUN = 20;
 
@@ -247,8 +246,8 @@ export async function runFeedbackReview(): Promise<{
         await prisma.questionFeedback.update({ where: { id: fb.id }, data: { status: "resolved", resolution: "Întrebarea nu mai există." } });
         continue;
       }
-      const domain = await prisma.domain.findUnique({ where: { id: q.domainId }, select: { slug: true, name: true } });
-      const isPrivate = domain ? PRIVATE_SLUGS.has(domain.slug) : false;
+      const domain = await prisma.domain.findUnique({ where: { id: q.domainId }, select: { slug: true, name: true, visibility: true } });
+      const isPrivate = domain?.visibility === "PRIVATE";
       const options = Array.isArray(q.options) ? (q.options as string[]) : [];
 
       const j = await judge({

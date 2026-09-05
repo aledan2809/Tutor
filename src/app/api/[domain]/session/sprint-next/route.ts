@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
-import { canAccessDomain } from "@/lib/domain-access";
+import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import {
   SPRINT_DOMAIN_SLUG,
   SPRINT_SESSION_TYPE,
@@ -39,13 +39,9 @@ async function _POST(
     return NextResponse.json({ error: "Missing sessionId" }, { status: 400 });
   }
 
-  const domain = await prisma.domain.findUnique({ where: { slug: domainSlug } });
-  if (!domain) {
-    return NextResponse.json({ error: "Domain not found" }, { status: 404 });
-  }
-  if (!canAccessDomain(session.user, domainSlug, domain.id)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const gate = await resolveDomainOrForbid(domainSlug, session.user);
+  if (!gate.ok) return gate.response;
+  const domain = gate.domain;
 
   const learningSession = await prisma.session.findUnique({ where: { id: sessionId } });
   if (!learningSession || learningSession.userId !== session.user.id) {

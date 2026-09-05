@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import { sm2, gradeResponse } from "@/lib/sm2";
 import { awardAnswerXp } from "@/lib/gamification";
 import { withErrorHandler } from "@/lib/api-handler";
@@ -44,22 +45,20 @@ async function _POST(
     );
   }
 
-  // Resolve domain
-  const domain = await prisma.domain.findUnique({
-    where: { slug: domainSlug },
-  });
-  if (!domain) {
-    return NextResponse.json({ error: "Domain not found" }, { status: 404 });
-  }
+  const gate = await resolveDomainOrForbid(domainSlug, session.user);
+  if (!gate.ok) return gate.response;
+  const domain = gate.domain;
 
   // C03: Validate session belongs to this domain
   if (learningSession.domainId && learningSession.domainId !== domain.id) {
     return NextResponse.json({ error: "Domain mismatch" }, { status: 403 });
   }
 
-  // Get question with correct answer
-  const question = await prisma.question.findUnique({
-    where: { id: questionId },
+  // Get question with correct answer — constrained to THIS domain. Looked up by id
+  // alone, any question in the database (a private subject's included) answered
+  // back with correctAnswer + explanation to anyone holding a session elsewhere.
+  const question = await prisma.question.findFirst({
+    where: { id: questionId, domainId: domain.id },
   });
   if (!question) {
     return NextResponse.json(

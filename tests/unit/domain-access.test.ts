@@ -1,89 +1,85 @@
 import { describe, it, expect } from "vitest";
-import {
-  isRestrictedDomainSlug,
-  canSeeRestrictedDomains,
-  canAccessDomain,
-  RESTRICTED_DOMAIN_ALLOWLIST,
-} from "@/lib/domain-access";
+import { canSeePrivateDomains, isEnrolledIn, canListDomain } from "@/lib/domain-access";
 
-const RARES = RESTRICTED_DOMAIN_ALLOWLIST[0];
+const PUBLIC = { id: "d-mate", visibility: "PUBLIC" as const, isActive: true };
+const PRIVATE = { id: "d-avi", visibility: "PRIVATE" as const, isActive: true };
+const OFF = { id: "d-off", visibility: "PUBLIC" as const, isActive: false };
 
-describe("domain access control", () => {
-  describe("isRestrictedDomainSlug", () => {
-    it("non-curriculum slugs are restricted", () => {
-      expect(isRestrictedDomainSlug("aviation")).toBe(true);
-      expect(isRestrictedDomainSlug("drept")).toBe(true);
-    });
-    it("curriculum slugs (exam-level) are NOT restricted", () => {
-      expect(isRestrictedDomainSlug("matematica-v-viii")).toBe(false);
-      expect(isRestrictedDomainSlug("romana-ix-xii")).toBe(false);
-    });
+const nobody = null;
+const student = { email: "x@y.ro", isSuperAdmin: false, enrollments: [] };
+const superadmin = { isSuperAdmin: true };
+const domainAdmin = { enrollments: [{ domainId: "d-any", roles: ["ADMIN"] }] };
+const instructor = { enrollments: [{ domainId: "d-any", roles: ["INSTRUCTOR"] }] };
+// The one student the old email allowlist named. He must keep what he had
+// through his ENROLLMENT, not through his address.
+const rares = {
+  email: "raresdanciulescu9@gmail.com",
+  enrollments: [{ domainId: "d-avi", roles: ["STUDENT"] }],
+};
+
+describe("canSeePrivateDomains — who sees everything", () => {
+  it("nobody and plain students do not", () => {
+    expect(canSeePrivateDomains(nobody)).toBe(false);
+    expect(canSeePrivateDomains(student)).toBe(false);
+  });
+  it("superadmin and a domain ADMIN do", () => {
+    expect(canSeePrivateDomains(superadmin)).toBe(true);
+    expect(canSeePrivateDomains(domainAdmin)).toBe(true);
+  });
+  it("INSTRUCTOR alone does not", () => {
+    expect(canSeePrivateDomains(instructor)).toBe(false);
+  });
+  it("an email grants nothing on its own — the allowlist is gone", () => {
+    expect(canSeePrivateDomains({ email: rares.email })).toBe(false);
+  });
+});
+
+describe("isEnrolledIn", () => {
+  it("reads the session enrollments, exact domain only", () => {
+    expect(isEnrolledIn(rares, "d-avi")).toBe(true);
+    expect(isEnrolledIn(rares, "d-other")).toBe(false);
+    expect(isEnrolledIn(nobody, "d-avi")).toBe(false);
+  });
+});
+
+describe("canListDomain — what a picker may show", () => {
+  it("a PUBLIC domain is listed to everyone, signed in or not", () => {
+    expect(canListDomain(nobody, PUBLIC)).toBe(true);
+    expect(canListDomain(student, PUBLIC)).toBe(true);
   });
 
-  describe("canSeeRestrictedDomains", () => {
-    it("false for null / plain student", () => {
-      expect(canSeeRestrictedDomains(null)).toBe(false);
-      expect(
-        canSeeRestrictedDomains({ email: "a@b.ro", isSuperAdmin: false, enrollments: [] })
-      ).toBe(false);
-    });
-    it("true for superadmin", () => {
-      expect(canSeeRestrictedDomains({ isSuperAdmin: true })).toBe(true);
-    });
-    it("true for an ADMIN-role enrollment", () => {
-      expect(
-        canSeeRestrictedDomains({ enrollments: [{ domainId: "d1", roles: ["ADMIN"] }] })
-      ).toBe(true);
-    });
-    it("true for an allowlisted email", () => {
-      expect(canSeeRestrictedDomains({ email: RARES })).toBe(true);
-    });
-    it("INSTRUCTOR role alone does NOT grant it", () => {
-      expect(
-        canSeeRestrictedDomains({ enrollments: [{ domainId: "d1", roles: ["INSTRUCTOR"] }] })
-      ).toBe(false);
-    });
+  it("a PRIVATE domain is invisible to a stranger", () => {
+    expect(canListDomain(nobody, PRIVATE)).toBe(false);
+    expect(canListDomain(student, PRIVATE)).toBe(false);
   });
 
-  describe("canAccessDomain", () => {
-    const plain = { email: "x@y.ro", isSuperAdmin: false, enrollments: [] };
+  it("a PRIVATE domain is listed to someone enrolled in THAT domain", () => {
+    expect(canListDomain(rares, PRIVATE)).toBe(true);
+  });
 
-    it("curriculum domains are open to everyone (even plain students)", () => {
-      expect(canAccessDomain(plain, "matematica-v-viii", "d-mate")).toBe(true);
-      expect(canAccessDomain(null, "romana-ix-xii", "d-ro")).toBe(true);
-    });
+  it("enrollment in a DIFFERENT domain does not open a private one", () => {
+    const elsewhere = { enrollments: [{ domainId: "d-other", roles: ["STUDENT"] }] };
+    expect(canListDomain(elsewhere, PRIVATE)).toBe(false);
+  });
 
-    it("restricted domain blocked for a non-enrolled plain student", () => {
-      expect(canAccessDomain(plain, "aviation", "d-avi")).toBe(false);
-      expect(canAccessDomain(null, "aviation", "d-avi")).toBe(false);
-    });
+  it("admins see private and switched-off domains alike", () => {
+    expect(canListDomain(superadmin, PRIVATE)).toBe(true);
+    expect(canListDomain(domainAdmin, PRIVATE)).toBe(true);
+    expect(canListDomain(superadmin, OFF)).toBe(true);
+  });
 
-    it("restricted domain allowed for the allowlisted user (Rares)", () => {
-      expect(canAccessDomain({ email: RARES }, "aviation", "d-avi")).toBe(true);
-    });
+  it("a switched-off domain is hidden from everyone else, even when enrolled", () => {
+    const enrolledInOff = { enrollments: [{ domainId: "d-off", roles: ["STUDENT"] }] };
+    expect(canListDomain(student, OFF)).toBe(false);
+    expect(canListDomain(enrolledInOff, OFF)).toBe(false);
+  });
 
-    it("restricted domain allowed for superadmin", () => {
-      expect(canAccessDomain({ isSuperAdmin: true }, "aviation", "d-avi")).toBe(true);
-    });
-
-    it("restricted domain allowed for a user enrolled in THAT domain (no regression)", () => {
-      expect(
-        canAccessDomain(
-          { email: "z@y.ro", enrollments: [{ domainId: "d-avi", roles: ["STUDENT"] }] },
-          "aviation",
-          "d-avi"
-        )
-      ).toBe(true);
-    });
-
-    it("enrollment in a DIFFERENT restricted domain does not grant access", () => {
-      expect(
-        canAccessDomain(
-          { email: "z@y.ro", enrollments: [{ domainId: "d-other", roles: ["STUDENT"] }] },
-          "aviation",
-          "d-avi"
-        )
-      ).toBe(false);
-    });
+  it("does not care what the domain is CALLED", () => {
+    // The old rule keyed on the slug shape. Two domains with identical slugs
+    // and different visibility must now be treated differently.
+    const namedLikeSchool = { id: "d-x", visibility: "PRIVATE" as const, isActive: true };
+    expect(canListDomain(student, namedLikeSchool)).toBe(false);
+    const namedLikeVertical = { id: "d-y", visibility: "PUBLIC" as const, isActive: true };
+    expect(canListDomain(student, namedLikeVertical)).toBe(true);
   });
 });

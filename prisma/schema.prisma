@@ -279,6 +279,24 @@ model TelegramConnectToken {
   @@index([expiresAt])
 }
 
+/// Who may reach a domain's content.
+///
+/// Until 2026-09-05 "private" was stored nowhere: it was inferred from the SHAPE
+/// OF THE SLUG (classifyDomainSlug === null, src/lib/exam-level.ts), so chimie,
+/// biologie, istorie and geografie became private by accident of naming while the
+/// genuinely private verticals (aviation, licenta) rested on that same coincidence.
+/// Storing the decision makes it auditable, independent of what a domain is called,
+/// and impossible to flip by renaming a URL.
+enum DomainVisibility {
+  /// Listed everywhere, practiceable by anyone who enrolls — the school subjects.
+  PUBLIC
+
+  /// Invisible: absent from every picker, list and public API, and unreachable on
+  /// every /api/[domain]/* route without an active enrollment that an admin created
+  /// (or that an access code they issued granted).
+  PRIVATE
+}
+
 model Domain {
   id          String   @id @default(cuid())
   name        String   @unique
@@ -287,6 +305,14 @@ model Domain {
   icon        String?
   isActive           Boolean  @default(true)
   instructorEnabled  Boolean  @default(false)
+  /// PRIVATE by default: a domain that exists before anyone decided to publish it
+  /// must not leak. The 2026-09-05 backfill set PUBLIC on exactly the slugs that
+  /// classified as curriculum, so nothing changed for anyone the day it shipped.
+  visibility         DomainVisibility @default(PRIVATE)
+  /// Admin-issued access code. Null = none in circulation. Redeeming it creates an
+  /// active STUDENT enrollment (POST /api/domains/join); rotating it only affects
+  /// future joins. Unique: one code names one domain.
+  joinCode           String?  @unique
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 

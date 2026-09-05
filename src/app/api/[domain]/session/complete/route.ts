@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { updateWeakAreas } from "@/lib/session-engine";
 import { awardSessionCompleteXp } from "@/lib/gamification";
 import { withErrorHandler } from "@/lib/api-handler";
+import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import { cancelEscalation } from "@/lib/escalation/engine";
 import {
   SPRINT_SESSION_TYPE,
@@ -33,12 +34,9 @@ async function _POST(
   }
 
   // Resolve domain
-  const domain = await prisma.domain.findUnique({
-    where: { slug: domainSlug },
-  });
-  if (!domain) {
-    return NextResponse.json({ error: "Domain not found" }, { status: 404 });
-  }
+  const gate = await resolveDomainOrForbid(domainSlug, session.user);
+  if (!gate.ok) return gate.response;
+  const domain = gate.domain;
 
   const learningSession = await prisma.session.findUnique({
     where: { id: sessionId },

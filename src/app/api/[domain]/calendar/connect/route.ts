@@ -3,6 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { getCalendarClient } from "@/lib/calendar";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import { requireFeature } from "@/lib/plan-gate";
 
 /**
@@ -18,18 +19,15 @@ async function _POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const { domain: domainSlug } = await params;
+  const domainGate = await resolveDomainOrForbid(domainSlug, session.user);
+  if (!domainGate.ok) return domainGate.response;
+  const domain = domainGate.domain;
+
   const gate = await requireFeature(session.user.id, "calendar_sync", {
     bypass: session.user.isSuperAdmin,
   });
   if (gate) return gate;
-
-  const { domain: domainSlug } = await params;
-  const domain = await prisma.domain.findUnique({
-    where: { slug: domainSlug },
-  });
-  if (!domain) {
-    return NextResponse.json({ error: "Domain not found" }, { status: 404 });
-  }
 
   // Check if already connected
   const existing = await prisma.userCalendar.findUnique({
@@ -68,12 +66,9 @@ async function _DELETE(
   }
 
   const { domain: domainSlug } = await params;
-  const domain = await prisma.domain.findUnique({
-    where: { slug: domainSlug },
-  });
-  if (!domain) {
-    return NextResponse.json({ error: "Domain not found" }, { status: 404 });
-  }
+  const gate = await resolveDomainOrForbid(domainSlug, session.user);
+  if (!gate.ok) return gate.response;
+  const domain = gate.domain;
 
   await prisma.userCalendar.deleteMany({
     where: { userId: session.user.id, domainId: domain.id },

@@ -794,7 +794,15 @@
     "noDomains": "Niciun domeniu disponibil.",
     "enrollFailed": "Înscrierea a eșuat",
     "networkError": "Eroare de rețea",
-    "selectDomain": "Selectează domeniul"
+    "selectDomain": "Selectează domeniul",
+    "joinTitle": "Ai un cod de acces?",
+    "joinHint": "Un cod primit de la profesor sau de la administrator te înscrie într-o materie care nu apare în listă.",
+    "joinPlaceholder": "XXXX-XXXX",
+    "joinButton": "Înscrie-mă",
+    "joining": "Se verifică...",
+    "joinInvalid": "Codul nu e valid.",
+    "joinSuccess": "Te-ai înscris la {name}.",
+    "joinAlready": "Ești deja înscris la {name}."
   },
   "lessons": {
     "noLessons": "Nicio lecție disponibilă.",
