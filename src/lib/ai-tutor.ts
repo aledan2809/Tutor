@@ -43,7 +43,10 @@ export async function generateQuestions(params: {
 
   const systemPrompt = `You are an expert educational content creator for the "${domain}" domain.
 Generate exam questions that are accurate, clear, and well-structured.
-Always respond with valid JSON only, no markdown wrapping.`;
+Always respond with valid JSON only, no markdown wrapping.
+Keep every string on ONE line: a raw newline inside a JSON string is invalid JSON, and
+asking for "markdown" in the question text is what produced them. Use \\n if a break is
+truly needed.`;
 
   const materialBlock = material
     ? `
@@ -70,13 +73,13 @@ Respond with a JSON array of objects with this structure:
 ${
   type === "MULTIPLE_CHOICE"
     ? `[{
-  "content": "Question text in markdown",
+  "content": "Question text, one line",
   "options": ["Option A", "Option B", "Option C", "Option D"],
   "correctAnswer": "The correct option text",
   "explanation": "Why this is correct"
 }]`
     : `[{
-  "content": "Question text in markdown",
+  "content": "Question text, one line",
   "correctAnswer": "Expected answer or key points",
   "explanation": "Detailed explanation"
 }]`
