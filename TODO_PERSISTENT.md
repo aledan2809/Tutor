@@ -4,6 +4,43 @@
 
 ---
 
+## [~] 🔒📚 Conținut public/privat pe materii + cursuri generate din prompt (creat 2026-09-05)
+
+**Cerere user**: unele cursuri/teste sunt pentru publicul larg, altele nu (Aviația lui Rareș) → comutator în
+Admin; plus creare de cursuri și teste de la zero dintr-un prompt (dat: antrenor de agenți imobiliari, 8 module).
+Decizii (AskUserQuestion ×7, 2026-09-05): curs static acum + antrenor conversațional faza 2 · bifă pe materie ·
+privat = invizibil complet · agenți: intern (REAL) → public după rodaj · backfill = exact ce se vede azi ·
+acces = admin înscrie + cod la nevoie · coloană vertebrală Curs → Modul → Lecție (aditivă, neatinge cele 4.179 grile).
+
+- [x] **W1+W2 — bariera + comutatorul + codul de acces** — DONE + LIVE 2026-09-05 (`b51d528`). `Domain.visibility`
+  + poartă unică `resolveDomainOrForbid` pe toate 29 rute `/api/[domain]/*` + 3 căi de auto-înscriere închise + IDOR
+  `session/answer` + admin radio/confirm/audit + `Domain.joinCode` (emite/rotește/retrage; elevul introduce în Domenii).
+  Verificat pe prod ca atacator (cont `leak-test-2026-09-05@tutor.app`): 9/9 + IDOR. Detalii: DEVELOPMENT_STATUS 2026-09-05, L31.
+- [ ] **W4 — coloana vertebrală Curs → Modul → Lecție** (aditiv). Modele noi `Course` (domainId, title, slug, description,
+  order, isPublished) → `CourseModule` (courseId, order, title, summary) → `Lesson` primește `moduleId?` + `order`; test de
+  modul = `ExamSimulation` legat de modul (sau set de grile filtrat pe `Question.topic = modul`). Progres pe curs =
+  agregare `LessonProgress` + attempts pe modul. **Blocant descoperit**: lista de lecții a elevului (`/api/student/lessons`)
+  citește `ContentSource`, nu `Lesson` → o lecție scrisă din admin e invizibilă; `/dashboard/lessons` e în HIDDEN_NAV.
+  Trebuie repus pe `Lesson` + readus în meniu (secțiunea ÎNVAȚĂ din planul A).
+- [ ] **W5 — generator de curs din prompt** (admin). Pagină nouă `/dashboard/admin/courses/new`: lipești promptul +
+  alegi materia (privată la creare) → modelul propune schema (module + lecții cu rezumat) → confirmi → generează per
+  modul: lecția (Markdown, ~5-7 propoziții/concept + exemplu, per prompt) + 10-20 grile prin `generateQuestions`
+  (`lib/ai-tutor.ts`, AIRouter) trecute prin `question-gate.ts` (fail-closed, ca la `ai-generate`) + o simulare.
+  Totul intră DRAFT/`isPublished=false`; publicare manuală. **Reguli din recon**: `Question.topic` = numele modulului
+  (pe materiile fără poartă de programă nu contează lista din `curriculum.ts`); fără dedup pe `Question` → hash
+  (domainId, content normalizat) înainte de scriere; telemetrie de cost (nu există azi nicăieri).
+- [ ] **W6 — cursul „Agent imobiliar" (REAL)**: materie privată `agent-imobiliar` (icon 🏠), generată cu W5 din promptul
+  dat, 8 module; înscriși: agenții REAL prin cod de acces; public când se rodează (o bifă).
+- [ ] **Faza 2 — antrenor conversațional** peste același conținut: chat cu personaje (proprietarul +20%, „de ce 2%?",
+  cumpărătorul de 8 luni, investitorul cu cap rate…), scor 1-10 pe descoperire/ascultare/obiecție/avansare + o
+  recomandare. Model nou `TrainingSession`/`TrainingTurn`, cost per mesaj → plafon per user/zi. Se leagă de progres.
+- [ ] **Follow-ups din review-ul rutelor** (neatinse, semnalate): `calendar/schedule` nu validează `studentIds` ca înscriși în
+  domeniu (workstream D); `vouchers/redeem` nu are niciun apelant în `src`; `ExamPaper` nelegat de materie (subiectele
+  oficiale sunt publice — nu scurge azi, dar un curs privat cu simulări proprii ar scurge); `Lesson.isPublished`
+  decorativ (nicio cale de citire student nu-l verifică); `Domain.instructorEnabled` mort; geografie/chimie/biologie/
+  matematica-ix-xii au 0 întrebări publicate (un elev înscris n-are ce exersa).
+- [ ] **Tehnic**: `tests/unit/reclassify-rule.test.ts` are un `@ts-expect-error` nefolosit (tsc local; build-ul de prod trece).
+
 ## [~] 📲 Telegram ca implicit, cu reducere de 10% legată de costul real (decis 2026-08-26)
 
 > **Stare 2026-09-01** — **conectarea e LIVRATĂ ȘI FUNCȚIONEAZĂ; partea de bani NU e construită.**

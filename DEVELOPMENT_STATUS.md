@@ -1,7 +1,68 @@
 # Project Status - Tutor
-Last Updated: 2026-09-03 (conținutul memento-ului Telegram reparat; incident 502 provocat de mine, remediat în ~4 min)
+Last Updated: 2026-09-05 (bariera public/privat pe materii + cod de acces — LIVE, verificată ca atacator pe producție)
+<!-- anterior: 2026-09-03 (conținutul memento-ului Telegram reparat; incident 502 provocat de mine, remediat în ~4 min) -->
 <!-- anterior: 2026-09-01 (treapta Telegram din cascadă -->
 <!--  — sărită tăcut pentru TOȚI utilizatorii; reparată, deployată, verificată pe date de producție) -->
+
+## Current State (Sesiunea 2026-09-05 — bariera public/privat pe materii + cod de acces; regim mesh + workflow-uri)
+
+Cererea: (1) un comutator în Admin/SuperAdmin care decide dacă o materie (lecții + teste) e pentru
+publicul larg sau nu — Aviația lui Rareș e cazul-test; (2) cursuri și teste generate de la zero
+dintr-un prompt (dat: antrenor de agenți imobiliari, 8 module). Livrată prima jumătate, verificată
+pe producție; a doua e decisă și planificată (vezi TODO).
+
+**Ce s-a găsit** (recon: 6 exploratori + 6 sceptici în paralel; cele 3 scurgeri grave le-am citit
+eu în cod înainte să le raportez):
+- „Privat" nu era stocat nicăieri. Se deducea din forma slug-ului (`classifyDomainSlug === null`):
+  chimie, biologie, istorie, geografie erau private din accident de denumire, iar cine avea voie la
+  materiile restricționate era **un e-mail scris în cod** (`RESTRICTED_DOMAIN_ALLOWLIST`).
+- Șase scurgeri reale: înregistrarea / activarea cu voucher / crearea copilului din invitație
+  auto-înscriau în ORICE slug trimis (un anonim intra în `licenta-rares` cu un POST);
+  `daily-challenge`, `bibliography`, `leaderboard` nu verificau nimic; `session/answer` încărca
+  întrebarea doar după id și întorcea răspunsul corect + explicația pentru orice întrebare din bază.
+- Itemul „#2 SECURITATE — domeniu Aviație vizibil fără acces" fusese marcat DONE (`6b5f58d`): reparase
+  **listările**, nu rutele. Din 29 de rute `/api/[domain]/*`, 11 aveau o poartă.
+- Producție: 16 materii, 4.179 întrebări, **0 lecții** (tabelul `Lesson` e gol; lista elevului citește
+  `ContentSource`); Rareș = 2.379 din 2.418 răspunsuri totale.
+
+**Ce s-a livrat** (`b51d528`, LIVE etutor.ro):
+- `Domain.visibility` PUBLIC | PRIVATE, default PRIVATE. Migrarea 0051 face backfill PUBLIC pe exact
+  cele 7 sluguri vizibile azi (verificat pe prod: 7 PUBLIC / 9 PRIVATE) — nimic nu s-a schimbat pentru
+  nimeni în ziua livrării; chimie/biologie/istorie/geografie rămân private, dar acum e o decizie scrisă.
+- `src/lib/domain-gate.ts` — `resolveDomainOrForbid`, **singura poartă**, pe toate cele 29 de rute
+  (23 aplicate în paralel de 4 agenți pe grupuri disjuncte, 4 reviewers adversariali: 23 OK).
+  404, nu 403, pe privat fără înscriere — invizibil înseamnă că nu confirmă nici că există. Înscrierea
+  se re-citește din DB pe materiile private, ca revocarea să ia efect imediat (sesiunea e cache-uită 5 min).
+- Admin: radio Private/Public în formularul materiei cu confirmare la trecerea spre public + rând în
+  `AdminAuditLog` (`DOMAIN_VISIBILITY_CHANGE`); badge Public/Private în listă.
+- **Cod de acces** (`Domain.joinCode`, migrarea 0052): adminul emite / rotește / retrage din formular
+  (auditat), elevul îl introduce în Domenii → înscriere STUDENT. `POST /api/domains/join`; orice eșec = același 404.
+- Allowlist-ul de e-mail a dispărut; `canUseLicenta` = admin sau `LICENTA_STUDENT_EMAIL`; Rareș păstrează
+  totul prin cele 4 înscrieri active ale lui (verificat pe prod înainte de deploy).
+- `PRIVATE_SLUGS` din feedback-review (a doua definiție paralelă a privatului) citește acum câmpul.
+
+**Verificare**: tsc curat (rămâne eroarea pre-existentă din `reclassify-rule.test.ts`), lint 0 erori,
+772/772 (+16: poartă cu prisma stub, regulă pură, cod de acces), `next build` local, backup
+`/root/backups/tutor-pre-visibility-2026-09-05.dump`, deploy gardat (`.next` salvat, restart doar pe
+build reușit). **Pe producție, ca atacator** — cont nou `leak-test-2026-09-05@tutor.app` (creds în
+`Master/credentials/tutor-test-users.env`, și ca `JOURNEY_*` pentru audit): cererea de înregistrare cu
+`aptitudini-aviatie` + `licenta-rares` a produs **doar** înscrierea la matematică; daily-challenge /
+leaderboard / bibliography / progress pe privat → 404 identic byte-cu-byte cu un slug inexistent; POST
+pe id-ul materiei private → 404; cod greșit → 404; catalogul fără nimic privat; **IDOR**: sesiune la
+matematică + questionId din aviație → 404, întrebarea proprie → 200 cu răspuns. Materia publică = control 200.
+
+**Decizii user** (AskUserQuestion ×7): curs static acum + antrenor conversațional în faza 2; bifă pe
+materie; privat = invizibil complet; cursul de agenți: intern (REAL) → public după rodaj; backfill =
+exact ce se vede azi; acces = admin înscrie + cod la nevoie; coloană vertebrală Curs → Modul → Lecție.
+
+**Rămas** (în TODO): W4 coloana vertebrală; W5 generatorul din prompt; W6 cursul de agenți imobiliari;
+faza 2 antrenorul conversațional. Follow-ups semnalate de reviewers, neatinse: `calendar/schedule` nu
+validează `studentIds` (ține de workstream-ul D); `vouchers/redeem` n-are niciun apelant; banca de
+simulări (`ExamPaper`) nu e legată de materie (subiectele oficiale sunt publice, deci nu scurge azi);
+`Lesson.isPublished` e decorativ; `Domain.instructorEnabled` e câmp mort; 4 materii au 0 întrebări publicate.
+
+## Lessons Learned (sesiunea 2026-09-05)
+- L31 — „Închis" la nivel de listă nu înseamnă închis. Vezi `knowledge/lessons-learned.md`.
 
 ## Current State (Sesiunea 2026-09-03 — conținutul memento-ului + un 502 provocat de mine)
 
