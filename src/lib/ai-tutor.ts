@@ -1,5 +1,6 @@
 import { AIRouter, getProjectPreset } from "ai-router";
 import type { AIRequest, AIResponse } from "ai-router";
+import { callClaudeCli } from "@/lib/claude-cli";
 
 const tutorPreset = {
   ...getProjectPreset("default"),
@@ -80,6 +81,22 @@ ${
   "explanation": "Detailed explanation"
 }]`
 }`;
+
+  // The CLI first, then the router.
+  //
+  // Not a preference — a measurement, 2026-09-05 on this box: groq answers but its
+  // daily token budget is spent by mid-afternoon (and a prompt carrying a lesson is
+  // large), gemini 404s on a model Google retired for new keys, mistral is
+  // rate-limited. The CLI runs on the subscription, so it neither meters nor runs
+  // out the way a free tier does. The router stays as the fallback for the moment
+  // one of those recovers, and for any box without the CLI.
+  const cli = await callClaudeCli(
+    `${systemPrompt}\n\n${userPrompt}\n\nRăspunde EXCLUSIV cu JSON valid, fără markdown, fără text în afara JSON-ului.`,
+    { timeoutMs: 240_000 }
+  );
+  if (cli.ok && cli.text) {
+    return { content: cli.text, provider: "claude-cli", model: "sonnet" } as unknown as AIResponse;
+  }
 
   const request: AIRequest = {
     messages: [
