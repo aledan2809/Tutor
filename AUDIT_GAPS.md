@@ -6,6 +6,50 @@
 
 ## Open Gaps
 
+### G-TUT-AUDIT-2026-09-05 — Șase constatări din True E2E [10] — **Eliminated 2026-09-05 (`483427f`, LIVE + verificat)**
+`/api/public/practice/subjects` pe regula veche (slug) · ordinea 400/404 la self-enroll · `joinCode` serializat oricărui ADMIN de materie (verificat live: superadmin vede codul, adminul de materie nu, rotate → 403) · dublu-submit pe cod → 500 citit ca „cod invalid" · materie oprită listată în `enrolled` · `/dashboard/progress` pornea hardcodat pe `aviation` (privată → 404 pentru neînscriși).
+
+### G-TUT-JOINCODE-REACTIVATE-001 — Codul de acces reactivează o înscriere veche cu rolurile ei — OPEN (P2)
+- `POST /api/domains/join` pe o înscriere `isActive=false` o repune activă **păstrându-i rolurile**: un cont căruia i s-a revocat rolul ADMIN/INSTRUCTOR pe o materie privată și-l recapătă cu un cod destinat elevilor. Sursă: /review (CONFIRMED).
+- Fix: la reactivare, forțează `roles: ["STUDENT"]` (sau refuză reactivarea rolurilor privilegiate). `src/app/api/domains/join/route.ts`.
+
+### G-TUT-JOINCODE-LIFECYCLE-001 — Codul de acces n-are expirare, limită de utilizări sau audit la răscumpărare — OPEN (P2)
+- `Voucher` din aceeași schemă are `expiresAt`/`maxUses`/`usedCount`/`isActive`; `Domain.joinCode` n-are niciunul, iar înscrierea prin cod nu se distinge de una făcută de admin (fără urmă pe `Enrollment`, fără `AdminAuditLog`). Emiterea e auditată, folosirea nu.
+- Relevant înainte de a da codul agenților REAL (W6): un cod scurs rămâne valabil la nesfârșit.
+
+### G-TUT-GATE-COVERAGE-001 — Nimic nu împiedică o rută nouă `/api/[domain]/*` să uite poarta — OPEN (P2)
+- Inventarul celor 29 de rute a fost făcut cu `find`, o dată. Poarta e per-handler; nu există test/lint care să eșueze dacă un handler nou nu cheamă `resolveDomainOrForbid`. Sursă: /review (unghiul altitudine).
+- Fix propus: un test care enumeră `src/app/api/[domain]/**/route.ts` și cere prezența importului în fiecare fișier — plasa care lipsește azi.
+
+### G-TUT-FEEDBACK-PRIVATE-WIDENED-001 — „Materialul propriu se editează automat" s-a lărgit de la 2 la 9 materii — OPEN (P1, decizie)
+- `feedback-review.ts` folosea o listă de 2 sluguri (`aptitudini-aviatie`, `licenta-rares`); acum citește `visibility === "PRIVATE"`, deci regimul de auto-corectare/auto-ascundere acoperă și `aviation`, `drept-penal`, `chimie`, `biologie`, `istorie`, `geografie`. Lărgire reală, introdusă de unificarea definiției (`b51d528`).
+- Se leagă direct de itemul deschis „Verdictul pe feedback-ul elevului nu mai are voie să fie final fără om". Decizie de produs: fie se revine la o listă explicită, fie se acceptă lărgirea odată cu omul-în-buclă.
+
+### G-TUT-ADMIN-SCOPE-001 — Un ADMIN de materie vedea materiile private străine — **Eliminated 2026-09-05 (`70534c5`, LIVE)**
+- Găsit de True E2E [10], rolul ADMIN: `test_admin` (ADMIN pe `aviation`) → `GET /api/licenta-rares/progress` 200, `/api/aptitudini-aviatie/leaderboard` 200, `/api/licenta-rares/bibliography` 200, iar catalogul lista materiile private.
+- Cauză: `canSeePrivateDomains` moștenise „orice înscriere cu rol ADMIN = admin global" din vechiul `canSeeRestrictedDomains` (nu regresie, dar contrazice „privat = invizibil").
+- Fix: doar `isSuperAdmin`; un admin al lui X ajunge în Y ca oricine — printr-o înscriere în Y. Verificat live post-deploy: aceleași trei rute → 404, materia proprie → 200, catalog fără privat. Niciun cont real afectat.
+
+### G-TUT-ADMIN-QUESTIONS-001 — Trei politici de acces pe aceeași resursă (`/api/admin/questions`) — OPEN (P2, pre-existent)
+- Găsit de True E2E [10], rolul ADMIN: lista `GET /api/admin/questions` → 200 scoped (`requireAdminOrInstructor`); `GET /api/admin/questions/<id>` → 403 (`requireAdmin` = superadmin-only); `PUT/DELETE /<id>` → `requireDomainAdmin`; `POST` → 403 pentru un ADMIN de domeniu, deși corpul rutei conține o verificare per-domeniu (enrollment ADMIN/INSTRUCTOR pe `domainId`) care nu se mai execută niciodată — cod mort.
+- Efect: un ADMIN de domeniu vede panoul (layout-ul îl lasă) dar nu poate crea/citi individual întrebări. Nu e scurgere; e funcție promisă și nelivrată pentru rolul ADMIN.
+- Unde: `src/app/api/admin/questions/route.ts` (POST) + `[id]/route.ts` (GET). Decizie: fie `requireDomainAdmin` peste tot pe întrebări, fie se scoate rolul ADMIN de domeniu din UI. Ține de workstream-ul D (roluri).
+
+### G-TUT-DOMAIN-INACTIVE-001 — O materie oprită (`isActive=false`) apare încă în `enrolled`, deși rutele ei răspund 404 — OPEN (P3/UX)
+- Găsit de True E2E [10], rolul SUPERADMIN (V2): elevul înscris vede materia în `GET /api/student/domains` → `enrolled`, dar orice `/api/<slug>/*` → 404 (poarta, corect). UI-ul ar arăta o materie pe care nu o poți deschide. Tot acolo: comutarea `isActive` prin `PUT /api/admin/domains/[id]` nu scrie în audit log (doar `visibility` e auditat).
+- Fix mic: `enrolled` filtrat pe `domain.isActive` pentru non-admini (sau marcat „oprită"); audit și pe `isActive`.
+
+### AGT-001 (PATCH `/api/admin/questions/<id>` → 405) — **Eliminated** (verificat 2026-09-05: PATCH e alias la PUT; pe id inexistent răspunde 404, nu 405)
+
+### G-TUT-LEGAL-EN-001 — Termenii și Confidențialitatea în ENGLEZĂ servite pentru eTutor sunt ale altui produs (4pro-eat)
+- **Status**: OPEN (găsit 2026-09-05, True E2E [10] — journey `/en/terms` HAS_ERRORS → citit conținutul)
+- **Severitate**: P1 (conformitate). Un utilizator pe locale EN acceptă la înscriere termeni despre „AI-assisted food logging", „nutritional analysis", „body weight and composition goals", „Health and Nutrition Data (Art. 9 GDPR)" — nimic din asta nu există în eTutor. Versiunea RO e corectă.
+- **Dovadă (sursă, nu simptom)**: `GET https://legal.knowbest.ro/api/v1/public/legal/tutor/tos?locale=en` → 9 potriviri „nutri/food logging", 1 „body weight"; `.../privacy?locale=en` → la fel; `?locale=ro` → 0 pe ambele; `cookies` curat pe ambele locale. Randat identic pe `https://etutor.ro/en/terms` și `/en/privacy` (v2.1, „Effective from 31 May 2026").
+- **Cauză probabilă**: la crearea variantei EN a documentelor pentru `tutor` în Legal Hub s-a pornit din documentul lui `4pro-eat` și nu s-a mai adaptat.
+- **Unde se repară**: în **Legal Hub** (NO-TOUCH CRITIC — propose-confirm-apply per CLAUDE.md §2d): o versiune nouă (v2.2) EN pentru TOS + PRIVACY ale app-ului `tutor`, tradusă din RO v2.1. Tutor nu are nimic de schimbat (`src/lib/legal-doc.ts` doar randează ce primește).
+- **Colateral de decis (produs, nu bug)**: ambele locale cer „18 ani sau peste" (RO: 4 potriviri) pe o platformă folosită de elevi de clasa a VIII-a; textul RO permite 16-18 cu acordul părintelui, dar sub 16 nu e acoperit deloc. De discutat cu consilierul juridic înainte de v2.2.
+
+
 > **Audit COMPLET /pa + True E2E [10] 2026-07-12** — 7-persona walk (vizitator/elev/părinte/meditator/admin/superadmin) + cross-cutting E2E. Full report: `Reports/AUDIT-PA-E2E-2026-07-12.md`. Zero 404s + clean auth gating; but **10 × P0** (7 security + 3 money-path) + ~20 P1. Batch A (7 security P0) **ELIMINATED + LIVE** (commit `1808362`, see below). Remaining open (batched for next passes):
 
 | Gap ID | Description | Priority | Status |
