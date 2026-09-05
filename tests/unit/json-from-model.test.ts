@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { extractJson } from "@/lib/json-from-model";
+import { extractJson, extractJsonObjects } from "@/lib/json-from-model";
 
 describe("extractJson", () => {
   it("JSON curat", () => {
@@ -39,5 +39,39 @@ describe("extractJson", () => {
 
   it("esueaza clar cand JSON-ul e taiat la jumatate (raspuns trunchiat de maxTokens)", () => {
     expect(() => extractJson('{"a":1,"b":[1,2')).toThrow(/nu se închide/i);
+  });
+});
+
+describe("extractJsonObjects — recuperare cand lotul e partial stricat", () => {
+  it("tabloul curat trece neatins, in ordine", () => {
+    expect(extractJsonObjects('[{"a":1},{"a":2}]')).toEqual([{ a: 1 }, { a: 2 }]);
+  });
+
+  it("un singur obiect devine lista de unu", () => {
+    expect(extractJsonObjects('{"a":1}')).toEqual([{ a: 1 }]);
+  });
+
+  it("raspuns TRUNCHIAT: pastreaza obiectele intregi, il arunca pe cel taiat", () => {
+    const r = extractJsonObjects('[{"a":1},{"b":2},{"c":');
+    expect(r).toEqual([{ a: 1 }, { b: 2 }]);
+  });
+
+  it("un obiect STRICAT nu omoara lotul — restul supravietuiesc", () => {
+    const r = extractJsonObjects('[{"a":1},{"b":stricat},{"c":3}]');
+    expect(r).toEqual([{ a: 1 }, { c: 3 }]);
+  });
+
+  it("acolade in interiorul sirurilor nu rup numaratoarea", () => {
+    const r = extractJsonObjects('[{"t":"contine } si {"},{"t":"altul"}]');
+    expect(r).toEqual([{ t: "contine } si {" }, { t: "altul" }]);
+  });
+
+  it("obiecte imbricate se intorc ca UN singur element, nu desfacute", () => {
+    expect(extractJsonObjects('[{"a":{"b":1}}]')).toEqual([{ a: { b: 1 } }]);
+  });
+
+  it("fara niciun obiect → lista goala, nu exceptie", () => {
+    expect(extractJsonObjects("nu am generat nimic")).toEqual([]);
+    expect(extractJsonObjects("")).toEqual([]);
   });
 });

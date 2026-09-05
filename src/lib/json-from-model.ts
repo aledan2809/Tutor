@@ -48,3 +48,57 @@ export function extractJson(raw: string): unknown {
   }
   throw new Error("JSON-ul din răspuns nu se închide.");
 }
+
+/**
+ * A list of objects out of an answer that may be partly broken.
+ *
+ * `extractJson` is all-or-nothing: one unescaped newline inside a markdown field,
+ * or a response cut short by an output limit, and the whole batch is lost. Observed
+ * on both counts while generating eight questions with a lesson as context — once a
+ * parse error at character 1519, once an array that never closed.
+ *
+ * So: try the clean parse first, and if it fails, walk the text picking out every
+ * balanced `{...}` and parsing each on its own. A malformed question is dropped; the
+ * seven good ones survive. Order is preserved.
+ */
+export function extractJsonObjects(raw: string): unknown[] {
+  try {
+    const whole = extractJson(raw);
+    if (Array.isArray(whole)) return whole;
+    if (whole && typeof whole === "object") return [whole];
+  } catch {
+    // fall through to per-object recovery
+  }
+
+  const text = String(raw ?? "");
+  const out: unknown[] = [];
+  let depth = 0;
+  let start = -1;
+  let inString = false;
+  let escaped = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (escaped) { escaped = false; continue; }
+    if (ch === "\\") { escaped = true; continue; }
+    if (ch === '"') { inString = !inString; continue; }
+    if (inString) continue;
+
+    if (ch === "{") {
+      if (depth === 0) start = i;
+      depth++;
+    } else if (ch === "}") {
+      depth--;
+      if (depth === 0 && start !== -1) {
+        try {
+          out.push(JSON.parse(text.slice(start, i + 1)));
+        } catch {
+          // one bad object, not a bad batch
+        }
+        start = -1;
+      }
+      if (depth < 0) depth = 0; // a stray closer must not desynchronise the rest
+    }
+  }
+  return out;
+}

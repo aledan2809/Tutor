@@ -4,7 +4,7 @@ import { withErrorHandler } from "@/lib/api-handler";
 import { logAudit } from "@/lib/audit";
 import { requireContentAdmin, ownsDomain } from "@/lib/merchant-auth";
 import { generateQuestions } from "@/lib/ai-tutor";
-import { extractJson } from "@/lib/json-from-model";
+import { extractJsonObjects } from "@/lib/json-from-model";
 import { describeGateOutcome, gateGeneratedQuestions } from "@/lib/question-gate";
 import { z } from "zod";
 
@@ -117,8 +117,7 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
         language,
         material,
       });
-      const raw = extractJson(res.content ?? "[]");
-      const list = Array.isArray(raw) ? raw : (raw as { questions?: unknown[] })?.questions ?? [];
+      const list = extractJsonObjects(res.content ?? "[]");
       const candidates = (list as Record<string, unknown>[])
         .map((q) => ({
           content: String(q.content ?? "").trim(),
