@@ -46,6 +46,14 @@ model User {
   image         String?
   password      String?
   isSuperAdmin  Boolean   @default(false)
+  /// Which merchant this account belongs to. Null = a platform account: an
+  /// ordinary student, parent or tutor, and the superadmin.
+  organizationId String?
+  /// Administers their OWN organization — its subjects, its content, its people.
+  /// Meaningless without organizationId; the two are checked together, never apart.
+  /// This is not `isSuperAdmin`: a merchant admin can reach nothing outside their
+  /// organization, and platform-wide surfaces (plans, ads, revenue) stay closed.
+  isOrgAdmin    Boolean   @default(false)
   accountRole   AccountRole?
   locale        String    @default("en")
   // Clasa în care e elevul (5-12), declarată în flow-ul de inițiere al Grilelor.
@@ -101,6 +109,7 @@ model User {
   paidExtraChildSeats Int       @default(0)
   isBanned            Boolean   @default(false)
   bannedReason        String?
+  organization        Organization?     @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   subscriptionPlan    SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
   vouchersCreated     Voucher[]
   auditLogs           AdminAuditLog[]  @relation("AuditPerformer")
@@ -133,6 +142,8 @@ model User {
   // Parent monitoring escalations (as parent / as child).
   parentEscAsParent    ParentEscalation[] @relation("ParentEscParent")
   parentEscAsChild     ParentEscalation[] @relation("ParentEscChild")
+
+  @@index([organizationId])
 }
 
 /// One parent-monitoring episode: opened when a child ignores their whole
@@ -279,6 +290,26 @@ model TelegramConnectToken {
   @@index([expiresAt])
 }
 
+/// A merchant on the platform: a company that owns its own subjects and its own
+/// people (e.g. an agency running a training course for its agents).
+///
+/// Everything that existed before this belongs to no organization, which is what
+/// "platform-owned" means — administered only by the superadmin, exactly as before.
+/// An organization draws a boundary: its admin administers its subjects and its
+/// members, and nothing else.
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// The subjects this merchant owns.
+  domains Domain[]
+  /// The accounts that belong to this merchant.
+  members User[]
+}
+
 /// Who may reach a domain's content.
 ///
 /// Until 2026-09-05 "private" was stored nowhere: it was inferred from the SHAPE
@@ -309,6 +340,9 @@ model Domain {
   /// must not leak. The 2026-09-05 backfill set PUBLIC on exactly the slugs that
   /// classified as curriculum, so nothing changed for anyone the day it shipped.
   visibility         DomainVisibility @default(PRIVATE)
+  /// Which merchant owns this subject. Null = platform-owned (every subject that
+  /// existed before organizations did), administered only by the superadmin.
+  organizationId     String?
   /// Admin-issued access code. Null = none in circulation. Redeeming it creates an
   /// active STUDENT enrollment (POST /api/domains/join); rotating it only affects
   /// future joins. Unique: one code names one domain.
@@ -316,6 +350,7 @@ model Domain {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
+  organization    Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   enrollments     Enrollment[]
   questions       Question[]
   contentSources  ContentSource[]
@@ -341,6 +376,8 @@ model Domain {
   escalationThresholds EscalationThreshold[]
   dashboardAnalytics   DashboardAnalytics[]
   bibliography         Bibliography[]
+
+  @@index([organizationId])
 }
 
 /// What the account IS, as declared at signup — distinct from EnrollmentRole,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/admin-auth";
+import { requireContentAdmin, domainScopeWhere } from "@/lib/merchant-auth";
 import { z } from "zod";
 import { withErrorHandler } from "@/lib/api-handler";
 
@@ -15,10 +15,13 @@ const domainSchema = z.object({
 });
 
 async function _GET() {
-  const { error } = await requireAdmin();
+  const { error, scope } = await requireContentAdmin();
   if (error) return error;
 
   const domains = await prisma.domain.findMany({
+    // A merchant admin lists only its own organization's subjects. For the
+    // superadmin domainScopeWhere returns {}, so this stays the query it was.
+    where: domainScopeWhere(scope),
     include: {
       _count: { select: { questions: true, enrollments: true } },
       examConfig: true,
@@ -30,7 +33,7 @@ async function _GET() {
 }
 
 async function _POST(req: NextRequest) {
-  const { error } = await requireAdmin();
+  const { error, scope } = await requireContentAdmin();
   if (error) return error;
 
   const body = await req.json();
@@ -47,6 +50,11 @@ async function _POST(req: NextRequest) {
   const domain = await prisma.domain.create({
     data: {
       ...parsed.data,
+      // A merchant admin's subject is born owned by that merchant and cannot be
+      // created anywhere else: organizationId is absent from the schema above, so
+      // it cannot be chosen from the body. PLATFORM adds nothing here, so the
+      // superadmin keeps creating platform subjects (organizationId null).
+      ...(scope.kind === "ORG" ? { organizationId: scope.organizationId } : {}),
       examConfig: {
         create: {
           questionTypes: ["MULTIPLE_CHOICE"],

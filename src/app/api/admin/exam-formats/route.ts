@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/admin-auth";
+import {
+  requireContentAdmin,
+  domainScopeWhere,
+  ownsDomain,
+  resolveOwnedDomain,
+} from "@/lib/merchant-auth";
 import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 
@@ -29,7 +34,7 @@ const examFormatSchema = z.object({
 });
 
 async function _GET(req: NextRequest) {
-  const { error } = await requireAdmin();
+  const { error, scope } = await requireContentAdmin();
   if (error) return error;
 
   const { searchParams } = new URL(req.url);
@@ -37,6 +42,9 @@ async function _GET(req: NextRequest) {
 
   const where: Record<string, unknown> = {};
   if (domainId) where.domainId = domainId;
+  // A merchant admin sees only formats attached to its own organization's
+  // subjects. PLATFORM adds no filter, so the superadmin's query is unchanged.
+  if (scope.kind === "ORG") where.domain = domainScopeWhere(scope);
 
   const formats = await prisma.examSimulation.findMany({
     where,
@@ -48,7 +56,7 @@ async function _GET(req: NextRequest) {
   });
 
   const domains = await prisma.domain.findMany({
-    where: { isActive: true },
+    where: { isActive: true, ...domainScopeWhere(scope) },
     select: {
       id: true,
       name: true,
@@ -71,7 +79,7 @@ async function _GET(req: NextRequest) {
 }
 
 async function _POST(req: NextRequest) {
-  const { error } = await requireAdmin();
+  const { error, scope } = await requireContentAdmin();
   if (error) return error;
 
   const body = await req.json();
@@ -80,10 +88,11 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const domain = await prisma.domain.findUnique({ where: { id: parsed.data.domainId } });
-  if (!domain) {
-    return NextResponse.json({ error: "Domain not found" }, { status: 404 });
-  }
+  // Was: "does this subject exist?". Now also: "is it this admin's?". For
+  // PLATFORM the answer is the same one it always was — same 404, same body —
+  // because ownership can only fail for a merchant.
+  const owned = await resolveOwnedDomain(scope, parsed.data.domainId);
+  if (!owned.ok) return owned.response;
 
   const format = await prisma.examSimulation.create({
     data: {
@@ -102,7 +111,7 @@ async function _POST(req: NextRequest) {
 }
 
 async function _PUT(req: NextRequest) {
-  const { error } = await requireAdmin();
+  const { error, scope } = await requireContentAdmin();
   if (error) return error;
 
   const body = await req.json();
@@ -115,6 +124,24 @@ async function _PUT(req: NextRequest) {
   const parsed = examFormatSchema.partial().safeParse(data);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  }
+
+  if (scope.kind === "ORG") {
+    // 404, not 403: a format outside the scope must read as non-existent.
+    const existing = await prisma.examSimulation.findUnique({
+      where: { id },
+      select: { domain: { select: { organizationId: true } } },
+    });
+    if (!existing || !ownsDomain(scope, existing.domain)) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    // The update below does not write domainId, so a format cannot be moved
+    // between subjects today. Validated anyway, so that adding that field later
+    // cannot silently open a way out of the organization.
+    if (parsed.data.domainId) {
+      const owned = await resolveOwnedDomain(scope, parsed.data.domainId);
+      if (!owned.ok) return owned.response;
+    }
   }
 
   const format = await prisma.examSimulation.update({
@@ -134,7 +161,7 @@ async function _PUT(req: NextRequest) {
 }
 
 async function _DELETE(req: NextRequest) {
-  const { error } = await requireAdmin();
+  const { error, scope } = await requireContentAdmin();
   if (error) return error;
 
   const { searchParams } = new URL(req.url);
@@ -142,6 +169,16 @@ async function _DELETE(req: NextRequest) {
 
   if (!id) {
     return NextResponse.json({ error: "id is required" }, { status: 400 });
+  }
+
+  if (scope.kind === "ORG") {
+    const existing = await prisma.examSimulation.findUnique({
+      where: { id },
+      select: { domain: { select: { organizationId: true } } },
+    });
+    if (!existing || !ownsDomain(scope, existing.domain)) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
   }
 
   const sessions = await prisma.examSession.count({ where: { formatId: id } });

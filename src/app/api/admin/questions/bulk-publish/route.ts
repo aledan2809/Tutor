@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/admin-auth";
+import { domainScopeWhere, isPlatform, requireContentAdmin } from "@/lib/merchant-auth";
 import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 
@@ -16,7 +16,7 @@ const schema = z.object({
  * PUBLISHED — already-published/approved rows are untouched. Admin-gated.
  */
 async function _POST(req: NextRequest) {
-  const { error } = await requireAdmin();
+  const { error, scope } = await requireContentAdmin();
   if (error) return error;
 
   const parsed = schema.safeParse(await req.json());
@@ -24,8 +24,14 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
+  // The ids arrive from the client, so ownership is enforced in the `where` itself:
+  // a merchant admin publishes only rows sitting in his organization's subjects, and
+  // ids outside it are left untouched rather than refused (refusing would confirm
+  // that someone else's question id exists). The superadmin's filter is unchanged.
   const result = await prisma.question.updateMany({
-    where: { id: { in: parsed.data.ids }, status: "DRAFT" },
+    where: isPlatform(scope)
+      ? { id: { in: parsed.data.ids }, status: "DRAFT" }
+      : { id: { in: parsed.data.ids }, status: "DRAFT", domain: domainScopeWhere(scope) },
     data: { status: "PUBLISHED" },
   });
 

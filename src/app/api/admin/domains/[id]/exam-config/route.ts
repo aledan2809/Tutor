@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/admin-auth";
+import { requireContentAdmin, resolveOwnedDomain } from "@/lib/merchant-auth";
 import { z } from "zod";
 import { withErrorHandler } from "@/lib/api-handler";
 
@@ -18,10 +18,20 @@ async function _GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireAdmin();
+  const { error, scope } = await requireContentAdmin();
   if (error) return error;
 
   const { id } = await params;
+
+  // Reading a subject's exam settings — including the "no config yet" answer, which
+  // would otherwise reveal whether a foreign subject exists — is limited to the
+  // merchant's own subjects. Gated on ORG so the superadmin's answers, defaults
+  // included, are exactly the ones it got before.
+  if (scope.kind === "ORG") {
+    const owned = await resolveOwnedDomain(scope, id);
+    if (!owned.ok) return owned.response;
+  }
+
   const config = await prisma.examConfig.findUnique({
     where: { domainId: id },
     include: { domain: { select: { name: true } } },
@@ -47,10 +57,18 @@ async function _PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireAdmin();
+  const { error, scope } = await requireContentAdmin();
   if (error) return error;
 
   const { id } = await params;
+
+  // The subject whose exam settings are written must be the merchant's own; the id
+  // arrives from the URL and is otherwise trusted straight into the upsert.
+  if (scope.kind === "ORG") {
+    const owned = await resolveOwnedDomain(scope, id);
+    if (!owned.ok) return owned.response;
+  }
+
   const body = await req.json();
   const parsed = examConfigSchema.safeParse(body);
   if (!parsed.success) {

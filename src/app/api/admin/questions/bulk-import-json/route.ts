@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/admin-auth";
+import { ownsDomain, requireContentAdmin } from "@/lib/merchant-auth";
 import { z } from "zod";
 import { withErrorHandler } from "@/lib/api-handler";
 
@@ -21,7 +21,7 @@ const itemSchema = z.object({
 const bulkSchema = z.array(itemSchema).min(1).max(500);
 
 async function _POST(req: NextRequest) {
-  const { error, session } = await requireAdmin();
+  const { error, scope, userId } = await requireContentAdmin();
   if (error) return error;
 
   const body = await req.json();
@@ -32,20 +32,18 @@ async function _POST(req: NextRequest) {
 
   const items = parsed.data;
 
-  // For non-superadmins, verify all domainIds are in their enrolled domains with ADMIN role
-  if (!session!.user.isSuperAdmin) {
-    const allowedDomainIds = new Set(
-      (session!.user.enrollments || [])
-        .filter((e: { roles: string[] }) => e.roles.includes("ADMIN"))
-        .map((e: { domainId: string }) => e.domainId)
-    );
-    const unauthorized = items.find((item) => !allowedDomainIds.has(item.domainId));
-    if (unauthorized) {
-      return NextResponse.json(
-        { error: `No ADMIN permission for domainId: ${unauthorized.domainId}` },
-        { status: 403 }
-      );
-    }
+  // Every target subject must belong to this admin before a single row is written.
+  // The superadmin owns all of them; a merchant admin only his organization's, and
+  // a subject outside it reads as missing rather than refused (404, not 403) so he
+  // cannot map out which subjects other organizations have. One query, not one per item.
+  const domainIds = [...new Set(items.map((item) => item.domainId))];
+  const domains = await prisma.domain.findMany({
+    where: { id: { in: domainIds } },
+    select: { id: true, organizationId: true },
+  });
+  const byId = new Map(domains.map((d) => [d.id, d]));
+  if (domainIds.some((domainId) => !ownsDomain(scope, byId.get(domainId)))) {
+    return NextResponse.json({ error: "Domain not found" }, { status: 404 });
   }
 
   const results = await prisma.$transaction(
@@ -56,7 +54,7 @@ async function _POST(req: NextRequest) {
           options: data.options ?? undefined,
           status: "APPROVED",
           source: "MANUAL",
-          createdById: session!.user.id,
+          createdById: userId,
           tags: tags?.length
             ? {
                 connectOrCreate: tags.map((name) => ({

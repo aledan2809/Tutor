@@ -19,9 +19,14 @@ export default async function AdminLayout({
   const session = await auth();
   if (!session?.user) redirect("/auth/signin");
 
+  // Two kinds of administrator reach this panel: the superadmin, and a merchant
+  // admin who administers their own organization. The per-domain ADMIN enrollment
+  // is deliberately NOT one of them any more: it used to open the door and then be
+  // refused by almost everything inside, because 41 routes check isSuperAdmin.
+  // Content scoping for instructors still runs on that role, inside the routes.
   const isAdmin =
     session.user.isSuperAdmin ||
-    session.user.enrollments?.some((e) => e.roles.includes("ADMIN" as never));
+    (session.user.isOrgAdmin === true && Boolean(session.user.organizationId));
 
   if (!isAdmin) redirect("/dashboard");
 

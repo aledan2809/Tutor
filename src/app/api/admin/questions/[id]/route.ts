@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, requireDomainAdmin } from "@/lib/admin-auth";
+import { requireDomainAdmin } from "@/lib/admin-auth";
+import { isPlatform, requireContentAdmin, resolveOwnedDomain } from "@/lib/merchant-auth";
 import { z } from "zod";
 import { withErrorHandler } from "@/lib/api-handler";
 
@@ -18,13 +19,30 @@ const updateSchema = z.object({
   tags: z.array(z.string()).optional(),
 });
 
+/**
+ * Who may touch a question that lives in this subject.
+ *
+ * Superadmin: every subject, unscoped — exactly as before. Merchant admin: only
+ * his organization's subjects, and without needing an enrollment on them.
+ * Everyone else: the per-domain ADMIN/INSTRUCTOR enrollment gate, unchanged.
+ *
+ * Returns the refusal to hand back, or null when the caller may proceed.
+ */
+async function authorizeQuestionDomain(domainId: string) {
+  const admin = await requireContentAdmin();
+  if (!admin.error) {
+    if (isPlatform(admin.scope)) return null;
+    const owned = await resolveOwnedDomain(admin.scope, domainId);
+    return owned.ok ? null : owned.response;
+  }
+  const domainGate = await requireDomainAdmin(domainId);
+  return domainGate.error;
+}
+
 async function _GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireAdmin();
-  if (error) return error;
-
   const { id } = await params;
   const question = await prisma.question.findUnique({
     where: { id },
@@ -34,6 +52,9 @@ async function _GET(
   if (!question) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
+
+  const denied = await authorizeQuestionDomain(question.domainId);
+  if (denied) return denied;
 
   return NextResponse.json(question);
 }
@@ -50,8 +71,8 @@ async function _PUT(
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
-  const { error } = await requireDomainAdmin(existing.domainId);
-  if (error) return error;
+  const denied = await authorizeQuestionDomain(existing.domainId);
+  if (denied) return denied;
 
   const body = await req.json();
   const parsed = updateSchema.safeParse(body);
@@ -94,8 +115,8 @@ async function _DELETE(
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
-  const { error } = await requireDomainAdmin(existing.domainId);
-  if (error) return error;
+  const denied = await authorizeQuestionDomain(existing.domainId);
+  if (denied) return denied;
 
   await prisma.question.delete({ where: { id } });
 

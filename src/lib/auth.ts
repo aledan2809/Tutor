@@ -17,6 +17,16 @@ declare module "next-auth" {
       isSuperAdmin: boolean;
       /** Declared at signup; null on every account created before the column. */
       accountRole: AccountRole | null;
+      /** The merchant this account belongs to; null for a platform account. */
+      organizationId: string | null;
+      /**
+       * Administers their own organization. Only meaningful together with
+       * organizationId — read the two as a pair, never one alone. Good enough to
+       * decide what to DRAW; the server re-reads it from the database before
+       * letting anyone act (src/lib/merchant-auth.ts), because this claim is
+       * cached for up to five minutes like the rest of the token.
+       */
+      isOrgAdmin: boolean;
       enrollments: {
         domainId: string;
         domainSlug: string;
@@ -174,6 +184,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
             token.isSuperAdmin = dbUser.isSuperAdmin ?? false;
             token.accountRole = dbUser.accountRole ?? null;
+            token.organizationId = dbUser.organizationId ?? null;
+            token.isOrgAdmin = dbUser.isOrgAdmin ?? false;
             token.enrollments = dbUser.enrollments.map((e) => ({
               domainId: e.domain.id,
               domainSlug: e.domain.slug,
@@ -190,6 +202,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Always-defined defaults so the session callback never sees undefined.
       if (token.isSuperAdmin === undefined) token.isSuperAdmin = false;
       if (token.accountRole === undefined) token.accountRole = null;
+      if (token.organizationId === undefined) token.organizationId = null;
+      if (token.isOrgAdmin === undefined) token.isOrgAdmin = false;
       if (token.enrollments === undefined) token.enrollments = [];
       return token;
     },
@@ -197,6 +211,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.id = token.id as string;
       session.user.isSuperAdmin = token.isSuperAdmin as boolean;
       session.user.accountRole = (token.accountRole as AccountRole | null) ?? null;
+      session.user.organizationId = (token.organizationId as string | null) ?? null;
+      session.user.isOrgAdmin = (token.isOrgAdmin as boolean) ?? false;
       session.user.enrollments = token.enrollments as {
         domainId: string;
         domainSlug: string;

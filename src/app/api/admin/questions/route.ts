@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, requireAdminOrInstructor } from "@/lib/admin-auth";
+import { requireAdminOrInstructor } from "@/lib/admin-auth";
+import {
+  domainScopeWhere,
+  isPlatform,
+  requireContentAdmin,
+  resolveOwnedDomain,
+} from "@/lib/merchant-auth";
 import { z } from "zod";
 import { withErrorHandler } from "@/lib/api-handler";
 
@@ -21,8 +27,24 @@ const questionSchema = z.object({
 });
 
 async function _GET(req: NextRequest) {
-  const { error, allowedDomainIds } = await requireAdminOrInstructor();
-  if (error) return error;
+  // The superadmin stays unscoped (allowedDomainIds = null, exactly as before).
+  // A merchant admin sees his organization's subjects even with no enrollment on
+  // them. Anyone else keeps the existing per-domain ADMIN/INSTRUCTOR path.
+  const admin = await requireContentAdmin();
+  let allowedDomainIds: string[] | null;
+  if (admin.error) {
+    const instructor = await requireAdminOrInstructor();
+    if (instructor.error) return instructor.error;
+    allowedDomainIds = instructor.allowedDomainIds;
+  } else if (isPlatform(admin.scope)) {
+    allowedDomainIds = null;
+  } else {
+    const orgDomains = await prisma.domain.findMany({
+      where: domainScopeWhere(admin.scope),
+      select: { id: true },
+    });
+    allowedDomainIds = orgDomains.map((d) => d.id);
+  }
 
   const { searchParams } = new URL(req.url);
   const domainId = searchParams.get("domainId");
@@ -69,7 +91,7 @@ async function _GET(req: NextRequest) {
 }
 
 async function _POST(req: NextRequest) {
-  const { error, session } = await requireAdmin();
+  const { error, scope, userId } = await requireContentAdmin();
   if (error) return error;
 
   const body = await req.json();
@@ -80,20 +102,11 @@ async function _POST(req: NextRequest) {
 
   const { tags, ...data } = parsed.data;
 
-  // Verify user has ADMIN/INSTRUCTOR role in the target domain (superadmins bypass)
-  if (!session!.user.isSuperAdmin) {
-    const hasRole = session!.user.enrollments?.some(
-      (e: { domainId: string; roles: string[] }) =>
-        e.domainId === data.domainId &&
-        (e.roles.includes("ADMIN") || e.roles.includes("INSTRUCTOR"))
-    );
-    if (!hasRole) {
-      return NextResponse.json(
-        { error: "You do not have permission to create questions in this domain" },
-        { status: 403 }
-      );
-    }
-  }
+  // The target subject must belong to this admin. The superadmin owns every
+  // subject; a merchant admin only his organization's — anything else is a 404,
+  // so he cannot discover which subjects other organizations have.
+  const owned = await resolveOwnedDomain(scope, data.domainId);
+  if (!owned.ok) return owned.response;
 
   // Manual content gets approved directly
   const status = data.status || (data.source === "MANUAL" ? "APPROVED" : "DRAFT");
@@ -103,7 +116,7 @@ async function _POST(req: NextRequest) {
       ...data,
       options: data.options ? data.options : undefined,
       status,
-      createdById: session!.user.id,
+      createdById: userId,
       tags: tags?.length
         ? {
             connectOrCreate: tags.map((name) => ({

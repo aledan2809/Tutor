@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/admin-auth";
+import {
+  requireContentAdmin,
+  domainScopeWhere,
+  ownsDomain,
+  resolveOwnedDomain,
+} from "@/lib/merchant-auth";
 import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 
@@ -29,7 +34,7 @@ function slugify(text: string): string {
 }
 
 async function _GET(req: NextRequest) {
-  const { error } = await requireAdmin();
+  const { error, scope } = await requireContentAdmin();
   if (error) return error;
 
   const { searchParams } = new URL(req.url);
@@ -37,6 +42,10 @@ async function _GET(req: NextRequest) {
 
   const where: Record<string, unknown> = {};
   if (domainId) where.domainId = domainId;
+  // A merchant admin sees only lessons that sit in its own organization's
+  // subjects. PLATFORM adds no filter at all, so the superadmin's query stays
+  // byte-for-byte the one it was.
+  if (scope.kind === "ORG") where.domain = domainScopeWhere(scope);
 
   const lessons = await prisma.lesson.findMany({
     where,
@@ -48,7 +57,7 @@ async function _GET(req: NextRequest) {
   });
 
   const domains = await prisma.domain.findMany({
-    where: { isActive: true },
+    where: { isActive: true, ...domainScopeWhere(scope) },
     select: { id: true, name: true, slug: true },
     orderBy: { name: "asc" },
   });
@@ -57,7 +66,7 @@ async function _GET(req: NextRequest) {
 }
 
 async function _POST(req: NextRequest) {
-  const { error } = await requireAdmin();
+  const { error, scope } = await requireContentAdmin();
   if (error) return error;
 
   const body = await req.json();
@@ -67,6 +76,15 @@ async function _POST(req: NextRequest) {
   }
 
   const data = parsed.data;
+
+  // The subject written into must be the merchant's own. Gated on ORG because
+  // for PLATFORM the check can only ever pass, and gating keeps the superadmin's
+  // path — including its behaviour on a bogus domainId — exactly as it was.
+  if (scope.kind === "ORG") {
+    const owned = await resolveOwnedDomain(scope, data.domainId);
+    if (!owned.ok) return owned.response;
+  }
+
   const baseSlug = slugify(data.title);
   let slug = baseSlug;
   let attempt = 0;
@@ -84,7 +102,7 @@ async function _POST(req: NextRequest) {
 }
 
 async function _PUT(req: NextRequest) {
-  const { error } = await requireAdmin();
+  const { error, scope } = await requireContentAdmin();
   if (error) return error;
 
   const body = await req.json();
@@ -99,6 +117,24 @@ async function _PUT(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
+  if (scope.kind === "ORG") {
+    // Two subjects matter here: the one the lesson is in, and the one it would
+    // be moved to. Both must be the merchant's own, or a foreign lesson could be
+    // edited by id, or one of its own lessons handed to another organization.
+    // 404, not 403: a lesson outside the scope must read as non-existent.
+    const existing = await prisma.lesson.findUnique({
+      where: { id },
+      select: { domain: { select: { organizationId: true } } },
+    });
+    if (!existing || !ownsDomain(scope, existing.domain)) {
+      return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
+    }
+    if (parsed.data.domainId) {
+      const owned = await resolveOwnedDomain(scope, parsed.data.domainId);
+      if (!owned.ok) return owned.response;
+    }
+  }
+
   const lesson = await prisma.lesson.update({
     where: { id },
     data: parsed.data,
@@ -109,7 +145,7 @@ async function _PUT(req: NextRequest) {
 }
 
 async function _DELETE(req: NextRequest) {
-  const { error } = await requireAdmin();
+  const { error, scope } = await requireContentAdmin();
   if (error) return error;
 
   const { searchParams } = new URL(req.url);
@@ -117,6 +153,16 @@ async function _DELETE(req: NextRequest) {
 
   if (!id) {
     return NextResponse.json({ error: "id is required" }, { status: 400 });
+  }
+
+  if (scope.kind === "ORG") {
+    const existing = await prisma.lesson.findUnique({
+      where: { id },
+      select: { domain: { select: { organizationId: true } } },
+    });
+    if (!existing || !ownsDomain(scope, existing.domain)) {
+      return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
+    }
   }
 
   await prisma.lesson.delete({ where: { id } });
