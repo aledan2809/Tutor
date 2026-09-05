@@ -64,7 +64,16 @@ async function _GET(_req: Request, { params }: { params: Promise<{ slug: string 
     topics.length
       ? prisma.question.groupBy({
           by: ["topic"],
-          where: { domainId: gate.domain.id, status: "PUBLISHED", topic: { in: topics } },
+          where: {
+            domainId: gate.domain.id,
+            topic: { in: topics },
+            // A learner's test is the published questions; an admin previewing a
+            // course being built must see the drafts too, exactly as they already
+            // see unpublished lessons above. Counting only PUBLISHED for everyone
+            // showed "0 questions" on a module holding eight, which reads as a
+            // generator that silently did nothing.
+            ...(isAdmin ? {} : { status: "PUBLISHED" as const }),
+          },
           _count: { _all: true },
         })
       : Promise.resolve([] as { topic: string; _count: { _all: number } }[]),
