@@ -52,7 +52,15 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
       domain: { select: { id: true, name: true, slug: true, organizationId: true } },
       modules: {
         orderBy: { order: "asc" },
-        select: { id: true, order: true, title: true, questionTopic: true },
+        select: {
+          id: true,
+          order: true,
+          title: true,
+          summary: true,
+          questionTopic: true,
+          // The lesson is what the module's test must test.
+          lessons: { orderBy: { order: "asc" }, select: { content: true }, take: 3 },
+        },
       },
     },
   });
@@ -86,6 +94,19 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
     }
 
     try {
+      const material = [m.summary ?? "", ...m.lessons.map((l) => l.content)]
+        .filter(Boolean)
+        .join("\n\n")
+        .trim();
+      // A module with no lesson yet gets no questions: without material the model
+      // writes about the field instead of about the module, which is how the first
+      // run produced land-registry questions for a module on commission and ethics.
+      if (!material) {
+        row.note = "sărit — modulul n-are încă lecție, iar grilele fără material ies generice";
+        report.push(row);
+        continue;
+      }
+
       const res = await generateQuestions({
         domain: course.domain.name,
         subject: course.title,
@@ -94,6 +115,7 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
         difficulty,
         type: "MULTIPLE_CHOICE",
         language,
+        material,
       });
       const raw = extractJson(res.content ?? "[]");
       const list = Array.isArray(raw) ? raw : (raw as { questions?: unknown[] })?.questions ?? [];

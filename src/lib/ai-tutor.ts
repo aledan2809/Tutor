@@ -21,8 +21,19 @@ export async function generateQuestions(params: {
   difficulty: number;
   type: "MULTIPLE_CHOICE" | "OPEN";
   language?: "en" | "ro";
+  /**
+   * The material these questions must test.
+   *
+   * Without it the model has only a subject and a topic string to go on, and it
+   * writes plausible questions about the field rather than about the lesson: the
+   * first run for "Fundamentele meseriei" produced questions on land-registry
+   * extracts and property valuation — correct, and belonging to two other modules.
+   * A module's test that does not test the module's lesson makes "passed" mean
+   * nothing about having read it.
+   */
+  material?: string;
 }): Promise<AIResponse> {
-  const { domain, subject, topic, count, difficulty, type, language = "en" } = params;
+  const { domain, subject, topic, count, difficulty, type, language = "en", material } = params;
 
   const typeInstruction =
     type === "MULTIPLE_CHOICE"
@@ -33,13 +44,26 @@ export async function generateQuestions(params: {
 Generate exam questions that are accurate, clear, and well-structured.
 Always respond with valid JSON only, no markdown wrapping.`;
 
+  const materialBlock = material
+    ? `
+
+The questions must test THIS material and nothing outside it. Do not ask about
+neighbouring subjects, however related — if the material does not cover it, it is
+not a question for this test. Where the material gives figures, scripts or named
+steps, prefer questions that check those.
+
+--- MATERIAL ---
+${material.slice(0, 12000)}
+--- END MATERIAL ---`
+    : "";
+
   const userPrompt = `Generate ${count} ${type === "MULTIPLE_CHOICE" ? "multiple choice" : "open"} questions for:
 - Subject: ${subject}
 - Topic: ${topic}
 - Difficulty: ${difficulty}/5
 - Language: ${language === "ro" ? "Romanian" : "English"}
 
-${typeInstruction}
+${typeInstruction}${materialBlock}
 
 Respond with a JSON array of objects with this structure:
 ${
