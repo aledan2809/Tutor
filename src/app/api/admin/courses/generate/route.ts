@@ -31,6 +31,25 @@ const bodySchema = z.discriminatedUnion("action", [
     maxModules: z.number().int().min(2).max(12).default(8),
   }),
   z.object({
+    action: z.literal("import"),
+    domainId: z.string().min(1),
+    title: z.string().min(2).max(160),
+    description: z.string().max(2000).default(""),
+    modules: z
+      .array(
+        z.object({
+          order: z.number().int().min(1),
+          title: z.string().min(2).max(60),
+          summary: z.string().max(1000).default(""),
+          lessonTitle: z.string().min(2).max(160),
+          lessonSummary: z.string().max(1000).default(""),
+          lessonMarkdown: z.string().min(200).max(40000),
+        })
+      )
+      .min(1)
+      .max(20),
+  }),
+  z.object({
     action: z.literal("build"),
     domainId: z.string().min(1),
     prompt: z.string().min(50).max(20000),
@@ -86,6 +105,71 @@ async function _POST(req: NextRequest) {
   }
 
   const suffix = crypto.randomBytes(3).toString("hex");
+
+  if (body.action === "import") {
+    // Lessons written elsewhere — by a person, or in a session with a model the
+    // server cannot reach. Prose only: no questions come in this way, because the
+    // judge in question-gate.ts is what stands between a generated question and
+    // the bank, and it cannot be waived by choosing a different door.
+    const imported = await prisma.$transaction(async (tx) => {
+      const created = await tx.course.create({
+        data: {
+          domainId: domain!.id,
+          title: body.title,
+          slug: courseSlug(body.title, suffix),
+          description: body.description || null,
+          isPublished: false,
+        },
+        select: { id: true, slug: true, title: true },
+      });
+
+      for (const m of [...body.modules].sort((x, y) => x.order - y.order)) {
+        const questionTopic = m.title;
+        const courseModule = await tx.courseModule.create({
+          data: {
+            courseId: created.id,
+            order: m.order,
+            title: m.title,
+            summary: m.summary || null,
+            questionTopic,
+          },
+          select: { id: true },
+        });
+        await tx.lesson.create({
+          data: {
+            domainId: domain!.id,
+            moduleId: courseModule.id,
+            subject: body.title,
+            topic: questionTopic,
+            title: m.lessonTitle,
+            slug: courseSlug(m.lessonTitle, `${suffix}-${m.order}`),
+            content: m.lessonMarkdown,
+            summary: m.lessonSummary || null,
+            order: m.order,
+            isPublished: false,
+          },
+        });
+      }
+      return created;
+    });
+
+    await logAudit({
+      action: "COURSE_IMPORT",
+      performedById: userId,
+      targetType: "Course",
+      metadata: {
+        courseId: imported.id,
+        slug: imported.slug,
+        domainId: domain!.id,
+        domainSlug: domain!.slug,
+        modules: body.modules.length,
+        scope: scope.kind,
+      },
+    });
+
+    return NextResponse.json({ course: imported, modules: body.modules.length }, { status: 201 });
+  }
+
   const course = await prisma.course.create({
     data: {
       domainId: domain!.id,
