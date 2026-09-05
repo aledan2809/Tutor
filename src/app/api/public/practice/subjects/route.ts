@@ -20,8 +20,12 @@ export async function GET() {
     });
 
     const domainIds = [...new Set(rows.map((r) => r.domainId))];
+    // PUBLIC only. classifyDomainSlug below still groups by exam level — that is
+    // what it is for — but it must not decide WHO may see a subject: a domain
+    // named like curriculum can be private, and a private one must not surface
+    // its subjects in the no-account dropdown.
     const domains = await prisma.domain.findMany({
-      where: { id: { in: domainIds } },
+      where: { id: { in: domainIds }, isActive: true, visibility: "PUBLIC" },
       select: { id: true, slug: true },
     });
     const slugById = new Map(domains.map((d) => [d.id, d.slug]));

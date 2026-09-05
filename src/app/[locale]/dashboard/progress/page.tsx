@@ -53,7 +53,11 @@ export default function ProgressPage() {
   const searchParams = useSearchParams();
   const [data, setData] = useState<ProgressData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [domain, setDomain] = useState(searchParams?.get("domain") || "aviation");
+  // No hardcoded default: "aviation" is a private domain now, so a student not
+  // enrolled in it opened this page onto a 404 (before the gate existed, that
+  // route answered 200 with empty data). The enrolled list below picks the first
+  // real subject; until it arrives there is nothing to fetch.
+  const [domain, setDomain] = useState(searchParams?.get("domain") || "");
   const [domains, setDomains] = useState<{ slug: string; name: string }[]>([]);
 
   useEffect(() => {
@@ -68,6 +72,8 @@ export default function ProgressPage() {
           setDomains(list);
           if (list.length > 0 && !list.find((l: { slug: string }) => l.slug === domain)) {
             setDomain(list[0].slug);
+          } else if (list.length === 0) {
+            setLoading(false);
           }
         }
       })

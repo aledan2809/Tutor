@@ -10,8 +10,12 @@ async function _GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // A domain switched off answers 404 on every one of its routes (the gate in
+  // domain-gate.ts), so an enrollment in one must not be listed as something the
+  // student can open — it would be a card that leads nowhere. The superadmin
+  // branch below re-adds every domain, so admins still see it to repair it.
   const enrollments = await prisma.enrollment.findMany({
-    where: { userId: session.user.id, isActive: true },
+    where: { userId: session.user.id, isActive: true, domain: { isActive: true } },
     include: {
       domain: {
         include: {

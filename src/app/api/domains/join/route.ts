@@ -46,9 +46,16 @@ async function _POST(req: NextRequest) {
     select: { isActive: true },
   });
   if (!existing) {
-    await prisma.enrollment.create({
-      data: { userId: session.user.id, domainId: domain.id, roles: ["STUDENT"], isActive: true },
-    });
+    try {
+      await prisma.enrollment.create({
+        data: { userId: session.user.id, domainId: domain.id, roles: ["STUDENT"], isActive: true },
+      });
+    } catch (e) {
+      // Double-submit: the row appeared between the read and the write. The
+      // unique constraint is the real guard; a 500 here would read to the user
+      // as "that code is invalid", which is the opposite of what happened.
+      if ((e as { code?: string }).code !== "P2002") throw e;
+    }
   } else if (!existing.isActive) {
     await prisma.enrollment.update({
       where: { userId_domainId: { userId: session.user.id, domainId: domain.id } },

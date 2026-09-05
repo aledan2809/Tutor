@@ -37,13 +37,11 @@ async function _POST(
     return NextResponse.json({ error: "Domain not found" }, { status: 404 });
   }
 
-  if (!domain.isActive) {
-    return NextResponse.json({ error: "Domain is not active" }, { status: 400 });
-  }
-
   // A private domain cannot be self-joined — not from the picker, not by POSTing
   // its id. Only an admin enrolls into it (or an access code they issued does).
-  // 404, not 403: a private domain must not confirm that it exists.
+  // 404, not 403: a private domain must not confirm that it exists. This runs
+  // BEFORE the isActive check, which answers 400 "is not active" and would
+  // otherwise confirm a private domain simply by being switched off.
   if (
     domain.visibility === "PRIVATE" &&
     !canSeePrivateDomains({
@@ -53,6 +51,10 @@ async function _POST(
     })
   ) {
     return NextResponse.json({ error: "Domain not found" }, { status: 404 });
+  }
+
+  if (!domain.isActive) {
+    return NextResponse.json({ error: "Domain is not active" }, { status: 400 });
   }
 
   // Check if already enrolled
