@@ -12,7 +12,8 @@ Decizii (AskUserQuestion ×7, 2026-09-05): curs static acum + antrenor conversa�
 privat = invizibil complet · agenți: intern (REAL) → public după rodaj · backfill = exact ce se vede azi ·
 acces = admin înscrie + cod la nevoie · coloană vertebrală Curs → Modul → Lecție (aditivă, neatinge cele 4.179 grile).
 
-- [x] **W1+W2 — bariera + comutatorul + codul de acces** — DONE + LIVE 2026-09-05 (`b51d528`). `Domain.visibility`
+- [x] **True E2E Full Audit [10]** — DONE 2026-09-05 (`9bd1509`): 9 faze, 0 FAILED/BLOCKED, 7 defecte reale reparate (`70534c5` + `483427f`). Raport `Reports/TRUE-E2E-FULL-2026-09-05.md`; 7 gap-uri noi în `AUDIT_GAPS.md`.
+- [x] **W1+W2 — bariera + comutatorul + codul de acces** — DONE + LIVE 2026-09-05 (`b51d528` + fixurile de audit). `Domain.visibility`
   + poartă unică `resolveDomainOrForbid` pe toate 29 rute `/api/[domain]/*` + 3 căi de auto-înscriere închise + IDOR
   `session/answer` + admin radio/confirm/audit + `Domain.joinCode` (emite/rotește/retrage; elevul introduce în Domenii).
   Verificat pe prod ca atacator (cont `leak-test-2026-09-05@tutor.app`): 9/9 + IDOR. Detalii: DEVELOPMENT_STATUS 2026-09-05, L31.

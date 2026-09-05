@@ -1,8 +1,48 @@
 # Project Status - Tutor
-Last Updated: 2026-09-05 (bariera public/privat pe materii + cod de acces — LIVE, verificată ca atacator pe producție)
+Last Updated: 2026-09-05 (bariera public/privat + cod de acces LIVE; True E2E [10] rulat după — 7 defecte reale reparate)
 <!-- anterior: 2026-09-03 (conținutul memento-ului Telegram reparat; incident 502 provocat de mine, remediat în ~4 min) -->
 <!-- anterior: 2026-09-01 (treapta Telegram din cascadă -->
 <!--  — sărită tăcut pentru TOȚI utilizatorii; reparată, deployată, verificată pe date de producție) -->
+
+## Current State (Sesiunea 2026-09-05 partea 2 — True E2E Full Audit [10] pe livrarea din aceeași zi)
+
+Auditul cerut de user imediat după livrarea barierei. **9 faze DONE** (una parțial), 2 N/A motivate,
+**0 FAILED, 0 BLOCKED** — cele 3 blocaje din 15 august (parole moarte pe 3 conturi de test, TWG,
+a11y) sunt deblocate sau motivate. Raport: `Reports/TRUE-E2E-FULL-2026-09-05.md`.
+
+**Bariera ține** — reverificată ca atacator: cont nou care cere explicit materiile private la
+înregistrare primește doar cea publică; 404 identic octet-cu-octet cu un slug inexistent; IDOR
+închis; ciclul complet al comutatorului (privat → cod → înscriere → public → privat → cod retras)
+PASS pe 9 pași, cu cele 4 rânduri de audit așteptate în DB.
+
+**Dar auditul a găsit 7 defecte reale, toate reparate și verificate live:**
+- 🔴 `70534c5` — un cont cu rol ADMIN pe o materie citea materiile private STRĂINE (200 pe progress/
+  leaderboard/bibliography) și le vedea în catalog. `canSeePrivateDomains` moștenise „orice ADMIN =
+  admin global"; acum doar superadminul. **Verificarea mea de dimineață ratase asta pentru că
+  testasem cu un singur rol.** → L32.
+- 🟠 `483427f` — șase din `/review` (efort înalt, 61 candidați, 39 după dedup): cheia de acces
+  serializată oricărui admin de materie · ultima suprafață publică rămasă pe regula veche
+  (`public/practice/subjects`) · ordinea 400/404 care confirma o materie privată oprită · dublu-submit
+  pe cod → 500 citit ca „cod invalid" · materie oprită listată în `enrolled` · `/dashboard/progress`
+  pornea hardcodat pe `aviation`, acum privată.
+
+**Constatare din afara barierei**: `etutor.ro/en/terms` și `/en/privacy` servesc termenii lui
+**4pro-eat** (food logging, nutritional analysis, body weight, „Health and Nutrition Data Art. 9").
+RO e corect. Sursa e **Legal Hub**, nu Tutor → `G-TUT-LEGAL-EN-001`, se repară acolo (NO-TOUCH).
+
+**Unealtă reparată**: fluxul TG `student-practice-session` cerea „Quiz" pe pagina `/ro/` care
+randează „Grile" — fals pozitiv P0 raportat ca „fluxul central e rupt" în DOUĂ audituri
+(`18114d3`). TG acum PASSED, 0 P0.
+
+**Scoruri**: [7] CODE 95/100 (0 critice/high) · [8] journey 4 roluri × 19 pagini, 18 OK + 1
+HAS_ERRORS (marcator fals) · TG PASSED · 774/774 teste · lint 0 erori.
+
+**Rămas deschis**: 7 gap-uri în `AUDIT_GAPS.md`, dintre care două cer decizie de produs
+(termenii EN; lărgirea regimului „material propriu se editează automat" de la 2 la 9 materii).
+
+## Lessons Learned (sesiunea 2026-09-05 partea 2)
+- L32 — verificarea unei bariere cu UN singur rol nu dovedește nimic despre celelalte; iar „numele
+  cheii apare în HTML" nu e „secretul s-a scurs". Vezi `knowledge/lessons-learned.md`.
 
 ## Current State (Sesiunea 2026-09-05 — bariera public/privat pe materii + cod de acces; regim mesh + workflow-uri)
 
