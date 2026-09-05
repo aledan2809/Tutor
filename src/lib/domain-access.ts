@@ -33,17 +33,18 @@ export interface DomainAccessTarget {
 }
 
 /**
- * Admins see every domain, private ones included.
+ * Only the superadmin sees every domain, private ones included.
  *
- * There is deliberately no email allowlist any more. One used to live here
- * (`RESTRICTED_DOMAIN_ALLOWLIST`) and it granted its single entry access to EVERY
- * restricted domain at once, not just their own — and adding a student meant
- * shipping code. Access is now an enrollment, which is data.
+ * Two grants that used to live here are gone on purpose:
+ * - an email allowlist (`RESTRICTED_DOMAIN_ALLOWLIST`), which opened EVERY
+ *   restricted domain to its single entry and meant shipping code to add a student;
+ * - "any enrollment with the ADMIN role" — inherited from the old rule and caught
+ *   by the 2026-09-05 audit: an admin of subject X could read the private subject Y
+ *   (progress, leaderboard, bibliography) and see it listed. An admin of X is an
+ *   admin of X. They reach Y like anyone else: through an enrollment in Y.
  */
 export function canSeePrivateDomains(user: DomainAccessUser | null | undefined): boolean {
-  if (!user) return false;
-  if (user.isSuperAdmin) return true;
-  return user.enrollments?.some((e) => e.roles.includes("ADMIN")) ?? false;
+  return user?.isSuperAdmin === true;
 }
 
 /** Does the session say this user is enrolled in this domain? */

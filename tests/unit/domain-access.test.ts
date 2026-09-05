@@ -22,9 +22,11 @@ describe("canSeePrivateDomains — who sees everything", () => {
     expect(canSeePrivateDomains(nobody)).toBe(false);
     expect(canSeePrivateDomains(student)).toBe(false);
   });
-  it("superadmin and a domain ADMIN do", () => {
+  it("superadmin does", () => {
     expect(canSeePrivateDomains(superadmin)).toBe(true);
-    expect(canSeePrivateDomains(domainAdmin)).toBe(true);
+  });
+  it("a domain ADMIN does NOT — audit 2026-09-05: admin of X was reading private Y", () => {
+    expect(canSeePrivateDomains(domainAdmin)).toBe(false);
   });
   it("INSTRUCTOR alone does not", () => {
     expect(canSeePrivateDomains(instructor)).toBe(false);
@@ -62,10 +64,15 @@ describe("canListDomain — what a picker may show", () => {
     expect(canListDomain(elsewhere, PRIVATE)).toBe(false);
   });
 
-  it("admins see private and switched-off domains alike", () => {
+  it("the superadmin sees private and switched-off domains alike", () => {
     expect(canListDomain(superadmin, PRIVATE)).toBe(true);
-    expect(canListDomain(domainAdmin, PRIVATE)).toBe(true);
     expect(canListDomain(superadmin, OFF)).toBe(true);
+  });
+
+  it("a domain ADMIN sees a private domain only where enrolled — not another one", () => {
+    const adminOfX = { enrollments: [{ domainId: "d-x", roles: ["ADMIN"] }] };
+    expect(canListDomain(adminOfX, { id: "d-x", visibility: "PRIVATE", isActive: true })).toBe(true);
+    expect(canListDomain(adminOfX, PRIVATE)).toBe(false); // d-avi, not theirs
   });
 
   it("a switched-off domain is hidden from everyone else, even when enrolled", () => {
