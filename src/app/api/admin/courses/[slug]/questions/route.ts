@@ -6,6 +6,7 @@ import { requireContentAdmin, ownsDomain } from "@/lib/merchant-auth";
 import { generateQuestions } from "@/lib/ai-tutor";
 import { extractJsonObjects } from "@/lib/json-from-model";
 import { describeGateOutcome, gateGeneratedQuestions } from "@/lib/question-gate";
+import { hasLengthCue } from "@/lib/answer-length-cue";
 import { z } from "zod";
 
 /**
@@ -148,12 +149,17 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
         // not a borderline case for the judge to weigh — it is malformed, and it
         // is the exact shape that put wrong answers in front of a student before.
         .filter((q) => q.content && q.correctAnswer && q.options.length >= 2 && q.options.includes(q.correctAnswer));
-      row.generated = candidates.length;
 
-      if (candidates.length) {
-        const gate = await gateGeneratedQuestions(candidates);
-        row.rejected = gate.rejected.length;
-        row.note = describeGateOutcome(gate);
+      // Deterministic, before the judge: an answer that is the longest option AND
+      // half again the others is guessable without reading the question.
+      const withoutCue = candidates.filter((q) => !hasLengthCue(q.options, q.correctAnswer));
+      const cued = candidates.length - withoutCue.length;
+      row.generated = withoutCue.length;
+
+      if (withoutCue.length) {
+        const gate = await gateGeneratedQuestions(withoutCue);
+        row.rejected = gate.rejected.length + cued;
+        row.note = (cued ? `${cued}× indiciu de lungime. ` : "") + describeGateOutcome(gate);
         if (gate.kept.length) {
           await prisma.question.createMany({
             data: gate.kept.map((q) => ({
@@ -174,7 +180,10 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
           row.kept = gate.kept.length;
         }
       } else {
-        row.note = "modelul n-a întors nicio grilă utilizabilă";
+        row.rejected = cued;
+        row.note = cued
+          ? `toate cele ${cued} aveau indiciu de lungime`
+          : "modelul n-a întors nicio grilă utilizabilă";
       }
     } catch (e) {
       row.note = `eșec: ${(e as Error).message.slice(0, 200)}`;

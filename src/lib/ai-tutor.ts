@@ -64,8 +64,13 @@ never this material. So:
 - spell out the context inside the question itself. Instead of "Care este ținta
   zilnică recomandată?", write "Câte conversații noi pe zi recomandă programul, ca
   țintă în primele șase luni?".
-- exactly one option may be defensible as correct, and the correct one must not be
-  conspicuously longer or more detailed than the others.
+- exactly one option may be defensible as correct;
+- ALL FOUR options must be comparable in length — within roughly ten words of each
+  other. Measured on a previous batch, the correct option was the longest one in 71%
+  of questions, where chance is 25%: a student who always picks the longest answer
+  scored 71% without reading anything. Do not put the full justification in the
+  correct option and one-liners in the distractors. If the correct answer needs
+  detail, give the distractors the same amount of detail.
 
 A question that fails any of these is discarded by an independent judge before it is
 stored, so writing them that way wastes the attempt.
