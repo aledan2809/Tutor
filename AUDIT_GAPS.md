@@ -30,7 +30,11 @@
 - Cauză: `canSeePrivateDomains` moștenise „orice înscriere cu rol ADMIN = admin global" din vechiul `canSeeRestrictedDomains` (nu regresie, dar contrazice „privat = invizibil").
 - Fix: doar `isSuperAdmin`; un admin al lui X ajunge în Y ca oricine — printr-o înscriere în Y. Verificat live post-deploy: aceleași trei rute → 404, materia proprie → 200, catalog fără privat. Niciun cont real afectat.
 
-### G-TUT-ADMIN-QUESTIONS-001 — Trei politici de acces pe aceeași resursă (`/api/admin/questions`) — OPEN (P2, pre-existent)
+### G-TUT-ADMIN-QUESTIONS-001 — Trei politici de acces pe aceeași resursă — **Eliminated 2026-09-05 (`b639bfa`, LIVE + verificat)**
+- Rezolvat odată cu cele două tipuri de administrator: GET/POST/[id] pe întrebări trec acum prin `requireContentAdmin` cu scope de organizație; ramurile moarte de verificare per-domeniu (care nu se mai executau fiindcă poarta era superadmin-only) au fost reînviate. Un merchant admin creează întrebări în materiile lui (201 verificat live) și primește 404 pe o materie a platformei.
+- (istoric) Trei politici pe aceeași resursă: listă `requireAdminOrInstructor`, detaliu `requireAdmin`, scrieri `requireDomainAdmin`.
+
+### G-TUT-ADMIN-QUESTIONS-001-vechi — descrierea inițială (P2, pre-existent)
 - Găsit de True E2E [10], rolul ADMIN: lista `GET /api/admin/questions` → 200 scoped (`requireAdminOrInstructor`); `GET /api/admin/questions/<id>` → 403 (`requireAdmin` = superadmin-only); `PUT/DELETE /<id>` → `requireDomainAdmin`; `POST` → 403 pentru un ADMIN de domeniu, deși corpul rutei conține o verificare per-domeniu (enrollment ADMIN/INSTRUCTOR pe `domainId`) care nu se mai execută niciodată — cod mort.
 - Efect: un ADMIN de domeniu vede panoul (layout-ul îl lasă) dar nu poate crea/citi individual întrebări. Nu e scurgere; e funcție promisă și nelivrată pentru rolul ADMIN.
 - Unde: `src/app/api/admin/questions/route.ts` (POST) + `[id]/route.ts` (GET). Decizie: fie `requireDomainAdmin` peste tot pe întrebări, fie se scoate rolul ADMIN de domeniu din UI. Ține de workstream-ul D (roluri).
@@ -41,8 +45,10 @@
 
 ### AGT-001 (PATCH `/api/admin/questions/<id>` → 405) — **Eliminated** (verificat 2026-09-05: PATCH e alias la PUT; pe id inexistent răspunde 404, nu 405)
 
-### G-TUT-LEGAL-EN-001 — Termenii și Confidențialitatea în ENGLEZĂ servite pentru eTutor sunt ale altui produs (4pro-eat)
-- **Status**: OPEN (găsit 2026-09-05, True E2E [10] — journey `/en/terms` HAS_ERRORS → citit conținutul)
+### G-TUT-LEGAL-EN-001 — Termenii și Confidențialitatea în ENGLEZĂ erau ale altui produs — **Eliminated 2026-09-05 (LIVE + verificat)**
+- **Status**: ELIMINATED. Cauza reală: `tutor` n-avea documente proprii și cădea pe **master EN v2.1**, rămas în urma lui master RO vL2.2. Afecta 17 aplicații în date; vizibil doar pe etutor.ro. Reparat prin master EN vL2.2 (traducere) + documente proprii `tutor` vE1.0 (RO+EN) cu clauza de vârstă rescrisă pentru elevi. Fără re-consimțământ, per decizia userului. Ledger: `Legal/Reports/DIRECT-CHANGES-2026-09.md`. Verificat: 0/22 aplicații cu documente structural greșite; etutor.ro fără „18+" și fără „nu e pentru copii".
+- **Rămâne**: 10 întrebări pentru consilierul juridic (colectăm vârsta? verificarea acordului parental art. 8(2)? conturile existente? DPIA?) — vezi ledgerul.
+- (istoric) Găsit 2026-09-05, True E2E [10] — journey `/en/terms` HAS_ERRORS → citit conținutul
 - **Severitate**: P1 (conformitate). Un utilizator pe locale EN acceptă la înscriere termeni despre „AI-assisted food logging", „nutritional analysis", „body weight and composition goals", „Health and Nutrition Data (Art. 9 GDPR)" — nimic din asta nu există în eTutor. Versiunea RO e corectă.
 - **Dovadă (sursă, nu simptom)**: `GET https://legal.knowbest.ro/api/v1/public/legal/tutor/tos?locale=en` → 9 potriviri „nutri/food logging", 1 „body weight"; `.../privacy?locale=en` → la fel; `?locale=ro` → 0 pe ambele; `cookies` curat pe ambele locale. Randat identic pe `https://etutor.ro/en/terms` și `/en/privacy` (v2.1, „Effective from 31 May 2026").
 - **Cauză probabilă**: la crearea variantei EN a documentelor pentru `tutor` în Legal Hub s-a pornit din documentul lui `4pro-eat` și nu s-a mai adaptat.
