@@ -33,8 +33,17 @@ export async function generateQuestions(params: {
    * nothing about having read it.
    */
   material?: string;
+  /**
+   * Enunțurile care există deja pentru acest subiect.
+   *
+   * Ruta de completare trimitea doar NUMĂRUL de grile existente, deci la a doua
+   * trecere modelul rescria din aceeași lecție fără să știe ce scrisese. Rezultat
+   * măsurat pe lotul de 62: două perechi de enunțuri aproape identice, ambele cu
+   * chei DIFERITE — același răspuns marcat corect într-o grilă și greșit în alta.
+   */
+  avoid?: readonly string[];
 }): Promise<AIResponse> {
-  const { domain, subject, topic, count, difficulty, type, language = "en", material } = params;
+  const { domain, subject, topic, count, difficulty, type, language = "en", material, avoid } = params;
 
   const typeInstruction =
     type === "MULTIPLE_CHOICE"
@@ -95,6 +104,20 @@ the following as hard requirements, not style advice:
   If a reader can rule out an option without knowing the subject, that option is wasted
   and the item is now a three-way choice.
 
+  Three patterns were found repeatedly in the last batch and each one hands the answer
+  away for free — none of them may appear:
+    - a distractor that CONTRADICTS A FIGURE GIVEN IN THE STEM. The stem said the split
+      was 40%; two distractors announced 30% and 50% in their own text and were struck
+      out by reading, with no arithmetic.
+    - a distractor propped up by an INVENTED RULE OR AUTHORITY — "conform baremului
+      standard", "cota minimă garantată prin contract", "conform legislației". Real
+      alternatives do not need a fictional regulation to sound possible.
+    - a distractor that DECLARES ITS OWN DISHONESTY — "să sugereze că…", "astfel încât
+      presiunea să pară că…", "să informeze că prețul va crește automat". In a question
+      about ethical practice, a student simply drops every option containing a verb of
+      fabrication and the ethical one is left. A wrong answer must be wrong on the FACTS,
+      never wrong on the morals.
+
 The test: if someone reads only your four options, with the question hidden, they must
 NOT be able to tell which one you marked correct. A separate judge is shown exactly that
 and the item is discarded when it can.
@@ -107,13 +130,24 @@ ${material.slice(0, 12000)}
 --- END MATERIAL ---`
     : "";
 
+  const avoidBlock =
+    avoid && avoid.length
+      ? `
+
+These questions already exist for this topic. Do NOT write another question on the same
+point, in any wording — a near-duplicate with a different key marks the same answer right
+in one question and wrong in the other. Pick different facts from the material.
+
+${avoid.map((q, i) => `${i + 1}. ${q}`).join("\n")}`
+      : "";
+
   const userPrompt = `Generate ${count} ${type === "MULTIPLE_CHOICE" ? "multiple choice" : "open"} questions for:
 - Subject: ${subject}
 - Topic: ${topic}
 - Difficulty: ${difficulty}/5
 - Language: ${language === "ro" ? "Romanian" : "English"}
 
-${typeInstruction}${materialBlock}
+${typeInstruction}${materialBlock}${avoidBlock}
 
 Respond with a JSON array of objects with this structure:
 ${

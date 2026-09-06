@@ -10,6 +10,7 @@ import { hasLengthCue } from "@/lib/answer-length-cue";
 import { shuffleOptions } from "@/lib/shuffle-options";
 import { findBlindSolvable } from "@/lib/blind-check";
 import { measureGuessBaseline, describeGuessBaseline } from "@/lib/guess-baseline";
+import { dropNearDuplicates } from "@/lib/near-duplicate";
 import { z } from "zod";
 
 /**
@@ -130,6 +131,19 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
         continue;
       }
 
+      // Ce există deja pentru subiect — trimis modelului, nu doar numărat. Fără
+      // asta, a doua trecere rescrie din aceeași lecție și iese aceeași întrebare
+      // cu altă cheie.
+      const existingStems = existing
+        ? (
+            await prisma.question.findMany({
+              where: { domainId: course.domain.id, topic },
+              select: { content: true },
+              take: 60,
+            })
+          ).map((q) => q.content)
+        : [];
+
       const res = await generateQuestions({
         domain: course.domain.name,
         subject: course.title,
@@ -139,6 +153,7 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
         type: "MULTIPLE_CHOICE",
         language,
         material,
+        avoid: existingStems,
       });
       const list = extractJsonObjects(res.content ?? "[]");
       const candidates = (list as Record<string, unknown>[])
@@ -153,10 +168,15 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
         // is the exact shape that put wrong answers in front of a student before.
         .filter((q) => q.content && q.correctAnswer && q.options.length >= 2 && q.options.includes(q.correctAnswer));
 
+      // Plasa de sub instrucțiune: modelul poate ignora lista de mai sus, iar o
+      // reformulare a aceleiași întrebări cu altă cheie e defectul cel mai scump.
+      const deduped = dropNearDuplicates(candidates, existingStems);
+      const duplicates = deduped.dropped.length;
+
       // Deterministic, before the judge: an answer that is the longest option AND
       // half again the others is guessable without reading the question.
-      const withoutCue = candidates.filter((q) => !hasLengthCue(q.options, q.correctAnswer));
-      const cued = candidates.length - withoutCue.length;
+      const withoutCue = deduped.kept.filter((q) => !hasLengthCue(q.options, q.correctAnswer));
+      const cued = deduped.kept.length - withoutCue.length;
       row.generated = withoutCue.length;
 
       if (withoutCue.length) {
@@ -171,8 +191,9 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
         const blindSet = new Set(blind.solvable);
         const survivors = gate.kept.filter((_, i) => !blindSet.has(i));
 
-        row.rejected = gate.rejected.length + cued + blind.solvable.length;
+        row.rejected = gate.rejected.length + cued + blind.solvable.length + duplicates;
         row.note =
+          (duplicates ? `${duplicates}× reformulare a unei grile existente. ` : "") +
           (cued ? `${cued}× indiciu de lungime. ` : "") +
           describeGateOutcome(gate) +
           " " +
@@ -204,10 +225,12 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
           row.kept = survivors.length;
         }
       } else {
-        row.rejected = cued;
-        row.note = cued
-          ? `toate cele ${cued} aveau indiciu de lungime`
-          : "modelul n-a întors nicio grilă utilizabilă";
+        row.rejected = cued + duplicates;
+        row.note = duplicates
+          ? `${duplicates}× reformulare a unei grile existente, ${cued}× indiciu de lungime`
+          : cued
+            ? `toate cele ${cued} aveau indiciu de lungime`
+            : "modelul n-a întors nicio grilă utilizabilă";
       }
     } catch (e) {
       row.note = `eșec: ${(e as Error).message.slice(0, 200)}`;
