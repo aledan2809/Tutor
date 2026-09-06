@@ -82,14 +82,40 @@ export async function callClaudeCli(
       child.on("close", (code) => {
         clearTimeout(timer);
         try {
-          const j = JSON.parse(out) as { is_error?: boolean; result?: string };
+          const j = JSON.parse(out) as {
+            is_error?: boolean;
+            result?: string;
+            subtype?: string;
+            num_turns?: number;
+            duration_ms?: number;
+            stop_reason?: string;
+            total_cost_usd?: number;
+          };
           // exit 0 with is_error is a real failure the envelope reports; treating it
           // as success is how an error message ends up stored as content.
           if (j.is_error) {
             done({ ok: false, text: null, error: String(j.result ?? "is_error").slice(0, 300) });
             return;
           }
-          done({ ok: true, text: j.result ?? null });
+          // Un plic valid cu rezultat GOL nu e un succes.
+          //
+          // Îl raportam ca `ok:true, text:null`, iar apelantul trecea la furnizorul
+          // de rezervă cu „fără eroare" în jurnal — adică exact zero informație
+          // despre ce s-a întâmplat. Plicul spune de ce (subtype, num_turns,
+          // motivul opririi); îl păstrăm.
+          const text = typeof j.result === "string" ? j.result.trim() : "";
+          if (!text) {
+            const envelope = JSON.stringify({
+              subtype: j.subtype,
+              num_turns: j.num_turns,
+              duration_ms: j.duration_ms,
+              stop_reason: j.stop_reason,
+              total_cost_usd: j.total_cost_usd,
+            });
+            done({ ok: false, text: null, error: `rezultat gol · plic: ${envelope}` });
+            return;
+          }
+          done({ ok: true, text });
         } catch {
           done({
             ok: false,
