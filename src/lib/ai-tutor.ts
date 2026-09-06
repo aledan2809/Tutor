@@ -203,6 +203,16 @@ ${
     return { content: cli.text, provider: "claude-cli", model: "sonnet" } as unknown as AIResponse;
   }
 
+  // De ce a căzut CLI-ul, nu doar CĂ a căzut.
+  //
+  // Fără linia asta, orice eșec al CLI-ului apare în jurnal drept „groq 429" —
+  // eroarea furnizorului de rezervă, nu cauza. M-a costat două reparații greșite:
+  // am ridicat timeout-ul de la 240s la 420s, apoi la 300s pe tranșe, crezând că
+  // modelul e lent, când CLI-ul răspundea în 20s la aceleași date.
+  console.warn(
+    `[ai-tutor] claude-cli a eșuat (prompt ${systemPrompt.length + userPrompt.length} caractere), se încearcă routerul: ${cli.error ?? "fără eroare"}`,
+  );
+
   const request: AIRequest = {
     messages: [
       { role: "system", content: systemPrompt },
