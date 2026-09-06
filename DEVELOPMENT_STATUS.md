@@ -1,8 +1,81 @@
 # Project Status - Tutor
-Last Updated: 2026-09-05 (termeni legali reparați ecosistem-wide · două tipuri de admin · cursuri W4-W6)
+Last Updated: 2026-09-06 (grilele cursului „Agent imobiliar" — generate prin Claude CLI, cu 5 defecte de calitate reparate și măsurate)
 <!-- anterior: 2026-09-03 (conținutul memento-ului Telegram reparat; incident 502 provocat de mine, remediat în ~4 min) -->
 <!-- anterior: 2026-09-01 (treapta Telegram din cascadă -->
 <!--  — sărită tăcut pentru TOȚI utilizatorii; reparată, deployată, verificată pe date de producție) -->
+
+## Current State (Sesiunea 2026-09-06 — grilele cursului „Agent imobiliar")
+
+Cerut: „genereaza grilele cand revine cota sau daca poti foloseste Claude CLI".
+
+### Ce a mers, după ce am măsurat de ce nu mergea
+`claude` CLI **funcționează** pe VPS2 (răspunde în 1,5s; judecătorul din poartă îl
+folosea deja). Ce nu mergea era calea claude din AIRouter, care cere
+`claude-sonnet-4-20250514` — id datat, retras. AIRouter e partajat cu consumatori
+NO-TOUCH, deci registrul lui nu se editează de aici; chemăm binarul prin ALIASUL
+`sonnet`, exact ca `content-quality-mesh.ts` (`src/lib/claude-cli.ts`, commit `2a8ee17`).
+
+### Cinci defecte reale, fiecare găsit prin măsurare, nu prin presupunere
+1. **`"Question text in markdown"`** în promptul din `ai-tutor.ts` cerea markdown în
+   enunț → modelul scria linii noi brute în șiruri JSON → JSON invalid. Ruta păstra
+   1 grilă din 8, deși același model cu un prompt aproape identic dădea 8 din 8.
+   (`838f809`)
+2. **Un obiect stricat omora tot lotul**: `extractJson` e totul-sau-nimic. Adăugat
+   `extractJsonObjects`, care recuperează obiectele întregi dintr-un răspuns parțial
+   stricat sau trunchiat. (`766da03`)
+3. **Întrebările nu stăteau singure** — cea mai mare categorie de respingeri la poartă
+   („not self-contained"): modelul scria „conform materialului", dar elevul vede doar
+   întrebarea. Plus `onlyEmpty` sărea peste modulele cu o singură grilă, înghețând
+   cursul strâmb. Acum politica implicită e `topUp`. (`797833e`)
+4. **Testul se putea trece fără citit** — vezi L34. În 40 din 56 de grile varianta
+   corectă era cea mai lungă (la întâmplare 25%): cine alege mereu cea mai lungă lua
+   71%. Judecătorul are regulă pentru asta și nu le-a prins, fiindcă defectul e
+   vizibil doar **pe lot**, nu pe item. Verificare deterministă cu prag dublu,
+   calibrat pe date reale. (`43860e6`)
+5. **Aceeași clasă, a doua față: poziția.** Re-măsurând lotul reparat, varianta
+   corectă era **prima în 44%** din cazuri și ultima în 8% (la întâmplare 25%
+   fiecare) — un elev care apasă mereu prima variantă lua 44% fără să citească.
+   Promptul poate cere o poziție uniformă; nu o poate garanta. Permutăm noi
+   (`shuffle-options.ts`), sigur fiindcă fiecare comparație de răspuns pe
+   `Question` se face pe TEXT, nu pe indice. Excepția: o variantă care trimite la
+   celelalte prin poziție („toate cele de mai sus") rămâne pe loc — 0 în lotul
+   ăsta, 7 în restul bazei, neatinse. (`f3cd040`)
+
+### Măsurat, înainte și după
+| | lot vechi (56) | lot nou (62) |
+|---|---|---|
+| corectă e cea mai lungă | 40 (71%) | 23 (**37%**) |
+| corectă mai lungă cu peste 40% decât media | 19 (34%) | **0** |
+| scurgeri prinse de filtrul determinist | 19 (34%) | **0** |
+| trimit la „material/lecție" | 3 (5%) | **0** |
+| corectă pe prima poziție | — | 27 (44%) → **18 (29%)** după amestecare |
+
+Despre poziție, onest: după amestecare distribuția e 18/11/24/9. **Nu e plată** —
+dar abaterea rămasă e de mărimea pe care întâmplarea o produce o dată la 38 de
+loturi, față de o dată la 5.000 înainte (simulare, 200.000 trageri). Mecanismul e
+eliminat prin construcție — Fisher-Yates e uniform, testul o verifică pe 400 de
+trageri — deci ce rămâne e artefact de eșantion pe 62 de itemi, se schimbă la
+fiecare rulare și nu poate fi învățat. Cei 37% „cea mai lungă" care rămân sunt
+inofensivi: **zero** grile mai depășesc media distractorilor nici măcar cu 40%,
+deci „mai lungă cu un cuvânt" nu e un indiciu utilizabil.
+
+### Starea cursului
+8 module × 1 lecție + grile pe fiecare, toate **ciorne**. Poarta ține: un elev
+neînscris primește 404 pe curs, pe listă și pe materie. Bonus reparat: ruta de curs
+arăta „grile=0" pe module cu opt, fiindcă număra doar PUBLISHED pentru oricine —
+adminul vede acum ciornele, exact ca la lecții. (`f8f18a8`)
+
+**Rămas**: publicarea (după verificarea juridică a celor 70+ puncte din raportul
+cursului); UI de curs pentru elev; înscrierea agenților REAL prin cod de acces.
+
+## Lessons Learned (sesiunea 2026-09-06)
+- L34 — un test grilă generat poate fi trecut fără să fie citit; măsoară linia de
+  bază a ghicitului pe LOT, fiindcă un judecător per-item nu vede o distribuție.
+  Vezi `knowledge/lessons-learned.md`.
+- L35 — o scurgere distribuțională are de obicei mai multe fețe (lungime **și**
+  poziție). Când găsești una, caută-i surorile înainte de a declara reparat; și
+  preferă remediul care o face imposibilă (o permutare) celui care o descurajează
+  (o propoziție în prompt). Vezi `knowledge/lessons-learned.md`.
 
 ## Current State (Sesiunea 2026-09-05 partea 3 — cele 3 cereri + W4/W5/W6)
 
