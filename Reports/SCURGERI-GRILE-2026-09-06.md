@@ -153,7 +153,64 @@ Concluziile nu s-au schimbat după corectare, dar cifrele da.
 
 ---
 
-## 7. Ce rămâne deschis
+## 7. Verificarea finală — lotul regenerat (56 de grile)
+
+Lotul vechi a fost șters și regenerat integral cu promptul reparat plus cele două
+gărzi. Din 67 generate au rămas **34**; dintre cele care trecuseră de poarta de
+corectitudine, **39% au căzut la proba oarbă**. Zero eșecuri de generare (înainte:
+12 din 18 rulări cădeau pe timeout).
+
+### Ce s-a rezolvat — scurgerea de suprafață, complet
+
+| strategie | lot vechi (62) | lot nou (56) |
+|---|---|---|
+| cascadă propoziții→cuvinte→caractere | **50%** (p=0,00002) | **19%** (p=0,86) |
+| cele mai multe virgule | 57% | 29% (nesemnificativ) |
+| cele mai multe propoziții | 53% | 24% |
+| „varianta care iese din tipar" | 95% | **27%** |
+
+| diferență corectă vs distractori | vechi | nou |
+|---|---|---|
+| propoziții | +23% | **+2%** |
+| virgule | +47% | **+10%** |
+| caractere | +1% | −1% |
+
+**Un elev care nu citește întrebarea ia acum 19%, sub cei 25% ai întâmplării.**
+Singura strategie peste prag e „cea mai scurtă variantă" (39%, p=0,021) — sub pragul
+de alarmă și așteptată ca fals-pozitiv când testezi zece strategii deodată, dar de
+urmărit la lotul următor.
+
+### Ce NU s-a rezolvat — rezolvarea oarbă semantică
+
+| atac | vechi | nou |
+|---|---|---|
+| doar variantele, fără enunț (4-5 atacuri) | 97% | **52-61%** |
+| doar criterii formale de item defect (vede enunțul) | 100% | 98% |
+| doar registrul și specificitatea (vede enunțul) | 98% | 96% |
+
+Înjumătățit, nu eliminat. Regulile pe care le-au raportat agenții spun de ce: aleg
+„varianta care exprimă practica recomandată de curs — transparență, cifre
+documentate, protecția clientului".
+
+**Și aici e limita onestă a măsurătorii.** Într-o materie care predă practica
+onestă, răspunsul corect *va fi* cel onest. Un cititor care a absorbit valorile
+cursului și alege varianta transparentă demonstrează că a învățat, nu că trișează.
+Nu pot separa „a învățat" de „a exploatat un indiciu" fără elevi reali — iar a face
+valorile cursului ambigue ca să scadă cifra ar fi pedagogie mai proastă, nu mai bună.
+
+Cifrele cu enunțul vizibil (96-98%) sunt dovadă slabă de defect din același motiv: un
+model care citește întrebarea și știe domeniul *trebuie* să iasă bine.
+
+### O ipoteză proprie, respinsă de măsurătoare
+
+Agenții au invocat repetat referințe încrucișate („«60-90 de zile» din Q14 confirmă
+Q12"), iar eu am presupus că regula „distractorii să fie fapte adevărate care răspund
+la altă întrebare" a creat singură defectul ăsta. **Măsurat: 9% în lotul nou vs 10%
+în cel vechi** — practic neschimbat. Ipoteza nu se susține, deci nu am livrat gardă
+pentru ea. Detectorul lexical prinde doar potrivirile de suprafață; corelarea
+semantică pe care o fac agenții rămâne nemăsurată.
+
+## 8. Ce rămâne deschis
 
 - **Rezolvabilitatea oarbă la 95-100% e o slăbiciune de proiectare, nu neapărat o
   scurgere pentru un elev care nu știe materia.** Un agent care recunoaște afirmația
@@ -163,3 +220,6 @@ Concluziile nu s-au schimbat după corectare, dar cifrele da.
 - Fețele neverificate încă: ordinea alfabetică, lungimea explicației, tiparele între
   module. Lista din `TODO_PERSISTENT.md` rămâne deschisă — de data asta numită, nu
   presupusă acoperită.
+- **Rezolvarea oarbă la 52-61%** (vezi §7): înjumătățită, dar deschisă. Următorul pas
+  onest nu e încă un filtru, ci elevi reali — singura măsurătoare care separă „a
+  învățat valorile cursului" de „a exploatat un indiciu".

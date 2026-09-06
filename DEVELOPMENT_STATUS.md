@@ -70,6 +70,24 @@ prompt elimină cauza, nu conținutul.
 conjuncția care leagă enumerările românești; și o virgulă urmată de conjuncție
 marchează o graniță, nu două. Concluziile nu s-au schimbat, cifrele da.
 
+### Verificat pe lotul regenerat (56 de grile, 67 generate)
+| | vechi (62) | nou (56) |
+|---|---|---|
+| ghicitorul de suprafață | **50%** (p=0,00002) | **19%** (p=0,86) |
+| „varianta care iese din tipar" | 95% | **27%** |
+| propoziții: corectă vs distractori | +23% | **+2%** |
+| rezolvabil fără enunț (atac semantic) | 97% | **52-61%** |
+
+Scurgerea de suprafață e închisă — sub linia întâmplării. Cea semantică e
+înjumătățită, nu eliminată, iar limita e onestă: într-o materie care predă practica
+onestă, răspunsul corect *va fi* cel onest, și nu pot separa „a învățat" de „a
+exploatat un indiciu" fără elevi reali.
+
+Pe drum, patru defecte de infrastructură care făceau generarea să dea zero în 12 din
+18 rulări: timeout prea mic pe un prompt devenit greu (600s + tranșe de 2), CLI-ul
+care nu spunea DE CE cade, un plic JSON gol raportat ca succes, și lipsa enunțurilor
+existente în prompt. Cinci ipoteze despre blocaj, toate respinse cu măsurători.
+
 Raport complet: `Reports/SCURGERI-GRILE-2026-09-06.md`.
 
 ## Lessons Learned (sesiunea 2026-09-06 partea 2)
