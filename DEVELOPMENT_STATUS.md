@@ -1,8 +1,81 @@
 # Project Status - Tutor
-Last Updated: 2026-09-06 (grilele cursului „Agent imobiliar" — generate prin Claude CLI, cu 5 defecte de calitate reparate și măsurate)
+Last Updated: 2026-09-06 (scurgerile grilelor — verificate toate fețele, empiric; nu erau două, erau cinci)
 <!-- anterior: 2026-09-03 (conținutul memento-ului Telegram reparat; incident 502 provocat de mine, remediat în ~4 min) -->
 <!-- anterior: 2026-09-01 (treapta Telegram din cascadă -->
 <!--  — sărită tăcut pentru TOȚI utilizatorii; reparată, deployată, verificată pe date de producție) -->
+
+## Current State (Sesiunea 2026-09-06 partea 2 — celelalte fețe ale scurgerii)
+
+Cerut: „verifica si celelalte fete ale scurgerii". Le-am verificat **empiric**, nu
+teoretic: agenți care dau testul fără să-l citească, plus o baterie deterministă.
+Cheia n-a ieșit din mâna mea, iar orbirea am verificat-o în transcripturi.
+
+### Reparasem unitatea greșită
+| unitate | corectă vs distractori |
+|---|---|
+| caractere | **+1%** ← singura pe care o filtram |
+| cuvinte | +6% |
+| propoziții | +23% |
+| virgule | **+47%** |
+
+Modelul respectase „variante de lungime egală" umplând distractorii la același număr
+de caractere. Indiciul nu dispăruse, se mutase în sintaxă: „alege varianta cu cele
+mai multe virgule" = **57%**, o cascadă propoziții→cuvinte→caractere = **50%**
+(p = 0,00002), uniform pe toate cele 8 module.
+
+### Ce a găsit atacul empiric — mai grav decât aritmetica
+Zece agenți au dat testul. Șase vedeau **doar variantele**, fără nicio întrebare.
+
+| atac | scor |
+|---|---|
+| doar criterii formale de item defect | **100%** (62/62) |
+| doar registrul și specificitatea | 98% |
+| doar variantele, fără întrebare (×4) | **97%** |
+| doar acordul gramatical | **45%** |
+| doar repetarea cuvintelor din enunț | 27% |
+| doar punctuație și structură | 13% |
+
+Cele patru atacuri semantice au ales **identic** pe toate 62 — nu-s patru strategii,
+e un semnal atât de puternic încât orice formulare îl găsește. „Reușite doar de
+ghicitorul de suprafață: 0" → sintaxa e un simptom, nu o cauză separată. Distractorii
+nu erau tentanți, erau recognoscibil falși, deci enunțul nu făcea nicio muncă.
+
+Analiza per-item: 110 agenți, 92 de constatări, **34 confirmate** după verificare
+adversarială (46 respinse).
+
+### Cel mai scump defect nu era o scurgere, era o eroare
+Ruta de completare trimitea generatorului doar **numărul** grilelor existente,
+niciodată textul. La a doua trecere modelul rescria din aceeași lecție fără să știe
+ce scrisese: două perechi de enunțuri aproape identice, **ambele cu chei diferite**.
+Același răspuns marcat corect într-o grilă și greșit în alta.
+
+### Reparat la trei altitudini (`7e21f08`, `27dc5dc`, `2a78b68`)
+- **cauza — promptul**: paritate de sintaxă/gramatică/specificitate + distractori
+  plauzibili. Trei tipare numite cu dovadă: contrazice o cifră din enunț · se
+  sprijină pe o regulă inventată · își declară singur necinstea („să sugereze că…").
+  Un răspuns greșit trebuie să fie greșit pe fapte, niciodată pe morală.
+- **proprietatea, nu indiciile — `blind-check.ts`**: a doua poartă, care NU vede
+  enunțul. Nu-i pasă ce indiciu a scăpat, doar dacă întrebarea mai e necesară.
+- **familia, nu unitatea — `guess-baseline.ts`**: măsoară lotul pe caractere,
+  cuvinte, propoziții, virgule și fiecare poziție, și spune în română cât ia un elev
+  care nu citește. Pur, deci rulează gratis pe fiecare lot.
+- **`near-duplicate.ts`** + enunțurile existente trimise în prompt.
+
+**NU** am adăugat un filtru determinist pe structură: pragul care ar fi adus
+ghicitorul la întâmplare tăia **21 din 62** de grile bune. Aceiași bani cheltuiți pe
+prompt elimină cauza, nu conținutul.
+
+### Două greșeli în propria măsurătoare, prinse de teste
+`\b` în JavaScript e ASCII → `\bși\b` nu se potrivește niciodată, deci lipsea
+conjuncția care leagă enumerările românești; și o virgulă urmată de conjuncție
+marchează o graniță, nu două. Concluziile nu s-au schimbat, cifrele da.
+
+Raport complet: `Reports/SCURGERI-GRILE-2026-09-06.md`.
+
+## Lessons Learned (sesiunea 2026-09-06 partea 2)
+- L36 — a stoarce scurgerea dintr-o unitate o împinge în vecina ei; măsoară familia,
+  și testează proprietatea („se poate răspunde fără întrebare?") în loc să enumeri
+  indiciile la nesfârșit. Vezi `knowledge/lessons-learned.md`.
 
 ## Current State (Sesiunea 2026-09-06 — grilele cursului „Agent imobiliar")
 
