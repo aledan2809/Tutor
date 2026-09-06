@@ -193,11 +193,16 @@ ${
   // one of those recovers, and for any box without the CLI.
   const cli = await callClaudeCli(
     `${systemPrompt}\n\n${userPrompt}\n\nRăspunde EXCLUSIV cu JSON valid, fără markdown, fără text în afara JSON-ului.`,
-    // Un timeout aici cade tăcut pe furnizorul de rezervă, care e limitat de cotă —
-    // adică zero grile după minute de așteptare, cu un mesaj de eroare care arată a
-    // problemă de cotă, nu a limită proprie. Apelantul cere acum în tranșe mici (4),
-    // deci 300s sunt largi pentru o tranșă; erau prea puțini pentru opt deodată.
-    { timeoutMs: 300_000 }
+    // 600s, și nu e generozitate.
+    //
+    // Măsurat pe cutia asta: același binar, același mediu (toate cele 90 de
+    // variabile ale workerului), același mod de pornire răspunde în 3s la un prompt
+    // banal și în ~20s la unul de 16.000 de caractere. Promptul REAL, cu paritatea
+    // de sintaxă/gramatică/specificitate și distractori adevărați-dar-nepotriviți,
+    // e altă muncă: procesul-copil consuma CPU și aștepta în rețea când l-am privit
+    // la 60s, deci scria, nu era blocat. Un timeout aici nu întoarce grile mai
+    // slabe, ci ZERO — cade pe furnizorul de rezervă, care e limitat de cotă.
+    { timeoutMs: 600_000 }
   );
   if (cli.ok && cli.text) {
     return { content: cli.text, provider: "claude-cli", model: "sonnet" } as unknown as AIResponse;

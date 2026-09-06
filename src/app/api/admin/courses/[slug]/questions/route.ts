@@ -152,7 +152,7 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
       // cotă — deci nu opt grile mai slabe, ci ZERO, după șapte minute de așteptare.
       // Tranșele fac progresul parțial să supraviețuiască, iar fiecare tranșă știe
       // ce au scris cele dinainte, deci nu se repetă între ele.
-      const CHUNK = 4;
+      const CHUNK = 2;
       const raw: Record<string, unknown>[] = [];
       const seenStems = [...existingStems];
       for (let done = 0; done < want; done += CHUNK) {
