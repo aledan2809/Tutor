@@ -7,6 +7,7 @@ import { generateQuestions } from "@/lib/ai-tutor";
 import { extractJsonObjects } from "@/lib/json-from-model";
 import { describeGateOutcome, gateGeneratedQuestions } from "@/lib/question-gate";
 import { hasLengthCue } from "@/lib/answer-length-cue";
+import { shuffleOptions } from "@/lib/shuffle-options";
 import { z } from "zod";
 
 /**
@@ -169,7 +170,7 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
               difficulty,
               type: "MULTIPLE_CHOICE" as const,
               content: q.content,
-              options: q.options,
+              options: shuffleOptions(q.options, q.correctAnswer),
               correctAnswer: q.correctAnswer,
               explanation: q.explanation ?? null,
               source: "AI_GENERATED" as const,
