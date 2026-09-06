@@ -42,7 +42,16 @@ export async function callClaudeCli(
     };
 
     try {
-      const child = spawn("claude", ["-p", prompt, "--output-format", "json", "--model", model], { env });
+      // stdin ignorat, nu „pipe".
+      //
+      // CLI-ul chiar așteaptă la stdin — o spune singur: „no stdin data received in
+      // 3s, proceeding without it". Cu un pipe deschis pe care nimeni nu-l scrie și
+      // nimeni nu-l închide, așteptarea aia n-are motiv să se termine. Nu costă
+      // nimic: promptul intră prin argv, deci stdin nu ne trebuie deloc.
+      const child = spawn("claude", ["-p", prompt, "--output-format", "json", "--model", model], {
+        env,
+        stdio: ["ignore", "pipe", "pipe"],
+      });
       // A hung CLI must be killed, not waited on: it holds a request handler open,
       // and an unkilled child accumulates until the box runs out of them.
       const timer = setTimeout(() => {
@@ -51,7 +60,17 @@ export async function callClaudeCli(
         } catch {
           /* already gone */
         }
-        done({ ok: false, text: null, error: `timeout după ${Math.round(timeoutMs / 1000)}s` });
+        // Ce apucase să scrie copilul, nu doar faptul că a expirat: fără asta, un
+        // CLI blocat arată identic cu unul lent, iar în jurnal apare doar eroarea
+        // furnizorului de rezervă. M-a costat trei diagnostice greșite.
+        const seen = (err || out).trim().replace(/\s+/g, " ").slice(0, 200);
+        done({
+          ok: false,
+          text: null,
+          error:
+            `timeout după ${Math.round(timeoutMs / 1000)}s` +
+            (seen ? ` · copilul scrisese: „${seen}"` : " · copilul nu scrisese nimic"),
+        });
       }, timeoutMs);
 
       child.stdout.on("data", (d) => (out += d.toString()));
