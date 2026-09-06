@@ -8,6 +8,8 @@ import { extractJsonObjects } from "@/lib/json-from-model";
 import { describeGateOutcome, gateGeneratedQuestions } from "@/lib/question-gate";
 import { hasLengthCue } from "@/lib/answer-length-cue";
 import { shuffleOptions } from "@/lib/shuffle-options";
+import { findBlindSolvable } from "@/lib/blind-check";
+import { measureGuessBaseline, describeGuessBaseline } from "@/lib/guess-baseline";
 import { z } from "zod";
 
 /**
@@ -159,11 +161,32 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
 
       if (withoutCue.length) {
         const gate = await gateGeneratedQuestions(withoutCue);
-        row.rejected = gate.rejected.length + cued;
-        row.note = (cued ? `${cued}× indiciu de lungime. ` : "") + describeGateOutcome(gate);
-        if (gate.kept.length) {
+
+        // A doua poartă, pe altă proprietate: judecătorul de mai sus vede întrebarea
+        // și verifică dacă e corectă. Ăsta NU o vede și verifică dacă mai e nevoie
+        // de ea. Șase atacuri oarbe pe lotul precedent au dat 95-100% — enunțul nu
+        // făcea nicio muncă. Nu închide poarta când e inaccesibil: un item
+        // rezolvabil orb e corect, doar slab.
+        const blind = await findBlindSolvable(gate.kept);
+        const blindSet = new Set(blind.solvable);
+        const survivors = gate.kept.filter((_, i) => !blindSet.has(i));
+
+        row.rejected = gate.rejected.length + cued + blind.solvable.length;
+        row.note =
+          (cued ? `${cued}× indiciu de lungime. ` : "") +
+          describeGateOutcome(gate) +
+          " " +
+          blind.note;
+
+        if (survivors.length) {
+          // Ce ia un elev care nu citește deloc. Măsurat pe familia întreagă de
+          // indicii, fiindcă fiecare filtru pe o singură unitate mută defectul în
+          // vecina ei — caractere → cuvinte → virgule, de trei ori la rând.
+          const baseline = measureGuessBaseline(survivors);
+          row.note += " " + describeGuessBaseline(baseline);
+
           await prisma.question.createMany({
-            data: gate.kept.map((q) => ({
+            data: survivors.map((q) => ({
               domainId: course.domain.id,
               subject: course.title,
               topic,
@@ -178,7 +201,7 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
               createdById: userId,
             })),
           });
-          row.kept = gate.kept.length;
+          row.kept = survivors.length;
         }
       } else {
         row.rejected = cued;

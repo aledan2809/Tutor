@@ -65,12 +65,39 @@ never this material. So:
   zilnică recomandată?", write "Câte conversații noi pe zi recomandă programul, ca
   țintă în primele șase luni?".
 - exactly one option may be defensible as correct;
-- ALL FOUR options must be comparable in length — within roughly ten words of each
-  other. Measured on a previous batch, the correct option was the longest one in 71%
-  of questions, where chance is 25%: a student who always picks the longest answer
-  scored 71% without reading anything. Do not put the full justification in the
-  correct option and one-liners in the distractors. If the correct answer needs
-  detail, give the distractors the same amount of detail.
+
+The four options must be indistinguishable to someone who has not learned the material.
+This is measured, and every previous attempt failed it in a NEW way — so treat all of
+the following as hard requirements, not style advice:
+
+- SAME LENGTH. Correct was the longest option in 71% of an earlier batch (chance 25%).
+- SAME SYNTAX. After length was balanced, the leak simply moved: correct carried +47%
+  more commas and +23% more clauses than the distractors, and a student choosing "the
+  option with the most commas" scored 57%. If the correct answer is a three-part
+  enumeration, every distractor is a three-part enumeration. If it has a subordinate
+  clause ("care...", "dacă..."), so do the others. Same number of listed items, same
+  sentence shape.
+- SAME GRAMMAR. Every option must fit the stem grammatically — gender, number, tense,
+  case. A judge allowed to use ONLY grammatical agreement scored 45%.
+- SAME SPECIFICITY. If the correct answer names figures, thresholds or concrete steps,
+  the distractors name figures, thresholds and concrete steps too — different ones,
+  wrong ones. Never pair a concrete correct answer with vague distractors, and never
+  write a distractor that leans on "conform standardelor/legislației" instead of saying
+  something definite.
+- PLAUSIBLE DISTRACTORS. This is the one that matters most. Six independent judges shown
+  ONLY the four options — no question at all — scored 95-100%, because the distractors
+  were recognisably false rather than tempting. A distractor must be something a real
+  beginner actually believes: a widespread misconception, a rule from a neighbouring
+  situation applied where it does not hold, a plausible-but-wrong figure, an approach
+  that works in some other market. NEVER an absurd, unethical or self-marking option:
+  no "garantat", "automat", "exclusiv", "interzis", no invented pressure tactics, no
+  option that is obviously the dishonest choice in a course that teaches honest practice.
+  If a reader can rule out an option without knowing the subject, that option is wasted
+  and the item is now a three-way choice.
+
+The test: if someone reads only your four options, with the question hidden, they must
+NOT be able to tell which one you marked correct. A separate judge is shown exactly that
+and the item is discarded when it can.
 
 A question that fails any of these is discarded by an independent judge before it is
 stored, so writing them that way wastes the attempt.
