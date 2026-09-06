@@ -175,7 +175,10 @@ ${
   // one of those recovers, and for any box without the CLI.
   const cli = await callClaudeCli(
     `${systemPrompt}\n\n${userPrompt}\n\nRăspunde EXCLUSIV cu JSON valid, fără markdown, fără text în afara JSON-ului.`,
-    { timeoutMs: 240_000 }
+    // 240s nu mai ajung de când promptul cere paritate de sintaxă, gramatică și
+    // specificitate: modelul scrie mai încet fiindcă scrie mai atent, iar un
+    // timeout aici cade tăcut pe furnizorul de rezervă (măsurat: groq 429).
+    { timeoutMs: 420_000 }
   );
   if (cli.ok && cli.text) {
     return { content: cli.text, provider: "claude-cli", model: "sonnet" } as unknown as AIResponse;
