@@ -144,18 +144,41 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
           ).map((q) => q.content)
         : [];
 
-      const res = await generateQuestions({
-        domain: course.domain.name,
-        subject: course.title,
-        topic,
-        count: want,
-        difficulty,
-        type: "MULTIPLE_CHOICE",
-        language,
-        material,
-        avoid: existingStems,
-      });
-      const list = extractJsonObjects(res.content ?? "[]");
+      // Cerute în tranșe mici, nu într-un singur apel.
+      //
+      // De când promptul cere distractori adevărați-dar-nepotriviți, modelul scrie
+      // mult mai încet. Un apel pentru opt grile a depășit de două ori limita
+      // (240s, apoi 420s) și a căzut pe furnizorul de rezervă, care era limitat de
+      // cotă — deci nu opt grile mai slabe, ci ZERO, după șapte minute de așteptare.
+      // Tranșele fac progresul parțial să supraviețuiască, iar fiecare tranșă știe
+      // ce au scris cele dinainte, deci nu se repetă între ele.
+      const CHUNK = 4;
+      const raw: Record<string, unknown>[] = [];
+      const seenStems = [...existingStems];
+      for (let done = 0; done < want; done += CHUNK) {
+        const ask = Math.min(CHUNK, want - done);
+        const res = await generateQuestions({
+          domain: course.domain.name,
+          subject: course.title,
+          topic,
+          count: ask,
+          difficulty,
+          type: "MULTIPLE_CHOICE",
+          language,
+          material,
+          avoid: seenStems,
+        });
+        const part = extractJsonObjects(res.content ?? "[]") as Record<string, unknown>[];
+        raw.push(...part);
+        for (const q of part) {
+          const c = String(q.content ?? "").trim();
+          if (c) seenStems.push(c);
+        }
+        // Dacă o tranșă n-a întors nimic, a doua rareori merge mai bine (același
+        // furnizor, aceeași limită) — oprim în loc să mai ardem șapte minute.
+        if (!part.length) break;
+      }
+      const list = raw;
       const candidates = (list as Record<string, unknown>[])
         .map((q) => ({
           content: String(q.content ?? "").trim(),
