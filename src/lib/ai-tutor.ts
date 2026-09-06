@@ -93,16 +93,34 @@ the following as hard requirements, not style advice:
   wrong ones. Never pair a concrete correct answer with vague distractors, and never
   write a distractor that leans on "conform standardelor/legislației" instead of saying
   something definite.
-- PLAUSIBLE DISTRACTORS. This is the one that matters most. Six independent judges shown
-  ONLY the four options — no question at all — scored 95-100%, because the distractors
-  were recognisably false rather than tempting. A distractor must be something a real
-  beginner actually believes: a widespread misconception, a rule from a neighbouring
-  situation applied where it does not hold, a plausible-but-wrong figure, an approach
-  that works in some other market. NEVER an absurd, unethical or self-marking option:
-  no "garantat", "automat", "exclusiv", "interzis", no invented pressure tactics, no
-  option that is obviously the dishonest choice in a course that teaches honest practice.
-  If a reader can rule out an option without knowing the subject, that option is wasted
-  and the item is now a three-way choice.
+- DISTRACTORS THAT ARE TRUE. This is the requirement everything else depends on, and it
+  is not the obvious one. Do NOT write three false statements. A false statement is
+  recognisable, and that is exactly how the last two batches failed: six judges shown
+  ONLY the four options — no question at all — scored 95-100%, and one restricted to
+  formal defects scored 62 out of 62. Asking for "plausible" distractors did not fix it;
+  the model kept writing falsehoods and calling them plausible.
+
+  Instead: **each distractor must be a statement that is TRUE of this material, but that
+  answers a DIFFERENT question.** Take another real fact, step, figure or rule from the
+  lesson and use it where it does not belong — the right document at the wrong stage, the
+  correct duty of the other party, the real deadline for a different act, the true
+  procedure for a different type of client, the actual figure for a different period.
+
+  Two consequences you must accept:
+    - The STEM now has to carry the discriminating condition. If your four options are all
+      true, only a precise question separates them: name the stage, the party, the moment,
+      the document type. A vague stem with true options is a broken item and is rejected
+      as having several correct answers — that rejection is the sign your stem was lazy,
+      not that the rule is wrong.
+    - You may still use a precise beginner's misconception instead of a true-elsewhere
+      fact, but only a specific one that a real learner holds. Never an absurd, unethical
+      or self-marking option: no "garantat", "automat", "exclusiv", "interzis", no invented
+      pressure tactics, no option that is obviously the dishonest choice in a course about
+      honest practice.
+
+  The test: hide the question. A reader who knows the subject well must find all four
+  options defensible as statements, and must NOT be able to tell which one you marked.
+  A separate judge is shown exactly that, and the item is discarded when it can.
 
   Three patterns were found repeatedly in the last batch and each one hands the answer
   away for free — none of them may appear:
