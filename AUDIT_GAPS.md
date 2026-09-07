@@ -9,13 +9,17 @@
 ### G-TUT-AUDIT-2026-09-05 — Șase constatări din True E2E [10] — **Eliminated 2026-09-05 (`483427f`, LIVE + verificat)**
 `/api/public/practice/subjects` pe regula veche (slug) · ordinea 400/404 la self-enroll · `joinCode` serializat oricărui ADMIN de materie (verificat live: superadmin vede codul, adminul de materie nu, rotate → 403) · dublu-submit pe cod → 500 citit ca „cod invalid" · materie oprită listată în `enrolled` · `/dashboard/progress` pornea hardcodat pe `aviation` (privată → 404 pentru neînscriși).
 
-### G-TUT-JOINCODE-REACTIVATE-001 — Codul de acces reactivează o înscriere veche cu rolurile ei — OPEN (P2)
+### G-TUT-JOINCODE-REACTIVATE-001 — Codul de acces reactivează o înscriere veche cu rolurile ei — **Eliminated 2026-09-07 (`3ba164a`, LIVE + verificat)**
 - `POST /api/domains/join` pe o înscriere `isActive=false` o repune activă **păstrându-i rolurile**: un cont căruia i s-a revocat rolul ADMIN/INSTRUCTOR pe o materie privată și-l recapătă cu un cod destinat elevilor. Sursă: /review (CONFIRMED).
-- Fix: la reactivare, forțează `roles: ["STUDENT"]` (sau refuză reactivarea rolurilor privilegiate). `src/app/api/domains/join/route.ts`.
+- Livrat: la reactivare se scriu `roles: ["STUDENT"]`. Un cod de elev dă acces de elev; cine trebuie să fie iar administrator e repus de un administrator.
+- **Verificat pe producție** (cont real, înscriere pregătită cu rolurile retrase): înainte `{ADMIN,INSTRUCTOR} activ=false` → după folosirea codului `{STUDENT} activ=true`. Prima încercare de verificare NU a rulat (contul de test avea parola învechită în seif, iar a doua a picat pe `UID`, variabilă rezervată în bash) — abia a treia a exercitat cu adevărat calea.
 
-### G-TUT-JOINCODE-LIFECYCLE-001 — Codul de acces n-are expirare, limită de utilizări sau audit la răscumpărare — OPEN (P2)
+### G-TUT-JOINCODE-LIFECYCLE-001 — Codul de acces n-are expirare, limită de utilizări sau audit la răscumpărare — **Eliminated 2026-09-07 (`3ba164a`, LIVE + verificat)**
 - `Voucher` din aceeași schemă are `expiresAt`/`maxUses`/`usedCount`/`isActive`; `Domain.joinCode` n-are niciunul, iar înscrierea prin cod nu se distinge de una făcută de admin (fără urmă pe `Enrollment`, fără `AdminAuditLog`). Emiterea e auditată, folosirea nu.
-- Relevant înainte de a da codul agenților REAL (W6): un cod scurs rămâne valabil la nesfârșit.
+- Livrat (migrarea `0055`, aditivă — niciun cod nu era în circulație, deci nimeni n-a pierdut accesul): `joinCodeExpiresAt`, `joinCodeMaxUses`, `joinCodeUses`. Termen **implicit 30 de zile** la emitere; „fără termen" rămâne posibil dar trebuie cerut explicit. Contorul se pune la zero la fiecare rotire — limita e a codului, nu a materiei. Fiecare intrare pe cod se scrie în audit (`DOMAIN_JOIN_CODE_REDEEM`).
+- Revendicarea folosirii e o singură scriere condiționată, ca doi oameni care apasă simultan să nu treacă amândoi de ultima folosire. O folosire se consumă doar la o intrare reală: cine e deja înscris și dă dublu-click nu arde codul altcuiva.
+- Expirat și epuizat răspund cu **același 404** ca un cod inexistent — altfel cineva ar afla, încercând, care coduri au fost cândva reale.
+- **Verificat pe producție**: cod emis cu o singură folosire → prima intrare 200, a doua 404 cu înscrierea rămasă dezactivată, contor 1/1, o intrare în audit; cod cu termen trecut → 404.
 
 ### G-TUT-GATE-COVERAGE-001 — Nimic nu împiedică o rută nouă `/api/[domain]/*` să uite poarta — **Eliminated 2026-09-07 (`306d9e2`)**
 - Inventarul celor 29 de rute a fost făcut cu `find`, o dată. Poarta e per-handler; nu există test/lint care să eșueze dacă un handler nou nu cheamă `resolveDomainOrForbid`. Sursă: /review (unghiul altitudine).
