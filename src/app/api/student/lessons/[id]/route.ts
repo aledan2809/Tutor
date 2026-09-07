@@ -3,6 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { requireFeature } from "@/lib/plan-gate";
+import { isOrgProvidedAccess } from "@/lib/org-entitlement";
 import { z } from "zod";
 
 const paramsSchema = z.object({
@@ -18,11 +19,6 @@ async function _GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const gate = await requireFeature(session.user.id, "structured_lessons", {
-    bypass: session.user.isSuperAdmin,
-  });
-  if (gate) return gate;
-
   const rawParams = await params;
   const parsed = paramsSchema.safeParse(rawParams);
   if (!parsed.success) {
@@ -33,6 +29,23 @@ async function _GET(
   }
 
   const { id } = parsed.data;
+
+  // Poarta de abonament trebuie să știe DESPRE CE materie e vorba.
+  //
+  // Rula înainte de a citi lecția, deci trata la fel un elev care își cumpără
+  // singur pachetul și un agent înscris de firma lui într-o materie a firmei.
+  // Rezultatul, prins la proba de dinaintea publicării cursului „Agent imobiliar":
+  // cele opt lecții erau publicate, apăreau în lista agentului, iar deschiderea
+  // oricăreia răspundea 403 „face parte dintr-un pachet". Acolo clientul e firma.
+  const owner = await prisma.lesson.findUnique({ where: { id }, select: { domainId: true } });
+  const orgProvided = owner
+    ? await isOrgProvidedAccess(session.user.id, owner.domainId)
+    : false;
+
+  const gate = await requireFeature(session.user.id, "structured_lessons", {
+    bypass: session.user.isSuperAdmin || orgProvided,
+  });
+  if (gate) return gate;
 
   // Try Lesson model first (has proper markdown content)
   const lessonModel = await prisma.lesson.findUnique({
