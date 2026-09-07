@@ -49,9 +49,11 @@
 - Efect: un ADMIN de domeniu vede panoul (layout-ul îl lasă) dar nu poate crea/citi individual întrebări. Nu e scurgere; e funcție promisă și nelivrată pentru rolul ADMIN.
 - Unde: `src/app/api/admin/questions/route.ts` (POST) + `[id]/route.ts` (GET). Decizie: fie `requireDomainAdmin` peste tot pe întrebări, fie se scoate rolul ADMIN de domeniu din UI. Ține de workstream-ul D (roluri).
 
-### G-TUT-DOMAIN-INACTIVE-001 — O materie oprită (`isActive=false`) apare încă în `enrolled`, deși rutele ei răspund 404 — OPEN (P3/UX)
+### G-TUT-DOMAIN-INACTIVE-001 — O materie oprită (`isActive=false`) apare încă în `enrolled`, deși rutele ei răspund 404 — **Eliminated 2026-09-07 (`22ca60e`, LIVE + verificat)**
 - Găsit de True E2E [10], rolul SUPERADMIN (V2): elevul înscris vede materia în `GET /api/student/domains` → `enrolled`, dar orice `/api/<slug>/*` → 404 (poarta, corect). UI-ul ar arăta o materie pe care nu o poți deschide. Tot acolo: comutarea `isActive` prin `PUT /api/admin/domains/[id]` nu scrie în audit log (doar `visibility` e auditat).
-- Fix mic: `enrolled` filtrat pe `domain.isActive` pentru non-admini (sau marcat „oprită"); audit și pe `isActive`.
+- Jumătatea cu lista era **deja reparată** în `483427f` (filtrul `domain: { isActive: true }`, cu explicația în cod). A rămas urma: oprirea unei materii nu se scria nicăieri, deși `visibility` se scria.
+- Livrat: `DOMAIN_DEACTIVATE` / `DOMAIN_REACTIVATE` cu `from`→`to`. Motivul e același pentru amândouă câmpurile — schimbă CINE ajunge la conținut, nu cum arată: `visibility` îl expune internetului, `isActive` îl stinge pentru toți deodată, inclusiv pentru elevii înscriși.
+- **Verificat pe producție**: oprire → urmă `true→false`; repornire → urmă; **o redenumire NU lasă urmă** (exact 2 intrări noi, nu 4) — restul formularului rămâne neauditat, cum trebuie.
 
 ### AGT-001 (PATCH `/api/admin/questions/<id>` → 405) — **Eliminated** (verificat 2026-09-05: PATCH e alias la PUT; pe id inexistent răspunde 404, nu 405)
 
