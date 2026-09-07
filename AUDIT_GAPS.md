@@ -23,9 +23,13 @@
 - Două slăbiciuni prinse scriindu-l, ambele în cod: (a) prima versiune căuta numele cu `includes`, iar mutația de probă `resolveDomainOrForbid`→`resolveDomainOrForbidXX` a TRECUT (numele stricat îl conține ca subșir) — acum se cere APELUL; verificat cu două mutații, ambele pică; (b) un glob stricat ar fi raportat acoperire perfectă pe zero fișiere — de-aia testul cere și un număr minim de rute găsite.
 - Excepțiile sunt o listă goală, documentată: cine adaugă una scrie motivul, și se vede în diff.
 
-### G-TUT-FEEDBACK-PRIVATE-WIDENED-001 — „Materialul propriu se editează automat" s-a lărgit de la 2 la 9 materii — OPEN (P1, decizie)
+### G-TUT-FEEDBACK-PRIVATE-WIDENED-001 — „Materialul propriu se editează automat" s-a lărgit de la 2 la 9 materii — **Închis 2026-09-07 (decizie user: se păstrează)**
 - `feedback-review.ts` folosea o listă de 2 sluguri (`aptitudini-aviatie`, `licenta-rares`); acum citește `visibility === "PRIVATE"`, deci regimul de auto-corectare/auto-ascundere acoperă și `aviation`, `drept-penal`, `chimie`, `biologie`, `istorie`, `geografie`. Lărgire reală, introdusă de unificarea definiției (`b51d528`).
-- Se leagă direct de itemul deschis „Verdictul pe feedback-ul elevului nu mai are voie să fie final fără om". Decizie de produs: fie se revine la o listă explicită, fie se acceptă lărgirea odată cu omul-în-buclă.
+- Se leagă direct de itemul „Verdictul pe feedback-ul elevului nu mai are voie să fie final fără om".
+- **Decizie (user, 2026-09-07): lărgirea se păstrează.** Luată pe date, nu pe impresie — recomandarea mea inițială fusese revenirea la lista de 2, formulată înainte de a măsura.
+- Ce contează sunt doar grilele PUBLICATE (restul nu ajung la niciun elev). Lărgirea a adus **256** sub regimul automat, dintre care **250 sunt materialul de aviație al lui Rareș** (`aviatie-cunostinte` 226 + `aviation` 24) — exact cazul pentru care lista de 2 fusese făcută. Categoric nou: **6 grile** (istorie 4, drept penal 2). Restul materiilor private (biologie, chimie, geografie, agent-imobiliar) au **0 publicate**.
+- Ce rămâne automat pe o materie privată: rescrierea răspunsului corect (**doar dintre cele 4 variante existente**, nu inventează) și ascunderea grilei din practică (reversibilă). Cele două verdicte periculoase — „respinsă" și „semnalată" — **nu mai închid firul singure** din `4f1a3db` (LIVE 2026-08-31), iar un elev nu mai află de la mașină că se înșeală.
+- De reevaluat dacă o materie privată care NU e material propriu ajunge să aibă multe grile publicate.
 
 ### G-TUT-ADMIN-SCOPE-001 — Un ADMIN de materie vedea materiile private străine — **Eliminated 2026-09-05 (`70534c5`, LIVE)**
 - Găsit de True E2E [10], rolul ADMIN: `test_admin` (ADMIN pe `aviation`) → `GET /api/licenta-rares/progress` 200, `/api/aptitudini-aviatie/leaderboard` 200, `/api/licenta-rares/bibliography` 200, iar catalogul lista materiile private.
