@@ -17,9 +17,11 @@
 - `Voucher` din aceeași schemă are `expiresAt`/`maxUses`/`usedCount`/`isActive`; `Domain.joinCode` n-are niciunul, iar înscrierea prin cod nu se distinge de una făcută de admin (fără urmă pe `Enrollment`, fără `AdminAuditLog`). Emiterea e auditată, folosirea nu.
 - Relevant înainte de a da codul agenților REAL (W6): un cod scurs rămâne valabil la nesfârșit.
 
-### G-TUT-GATE-COVERAGE-001 — Nimic nu împiedică o rută nouă `/api/[domain]/*` să uite poarta — OPEN (P2)
+### G-TUT-GATE-COVERAGE-001 — Nimic nu împiedică o rută nouă `/api/[domain]/*` să uite poarta — **Eliminated 2026-09-07 (`306d9e2`)**
 - Inventarul celor 29 de rute a fost făcut cu `find`, o dată. Poarta e per-handler; nu există test/lint care să eșueze dacă un handler nou nu cheamă `resolveDomainOrForbid`. Sursă: /review (unghiul altitudine).
-- Fix propus: un test care enumeră `src/app/api/[domain]/**/route.ts` și cere prezența importului în fiecare fișier — plasa care lipsește azi.
+- Livrat: `tests/unit/domain-gate-coverage.test.ts` enumerează singur rutele și pică pe prima fără poartă. 29/29 acoperite azi.
+- Două slăbiciuni prinse scriindu-l, ambele în cod: (a) prima versiune căuta numele cu `includes`, iar mutația de probă `resolveDomainOrForbid`→`resolveDomainOrForbidXX` a TRECUT (numele stricat îl conține ca subșir) — acum se cere APELUL; verificat cu două mutații, ambele pică; (b) un glob stricat ar fi raportat acoperire perfectă pe zero fișiere — de-aia testul cere și un număr minim de rute găsite.
+- Excepțiile sunt o listă goală, documentată: cine adaugă una scrie motivul, și se vede în diff.
 
 ### G-TUT-FEEDBACK-PRIVATE-WIDENED-001 — „Materialul propriu se editează automat" s-a lărgit de la 2 la 9 materii — OPEN (P1, decizie)
 - `feedback-review.ts` folosea o listă de 2 sluguri (`aptitudini-aviatie`, `licenta-rares`); acum citește `visibility === "PRIVATE"`, deci regimul de auto-corectare/auto-ascundere acoperă și `aviation`, `drept-penal`, `chimie`, `biologie`, `istorie`, `geografie`. Lărgire reală, introdusă de unificarea definiției (`b51d528`).
