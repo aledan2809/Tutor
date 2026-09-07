@@ -102,6 +102,13 @@ describe("buildNavSections — what each role can reach", () => {
     expect(inLearn).toContain("/dashboard/domains");
     expect(inLearn).toContain("/dashboard/calendar");
   });
+
+  it("pune Lecțiile în meniu, înaintea Grilelor — altfel un curs publicat n-are ușă", () => {
+    const learn = buildNavSections(STUDENT).find((s) => s.id === "learn")!;
+    const inLearn = learn.items.map((i) => i.href);
+    expect(inLearn).toContain("/dashboard/lessons");
+    expect(inLearn.indexOf("/dashboard/lessons")).toBeLessThan(inLearn.indexOf("/dashboard/practice"));
+  });
 });
 
 describe("buildNavSections — mixed accounts lose nothing", () => {
@@ -135,7 +142,9 @@ describe("buildNavSections — gates carried over verbatim", () => {
 
   it("keeps the hidden routes out of every role's menu", () => {
     const hidden = [
-      "/dashboard/lessons",
+      // „/dashboard/lessons" a IEȘIT din listă 2026-09-08: era ascunsă cât timp
+      // tabela era goală și lista elevului citea din altă parte. Ambele s-au
+      // reparat, cursurile aduc lecții reale, deci pagina are din nou ce arăta.
       "/dashboard/assessment",
       "/dashboard/exams",
       "/dashboard/bibliography",

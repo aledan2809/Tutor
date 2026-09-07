@@ -50,6 +50,12 @@ const HIDDEN_NAV = new Set([
 ]);
 
 const CONTENT_LEARN: NavItem[] = [
+  // Lecțiile stau ÎNAINTEA grilelor: un curs se citește, apoi se testează.
+  //
+  // Ruta era vie dar în afara oricărei secțiuni — scoasă din HIDDEN_NAV când
+  // cursurile au adus primele lecții reale, dar niciodată pusă într-un meniu.
+  // Un elev nu găsește o pagină care nu apare nicăieri, oricâte lecții publici.
+  { href: "/dashboard/lessons", labelKey: "lessons" },
   { href: "/dashboard/practice", labelKey: "practice" },
   { href: "/dashboard/exam-bank", labelKey: "examBank" },
   { href: "/dashboard/genereaza", labelKey: "generate" },
