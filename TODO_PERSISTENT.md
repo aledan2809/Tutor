@@ -6,6 +6,14 @@
 
 ## [~] 🔒📚 Conținut public/privat pe materii + cursuri generate din prompt (creat 2026-09-05)
 
+> ✅ **2026-09-07 — cele 5 gap-uri de audit, toate închise și verificate pe producție.**
+> Bariera are acum un test care prinde o rută uitată (`306d9e2`) · codul de acces nu mai
+> redă drepturi retrase și capătă termen 30 de zile, limită de folosiri și urmă în audit
+> (`3ba164a`, migrarea 0055) · oprirea unei materii se scrie în audit (`22ca60e`) ·
+> lărgirea auto-corectării rămâne, prin decizie luată pe date (`bd36a0b`).
+> `AUDIT_GAPS.md`: **0 deschise**. Lecția L37 — un test scris cu `includes` trece exact
+> mutația pe care trebuie s-o prindă.
+
 **Cerere user**: unele cursuri/teste sunt pentru publicul larg, altele nu (Aviația lui Rareș) → comutator în
 Admin; plus creare de cursuri și teste de la zero dintr-un prompt (dat: antrenor de agenți imobiliari, 8 module).
 Decizii (AskUserQuestion ×7, 2026-09-05): curs static acum + antrenor conversațional faza 2 · bifă pe materie ·

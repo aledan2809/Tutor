@@ -1,8 +1,45 @@
 # Project Status - Tutor
-Last Updated: 2026-09-06 (scurgerile grilelor — verificate toate fețele, empiric; nu erau două, erau cinci)
+Last Updated: 2026-09-07 (cele 5 gap-uri de audit — toate închise și verificate pe producție)
 <!-- anterior: 2026-09-03 (conținutul memento-ului Telegram reparat; incident 502 provocat de mine, remediat în ~4 min) -->
 <!-- anterior: 2026-09-01 (treapta Telegram din cascadă -->
 <!--  — sărită tăcut pentru TOȚI utilizatorii; reparată, deployată, verificată pe date de producție) -->
+
+## Current State (Sesiunea 2026-09-07 — cele 5 gap-uri de audit, toate închise)
+
+Cerut: „hai să începem cu gap-urile din audit. Îmi vei explica fiecare gap în
+non-tehnic înainte să îți dau aprobarea". Explicate, aprobate, făcute.
+
+| gap | ce era | rezolvare |
+|---|---|---|
+| GATE-COVERAGE | nimic nu împiedica o rută nouă să uite bariera materiilor private | test care enumeră singur rutele (`306d9e2`) |
+| FEEDBACK-PRIVATE-WIDENED | auto-corectarea s-a lărgit de la 2 la 9 materii | **decizie user pe date: se păstrează** (`bd36a0b`) |
+| JOINCODE-REACTIVATE | codul de elev reda drepturile retrase | rolurile se resetează la STUDENT (`3ba164a`) |
+| JOINCODE-LIFECYCLE | codul nu expira, n-avea limită, nu lăsa urmă | termen 30 zile + limită + audit (`3ba164a`, migrarea 0055) |
+| DOMAIN-INACTIVE | materia oprită apărea în listă; oprirea nu se audita | lista reparată deja în `483427f`; audit adăugat (`22ca60e`) |
+
+### Ce am învățat verificând, nu scriind
+- **Testul de acoperire a trecut o mutație pe care trebuia s-o prindă.** Căuta numele
+  funcției cu `includes`, iar numele stricat (`...ForbidXX`) îl conține ca subșir.
+  Acum cere APELUL. Verificat cu două mutații: nume stricat și importă-dar-nu-apelează.
+- **Verificarea pe producție a eșuat de două ori înainte să exercite ceva.** Prima
+  dată contul de test avea parola învechită în seif (401, deci rolul a rămas ADMIN
+  pentru că nimeni n-a folosit codul); a doua oară scriptul a picat pe `UID`,
+  variabilă rezervată în bash. Abia a treia a arătat ce trebuia:
+  `{ADMIN,INSTRUCTOR} activ=false` → `{STUDENT} activ=true`.
+- **Recomandarea mea pe gap-ul P1 era greșită** — o dădusem înainte să măsor. Cu
+  datele: lărgirea a adus 256 de grile publicate sub regimul automat, dintre care
+  250 sunt materialul de aviație al lui Rareș, adică exact cazul pentru care lista
+  de 2 fusese făcută. Categoric nou: 6 grile.
+- **Două jumătăți de gap erau deja reparate** fără ca registrul s-o știe (lista
+  materiei oprite în `483427f`, omul-în-buclă pe feedback în `4f1a3db`).
+
+### Stare
+`AUDIT_GAPS.md`: **0 gap-uri deschise**. 875 de teste verzi. Producția pe `22ca60e`.
+
+## Lessons Learned (sesiunea 2026-09-07)
+- L37 — un test de acoperire scris cu `includes` pe numele unei funcții trece exact
+  mutația pe care trebuie s-o prindă; cere apelul, și verifică testul stricând codul
+  intenționat. Vezi `knowledge/lessons-learned.md`.
 
 ## Current State (Sesiunea 2026-09-06 partea 2 — celelalte fețe ale scurgerii)
 
