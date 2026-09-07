@@ -71,11 +71,18 @@ export async function PUT(
       if (!owned.ok) return owned.response;
     }
 
-    // Visibility is the one field here whose flip exposes content to the open
-    // internet (or pulls it back). It is audited; the rest of the form is not.
-    const before = parsed.data.visibility
-      ? await prisma.domain.findUnique({ where: { id }, select: { slug: true, visibility: true, organizationId: true } })
-      : null;
+    // Două câmpuri din formularul ăsta schimbă CINE poate ajunge la conținut, nu
+    // cum arată: `visibility` îl expune internetului deschis (sau îl trage înapoi),
+    // iar `isActive` îl stinge pentru toți deodată — orice rută a materiei începe
+    // să răspundă 404, inclusiv pentru elevii înscriși. Amândouă se auditează;
+    // restul formularului (nume, descriere, icoană) nu.
+    const before =
+      parsed.data.visibility !== undefined || parsed.data.isActive !== undefined
+        ? await prisma.domain.findUnique({
+            where: { id },
+            select: { slug: true, visibility: true, isActive: true, organizationId: true },
+          })
+        : null;
 
     const domain = await prisma.domain.update({
       where: { id },
@@ -89,6 +96,21 @@ export async function PUT(
         performedById: userId,
         targetType: "Domain",
         metadata: { domainId: id, slug: before.slug, from: before.visibility, to: domain.visibility, organizationId: before.organizationId },
+      });
+    }
+
+    if (before && before.isActive !== domain.isActive) {
+      await logAudit({
+        action: domain.isActive ? "DOMAIN_REACTIVATE" : "DOMAIN_DEACTIVATE",
+        performedById: userId,
+        targetType: "Domain",
+        metadata: {
+          domainId: id,
+          slug: before.slug,
+          from: before.isActive,
+          to: domain.isActive,
+          organizationId: before.organizationId,
+        },
       });
     }
 
