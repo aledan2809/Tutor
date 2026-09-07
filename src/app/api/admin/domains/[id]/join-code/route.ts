@@ -5,9 +5,20 @@ import { withErrorHandling, ApiErrors } from "@/lib/api-error-handler";
 import { logAudit } from "@/lib/audit";
 import { formatJoinCode } from "@/lib/join-code";
 import { generateJoinCode } from "@/lib/join-code-server";
+import { DEFAULT_EXPIRY_DAYS, expiryFromDays, MAX_EXPIRY_DAYS } from "@/lib/join-code-policy";
 import { z } from "zod";
 
-const bodySchema = z.object({ action: z.enum(["rotate", "clear"]) });
+const bodySchema = z.object({
+  action: z.enum(["rotate", "clear"]),
+  /**
+   * Câte zile trăiește codul. Lipsă = 30 (implicitul). `null` = fără termen, dar
+   * trebuie cerut explicit — o cheie fără termen e o cheie pierdută pentru
+   * totdeauna, și asta merită o apăsare conștientă, nu o omisiune.
+   */
+  expiresInDays: z.number().int().min(1).max(MAX_EXPIRY_DAYS).nullable().optional(),
+  /** De câte ori poate fi folosit. Lipsă sau `null` = nelimitat. */
+  maxUses: z.number().int().min(1).max(10_000).nullable().optional(),
+});
 
 /**
  * POST /api/admin/domains/[id]/join-code { action: "rotate" | "clear" }
@@ -41,7 +52,10 @@ export async function POST(
     if (scope.kind === "ORG" && !ownsDomain(scope, domain)) return ApiErrors.notFound();
 
     if (parsed.data.action === "clear") {
-      await prisma.domain.update({ where: { id }, data: { joinCode: null } });
+      await prisma.domain.update({
+        where: { id },
+        data: { joinCode: null, joinCodeExpiresAt: null, joinCodeMaxUses: null, joinCodeUses: 0 },
+      });
       await logAudit({
         action: "DOMAIN_JOIN_CODE_CLEAR",
         performedById: userId,
@@ -58,13 +72,34 @@ export async function POST(
       if (!clash) break;
       code = generateJoinCode();
     }
-    await prisma.domain.update({ where: { id }, data: { joinCode: code } });
+    // Contorul se pune la zero: limita e a codului, nu a materiei. Altfel un cod
+    // nou s-ar naște deja epuizat de folosirile celui pe care tocmai l-a înlocuit.
+    const expiresInDays =
+      parsed.data.expiresInDays === undefined ? DEFAULT_EXPIRY_DAYS : parsed.data.expiresInDays;
+    const expiresAt = expiryFromDays(expiresInDays, new Date());
+    const maxUses = parsed.data.maxUses ?? null;
+
+    await prisma.domain.update({
+      where: { id },
+      data: { joinCode: code, joinCodeExpiresAt: expiresAt, joinCodeMaxUses: maxUses, joinCodeUses: 0 },
+    });
     await logAudit({
       action: "DOMAIN_JOIN_CODE_ROTATE",
       performedById: userId,
       targetType: "Domain",
-      metadata: { domainId: id, slug: domain.slug, replaced: domain.joinCode !== null },
+      metadata: {
+        domainId: id,
+        slug: domain.slug,
+        replaced: domain.joinCode !== null,
+        expiresAt: expiresAt?.toISOString() ?? null,
+        maxUses,
+      },
     });
-    return NextResponse.json({ joinCode: code, display: formatJoinCode(code) });
+    return NextResponse.json({
+      joinCode: code,
+      display: formatJoinCode(code),
+      expiresAt: expiresAt?.toISOString() ?? null,
+      maxUses,
+    });
   });
 }

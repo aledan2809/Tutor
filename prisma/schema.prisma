@@ -39,13 +39,13 @@ model VerificationToken {
 // ─── Core models ───
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  isSuperAdmin  Boolean   @default(false)
+  id             String       @id @default(cuid())
+  name           String?
+  email          String?      @unique
+  emailVerified  DateTime?
+  image          String?
+  password       String?
+  isSuperAdmin   Boolean      @default(false)
   /// Which merchant this account belongs to. Null = a platform account: an
   /// ordinary student, parent or tutor, and the superadmin.
   organizationId String?
@@ -53,95 +53,95 @@ model User {
   /// Meaningless without organizationId; the two are checked together, never apart.
   /// This is not `isSuperAdmin`: a merchant admin can reach nothing outside their
   /// organization, and platform-wide surfaces (plans, ads, revenue) stay closed.
-  isOrgAdmin    Boolean   @default(false)
-  accountRole   AccountRole?
-  locale        String    @default("en")
+  isOrgAdmin     Boolean      @default(false)
+  accountRole    AccountRole?
+  locale         String       @default("en")
   // Clasa în care e elevul (5-12), declarată în flow-ul de inițiere al Grilelor.
   // Comandă checklistul programei parcurse; null = neîntrebat încă.
-  schoolYear    Int?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  schoolYear     Int?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
-  accounts      Account[]
-  enrollments   Enrollment[]
-  sessions      Session[]
-  attempts      Attempt[]
-  progress      Progress[]
-  weakAreas     WeakArea[]
-  sprintProfiles SprintProfile[]
-  curriculumChecks CurriculumCheck[]
-  notifications Notification[]
-  escalationEvents EscalationEvent[]
+  accounts               Account[]
+  enrollments            Enrollment[]
+  sessions               Session[]
+  attempts               Attempt[]
+  progress               Progress[]
+  weakAreas              WeakArea[]
+  sprintProfiles         SprintProfile[]
+  curriculumChecks       CurriculumCheck[]
+  notifications          Notification[]
+  escalationEvents       EscalationEvent[]
   notificationPreference NotificationPreference?
-  settings      Setting[]
-  questions     Question[]
-  gamification  UserGamification[]
-  leaderboards  LeaderboardEntry[]
+  settings               Setting[]
+  questions              Question[]
+  gamification           UserGamification[]
+  leaderboards           LeaderboardEntry[]
   dailyChallengeAttempts DailyChallengeAttempt[]
-  calendars        UserCalendar[]
-  studySessions    StudySession[]
-  examSessions     ExamSession[]
-  examCertificates ExamCertificate[]
+  calendars              UserCalendar[]
+  studySessions          StudySession[]
+  examSessions           ExamSession[]
+  examCertificates       ExamCertificate[]
   // Phase 4: Student Dashboard & Learning UX
-  lessonProgress   LessonProgress[]
-  assessments      Assessment[]
+  lessonProgress         LessonProgress[]
+  assessments            Assessment[]
   // Phase 9: Watcher & Instructor relations
-  createdGroups       Group[]              @relation("GroupCreator")
-  groupMemberships    GroupMember[]
-  goalsAsInstructor   InstructorGoal[]     @relation("GoalInstructor")
-  goalsAsStudent      InstructorGoal[]     @relation("GoalStudent")
-  sentMessages        InstructorMessage[]  @relation("MessageSender")
-  receivedMessages    InstructorMessage[]  @relation("MessageRecipient")
-  thresholdsSet       EscalationThreshold[] @relation("ThresholdInstructor")
-  thresholdsFor       EscalationThreshold[] @relation("ThresholdStudent")
-  dashboardAnalytics  DashboardAnalytics[]
-  pushSubscriptions   PushSubscription[]
+  createdGroups          Group[]                 @relation("GroupCreator")
+  groupMemberships       GroupMember[]
+  goalsAsInstructor      InstructorGoal[]        @relation("GoalInstructor")
+  goalsAsStudent         InstructorGoal[]        @relation("GoalStudent")
+  sentMessages           InstructorMessage[]     @relation("MessageSender")
+  receivedMessages       InstructorMessage[]     @relation("MessageRecipient")
+  thresholdsSet          EscalationThreshold[]   @relation("ThresholdInstructor")
+  thresholdsFor          EscalationThreshold[]   @relation("ThresholdStudent")
+  dashboardAnalytics     DashboardAnalytics[]
+  pushSubscriptions      PushSubscription[]
   // Phase 10: Monetization & SuperAdmin
-  subscriptionPlanId  String?
-  subscriptionStatus  String?   // "trialing", "active", "canceled", "past_due"
-  subscriptionEndsAt  DateTime?
-  stripeCustomerId    String?   @unique
+  subscriptionPlanId     String?
+  subscriptionStatus     String? // "trialing", "active", "canceled", "past_due"
+  subscriptionEndsAt     DateTime?
+  stripeCustomerId       String?                 @unique
   // Main plan's Stripe subscription id (persisted from the broker callback) — lets
   // /api/stripe/portal open the Customer Portal / cancel without re-deriving it.
-  stripeSubscriptionId String?
+  stripeSubscriptionId   String?
   // Child seats bought as a discounted add-on beyond the plan's base seat. The
   // family-seat check honours base + this. 0 for everyone until they buy one.
-  paidExtraChildSeats Int       @default(0)
-  isBanned            Boolean   @default(false)
-  bannedReason        String?
-  organization        Organization?     @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-  subscriptionPlan    SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
-  vouchersCreated     Voucher[]
-  auditLogs           AdminAuditLog[]  @relation("AuditPerformer")
-  payments            Payment[]
-  notificationRetries NotificationRetry[]
+  paidExtraChildSeats    Int                     @default(0)
+  isBanned               Boolean                 @default(false)
+  bannedReason           String?
+  organization           Organization?           @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  subscriptionPlan       SubscriptionPlan?       @relation(fields: [subscriptionPlanId], references: [id])
+  vouchersCreated        Voucher[]
+  auditLogs              AdminAuditLog[]         @relation("AuditPerformer")
+  payments               Payment[]
+  notificationRetries    NotificationRetry[]
   // Phase 12: Referral / Growth engine (Tier 2)
-  referralCode        String?           @unique
-  referredById        String?
-  referredBy          User?             @relation("UserReferrals", fields: [referredById], references: [id])
-  referredUsers       User[]            @relation("UserReferrals")
-  referralsAsPromoter Referral[]        @relation("ReferralPromoter")
-  referralAsReferred  Referral?         @relation("ReferralReferred")
-  referralEarnings    ReferralEarning[] @relation("EarningPromoter")
-  magicQuizzes        MagicQuiz[]       @relation("UserMagicQuizzes")
+  referralCode           String?                 @unique
+  referredById           String?
+  referredBy             User?                   @relation("UserReferrals", fields: [referredById], references: [id])
+  referredUsers          User[]                  @relation("UserReferrals")
+  referralsAsPromoter    Referral[]              @relation("ReferralPromoter")
+  referralAsReferred     Referral?               @relation("ReferralReferred")
+  referralEarnings       ReferralEarning[]       @relation("EarningPromoter")
+  magicQuizzes           MagicQuiz[]             @relation("UserMagicQuizzes")
   // Telegram opt-in channel (free nudges in place of paid WhatsApp).
-  telegramChatId       String?   @unique
-  telegramUsername     String?
-  telegramLinkedAt     DateTime?
-  telegramConnectTokens TelegramConnectToken[]
+  telegramChatId         String?                 @unique
+  telegramUsername       String?
+  telegramLinkedAt       DateTime?
+  telegramConnectTokens  TelegramConnectToken[]
   // Marketing campaign attribution (UTM / per-voucher conversion tracking).
-  campaignSignup       CampaignSignup?
+  campaignSignup         CampaignSignup?
   // Parent (WATCHER) ↔ child (STUDENT) links — a parent sees ONLY linked children.
-  childrenLinks        Guardian[] @relation("GuardianParent")
-  guardianLinks        Guardian[] @relation("GuardianChild")
+  childrenLinks          Guardian[]              @relation("GuardianParent")
+  guardianLinks          Guardian[]              @relation("GuardianChild")
   // Family invitations (as inviter / as the accepted invitee).
-  familyInvitesSent     FamilyInvite[] @relation("FamilyInviteInviter")
-  familyInvitesAccepted FamilyInvite[] @relation("FamilyInviteAccepted")
+  familyInvitesSent      FamilyInvite[]          @relation("FamilyInviteInviter")
+  familyInvitesAccepted  FamilyInvite[]          @relation("FamilyInviteAccepted")
   // Scheduled study reminders (fixed days + time → escalation cascade + deep-link).
-  studyReminders       StudyReminder[]
+  studyReminders         StudyReminder[]
   // Parent monitoring escalations (as parent / as child).
-  parentEscAsParent    ParentEscalation[] @relation("ParentEscParent")
-  parentEscAsChild     ParentEscalation[] @relation("ParentEscChild")
+  parentEscAsParent      ParentEscalation[]      @relation("ParentEscParent")
+  parentEscAsChild       ParentEscalation[]      @relation("ParentEscChild")
 
   @@index([organizationId])
 }
@@ -182,14 +182,14 @@ model StudyReminder {
   userId      String
   label       String?
   window      String   @default("morning") // morning | evening — drives cascade grace
-  sessionType String   @default("quick")   // quick | deep | ...
-  daysOfWeek  Int[]                          // JS getDay: 0=Sun .. 6=Sat
-  hour        Int                            // 0-23, local to timezone
+  sessionType String   @default("quick") // quick | deep | ...
+  daysOfWeek  Int[] // JS getDay: 0=Sun .. 6=Sat
+  hour        Int // 0-23, local to timezone
   minute      Int      @default(0)
-  domainSlug  String?                        // deep-link target subject
+  domainSlug  String? // deep-link target subject
   timezone    String   @default("Europe/Bucharest")
   isActive    Boolean  @default(true)
-  lastFiredOn String?                        // YYYY-MM-DD in timezone (anti double-fire)
+  lastFiredOn String? // YYYY-MM-DD in timezone (anti double-fire)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -229,16 +229,16 @@ model Guardian {
 /// beyond the two relations below.
 model FamilyInvite {
   id           String    @id @default(cuid())
-  inviterId    String                          // account owner who sent the invite
-  token        String    @unique               // opaque accept-link token (all channels)
-  code         String?   @unique               // short human code (family-code path)
-  targetRole   String                          // CHILD | PARENT | TUTOR (what the invitee becomes)
-  relation     String    @default("PARENT")    // Guardian.relation to stamp on accept (PARENT | TUTOR)
-  email        String?                         // delivery target for EMAIL channel
-  phone        String?                         // delivery target for WHATSAPP channel
-  channel      String                          // EMAIL | WHATSAPP | TELEGRAM | CODE | DIRECT
-  status       String    @default("pending")   // pending | accepted | revoked | expired
-  acceptedById String?                         // user who accepted (set on accept)
+  inviterId    String // account owner who sent the invite
+  token        String    @unique // opaque accept-link token (all channels)
+  code         String?   @unique // short human code (family-code path)
+  targetRole   String // CHILD | PARENT | TUTOR (what the invitee becomes)
+  relation     String    @default("PARENT") // Guardian.relation to stamp on accept (PARENT | TUTOR)
+  email        String? // delivery target for EMAIL channel
+  phone        String? // delivery target for WHATSAPP channel
+  channel      String // EMAIL | WHATSAPP | TELEGRAM | CODE | DIRECT
+  status       String    @default("pending") // pending | accepted | revoked | expired
+  acceptedById String? // user who accepted (set on accept)
   expiresAt    DateTime
   acceptedAt   DateTime?
   createdAt    DateTime  @default(now())
@@ -329,47 +329,54 @@ enum DomainVisibility {
 }
 
 model Domain {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  slug        String   @unique
-  description String?  @db.Text
-  icon        String?
-  isActive           Boolean  @default(true)
-  instructorEnabled  Boolean  @default(false)
+  id                String           @id @default(cuid())
+  name              String           @unique
+  slug              String           @unique
+  description       String?          @db.Text
+  icon              String?
+  isActive          Boolean          @default(true)
+  instructorEnabled Boolean          @default(false)
   /// PRIVATE by default: a domain that exists before anyone decided to publish it
   /// must not leak. The 2026-09-05 backfill set PUBLIC on exactly the slugs that
   /// classified as curriculum, so nothing changed for anyone the day it shipped.
-  visibility         DomainVisibility @default(PRIVATE)
+  visibility        DomainVisibility @default(PRIVATE)
   /// Which merchant owns this subject. Null = platform-owned (every subject that
   /// existed before organizations did), administered only by the superadmin.
-  organizationId     String?
+  organizationId    String?
   /// Admin-issued access code. Null = none in circulation. Redeeming it creates an
   /// active STUDENT enrollment (POST /api/domains/join); rotating it only affects
   /// future joins. Unique: one code names one domain.
-  joinCode           String?  @unique
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  joinCode          String?          @unique
+  /// Când moare codul. Null = niciodată (se poate cere explicit, dar implicitul la
+  /// emitere e 30 de zile: un cod fără termen e o cheie pierdută pentru totdeauna).
+  joinCodeExpiresAt DateTime?
+  /// De câte ori mai poate fi folosit. Null = nelimitat.
+  joinCodeMaxUses   Int?
+  /// Câte înscrieri s-au făcut cu codul CURENT. Se pune la zero la fiecare rotire.
+  joinCodeUses      Int              @default(0)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 
-  organization    Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-  enrollments     Enrollment[]
-  questions       Question[]
-  contentSources  ContentSource[]
-  examSimulations ExamSimulation[]
-  examConfig      ExamConfig?
-  gamification    UserGamification[]
-  leaderboards    LeaderboardEntry[]
-  dailyChallenges DailyChallenge[]
-  levelConfig     LevelConfig[]
-  calendars       UserCalendar[]
-  studySessions   StudySession[]
+  organization         Organization?         @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  enrollments          Enrollment[]
+  questions            Question[]
+  contentSources       ContentSource[]
+  examSimulations      ExamSimulation[]
+  examConfig           ExamConfig?
+  gamification         UserGamification[]
+  leaderboards         LeaderboardEntry[]
+  dailyChallenges      DailyChallenge[]
+  levelConfig          LevelConfig[]
+  calendars            UserCalendar[]
+  studySessions        StudySession[]
   // Phase 4: Student Dashboard & Learning UX
-  lessons         Lesson[]
-  courses         Course[]
-  assessments     Assessment[]
+  lessons              Lesson[]
+  courses              Course[]
+  assessments          Assessment[]
   // Phase 3: Learning Engine
-  progress        Progress[]
-  weakAreas       WeakArea[]
-  sprintProfiles  SprintProfile[]
+  progress             Progress[]
+  weakAreas            WeakArea[]
+  sprintProfiles       SprintProfile[]
   // Phase 9: Watcher & Instructor relations
   groups               Group[]
   instructorGoals      InstructorGoal[]
@@ -438,32 +445,32 @@ enum QuestionType {
 }
 
 model Question {
-  id            String         @id @default(cuid())
-  domainId      String
-  subject       String
-  topic         String
-  difficulty    Int            @default(3) // 1-5 scale
-  type          QuestionType   @default(MULTIPLE_CHOICE)
-  content       String         @db.Text
-  passage       String?        @db.Text // Reading text for passage-dependent grile (RO) — shown in a collapsible drawer
-  options       Json?          // Array of answer options for multiple choice
-  correctAnswer String         @db.Text
-  explanation   String?        @db.Text
-  sourceReference String?      // "Udroiu 2023, p.10, Q11" — visible only to Instructor/Admin
-  bookOrder     Int?           // Sort key: sequential extraction index (0,1,2...)
-  pdfPage       Int?           // PDF page number where question appears
-  bookPage      Int?           // Printed book page (left side of spread)
-  qNumberInBook Int?           // Original question number in book (e.g., 11 for "Q11")
-  chapterIndex  Int?           // Chapter order (1=Cap I, 2=Cap II, ...)
-  imageUrl      String?        // Image attached to question
-  explanationVideoUrl String?  // Video explanation URL
-  source        QuestionSource @default(MANUAL)
-  status        QuestionStatus @default(DRAFT)
-  meshConfidence Float?        // 0-1 mesh quality score (null = not screened)
-  meshFlags     Json?          // Array of {lens, defectClass, confidence, details}
-  createdById   String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id                  String         @id @default(cuid())
+  domainId            String
+  subject             String
+  topic               String
+  difficulty          Int            @default(3) // 1-5 scale
+  type                QuestionType   @default(MULTIPLE_CHOICE)
+  content             String         @db.Text
+  passage             String?        @db.Text // Reading text for passage-dependent grile (RO) — shown in a collapsible drawer
+  options             Json? // Array of answer options for multiple choice
+  correctAnswer       String         @db.Text
+  explanation         String?        @db.Text
+  sourceReference     String? // "Udroiu 2023, p.10, Q11" — visible only to Instructor/Admin
+  bookOrder           Int? // Sort key: sequential extraction index (0,1,2...)
+  pdfPage             Int? // PDF page number where question appears
+  bookPage            Int? // Printed book page (left side of spread)
+  qNumberInBook       Int? // Original question number in book (e.g., 11 for "Q11")
+  chapterIndex        Int? // Chapter order (1=Cap I, 2=Cap II, ...)
+  imageUrl            String? // Image attached to question
+  explanationVideoUrl String? // Video explanation URL
+  source              QuestionSource @default(MANUAL)
+  status              QuestionStatus @default(DRAFT)
+  meshConfidence      Float? // 0-1 mesh quality score (null = not screened)
+  meshFlags           Json? // Array of {lens, defectClass, confidence, details}
+  createdById         String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
 
   domain          Domain           @relation(fields: [domainId], references: [id], onDelete: Cascade)
   createdBy       User?            @relation(fields: [createdById], references: [id], onDelete: SetNull)
@@ -478,37 +485,37 @@ model Question {
 }
 
 model Tag {
-  id        String     @id @default(cuid())
-  name      String     @unique
-  category  String     @default("general") // domain, subject, topic, custom
-  createdAt DateTime   @default(now())
+  id        String   @id @default(cuid())
+  name      String   @unique
+  category  String   @default("general") // domain, subject, topic, custom
+  createdAt DateTime @default(now())
 
   questions Question[] @relation("QuestionTags")
 }
 
 model ExamConfig {
-  id              String   @id @default(cuid())
-  domainId        String   @unique
-  questionTypes   Json     // e.g. ["MULTIPLE_CHOICE", "OPEN"]
-  timeLimit       Int?     // minutes
-  questionCount   Int      @default(20)
-  passingScore    Float    @default(75)
+  id               String   @id @default(cuid())
+  domainId         String   @unique
+  questionTypes    Json // e.g. ["MULTIPLE_CHOICE", "OPEN"]
+  timeLimit        Int? // minutes
+  questionCount    Int      @default(20)
+  passingScore     Float    @default(75)
   shuffleQuestions Boolean  @default(true)
-  shuffleOptions  Boolean  @default(true)
-  metadata        Json?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  shuffleOptions   Boolean  @default(true)
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
 }
 
 model Session {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  type      String   @default("practice")
+  type      String    @default("practice")
   domainId  String?
   subject   String?
-  startedAt DateTime @default(now())
+  startedAt DateTime  @default(now())
   endedAt   DateTime?
   score     Float?
   metadata  Json?
@@ -544,20 +551,20 @@ model Attempt {
 }
 
 model Progress {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   userId          String
   domainId        String
   subject         String
   topic           String
-  masteryLevel    Float    @default(0)
-  totalAttempts   Int      @default(0)
-  correctAttempts Int      @default(0)
-  lastPracticed   DateTime @default(now())
+  masteryLevel    Float     @default(0)
+  totalAttempts   Int       @default(0)
+  correctAttempts Int       @default(0)
+  lastPracticed   DateTime  @default(now())
   nextReview      DateTime?
-  easeFactor      Float    @default(2.5)
-  interval        Int      @default(1)
-  repetitions     Int      @default(0)
-  updatedAt       DateTime @updatedAt
+  easeFactor      Float     @default(2.5)
+  interval        Int       @default(1)
+  repetitions     Int       @default(0)
+  updatedAt       DateTime  @updatedAt
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
@@ -668,24 +675,24 @@ enum EscalationChannel {
 }
 
 model EscalationEvent {
-  id          String           @id @default(cuid())
-  userId      String
-  sessionId   String?
-  level       Int              // 1-6
-  status      EscalationStatus @default(PENDING)
-  channel     EscalationChannel
-  templateId  String?
-  metadata    Json?
-  sentAt      DateTime?
+  id             String            @id @default(cuid())
+  userId         String
+  sessionId      String?
+  level          Int // 1-6
+  status         EscalationStatus  @default(PENDING)
+  channel        EscalationChannel
+  templateId     String?
+  metadata       Json?
+  sentAt         DateTime?
   // Set when the user taps the push notification for this event (via /api/escalation/ack).
   // An acknowledged event is NOT escalated to the next (paid) channel — push-first cost gate.
   acknowledgedAt DateTime?
   // Cost-metrics flag: true when the recipient is a synthetic (journey-audit / seed)
   // account, per @aledan/notify-ladder isTestAccount (incl. @tutor.app / @demo.tutor.app).
   // Keeps escalation/WhatsApp cost stats free of test traffic. Additive, defaulted.
-  isTest      Boolean          @default(false)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  isTest         Boolean           @default(false)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -694,14 +701,14 @@ model EscalationEvent {
 }
 
 model NotificationPreference {
-  id              String  @id @default(cuid())
-  userId          String  @unique
-  push            Boolean @default(true)
-  telegram        Boolean @default(true)
-  whatsapp        Boolean @default(true)
-  sms             Boolean @default(true)
-  email           Boolean @default(true)
-  call            Boolean @default(true)
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  push            Boolean  @default(true)
+  telegram        Boolean  @default(true)
+  whatsapp        Boolean  @default(true)
+  sms             Boolean  @default(true)
+  email           Boolean  @default(true)
+  call            Boolean  @default(true)
   // Priority order of the escalation cascade channels for THIS user, most-preferred
   // first (e.g. ["WHATSAPP","EMAIL","TELEGRAM","PUSH"]). Empty = the code default
   // order (push -> telegram -> email -> whatsapp). On/off still lives on the booleans
@@ -712,17 +719,17 @@ model NotificationPreference {
   // STANDARD_30 = every 30 min (default, pre-feature). EVERY_H = every selfAlertEveryH
   // hours. FIXED_AT = once a day at selfAlertAt (local time). ONCE = first alert only.
   // Only read by parent monitoring; a no-op on student/instructor rows.
-  selfAlertMode   String  @default("STANDARD_30")
-  selfAlertEveryH Int     @default(6)
-  selfAlertAt     String  @default("20:00")
+  selfAlertMode   String   @default("STANDARD_30")
+  selfAlertEveryH Int      @default(6)
+  selfAlertAt     String   @default("20:00")
   // Parent-set custom escalation cascade for THIS child: an ordered list of
   // { channel, delayMinutes } that overrides channelOrder AND the window grace.
   // Null = default (channelOrder + window grace). Written only via the guardian-gated
   // family endpoint. See resolveUserLadder() / resolveUserGraceMs() in escalation/config.ts.
   escalationSteps Json?
-  quietHoursStart String  @default("22:00")
-  quietHoursEnd   String  @default("07:00")
-  timezone        String  @default("Europe/Bucharest")
+  quietHoursStart String   @default("22:00")
+  quietHoursEnd   String   @default("07:00")
+  timezone        String   @default("Europe/Bucharest")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -745,17 +752,17 @@ model ContentSource {
 }
 
 model ExamSimulation {
-  id             String   @id @default(cuid())
-  domainId       String
-  name           String
-  description    String?  @db.Text
-  timeLimit      Int?
-  questionCount  Int      @default(20)
-  passingScore   Float    @default(75)
-  format         Json     // { questionTypes: { MCQ: 70, OPEN: 30 }, sections: [{ name, weight }] }
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(cuid())
+  domainId      String
+  name          String
+  description   String?  @db.Text
+  timeLimit     Int?
+  questionCount Int      @default(20)
+  passingScore  Float    @default(75)
+  format        Json // { questionTypes: { MCQ: 70, OPEN: 30 }, sections: [{ name, weight }] }
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   domain       Domain        @relation(fields: [domainId], references: [id], onDelete: Cascade)
   examSessions ExamSession[]
@@ -764,25 +771,25 @@ model ExamSimulation {
 // ─── Exam Simulator models ───
 
 model ExamSession {
-  id            String    @id @default(cuid())
-  userId        String
-  domainId      String
-  formatId      String    // Links to ExamSimulation
-  mode          String    @default("PRACTICE") // "PRACTICE" | "REAL"
-  startedAt     DateTime  @default(now())
-  submittedAt   DateTime?
-  timeLimit     Int?      // Snapshot of time limit in minutes at start
-  score         Float?
-  passed        Boolean?
-  status        String    @default("IN_PROGRESS") // "IN_PROGRESS" | "COMPLETED" | "TIMED_OUT"
-  questionIds   Json      // Array of question IDs served
-  answers       Json?     // Array of { questionId, answer }
-  results       Json?     // { correct, incorrect, topics: { [topic]: { correct, total } }, timeTaken }
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id          String    @id @default(cuid())
+  userId      String
+  domainId    String
+  formatId    String // Links to ExamSimulation
+  mode        String    @default("PRACTICE") // "PRACTICE" | "REAL"
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+  timeLimit   Int? // Snapshot of time limit in minutes at start
+  score       Float?
+  passed      Boolean?
+  status      String    @default("IN_PROGRESS") // "IN_PROGRESS" | "COMPLETED" | "TIMED_OUT"
+  questionIds Json // Array of question IDs served
+  answers     Json? // Array of { questionId, answer }
+  results     Json? // { correct, incorrect, topics: { [topic]: { correct, total } }, timeTaken }
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  format       ExamSimulation  @relation(fields: [formatId], references: [id], onDelete: Cascade)
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  format       ExamSimulation    @relation(fields: [formatId], references: [id], onDelete: Cascade)
   certificates ExamCertificate[]
 
   @@index([userId, domainId])
@@ -796,7 +803,7 @@ model ExamCertificate {
   domainId    String
   score       Float
   generatedAt DateTime @default(now())
-  filePath    String   // e.g. "certificates/{userId}/{domainId}/{sessionId}.pdf"
+  filePath    String // e.g. "certificates/{userId}/{domainId}/{sessionId}.pdf"
 
   session ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -826,23 +833,23 @@ model Setting {
 // O bandă e "inițiată" pentru un user când există măcar un rând al ei aici;
 // flow-ul de inițiere scrie toate unitățile explicit (true/false).
 model CurriculumCheck {
-  id        String   @id @default(cuid())
-  userId    String
-  band      String   // SubjectBand din src/lib/curriculum.ts
-  unitKey   String   // CurriculumUnit.key — cheie stabilă, nu se redenumește fără migrare
+  id         String   @id @default(cuid())
+  userId     String
+  band       String // SubjectBand din src/lib/curriculum.ts
+  unitKey    String // CurriculumUnit.key — cheie stabilă, nu se redenumește fără migrare
   // Clasa declarată PENTRU banda asta. Ține anul per bandă, nu global: un cont
   // cu materii și de gimnaziu și de liceu (recuperare, meditator) ar face
   // altfel ping-pong — salvarea unei benzi ar "deziníția" cealaltă (finding
   // review 2026-08-24). User.schoolYear rămâne ultima clasă declarată (info).
   schoolYear Int
-  taught    Boolean
-  markedBy  String   @default("SELF") // SELF | GUARDIAN | INSTRUCTOR
+  taught     Boolean
+  markedBy   String   @default("SELF") // SELF | GUARDIAN | INSTRUCTOR
   // CINE anume a atins ultima oară rândul — id-ul actorului, nu doar rolul.
   // Fără el, "markedBy: INSTRUCTOR" pe o scriere cross-user nu spune CARE
   // dintre instructorii domeniului a modificat (finding review 2026-08-25).
   markedById String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -851,17 +858,17 @@ model CurriculumCheck {
 }
 
 model UserGamification {
-  id               String   @id @default(cuid())
+  id               String    @id @default(cuid())
   userId           String
   domainId         String
-  xp               Int      @default(0)
-  level            String   @default("Cadet")
-  streak           Int      @default(0)
-  longestStreak    Int      @default(0)
+  xp               Int       @default(0)
+  level            String    @default("Cadet")
+  streak           Int       @default(0)
+  longestStreak    Int       @default(0)
   lastActivityDate DateTime? // Date of last session completion (for streak calc)
-  achievements     Json     @default("[]") // Array of { slug, unlockedAt }
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  achievements     Json      @default("[]") // Array of { slug, unlockedAt }
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
@@ -875,9 +882,9 @@ model LeaderboardEntry {
   id        String   @id @default(cuid())
   userId    String
   domainId  String
-  groupId   String   // Enrollment group or class identifier
+  groupId   String // Enrollment group or class identifier
   xp        Int      @default(0)
-  week      Int      // ISO week number
+  week      Int // ISO week number
   year      Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -896,8 +903,8 @@ model DailyChallenge {
   date       DateTime @db.Date // One per domain per day
   createdAt  DateTime @default(now())
 
-  domain   Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
-  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  domain   Domain                  @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  question Question                @relation(fields: [questionId], references: [id], onDelete: Cascade)
   attempts DailyChallengeAttempt[]
 
   @@unique([domainId, date])
@@ -923,7 +930,7 @@ model LevelConfig {
   domainId String
   name     String // e.g. "Cadet", "Co-pilot", "Captain", "Instructor"
   minXp    Int
-  rank     Int    // ordering (1=lowest)
+  rank     Int // ordering (1=lowest)
 
   domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
 
@@ -953,18 +960,18 @@ model UserCalendar {
 }
 
 model StudySession {
-  id              String   @id @default(cuid())
-  userCalendarId  String
-  userId          String
-  domainId        String
-  title           String
-  description     String?  @db.Text
-  startTime       DateTime
-  endTime         DateTime
-  googleEventId   String?
-  calendarLink    String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(cuid())
+  userCalendarId String
+  userId         String
+  domainId       String
+  title          String
+  description    String?  @db.Text
+  startTime      DateTime
+  endTime        DateTime
+  googleEventId  String?
+  calendarLink   String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   userCalendar UserCalendar @relation(fields: [userCalendarId], references: [id], onDelete: Cascade)
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -1003,16 +1010,16 @@ model GroupMember {
 }
 
 model InstructorGoal {
-  id          String   @id @default(cuid())
+  id           String    @id @default(cuid())
   instructorId String
-  studentId   String
-  domainId    String
-  title       String
-  description String?  @db.Text
-  targetDate  DateTime?
-  isCompleted Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  studentId    String
+  domainId     String
+  title        String
+  description  String?   @db.Text
+  targetDate   DateTime?
+  isCompleted  Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   instructor User   @relation("GoalInstructor", fields: [instructorId], references: [id], onDelete: Cascade)
   student    User   @relation("GoalStudent", fields: [studentId], references: [id], onDelete: Cascade)
@@ -1040,19 +1047,19 @@ model InstructorMessage {
 }
 
 model EscalationThreshold {
-  id           String @id @default(cuid())
+  id           String    @id @default(cuid())
   instructorId String
   studentId    String
   domainId     String
   metric       String // streak, score, session_missed
-  operator     String @default("lt") // lt, gt, eq
+  operator     String    @default("lt") // lt, gt, eq
   value        Int
-  action       String @default("notify_instructor") // notify_instructor, notify_watcher
-  isActive     Boolean @default(true)
+  action       String    @default("notify_instructor") // notify_instructor, notify_watcher
+  isActive     Boolean   @default(true)
   // Dedup for the cron evaluator: a breached threshold fires at most once per day.
   lastFiredOn  DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   instructor User   @relation("ThresholdInstructor", fields: [instructorId], references: [id], onDelete: Cascade)
   student    User   @relation("ThresholdStudent", fields: [studentId], references: [id], onDelete: Cascade)
@@ -1065,7 +1072,7 @@ model DashboardAnalytics {
   id          String   @id @default(cuid())
   studentId   String
   domainId    String
-  metric      String   // progress, weak_areas, predictive_failure
+  metric      String // progress, weak_areas, predictive_failure
   value       Json
   generatedAt DateTime @default(now())
 
@@ -1084,16 +1091,16 @@ enum PlanInterval {
 }
 
 model SubscriptionPlan {
-  id          String       @id @default(cuid())
-  name        String
-  stripeId    String       @unique
-  price       Int          // Cents (e.g., 999 = $9.99)
-  interval    PlanInterval
-  trialDays   Int?
-  features    Json?        // Array of feature strings
-  isActive    Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id        String       @id @default(cuid())
+  name      String
+  stripeId  String       @unique
+  price     Int // Cents (e.g., 999 = $9.99)
+  interval  PlanInterval
+  trialDays Int?
+  features  Json? // Array of feature strings
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   // Family-plan seat composition (replaces fragile name-string derivation in
   // src/lib/family.ts). All nullable + additive: a null familyPlanKey means
@@ -1112,8 +1119,8 @@ model SubscriptionPlan {
 model Voucher {
   id              String    @id @default(cuid())
   code            String    @unique
-  discountPercent Int       // 0-100
-  maxUses         Int?      // Null = unlimited
+  discountPercent Int // 0-100
+  maxUses         Int? // Null = unlimited
   usedCount       Int       @default(0)
   expiresAt       DateTime?
   createdById     String
@@ -1124,27 +1131,27 @@ model Voucher {
 }
 
 model AdPlacement {
-  id        String   @id @default(cuid())
-  name      String
-  slot      String   // "homepage_banner", "exam_sidebar", "dashboard_top"
-  imageUrl  String?
-  clickUrl  String?
-  priority  Int      @default(0)
-  isActive  Boolean  @default(true)
-  impressions Int    @default(0)
-  clicks    Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  slot        String // "homepage_banner", "exam_sidebar", "dashboard_top"
+  imageUrl    String?
+  clickUrl    String?
+  priority    Int      @default(0)
+  isActive    Boolean  @default(true)
+  impressions Int      @default(0)
+  clicks      Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model AdminAuditLog {
-  id             String   @id @default(cuid())
-  action         String   // "IMPERSONATE", "BAN_USER", "UNBAN_USER", "GENERATE_VOUCHER", "ROLE_CHANGE"
-  targetUserId   String?
-  targetType     String?  // "User", "Voucher", "Ad", "Plan"
-  metadata       Json?
-  performedById  String
-  createdAt      DateTime @default(now())
+  id            String   @id @default(cuid())
+  action        String // "IMPERSONATE", "BAN_USER", "UNBAN_USER", "GENERATE_VOUCHER", "ROLE_CHANGE"
+  targetUserId  String?
+  targetType    String? // "User", "Voucher", "Ad", "Plan"
+  metadata      Json?
+  performedById String
+  createdAt     DateTime @default(now())
 
   performedBy User @relation("AuditPerformer", fields: [performedById], references: [id], onDelete: Cascade)
 
@@ -1153,18 +1160,18 @@ model AdminAuditLog {
 }
 
 model Payment {
-  id               String   @id @default(cuid())
-  userId           String
-  planId           String?
-  stripeSessionId  String?  @unique
-  stripeInvoiceId  String?
-  stripeEventId    String?  @unique // broker callback eventId (Stripe event.id) — dedups renewals on retry
-  amount           Int      // Cents
-  currency         String   @default("usd")
-  status           String   // "pending", "succeeded", "failed", "refunded"
-  type             String   // "subscription", "one_time"
-  metadata         Json?
-  createdAt        DateTime @default(now())
+  id              String   @id @default(cuid())
+  userId          String
+  planId          String?
+  stripeSessionId String?  @unique
+  stripeInvoiceId String?
+  stripeEventId   String?  @unique // broker callback eventId (Stripe event.id) — dedups renewals on retry
+  amount          Int // Cents
+  currency        String   @default("usd")
+  status          String // "pending", "succeeded", "failed", "refunded"
+  type            String // "subscription", "one_time"
+  metadata        Json?
+  createdAt       DateTime @default(now())
 
   user User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan SubscriptionPlan? @relation(fields: [planId], references: [id])
@@ -1177,11 +1184,11 @@ model Payment {
 model EscalationTemplate {
   id          String   @id @default(cuid())
   language    String   @default("ro") // ISO 639-1
-  channel     String   // "whatsapp", "sms", "push", "email"
-  triggerType String   // "missed_session", "low_score", "inactivity", "streak_lost"
+  channel     String // "whatsapp", "sms", "push", "email"
+  triggerType String // "missed_session", "low_score", "inactivity", "streak_lost"
   templateId  String   @unique // Matches escalation config templateId
   content     String   @db.Text
-  variables   Json?    // Array of variable names: ["userName", "streakDays", ...]
+  variables   Json? // Array of variable names: ["userName", "streakDays", ...]
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -1220,12 +1227,12 @@ model Course {
 
 /// One module of a course: the unit a learner finishes before the next one.
 model CourseModule {
-  id        String   @id @default(cuid())
-  courseId  String
+  id            String   @id @default(cuid())
+  courseId      String
   /// 1-based position. Unique per course, so two modules cannot claim the same seat.
-  order     Int
-  title     String
-  summary   String?  @db.Text
+  order         Int
+  title         String
+  summary       String?  @db.Text
   /// The value of `Question.topic` that belongs to this module.
   ///
   /// Stored rather than inferred from the title. The practice engine already
@@ -1235,8 +1242,8 @@ model CourseModule {
   /// stray diacritic, and the module's test silently returns nothing. Written
   /// once, at creation, by whoever writes both sides.
   questionTopic String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lessons Lesson[]
@@ -1269,7 +1276,6 @@ model Lesson {
 
   @@index([domainId, subject, topic])
   @@index([isPublished])
-
   @@index([moduleId, order])
 }
 
@@ -1296,14 +1302,14 @@ enum AssessmentLevel {
 }
 
 model Assessment {
-  id        String          @id @default(cuid())
-  userId    String
-  domainId  String
-  score     Int             // Number of correct answers out of total
-  total     Int             @default(10) // Number of questions
-  level     AssessmentLevel @default(BEGINNER)
-  answers   Json?           // Array of { questionId, answer, isCorrect }
-  takenAt   DateTime        @default(now())
+  id       String          @id @default(cuid())
+  userId   String
+  domainId String
+  score    Int // Number of correct answers out of total
+  total    Int             @default(10) // Number of questions
+  level    AssessmentLevel @default(BEGINNER)
+  answers  Json? // Array of { questionId, answer, isCorrect }
+  takenAt  DateTime        @default(now())
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
@@ -1314,22 +1320,22 @@ model Assessment {
 // ─── Bibliography (required by law) ───
 
 model Bibliography {
-  id          String   @id @default(cuid())
-  domainId    String
-  title       String   // Title of the work
-  authors     String   // Comma-separated author names
-  publisher   String?  // Editura
-  year        Int?     // Year of publication
-  edition     String?  // e.g., "Ediția 4, revizuită și adăugită"
-  city        String?  // Place of publication
-  isbn        String?
-  url         String?  // For online sources
-  notes       String?  @db.Text // Additional info (pages, chapters covered, etc.)
-  order       Int      @default(0) // Display order
-  status      String   @default("DRAFT") // DRAFT, APPROVED, PUBLISHED
-  createdBy   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  domainId  String
+  title     String // Title of the work
+  authors   String // Comma-separated author names
+  publisher String? // Editura
+  year      Int? // Year of publication
+  edition   String? // e.g., "Ediția 4, revizuită și adăugită"
+  city      String? // Place of publication
+  isbn      String?
+  url       String? // For online sources
+  notes     String?  @db.Text // Additional info (pages, chapters covered, etc.)
+  order     Int      @default(0) // Display order
+  status    String   @default("DRAFT") // DRAFT, APPROVED, PUBLISHED
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
 
@@ -1355,17 +1361,17 @@ model PushSubscription {
 // Educators apply to add content + earn perpetual commissions. NOT a payment
 // record — pure lead. The commission/Stripe-Connect product is a later phase.
 model CreatorWaitlist {
-  id         String   @id @default(cuid())
-  name       String
-  email      String   @unique
-  track      String   @default("") // "Pregătire pentru" (ex: Bacalaureat, Drept INM/Barou)
-  subject    String   // materia concretă (ex: Limba și literatura română, Matematică)
-  experience String?  @db.Text
-  cvPath     String?  // fișier CV încărcat (cale pe server)
-  needsTaxHelp Boolean @default(false) // a bifat „am nevoie de sprijin în fiscalitate”
-  locale     String   @default("ro")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  track        String   @default("") // "Pregătire pentru" (ex: Bacalaureat, Drept INM/Barou)
+  subject      String // materia concretă (ex: Limba și literatura română, Matematică)
+  experience   String?  @db.Text
+  cvPath       String? // fișier CV încărcat (cale pe server)
+  needsTaxHelp Boolean  @default(false) // a bifat „am nevoie de sprijin în fiscalitate”
+  locale       String   @default("ro")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([track, subject])
   @@index([subject])
@@ -1425,15 +1431,15 @@ model ReferralEarning {
 // include correctIndex but are only served stripped via the public fetch endpoint;
 // scoring is done server-side. TTL via expiresAt (cleaned lazily / by cron later).
 model MagicQuiz {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   questions   Json // MagicQuestion[] (content, options, correctIndex, explanation)
-  language    String    @default("ro")
+  language    String   @default("ro")
   creatorName String? // optional display name of the sharer
   sharerScore Int // the creator's own score
   total       Int // number of questions
-  takenCount  Int       @default(0) // how many friends took the duel
+  takenCount  Int      @default(0) // how many friends took the duel
   userId      String? // set on lazy-save when the creator signs up
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime @default(now())
   expiresAt   DateTime // soft TTL (e.g. createdAt + 90d)
 
   user User? @relation("UserMagicQuizzes", fields: [userId], references: [id], onDelete: SetNull)
@@ -1539,11 +1545,11 @@ model ExamAttempt {
 // (nu atingem modelul User). Domeniul țintă e cel restricționat "licenta-rares".
 model LicentaDocument {
   id                String   @id @default(cuid())
-  userId            String   // studentul pentru care e materialul (Rareș)
-  domainId          String   // domeniul restricționat licenta-rares
+  userId            String // studentul pentru care e materialul (Rareș)
+  domainId          String // domeniul restricționat licenta-rares
   title             String
   filePath          String
-  fileType          String   // pdf | docx | txt
+  fileType          String // pdf | docx | txt
   totalPassages     Int      @default(0)
   processedPassages Int      @default(0)
   questionCount     Int      @default(0)
@@ -1598,31 +1604,31 @@ model ParentNudge {
 // ce e în neregulă; agentul cron îl verifică + corectează/ascunde + notifică.
 // Fără FK pe User (nu atingem modelul User).
 model QuestionFeedback {
-  id         String   @id @default(cuid())
-  questionId String
-  userId     String
-  sessionId  String?
-  rating     String // "up" | "down"
-  comment    String?  @db.Text
-  status     String   @default("new") // new | resolved
-  resolution String?  @db.Text // decizia agentului
+  id              String    @id @default(cuid())
+  questionId      String
+  userId          String
+  sessionId       String?
+  rating          String // "up" | "down"
+  comment         String?   @db.Text
+  status          String    @default("new") // new | resolved
+  resolution      String?   @db.Text // decizia agentului
   // Structured decision (so an admin can understand + override it, not just read prose).
   reviewAction    String? // corrected | hidden | flagged | dismissed | overridden
-  reviewIssue     String? @db.Text // the problem the reviewer identified
+  reviewIssue     String?   @db.Text // the problem the reviewer identified
   correctedAnswer String? // the answer the reviewer set, when action=corrected
   /// Verdictul OMULUI asupra reclamatiei elevului: "approved" (avea dreptate) sau
   /// "rejected" (nu avea). Distinct de `reviewAction`, care e decizia masinii.
-  adminVerdict   String?
+  adminVerdict    String?
   /// Raspunsul scris de admin catre elev. Un verdict fara explicatie e exact
   /// ce a primit elevul de cinci ori cat timp avea dreptate.
-  adminReply     String?   @db.Text
-  adminRepliedAt DateTime?
+  adminReply      String?   @db.Text
+  adminRepliedAt  DateTime?
   // Admin override of the reviewer's decision. Fără FK pe User (nu atingem modelul User).
-  overriddenById String?
-  overrideNote   String?   @db.Text
-  overriddenAt   DateTime?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  overriddenById  String?
+  overrideNote    String?   @db.Text
+  overriddenAt    DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@unique([userId, questionId])
   @@index([status, rating])
