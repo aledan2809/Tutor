@@ -229,18 +229,24 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
           // Ce ia un elev care nu citește deloc. Măsurat pe familia întreagă de
           // indicii, fiindcă fiecare filtru pe o singură unitate mută defectul în
           // vecina ei — caractere → cuvinte → virgule, de trei ori la rând.
-          const baseline = measureGuessBaseline(survivors);
+          //
+          // Amestecăm ÎNTÂI, apoi măsurăm. Altfel raportul descrie ordinea în care
+          // a scris modelul — care pune de regulă răspunsul primul — nu ce ajunge
+          // în bancă: pe demo-ul Poșta a strigat „100% alegând mereu poziția 1"
+          // pentru un lot ale cărui poziții stocate erau 4/0/2/1.
+          const deStocat = survivors.map((q) => ({ ...q, options: shuffleOptions(q.options, q.correctAnswer) }));
+          const baseline = measureGuessBaseline(deStocat);
           row.note += " " + describeGuessBaseline(baseline);
 
           await prisma.question.createMany({
-            data: survivors.map((q) => ({
+            data: deStocat.map((q) => ({
               domainId: course.domain.id,
               subject: course.title,
               topic,
               difficulty,
               type: "MULTIPLE_CHOICE" as const,
               content: q.content,
-              options: shuffleOptions(q.options, q.correctAnswer),
+              options: q.options,
               correctAnswer: q.correctAnswer,
               explanation: q.explanation ?? null,
               source: "AI_GENERATED" as const,
@@ -248,7 +254,7 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
               createdById: userId,
             })),
           });
-          row.kept = survivors.length;
+          row.kept = deStocat.length;
         }
       } else {
         row.rejected = cued + duplicates;
