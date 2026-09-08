@@ -51,3 +51,6 @@ scripts/_rollback/
 
 # cache generat de e2e-audit-runner
 .e2e-plugin-cache.json
+
+# Starea demo-ului Poșta: conține codurile de acces ale materiilor private.
+scripts/data/posta-demo.state.json

@@ -18,7 +18,7 @@
  * Cere în mediu: TUTOR_BASE_URL (implicit https://etutor.ro),
  * TUTOR_SUPERADMIN_EMAIL, TUTOR_SUPERADMIN_PASSWORD.
  */
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -28,6 +28,19 @@ const APPLY = process.argv.includes("--apply");
 const WITH_QUESTIONS = process.argv.includes("--questions");
 const WITH_PUBLISH = process.argv.includes("--publish");
 const DATA = join(HERE, "data", "posta-demo.json");
+/**
+ * Ce s-a creat deja. Ruta de import creează un curs NOU la fiecare apel — fără
+ * fișierul ăsta, a doua rulare dublează cursurile (pățit 2026-09-08). Tot de aici
+ * se știe că materia are deja un cod în circulație, ca o re-rulare să nu-l rotească
+ * și să nu lase oamenii pe dinafară.
+ */
+const STATE = join(HERE, "data", "posta-demo.state.json");
+// --only <slug>: o singură materie per proces, ca generarea grilelor (lentă, fiecare
+// grilă trece prin judecător) să poată rula pe cele trei materii în paralel.
+const ONLY = (() => {
+  const i = process.argv.indexOf("--only");
+  return i > 0 ? process.argv[i + 1] : null;
+})();
 
 let cookie = "";
 
@@ -70,6 +83,8 @@ async function login() {
 
 async function main() {
   const plan = JSON.parse(readFileSync(DATA, "utf8"));
+  if (ONLY) plan.domains = plan.domains.filter((d) => d.slug === ONLY);
+  if (!plan.domains.length) throw new Error(`Nicio materie pentru --only ${ONLY}`);
   console.log(`${APPLY ? "EXECUȚIE" : "SIMULARE"} pe ${BASE}`);
   console.log(`  organizație: ${plan.organization.name} (${plan.organization.slug})`);
   for (const d of plan.domains) {
@@ -79,6 +94,7 @@ async function main() {
   }
   if (!APPLY) { console.log("\nNimic scris. Rulează cu --apply."); return; }
 
+  const state = existsSync(STATE) ? JSON.parse(readFileSync(STATE, "utf8")) : {};
   const who = await login();
   console.log(`autentificat: ${who}`);
 
@@ -114,23 +130,37 @@ async function main() {
       body: JSON.stringify({ action: "assignDomains", domainIds: [dom.id] }),
     });
 
-    // 4. Cursul, importat ca ciornă.
+    // 4. Cursul, importat ca ciornă — o singură dată. Ruta creează un curs nou la
+    //    fiecare apel, deci refolosim ce s-a creat prima oară.
+    let slug = state[d.slug]?.curs;
+    if (slug) {
+      console.log(`  = curs ${slug} (exista)`);
+    } else {
     const imp = await call("/api/admin/courses/generate", {
       method: "POST",
       body: JSON.stringify({ action: "import", domainId: dom.id, title: d.course.title, description: d.course.description, modules: d.course.modules }),
     });
     if (imp.status >= 300) throw new Error(`curs ${d.slug}: ${imp.status} ${JSON.stringify(imp.body).slice(0, 300)}`);
-    const slug = imp.body.course?.slug || imp.body.slug;
-    console.log(`  + curs ${slug}`);
+      slug = imp.body.course?.slug || imp.body.slug;
+      console.log(`  + curs ${slug}`);
+    }
 
-    // 5. Codul de acces: 30 de zile, număr limitat de folosiri.
-    const jc = await call(`/api/admin/domains/${dom.id}/join-code`, {
-      method: "POST",
-      body: JSON.stringify({ action: "rotate", expiresInDays: d.joinCode?.expiresInDays ?? 30, maxUses: d.joinCode?.maxUses ?? 50 }),
-    });
-    const cod = jc.body?.display || jc.body?.joinCode;
-    console.log(`  + cod ${cod}`);
+    // 5. Codul de acces: 30 de zile, număr limitat de folosiri. Se emite o singură
+    //    dată — o rotire ar invalida codurile deja împărțite oamenilor.
+    let cod = state[d.slug]?.cod;
+    if (cod) {
+      console.log(`  = cod ${cod} (emis deja)`);
+    } else {
+      const jc = await call(`/api/admin/domains/${dom.id}/join-code`, {
+        method: "POST",
+        body: JSON.stringify({ action: "rotate", expiresInDays: d.joinCode?.expiresInDays ?? 30, maxUses: d.joinCode?.maxUses ?? 50 }),
+      });
+      cod = jc.body?.display || jc.body?.joinCode;
+      console.log(`  + cod ${cod}`);
+    }
 
+    state[d.slug] = { domainId: dom.id, curs: slug, cod };
+    writeFileSync(STATE, JSON.stringify(state, null, 1));
     rezultat.push({ materie: d.slug, domainId: dom.id, curs: slug, cod });
 
     // 6. Grilele — opțional, e partea lentă (fiecare grilă trece prin judecător).
