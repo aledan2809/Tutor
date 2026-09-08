@@ -12,6 +12,7 @@ import { withErrorHandler } from "@/lib/api-handler";
 import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import { bandForDomainSlug } from "@/lib/curriculum";
 import { visibleTopicsFor } from "@/lib/curriculum-service";
+import { courseTopicsFor } from "@/lib/course-topics";
 import { LICENTA_DOMAIN_SLUG } from "@/lib/licenta-constants";
 import {
   SPRINT_DOMAIN_SLUG,
@@ -150,6 +151,7 @@ async function _POST(
   // în UI ÎNAINTE de orice test pe anul curent. Fără inițiere → 409 cu semnal
   // explicit; UI-ul deschide flow-ul, nu pornește sesiunea.
   let topicIn: string[] | null = null;
+  let gateKind: "curriculum" | "course" | null = null;
   if (bandForDomainSlug(domainSlug)) {
     topicIn = await visibleTopicsFor(session.user.id, domainSlug);
     if (topicIn === null) {
@@ -160,6 +162,18 @@ async function _POST(
         },
         { status: 409 }
       );
+    }
+    gateKind = "curriculum";
+  } else {
+    // ── Aceeași poartă, pentru materiile cu curs ──
+    // Cerință user (2026-09-08): „se testează doar din materia învățată", cu
+    // analogia elevului de clasa a VIII-a. La un curs nu se bifează nimic de mână:
+    // se citește din `LessonProgress`, pe care cititorul de lecții îl scrie singur.
+    // `null` = materia n-are curs publicat → nicio schimbare față de înainte.
+    const courseTopics = await courseTopicsFor(session.user.id, domain.id);
+    if (courseTopics !== null) {
+      topicIn = courseTopics;
+      gateKind = "course";
     }
   }
 
@@ -177,6 +191,17 @@ async function _POST(
   if (questions.length === 0) {
     // Cu poartă activă, sesiunea goală înseamnă "nimic bifat încă" — mesajul
     // trimite la checklist, nu pretinde că banca e goală.
+    if (gateKind === "course") {
+      // Nu e o bancă goală, e un curs necitit: mesajul trimite la lecții.
+      return NextResponse.json(
+        {
+          error: "No questions in completed modules",
+          emptyBecauseCourse: true,
+          hint: "Termină o lecție ca să se deschidă testul modulului ei.",
+        },
+        { status: 409 }
+      );
+    }
     if (topicIn !== null) {
       return NextResponse.json(
         {
