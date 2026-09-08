@@ -42,6 +42,19 @@ const ONLY = (() => {
   return i > 0 ? process.argv[i + 1] : null;
 })();
 
+/**
+ * Generarea grilelor durează ~19 minute pe modul (fiecare grilă trece prin judecător,
+ * apoi prin al doilea judecător care nu vede enunțul). Două ceasuri taie apelul înainte:
+ * nginx la 300s (de-asta se rulează pe VPS, direct pe :3013) și `fetch` din Node, care
+ * are tot 300s pe antete și corp — de acolo venea „fetch failed". Aici se scot amândouă.
+ */
+try {
+  const { Agent, setGlobalDispatcher } = await import("undici");
+  setGlobalDispatcher(new Agent({ headersTimeout: 0, bodyTimeout: 0, connectTimeout: 30_000 }));
+} catch {
+  console.warn("  (undici indisponibil — apelurile lungi pot cădea la 300s)");
+}
+
 let cookie = "";
 
 async function call(path, init = {}) {
@@ -176,7 +189,7 @@ async function main() {
 
     // 7. Publicarea — curs + lecții + grile, într-un singur pas reversibil.
     if (WITH_PUBLISH) {
-      const p = await call(`/api/admin/courses/${slug}/publish`, { method: "POST", body: JSON.stringify({ action: "publish" }) });
+      const p = await call(`/api/admin/courses/${slug}/publish`, { method: "POST", body: JSON.stringify({ publish: true, includeQuestions: true }) });
       console.log(`    publicare: ${p.status} ${JSON.stringify(p.body?.published ?? p.body).slice(0, 160)}`);
     }
   }

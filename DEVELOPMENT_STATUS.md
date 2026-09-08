@@ -4,6 +4,50 @@ Last Updated: 2026-09-08 (cursul publicat pentru agenți; limba curățată în 
 <!-- anterior: 2026-09-01 (treapta Telegram din cascadă -->
 <!--  — sărită tăcut pentru TOȚI utilizatorii; reparată, deployată, verificată pe date de producție) -->
 
+## Current State (Sesiunea 2026-09-08 b — demo Poșta Română)
+
+Cerut: o demonstrație de vânzare pentru Poșta Română — prezentarea aplicației, trei
+materiale cu lecții și grile pe roluri, și o pagină separată la `etutor.ro/posta`.
+Aprobate toate trei.
+
+### Ce e livrat
+- **`etutor.ro/posta` — LIVE.** Antet propriu (SiteHeader trimite spre „Ești ELEV /
+  PĂRINTE / PROFESOR", ceea ce la un client instituțional sună a altă adresă), casetă
+  vizibilă „conținut simulat", cele trei trasee, autentificare. `/posta` a cerut o linie
+  în matcher-ul middleware-ului: fără ea răspundea 404, ca `/elev` sau `/preturi`.
+- **Prezentarea** ca pagină de trimis pe mail, cu capitol „Ce nu promitem". Argumentul
+  central e o frază din propriul lor raport de activitate (ianuarie 2025), la investiții:
+  „achiziționarea unei platforme de training online prin care toți salariații Companiei
+  își completează cunoștințele". Au decis deja că le trebuie; noi venim cu ea plină.
+- **Trei cursuri**, câte o materie privată per rol (factor / ghișeu / oficiu), 9 lecții de
+  ~1.120 de cuvinte, fiecare cu ipotezele marcate vizibil în text ca linii de contract.
+
+### Cum s-au scris
+Trei treceri: recunoaștere pe surse publice (149 de constatări, marcate verificat /
+plauzibil / presupunere) → schiță per rol, criticată din trei unghiuri (omul de la Poștă,
+decidentul, verificatorul de fapte) → scriere + verificare per lecție. **382 de constatări,
+213 aplicate, 65 respinse motivat.** Criticii au tăiat comparația cu un curier privat pe
+reclamații (cifrele ANCOM nu sunt raportate la volum), trimiterea la dosare penale și un
+anti-exemplu din presă; au adăugat ce faci fără semnal, câinele liber și omul agresiv, și
+costul în timp spus pe față.
+
+### Trei lucruri prinse pe drum
+- **Ruta de import creează un curs NOU la fiecare apel** — prima re-rulare a dublat
+  cursurile pe toate trei materiile. Curățate; seeder-ul ține acum minte ce a creat
+  (`posta-demo.state.json`, gitignorat: conține codurile de acces).
+- **`courseTopicsFor` ia doar primul curs publicat al unei materii.** De-asta demo-ul are
+  o materie per rol. Notat în TODO ca defect propriu.
+- **Rutele cu `domainId` răspund 403, nu 404, pe o materie privată** — deci confirmă că
+  există. Pe slug răspund corect 404, identic cu o materie inexistentă (verificat pe
+  producție). Cuid-ul nu se ghicește, deci secretul practic ține, dar cele două căi ar
+  trebui să răspundă la fel. Notat în TODO.
+
+### Deschis
+Generarea grilelor rulează **pe VPS, direct pe :3013** — prin nginx nu se poate: un modul
+de 8 grile ia ~19 minute, iar `proxy_read_timeout` e 300s (504 la prima încercare).
+
+Raport complet: `Reports/POSTA-DEMO-2026-09-08.md`.
+
 ## Current State (Sesiunea 2026-09-08 — cursul publicat, limba curățată, incident de infrastructură)
 
 ### Cursul „Agent imobiliar" e publicat și funcționează
