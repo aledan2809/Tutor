@@ -101,6 +101,36 @@ Credențialele contului demo și codurile: `Master/credentials/tutor-test-users.
 
 ---
 
+## Grilele — ce a ieșit și ce a arătat despre platformă
+
+| materie | grile publicate | pe module |
+|---|---|---|
+| `posta-factor` | 24 | 13 / 6 / 5 |
+| `posta-oficiu` | 11 | 7 / 3 / 1 |
+| `posta-ghiseu` | 10 | 5 / 5 / 0 |
+
+Măsurat pe toate: **zero indicii de lungime**, iar ghicitul fără citire rămâne la nivelul
+întâmplării (25%) — cea mai bună strategie oarbă scoate 9-17%, adică sub întâmplare. Fiecare grilă
+a trecut prin judecătorul de corectitudine, filtrul determinist de indicii și al doilea judecător
+care nu vede enunțul.
+
+**Defect al platformei, găsit aici și reparat** (`67af18b`): judecătorii cer, în propriul lor
+prompt, ca răspunsul să fie *derivabil din sursă*, iar structura are de mult câmpul `sourceText` —
+dar poarta nu îl completa niciodată. La matematică de bacalaureat nu se vede, cunoștințele generale
+ajung; la un curs despre practica de la ghișeu se vede imediat: o afirmație corectă, luată din
+propria noastră lecție, e respinsă ca „factual unverifiable". Ruta are lecția în mână — o trimite
+acum și judecătorului. Aditiv; testul pică dacă cineva scoate transmiterea (probat cu mutație).
+
+**Ce rămâne inegal:** modulele 2-3 de la ghișeu și oficiu au puține grile. Cauza măsurată nu e
+poarta, ci generarea: rulate în paralel, cursurile primesc 2-4 candidate în loc de 8 (factorul, care
+a rulat singur, a primit 8 pe modul). Se completează rulând `--questions` din nou, **o materie o
+dată** — fiecare trecere adaugă până la pragul de 8.
+
+**Cinci enunțuri reformulate manual**: întrebau despre text („ce recomandă materialul"), nu despre
+meserie. Variantele și răspunsul corect neatinse, deci corectitudinea nu s-a mișcat.
+
+---
+
 ## Verificat pe producție
 
 - `etutor.ro/posta` → 307 → `/ro/posta` → 200; `/en/posta` → 200. Restul site-ului neatins.
