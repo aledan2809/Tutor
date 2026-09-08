@@ -106,8 +106,8 @@ Credențialele contului demo și codurile: `Master/credentials/tutor-test-users.
 | materie | grile publicate | pe module |
 |---|---|---|
 | `posta-factor` | 24 | 13 / 6 / 5 |
-| `posta-oficiu` | 11 | 7 / 3 / 1 |
-| `posta-ghiseu` | 10 | 5 / 5 / 0 |
+| `posta-oficiu` | 19 | 7 / 5 / 7 |
+| `posta-ghiseu` | 17 | 6 / 7 / 4 |
 
 Măsurat pe toate: **zero indicii de lungime**, iar ghicitul fără citire rămâne la nivelul
 întâmplării (25%) — cea mai bună strategie oarbă scoate 9-17%, adică sub întâmplare. Fiecare grilă
@@ -121,10 +121,16 @@ ajung; la un curs despre practica de la ghișeu se vede imediat: o afirmație co
 propria noastră lecție, e respinsă ca „factual unverifiable". Ruta are lecția în mână — o trimite
 acum și judecătorului. Aditiv; testul pică dacă cineva scoate transmiterea (probat cu mutație).
 
-**Ce rămâne inegal:** modulele 2-3 de la ghișeu și oficiu au puține grile. Cauza măsurată nu e
-poarta, ci generarea: rulate în paralel, cursurile primesc 2-4 candidate în loc de 8 (factorul, care
-a rulat singur, a primit 8 pe modul). Se completează rulând `--questions` din nou, **o materie o
-dată** — fiecare trecere adaugă până la pragul de 8.
+**Cauza inegalității, măsurată:** rulate în paralel, cursurile primesc 2-4 candidate în loc de 8
+(factorul, care a rulat singur, a primit 8 pe modul). Rulat câte o materie o dată, ghișeul și
+oficiul au ajuns la 17 și 19. Se completează la fel: `--questions` din nou, **o materie o dată**.
+
+**Al doilea defect al platformei, găsit tot aici** (`f159ec3`): raportul a strigat „un elev care nu
+citește ia 100%, alegând mereu poziția 1" pentru un lot ale cărui poziții STOCATE erau 4/0/2/1.
+Măsurătoarea rula pe lotul dinaintea amestecării, iar modelul pune de regulă răspunsul corect
+primul. Avertismentul fals e cazul bun; cel rău e simetric — măsurând altceva decât ce se salvează,
+un indiciu real din lotul stocat rămâne nevăzut. Acum se amestecă întâi și se măsoară pe exact ce
+intră în bancă.
 
 **Cinci enunțuri reformulate manual**: întrebau despre text („ce recomandă materialul"), nu despre
 meserie. Variantele și răspunsul corect neatinse, deci corectitudinea nu s-a mișcat.
