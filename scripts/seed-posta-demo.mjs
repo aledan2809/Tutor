@@ -183,7 +183,10 @@ async function main() {
           method: "POST",
           body: JSON.stringify({ perModule: d.course.perModule ?? 8, moduleOrders: [m.order], existingPolicy: "topUp" }),
         });
-        console.log(`    grile M${m.order}: ${q.status} ${JSON.stringify(q.body?.summary ?? q.body).slice(0, 160)}`);
+        // raportul spune de ce a fost respinsă fiecare grilă — tăiat la 160 de caractere,
+        // exact partea aia se pierdea
+        const rap = q.body?.report?.[0];
+        console.log(`    grile M${m.order}: ${q.status} ${rap ? `păstrate=${rap.kept} respinse=${rap.rejected} · ${rap.note ?? ""}` : JSON.stringify(q.body).slice(0, 300)}`);
       }
     }
 
