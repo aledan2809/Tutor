@@ -1,8 +1,89 @@
 # Project Status - Tutor
-Last Updated: 2026-09-07 (cele 5 gap-uri de audit — toate închise și verificate pe producție)
+Last Updated: 2026-09-08 (cursul publicat pentru agenți; limba curățată în trei treceri; incident disc+memorie pe VPS2)
 <!-- anterior: 2026-09-03 (conținutul memento-ului Telegram reparat; incident 502 provocat de mine, remediat în ~4 min) -->
 <!-- anterior: 2026-09-01 (treapta Telegram din cascadă -->
 <!--  — sărită tăcut pentru TOȚI utilizatorii; reparată, deployată, verificată pe date de producție) -->
+
+## Current State (Sesiunea 2026-09-08 — cursul publicat, limba curățată, incident de infrastructură)
+
+### Cursul „Agent imobiliar" e publicat și funcționează
+8 lecții + 56 de grile, toate publicate; materia rămâne **privată** (poarta dă 404
+oricui nu e înscris). Cod de acces emis: 25 de folosiri, expiră 07.10.2026.
+Verificat pe producție ca agent real: neînscris → 404 · intră cu codul → rol elev ·
+deschide lecția · pornește testul.
+
+Trei goluri prinse de proba de la capăt la capăt, nu de citit codul:
+- nu exista rută de publicare a unui curs (`a78d185`)
+- `/dashboard/lessons` era în afara oricărui meniu — lecții publicate fără ușă (`b0a9351`)
+- poarta de abonament rula ÎNAINTE de a ști despre ce materie e vorba, deci un agent
+  înscris de firmă primea 403 „face parte dintr-un pachet" (`9ac59ad`)
+
+### Testezi doar din ce ai parcurs (`5874365`)
+Cerință user, cu analogia elevului de clasa a VIII-a. Poarta exista pentru materiile
+școlare (bifare manuală); la cursuri se citește din `LessonProgress`, pe care
+cititorul de lecții îl scrie singur. Verificat live: fără nicio lecție terminată →
+„Termină o lecție ca să se deschidă testul modulului ei"; după lecția 1 → 7 întrebări,
+doar din „Fundamentele meseriei". Regula e pură și refolosibilă.
+
+### Limba — trei metode, fiindcă primele două n-au fost destule
+Userul a semnalat „mandat" (calc după *mandate*). Ce a urmat:
+1. **verificare pe categorii** (calc/jargon/frază neclară): 86 ridicate, 39 confirmate
+2. **măturare obiectivă** — fiecare cuvânt care arată englezește, scos automat cu
+   context, fără ca ceva să decidă singur ce contează. A găsit ce ratase prima:
+   `prescoring` folosit de 3 ori și explicat de 0 ori, `listing` în 4 locuri, `per lead`
+3. **citire ca începător** — agenți care nu vânează categorii, ci citesc ca un om de 34
+   de ani venit din vânzări de piese auto și notează unde se împiedică. A găsit clasa
+   pe care celelalte două n-o pot vedea: „înțeleg cuvintele, dar nu știu ce e asta" —
+   `antecontract` folosit din modulul 1 și explicat abia în 7, cifre care pică din cer,
+   „zona aia" folosit cu alt sens decât „zonă" în restul lecției
+
+A treia trecere s-a încheiat cu **80 de locuri ridicate, 43 confirmate după verificare
+adversarială, toate aplicate** (34 de editări — mai multe constatări cădeau pe aceeași
+frază și au fost unite). Cele mai grele: `antecontract` și `cartea funciară` explicate
+acum la prima folosire, nu în modulul 7; cheltuielile de la notar defalcate cu cine le
+plătește după lege; data limită a clauzei de finanțare calculată din calendarul lecției
+(și scriptul corectat, spunea o dată care contrazicea regula); „arvuna nu e un avans";
+de unde iei lista de anunțuri expirate când nimeni nu ți-o dă; ce faci la prima
+prezentare dacă n-ai încă dosare proprii.
+
+Rezultat: `mandat` ca anglicism **zero** (cele 4 rămase sunt `decomandat`/`recomandat`/
+`comandată`), `lead-uri` 0, `follow-up` 0, `pricing` 0. Păstrate, explicate la prima
+folosire: `split`, `farming`, `prescoring`, `CMA`, `listing` (numele din breaslă).
+
+Două lucruri găsite de verificarea de după editări, nu de agenți:
+- **o frază dublată** în modulul 5, rămasă dintr-o rundă anterioară — o înlocuire care
+  conținea și fraza dinainte, pusă peste o ancoră care era doar o bucată din ea. De
+  aceea editările de acum se ancorează pe **linia luată din baza de date**, nu pe text
+  retastat, iar la final rulează un detector de blocuri repetate (1-4 fraze).
+- **cele patru copii de siguranță ale lecțiilor erau JSON invalid** (dublu-escapate) —
+  adică nerestaurabile programatic, exact când ar fi contat. Reparate toate patru
+  (`*.reparat.json`) și scrisă una nouă, validă, după corecturi.
+
+Verificat pe producție, prin aplicație, cu cont real: toate cele 8 lecții servite au
+lungimile din baza de date și conțin textul nou; 56 de grile rămân legate corect de
+module (7/7/4/9/8/7/8/6); materia e în continuare privată, codul valabil 0/25.
+
+### Incident de infrastructură — toate aplicațiile VPS2 jos
+Raportat de user ca „ecran alb la Tutor". Cauza: **discul plin 100%**, zero octeți.
+PostgreSQL a picat, iar la prăbușire pm2 a pierdut lista de procese — 21 de aplicații
+jos, nu doar Tutor.
+- ce umplea discul: `ave_platform` a crescut 3,6G → 5,1G **într-o zi**, iar backupul
+  zilnic o dubla. Șterse copiile vechi ale acestei singure baze (+7,4G)
+- repornite toate 21 din configurațiile fiecăreia; lista pm2 salvată era din mai
+- `blochub` pornit greșit de mine (prin `npx`) a intrat în buclă: **2.333 de reporniri**,
+  load 131. Repornit direct pe binarul Next
+- **PostgreSQL omorât de două ori de OOM killer**. Pus `OOMScoreAdjust=-900`: când
+  moare baza cad toate deodată, când moare o aplicație cade una. Oprite 3 procese de
+  fundal → RAM disponibil 222 MB → 2,7G
+
+**Rămâne deschis**: VPS2 rulează 21 de aplicații Node + baza + 3 containere pe 8 GB,
+cu swap plin. Discul și memoria sunt aceeași problemă spusă de două ori. Cere o
+decizie: mai multă memorie sau mutat aplicații pe VPS1.
+
+## Lessons Learned (sesiunea 2026-09-08)
+- L38 — o verificare care vânează CATEGORII ratează exact ce nu intră în ele; a doua
+  opinie trebuie să folosească altă metodă, nu aceeași metodă încă o dată. Vezi
+  `knowledge/lessons-learned.md`.
 
 ## Current State (Sesiunea 2026-09-07 — cele 5 gap-uri de audit, toate închise)
 

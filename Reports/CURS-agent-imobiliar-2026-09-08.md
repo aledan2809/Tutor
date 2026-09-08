@@ -9,19 +9,21 @@
 
 ## Ce vinzi, de fapt
 
-Un agent bun nu vinde apartamente. Apartamentul se vinde singur dacă prețul e corect — despre asta e Modulul 4. Tu vinzi trei lucruri pe care proprietarul nu le poate obține de altundeva: **acces la cumpărători reali**, **un preț apărat în negociere** și **un dosar care ajunge la notar fără surprize**.
+Un agent bun nu vinde apartamente. Apartamentul se vinde singur dacă prețul e corect — despre asta e Modulul 4. Tu vinzi trei lucruri pe care proprietarul nu le poate obține de altundeva: **acces la cumpărători reali**, **un preț apărat în negociere** și **un dosar de acte verificat de tine înainte de notar** — ca la semnare să nu lipsească o hârtie și să nu apară în acte o problemă care amână sau strică vânzarea.
 
-Testul e simplu și îl aplici la fiecare proprietate: dacă omul ar pune singur anunțul pe portaluri, ce ar pierde? Dacă răspunsul e „nimic", nu ai ce onorariu să ceri. Dacă răspunsul e „ar lua 8.000 de euro mai puțin pentru că nu știe să răspundă la «mai lăsați ceva?» și ar semna un antecontract fără să verifice o interdicție în cartea funciară", atunci ai o meserie.
+Testul e simplu și îl aplici la fiecare proprietate: dacă omul ar pune singur anunțul pe portaluri, ce ar pierde? Dacă răspunsul e „nimic", nu ai ce onorariu să ceri. Dacă răspunsul e „ar lua 8.000 de euro mai puțin pentru că nu știe să răspundă la «mai lăsați ceva?» și ar semna un antecontract — hârtia semnată înaintea notarului, prin care cumpărătorul dă de regulă un avans, iar amândoi se obligă să semneze actul final până la o dată stabilită — fără să se uite în cartea funciară", atunci ai o meserie. Cartea funciară este evidența oficială a imobilului, ținută de biroul de cadastru (OCPI); din ea ceri un **extras de carte funciară** — hârtia care arată cine e proprietarul de drept și dacă apartamentul are ipotecă, proces pe rol sau interdicție de înstrăinare, adică o notare care blochează vânzarea până e ridicată. Extrasul îl ceri tu, înainte de antecontract — nu îl aștepți de la notar.
 
 ## Pe cine reprezinți — și de ce se spune cu voce tare
 
-Aici cad cei mai mulți începători. Ei cred că sunt „la mijloc". Nu ești la mijloc. Ești de o parte, iar partea aia e scrisă în contractul pe care l-ai semnat și în factura pe care o emiți.
+Aici cad cei mai mulți începători. Ei cred că sunt „la mijloc". Nu ești la mijloc. Ești de o parte, iar partea aia e scrisă în două acte: contractul de intermediere semnat cu proprietarul (de agenție, cu tine ca agent care o reprezintă — sau de tine, dacă lucrezi pe cont propriu) și factura de onorariu, emisă de cel care încasează. Dacă lucrezi într-o agenție, ea încasează și facturează, iar ție îți vine partea ta („splitul", mai jos).
 
 În piața din București se practică frecvent încasarea de onorariu de la ambele părți. Nu e ilegal în sine, dar devine problemă în clipa în care nu e declarat, pentru că nu poți apăra simultan interesul celui care vrea preț mare și al celui care vrea preț mic. Regula pe care o ținem în agenție: **spui din prima cine te plătește, înainte ca omul să investească timp în tine.**
 
 Scriptul pe care îl folosești la semnarea contractului cu proprietarul, cuvânt cu cuvânt:
 
 > „Domnule Ionescu, ca să fie clar de la început: eu lucrez pentru dumneavoastră, în baza acestui contract. Onorariul meu este de 2,5% plus TVA din prețul final și îl plătiți doar la semnarea actului la notar — dacă nu se vinde, nu plătiți nimic. Dacă vine un cumpărător cu agentul lui, îl plătește el separat. Dacă eu aduc direct cumpărătorul și el îmi cere să îl reprezint, vă anunț înainte și decidem împreună cum procedăm. Aveți vreo întrebare despre onorariu, ca să nu rămână nimic neclar?"
+
+Cei 2,5% nu sunt o cifră pe care o alegi tu la fiecare proprietate: e procentul standard al agenției, ales în mijlocul intervalului uzual de 2–3% de care vorbim mai jos. Dacă proprietarul întreabă „lăsați la 2%?", nu răspunzi pe loc — spui „vă confirm mâine" și verifici cu agenția. Sub pragul minim pe tranzacție (2.000–3.000 €) nu se coboară în niciun caz, indiferent de procent, iar orice abatere de la procentul standard se stabilește împreună cu agenția, nu de tine singur. (Nu confunda asta cu împărțirea onorariului între tine și agenție, de la secțiunea următoare — aia e o discuție complet separată de ce ceri clientului.)
 
 Și scriptul pentru cumpărătorul care sună la anunțul tău, spus la telefon, nu la a treia vizionare:
 
@@ -33,7 +35,7 @@ Pierzi cumpărători cu scriptul ăsta? Pierzi vreo doi. Câștigi reputația di
 
 Fă socoteala o dată, cinstit, ca să știi ce urmărești.
 
-Onorariul uzual în București este, de regulă, **2–3% din prețul de vânzare, plus TVA**, încasat de la vânzător, cu un prag minim pe tranzacție undeva la **2.000–3.000 de euro** (altfel garsonierele îți mănâncă timpul degeaba). Cota de TVA aplicabilă și regimul tău fiscal — PFA, SRL sau contract cu agenția — se verifică la zi cu un contabil, s-au schimbat de mai multe ori în ultimii ani.
+Onorariul uzual în București este, de regulă, **2–3% din prețul de vânzare, plus TVA**, încasat de la vânzător, cu un prag minim pe tranzacție undeva la **2.000–3.000 de euro** — adică în contract scrii „2,5% + TVA, dar nu mai puțin de 2.500 €", nu îl anunți doar la telefon; la o garsonieră de 60.000 € procentul ar da 1.500 €, iar munca e aceeași (altfel garsonierele îți mănâncă timpul degeaba). (altfel garsonierele îți mănâncă timpul degeaba). Cota de TVA aplicabilă și regimul tău fiscal — PFA, SRL sau contract cu agenția — se verifică la zi cu un contabil, s-au schimbat de mai multe ori în ultimii ani.
 
 Exemplu concret, cu cifre de ordin de mărime pentru un apartament de 2 camere în București, circa 55 mp utili la aproximativ 2.000 €/mp:
 
@@ -56,9 +58,9 @@ Al doilea calcul, cel care doare: un agent decent din piața locală face, ca or
 
 ## Ziua care produce rezultate
 
-Restul e disciplină, și disciplina are o formă foarte concretă: **blochezi 9:00–12:00 pentru activități care produc venit** — prospectare telefonică, revenire la contactele mai vechi, prezentări de listing, vizionări programate. Nu poze, nu descrieri, nu Canva, nu ședințe. Alea se fac după 14:00.
+Restul e disciplină, și disciplina are o formă foarte concretă: **blochezi 9:00–12:00 pentru activități care produc venit** — prospectare telefonică, revenire la contactele mai vechi, prezentări în fața proprietarilor, vizionări programate. Nu poze, nu descrieri, nu Canva, nu ședințe. Alea se fac după 14:00.
 
-Ținta ta zilnică în primele șase luni, ca ordin de mărime: **20 de conversații noi pe zi**, adică vreo 400 pe lună. Din ele ies, de regulă, câteva prezentări de listing — adică întâlnirile cu proprietarul în care îi arăți cum vinzi și îi ceri contractul de intermediere; iar din prezentări un începător semnează cam 3 din 10. Vezi Modulul 2 pentru de unde iei cele 20 de contacte.
+Ținta ta zilnică în primele șase luni, ca ordin de mărime: **20 de conversații noi pe zi**, adică vreo 400 pe lună. Din ele ies, de regulă, câteva prezentări în fața proprietarului — adică întâlnirile în care îi arăți cum vinzi și îi ceri contractul de intermediere; iar din prezentări un începător semnează cam 3 din 10. Vezi Modulul 2 pentru de unde iei cele 20 de contacte.
 
 Ține evidența, pe hârtie sau într-un program de evidență a clienților (CRM), la trei coloane: contacte, prezentări, contracte semnate. Când nu vin banii, răspunsul e aproape întotdeauna în prima coloană, nu în a treia.
 
@@ -94,9 +96,9 @@ Nu toate contactele costă la fel. Ordinea în care merită să-ți pui timpul:
 3. **FSBO** (proprietari care vând singuri) — intenție clară, dar rezistență la agenți.
 4. **Farming pe zonă** (te faci cunoscut într-o zonă mică — 2-3 blocuri sau o stradă de case — prin comunicare lunară constantă) — pornește greu, dar apoi îți aduce clienți ani la rând.
 5. **Prezență online** — amplifică celelalte canale, rareori le înlocuiește.
-6. **Apel la rece pur** — ultimul, pentru că e cel mai ineficient pe unitate de timp.
+6. **Apel la rece pur** — suni oameni care n-au scos nimic la vânzare și nu ți-au dat niciun semn (locatari dintr-un bloc din zona ta, cunoștințe de-ale cunoștințelor), spre deosebire de expirate și FSBO, unde omul și-a arătat deja intenția de a vinde. E ultimul pentru că e cel mai ineficient pe unitate de timp. Numerele le aduni pe teren, de la oameni — baze de date nu se cumpără (vezi „Limite legale").
 
-Începătorii fac invers: încep cu apelul la rece pur, se lovesc de refuzuri și abandonează. Începe cu expiratele.
+Începătorii fac invers: încep cu apelul la rece pur, se lovesc de refuzuri și abandonează. Începe cu expiratele. Lista de expirate nu ți-o dă nimeni gata făcută și nu se cumpără — ți-o construiești singur, de aceea o începi din prima zi: o dată pe săptămână salvezi într-un tabel anunțurile din zona ta (link, telefon, preț cerut, data postării), iar când unul dispare de pe site îl treci pe lista de sunat. O parte au dispărut fiindcă s-au vândut — asta afli din prima întrebare a scriptului.
 
 ## Script complet: anunț expirat
 
@@ -112,6 +114,8 @@ Context: apartamentul a stat pe piață 4-6 luni, a fost retras sau a expirat, p
 >
 > — Și a doua: dacă ar apărea cineva care să vă aducă un cumpărător în 45-60 de zile, la un preț pe care îl acceptați dumneavoastră, ar merita o discuție de 20 de minute la apartament?
 >
+> *(45-60 de zile nu e o promisiune — e intervalul în care se vând de regulă apartamentele prețuite corect. Verifică-l pentru zona ta înainte de primul apel, din aceleași tranzacții reale pe ultimele 6 luni pe care le duci la întâlnire. Întrebarea rămâne ipotetică: „dacă ar apărea cineva". Dacă totuși te întreabă „de unde știți dumneavoastră?", răspunzi sincer: „Nu vă garantez termenul, vă garantez metoda — și vă arăt cifrele din blocul dumneavoastră când vin la apartament.")*
+>
 > *(Dacă spune da:)* — Perfect. Vin să văd apartamentul și vă aduc o analiză scrisă cu prețurile la care s-au vândut efectiv apartamentele similare în bloc și în zonă în ultimele 6 luni — nu prețurile cerute pe site-uri, prețurile reale de tranzacție. Vă convine joi la 18:00 sau sâmbătă la 11:00?
 
 Două lucruri de reținut din script: nu ceri „exclusivitate" la telefon (aia e discuția din Modulul 3) și oferi ceva concret în schimbul timpului lui — analiza de preț, nu „o discuție să ne cunoaștem".
@@ -122,9 +126,13 @@ Omul a spus în anunț „fără agenții". Îl suni oricum, dar nu ca să-l con
 
 > — Bună ziua, sunați pentru apartamentul din Berceni, de pe [site]? Numele meu este Andrei Popa, sunt agent imobiliar. Am văzut că scrieți „fără agenții" — vă respect decizia și nu vă sun să vă cer exclusivitate.
 >
-> — Vă sun pentru un singur lucru: am pe listă cumpărători care caută exact în blocul dumneavoastră. Dacă aduc unul care cumpără, comisionul îl plătește cumpărătorul, nu dumneavoastră. Ați fi de acord să-l aduc la o vizionare?
+> — Vă sun pentru un singur lucru: agenția noastră are cumpărători care caută exact în zona dumneavoastră. Dacă vă aduc unul care cumpără, comisionul îl plătește cumpărătorul, nu dumneavoastră. Ați fi de acord să-l aduc la o vizionare?
+>
+> *(Spui asta doar după ce ai verificat în baza agenției că există cel puțin un cumpărător real pe zona aia. Dacă nu există, nu inventezi — pierzi omul definitiv în secunda în care te întreabă „și cine e cumpărătorul?". Spui adevărul, pe aceeași structură: „Vă sun pentru un singur lucru: caut activ cumpărători pentru apartamente ca al dumneavoastră în zonă. Dacă vă aduc unul care cumpără, comisionul îl plătește el, nu dumneavoastră. Ca să-l pot recomanda, ar trebui să văd apartamentul — ați fi de acord cu o vizionare?")*
 >
 > *(Dacă spune da:)* — Vă mulțumesc. Ca să nu vă pierd timpul cu oameni nepotriviți: îmi spuneți vă rog dacă acceptați plata prin credit sau doar cash, și dacă apartamentul are certificatul energetic făcut? Sunt cele două lucruri care blochează cel mai des tranzacțiile.
+>
+> *(Ce faci cu răspunsul: dacă spune „nu accept credit", notezi și îi aduci doar cumpărători cu banii jos — și îi spui asta, ca să știe de ce vin mai puțini. Dacă spune „n-am certificat energetic", acolo e ocazia ta: fără el notarul nu poate autentifica vânzarea, iar un auditor energetic atestat îl face de regulă în câteva zile, pe bani puțini față de prețul apartamentului. Te oferi să-i recomanzi unul din agenda agenției — e primul serviciu real pe care i-l faci, gratuit.)*
 >
 > *(La final, indiferent de răspuns:)* — Vă las numărul meu. Vindeți singur liniștit, sper să vă iasă repede. Dacă în 30-40 de zile simțiți că nu se mișcă, sunați-mă și vă spun sincer ce aș schimba, fără nicio obligație. Vă deranjează dacă vă trimit peste două săptămâni un mesaj cu tranzacțiile noi din bloc?
 
@@ -134,7 +142,7 @@ Ultima frază e cea care contează. Ai cerut permisiunea pentru un al doilea con
 
 Scriptul e schelet, nu text de teatru. Trei reguli de adaptare:
 
-- **Schimbă doar variabilele, nu structura**: deschidere → permisiune → întrebare deschisă → tăcere → ofertă concretă → două variante de oră.
+- **Schimbă doar variabilele, nu structura.** Pe scriptul de anunț expirat, pașii sunt: deschidere („Sunt Andrei Popa… mai aveți intenția să-l vindeți?") → permisiune („vă pun două întrebări scurte și vă las în pace") → întrebare deschisă, adică una la care nu se poate răspunde cu da sau nu („de ce nu s-a vândut?") → tăcere → ofertă concretă (analiza de preț) → două variante de oră („joi la 18:00 sau sâmbătă la 11:00?").
 - **Repetă cuvintele lui**. Dacă a spus „m-am săturat de vizionări degeaba", tu spui mai târziu „ca să nu mai aveți vizionări degeaba". Nu „ca să eficientizăm procesul".
 - **Fă-l al tău**. Citește-l de 20 de ori cu voce tare, apoi rescrie-l în cuvintele tale. Cu un script recitat robotic scoți mai puține întâlniri decât cu o conversație stângace, dar sinceră.
 
@@ -156,7 +164,7 @@ Trei lucruri care nu sunt opționale și pe care le verifici la zi, cu un jurist
 - **Contractele semnate acasă la client** intră, de regulă, sub reguli speciale de protecție a consumatorului, inclusiv un drept de retragere. Cere agenției formularul corect și clauza de informare.
 - **Programele de creditare cu garanție de stat** („Noua Casă") au plafoane și condiții care se schimbă anual. Nu spune niciodată unui proprietar „se încadrează sigur" — spune „verificăm la bancă".
 
-Și o limită de etică practică: nu promite unui proprietar un preț ca să-i iei listarea. E cea mai comună practică toxică din piață, se numește „buying the listing", și te costă în luna a treia, când trebuie să-i explici de ce trebuie scăzut. Prețul se discută pe date, iar cum se face asta e Modulul 4.
+Și o limită de etică practică: nu promite unui proprietar un preț mai mare decât crezi, doar ca să semneze cu tine. E cea mai comună practică toxică din piață, se numește „buying the listing", și te costă în luna a treia, când trebuie să-i explici de ce trebuie scăzut. Prețul se discută pe date, iar cum se face asta e Modulul 4.
 
 ## De reținut
 
@@ -165,7 +173,7 @@ Trei lucruri care nu sunt opționale și pe care le verifici la zi, cu un jurist
 - În orice apel, oferă ceva concret (analiză de preț, un cumpărător real) în schimbul timpului omului — nu „o discuție".
 - La FSBO nu vinzi serviciul din primul apel; ceri permisiunea pentru al doilea contact.
 - Cere recomandări explicit, imediat după un moment bun, cu o formulare exactă și repetabilă.
-- Nu cumpăra baze de date și nu promite prețuri ca să iei listarea — ambele te costă mai mult decât câștigi.
+- Nu cumpăra baze de date și nu promite prețuri umflate ca să semneze cu tine — ambele te costă mai mult decât câștigi.
 
 ---
 
@@ -175,7 +183,9 @@ Trei lucruri care nu sunt opționale și pe care le verifici la zi, cu un jurist
 
 ## Prezentarea se câștigă cu 48 de ore înainte
 
-Cei mai mulți agenți pierd contractul cu proprietarul la telefon, nu în sufragerie. Când suni ca să fixezi întâlnirea, ai de aflat șapte lucruri: **de ce vinde**, **până când trebuie să se mute**, **are unde**, **cât mai are de plătit la bancă**, **cine semnează actul** (câți proprietari, bunuri comune, moștenire dezbătută sau nu), **a mai fost la vânzare și cu cine**, **la ce preț**.
+Cei mai mulți agenți pierd contractul cu proprietarul la telefon, nu în sufragerie. Când suni ca să fixezi întâlnirea, ai de aflat șapte lucruri: **de ce vinde**, **până când trebuie să se mute**, **are unde**, **cât mai are de plătit la bancă**, **cine semnează actul** (câți proprietari sunt trecuți în acte, dacă e bun comun al soților și, dacă e moștenit, dacă succesiunea a fost dezbătută la notar), **a mai fost la vânzare și cu cine**, **la ce preț**.
+
+Ultimul punct decide dacă întâlnirea are rost. Cât timp succesiunea nu e dezbătută la notar și nu există certificat de moștenitor, moștenitorii nu sunt încă proprietari în acte — apartamentul nu se poate vinde, oricât de bine ar merge discuția în sufragerie. Dacă auzi la telefon că succesiunea nu e făcută, spune-i din acel moment să treacă întâi pe la notar și fixează prezentarea după. La bunurile cumpărate în timpul căsătoriei semnează, de regulă, amândoi soții — dacă proprietarul îți spune că au separație de bunuri sau că l-a primit prin moștenire ori donație, întreabă cine e trecut efectiv în extrasul de carte funciară.
 
 Și o propoziție pe care o spui de fiecare dată, fără excepție:
 
@@ -183,19 +193,19 @@ Cei mai mulți agenți pierd contractul cu proprietarul la telefon, nu în sufra
 
 Dacă mergi la o prezentare unde lipsește un semnatar, ai mers degeaba. Vei auzi „mai vorbesc cu soția și vă sun" — și nu te mai sună.
 
-Ce iei cu tine: CMA-ul printat (nu pe telefon), contractul în două exemplare, planul de promovare pe **o singură pagină** și trei dosare cu apartamente vândute — inclusiv unul la care ai dat greș. Ce **nu** trimiți înainte: nicio cifră de preț. Prețul se discută după ce ai umblat prin casă.
+Ce iei cu tine: CMA-ul printat (nu pe telefon), contractul în două exemplare, planul de promovare pe **o singură pagină** și trei dosare cu apartamente vândute — inclusiv unul la care ai dat greș. **Dacă ești la început și nu ai încă dosare proprii, cere-i coordonatorului trei cazuri ale agenției și spune-le exact ca atare: „Nu sunt tranzacțiile mele, sunt ale echipei din care fac parte — eu sunt de două luni aici." Spus pe față, nu te scade. Te scade doar dacă se află după.** Ce **nu** trimiți înainte: nicio cifră de preț. Prețul se discută după ce ai umblat prin casă.
 
-La fața locului: 15-20 de minute prin apartament, cu carnetul în mână, punând întrebări. Abia apoi vă așezați la masă. Un agent experimentat semnează, de regulă, în jur de 4-6 contracte din 10 prezentări; la început, 1-2 e normal. Diferența dintre cele două cifre e aproape integral pregătirea.
+La fața locului: 15-20 de minute prin apartament, cu carnetul în mână, și întrebi lucrurile de care ai nevoie mai târziu la preț și la anunț: în ce an s-au schimbat instalația electrică, țevile și geamurile, ce mobilă rămâne în casă, cât e întreținerea iarna, ce se aude de la vecini, dacă are boxă sau loc de parcare și dacă actele sunt toate la zi.
 
 ## CMA: trei categorii, nu treizeci de anunțuri
 
-În România **nu există o bază publică de prețuri de tranzacție**. Grila notarilor e orientativă și de regulă sub piață. Deci CMA-ul se construiește din trei categorii, iar sinceritatea despre limitele lui e parte din profesionalism:
+În România **nu există o bază publică de prețuri de tranzacție**. Ce există e grila notarilor — studiul de valori orientative pe zone și tipuri de locuință, actualizat anual pentru camerele notarilor, pe care notarul îl folosește ca să calculeze taxele la vânzare. Valorile din grilă sunt de regulă sub prețurile reale, deci nu-ți ține loc de CMA.
 
 - **3 comparabile vândute** în ultimele 6 luni — din istoricul agenției tale și de la colegi. Astea sunt aurul.
 - **3 anunțuri active acum**, adică cu cine te bați efectiv.
 - **2 retrase sau expirate** — cel mai puternic argument pe care îl ai. Nimic nu convinge un proprietar ca un apartament identic care a stat 6 luni la un preț prea mare și s-a vândut până la urmă mai ieftin.
 
-Exemplu concret, apartament 2 camere decomandat, 54 mp utili, Titan, etaj 3/4, bloc 1978, renovat în 2021:
+Exemplu concret — apartament 2 camere decomandat, 54 mp utili, Titan, etaj 3/4, bloc 1978, renovat în 2021. Tabelul de mai jos e scurtat, ca ilustrație; în CMA-ul pe care îl duci la client pui toate cele opt rânduri: 3 vândute, 3 active, 2 retrase.
 
 | Categorie | Preț | Observație |
 |---|---|---|
@@ -216,9 +226,9 @@ Aproape întotdeauna își arată singur intervalul. Metodologia completă de ev
 
 Nu vinzi „promovare pe portaluri", pentru că aia o face și proprietarul singur, cu 0 lei. Vinzi trei lucruri, în ordinea asta:
 
-**Expunere controlată.** Plan pe o pagină, cu cifre: fotograf profesionist (de regulă 200-400 lei în București), 20-25 de fotografii, tur video, plan 2D, promovare plătită pe 2-3 portaluri (câteva sute de lei pe lună), difuzare către baza proprie și către agenții colaboratori, vizionări grupate în aceeași după-amiază.
+**Expunere controlată.** Plan pe o pagină, cu cifre: fotograf profesionist (de regulă 200-400 lei în București), 20-25 de fotografii, tur video, plan 2D, promovare plătită pe 2-3 portaluri (câteva sute de lei pe lună), difuzare către baza proprie și către agenții colaboratori, vizionări grupate în aceeași după-amiază. Cheltuielile astea le suportă agenția din comision, nu proprietarul — dar cere-i agenției tale bugetul aprobat pe listare înainte de întâlnire: cifrele pe care le scrii în pagina asta ajung în contract, ca angajament pe primele 30 de zile.
 
-**Filtrare.** Din 10 telefoane la un anunț, în jur de 3 sunt cumpărători cu finanțare confirmată — restul sunt curioși, vecini, agenți și oameni care „se uită de un an". Proprietarul care vinde singur le deschide ușa la toți zece.
+**Filtrare.** Din 10 telefoane la un anunț, în jur de 3 sunt cumpărători cu finanțare confirmată — adică fie au banii cash, fie au deja de la bancă acordul scris pentru credit, nu doar „am fost și am întrebat". Afli asta din prima, fără ocolișuri: „Cumpărați cash sau prin credit? Dacă e credit, aveți deja acordul de la bancă?" Restul celor zece sunt curioși, vecini, agenți și oameni care „se uită de un an". Proprietarul care vinde singur le deschide ușa la toți zece.
 
 **Negocierea.** Aici se face sau se pierde diferența de preț. Modulul 6 tratează tehnicile.
 
@@ -272,15 +282,17 @@ Regula de bază: **prețul se face din tranzacții încheiate, nu din anunțuri*
 
 ## Comparabilele: ce intră în tabel și ce arunci
 
-Ia un caz concret, cu care lucrăm toată lecția: **2 camere, 54 mp utili, Drumul Taberei, decomandat, etaj 4/10, bloc 1978, renovat în 2021, fără parcare cu act.**
+Ia un caz concret, cu care lucrăm toată lecția: **2 camere, 54 mp utili, Drumul Taberei, decomandat, etaj 4/10, bloc 1978, renovat în 2021, fără parcare cu act.** („Utili" = suprafața din interior pe care calci, fără pereți și fără balcon; multe anunțuri dau *suprafața construită*, care le include și e cu 10-20% mai mare. Adu toate comparabilele la același fel de metri înainte de orice calcul de EUR/mp.)
 
 Criterii de selecție a comparabilelor, în ordine:
-1. **Vândute** (act semnat), nu listate — 3-5 exemple.
+1. **Vândute** (act semnat la notar), nu listate — 3-5 exemple. Prețurile de vânzare nu sunt publice în România, deci le iei, în ordinea asta: din baza de tranzacții a agenției, de la colegii care au lucrat zona în ultimele 6 luni, sau de la coordonator. Dacă nu ai acces la niciuna, spune-i proprietarului din start că estimarea e provizorie.
 2. **Ultimele 6 luni.** Peste 12 luni, comparabilul devine istorie, nu referință.
 3. **Rază mică** — același cartier, ideal aceleași 3-4 străzi, același tip de bloc.
 4. **± 15% suprafață** și aceeași compartimentare.
 
-Ce am găsit: 108.000 / 112.000 / 115.000 EUR, pentru 52-56 mp. Mediana (valoarea din mijlocul șirului, nu media) ≈ **2.070 EUR/mp**, deci pentru 54 mp iese ~112.000 EUR. Ajustezi apoi: etaj și lift (+), lipsă parcare cu act (−), renovare recentă (+), bloc pe structură din '78 fără reabilitare (−). Interval final recomandat: **112.000 – 118.000 EUR**.
+Ce am găsit: 108.000 / 112.000 / 115.000 EUR, pentru 52-56 mp. Mediana (valoarea din mijlocul șirului, nu media) ≈ **2.070 EUR/mp**, deci pentru 54 mp iese ~112.000 EUR. Ajustezi apoi mediana — și scrii lângă fiecare criteriu cât valorează, nu doar semnul: etaj și lift (+), renovare recentă (+), lipsă parcare cu act (−), bloc din 1978 fără reabilitare termică, adică fără anveloparea făcută de primărie, deci facturi mai mari la întreținere (−). Regula care te deblochează la următorul apartament: ce au și comparabilele (aici, același tip de bloc și aceeași vechime) e deja plătit în mediană și nu se mai scade a doua oară — ajustezi doar diferențele față de ele. Cât valorează o diferență afli tot din comparabile (cât a luat în plus un apartament la fel, dar renovat), nu dintr-un procent fix, pentru că diferă de la cartier la cartier. În cazul nostru singurul plus real față de comparabile e renovarea din 2021, așa că intervalul pleacă de la mediana neajustată și urcă cu ~5%: **112.000 – 118.000 EUR** — 112.000 dacă piața nu plătește renovarea, 118.000 dacă o plătește integral.
+
+Nu confunda reabilitarea termică (polistirenul de pe fațadă) cu consolidarea seismică — sunt două lucruri diferite ca preț și ca risc. Anul contează tocmai de aceea: 1978 e după cutremurul din '77, deci blocul e ridicat pe normele înăsprite de atunci și de regulă nu apare pe lista de risc seismic a Primăriei Municipiului București. Verific-o oricum, la fiecare apartament pe care îl iei: o încadrare la risc seismic scade prețul mai mult decât orice alt criteriu din tabelul de mai sus, iar la clasa I băncile de regulă nu dau credit — deci pierzi și jumătate din cumpărători, nu doar câteva mii de euro.
 
 Convertește întotdeauna în **EUR/mp**. E singura unitate care îți permite să compari un 54 mp cu un 62 mp fără să te păcălești singur.
 
@@ -290,20 +302,22 @@ Convertește întotdeauna în **EUR/mp**. E singura unitate care îți permite s
 
 Nu aștepta „feedback de la piață" ca pe o vreme. Măsoară:
 
-- **Trafic pe anunț.** Compară-te cu anunțurile similare din aceeași zonă și din același interval de preț, nu cu o cifră fixă: dacă rămâi mult sub ele la afișări, de regulă filtrul de preț te aruncă afară din căutări — e preț, nu poze. Lasă anunțul două săptămâni și ține cont dacă e promovat sau nu; sub atât măsori vizibilitatea, nu prețul.
+- **Trafic pe anunț.** Statisticile altor agenții nu-ți sunt vizibile, așa că reperul ți-l construiești din ce ai la îndemână: propriile tale anunțuri din aceeași zonă și din același interval de preț și, dacă agenția ta are un panou pe zonă din contul de portal, media de acolo. Compari relativ, nu cu o cifră fixă: dacă anunțul ăsta rămâne mult sub ele la afișări — ca ordin de mărime, sub jumătate față de un anunț comparabil de-al tău — de regulă filtrul de preț te aruncă afară din căutări; e preț, nu poze. Lasă anunțul două săptămâni și ține cont dacă e promovat sau nu; sub atât măsori vizibilitatea, nu prețul.
 - **Afișări multe, vizionări zero.** Prețul e la limită; pozele și descrierea încă mai pot ajuta.
 - **10 vizionări fără nicio ofertă = preț.** Nu prezentare, nu „cumpărătorii de azi". Preț. Dacă 10 oameni au venit fizic, au văzut și au plecat, mesajul e unanim.
 - **Pragurile de căutare.** Cumpărătorii filtrează la cifre rotunde: 100.000, 120.000, 150.000 EUR. Un anunț la 121.000 nu apare deloc în căutările celor care caută „până în 120.000". În schimb, unul la 119.500 e văzut de exact aceiași cumpărători ca unul la 115.000.
 - **Stocul din zonă.** Dacă în același bloc mai sunt 4 apartamente similare listate, ești într-o piață a cumpărătorului, indiferent ce spun titlurile din presă.
 - **Sezonalitatea.** Ianuarie-februarie și august sunt lente; martie-iunie și septembrie-octombrie concentrează cererea. Un preț „testat" în august nu e testat.
 
-Ca ordin de mărime, în București un apartament corect prețuit se vinde în circa **60-110 zile** de la listare până la autentificare, iar diferența dintre prețul cerut și cel semnat e uzual **3-7%**. Dacă ești la 90 de zile fără ofertă, nu ai o problemă de piață, ai o problemă de preț.
+Ca ordin de mărime, în București un apartament corect prețuit se vinde în circa **60-110 zile** de la listare până la **autentificare** (semnarea actului final la notar), iar diferența dintre prețul cerut și cel semnat e uzual **3-7%**. Atenție la ce măsoară fiecare cifră: cele 60-110 zile includ și perioada de acte și credit de **după** ce ai primit o ofertă. Dacă ai trecut de 90 de zile și încă n-ai primit **nicio ofertă**, nu ești într-o vânzare normală care durează — ai o problemă de preț.
 
 ## Conversația cu proprietarul care cere cu 20% peste piață
 
 Situația: proprietarul cere **138.000 EUR** (≈2.555 EUR/mp) pentru apartamentul de mai sus, „că vecinul de la 2 a luat 132.000".
 
 Nu contrazice. Cere date. Iată cum sună, cuvânt cu cuvânt:
+
+**Scriptul presupune că ai verificat vânzarea vecinului înainte de întâlnire**: suprafață, etaj, dacă avea parcare cu act și boxă, și data la care s-a semnat efectiv. Suprafața, etajul și dotările le scoți din anunțul arhivat al apartamentului; data reală a vânzării și prețul, nu — alea vin din evidența agenției sau de la colegul care a lucrat tranzacția. Dacă proprietarul aruncă în discuție o vânzare de care nu știai, nu improviza: „Notez, verific până mâine și ne uităm împreună pe cifre." A reveni a doua zi cu date bate contrazicerea pe loc — e exact regula de mai sus, aplicată când datele nu-ți sunt încă la îndemână.
 
 > **Agent:** Domnule Popescu, îmi spuneți vă rog mai exact care apartament e? Cel de la etajul 2, scara B?
 >
@@ -361,7 +375,7 @@ Se numește „cumpărarea listării": accepți prețul umflat al proprietarului
 
 Cea mai frecventă greșeală a agentului la început: prima întrebare pusă unui cumpărător este „ce buget aveți?". Omul se închide, îți dă o cifră rotundă și falsă (de regulă mai mică cu 10-15% decât realitatea, ca să nu fie „tras în sus"), iar tu construiești tot restul pe o minciună.
 
-Bugetul se pune **al cincilea**, nu primul. Înainte de bani vine motivul, pentru că motivul îți spune dacă omul chiar cumpără sau doar se plimbă. Un apel de calificare bine făcut durează 12-15 minute și îți economisește 20 de ore de vizionări inutile.
+Bugetul se pune **al cincilea**, nu primul. Înainte de bani vine motivul, pentru că motivul îți spune dacă omul chiar cumpără sau doar se plimbă. Un apel de calificare bine făcut durează 12-15 minute. Un cumpărător necalificat te poate purta prin 15-20 de vizionări fără nicio ofertă — la 30-45 de minute fiecare, plus deplasarea, sunt în jur de 20 de ore pierdute cu un om care oricum nu cumpăra.
 
 ## Cele șapte întrebări, cuvânt cu cuvânt
 
@@ -372,17 +386,17 @@ Ascultă dacă e „ne-am mărit familia", „am terminat contractul de chirie l
 Dacă spune „în 2-3 luni", ai un cumpărător real. Dacă spune „prin vară, poate", ai un vizitator.
 
 **3. Situația actuală și ce are de vândut.** „Acum stați în chirie sau la proprietate? Trebuie să vindeți ceva ca să cumpărați?"
-Asta e întrebarea pe care o sar 8 din 10 agenți începători. Un cumpărător care trebuie să-și vândă întâi apartamentul nu e cumpărător până nu are antecontract semnat pe vânzare. Îl tratezi ca pe două tranzacții, nu una.
+Asta e întrebarea pe care o sar 8 din 10 agenți începători. Un cumpărător care trebuie să-și vândă întâi apartamentul nu e cumpărător până nu are antecontract semnat pe vânzarea lui — hârtia prin care el și cel care îi cumpără apartamentul se obligă unul față de celălalt să încheie tranzacția la notar, la un preț și o dată stabilite. Până la hârtia asta, totul e doar intenție. Îl tratezi ca pe două tranzacții, nu una.
 
 **4. Cine decide.** „La vizionare vine cineva alături de dumneavoastră? Soț, soție, părinți?"
 Dacă socrul plătește avansul, socrul vine la a doua vizionare. Altfel vei primi „ne mai gândim" fără să afli vreodată de ce.
 
 **5. Bugetul, ca sumă totală.** „Ca să filtrez corect: la ce sumă totală vă simțiți confortabil — nu maximul la care vă aprobă banca, ci suma la care dormiți liniștit? Și cât ați fi dispus să mai adăugați pentru ceva care vă place mult?"
-Întrebarea dublă e importantă. Aproape orice cumpărător are o rezervă de 5-10% peste cifra declarată. Dacă nu o afli, ratezi proprietățile din zona aia.
+Întrebarea dublă e importantă. Aproape orice cumpărător are o rezervă de 5-10% peste suma declarată. Dacă nu o afli, nu-i arăți niciodată proprietățile din intervalul de preț imediat superior — exact acolo unde ar fi găsit ce caută.
 
-**6. Finanțarea.** „Cumpărați cash sau prin credit? Dacă e credit, ați fost deja la bancă pentru un prescoring?"
-Dacă răspunsul e „nu încă", asta e următorul lucru de făcut, înaintea oricărei vizionări. Prescoringul durează de regulă 1-3 zile lucrătoare și e gratuit. Formula pe care o folosești: „Vă propun să facem lucrurile în ordinea corectă. Fără hârtia de la bancă, riscăm să ne îndrăgostim de un apartament pe care nu îl putem lua. Vreți să vă recomand doi consultanți de creditare cu care lucrăm?"
-Ordinele de mărime pe care trebuie să le știi ca să porți conversația: la creditul ipotecar standard avansul minim pentru prima locuință este în jur de 15% din preț, iar rata nu poate depăși un anumit procent din venitul net al familiei (în jur de 40%, cu o marjă în plus la prima locuință). **Aceste praguri sunt reglementate și se modifică — verifică-le la zi cu un consultant de creditare, nu le cita din memorie.** La fel programele guvernamentale de tip „Noua Casă": plafoanele, avansul redus și disponibilitatea alocărilor se schimbă de la an la an.
+**6. Finanțarea.** „Cumpărați cash sau prin credit? Dacă e credit, ați fost deja la bancă să vedeți ce sumă vă aprobă — ce se cheamă prescoring?"
+Dacă răspunsul e „nu încă", asta e următorul lucru de făcut, înaintea oricărei vizionări. Prescoringul e verificarea prin care banca îi spune, înainte să caute ceva, ce sumă maximă îi poate împrumuta; durează de regulă 1-3 zile lucrătoare și e gratuit. Formula pe care o folosești: „Vă propun să facem lucrurile în ordinea corectă. Fără hârtia de la bancă, riscăm să ne îndrăgostim de un apartament pe care nu îl putem lua. Vreți să vă recomand doi consultanți de creditare cu care lucrăm?"
+Ordinele de mărime pe care trebuie să le știi ca să porți conversația: la creditul ipotecar standard avansul minim pentru prima locuință este în jur de 15% din preț, iar rata nu poate depăși un anumit procent din venitul net al familiei (în jur de 40%, cu o marjă în plus la prima locuință). **Aceste praguri sunt reglementate și se modifică — verifică-le la zi cu un consultant de creditare, nu le cita din memorie.** La fel se schimbă de la an la an și programele guvernamentale de tip „Noua Casă": prețul maxim al locuinței care se încadrează, avansul redus și plafonul de garanții pe care statul îl alocă anual — când acesta se epuizează, băncile nu mai primesc dosare noi până la alocarea din anul următor.
 
 **7. Istoricul.** „Ce ați văzut până acum și ce nu v-a plăcut la fiecare?"
 Aici afli criteriile reale, nu cele declarate. Omul care spune „vreau etaj intermediar" dar a refuzat trei apartamente la etaj 3 din cauza zgomotului îți spune de fapt că vrea liniște.
@@ -466,7 +480,7 @@ Prima cifră pusă pe masă devine punctul de referință al discuției — incl
 
 **Regula 1 — concesiile scad ca mărime.** Un cumpărător care merge 100.000 → 106.000 → 108.500 → 109.500 comunică fără cuvinte „mă apropii de plafon". Unul care merge 100.000 → 104.000 → 109.000 → 114.000 comunică „mai am". Ai grijă ce comunici tu în locul clientului.
 
-**Regula 2 — fiecare concesie se schimbă pe ceva.** Monedele care chiar nu costă bani: termenul de eliberare și data antecontractului. Trei care par mărunte și nu sunt — le poți da, dar cerând ceva în schimb, nu ca gest: **cine plătește onorariul notarial** (cu TVA și tariful de intabulare de 0,15% din valoare, la un apartament de 109.000 € vorbim de ordinul a 1.000-1.500 € — confirmă cifra cu notarul tău, tarifele se actualizează; în plus, dacă în contract nu scrie altfel, legea pune cheltuielile vânzării în sarcina cumpărătorului (art. 1666 alin. (1) Cod civil) — deci, dacă le preia vânzătorul, sunt bani mutați de la unul la altul și înțelegerea trebuie trecută în act), **mobila rămasă** (sunt bunuri cu valoare de piață — evaluează-le înainte de a le lăsa) și **cât e arvuna** — suma dată în avans la antecontract, care se scade din preț la final, deci nu e cost imediat; e însă expunere reală: cumpărătorul o pierde dacă se răzgândește, iar vânzătorul o dă înapoi dublu dacă se răzgândește el (art. 1544 Cod civil). Formularea:
+**Regula 2 — fiecare concesie se schimbă pe ceva.** Monedele care chiar nu costă bani: termenul de eliberare și data antecontractului (antecontractul = înțelegerea scrisă prin care cele două părți se obligă una să vândă, cealaltă să cumpere, la un preț și până la un termen stabilite; se semnează înaintea actului de vânzare de la notar). Trei care par mărunte și nu sunt — le poți da, dar cerând ceva în schimb, nu ca gest: **cine plătește cheltuielile de la notar** (la un apartament de 109.000 € vorbim, în total, de ordinul a 1.000–1.500 €: onorariul notarului plus TVA, la care se adaugă tariful de intabulare — înscrierea proprietății în cartea funciară — de 0,15% din valoare, adică aproximativ 164 €; confirmă cifrele cu notarul tău înainte de a le spune clientului, tarifele se actualizează. Dacă în contract nu scrie altfel, legea pune cheltuielile vânzării în sarcina cumpărătorului (art. 1666 alin. (1) Cod civil), deci nimeni nu creează bani din aer: cine le preia plătește el cei 1.000–1.500 €. Dacă le preia clientul tău, e o concesie reală de mărimea asta — cere ceva în schimb; dacă le preia cealaltă parte, ai obținut echivalentul unei reduceri de preț. Oricum ar fi, înțelegerea trebuie scrisă în act — altfel rămâne regula din lege), **mobila rămasă** (are valoare de piață: caută 2–3 anunțuri cu piese asemănătoare la mâna a doua, estimează sub prețul cerut din ele — ca la comparabile, anunțul nu e tranzacția — și treci suma în fișa proprietății înainte de a o oferi) și **cât e arvuna** — suma dată în avans la antecontract, care se scade din preț la final, deci nu e cost imediat; e însă expunere reală: cumpărătorul o pierde dacă se răzgândește, iar vânzătorul o dă înapoi dublu dacă se răzgândește el (art. 1544 Cod civil). Uzual se cere 10% din preț — la 109.000 € înseamnă 10.900 € — dar e obicei de piață, nu obligație legală: se negociază. Formularea, în care «autentificare» înseamnă semnarea actului la notar, momentul din care curge termenul de eliberare:
 
 > „Pot merge la 109.000, dar în condițiile astea: antecontract în 10 zile, arvună 10% și eliberați apartamentul în 45 de zile de la autentificare. Dacă termenul de eliberare nu vă convine, prețul rămâne 110.000. Alegeți dumneavoastră."
 
@@ -490,7 +504,7 @@ Ai făcut trei lucruri deodată: ai protejat relația, ai aflat ce buget are cum
 
 > „Aveți dreptate că se poate și mai ieftin, nu vă contrazic. Diferența e ce faceți cu 3.000 € în plus sau în minus la final. Eu am vândut anul trecut [X] apartamente în zona asta, în medie în [Y] zile. Dacă obțin cu 4.000 mai mult decât ați fi luat singur și în jumătate din timp, comisionul se plătește singur. Dacă nu vând, nu-mi luați un leu. Vreți să vă arăt cifrele pe tranzacțiile mele?"
 
-Completezi X și Y cu numerele tale reale. Dacă n-ai încă istoric, folosești cifrele agenției și spui explicit că sunt ale agenției.
+Completezi X și Y cu numerele tale reale. Dacă n-ai încă istoric, folosești cifrele agenției și spui explicit că sunt ale agenției. Ultima frază — «dacă nu vând, nu-mi luați un leu» — o spui doar dacă exact așa scrie în contractul de intermediere al agenției tale: comision plătit numai la succes, fără taxă la semnare și fără penalizare de exclusivitate dacă proprietarul se retrage. Citește contractul înainte de prima întâlnire, nu după. Dacă modelul agenției e altul, spui condiția reală, oricât de puțin sună a argument de vânzare: o promisiune pe care propriul contract o contrazice se vede la prima semnătură și strică tot ce ai construit până acolo.
 
 **2. „Nu cobor niciun leu. Ăsta e prețul meu."**
 
@@ -535,7 +549,7 @@ Regula de bază: **stabilești data la notar în prima zi și lucrezi invers de 
 |---|---|
 | 0 | Ofertă acceptată. Trimit lista de documente vânzătorului. |
 | 3-5 | Semnare antecontract + arvună. Cumpărătorul depune dosarul la bancă. |
-| 10-15 | Evaluare ANEVAR (comandată de bancă, ~400-800 lei, plătită de cumpărător). |
+| 10-15 | Evaluarea apartamentului, făcută de un evaluator autorizat ANEVAR (asociația profesională care autorizează evaluatorii din România). Comandată de bancă, ~400-800 lei, plătită de cumpărător. |
 | 25-35 | Aprobare finală + emitere acord de finanțare. |
 | 40 | Extras de carte funciară pentru autentificare + certificat fiscal. |
 | 45 | Semnare act autentic de vânzare la notar. |
@@ -544,9 +558,9 @@ Regula de bază: **stabilești data la notar în prima zi și lucrezi invers de 
 
 Nu-l lăsa scris „după model de pe internet". Cele patru lucruri pe care le verifici de fiecare dată:
 
-1. **Prețul și moneda, plus modul de plată defalcat**: cât se dă acum, cât din credit, cât cash la notar. Dacă e în euro, scrii cursul și ziua de referință.
+1. **Prețul și moneda, plus modul de plată defalcat**: cât se dă acum, cât din credit, cât cash la notar. Dacă prețul e în euro, scrii în antecontract ce curs se aplică și din ce zi se ia — uzual „cursul BNR din ziua efectuării fiecărei plăți". Fără asta, la 92.000 EUR câțiva bani diferență de curs înseamnă mii de lei, exact în ziua semnării.
 2. **Termenul ferm** și ce se întâmplă la depășire: prelungire automată 15 zile? Penalitate? Reziliere?
-3. **Condiția suspensivă de finanțare.** Formularea în esență: dacă până la data X cumpărătorul prezintă refuzul scris al băncii, antecontractul încetează și arvuna se restituie integral, fără penalități. Fără clauza asta, cumpărătorul care nu ia creditul își pierde banii — și tu îți pierzi reputația.
+3. **Condiția suspensivă de finanțare.** Formularea în esență: dacă până la data X cumpărătorul prezintă refuzul scris al băncii, antecontractul încetează și arvuna se restituie integral, fără penalități. Fără clauza asta, cumpărătorul care nu ia creditul își pierde banii — și tu îți pierzi reputația. **Data X nu se pune din ochi**: o alegi după ziua în care banca dă răspunsul final (ziua 25-35 din calendarul de mai sus) și cu circa 10 zile înainte de data de la notar, ca să mai fie timp de desfăcut totul. În exemplul de mai sus — ofertă acceptată pe 1 octombrie, notar pe 15 noiembrie — data X este 5 noiembrie. Pusă mai devreme, clauza nu protejează pe nimeni: termenul expiră înainte ca banca să fi decis, iar cumpărătorul rămâne fără arvună tocmai pentru că nu are încă hârtia. Dacă cele două condiții nu încap una în alta, nu strânge clauza — mută data la notar.
 4. **Predarea**: la ce dată, în ce stare, cu ce rămâne în casă (mobilă, aer condiționat, centrală). Aici se nasc jumătate din scandalurile de la cheie.
 
 Recomandă antecontract **în formă autentică**, la notar, nu sub semnătură privată la agenție. Costă câteva sute de lei în plus și permite notarea în cartea funciară — adică vânzătorul nu mai poate vinde altcuiva peste tine. Termenul în care nota se poate radia dacă nu se cere înscrierea (în principiu 6 luni de la împlinirea termenului) e o chestiune de verificat cu notarul, nu de recitat din memorie.
@@ -578,7 +592,7 @@ Uzual în București: **5-10% din preț** ca arvună. La 92.000 EUR, 5.000 EUR e
 
 Îl dai la telefon, cumpărătorului, în ziua în care oferta e acceptată:
 
-> „Domnule Popescu, vânzătorul a acceptat 92.000. Vă felicit. Acum vă spun exact ce urmează, ca să nu vă surprindă nimic. Astăzi trimit lista de documente vânzătorului. Vineri la 17 semnăm antecontractul la biroul notarial X. Aduceți buletinul și 5.000 de euro arvună — restul de avans se dă la autentic. În antecontract punem clauza că, dacă banca vă refuză creditul în scris până pe 20 octombrie, primiți arvuna înapoi integral. Aveți dosarul depus la bancă? Dacă nu, luni îl depuneți — de asta depinde tot calendarul. Data la notar o punem pe 15 noiembrie. Și încă ceva important: până în ziua aceea nu luați nicio rată nouă, nu deschideți card, nu schimbați locul de muncă. Banca reverifică înainte de semnare. Vă sun în fiecare marți la 10, să vă spun unde suntem. Aveți întrebări acum?"
+> „Domnule Popescu, vânzătorul a acceptat 92.000. Vă felicit. Acum vă spun exact ce urmează, ca să nu vă surprindă nimic. Astăzi trimit lista de documente vânzătorului. Vineri la 17 semnăm antecontractul la biroul notarial X. Aduceți buletinul și 5.000 de euro arvună — nu e un avans, e o garanție, dar dacă mergem până la capăt se scade din preț. Cui se dau banii și cum, scriem negru pe alb în antecontract. Restul din partea dumneavoastră, peste credit, se plătește la autentic. În antecontract punem clauza că, dacă banca vă refuză creditul în scris până pe 5 noiembrie, primiți arvuna înapoi integral. Aveți dosarul depus la bancă? Dacă nu, luni îl depuneți — de asta depinde tot calendarul. Data la notar o punem pe 15 noiembrie. Și încă ceva important: până în ziua aceea nu luați nicio rată nouă, nu deschideți card, nu schimbați locul de muncă. Banca reverifică înainte de semnare. Vă sun în fiecare marți la 10, să vă spun unde suntem. Aveți întrebări acum?"
 
 ## Când se împotmolește: cele patru blocaje clasice
 
@@ -619,11 +633,11 @@ Diferența nu stă în negociere (modulul 6) și nici în prezentarea de listing
 
 ## Baza de date e singurul activ care rămâne al tău
 
-Portalul e închiriat. Pagina de Facebook e a lui Meta. Numărul de telefon al agenției e al agenției. Singurul lucru care rămâne al tău dacă mâine schimbi biroul e lista de oameni care te cunosc și te-ar recomanda.
+Portalul — site-ul de anunțuri unde agenția plătește abonament (OLX, Storia, Imobiliare.ro) — e închiriat. Pagina de Facebook e a lui Meta. Numărul de telefon al agenției e al agenției. Singurul lucru care rămâne al tău dacă mâine schimbi biroul e lista de oameni care te cunosc și te-ar recomanda.
 
-Cum arată o bază de date funcțională la un agent de 1-2 ani — de regulă **150-300 de contacte reale**, nu 3.000 de numere cumpărate (alea nu valorează nimic și te expun legal). Pentru fiecare contact ai nevoie de patru lucruri: sursa, data ultimei discuții, despre ce ați vorbit ultima oară și un detaliu personal — copil la școală în cartier, renovează bucătăria, vinde peste doi ani când termină creditul.
+O bază de date funcțională, la un agent de 1-2 ani, înseamnă de regulă **150-300 de contacte reale**. Nu 3.000 de numere cumpărate: alea nu valorează nimic și te expun legal — pentru mesaje de marketing ai nevoie de acordul explicit al omului, iar la numerele cumpărate nu îl ai. Pentru fiecare contact ai nevoie de patru lucruri: sursa, data ultimei discuții, despre ce ați vorbit ultima oară și un detaliu personal — copil la școală în cartier, renovează bucătăria, vinde peste doi ani când termină creditul.
 
-Un CRM e ideal. Un tabel bine ținut e acceptabil. Trei caiete și memoria telefonului nu sunt o bază de date.
+Un CRM e ideal — un program în care ții contactele și care îți dă singur alarmă când e vremea să suni pe cineva (întreabă la agenție ce folosesc colegii). Un tabel bine ținut — în Excel sau Google Sheets — e acceptabil. Trei caiete și memoria telefonului nu sunt o bază de date.
 
 Partea legală: ai voie să ții datele cuiva doar dacă ai un motiv permis de lege — la o listă de contacte ca a ta, de regulă acordul lui; pentru mesaje de marketing ai nevoie de acordul lui explicit și trebuie să poți șterge datele când omul îți cere asta. Regulile GDPR și interpretările lor se schimbă — pune formularul și textul de consimțământ să fie verificate de un specialist, nu le copia de pe internet.
 
@@ -651,7 +665,7 @@ Detaliul care face diferența: ceri **un nume**, dintr-un grup precis. „Dacă 
 
 **1. Pâlnia ta** — adică drumul pe care îl face un om de la primul contact până la semnătură: contacte → întâlniri → contracte de intermediere → tranzacții. Ca ordin de mărime, la un agent nou, din zece contacte venite de pe portal ajunge cam unul la o întâlnire serioasă — adică cu un om care chiar are ce vinde sau bani ca să cumpere — iar din trei prezentări în fața proprietarului iese cam un contract de intermediere. Dacă tu ești mult sub, problema e o etapă anume, nu volumul — dar o vezi doar dacă numeri.
 
-**2. Costul per lead și per tranzacție.** Dacă dai 400 EUR pe lună pe promovare și scoți 30 de contacte, ai ~13 EUR pe contact. Dacă din trei luni de promovare iese o tranzacție care îți aduce, să zicem, 1.400 EUR înainte de taxe, ai cheltuit 1.200 ca să câștigi 1.400. Ăla nu e business, e hobby scump. O recomandare costă zero.
+**2. Costul per contact și per tranzacție.** Dacă dai 400 EUR pe lună pe promovare și scoți 30 de contacte, ai ~13 EUR pe contact. Dacă din trei luni de promovare iese o tranzacție care îți aduce, să zicem, 1.400 EUR înainte de taxe, ai cheltuit 1.200 ca să câștigi 1.400. Ăla nu e business, e hobby scump. O recomandare costă zero.
 
 **3. Venitul pe oră.** Zece tranzacții pe an, preț mediu 120.000 EUR, comision de agenție 2,5% = 3.000 EUR, din care agentul ia, uzual, 40-60%. La 45% ≈ 1.350 EUR pe tranzacție, deci ~13.500 EUR pe an, brut, înainte de taxe. Împărțit la vreo 2.200 de ore lucrate: în jur de 6 EUR pe oră. Nu e plăcut, dar e util — îți arată că problema nu e că muncești puțin, ci ce fel de ore aduni. Regimul fiscal (PFA sau SRL, TVA la comision, CAS și CASS) îl discuți cu un contabil, nu cu colegii de birou.
 
@@ -672,3 +686,4 @@ Trei lucruri care chiar funcționează: ore de disponibilitate scrise în semnă
 - Recomandarea se cere explicit, la 5-7 zile după notar, și se cere **un nume**, nu „pe cineva".
 - Măsoară trei cifre lunar: pâlnia, costul per tranzacție și venitul pe oră. Fără ele lucrezi pe ghicite.
 - Ține-ți orele și țintele pe activitate, nu pe rezultat — cariera se face în ani, nu în luni.
+
