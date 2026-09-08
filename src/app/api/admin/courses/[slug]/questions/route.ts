@@ -185,6 +185,9 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ slug: str
           options: Array.isArray(q.options) ? (q.options as unknown[]).map(String) : [],
           correctAnswer: String(q.correctAnswer ?? "").trim(),
           explanation: q.explanation ? String(q.explanation) : undefined,
+          // Lecția merge cu întrebarea la judecător: fără ea, o afirmație corectă
+          // din materialul nostru e respinsă ca neverificabilă (vezi GateCandidate).
+          sourceText: material,
         }))
         // A four-option question whose correct answer is not among the options is
         // not a borderline case for the judge to weigh — it is malformed, and it

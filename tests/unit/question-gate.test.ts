@@ -23,6 +23,23 @@ describe("the gate on AI-generated questions", () => {
     expect(out.rejected[0].defect).toBe("wrong-answer");
   });
 
+  it("duce lecția la judecător, ca răspunsul să poată fi verificat pe sursă", async () => {
+    // Judecătorii cer ca răspunsul să fie derivabil din sursă — dar poarta nu le
+    // dădea niciuna, deci judecau din cunoștințe generale. La un curs despre
+    // practica de la ghișeu, o afirmație corectă din lecție se respingea ca
+    // „factual unverifiable" (măsurat pe demo-ul Poșta, 2026-09-08).
+    finalJudge.mockResolvedValue({ pass: true, reason: "", defect: null });
+
+    await gateGeneratedQuestions([{ ...q("cu sursă"), sourceText: "Suni înainte de a scrie avizul." }]);
+    expect(finalJudge.mock.calls[0][0]).toMatchObject({ sourceText: "Suni înainte de a scrie avizul." });
+
+    // Fără sursă, comportamentul rămâne exact cel de dinainte.
+    finalJudge.mockReset();
+    finalJudge.mockResolvedValue({ pass: true, reason: "", defect: null });
+    await gateGeneratedQuestions([q("fără sursă")]);
+    expect(finalJudge.mock.calls[0][0].sourceText).toBeUndefined();
+  });
+
   it("fails CLOSED when the judge is unreachable", async () => {
     // The whole point. An unreachable verifier reading as "approved" is the
     // failure that produced the defective bank in the first place — and the one

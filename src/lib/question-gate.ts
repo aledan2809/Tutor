@@ -23,6 +23,18 @@ export interface GateCandidate {
   options?: string[];
   correctAnswer: string;
   explanation?: string | null;
+  /**
+   * Lecția din care a fost scoasă întrebarea.
+   *
+   * Judecătorii cer de la ei înșiși ca răspunsul să fie „derivable from the Source
+   * ALONE" — dar poarta nu le dădea nicio sursă, deci judecau din cunoștințe
+   * generale. La matematică de bacalaureat merge; la un curs despre practica de
+   * la ghișeu, nu: o afirmație corectă din lecție se respinge ca „factual
+   * unverifiable". Măsurat pe demo-ul Poșta, 2026-09-08: 1-4 grile păstrate din 8
+   * cerute, cu motive de genul ăsta. Opțional: fără el, comportamentul rămâne
+   * exact cel de dinainte.
+   */
+  sourceText?: string;
 }
 
 export interface GateRejection {
@@ -54,6 +66,7 @@ export async function gateGeneratedQuestions<T extends GateCandidate>(
           options: q.options,
           correctAnswer: q.correctAnswer,
           explanation: q.explanation ?? undefined,
+          sourceText: q.sourceText,
         };
         try {
           return await finalJudge(forMesh);
