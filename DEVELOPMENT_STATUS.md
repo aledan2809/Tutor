@@ -42,6 +42,31 @@ costul în timp spus pe față.
   producție). Cuid-ul nu se ghicește, deci secretul practic ține, dar cele două căi ar
   trebui să răspundă la fel. Notat în TODO.
 
+### Verificare + TWG (2026-09-09)
+Verificarea mea pe pagina live a scos un defect care nu era al demo-ului, ci al site-ului:
+**`PolicyFooter` importa `Link` din `next/link`**, deci `/privacy`, `/terms`, `/cookies` se
+randau fără prefixul de limbă și răspundeau **404** pe fiecare pagină internă — exact banda
+al cărei scop declarat, în propriul ei comentariu, e ca politicile să rămână accesibile după
+ce omul închide bannerul. Bannerul de cookie-uri, deasupra ei, făcea corect.
+
+Reparat prin bucla TRWG (`loop_trwg_mttrg8kk_7kqlla`), commit `9c6a851`, deployat și verificat
+live: subsolul dă acum `/ro/privacy|terms|cookies` → 200, iar `/en/posta` are titlu în engleză
+(`generateMetadata` pe limbă).
+
+**Ca să pornească TWG cu toate straturile a fost nevoie de o corecție** (lecția L547 în Master):
+prima lansare, deși detașată și cu mediul curățat exact cum cere L340, a raportat
+`nested-session-hook-conflict`. Nu era imbricare — scriptul făcea `cd ~/Projects/Master`, iar
+`claude` moștenește directorul și încarcă hook-urile proiectului; hook-ul `SessionEnd` scrie
+`Hook cancelled` pe stderr **și când apelul reușește** (măsurat: exit 0, `is_error:false`).
+Lansat din `/tmp`: `guruVisionBlocked:false`, 10 iterații, zero avertismente.
+
+Din ce a scris Website Guru am păstrat reparațiile și am aruncat colateralele: un `pb-36` pus în
+layout pe TOATE paginile, un `pb-[env(safe-area-inset-bottom,0px)]` care suprascria padding-ul de
+jos al lui `p-4` cu 0 pe telefoanele fără notch, o restructurare a subsolului cu `aria-label` în
+engleză pe pagina românească, și o schimbare de copy nesolicitată. Cele trei constatări ale
+stratului `/review` (rulat pe Ollama local) erau zgomot — parametri tipați „ar putea să nu fie
+string", un array literal static „ar putea avea câmpuri nedefinite" — respinse, nu aplicate.
+
 ### Deschis
 Generarea grilelor rulează **pe VPS, direct pe :3013** — prin nginx nu se poate: un modul
 de 8 grile ia ~19 minute, iar `proxy_read_timeout` e 300s (504 la prima încercare).
