@@ -1001,5 +1001,8 @@
   "howItWorks": {
     "title": "How it works",
     "more": "Details in Help"
+  },
+  "practice": {
+    "courseGate": "Finish a lesson to unlock the test for its module."
   }
 }

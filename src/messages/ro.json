@@ -1001,5 +1001,8 @@
   "howItWorks": {
     "title": "Cum funcționează",
     "more": "Detalii în Ajutor"
+  },
+  "practice": {
+    "courseGate": "Termină o lecție ca să se deschidă testul modulului ei."
   }
 }

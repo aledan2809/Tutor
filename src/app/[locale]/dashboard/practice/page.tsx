@@ -45,6 +45,13 @@ export default function PracticePage() {
   const [selectedDomain, setSelectedDomain] = useState<string>("");
   const [curriculumSetupNeeded, setCurriculumSetupNeeded] = useState(false);
   const [gateReason, setGateReason] = useState<"setup" | "empty" | null>(null);
+  /**
+   * Poarta de modul („testezi doar din ce ai parcurs") răspunde 409 cu o explicație.
+   * Până acum niciun `if` nu o prindea, deci apelul cădea în `else`, sesiunea nu
+   * pornea și pe ecran nu apărea nimic — omul apasă și e tăcere, ceea ce se citește
+   * ca aplicație stricată. Mesajul vine de la server, care știe DE CE a refuzat.
+   */
+  const [startNotice, setStartNotice] = useState<string | null>(null);
   const [domains, setDomains] = useState<DomainOpt[]>([]);
   // A1: when the student has no practiceable subject, offer the catalog inline so
   // they pick + start on the spot instead of being sent "to your account".
@@ -138,6 +145,7 @@ export default function PracticePage() {
   const handleSelect = async (type: string) => {
     setStarting(true);
     try {
+      setStartNotice(null);
       const res = await fetch(`/api/${selectedDomain}/session/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -159,6 +167,11 @@ export default function PracticePage() {
         setCurriculumSetupNeeded(true);
         setStarting(false);
         window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      if (res.status === 409 && session.emptyBecauseCourse) {
+        setStartNotice(session.hint || t("practice.courseGate"));
+        setStarting(false);
         return;
       }
       if (session.sessionId) {
@@ -303,6 +316,15 @@ export default function PracticePage() {
           {/* Above the checklist, not inside it: the checklist renders null until it
               has state, so a message placed inside would be invisible exactly when
               it is needed. */}
+          {startNotice && (
+            <div
+              role="status"
+              className="mb-3 rounded-lg border border-amber-800 bg-amber-950/20 px-3 py-2 text-sm text-amber-200"
+            >
+              {startNotice}
+            </div>
+          )}
+
           {gateReason && (
             <div
               role="status"
