@@ -101,6 +101,9 @@ export default async function AdminOverviewPage() {
             <QuickAction href="/dashboard/admin/questions/generate" label={t("aiGenerate")} accent="purple" />
             <QuickAction href="/dashboard/admin/questions/import" label={t("bulkImport")} />
             <QuickAction href="/dashboard/admin/domains/new" label={t("newDomain")} accent="green" />
+            {/* Fără intrarea asta pagina ar exista fără ușă — exact defectul prins
+                la lecții (`b0a9351`), care se repetă ușor. */}
+            <QuickAction href="/dashboard/admin/invitatii" label={t("sendInvite")} accent="green" />
             {draftCount > 0 && (
               <QuickAction
                 href="/dashboard/admin/questions/review"

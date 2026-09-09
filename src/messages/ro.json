@@ -431,7 +431,8 @@
     "domainsRoles": "Domenii și roluri",
     "examBankViewTitle": "Bancă examene (vizualizare)",
     "panelTitle": "Administrare",
-    "superadminTitle": "Panou SuperAdmin"
+    "superadminTitle": "Panou SuperAdmin",
+    "sendInvite": "Trimite invitație"
   },
   "session": {
     "practice": "Practică",

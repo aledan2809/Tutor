@@ -431,7 +431,8 @@
     "domainsRoles": "Domains & Roles",
     "examBankViewTitle": "Exam bank (view only)",
     "panelTitle": "Admin Dashboard",
-    "superadminTitle": "SuperAdmin Panel"
+    "superadminTitle": "SuperAdmin Panel",
+    "sendInvite": "Send invite"
   },
   "session": {
     "practice": "Practice",
