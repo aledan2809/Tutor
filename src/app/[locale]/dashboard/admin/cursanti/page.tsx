@@ -2,6 +2,16 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
+import { agregaGreseliPeModul, procentGreseli } from "@/lib/roster-aggregate";
+
+/**
+ * Numere ca în românește, pe un ecran care la un client mare arată patru cifre.
+ * `1234 cursanți` e greșit gramatical (de la 20 în sus se cere „de") și greu de citit
+ * fără separator de mii.
+ */
+const nr = (n: number) => n.toLocaleString("ro-RO");
+const subst = (n: number, singular: string, plural: string) =>
+  n === 1 ? singular : n % 100 >= 20 || n % 100 === 0 ? `de ${plural}` : plural;
 import { Roster, type RosterRow, type ModuleCol } from "./roster";
 
 /**
@@ -177,6 +187,18 @@ export default async function CursantiPage({
 
   const cols: ModuleCol[] = modules.map((m) => ({ id: m.id, order: m.order, title: m.title }));
 
+  /*
+   * Pe ce modul se greșește cel mai mult — pe toată grupa, nu pe om.
+   * Calculul stă în `roster-aggregate.ts` ca să poată fi probat cu teste: pagina
+   * asta cere autentificare, deci altfel singura verificare ar fi fost privitul cu
+   * ochii, care nu prinde un raport inversat sau o împărțire la zero.
+   * Se folosesc încercările deja aduse pentru tablou — nicio interogare în plus.
+   */
+  const agregatPeModul = agregaGreseliPeModul(
+    modules,
+    attempts.map((a) => ({ userId: a.userId, isCorrect: a.isCorrect, topic: a.question.topic })),
+  );
+
   /** Celulele pe module pentru un utilizator — aceleași, indiferent de unde vine rândul. */
   const celule = (userId: string | null) => {
     const done = userId ? doneByUser.get(userId) : undefined;
@@ -306,6 +328,42 @@ export default async function CursantiPage({
             </Link>
           ))}
         </div>
+      )}
+
+      {agregatPeModul.length > 0 && (
+        <section className="rounded-xl border border-gray-800 bg-gray-900/60 p-5">
+          <h2 className="text-base font-semibold text-gray-100">Pe ce modul se greșește cel mai mult</h2>
+          <p className="mt-1 text-xs text-gray-500">
+            Pe toată grupa, nu pe om. Se numără încercările greșite, nu oamenii — coloana
+            din dreapta spune câți cursanți au ajuns la modul.
+          </p>
+          <ul className="mt-4 space-y-2.5">
+            {agregatPeModul.map((m) => {
+              const pct = procentGreseli(m);
+              const culoare = pct >= 50 ? "bg-red-500" : pct >= 30 ? "bg-amber-500" : "bg-emerald-500";
+              return (
+                <li key={m.moduleId} className="text-sm">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="text-gray-200">
+                      <span className="text-gray-500">M{m.ordine} · </span>
+                      {m.titlu}
+                    </span>
+                    <span className="shrink-0 tabular-nums text-gray-400">
+                      <span className="font-semibold text-gray-200">{pct}%</span> greșit
+                      <span className="ml-2 text-xs text-gray-600">
+                        {nr(m.greseli)}/{nr(m.total)} {subst(m.total, "răspuns", "răspunsuri")} ·{" "}
+                        {nr(m.cursanti)} {subst(m.cursanti, "cursant", "cursanți")}
+                      </span>
+                    </span>
+                  </div>
+                  <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-gray-800">
+                    <div className={`h-full ${culoare}`} style={{ width: `${pct}%` }} />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       )}
 
       <Roster rows={rows} cols={cols} domainId={active.id} />
