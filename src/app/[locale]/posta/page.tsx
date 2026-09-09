@@ -351,7 +351,7 @@ const PRINT_CSS = `
 
   /* Marginea de jos e mărită ca să încapă subsolul repetat de mai jos.
      Fără ea, textul ar trece pe sub el pe fiecare pagină. */
-  @page { margin: 14mm 14mm 22mm 14mm; }
+  @page { margin: 24mm 14mm 25mm 14mm; }
 
   /*
     Datele firmei pe FIECARE pagină, nu doar pe ultima: paginile unui document
@@ -369,6 +369,28 @@ const PRINT_CSS = `
     font-size: 8.5pt;
     line-height: 1.35;
   }
+  /*
+    Antetul repetat. Regulile stau lângă cele de subsol și din același motiv: la
+    specificitate egală cu \`[data-posta] *\`, dar mai jos în fișier, deci câștigă.
+
+    Antetul de ecran se ascunde ca să nu iasă de două ori pe prima pagină. Marginea de
+    sus din \`@page\` a crescut de la 14 la 20 mm ca textul să nu treacă pe sub el.
+  */
+  [data-posta] .posta-ecran-header { display: none !important; }
+  .posta-print-header {
+    display: flex !important;
+    position: fixed !important;
+    top: 0; left: 0; right: 0;
+    align-items: center; justify-content: space-between;
+    border-bottom: 1px solid #d1d5db !important;
+    padding-bottom: 5px;
+  }
+  .posta-print-marca {
+    font-size: 11pt; font-weight: 700; letter-spacing: -.01em;
+    color: #111827 !important;
+  }
+  .posta-print-header-logo { height: 24px; width: auto; }
+
   .posta-print-footer, .posta-print-footer * { color: #4b5563 !important; }
   .posta-print-footer strong { color: #1f2937 !important; }
 }
@@ -963,7 +985,7 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
         „Autentificare" a coborât la finalul paginii: aici concura cu logo-ul clientului
         și oricum nu e pentru decident.
       */}
-      <header className="border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm">
+      <header className="posta-ecran-header border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
           <Link href="/" aria-label="eTUTOR.ro" className="inline-flex min-h-[44px] items-center">
             <Brand className="text-xl" />
@@ -1331,6 +1353,26 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
             {CONTACT_TEL_AFISAT}
           </p>
         </div>
+      </div>
+
+      {/*
+        Antetul, repetat pe FIECARE pagină tipărită — cerut de user după ce a văzut că
+        vechea randare punea doar subsolul pe toate foile. Aceeași unealtă ca la subsol:
+        un element `position: fixed`, singurul mecanism prin care motorul de tipărire
+        repetă ceva pe toate paginile.
+
+        Motivul e același ca la subsol: paginile unui document se despart pe drum. O foaie
+        ruptă din teanc trebuie să spună cine vorbește și cui i se adresează — altfel e o
+        pagină anonimă.
+      */}
+      <div className="posta-print-header hidden">
+        <span className="posta-print-marca">eTUTOR.ro</span>
+        {logoPosta ? (
+          /* eslint-disable-next-line @next/next/no-img-element -- fișier statuar din public/ */
+          <img src={logoPosta} alt="Poșta Română" className="logo-posta posta-print-header-logo" />
+        ) : (
+          <span className="posta-print-marca">Poșta Română</span>
+        )}
       </div>
 
       {/*
