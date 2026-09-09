@@ -41,6 +41,9 @@ export function QuestionRenderer({
   instantAnswer = false,
 }: QuestionRendererProps) {
   const t = useTranslations("grile");
+  // Butonul de trimitere avea textul scris direct în cod, în engleză, deși
+  // traducerea exista de mult — doar în alt spațiu de nume decât cel folosit aici.
+  const tSession = useTranslations("session");
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [openAnswer, setOpenAnswer] = useState("");
   const [showPassage, setShowPassage] = useState(false);
@@ -207,7 +210,7 @@ export function QuestionRenderer({
           disabled={disabled || dictating || filled < audioItems.length}
           className="min-h-[44px] w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Submit Answer
+          {tSession("submitAnswer")}
         </button>
       </div>
     );
@@ -253,7 +256,7 @@ export function QuestionRenderer({
           disabled={disabled || !clockH || !clockM}
           className="min-h-[44px] w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Submit Answer
+          {tSession("submitAnswer")}
         </button>
       </div>
     );
@@ -375,7 +378,7 @@ export function QuestionRenderer({
         }
         className="min-h-[44px] w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        Submit Answer
+        {tSession("submitAnswer")}
       </button>
       )}
     </div>

@@ -63,7 +63,7 @@ export default function LessonDetailPage() {
     setError(null);
     fetch(`/api/student/lessons/${params.id}`)
       .then((r) => {
-        if (!r.ok) throw new Error("Failed to load lesson");
+        if (!r.ok) throw new Error("LOAD_FAILED");
         return r.json();
       })
       .then(setLesson)
@@ -108,13 +108,13 @@ export default function LessonDetailPage() {
   }, [params?.id, markingProgress]);
 
   if (loading) {
-    return <div className="py-12 text-center text-gray-500">Loading...</div>;
+    return <div className="py-12 text-center text-gray-500">{t("common.loading")}</div>;
   }
 
   if (error || !lesson) {
     return (
       <div className="py-12 text-center text-gray-500">
-        {error || "Lesson not found."}
+        {error === "LOAD_FAILED" ? t("lessons.loadFailed") : t("lessons.notFound")}
       </div>
     );
   }
@@ -128,7 +128,7 @@ export default function LessonDetailPage() {
         onClick={() => router.push("/dashboard/lessons")}
         className="text-sm text-gray-400 hover:text-white"
       >
-        &larr; Back to Lessons
+        {t("lessons.backToLessons")}
       </button>
 
       <div>
@@ -142,10 +142,10 @@ export default function LessonDetailPage() {
           )}
           {lesson.difficulty && (
             <span className="rounded bg-gray-800 px-2 py-0.5">
-              Difficulty: {lesson.difficulty}
+              {t("lessons.difficulty")}: {lesson.difficulty}
             </span>
           )}
-          {lesson.estimatedMinutes && <span>{lesson.estimatedMinutes} min read</span>}
+          {lesson.estimatedMinutes && <span>{t("lessons.minRead", { n: lesson.estimatedMinutes })}</span>}
         </div>
         <h1 className="text-2xl font-bold text-white">{lesson.name}</h1>
         {lesson.description && (
@@ -168,7 +168,7 @@ export default function LessonDetailPage() {
                 isCompleted ? "text-green-400" : "text-blue-400"
               }`}
             >
-              {isCompleted ? "Completed" : "In Progress"}
+              {isCompleted ? t("lessons.statusCompleted") : t("lessons.statusInProgress")}
             </span>
             {!isCompleted && (
               <span className="text-xs text-gray-500">
@@ -188,26 +188,26 @@ export default function LessonDetailPage() {
       {lesson.progress && (
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
           <h2 className="mb-3 text-sm font-semibold text-gray-400">
-            Topic Mastery
+            {t("lessons.topicMastery")}
           </h2>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <p className="text-xl font-bold text-white">
                 {lesson.progress.mastery}%
               </p>
-              <p className="text-xs text-gray-500">Mastery</p>
+              <p className="text-xs text-gray-500">{t("lessons.mastery")}</p>
             </div>
             <div>
               <p className="text-xl font-bold text-white">
                 {lesson.progress.accuracy}%
               </p>
-              <p className="text-xs text-gray-500">Accuracy</p>
+              <p className="text-xs text-gray-500">{t("lessons.accuracy")}</p>
             </div>
             <div>
               <p className="text-xl font-bold text-white">
                 {lesson.progress.totalAttempts}
               </p>
-              <p className="text-xs text-gray-500">Attempts</p>
+              <p className="text-xs text-gray-500">{t("lessons.attempts")}</p>
             </div>
           </div>
           <div className="mt-3 h-2 rounded-full bg-gray-700">
@@ -224,7 +224,7 @@ export default function LessonDetailPage() {
           </div>
           {lesson.progress.nextReview && (
             <p className="mt-2 text-xs text-gray-500">
-              Next review:{" "}
+              {t("lessons.nextReview")}:{" "}
               {new Date(lesson.progress.nextReview).toLocaleDateString()}
             </p>
           )}
@@ -273,7 +273,7 @@ export default function LessonDetailPage() {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-4 py-2 text-sm text-blue-400 hover:bg-gray-800"
         >
-          Open resource
+          {t("lessons.openResource")}
           <svg
             className="h-4 w-4"
             fill="none"
@@ -306,7 +306,7 @@ export default function LessonDetailPage() {
           disabled={markingProgress}
           className="w-full rounded-lg bg-green-600 px-4 py-3 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
         >
-          {markingProgress ? "Saving..." : "Mark as Complete"}
+          {markingProgress ? t("lessons.saving") : t("lessons.markComplete")}
         </button>
       )}
 
@@ -314,14 +314,13 @@ export default function LessonDetailPage() {
       {lesson.questionsAvailable > 0 && (
         <div className="rounded-xl border border-blue-600/30 bg-blue-600/5 p-4">
           <p className="text-sm text-gray-400">
-            {lesson.questionsAvailable} practice questions available for this
-            topic.
+            {t("lessons.questionsAvailable", { n: lesson.questionsAvailable })}
           </p>
           <button
             onClick={() => router.push("/dashboard/practice")}
             className="mt-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
           >
-            Practice Now
+            {t("lessons.practiceNow")}
           </button>
         </div>
       )}

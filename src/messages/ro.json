@@ -817,7 +817,24 @@
     "noAccess": "Materia asta nu e disponibilă pentru contul tău. Dacă ai primit un cod de acces, folosește-l la Domenii → Alătură-te.",
     "completeFailed": "Nu am putut salva. Încearcă din nou; dacă se repetă, materia nu e disponibilă pentru contul tău.",
     "onlyQuestions": "Materia asta nu are lecții — conținutul ei sunt grilele.",
-    "goToPractice": "Mergi la Grile"
+    "goToPractice": "Mergi la Grile",
+    "backToLessons": "← Înapoi la lecții",
+    "notFound": "Lecția nu a fost găsită.",
+    "loadFailed": "Nu am putut încărca lecția.",
+    "difficulty": "Dificultate",
+    "minRead": "{n} min de citit",
+    "statusCompleted": "Terminată",
+    "statusInProgress": "În curs",
+    "topicMastery": "Cât stăpânești tema",
+    "mastery": "Stăpânire",
+    "accuracy": "Răspunsuri corecte",
+    "attempts": "Încercări",
+    "nextReview": "Următoarea recapitulare",
+    "openResource": "Deschide materialul",
+    "questionsAvailable": "{n} întrebări de exersat pe tema asta.",
+    "practiceNow": "Exersează acum",
+    "markComplete": "Am terminat lecția",
+    "saving": "Se salvează…"
   },
   "remarks": {
     "lines": {

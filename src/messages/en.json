@@ -817,7 +817,24 @@
     "noAccess": "This subject is not available for your account. If you were given an access code, use it under Domains → Join.",
     "completeFailed": "Could not save. Try again; if it keeps failing, this subject is not available for your account.",
     "onlyQuestions": "This subject has no lessons — its content is the question bank.",
-    "goToPractice": "Go to Questions"
+    "goToPractice": "Go to Questions",
+    "backToLessons": "← Back to lessons",
+    "notFound": "Lesson not found.",
+    "loadFailed": "Could not load the lesson.",
+    "difficulty": "Difficulty",
+    "minRead": "{n} min read",
+    "statusCompleted": "Completed",
+    "statusInProgress": "In progress",
+    "topicMastery": "Topic mastery",
+    "mastery": "Mastery",
+    "accuracy": "Accuracy",
+    "attempts": "Attempts",
+    "nextReview": "Next review",
+    "openResource": "Open resource",
+    "questionsAvailable": "{n} practice questions on this topic.",
+    "practiceNow": "Practice now",
+    "markComplete": "I finished the lesson",
+    "saving": "Saving…"
   },
   "remarks": {
     "lines": {
