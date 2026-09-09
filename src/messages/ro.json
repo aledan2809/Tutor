@@ -432,7 +432,8 @@
     "examBankViewTitle": "Bancă examene (vizualizare)",
     "panelTitle": "Administrare",
     "superadminTitle": "Panou SuperAdmin",
-    "sendInvite": "Trimite invitație"
+    "sendInvite": "Trimite invitație",
+    "roster": "Cursanți"
   },
   "session": {
     "practice": "Practică",

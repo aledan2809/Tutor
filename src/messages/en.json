@@ -432,7 +432,8 @@
     "examBankViewTitle": "Exam bank (view only)",
     "panelTitle": "Admin Dashboard",
     "superadminTitle": "SuperAdmin Panel",
-    "sendInvite": "Send invite"
+    "sendInvite": "Send invite",
+    "roster": "Learners"
   },
   "session": {
     "practice": "Practice",

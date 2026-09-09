@@ -104,6 +104,7 @@ export default async function AdminOverviewPage() {
             {/* Fără intrarea asta pagina ar exista fără ușă — exact defectul prins
                 la lecții (`b0a9351`), care se repetă ușor. */}
             <QuickAction href="/dashboard/admin/invitatii" label={t("sendInvite")} accent="green" />
+            <QuickAction href="/dashboard/admin/cursanti" label={t("roster")} />
             {draftCount > 0 && (
               <QuickAction
                 href="/dashboard/admin/questions/review"
