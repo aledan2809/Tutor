@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { Brand } from "@/components/Brand";
@@ -164,6 +166,35 @@ type Copy = {
   finalCursant: string;
 };
 
+/**
+ * Logo-urile din antet și subsol.
+ *
+ * Se randează DOAR dacă fișierul chiar există în `public/`. Motivul e practic: la
+ * scrierea paginii nu aveam niciunul dintre cele două fișiere, iar un `<img>` către
+ * un fișier absent afișează pictograma de imagine ruptă — exact pe documentul care
+ * ajunge la conducerea clientului. Cu verificarea de mai jos, pagina arată curat cu
+ * text până când cineva copiază fișierul, și se schimbă singură în clipa în care îl
+ * copiază. Nicio altă modificare de cod.
+ *
+ * E o citire de disc la randare, într-o componentă de server, pe o pagină publică și
+ * rar cerută — nu merită complicație în plus.
+ */
+const LOGO_POSTA = "/posta/logo-posta-romana.png";
+const LOGO_KNOWHOW = "/posta/logo-know-how.png";
+
+/** Adevărat dacă fișierul public chiar e pe disc. Alternativele acceptate: .png, .svg, .webp. */
+function logoExistent(caleaPublica: string): string | null {
+  const fara = caleaPublica.replace(/\.[a-z0-9]+$/i, "");
+  for (const ext of [".svg", ".png", ".webp", ".jpg"]) {
+    const cale = fara + ext;
+    if (existsSync(path.join(process.cwd(), "public", cale.replace(/^\//, "")))) return cale;
+  }
+  return null;
+}
+
+/** Grupul din care face parte furnizorul, cerut în subsol. */
+const CONSORTIU = "part of Know How Consortium";
+
 /** Datele firmei, așa cum le ține Legal Hub pentru aplicația `tutor` (biller + controller). */
 const FURNIZOR = "Class RDA Impex SRL";
 const CONTACT_MAIL = "office@etutor.ro";
@@ -229,6 +260,38 @@ const PRINT_CSS = `
   */
   [data-posta] .text-emerald-300 { color: #047857 !important; }
   [data-posta] .text-red-300 { color: #b91c1c !important; }
+
+  /*
+    Logo-ul Poștei, așa cum îl publică ei, e ALB pe fond transparent — făcut pentru un
+    antet închis. Pe pagina noastră (întunecată) arată corect; pe hârtia albă a PDF-ului
+    ar fi dispărut complet, iar antetul ar fi rămas cu marca noastră singură, exact pe
+    documentul care ajunge la ei.
+
+    Măsurat înainte de a alege soluția: fișierul e monocrom, 32.576 de pixeli opaci de o
+    singură culoare, alb pur. Deci \`brightness(0)\` îl face negru fără să strice nimic —
+    ceea ce la un logo colorat NU ar fi fost adevărat.
+  */
+  [data-posta] .logo-posta { filter: brightness(0) !important; }
+
+  /*
+    Subsolul de sfârșit. Fără regula asta se rupea între foi — numele firmei rămânea
+    pe ultima pagină de conținut, iar consorțiul, contactul și logo-ul treceau singure
+    pe o foaie nouă, aproape goală. Un bloc de semnătură rupt în două arată a greșeală
+    de tipar, nu a document îngrijit. Prins uitându-mă la PDF, la pagina 11.
+  */
+  /*
+    Blocul mare de semnătură e pentru ECRAN. La tipar se ascunde: subsolul repetat de
+    mai jos spune deja firma, consorțiul și contactul pe FIECARE pagină, iar blocul
+    mare mai cerea o foaie întreagă pentru un rând de text — a 11-a pagină a PDF-ului
+    era goală în proporție de 90%. Logo-ul, ca să nu se piardă, a trecut în subsolul
+    repetat, deci acum apare pe toate paginile, nu pe una.
+  */
+  [data-posta] .posta-subsol { display: none !important; }
+
+  .posta-print-logo {
+    height: 13px; width: auto; vertical-align: -2px;
+    margin-right: 7px; display: inline-block;
+  }
   /*
     Așezarea în pagini. Regula de dinainte era \`section { break-inside: avoid }\`, care
     arunca o secțiune ÎNTREAGĂ pe foaia următoare dacă nu încăpea — măsurat pe PDF-ul
@@ -888,21 +951,29 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
   const { locale } = await params;
   const c = locale === "en" ? EN : RO;
   const mailto = `mailto:${CONTACT_MAIL}?subject=${encodeURIComponent(c.contactSubiect)}`;
+  const logoPosta = logoExistent(LOGO_POSTA);
+  const logoKnowHow = logoExistent(LOGO_KNOWHOW);
 
   return (
     <div data-posta className="min-h-screen bg-gray-950 text-gray-100">
       <style>{PRINT_CSS}</style>
+      {/*
+        Antetul e al ÎNTÂLNIRII, nu al site-ului: marca noastră în stânga, a clientului
+        în dreapta — cerut de user, ca omul de la Poșta să-și vadă casa pe document.
+        „Autentificare" a coborât la finalul paginii: aici concura cu logo-ul clientului
+        și oricum nu e pentru decident.
+      */}
       <header className="border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
           <Link href="/" aria-label="eTUTOR.ro" className="inline-flex min-h-[44px] items-center">
             <Brand className="text-xl" />
           </Link>
-          <Link
-            href="/auth/signin"
-            className="inline-flex min-h-[44px] items-center rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:border-gray-500 print:hidden"
-          >
-            {c.ctaIn}
-          </Link>
+          {logoPosta ? (
+            /* eslint-disable-next-line @next/next/no-img-element -- fișier statuar din public/, fără optimizare */
+            <img src={logoPosta} alt="Poșta Română" className="logo-posta h-9 w-auto object-contain" />
+          ) : (
+            <span className="text-sm font-semibold tracking-wide text-gray-300">Poșta Română</span>
+          )}
         </div>
       </header>
 
@@ -1230,13 +1301,55 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
       </main>
 
       {/*
+        Subsolul paginii. NU e un `<footer>`: eticheta aia e ascunsă la tipar de regula
+        din PRINT_CSS (subsolul de politici al site-ului ieșea ca o bandă neagră), iar
+        blocul ăsta trebuie să apară ȘI pe hârtie.
+
+        Fără marca noastră, cerut de user: aici vorbește FIRMA — cea care semnează
+        contractul și emite factura — nu produsul.
+      */}
+      <div className="posta-subsol border-t border-gray-800">
+        <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 px-4 py-8 text-center sm:flex-row sm:justify-between sm:text-left">
+          <div>
+            <p className="font-semibold text-gray-200">{FURNIZOR}</p>
+            <p className="mt-0.5 text-sm text-gray-500">{CONSORTIU}</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <p className="text-sm text-gray-500">
+              {CONTACT_MAIL}
+              <span className="mx-2 text-gray-700">·</span>
+              {CONTACT_TEL_AFISAT}
+            </p>
+            {logoKnowHow ? (
+              /* eslint-disable-next-line @next/next/no-img-element -- fișier statuar din public/ */
+              /*
+                Plăcuță albă: scrisul logo-ului e închis la culoare, deci pe subsolul
+                întunecat ar fi fost invizibil. La tipar plăcuța devine transparentă
+                singură (regula generală din PRINT_CSS), iar pe hârtie albă iese exact
+                la fel — deci o singură soluție ține pentru ambele.
+              */
+              <span className="inline-flex items-center rounded bg-white px-2 py-1">
+                <img src={logoKnowHow} alt="Know How Consortium" className="h-9 w-auto object-contain" />
+              </span>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      {/*
         Doar în PDF, repetat pe fiecare pagină (vezi `.posta-print-footer` din PRINT_CSS).
         Cine primește documentul îl dă mai departe la juridic și achiziții, iar paginile
         se despart pe drum — o singură foaie ruptă din teanc trebuie să spună tot cine e
         furnizorul și pe cine sună.
       */}
       <div className="posta-print-footer hidden">
-        <strong>eTUTOR.ro — {FURNIZOR}</strong>
+        {logoKnowHow ? (
+          /* eslint-disable-next-line @next/next/no-img-element -- fișier statuar din public/ */
+          <img src={logoKnowHow} alt="" className="posta-print-logo" />
+        ) : null}
+        <strong>{FURNIZOR}</strong>
+        {" · "}
+        {CONSORTIU}
         {" · "}
         {CONTACT_MAIL}
         {" · "}
