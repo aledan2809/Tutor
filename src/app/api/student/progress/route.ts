@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { awardSessionCompleteXp } from "@/lib/gamification";
 import { updateWeakAreas } from "@/lib/session-engine";
 import { withErrorHandler } from "@/lib/api-handler";
+import { resolveDomainByIdOrForbid } from "@/lib/domain-gate";
 import { z } from "zod";
 
 const progressSchema = z.object({
@@ -38,17 +39,9 @@ async function _PATCH(req: NextRequest) {
   const { domainId, sessionId, score, totalQuestions, xpOverride } = parsed.data;
   const userId = session.user.id;
 
-  // Verify enrollment
-  const enrollment = await prisma.enrollment.findUnique({
-    where: { userId_domainId: { userId, domainId } },
-  });
-
-  if (!enrollment || !enrollment.isActive) {
-    return NextResponse.json(
-      { error: "Not enrolled in this domain" },
-      { status: 403 }
-    );
-  }
+  // Poarta comună (înscriere + ocolire pentru superadmin + 404 în loc de 403).
+  const gate = await resolveDomainByIdOrForbid(domainId, session.user);
+  if (!gate.ok) return gate.response;
 
   // Award XP via gamification engine
   let xpResult = null;

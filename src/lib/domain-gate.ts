@@ -80,3 +80,48 @@ export async function resolveDomainOrForbid(
 
   return { ok: true, domain };
 }
+
+/**
+ * Același gate, pentru rutele care primesc `domainId` în loc de slug.
+ *
+ * De ce a trebuit să existe: rutele de conținut ale elevului (`student/lessons`,
+ * `student/lessons/[id]`, `student/sessions/quick`, `student/assessment`,
+ * `student/progress`) își citeau singure înscrierea și răspundeau 403. Două urmări,
+ * ambele măsurate pe producție 2026-09-09:
+ *
+ * 1. Superadminul era blocat din propriile materii private. Selectorul de pe
+ *    `/dashboard/lessons` i le oferea (corect — `canSeePrivateDomains`), dar API-ul
+ *    îi răspundea 403, iar pagina cădea în „Something went wrong".
+ * 2. 403 confirma că materia există. Pe slug, o materie privată răspunde 404, adică
+ *    exact ca una inexistentă; pe id răspundea altfel, deci cele două căi spuneau
+ *    lucruri diferite despre același secret.
+ *
+ * Aceleași reguli ca varianta pe slug, în aceeași ordine — inclusiv recitirea
+ * înscrierii din baza de date, ca o retragere de acces să lucreze imediat.
+ */
+export async function resolveDomainByIdOrForbid(
+  domainId: string,
+  user: DomainGateUser | null | undefined
+): Promise<DomainGateResult> {
+  const domain = await prisma.domain.findUnique({
+    where: { id: domainId },
+    select: { id: true, slug: true, name: true, visibility: true, isActive: true },
+  });
+  if (!domain) return { ok: false, response: notFound() };
+
+  if (canSeePrivateDomains(user)) return { ok: true, domain };
+
+  if (!domain.isActive) return { ok: false, response: notFound() };
+
+  if (domain.visibility === "PUBLIC") return { ok: true, domain };
+
+  if (!user?.id) return { ok: false, response: notFound() };
+
+  const enrollment = await prisma.enrollment.findUnique({
+    where: { userId_domainId: { userId: user.id, domainId: domain.id } },
+    select: { isActive: true },
+  });
+  if (!enrollment?.isActive) return { ok: false, response: notFound() };
+
+  return { ok: true, domain };
+}

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { requireFeature } from "@/lib/plan-gate";
 import { isOrgProvidedAccess } from "@/lib/org-entitlement";
+import { resolveDomainByIdOrForbid } from "@/lib/domain-gate";
 import { z } from "zod";
 
 const paramsSchema = z.object({
@@ -54,19 +55,9 @@ async function _GET(
   });
 
   if (lessonModel) {
-    // Verify enrollment
-    const enrollment = await prisma.enrollment.findUnique({
-      where: {
-        userId_domainId: {
-          userId: session.user.id,
-          domainId: lessonModel.domainId,
-        },
-      },
-    });
-
-    if (!enrollment?.isActive) {
-      return NextResponse.json({ error: "Not enrolled in this domain" }, { status: 403 });
-    }
+    // Poarta comună (înscriere + ocolire pentru superadmin + 404 în loc de 403).
+    const gate = await resolveDomainByIdOrForbid(lessonModel.domainId, session.user);
+    if (!gate.ok) return gate.response;
 
     // Get lesson progress
     const lessonProgress = await prisma.lessonProgress.findUnique({
@@ -180,19 +171,9 @@ async function _GET(
     return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
   }
 
-  // Verify enrollment
-  const enrollment = await prisma.enrollment.findUnique({
-    where: {
-      userId_domainId: {
-        userId: session.user.id,
-        domainId: contentSource.domainId,
-      },
-    },
-  });
-
-  if (!enrollment?.isActive) {
-    return NextResponse.json({ error: "Not enrolled in this domain" }, { status: 403 });
-  }
+  // Poarta comună (înscriere + ocolire pentru superadmin + 404 în loc de 403).
+  const csGate = await resolveDomainByIdOrForbid(contentSource.domainId, session.user);
+  if (!csGate.ok) return csGate.response;
 
   const meta = contentSource.metadata as Record<string, unknown> | null;
   const lessonSubject = (meta?.subject as string) || "";

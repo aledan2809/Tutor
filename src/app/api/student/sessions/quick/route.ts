@@ -9,6 +9,7 @@ import {
 import { withErrorHandler } from "@/lib/api-handler";
 import { bandForDomainSlug } from "@/lib/curriculum";
 import { visibleTopicsFor } from "@/lib/curriculum-service";
+import { resolveDomainByIdOrForbid } from "@/lib/domain-gate";
 import { z } from "zod";
 
 const quickSessionSchema = z.object({
@@ -39,19 +40,9 @@ async function _POST(req: NextRequest) {
 
   const { domainId, topicId } = parsed.data;
 
-  // Verify enrollment
-  const enrollment = await prisma.enrollment.findUnique({
-    where: {
-      userId_domainId: {
-        userId: session.user.id,
-        domainId,
-      },
-    },
-  });
-
-  if (!enrollment?.isActive) {
-    return NextResponse.json({ error: "Not enrolled in this domain" }, { status: 403 });
-  }
+  // Poarta comună (înscriere + ocolire pentru superadmin + 404 în loc de 403).
+  const gate = await resolveDomainByIdOrForbid(domainId, session.user);
+  if (!gate.ok) return gate.response;
 
   // Poarta programei parcurse — ACEEAȘI ca în [domain]/session/start. Ruta
   // asta era al doilea apelant al lui selectQuestions și, negardată, oferea

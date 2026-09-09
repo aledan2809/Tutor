@@ -813,7 +813,8 @@
     "percentMastery": "{n}% mastery",
     "percentAccuracy": "{n}% accuracy",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "noAccess": "This subject is not available for your account. If you were given an access code, use it under Domains → Join."
   },
   "remarks": {
     "lines": {

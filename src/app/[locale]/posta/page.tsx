@@ -53,7 +53,6 @@ type Copy = {
   contactMailEticheta: string;
   contactTelEticheta: string;
   pdfCta: string;
-  furnizorEticheta: string;
   finalTitlu: string;
   finalSub: string;
 };
@@ -218,7 +217,6 @@ const RO: Copy = {
   contactMailEticheta: "E-mail",
   contactTelEticheta: "Telefon",
   pdfCta: "Descarcă prezentarea (PDF)",
-  furnizorEticheta: "Furnizor",
   finalTitlu: "Aveți deja un cod de acces?",
   finalSub: "Intrați în cont și deschideți traseul rolului dumneavoastră.",
 };
@@ -315,7 +313,6 @@ const EN: Copy = {
   contactMailEticheta: "Email",
   contactTelEticheta: "Phone",
   pdfCta: "Download the presentation (PDF)",
-  furnizorEticheta: "Provider",
   finalTitlu: "Already have an access code?",
   finalSub: "Sign in and open the track for your role.",
 };
@@ -500,7 +497,6 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
         furnizorul și pe cine sună.
       */}
       <div className="posta-print-footer hidden">
-        {c.furnizorEticheta}:{" "}
         <strong>eTUTOR.ro — {FURNIZOR}</strong>
         {" · "}
         {CONTACT_MAIL}

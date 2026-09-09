@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { resolveDomainByIdOrForbid } from "@/lib/domain-gate";
 import { z } from "zod";
 
 const assessmentSchema = z.object({
@@ -37,19 +38,9 @@ async function _POST(req: NextRequest) {
 
   const { domainId, answers } = parsed.data;
 
-  // Verify enrollment
-  const enrollment = await prisma.enrollment.findUnique({
-    where: {
-      userId_domainId: {
-        userId: session.user.id,
-        domainId,
-      },
-    },
-  });
-
-  if (!enrollment?.isActive) {
-    return NextResponse.json({ error: "Not enrolled in this domain" }, { status: 403 });
-  }
+  // Poarta comună (înscriere + ocolire pentru superadmin + 404 în loc de 403).
+  const gate = await resolveDomainByIdOrForbid(domainId, session.user);
+  if (!gate.ok) return gate.response;
 
   // Get questions and check answers
   const questionIds = answers.map((a) => a.questionId);
@@ -169,19 +160,9 @@ async function _GET(req: NextRequest) {
     return NextResponse.json({ error: "domainId is required" }, { status: 400 });
   }
 
-  // Verify enrollment
-  const enrollment = await prisma.enrollment.findUnique({
-    where: {
-      userId_domainId: {
-        userId: session.user.id,
-        domainId,
-      },
-    },
-  });
-
-  if (!enrollment?.isActive) {
-    return NextResponse.json({ error: "Not enrolled in this domain" }, { status: 403 });
-  }
+  // Poarta comună (înscriere + ocolire pentru superadmin + 404 în loc de 403).
+  const getGate = await resolveDomainByIdOrForbid(domainId, session.user);
+  if (!getGate.ok) return getGate.response;
 
   // Select 10 MULTIPLE_CHOICE questions with valid options across difficulties
   const baseWhere = { domainId, status: "PUBLISHED" as const, type: "MULTIPLE_CHOICE" as const, options: { not: null as unknown as undefined } };

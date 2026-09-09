@@ -45,6 +45,13 @@ function LessonsBody() {
   const [domains, setDomains] = useState<EnrolledDomain[]>([]);
   const [activeDomainId, setActiveDomainId] = useState<string>("");
   const [data, setData] = useState<LessonsResponse | null>(null);
+  /**
+   * O materie la care nu se poate ajunge trebuie SPUSĂ, nu aruncată.
+   * Până acum răspunsul de eroare (`{error}`) intra direct în `data`, randarea
+   * cerea `data.lessons` și pica în ecranul roșu „Something went wrong" — care
+   * nu spune omului nici ce s-a întâmplat, nici ce să facă.
+   */
+  const [accessError, setAccessError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [subject, setSubject] = useState("");
   const [topic, setTopic] = useState("");
@@ -70,10 +77,17 @@ function LessonsBody() {
     if (subject) params.set("subject", subject);
     if (topic) params.set("topic", topic);
 
+    setAccessError(false);
     fetch(`/api/student/lessons?${params}`)
-      .then((r) => r.json())
-      .then(setData)
-      .catch(() => {})
+      .then(async (r) => {
+        if (!r.ok) {
+          setAccessError(true);
+          setData(null);
+          return;
+        }
+        setData(await r.json());
+      })
+      .catch(() => setAccessError(true))
       .finally(() => setLoading(false));
   }, [activeDomainId, subject, topic, page]);
 
@@ -129,6 +143,11 @@ function LessonsBody() {
       {/* Lessons grid */}
       {loading ? (
         <div className="py-12 text-center text-gray-500">{t("common.loading")}</div>
+      ) : accessError ? (
+        // „Nicio lecție disponibilă" ar minți aici: lecțiile există, accesul lipsește.
+        <div className="rounded-lg border border-amber-800/60 bg-amber-900/10 px-4 py-6 text-center text-sm text-amber-300">
+          {t("lessons.noAccess")}
+        </div>
       ) : !data || data.lessons.length === 0 ? (
         <div className="py-12 text-center text-gray-500">{t("lessons.noLessons")}</div>
       ) : (

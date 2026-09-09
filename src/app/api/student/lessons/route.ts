@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { resolveDomainByIdOrForbid } from "@/lib/domain-gate";
 import { z } from "zod";
 
 const lessonsQuerySchema = z.object({
@@ -36,19 +37,12 @@ async function _GET(req: NextRequest) {
 
   const { domainId, subject, topic, page, limit } = parsed.data;
 
-  // Verify enrollment
-  const enrollment = await prisma.enrollment.findUnique({
-    where: {
-      userId_domainId: {
-        userId: session.user.id,
-        domainId,
-      },
-    },
-  });
-
-  if (!enrollment?.isActive) {
-    return NextResponse.json({ error: "Not enrolled in this domain" }, { status: 403 });
-  }
+  // Poarta comună, nu o verificare proprie: pe lângă înscriere, ea lasă superadminul
+  // în materiile private (altfel selectorul i le oferea, API-ul îi răspundea 403 și
+  // pagina cădea în „Something went wrong") și răspunde 404, nu 403, ca o materie
+  // privată să nu se dea de gol că există.
+  const gate = await resolveDomainByIdOrForbid(domainId, session.user);
+  if (!gate.ok) return gate.response;
 
   // Lessons come from the Lesson table — the one the admin form writes into.
   // Until 2026-09-05 this read ContentSource instead, a parallel table nothing in
