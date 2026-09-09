@@ -7,7 +7,7 @@ import { useRouter } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { pregatesteLectia, eReplica } from "@/lib/lesson-format";
+import { pregatesteLectia, eReplica, textDinCopii } from "@/lib/lesson-format";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
@@ -246,9 +246,7 @@ export default function LessonDetailPage() {
               // Replica de spus: singurul lucru de pe pagină pe care omul îl
               // ROSTEȘTE, nu îl citește. Galben, ca în macheta aprobată.
               blockquote({ children }) {
-                const text = String(
-                  Array.isArray(children) ? children.join(" ") : children ?? ""
-                );
+                const text = textDinCopii(children);
                 if (!eReplica(text)) {
                   return (
                     <blockquote className="border-l-4 border-gray-700 pl-4 text-gray-400">

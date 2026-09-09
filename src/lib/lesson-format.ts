@@ -72,3 +72,21 @@ export function eReplica(text: string): boolean {
   const t = text.trim();
   return t.startsWith("„") || t.startsWith('"') || t.startsWith("“");
 }
+
+/**
+ * Textul dintr-un arbore de copii React.
+ *
+ * `String(children)` dă „[object Object]" pentru orice altceva decât un șir —
+ * iar în markdown randat, copiii unui citat sunt un `<p>`, nu text. Din cauza
+ * asta replica de spus nu se recunoștea deloc (prins pe lecția reală, nu în cod).
+ */
+export function textDinCopii(nod: unknown): string {
+  if (nod == null || typeof nod === "boolean") return "";
+  if (typeof nod === "string" || typeof nod === "number") return String(nod);
+  if (Array.isArray(nod)) return nod.map(textDinCopii).join("");
+  if (typeof nod === "object" && "props" in (nod as Record<string, unknown>)) {
+    const props = (nod as { props?: { children?: unknown } }).props;
+    return textDinCopii(props?.children);
+  }
+  return "";
+}

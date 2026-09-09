@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { pregatesteLectia, eReplica } from "@/lib/lesson-format";
+import { pregatesteLectia, eReplica, textDinCopii } from "@/lib/lesson-format";
 
 describe("pregatesteLectia", () => {
   it("scoate ipotezele și lasă un marker numerotat în locul lor", () => {
@@ -52,5 +52,21 @@ describe("eReplica", () => {
   });
   it("un citat obișnuit nu e replică", () => {
     expect(eReplica("Presupunem că")).toBe(false);
+  });
+});
+
+describe("textDinCopii", () => {
+  it("scoate textul dintr-un arbore de elemente, nu „[object Object]”", () => {
+    const arbore = { props: { children: [{ props: { children: "„Bună ziua" } }, " rest"] } };
+    expect(textDinCopii(arbore)).toBe("„Bună ziua rest");
+  });
+  it("un citat randat ca <p> e recunoscut ca replică", () => {
+    const p = { props: { children: '„Bună ziua, sunt factorul."' } };
+    expect(eReplica(textDinCopii(p))).toBe(true);
+  });
+  it("nu cade pe null, boolean sau numere", () => {
+    expect(textDinCopii(null)).toBe("");
+    expect(textDinCopii(true)).toBe("");
+    expect(textDinCopii(42)).toBe("42");
   });
 });
