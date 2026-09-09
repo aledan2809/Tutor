@@ -7,6 +7,7 @@ import { useRouter } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { pregatesteLectia, eReplica } from "@/lib/lesson-format";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
@@ -120,6 +121,11 @@ export default function LessonDetailPage() {
   }
 
   const isCompleted = lesson.lessonProgress?.status === "COMPLETED";
+
+  // Ipotezele ies din corpul lecției și devin note de subsol. Nu se șterg —
+  // marcarea fiecărei presupuneri e chiar argumentul de vânzare al cursului — dar
+  // opt casete identice pe o pagină înseamnă opt întreruperi, iar cititul se rupe.
+  const { corp, ipoteze } = pregatesteLectia(lesson.content ?? "");
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -237,6 +243,46 @@ export default function LessonDetailPage() {
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
+              // Replica de spus: singurul lucru de pe pagină pe care omul îl
+              // ROSTEȘTE, nu îl citește. Galben, ca în macheta aprobată.
+              blockquote({ children }) {
+                const text = String(
+                  Array.isArray(children) ? children.join(" ") : children ?? ""
+                );
+                if (!eReplica(text)) {
+                  return (
+                    <blockquote className="border-l-4 border-gray-700 pl-4 text-gray-400">
+                      {children}
+                    </blockquote>
+                  );
+                }
+                return (
+                  <div className="not-prose my-5 rounded-r-xl border-l-4 border-amber-400 bg-amber-400/10 px-5 py-4">
+                    <span className="mb-2 block text-[11px] font-semibold uppercase tracking-widest text-amber-300">
+                      Ce spui
+                    </span>
+                    <div className="text-[17px] leading-relaxed text-gray-100">{children}</div>
+                  </div>
+                );
+              },
+              // Marcherul de notă: mic, stins, nu întrerupe fraza.
+              a({ href, children, ...props }) {
+                if (typeof href === "string" && href.startsWith("#ip-")) {
+                  return (
+                    <a
+                      href={href}
+                      className="not-prose ml-0.5 rounded bg-gray-800 px-1 align-super text-[10px] font-bold leading-none text-gray-400 no-underline hover:text-white"
+                    >
+                      {children}
+                    </a>
+                  );
+                }
+                return (
+                  <a href={href} {...props}>
+                    {children}
+                  </a>
+                );
+              },
               code({ className, children, ...props }) {
                 const match = /language-(\w+)/.exec(className || "");
                 const inline = !match && !className;
@@ -260,9 +306,36 @@ export default function LessonDetailPage() {
               },
             }}
           >
-            {lesson.content}
+            {corp}
           </ReactMarkdown>
         </div>
+      )}
+
+      {/*
+        Ipotezele, adunate la final. Nu sunt un apendice: pentru clientul care
+        primește cursul, asta e lista lui de lucru — „ne dați procedura,
+        presupunerea devine fraza voastră". De-aia titlul spune de confirmat, nu
+        „note".
+      */}
+      {ipoteze.length > 0 && (
+        <section className="not-prose rounded-xl border border-gray-800 bg-gray-900/60 p-5">
+          <h2 className="text-base font-semibold text-white">
+            De confirmat cu clientul{" "}
+            <span className="font-normal text-gray-500">({ipoteze.length})</span>
+          </h2>
+          <p className="mt-1 text-sm text-gray-400">
+            Materialul e scris din surse publice. Fiecare loc în care a trebuit să
+            presupunem ceva e numerotat în text și listat aici.
+          </p>
+          <ol className="mt-4 space-y-3">
+            {ipoteze.map((ip) => (
+              <li key={ip.n} id={`ip-${ip.n}`} className="flex gap-3 text-sm text-gray-400">
+                <span className="shrink-0 font-semibold text-gray-500">{ip.n}.</span>
+                <span className="leading-relaxed">{ip.text}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
       )}
 
       {/* External URL link */}
