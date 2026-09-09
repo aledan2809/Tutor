@@ -105,6 +105,7 @@ export default async function AdminOverviewPage() {
                 la lecții (`b0a9351`), care se repetă ușor. */}
             <QuickAction href="/dashboard/admin/invitatii" label={t("sendInvite")} accent="green" />
             <QuickAction href="/dashboard/admin/cursanti" label={t("roster")} />
+            <QuickAction href="/dashboard/admin/import-cursanti" label={t("importLearners")} />
             {draftCount > 0 && (
               <QuickAction
                 href="/dashboard/admin/questions/review"

@@ -433,7 +433,8 @@
     "panelTitle": "Administrare",
     "superadminTitle": "Panou SuperAdmin",
     "sendInvite": "Trimite invitație",
-    "roster": "Cursanți"
+    "roster": "Cursanți",
+    "importLearners": "Import cursanți"
   },
   "session": {
     "practice": "Practică",

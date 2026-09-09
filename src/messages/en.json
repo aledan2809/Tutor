@@ -433,7 +433,8 @@
     "panelTitle": "Admin Dashboard",
     "superadminTitle": "SuperAdmin Panel",
     "sendInvite": "Send invite",
-    "roster": "Learners"
+    "roster": "Learners",
+    "importLearners": "Import learners"
   },
   "session": {
     "practice": "Practice",
