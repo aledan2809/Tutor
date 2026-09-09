@@ -290,7 +290,7 @@ const PRINT_CSS = `
 
   .posta-print-logo {
     height: 13px; width: auto; vertical-align: -2px;
-    margin-right: 7px; display: inline-block;
+    margin: 0 7px; display: inline-block;
   }
   /*
     Așezarea în pagini. Regula de dinainte era \`section { break-inside: avoid }\`, care
@@ -1309,30 +1309,27 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
         contractul și emite factura — nu produsul.
       */}
       <div className="posta-subsol border-t border-gray-800">
-        <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 px-4 py-8 text-center sm:flex-row sm:justify-between sm:text-left">
-          <div>
-            <p className="font-semibold text-gray-200">{FURNIZOR}</p>
-            <p className="mt-0.5 text-sm text-gray-500">{CONSORTIU}</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <p className="text-sm text-gray-500">
-              {CONTACT_MAIL}
-              <span className="mx-2 text-gray-700">·</span>
-              {CONTACT_TEL_AFISAT}
-            </p>
+        <div className="mx-auto max-w-5xl px-4 py-8 text-center">
+          <p className="font-semibold text-gray-200">{FURNIZOR}</p>
+          <div className="mt-1 flex flex-wrap items-center justify-center gap-3">
+            <p className="text-sm text-gray-500">{CONSORTIU}</p>
             {logoKnowHow ? (
-              /* eslint-disable-next-line @next/next/no-img-element -- fișier statuar din public/ */
               /*
                 Plăcuță albă: scrisul logo-ului e închis la culoare, deci pe subsolul
                 întunecat ar fi fost invizibil. La tipar plăcuța devine transparentă
-                singură (regula generală din PRINT_CSS), iar pe hârtie albă iese exact
-                la fel — deci o singură soluție ține pentru ambele.
+                singură (regula generală din PRINT_CSS), iar pe hârtie albă iese la fel.
               */
               <span className="inline-flex items-center rounded bg-white px-2 py-1">
-                <img src={logoKnowHow} alt="Know How Consortium" className="h-9 w-auto object-contain" />
+                {/* eslint-disable-next-line @next/next/no-img-element -- fișier statuar din public/ */}
+                <img src={logoKnowHow} alt="Know How Consortium" className="h-8 w-auto object-contain" />
               </span>
             ) : null}
           </div>
+          <p className="mt-3 text-sm text-gray-500">
+            {CONTACT_MAIL}
+            <span className="mx-2 text-gray-700">·</span>
+            {CONTACT_TEL_AFISAT}
+          </p>
         </div>
       </div>
 
@@ -1343,13 +1340,13 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
         furnizorul și pe cine sună.
       */}
       <div className="posta-print-footer hidden">
+        <strong>{FURNIZOR}</strong>
+        {" · "}
+        {CONSORTIU}
         {logoKnowHow ? (
           /* eslint-disable-next-line @next/next/no-img-element -- fișier statuar din public/ */
           <img src={logoKnowHow} alt="" className="posta-print-logo" />
         ) : null}
-        <strong>{FURNIZOR}</strong>
-        {" · "}
-        {CONSORTIU}
         {" · "}
         {CONTACT_MAIL}
         {" · "}
