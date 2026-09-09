@@ -1,6 +1,16 @@
 import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { Brand } from "@/components/Brand";
+import {
+  XP_REWARDS,
+  ON_TIME_BONUS,
+  DEFAULT_LEVELS,
+  STREAK_RECOVERY,
+  LEADERBOARD_TOP,
+  FAST_ANSWER_THRESHOLD_MS,
+} from "@/lib/gamification-constants";
+import { ESCALATION_LEVELS } from "@/lib/escalation/config";
+import type { EscalationChannel } from "@prisma/client";
 
 /**
  * Pagina de demonstrație pentru Poșta Română.
@@ -12,6 +22,26 @@ import { Brand } from "@/components/Brand";
  * Caseta „conținut simulat" e obligatorie și stă sus, nu în subsol: cursurile sunt scrise
  * fără acces la procedurile lor, iar un factor care le-ar citi crezând că sunt regulament
  * ar face rău, nu bine.
+ *
+ * ── Despre cifrele din pagină ────────────────────────────────────────────────
+ * Regula, fără excepție: nimic din ce scrie aici nu e o promisiune de listă de funcții.
+ * Numerele mecanismului (puncte, praguri de nivel, treptele cascadei) se IMPORTĂ din
+ * codul care le aplică — `gamification-constants.ts` și `escalation/config.ts` — ca să
+ * nu poată aluneca de la ce face produsul. Dacă cineva schimbă pragul unui nivel,
+ * pagina asta se schimbă odată cu el.
+ *
+ * Cifrele de utilizare (817 lanțuri de memento-uri duse până la capăt, pe patru canale)
+ * au fost NUMĂRATE în baza de producție la 09.09.2026, nu estimate. Sunt scrise ca
+ * literali cu data lângă ele, tocmai fiindcă îmbătrânesc: o cifră fără dată devine o
+ * minciună tăcută. Nu se citesc live — pagina asta e publică și necachabilă pe user,
+ * iar o interogare de numărare la fiecare afișare ar plăti cu latență un lucru pe care
+ * un decident îl citește o dată.
+ *
+ * ── Ce NU scrie în pagină, deși ar suna bine ─────────────────────────────────
+ * Denumirile treptelor de nivel NU sunt prezentate ca reglabile din panou: `LevelConfig`
+ * există în bază, dar nu are nicio cale de scriere în cod (verificat 09.09.2026) — deci
+ * ar fi fost o funcție inventată, exact genul care se rupe la prima întrebare a
+ * clientului.
  */
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -27,34 +57,111 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
+/** Un rând din tabloul managerului, reprodus pentru captura demonstrativă. */
+type RandTablou = {
+  nume: string;
+  detaliu: string;
+  stare: string;
+  stareNota: string;
+  module: { lectie: string | null; scor: [number, number] | null; zi: string | null }[];
+};
+
+type PasFlux = {
+  titlu: string;
+  text: string;
+  /** Ce se întâmplă fără ca cineva să apese ceva. Se marchează vizibil în grafic. */
+  automat?: boolean;
+};
+
 type Copy = {
   badge: string;
   hero: string;
   subtitle: string;
+  ctaPdf: string;
+  ctaScrie: string;
   ctaIn: string;
-  ctaCont: string;
   avertismentTitlu: string;
   avertisment: string;
+
+  scaraTitlu: string;
+  scaraLead: string;
+  scaraCifre: { valoare: string; eticheta: string }[];
+  scaraConcluzie: string;
+  scaraSursa: string;
+
+  fluxTitlu: string;
+  fluxLead: string;
+  flux: PasFlux[];
+  fluxAutomatEticheta: string;
+
   cursuriTitlu: string;
   cursuriLead: string;
   cursuri: { titlu: string; rol: string; descriere: string; module: string[] }[];
-  cumTitlu: string;
-  cumLead: string;
-  pasi: { t: string; d: string }[];
-  conducereTitlu: string;
-  conducere: string[];
+
+  motorTitlu: string;
+  motorLead: string;
+  motor: { titlu: string; text: string }[];
+  motorNota: string;
+
+  cascadaTitlu: string;
+  cascadaLead: string;
+  /**
+   * Doar ETICHETELE canalelor. Treptele, ordinea lor și minutele dintre ele se citesc
+   * din `ESCALATION_LEVELS` — adică din fișierul pe care îl execută motorul. Dacă
+   * cineva mută WhatsApp înaintea e-mailului, pagina se mută odată cu el.
+   */
+  /*
+   * `Record<EscalationChannel, …>` — TOTAL peste enum, nu `Record<string, …>`. Cu varianta
+   * laxă, o treaptă nouă (enum-ul are deja `CALL`, iar motorul o are în plan ca L6) ar fi
+   * căzut pe o rezervă care tipărea tokenul brut „CALL" în mijlocul unei fraze românești,
+   * pe documentul care ajunge la conducerea clientului — fără nicio eroare de compilare.
+   * Acum lipsa unei etichete oprește build-ul.
+   */
+  cascadaCanale: Record<EscalationChannel, string>;
+  cascadaImediat: string;
+  /** Șablon cu `{n}` — minutele vin din configurarea cascadei, nu din text. */
+  cascadaDupaMin: string;
+  cascadaOprire: string;
+  cascadaDovadaTitlu: string;
+  cascadaDovada: string;
+  cascadaRitm: string;
+
+  tabloTitlu: string;
+  tabloLead: string;
+  tabloCapCursant: string;
+  tabloCapStare: string;
+  tabloModule: string[];
+  tabloLectie: string;
+  tabloTest: string;
+  tabloRanduri: RandTablou[];
+  tabloLegenda: string;
+  tabloConducere: string[];
+
+  obiectiiTitlu: string;
+  obiectiiLead: string;
+  obiectii: { intrebare: string; raspuns: string }[];
+
+  costTitlu: string;
+  costLead: string;
+  cost: { titlu: string; text: string }[];
+
   deCeTitlu: string;
   deCe: { text: string; sursa: string }[];
+
   pilotTitlu: string;
   pilotLead: string;
   pilot: string[];
+
   contactTitlu: string;
   contactLead: string;
   contactMailEticheta: string;
   contactTelEticheta: string;
-  pdfCta: string;
+  contactSubiect: string;
+
   finalTitlu: string;
   finalSub: string;
+  finalCta: string;
+  finalCursant: string;
 };
 
 /** Datele firmei, așa cum le ține Legal Hub pentru aplicația `tutor` (biller + controller). */
@@ -62,6 +169,22 @@ const FURNIZOR = "Class RDA Impex SRL";
 const CONTACT_MAIL = "office@etutor.ro";
 const CONTACT_TEL_AFISAT = "0712 383 492";
 const CONTACT_TEL_LINK = "+40712383492";
+
+/**
+ * Numărate în baza de producție la 09.09.2026 (`EscalationEvent`, grupat pe canal și
+ * stare). Data stă lângă cifră în pagină — vezi nota lungă din capul fișierului.
+ */
+const DOVADA_LANTURI = 817;
+const DOVADA_DATA_RO = "9 septembrie 2026";
+const DOVADA_DATA_EN = "9 September 2026";
+
+/** Cadența cronului care duce cascada mai departe (crontab VPS2, la fiecare 15 minute). */
+const CRON_MINUTE = 15;
+
+const PRAG_RASPUNS_RAPID_SEC = Math.round(FAST_ANSWER_THRESHOLD_MS / 1000);
+const RECUPERARE_MINUTE = Math.round(STREAK_RECOVERY.timeLimitMs / 60_000);
+const NIVELE_PRAGURI = DEFAULT_LEVELS.map((n) => n.minXp.toLocaleString("ro-RO")).join(" · ");
+const NIVELE_PRAGURI_EN = DEFAULT_LEVELS.map((n) => n.minXp.toLocaleString("en-US")).join(" · ");
 
 /**
  * Stratul de tipărire. Pagina rămâne întunecată pe ecran — doar PDF-ul iese alb,
@@ -98,7 +221,70 @@ const PRINT_CSS = `
   /* Accentele rămân, altfel documentul devine o masă cenușie. */
   [data-posta] .text-blue-400, [data-posta] .text-blue-300 { color: #1d4ed8 !important; }
   [data-posta] .text-amber-300 { color: #92400e !important; }
-  [data-posta] section { break-inside: avoid; }
+  /*
+    Verde și roșu, nu doar chihlimbar. Legenda de sub tablou PROMITE trei culori
+    („verde peste 70%, chihlimbar între 50 și 70, roșu sub") — fără liniile astea,
+    pe hârtie 7/7 și 2/7 ies amândouă gri și legenda devine o afirmație falsă
+    exact în locul unde documentul cere să fie crezut. Prins uitându-mă la PDF.
+  */
+  [data-posta] .text-emerald-300 { color: #047857 !important; }
+  [data-posta] .text-red-300 { color: #b91c1c !important; }
+  /*
+    Așezarea în pagini. Regula de dinainte era \`section { break-inside: avoid }\`, care
+    arunca o secțiune ÎNTREAGĂ pe foaia următoare dacă nu încăpea — măsurat pe PDF-ul
+    generat: pagini pe jumătate goale, iar al treilea card de curs oricum se rupea,
+    fiindcă interdicția era pe secțiune, nu pe card.
+
+    Inversat: secțiunile au voie să se rupă, dar CARDUL, PASUL din grafic și RÂNDUL din
+    tablou nu — alea sunt unitățile pe care ochiul le citește ca întreg. Plus titlul nu
+    rămâne singur la baza foii.
+  */
+  [data-posta] h2, [data-posta] h3 { break-after: avoid; }
+  [data-posta] .rounded-2xl,
+  [data-posta] .rounded-xl,
+  [data-posta] .flux-pas,
+  [data-posta] .tablou tr { break-inside: avoid; }
+
+  /*
+    Graficul fluxului. Pe ecran traseul se vede prin culoare; pe hârtie, culoarea
+    dispare sub regula de mai sus, deci desenul trebuie să se țină din LINIE și
+    CONTUR, nu din umplere. Cele trei reguli de mai jos sunt tot ce-l ține în viață
+    alb-negru: șina verticală, cercul cu numărul, și marcajul „automat".
+
+    Ordinea contează — stau după \`[data-posta] *\` ca să-l bată la specificitate egală.
+  */
+  [data-posta] .flux-sina { background-color: #9ca3af !important; }
+  [data-posta] .flux-nod {
+    background-color: #ffffff !important;
+    border: 1.5px solid #374151 !important;
+    color: #111827 !important;
+    font-weight: 700;
+  }
+  [data-posta] .flux-auto {
+    border: 1px dashed #6b7280 !important;
+    color: #374151 !important;
+  }
+  /* Un pas nu are voie să se rupă între două pagini: numărul pe o foaie și textul
+     pe următoarea transformă traseul în listă. */
+  [data-posta] .flux-pas { break-inside: avoid; }
+
+  /*
+    Tabloul demonstrativ. Fără liniile astea rămâne text aliniat în coloane invizibile,
+    adică exact impresia de „captură de ecran lipită" pe care o evită restul paginii.
+  */
+  [data-posta] .tablou th, [data-posta] .tablou td {
+    border: 1px solid #d1d5db !important;
+    padding: 4px 6px !important;
+  }
+  /*
+    Lățimea. Pe ecran tabloul are \`min-w-[44rem]\` și se derulează lateral în containerul
+    lui; pe hârtie nu există derulare, deci coloana din dreapta ieșea tăiată — măsurat:
+    antetul ultimului modul se citea „OMUL DE L UȘĂ". Scoatem lățimea minimă și
+    deschidem containerul, ca tabelul să se strângă în foaie.
+  */
+  [data-posta] .tablou { font-size: 8pt !important; min-width: 0 !important; width: 100% !important; }
+  [data-posta] .overflow-x-auto { overflow: visible !important; }
+  [data-posta] .tablou thead th { background-color: #f3f4f6 !important; font-weight: 700; }
 
   /* Marginea de jos e mărită ca să încapă subsolul repetat de mai jos.
      Fără ea, textul ar trece pe sub el pe fiecare pagină. */
@@ -130,11 +316,65 @@ const RO: Copy = {
   hero: "Sistemele se schimbă în ani. Oamenii de la ușă și de la ghișeu, în săptămâni.",
   subtitle:
     "Clientul nu vede sistemul informatic. Vede factorul de la ușă și casiera de la geam — și pe ei îi compară, fără să vrea, cu ce a primit marți de la altcineva. Pagina asta arată cum se instruiesc oamenii aceia: pe telefon, în zece minute, cu dovadă că s-a făcut.",
+  ctaPdf: "Descarcă prezentarea (PDF)",
+  ctaScrie: "Trimiteți-ne procedurile",
   ctaIn: "Autentificare",
-  ctaCont: "Creează cont",
+
   avertismentTitlu: "Conținut simulat",
   avertisment:
     "Cele trei cursuri de mai jos sunt scrise de noi, din surse publice, fără acces la procedurile Poștei Române. Fiecare loc în care a trebuit să presupunem ceva este marcat vizibil în text, cu numele procedurii care lipsește. Nu sunt regulamente oficiale și nu se pot folosi ca atare. Exact asta e propunerea: dați-ne procedurile voastre și presupunerile devin frazele voastre.",
+
+  scaraTitlu: "De ce nu se poate face în sală",
+  scaraLead:
+    "Nu e o obiecție de principiu față de sala de curs. E o problemă de aritmetică, făcută cu cifrele voastre publice.",
+  scaraCifre: [
+    { valoare: "19.931", eticheta: "salariați la finalul lui 2025" },
+    { valoare: "~5.600", eticheta: "unități în rețeaua teritorială" },
+    { valoare: "~1.000", eticheta: "grupe de câte 20 de oameni" },
+  ],
+  scaraConcluzie:
+    "O singură zi de sală pentru toți înseamnă circa o mie de grupe. Cu zece săli în paralel, sunt o sută de zile lucrătoare — aproape jumătate de an în care oamenii sunt scoși din tură, cu deplasări plătite. Iar la capăt aveți o listă de prezență, nu răspunsul la întrebarea care contează: cine a înțeles ce.",
+  scaraSursa:
+    "primele două cifre din raportări publice ale companiei (2025) și din prezentarea rețelei teritoriale; a treia e aritmetica noastră — 19.931 împărțit la grupe de câte 20",
+
+  fluxTitlu: "Drumul complet, de la lista voastră până la raport",
+  fluxLead:
+    "Șapte pași. Trei dintre ei se întâmplă singuri, fără ca cineva de la voi să apese ceva — sunt marcați ca atare.",
+  fluxAutomatEticheta: "se întâmplă singur",
+  flux: [
+    {
+      titlu: "Ne dați o listă",
+      text: "Un Excel sau un CSV cu nume și număr de telefon. Se încarcă din panou, în doi timpi: întâi vedeți ce s-a citit, apoi confirmați. Dacă nu aveți listă, se poate și fără: un cod comun, scris pe o foaie la avizier.",
+    },
+    {
+      titlu: "Pleacă invitația",
+      text: "Pe WhatsApp, pe loc, de la un buton. Fiecare om primește linkul lui, care nu merge decât o dată și numai pentru el.",
+    },
+    {
+      titlu: "Omul intră de pe telefonul lui",
+      text: "Apasă linkul, își alege o parolă și e înăuntru. Nu instalează nimic. Nu are nevoie de adresă de e-mail.",
+      automat: true,
+    },
+    {
+      titlu: "Citește lecția",
+      text: "Șapte-zece minute. Text simplu, cu replici exacte de spus clientului, nu cu principii. La capătul turei, în pauză, în autobuz — se reia de unde a rămas.",
+    },
+    {
+      titlu: "Testul se deschide după lecție",
+      text: "Nimeni nu e întrebat din ce n-a apucat să citească. Un modul intră în test abia după ce lecția lui e terminată.",
+      automat: true,
+    },
+    {
+      titlu: "Cine se oprește este căutat",
+      text: "După o zi fără nicio activitate pornește o cascadă de memento-uri, pe patru canale, una după alta. Se oprește singură în clipa în care omul reia. Nimeni de la voi nu ține evidența celor rămași în urmă.",
+      automat: true,
+    },
+    {
+      titlu: "Rămâne urma",
+      text: "Cine, ce modul, în ce zi, cu ce scor. Nu o listă de prezență la o sală — urma fiecărui om, pe care o vedeți în tabloul de mai jos.",
+    },
+  ],
+
   cursuriTitlu: "Trei trasee, pe cele trei roluri care ating clientul",
   cursuriLead:
     "Fiecare curs are trei module. Fiecare modul are o lecție de citit în șapte-zece minute și un test care se deschide după ea. Fiecare curs se termină cu un singur număr pe care omul îl urmărește o săptămână — pentru el, nu pentru raport.",
@@ -161,33 +401,159 @@ const RO: Copy = {
       module: ["Cinci numere pe o singură foaie", "Coada de la prânz și reclamația", "Primul client din oraș"],
     },
   ],
-  cumTitlu: "Cum arată pentru un angajat",
-  cumLead: "Fără sală, fără dosar, fără o zi luată din program.",
-  pasi: [
+
+  motorTitlu: "Ce-l face să deschidă a doua oară",
+  motorLead:
+    "Un curs trimis nu e un curs făcut. Diferența o face ce se întâmplă între lecția întâi și lecția a treia — și asta e construit în platformă, nu lăsat pe seama șefului direct.",
+  motor: [
     {
-      t: "1. Primește un cod",
-      d: "Codul e al rolului lui. Materia e privată: pentru cine nu are cod, nu apare nicăieri și nu poate fi găsită — nici măcar dacă îi ghicește numele.",
+      titlu: "Puncte pentru ce face, nu pentru cât stă",
+      text: `${XP_REWARDS.CORRECT_ANSWER} de puncte pentru fiecare răspuns corect, plus ${XP_REWARDS.FAST_ANSWER_BONUS} dacă răspunde în mai puțin de ${PRAG_RASPUNS_RAPID_SEC} secunde — semnul că știe, nu că a căutat. ${XP_REWARDS.SESSION_COMPLETE} la terminarea unei sesiuni, ${XP_REWARDS.PERFECT_SCORE} la scor perfect, ${ON_TIME_BONUS} dacă a făcut-o în fereastra în care i s-a cerut.`,
     },
     {
-      t: "2. Citește lecția pe telefon",
-      d: "Șapte-zece minute. Text simplu, cu replici exacte de spus clientului. Se poate relua oricând, de la capătul turei.",
+      titlu: "Seria zilnică, cu drept la greșeală",
+      text: `Zilele la rând contează. Dar dacă a sărit până la ${STREAK_RECOVERY.maxMissedDays} zile — a fost în concediu, a fost bolnav — își recuperează seria: ${STREAK_RECOVERY.questions} întrebări, din care ${STREAK_RECOVERY.requiredCorrect} corecte, în ${RECUPERARE_MINUTE} minute. Nu pierde tot pentru o săptămână grea.`,
     },
     {
-      t: "3. Testul se deschide după lecție",
-      d: "Nimeni nu e testat din ce n-a apucat să citească. Modulul intră în test abia după ce lecția lui e terminată.",
+      titlu: `${DEFAULT_LEVELS.length} trepte și un clasament`,
+      text: `Trepte la ${NIVELE_PRAGURI} de puncte, și un clasament al primilor ${LEADERBOARD_TOP} din grupa lui. Nu al întregii companii — competiția cu 19.000 de necunoscuți nu motivează pe nimeni; cea cu colegii de oficiu, da.`,
     },
     {
-      t: "4. Rămâne dovada",
-      d: "Cine a parcurs ce, când, și cu ce rezultat. Nu o listă de prezență la o sală, ci urma fiecărui om.",
+      titlu: "Provocarea zilei",
+      text: `O întrebare pe zi, la care punctele se ${XP_REWARDS.DAILY_CHALLENGE_MULTIPLIER === 2 ? "dublează" : `înmulțesc cu ${XP_REWARDS.DAILY_CHALLENGE_MULTIPLIER}`}. E motivul pentru care omul deschide aplicația într-o zi în care n-avea nimic de făcut acolo.`,
     },
   ],
-  conducereTitlu: "Ce vede conducerea",
-  conducere: [
+  motorNota:
+    "Cifrele de mai sus nu sunt scrise de mână în pagina asta: se citesc din același fișier de configurare pe care îl folosește motorul care acordă punctele. Dacă se schimbă regula, se schimbă și pagina.",
+
+  cascadaTitlu: "Cine rămâne în urmă nu rămâne uitat",
+  cascadaLead:
+    "Partea pe care niciun curs trimis pe e-mail n-o are. După o zi fără activitate, platforma începe să-l caute pe om singură, urcând treptele una câte una.",
+  cascadaCanale: {
+    PUSH: "Notificare pe telefon",
+    TELEGRAM: "Telegram",
+    EMAIL: "E-mail",
+    WHATSAPP: "WhatsApp",
+    SMS: "SMS",
+    CALL: "Apel telefonic",
+  },
+  cascadaImediat: "imediat",
+  cascadaDupaMin: "după încă {n} minute",
+  cascadaOprire:
+    "Cascada se oprește în clipa în care omul reia — nu la sfârșitul listei. Cine s-a apucat nu mai primește nimic; cine n-a deschis niciodată ajunge, treaptă cu treaptă, pe canalul la care chiar răspunde.",
+  cascadaRitm:
+    "Ritmul îl fixați voi. Implicit treptele sunt apropiate, fiindcă mecanismul a fost construit pentru un elev care ratează o ședință în seara aceea; pentru un curs de serviciu se așază pe zile.",
+  cascadaDovadaTitlu: "Nu e o funcție de pe listă",
+  cascadaDovada: `Mecanismul rulează la fiecare ${CRON_MINUTE} minute și a dus până la capăt ${DOVADA_LANTURI.toLocaleString("ro-RO")} de lanțuri de memento-uri pe cealaltă latură a platformei, pe toate cele patru canale — notificare pe telefon, Telegram, e-mail și WhatsApp. Cifră numărată în baza de producție la ${DOVADA_DATA_RO}, nu estimată.`,
+
+  tabloTitlu: "Ce primiți voi: tabloul, nu o promisiune",
+  tabloLead:
+    "Asta e chiar structura ecranului pe care îl deschide un diriginte sau un director de rețea. Numele și mărcile de mai jos sunt inventate; coloanele, treptele și felul în care se colorează scorul sunt cele reale.",
+  tabloCapCursant: "Cursant",
+  tabloCapStare: "Stare",
+  tabloModule: ["M1 · Prima încercare", "M2 · Banii și dovada", "M3 · Omul de la ușă"],
+  tabloLectie: "lecția",
+  tabloTest: "test",
+  tabloRanduri: [
+    {
+      nume: "Ionescu Marian",
+      detaliu: "marca 41207 · Of. Buzău 3",
+      stare: "A terminat",
+      stareNota: "a apăsat 02.09",
+      module: [
+        { lectie: "02.09", scor: [7, 7], zi: "02.09" },
+        { lectie: "04.09", scor: [6, 7], zi: "04.09" },
+        { lectie: "05.09", scor: [7, 7], zi: "05.09" },
+      ],
+    },
+    {
+      nume: "Dobre Elena",
+      detaliu: "marca 38914 · Of. Buzău 1",
+      stare: "Învață",
+      stareNota: "a apăsat 02.09",
+      module: [
+        { lectie: "03.09", scor: [7, 7], zi: "03.09" },
+        { lectie: "08.09", scor: [4, 7], zi: "08.09" },
+        { lectie: null, scor: null, zi: null },
+      ],
+    },
+    {
+      nume: "Vasilache Petru",
+      detaliu: "marca 40556 · Of. Râmnicu Sărat",
+      stare: "Cont creat",
+      stareNota: "a apăsat 03.09",
+      module: [
+        { lectie: null, scor: null, zi: null },
+        { lectie: null, scor: null, zi: null },
+        { lectie: null, scor: null, zi: null },
+      ],
+    },
+    {
+      nume: "Neagu Cristina",
+      detaliu: "marca 39880 · Of. Pogoanele",
+      stare: "Invitație trimisă",
+      stareNota: "trimisă 02.09",
+      module: [
+        { lectie: null, scor: null, zi: null },
+        { lectie: null, scor: null, zi: null },
+        { lectie: null, scor: null, zi: null },
+      ],
+    },
+  ],
+  tabloLegenda:
+    "Scorul se colorează singur: verde peste 70%, chihlimbar între 50 și 70, roșu sub. Rândul Elenei spune ceva ce o listă de prezență n-ar fi spus niciodată — a citit tot, dar la modulul cu banii a picat sub prag. Aia nu e o problemă de disciplină, e un modul prost înțeles.",
+  tabloConducere: [
     "Cine a parcurs fiecare modul și când — pe om, nu pe listă de prezență.",
-    "Pe ce modul se greșește cel mai mult — platforma ține rata de eroare pe fiecare temă, deci se vede ce n-a fost înțeles, nu doar cine n-a citit.",
+    "Pe ce modul se greșește cel mai mult: platforma ține rata de eroare pe fiecare temă, deci se vede ce n-a fost înțeles, nu doar cine n-a citit.",
+    "Fișa fiecărui om, în care greșelile stau înaintea răspunsurilor bune — fiindcă alea sunt de citit.",
     "Materia rămâne privată. Nu apare în catalog, nu se poate căuta, nu există pentru cine nu are cod.",
     "Conținutul se schimbă din panou, fără să depindeți de noi pentru fiecare corectură.",
   ],
+
+  obiectiiTitlu: "Ce ne-ați întreba, dacă am fi în aceeași cameră",
+  obiectiiLead:
+    "Le scriem noi, înainte să le puneți voi. Fiecare are un răspuns care există deja în produs, nu unul pe care l-am construi după semnătură.",
+  obiectii: [
+    {
+      intrebare: "„Oamenii mei n-au adresă de e-mail.”",
+      raspuns:
+        "Nu e nevoie de niciuna. Omul intră pe un cod și își spune numele, prenumele și telefonul; contul se face acolo. Iar dacă își uită parola, primește un cod pe WhatsApp și îl tastează în aplicație — fără nicio adresă de e-mail în tot drumul.",
+    },
+    {
+      intrebare: "„Nu vor să-și instaleze nimic pe telefon.”",
+      raspuns:
+        "Nu se instalează nimic. E o pagină web, se deschide din linkul primit pe WhatsApp. Nici pe telefoanele lor, nici pe serverele voastre.",
+    },
+    {
+      intrebare: "„Nu toți au telefon bun.”",
+      raspuns:
+        "Lecția e text, nu video: se încarcă pe orice telefon cu un browser și nu consumă trafic cât un film. Iar pentru cei care nu au deloc, codul comun merge de pe orice telefon — inclusiv de pe al dirigintelui, la oficiu.",
+    },
+    {
+      intrebare: "„Unde ajung datele oamenilor noștri?”",
+      raspuns: `Operatorul de date este ${FURNIZOR}, iar politicile sunt publice și versionate. Materia voastră e privată: nu apare în catalog, nu se poate căuta și nu există pentru cine nu are cod — nici măcar dacă îi ghicește numele.`,
+    },
+    {
+      intrebare: "„N-avem timp să scoatem oamenii din tură.”",
+      raspuns:
+        "Nici nu-i scoateți. Șapte-zece minute pe lecție, când poate el: la capătul turei, în pauză. Nicio zi luată din program, nicio deplasare plătită.",
+    },
+    {
+      intrebare: "„Și dacă materialul nu e corect pentru noi?”",
+      raspuns:
+        "Astăzi chiar nu este, și scrie asta sus, cu litere mari. E scris din surse publice, cu fiecare presupunere marcată în text și cu numele procedurii care lipsește. Primul lucru pe care îl facem împreună este să înlocuim presupunerile cu frazele voastre.",
+    },
+  ],
+
+  costTitlu: "Cât vă costă să porniți",
+  costLead: "Întrebarea nerostită a oricărui decident e cât îl costă pe el, ca timp. Răspunsul, pe față:",
+  cost: [
+    { titlu: "De la voi", text: "O listă cu nume și telefon. Un Excel sau un CSV. Atât." },
+    { titlu: "De instalat", text: "Nimic. Nici pe telefoanele oamenilor, nici pe serverele voastre." },
+    { titlu: "De integrat", text: "Nimic. Nu ne conectăm la niciun sistem al vostru ca să porniți." },
+    { titlu: "Până când intră primul om", text: "Ziua în care primim lista. Invitațiile pleacă de la un buton." },
+  ],
+
   deCeTitlu: "De ce acum",
   deCe: [
     {
@@ -203,6 +569,7 @@ const RO: Copy = {
       sursa: "comunicat Poșta Română",
     },
   ],
+
   pilotTitlu: "Ce urmează, dacă mergem mai departe",
   pilotLead: "Un pilot mărginit, cu măsurători înainte și după — nu un contract-cadru.",
   pilot: [
@@ -211,14 +578,19 @@ const RO: Copy = {
     "Un județ, câteva oficii de tipuri diferite, douăsprezece săptămâni, cu un grup care nu face cursul — ca să se vadă dacă diferența e reală.",
     "Instructorii sunt dirigenții voștri, nu noi. Mecanismul care schimbă obiceiuri e șeful direct care predă, nu furnizorul din afară.",
   ],
+
   contactTitlu: "Cui răspundeți",
   contactLead:
-    "Scrieți-ne sau sunați și vă trimitem codurile de acces pentru câte oameni vreți să vadă materialul, plus răspunsul la orice întrebare din pagina asta.",
+    "Scrieți-ne sau sunați și vă trimitem codurile de acces pentru câți oameni vreți să vadă materialul, plus răspunsul la orice întrebare din pagina asta.",
   contactMailEticheta: "E-mail",
   contactTelEticheta: "Telefon",
-  pdfCta: "Descarcă prezentarea (PDF)",
-  finalTitlu: "Aveți deja un cod de acces?",
-  finalSub: "Intrați în cont și deschideți traseul rolului dumneavoastră.",
+  contactSubiect: "Poșta Română — procedurile pentru pilot",
+
+  finalTitlu: "Un singur pas mai departe",
+  finalSub:
+    "Trimiteți-ne o procedură — una singură, cea de livrare și avizare. Vă returnăm modulul rescris cu frazele voastre, ca să vedeți diferența dintre ce e în pagina asta și ce ar fi la voi. Nu costă nimic și nu obligă la nimic.",
+  finalCta: "Trimiteți-ne procedurile",
+  finalCursant: "Sunteți cursant și aveți deja un cod de acces? Intrați în cont.",
 };
 
 const EN: Copy = {
@@ -226,11 +598,65 @@ const EN: Copy = {
   hero: "Systems change in years. The people at the door and at the counter change in weeks.",
   subtitle:
     "The customer never sees the IT system. They see the postman at the door and the clerk at the counter — and they compare them, without meaning to, with what arrived on Tuesday from someone else. This page shows how those people are trained: on a phone, in ten minutes, with proof that it happened.",
+  ctaPdf: "Download the presentation (PDF)",
+  ctaScrie: "Send us your procedures",
   ctaIn: "Sign in",
-  ctaCont: "Create account",
+
   avertismentTitlu: "Simulated content",
   avertisment:
     "The three courses below were written by us from public sources, without access to Poșta Română's own procedures. Every place where we had to assume something is marked in the text, naming the procedure that is missing. These are not official regulations and must not be used as such. That is precisely the offer: give us your procedures and the assumptions become your own wording.",
+
+  scaraTitlu: "Why a classroom cannot do this",
+  scaraLead:
+    "This is not an objection to classroom training in principle. It is an arithmetic problem, worked out with your own public figures.",
+  scaraCifre: [
+    { valoare: "19,931", eticheta: "employees at the end of 2025" },
+    { valoare: "~5,600", eticheta: "units in the territorial network" },
+    { valoare: "~1,000", eticheta: "groups of twenty people" },
+  ],
+  scaraConcluzie:
+    "One single classroom day for everyone means roughly a thousand groups. With ten rooms running in parallel that is a hundred working days — close to half a year of pulling people off their rounds, with travel paid. And at the end you hold an attendance sheet, not the answer to the question that matters: who understood what.",
+  scaraSursa:
+    "the first two figures come from the company's public reporting (2025) and its territorial-network presentation; the third is our own arithmetic — 19,931 divided into groups of twenty",
+
+  fluxTitlu: "The whole path, from your list to the report",
+  fluxLead:
+    "Seven steps. Three of them happen on their own, without anyone on your side pressing anything — those are marked.",
+  fluxAutomatEticheta: "happens on its own",
+  flux: [
+    {
+      titlu: "You give us a list",
+      text: "An Excel or CSV file with names and phone numbers. It uploads from the admin panel in two stages: first you see what was read, then you confirm. If you have no list, that works too — one shared code, written on a sheet on the notice board.",
+    },
+    {
+      titlu: "The invitation goes out",
+      text: "Over WhatsApp, on the spot, from a button. Each person gets their own link, which works once and only for them.",
+    },
+    {
+      titlu: "They come in on their own phone",
+      text: "They tap the link, choose a password, and they are in. Nothing is installed. No email address needed.",
+      automat: true,
+    },
+    {
+      titlu: "They read the lesson",
+      text: "Seven to ten minutes. Plain text, with exact lines to say to the customer rather than principles. At the end of a shift, on a break, on the bus — it resumes where they left off.",
+    },
+    {
+      titlu: "The test opens after the lesson",
+      text: "Nobody is asked about what they have not read. A module enters the test only once its lesson is finished.",
+      automat: true,
+    },
+    {
+      titlu: "Whoever stops gets chased",
+      text: "After a day with no activity a cascade of reminders starts, across four channels, one after another. It stops by itself the moment the person resumes. Nobody on your side keeps a list of who fell behind.",
+      automat: true,
+    },
+    {
+      titlu: "The trace stays",
+      text: "Who, which module, on which day, with what score. Not an attendance sheet — a trace for each person, which you read in the table below.",
+    },
+  ],
+
   cursuriTitlu: "Three tracks, for the three roles that touch the customer",
   cursuriLead:
     "Each course has three modules. Each module has a lesson you read in seven to ten minutes and a test that opens after it. Each course ends with a single number the person tracks for a week — for themselves, not for a report.",
@@ -257,33 +683,159 @@ const EN: Copy = {
       module: ["Five numbers on one sheet", "The lunchtime queue and the complaint", "The first customer in town"],
     },
   ],
-  cumTitlu: "What it looks like for an employee",
-  cumLead: "No classroom, no binder, no day taken out of the schedule.",
-  pasi: [
+
+  motorTitlu: "What makes them open it a second time",
+  motorLead:
+    "A course that was sent is not a course that was taken. The difference is what happens between the first lesson and the third — and that is built into the platform, not left to the line manager.",
+  motor: [
     {
-      t: "1. They get a code",
-      d: "The code belongs to their role. The subject is private: for anyone without a code it appears nowhere and cannot be found — not even by guessing its name.",
+      titlu: "Points for what they do, not for how long they sit",
+      text: `${XP_REWARDS.CORRECT_ANSWER} points for each correct answer, plus ${XP_REWARDS.FAST_ANSWER_BONUS} if they answer in under ${PRAG_RASPUNS_RAPID_SEC} seconds — the sign that they knew it rather than looked it up. ${XP_REWARDS.SESSION_COMPLETE} for finishing a session, ${XP_REWARDS.PERFECT_SCORE} for a perfect score, ${ON_TIME_BONUS} for doing it inside the window they were given.`,
     },
     {
-      t: "2. They read on their phone",
-      d: "Seven to ten minutes. Plain text, with exact lines to say to the customer. It can be reopened any time, at the end of a shift.",
+      titlu: "A daily streak, with the right to slip",
+      text: `Consecutive days count. But if they missed up to ${STREAK_RECOVERY.maxMissedDays} days — leave, illness — they win the streak back: ${STREAK_RECOVERY.questions} questions, ${STREAK_RECOVERY.requiredCorrect} of them correct, within ${RECUPERARE_MINUTE} minutes. One hard week does not cost them everything.`,
     },
     {
-      t: "3. The test opens after the lesson",
-      d: "Nobody is tested on what they have not read. A module enters the test only once its lesson is finished.",
+      titlu: `${DEFAULT_LEVELS.length} tiers and a leaderboard`,
+      text: `Tiers at ${NIVELE_PRAGURI_EN} points, and a leaderboard of the top ${LEADERBOARD_TOP} in their own group. Not the whole company — competing against 19,000 strangers motivates nobody; competing with the colleagues in your office does.`,
     },
     {
-      t: "4. The proof stays",
-      d: "Who covered what, when, and with what result. Not an attendance sheet, but a trace for each person.",
+      titlu: "The challenge of the day",
+      text: `One question a day, where the points are ${XP_REWARDS.DAILY_CHALLENGE_MULTIPLIER === 2 ? "doubled" : `multiplied by ${XP_REWARDS.DAILY_CHALLENGE_MULTIPLIER}`}. It is the reason someone opens the app on a day when they had nothing there to do.`,
     },
   ],
-  conducereTitlu: "What management sees",
-  conducere: [
+  motorNota:
+    "The figures above are not typed into this page: they are read from the same configuration file the engine uses to award the points. Change the rule and the page changes with it.",
+
+  cascadaTitlu: "Whoever falls behind is not forgotten",
+  cascadaLead:
+    "The part no course emailed as an attachment has. After a day without activity, the platform starts looking for the person by itself, climbing the rungs one at a time.",
+  cascadaCanale: {
+    PUSH: "Phone notification",
+    TELEGRAM: "Telegram",
+    EMAIL: "Email",
+    WHATSAPP: "WhatsApp",
+    SMS: "SMS",
+    CALL: "Phone call",
+  },
+  cascadaImediat: "immediately",
+  cascadaDupaMin: "{n} minutes later",
+  cascadaOprire:
+    "The cascade stops the moment the person resumes — not at the end of the list. Whoever got going hears nothing more; whoever never opened it reaches, rung by rung, the channel they actually answer on.",
+  cascadaRitm:
+    "You set the pace. By default the rungs sit close together, because the mechanism was built for a pupil missing a study session that evening; for a workplace course you space them out in days.",
+  cascadaDovadaTitlu: "Not a line on a feature list",
+  cascadaDovada: `The mechanism runs every ${CRON_MINUTE} minutes and has carried ${DOVADA_LANTURI.toLocaleString("en-US")} reminder chains through to the end on the other side of the platform, across all four channels — phone notification, Telegram, email and WhatsApp. Counted in the production database on ${DOVADA_DATA_EN}, not estimated.`,
+
+  tabloTitlu: "What you get: the table, not a promise",
+  tabloLead:
+    "This is the actual structure of the screen an office manager or a network director opens. The names and badge numbers below are invented; the columns, the stages and the way the score colours itself are the real ones.",
+  tabloCapCursant: "Learner",
+  tabloCapStare: "Stage",
+  tabloModule: ["M1 · The first attempt", "M2 · Cash and proof", "M3 · The person at the door"],
+  tabloLectie: "lesson",
+  tabloTest: "test",
+  tabloRanduri: [
+    {
+      nume: "Ionescu Marian",
+      detaliu: "badge 41207 · Buzău 3 office",
+      stare: "Finished",
+      stareNota: "tapped 02.09",
+      module: [
+        { lectie: "02.09", scor: [7, 7], zi: "02.09" },
+        { lectie: "04.09", scor: [6, 7], zi: "04.09" },
+        { lectie: "05.09", scor: [7, 7], zi: "05.09" },
+      ],
+    },
+    {
+      nume: "Dobre Elena",
+      detaliu: "badge 38914 · Buzău 1 office",
+      stare: "Learning",
+      stareNota: "tapped 02.09",
+      module: [
+        { lectie: "03.09", scor: [7, 7], zi: "03.09" },
+        { lectie: "08.09", scor: [4, 7], zi: "08.09" },
+        { lectie: null, scor: null, zi: null },
+      ],
+    },
+    {
+      nume: "Vasilache Petru",
+      detaliu: "badge 40556 · Râmnicu Sărat office",
+      stare: "Account created",
+      stareNota: "tapped 03.09",
+      module: [
+        { lectie: null, scor: null, zi: null },
+        { lectie: null, scor: null, zi: null },
+        { lectie: null, scor: null, zi: null },
+      ],
+    },
+    {
+      nume: "Neagu Cristina",
+      detaliu: "badge 39880 · Pogoanele office",
+      stare: "Invitation sent",
+      stareNota: "sent 02.09",
+      module: [
+        { lectie: null, scor: null, zi: null },
+        { lectie: null, scor: null, zi: null },
+        { lectie: null, scor: null, zi: null },
+      ],
+    },
+  ],
+  tabloLegenda:
+    "The score colours itself: green above 70%, amber between 50 and 70, red below. Elena's row says something an attendance sheet never could — she read everything, but on the module about cash she fell under the line. That is not a discipline problem, it is a module that was not understood.",
+  tabloConducere: [
     "Who completed each module and when — per person, not per attendance list.",
     "Which module people get wrong most: the platform keeps an error rate per topic, so you see what was not understood, not just who did not read.",
+    "Each person's own page, where the mistakes come before the right answers — because those are the ones worth reading.",
     "The subject stays private. It is not in the catalogue, cannot be searched, and does not exist for anyone without a code.",
     "Content is edited from the admin panel, without depending on us for every correction.",
   ],
+
+  obiectiiTitlu: "What you would ask us, if we were in the same room",
+  obiectiiLead:
+    "We write them down before you have to. Each one has an answer that already exists in the product, not one we would build after signature.",
+  obiectii: [
+    {
+      intrebare: "“My people do not have email addresses.”",
+      raspuns:
+        "None is needed. The person enters with a code and gives their first name, last name and phone number; the account is created there. And if they forget the password, they get a code over WhatsApp and type it into the app — with no email address anywhere along the way.",
+    },
+    {
+      intrebare: "“They do not want to install anything on their phones.”",
+      raspuns:
+        "Nothing gets installed. It is a web page, opened from the link that arrived over WhatsApp. Not on their phones, and not on your servers.",
+    },
+    {
+      intrebare: "“Not all of them have a good phone.”",
+      raspuns:
+        "The lesson is text, not video: it loads on any phone with a browser and does not eat data like a film. And for those who have none at all, the shared code works from any phone — including the office manager's, at the counter.",
+    },
+    {
+      intrebare: "“Where does our people's data end up?”",
+      raspuns: `The data controller is ${FURNIZOR}, and the policies are public and versioned. Your subject stays private: it is not in the catalogue, cannot be searched, and does not exist for anyone without a code — not even if they guess its name.`,
+    },
+    {
+      intrebare: "“We have no time to pull people off their rounds.”",
+      raspuns:
+        "You do not pull them off. Seven to ten minutes per lesson, whenever they can: at the end of a shift, on a break. No day taken out of the schedule, no travel paid.",
+    },
+    {
+      intrebare: "“And if the material is not right for us?”",
+      raspuns:
+        "Today it genuinely is not, and this page says so at the top, in large type. It is written from public sources, with every assumption marked in the text and the missing procedure named. The first thing we do together is replace the assumptions with your own wording.",
+    },
+  ],
+
+  costTitlu: "What it costs you to start",
+  costLead: "The unspoken question of any decision-maker is what it costs them, in time. The answer, plainly:",
+  cost: [
+    { titlu: "From you", text: "A list of names and phone numbers. An Excel or CSV file. That is all." },
+    { titlu: "To install", text: "Nothing. Not on your people's phones, not on your servers." },
+    { titlu: "To integrate", text: "Nothing. We connect to none of your systems in order to start." },
+    { titlu: "Until the first person is in", text: "The day we receive the list. Invitations go out from a button." },
+  ],
+
   deCeTitlu: "Why now",
   deCe: [
     {
@@ -299,6 +851,7 @@ const EN: Copy = {
       sursa: "Poșta Română press release",
     },
   ],
+
   pilotTitlu: "What happens next",
   pilotLead: "A bounded pilot, measured before and after — not a framework contract.",
   pilot: [
@@ -307,19 +860,34 @@ const EN: Copy = {
     "One county, a few offices of different kinds, twelve weeks, with a group that does not take the course — so the difference can be seen.",
     "The instructors are your own office managers, not us. What changes habits is the direct manager who teaches, not the outside supplier.",
   ],
+
   contactTitlu: "Who to reply to",
   contactLead:
     "Write or call us and we will send access codes for as many people as you want to see the material, plus an answer to any question on this page.",
   contactMailEticheta: "Email",
   contactTelEticheta: "Phone",
-  pdfCta: "Download the presentation (PDF)",
-  finalTitlu: "Already have an access code?",
-  finalSub: "Sign in and open the track for your role.",
+  contactSubiect: "Poșta Română — procedures for the pilot",
+
+  finalTitlu: "One step further",
+  finalSub:
+    "Send us one procedure — just one, the delivery-and-notice one. We will send back the module rewritten in your own wording, so you can see the difference between what is on this page and what it would be at your place. It costs nothing and commits you to nothing.",
+  finalCta: "Send us your procedures",
+  finalCursant: "Are you a learner with an access code already? Sign in.",
 };
+
+/** Aceleași praguri ca în tabloul real (`admin/cursanti/roster.tsx`). */
+function culoareScor(corecte: number, total: number): string {
+  if (total === 0) return "text-gray-500";
+  const p = (corecte / total) * 100;
+  if (p >= 70) return "text-emerald-300";
+  if (p >= 50) return "text-amber-300";
+  return "text-red-300";
+}
 
 export default async function PostaPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const c = locale === "en" ? EN : RO;
+  const mailto = `mailto:${CONTACT_MAIL}?subject=${encodeURIComponent(c.contactSubiect)}`;
 
   return (
     <div data-posta className="min-h-screen bg-gray-950 text-gray-100">
@@ -331,7 +899,7 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
           </Link>
           <Link
             href="/auth/signin"
-            className="inline-flex min-h-[44px] items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 print:hidden"
+            className="inline-flex min-h-[44px] items-center rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:border-gray-500 print:hidden"
           >
             {c.ctaIn}
           </Link>
@@ -345,28 +913,23 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
           </span>
           <h1 className="mt-5 text-3xl font-bold sm:text-5xl">{c.hero}</h1>
           <p className="mt-4 text-lg text-gray-400">{c.subtitle}</p>
+          {/*
+            Cele două butoane sunt pentru DECIDENT, nu pentru cursant: el nu-și face cont
+            de pe pagina asta, el ia fișierul și scrie un e-mail. „Autentificare" a rămas
+            doar în antet, unde nu concurează cu îndemnul care contează.
+          */}
           <div className="mt-7 flex flex-wrap gap-3 print:hidden">
-            <Link
-              href="/auth/signin"
-              className="inline-flex min-h-[44px] items-center rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-500"
-            >
-              {c.ctaIn}
-            </Link>
-            <Link
-              href="/auth/register"
-              className="inline-flex min-h-[44px] items-center rounded-xl border border-gray-700 px-6 py-3 font-semibold text-gray-200 hover:border-gray-500"
-            >
-              {c.ctaCont}
-            </Link>
-            {/*
-              Rută API, nu `Link` cu prefix de limbă. Omul de la Poșta ia fișierul
-              și îl trimite mai departe conducerii — de-asta există pagina.
-            */}
             <a
               href={`/api/posta/pdf?locale=${locale === "en" ? "en" : "ro"}`}
+              className="inline-flex min-h-[44px] items-center rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-500"
+            >
+              {c.ctaPdf}
+            </a>
+            <a
+              href={mailto}
               className="inline-flex min-h-[44px] items-center rounded-xl border border-gray-700 px-6 py-3 font-semibold text-gray-200 hover:border-gray-500"
             >
-              {c.pdfCta}
+              {c.ctaScrie}
             </a>
           </div>
         </div>
@@ -374,6 +937,61 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
         <section role="note" aria-label={c.avertismentTitlu} className="mt-10 rounded-2xl border border-amber-500/40 bg-amber-500/5 p-6">
           <h2 className="text-lg font-semibold text-amber-300">{c.avertismentTitlu}</h2>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-gray-300">{c.avertisment}</p>
+        </section>
+
+        {/* Aritmetica lor, nu a pieței: singura secțiune din pagină despre EI. */}
+        <section className="mt-16">
+          <h2 className="text-2xl font-semibold">{c.scaraTitlu}</h2>
+          <p className="mt-2 max-w-3xl text-sm text-gray-400">{c.scaraLead}</p>
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            {c.scaraCifre.map((x) => (
+              <div key={x.eticheta} className="rounded-2xl border border-gray-800 bg-gray-900 p-5">
+                <p className="text-3xl font-bold tabular-nums text-blue-400">{x.valoare}</p>
+                <p className="mt-1 text-sm text-gray-400">{x.eticheta}</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-5 max-w-3xl text-sm leading-relaxed text-gray-300">{c.scaraConcluzie}</p>
+          <p className="mt-2 text-xs text-gray-500">({c.scaraSursa})</p>
+        </section>
+
+        {/*
+          Elementul grafic cerut: traseul pe VERTICALĂ, cu șina în stânga și textul lateral.
+          E HTML, nu o imagine — deci se așază singur pe telefon, iese text selectabil în
+          PDF, și nu se învechește ca o captură de ecran. Alb-negru se ține din șină,
+          contur și marcajul punctat (vezi `.flux-*` din PRINT_CSS).
+        */}
+        <section className="mt-16">
+          <h2 className="text-2xl font-semibold">{c.fluxTitlu}</h2>
+          <p className="mt-2 max-w-3xl text-sm text-gray-400">{c.fluxLead}</p>
+          {/*
+            Șina stă în DIV-ul de poziționare, nu în <ol>: modelul de conținut al unei
+            liste ordonate admite doar <li>, iar un <div> acolo strică numărătoarea
+            anunțată de cititoarele de ecran și pică auditul de accesibilitate.
+          */}
+          <div className="relative mt-8">
+            <div aria-hidden className="flux-sina absolute bottom-4 left-[15px] top-4 w-px bg-gray-700" />
+            <ol>
+            {c.flux.map((p, i) => (
+              <li key={p.titlu} className="flux-pas relative flex gap-5 pb-8 last:pb-0">
+                <span className="flux-nod z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gray-700 bg-gray-950 text-sm font-semibold text-blue-300">
+                  {i + 1}
+                </span>
+                <div className="pt-0.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-semibold">{p.titlu}</h3>
+                    {p.automat && (
+                      <span className="flux-auto rounded-full border border-dashed border-gray-700 px-2 py-0.5 text-[11px] text-gray-400">
+                        {c.fluxAutomatEticheta}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-gray-400">{p.text}</p>
+                </div>
+              </li>
+            ))}
+            </ol>
+          </div>
         </section>
 
         <section className="mt-16">
@@ -398,43 +1016,157 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
           </div>
         </section>
 
+        {/* Gamificarea, spusă ca răspuns la „ce-i face să continue", nu ca listă de funcții. */}
         <section className="mt-16">
-          <h2 className="text-2xl font-semibold">{c.cumTitlu}</h2>
-          <p className="mt-2 text-sm text-gray-400">{c.cumLead}</p>
-          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {c.pasi.map((p) => (
-              <div key={p.t} className="rounded-2xl border border-gray-800 bg-gray-900 p-5">
-                <p className="font-semibold text-blue-400">{p.t}</p>
-                <p className="mt-2 text-sm text-gray-400">{p.d}</p>
+          <h2 className="text-2xl font-semibold">{c.motorTitlu}</h2>
+          <p className="mt-2 max-w-3xl text-sm text-gray-400">{c.motorLead}</p>
+          <div className="mt-6 grid gap-5 sm:grid-cols-2">
+            {c.motor.map((m) => (
+              <div key={m.titlu} className="rounded-2xl border border-gray-800 bg-gray-900 p-6">
+                <h3 className="font-semibold text-blue-400">{m.titlu}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-400">{m.text}</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-xs text-gray-500">{c.motorNota}</p>
+        </section>
+
+        {/*
+          Cascada. Treptele se citesc din `ESCALATION_LEVELS` — fișierul pe care îl execută
+          motorul — nu din text scris aici, tocmai ca să nu poată ajunge să spună altceva
+          decât face produsul.
+        */}
+        <section className="mt-16 rounded-2xl border border-gray-800 bg-gray-900/60 p-8">
+          <h2 className="text-2xl font-semibold">{c.cascadaTitlu}</h2>
+          <p className="mt-2 max-w-3xl text-sm text-gray-400">{c.cascadaLead}</p>
+          <ol className="mt-6 space-y-2.5">
+            {ESCALATION_LEVELS.map((l, i) => (
+              <li key={l.level} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
+                <span className="flux-nod inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-gray-700 text-xs font-semibold text-blue-300">
+                  {i + 1}
+                </span>
+                <span className="font-medium text-gray-200">{c.cascadaCanale[l.channel]}</span>
+                <span className="text-gray-500">
+                  {l.delayMinutes === 0
+                    ? c.cascadaImediat
+                    : c.cascadaDupaMin.replace("{n}", String(l.delayMinutes))}
+                </span>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-5 max-w-3xl text-sm leading-relaxed text-gray-300">{c.cascadaOprire}</p>
+          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-gray-400">{c.cascadaRitm}</p>
+          <div className="mt-6 rounded-xl border border-blue-900/60 bg-blue-950/20 p-5">
+            <h3 className="text-sm font-semibold text-blue-300">{c.cascadaDovadaTitlu}</h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-gray-300">{c.cascadaDovada}</p>
+          </div>
+        </section>
+
+        {/*
+          Dovada în locul promisiunii. NU e o captură de ecran — e tabloul reconstruit cu
+          aceleași coloane, aceleași trepte și aceleași praguri de culoare ca
+          `admin/cursanti/roster.tsx`. O captură ar fi îmbătrânit tăcut și ar fi ieșit
+          ilizibilă pe hârtie; asta se așază singură și rămâne text în PDF.
+        */}
+        <section className="mt-16">
+          <h2 className="text-2xl font-semibold">{c.tabloTitlu}</h2>
+          <p className="mt-2 max-w-3xl text-sm text-gray-400">{c.tabloLead}</p>
+          <div className="mt-6 overflow-x-auto rounded-xl border border-gray-800">
+            <table className="tablou w-full min-w-[44rem] border-collapse text-sm">
+              <thead>
+                <tr className="bg-gray-900 text-left text-xs uppercase tracking-wide text-gray-500">
+                  <th className="px-3 py-2.5 font-semibold">{c.tabloCapCursant}</th>
+                  <th className="px-3 py-2.5 font-semibold">{c.tabloCapStare}</th>
+                  {c.tabloModule.map((m) => (
+                    <th key={m} className="px-3 py-2.5 font-semibold">{m}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {c.tabloRanduri.map((r) => (
+                  <tr key={r.nume} className="border-t border-gray-800 align-top">
+                    <td className="px-3 py-3">
+                      <div className="font-medium text-white">{r.nume}</div>
+                      <div className="text-xs text-gray-500">{r.detaliu}</div>
+                    </td>
+                    <td className="px-3 py-3">
+                      <span className="inline-block rounded border border-gray-700 bg-gray-800 px-2 py-0.5 text-xs text-gray-300">
+                        {r.stare}
+                      </span>
+                      <div className="mt-1 text-[11px] text-gray-600">{r.stareNota}</div>
+                    </td>
+                    {r.module.map((m, i) => (
+                      <td key={i} className="px-3 py-3">
+                        <div className="text-xs">
+                          {m.lectie ? (
+                            <span className="text-emerald-300">✓ {c.tabloLectie} {m.lectie}</span>
+                          ) : (
+                            <span className="text-gray-600">{c.tabloLectie} −</span>
+                          )}
+                        </div>
+                        <div className="mt-0.5 text-xs font-medium tabular-nums">
+                          {m.scor ? (
+                            <span className={culoareScor(m.scor[0], m.scor[1])}>
+                              {m.scor[0]}/{m.scor[1]} · {m.zi}
+                            </span>
+                          ) : (
+                            <span className="text-gray-600">{c.tabloTest} −</span>
+                          )}
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-4 max-w-3xl text-sm leading-relaxed text-gray-300">{c.tabloLegenda}</p>
+          <ul className="mt-6 grid gap-2 sm:grid-cols-2">
+            {c.tabloConducere.map((x) => (
+              <li key={x} className="flex gap-2 text-sm text-gray-300">
+                <span className="text-blue-400">✓</span>
+                <span>{x}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="mt-16">
+          <h2 className="text-2xl font-semibold">{c.obiectiiTitlu}</h2>
+          <p className="mt-2 max-w-3xl text-sm text-gray-400">{c.obiectiiLead}</p>
+          <div className="mt-6 grid gap-5 sm:grid-cols-2">
+            {c.obiectii.map((o) => (
+              <div key={o.intrebare} className="rounded-2xl border border-gray-800 bg-gray-900 p-6">
+                <h3 className="font-semibold text-gray-200">{o.intrebare}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-400">{o.raspuns}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <div className="mt-16 grid gap-6 lg:grid-cols-2">
-          <section className="rounded-2xl border border-gray-800 bg-gray-900 p-6">
-            <h2 className="text-xl font-semibold">{c.conducereTitlu}</h2>
-            <ul className="mt-4 space-y-2">
-              {c.conducere.map((x) => (
-                <li key={x} className="flex gap-2 text-sm text-gray-300">
-                  <span className="text-blue-400">✓</span>
-                  <span>{x}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
+        <section className="mt-16">
+          <h2 className="text-2xl font-semibold">{c.costTitlu}</h2>
+          <p className="mt-2 max-w-3xl text-sm text-gray-400">{c.costLead}</p>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {c.cost.map((x) => (
+              <div key={x.titlu} className="rounded-2xl border border-gray-800 bg-gray-900 p-5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-blue-400">{x.titlu}</p>
+                <p className="mt-2 text-sm text-gray-300">{x.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-          <section className="rounded-2xl border border-gray-800 bg-gray-900 p-6">
-            <h2 className="text-xl font-semibold">{c.deCeTitlu}</h2>
-            <ul className="mt-4 space-y-3">
-              {c.deCe.map((x) => (
-                <li key={x.text} className="text-sm text-gray-300">
-                  {x.text} <span className="text-gray-500">({x.sursa})</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </div>
+        <section className="mt-16 rounded-2xl border border-gray-800 bg-gray-900 p-8">
+          <h2 className="text-2xl font-semibold">{c.deCeTitlu}</h2>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-3">
+            {c.deCe.map((x) => (
+              <li key={x.text} className="text-sm text-gray-300">
+                {x.text} <span className="text-gray-500">({x.sursa})</span>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         <section className="mt-16 rounded-2xl border border-gray-800 bg-gray-900/60 p-8">
           <h2 className="text-2xl font-semibold">{c.pilotTitlu}</h2>
@@ -450,8 +1182,7 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
         </section>
 
         {/*
-          Contactul stă imediat după pilot, nu în subsol: acolo termină de citit decidentul,
-          iar secțiunea de mai jos („Aveți deja un cod de acces?") e pentru cursant, nu pentru el.
+          Contactul stă imediat după pilot, nu în subsol: acolo termină de citit decidentul.
           `mailto:`/`tel:` merg pe `<a>` simplu, NU pe `Link`-ul din `@/i18n/navigation` — acela
           prefixează limba și ar strica schema (exact defectul reparat în `9c6a851`).
         */}
@@ -460,7 +1191,7 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
           <p className="mt-2 text-sm text-gray-400">{c.contactLead}</p>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:gap-8">
             <a
-              href={`mailto:${CONTACT_MAIL}`}
+              href={mailto}
               className="inline-flex min-h-[44px] items-center gap-2 text-blue-300 hover:text-blue-200 hover:underline"
             >
               <span className="text-gray-500">{c.contactMailEticheta}:</span>
@@ -476,16 +1207,24 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
           </div>
         </section>
 
-        {/* Secțiunea asta se adresează cursantului cu cod, nu decidentului — în PDF n-are rost. */}
-        <section className="mt-16 text-center print:hidden">
+        {/*
+          Un singur îndemn, același ca sus, la capătul lecturii — al DECIDENTULUI.
+          Linia pentru cursant a rămas, dar mică și fără buton: ea nu are ce concura cu el.
+        */}
+        <section className="mt-16 text-center">
           <h2 className="text-2xl font-semibold">{c.finalTitlu}</h2>
-          <p className="mt-2 text-gray-400">{c.finalSub}</p>
-          <Link
-            href="/auth/signin"
-            className="mt-6 inline-flex min-h-[44px] items-center rounded-xl bg-blue-600 px-8 py-3 font-semibold text-white hover:bg-blue-500"
+          <p className="mx-auto mt-3 max-w-2xl text-gray-400">{c.finalSub}</p>
+          <a
+            href={mailto}
+            className="mt-6 inline-flex min-h-[44px] items-center rounded-xl bg-blue-600 px-8 py-3 font-semibold text-white hover:bg-blue-500 print:hidden"
           >
-            {c.ctaIn}
-          </Link>
+            {c.finalCta}
+          </a>
+          <p className="mt-8 text-xs text-gray-600 print:hidden">
+            <Link href="/auth/signin" className="hover:text-gray-400 hover:underline">
+              {c.finalCursant}
+            </Link>
+          </p>
         </section>
 
       </main>
