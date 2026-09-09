@@ -130,9 +130,20 @@ async function _POST(req: NextRequest) {
   try {
     const { WhatsAppClient, normalizePhone } = await import("@aledan/whatsapp");
     const client = new WhatsAppClient({ phoneNumberId, accessToken });
-    const to = normalizePhone(rawPhone);
 
-    await client.sendTemplate(to, TEMPLATE, "ro", [
+    // Prefixul de țară e al DOILEA parametru al normalizării, și e opțional: fără
+    // el, „0712383492" pleacă exact așa spre Meta, care nu are de unde ști ce țară
+    // e. Meta nu se plânge — mesajul pur și simplu nu ajunge nicăieri. Prins la
+    // prima probă reală a rutei, 2026-09-09.
+    const to = normalizePhone(rawPhone, process.env.WHATSAPP_DEFAULT_COUNTRY_CODE || "40");
+    if (!/^\d{10,15}$/.test(to)) {
+      return NextResponse.json(
+        { error: `Numărul nu arată a număr de telefon: „${rawPhone}".` },
+        { status: 400 }
+      );
+    }
+
+    const result = await client.sendTemplate(to, TEMPLATE, "ro", [
       {
         type: "body" as const,
         parameters: [
@@ -150,14 +161,25 @@ async function _POST(req: NextRequest) {
       },
     ]);
 
+    // `sendTemplate` NU aruncă la refuz — întoarce `{success:false, error}`. Fără
+    // verificarea asta, orice refuz de la Meta ar fi fost raportat drept succes,
+    // adică exact minciuna care se descoperă abia când omul spune că n-a primit.
+    if (!result.success) {
+      console.error("[course-invite] Meta a refuzat:", result.error);
+      return NextResponse.json(
+        { error: "Mesajul nu a plecat.", detail: (result.error || "").slice(0, 300) },
+        { status: 502 }
+      );
+    }
+
     await logAudit({
       action: "COURSE_INVITE_WHATSAPP",
       performedById: session.user.id,
       targetType: "Domain",
-      metadata: { domainId: domain.id, courseTitle, to },
+      metadata: { domainId: domain.id, courseTitle, to, messageId: result.messageId },
     });
 
-    return NextResponse.json({ sent: true, to, course: courseTitle });
+    return NextResponse.json({ sent: true, to, course: courseTitle, messageId: result.messageId });
   } catch (e) {
     // Meta răspunde cu motive utile (număr fără WhatsApp, șablon nepotrivit, cotă
     // depășită). Le arătăm, în loc să spunem „a eșuat" — ruta se folosește live.
