@@ -48,6 +48,10 @@ type Copy = {
   pilotTitlu: string;
   pilotLead: string;
   pilot: string[];
+  contactTitlu: string;
+  contactLead: string;
+  contactMailEticheta: string;
+  contactTelEticheta: string;
   finalTitlu: string;
   finalSub: string;
 };
@@ -138,6 +142,11 @@ const RO: Copy = {
     "Un județ, câteva oficii de tipuri diferite, douăsprezece săptămâni, cu un grup care nu face cursul — ca să se vadă dacă diferența e reală.",
     "Instructorii sunt dirigenții voștri, nu noi. Mecanismul care schimbă obiceiuri e șeful direct care predă, nu furnizorul din afară.",
   ],
+  contactTitlu: "Cui răspundeți",
+  contactLead:
+    "Scrieți-ne sau sunați și vă trimitem codurile de acces pentru câte oameni vreți să vadă materialul, plus răspunsul la orice întrebare din pagina asta.",
+  contactMailEticheta: "E-mail",
+  contactTelEticheta: "Telefon",
   finalTitlu: "Aveți deja un cod de acces?",
   finalSub: "Intrați în cont și deschideți traseul rolului dumneavoastră.",
 };
@@ -228,6 +237,11 @@ const EN: Copy = {
     "One county, a few offices of different kinds, twelve weeks, with a group that does not take the course — so the difference can be seen.",
     "The instructors are your own office managers, not us. What changes habits is the direct manager who teaches, not the outside supplier.",
   ],
+  contactTitlu: "Who to reply to",
+  contactLead:
+    "Write or call us and we will send access codes for as many people as you want to see the material, plus an answer to any question on this page.",
+  contactMailEticheta: "Email",
+  contactTelEticheta: "Phone",
   finalTitlu: "Already have an access code?",
   finalSub: "Sign in and open the track for your role.",
 };
@@ -351,6 +365,33 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
               </li>
             ))}
           </ol>
+        </section>
+
+        {/*
+          Contactul stă imediat după pilot, nu în subsol: acolo termină de citit decidentul,
+          iar secțiunea de mai jos („Aveți deja un cod de acces?") e pentru cursant, nu pentru el.
+          `mailto:`/`tel:` merg pe `<a>` simplu, NU pe `Link`-ul din `@/i18n/navigation` — acela
+          prefixează limba și ar strica schema (exact defectul reparat în `9c6a851`).
+        */}
+        <section className="mt-16 rounded-2xl border border-blue-900/60 bg-blue-950/20 p-8">
+          <h2 className="text-2xl font-semibold">{c.contactTitlu}</h2>
+          <p className="mt-2 text-sm text-gray-400">{c.contactLead}</p>
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:gap-8">
+            <a
+              href="mailto:office@etutor.ro"
+              className="inline-flex min-h-[44px] items-center gap-2 text-blue-300 hover:text-blue-200 hover:underline"
+            >
+              <span className="text-gray-500">{c.contactMailEticheta}:</span>
+              <span className="font-semibold">office@etutor.ro</span>
+            </a>
+            <a
+              href="tel:+40712383492"
+              className="inline-flex min-h-[44px] items-center gap-2 text-blue-300 hover:text-blue-200 hover:underline"
+            >
+              <span className="text-gray-500">{c.contactTelEticheta}:</span>
+              <span className="font-semibold">0712 383 492</span>
+            </a>
+          </div>
         </section>
 
         <section className="mt-16 text-center">
