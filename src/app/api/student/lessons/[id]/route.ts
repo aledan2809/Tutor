@@ -288,19 +288,12 @@ async function _PATCH(
     return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
   }
 
-  // Verify enrollment
-  const enrollment = await prisma.enrollment.findUnique({
-    where: {
-      userId_domainId: {
-        userId: session.user.id,
-        domainId: lesson.domainId,
-      },
-    },
-  });
-
-  if (!enrollment?.isActive) {
-    return NextResponse.json({ error: "Not enrolled in this domain" }, { status: 403 });
-  }
+  // Poarta comună (înscriere + ocolire pentru superadmin + 404 în loc de 403).
+  // Fără ea, „Mark as Complete" răspundea 403, iar butonul înghițea răspunsul —
+  // deci bifa nu se scria, testul modulului nu se deschidea niciodată, și nimic
+  // pe ecran nu spunea de ce.
+  const patchGate = await resolveDomainByIdOrForbid(lesson.domainId, session.user);
+  if (!patchGate.ok) return patchGate.response;
 
   const computedStatus = status || (progress >= 100 ? "COMPLETED" : progress > 0 ? "IN_PROGRESS" : "NOT_STARTED");
 

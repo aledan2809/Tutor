@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import ReactMarkdown from "react-markdown";
@@ -47,7 +48,14 @@ export default function LessonDetailPage() {
   const [lesson, setLesson] = useState<LessonDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations();
   const [markingProgress, setMarkingProgress] = useState(false);
+  /**
+   * `markComplete` înghițea orice răspuns non-OK („silently fail"), deci bifa nu
+   * se scria, testul modulului nu se deschidea niciodată, iar butonul se întorcea
+   * la starea inițială ca și cum n-ai fi apăsat. Un refuz trebuie SPUS.
+   */
+  const [completeError, setCompleteError] = useState(false);
 
   useEffect(() => {
     if (!params?.id) return;
@@ -66,13 +74,18 @@ export default function LessonDetailPage() {
   const markComplete = useCallback(async () => {
     if (!params?.id || markingProgress) return;
     setMarkingProgress(true);
+    setCompleteError(false);
     try {
       const res = await fetch(`/api/student/lessons/${params.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ progress: 100, status: "COMPLETED" }),
       });
-      if (res.ok) {
+      if (!res.ok) {
+        setCompleteError(true);
+        return;
+      }
+      {
         const data = await res.json();
         setLesson((prev) =>
           prev
@@ -88,7 +101,7 @@ export default function LessonDetailPage() {
         );
       }
     } catch {
-      // silently fail
+      setCompleteError(true);
     } finally {
       setMarkingProgress(false);
     }
@@ -275,6 +288,15 @@ export default function LessonDetailPage() {
             />
           </svg>
         </a>
+      )}
+
+      {completeError && (
+        <div
+          role="status"
+          className="mb-3 rounded-lg border border-amber-800 bg-amber-950/20 px-3 py-2 text-sm text-amber-200"
+        >
+          {t("lessons.completeFailed")}
+        </div>
       )}
 
       {/* Mark as complete */}

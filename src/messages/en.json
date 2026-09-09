@@ -814,7 +814,8 @@
     "percentAccuracy": "{n}% accuracy",
     "previous": "Previous",
     "next": "Next",
-    "noAccess": "This subject is not available for your account. If you were given an access code, use it under Domains → Join."
+    "noAccess": "This subject is not available for your account. If you were given an access code, use it under Domains → Join.",
+    "completeFailed": "Could not save. Try again; if it keeps failing, this subject is not available for your account."
   },
   "remarks": {
     "lines": {
