@@ -5,6 +5,9 @@ import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { normalizeJoinCode } from "@/lib/join-code";
+import { isJoinCodeUsable } from "@/lib/join-code-policy";
+import { redeemJoinCode } from "@/lib/join-code-redeem";
 import type { AccountRole, EnrollmentRole } from "@prisma/client";
 
 declare module "next-auth" {
@@ -46,6 +49,76 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Resend({
       apiKey: process.env.AUTH_RESEND_KEY,
       from: process.env.EMAIL_FROM || "noreply@tutor.app",
+    }),
+    // Intrarea pe un link de acces, FĂRĂ cont.
+    //
+    // Cine primește linkul pe WhatsApp intră direct în curs. Contul i se cere abia
+    // în faza aleasă de client (`Domain.signupGate`) — imediat, după câteva minute,
+    // după a N-a întrebare, sau la final. La un client instituțional, fiecare pas
+    // pus înaintea materialului pierde oameni.
+    //
+    // Invitatul e un rând de User REAL, doar cu `email = null` (coloana e
+    // nullable) și `isGuest = true`. De-aia „crearea contului" mai târziu nu mută
+    // nimic: pune emailul pe ACELAȘI rând, peste progresul deja scris pe el.
+    //
+    // Nu e o poartă deschisă: fără un cod valid, nefolosit și neexpirat nu se
+    // creează nimic — aceleași reguli ca la tastarea codului, din același loc.
+    Credentials({
+      id: "guest-access",
+      name: "Acces pe link",
+      credentials: { code: { type: "text" } },
+      async authorize(credentials) {
+        const raw = credentials?.code;
+        if (typeof raw !== "string" || !raw.trim()) return null;
+
+        // Codul se verifică ÎNAINTE de a crea ceva: altfel oricine ar putea
+        // fabrica rânduri de utilizator lovind ruta cu gunoi.
+        const code = normalizeJoinCode(raw);
+        if (!code) return null;
+        const domain = await prisma.domain.findUnique({
+          where: { joinCode: code },
+          select: {
+            id: true,
+            isActive: true,
+            joinCodeExpiresAt: true,
+            joinCodeMaxUses: true,
+            joinCodeUses: true,
+          },
+        });
+        if (!domain || !domain.isActive) return null;
+        const usable = isJoinCodeUsable(
+          {
+            expiresAt: domain.joinCodeExpiresAt,
+            maxUses: domain.joinCodeMaxUses,
+            uses: domain.joinCodeUses,
+          },
+          new Date()
+        );
+        if (!usable) return null;
+
+        const guest = await prisma.user.create({
+          data: { isGuest: true, locale: "ro", accountRole: "STUDENT" },
+          select: { id: true, name: true, email: true, image: true },
+        });
+
+        // Înscrierea trece prin aceleași reguli ca tastarea codului: numără
+        // folosirea, revendică atomic ultimul loc, lasă urmă în audit.
+        const redeemed = await redeemJoinCode(guest.id, code);
+        if (!redeemed) {
+          // Codul s-a epuizat între verificare și răscumpărare (cineva l-a luat
+          // în aceeași clipă). Nu lăsăm în urmă un rând de utilizator orfan.
+          await prisma.user.delete({ where: { id: guest.id } }).catch(() => {});
+          return null;
+        }
+
+        // `email` e null pentru un invitat, iar NextAuth vrea `undefined`, nu `null`.
+        return {
+          id: guest.id,
+          name: guest.name ?? undefined,
+          email: guest.email ?? undefined,
+          image: guest.image ?? undefined,
+        };
+      },
     }),
     Credentials({
       name: "credentials",

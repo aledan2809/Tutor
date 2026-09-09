@@ -1007,5 +1007,10 @@
   },
   "practice": {
     "courseGate": "Termină o lecție ca să se deschidă testul modulului ei."
+  },
+  "acces": {
+    "loading": "Te ducem la curs…",
+    "invalid": "Linkul ăsta nu mai e valabil. Poate a expirat sau a fost folosit de prea multe ori.",
+    "signin": "Intră în cont"
   }
 }

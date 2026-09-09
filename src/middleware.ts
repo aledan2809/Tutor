@@ -40,7 +40,10 @@ const publicPaths = ["/", "/try", "/scor", "/grile", "/auth/signin", "/auth/veri
 // Public sections that carry a dynamic segment (e.g. /duel/<id>, /certificat/<id>, /grile/<slug>).
 // /family/accept/<token> must render for a logged-out invitee (the page itself
 // offers sign-in / sign-up); the accept POST stays auth-gated server-side.
-const publicPrefixes = ["/duel/", "/certificat/", "/grile/", "/family/accept/"];
+// /acces/<cod> e linkul din invitația pe WhatsApp: trebuie să se deschidă pentru
+// cineva care NU are cont — pagina îl bagă în curs ca invitat. Fără cod valid nu
+// se creează nimic (verificarea e în providerul `guest-access`).
+const publicPrefixes = ["/duel/", "/certificat/", "/grile/", "/family/accept/", "/acces/"];
 
 function isPublicPath(pathname: string): boolean {
   const pathWithoutLocale = pathname.replace(/^\/(en|ro)/, "") || "/";

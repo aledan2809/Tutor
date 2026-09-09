@@ -46,6 +46,10 @@ model User {
   image          String?
   password       String?
   isSuperAdmin   Boolean      @default(false)
+  /// A intrat pe un link de acces, fără să-și facă cont. E un rând de utilizator
+  /// REAL, doar fără email — de-aia „crearea contului" mai târziu nu pierde nimic:
+  /// completează același rând, peste progresul și răspunsurile deja scrise pe el.
+  isGuest        Boolean      @default(false)
   /// Which merchant this account belongs to. Null = a platform account: an
   /// ordinary student, parent or tutor, and the superadmin.
   organizationId String?
@@ -354,6 +358,13 @@ model Domain {
   joinCodeMaxUses   Int?
   /// Câte înscrieri s-au făcut cu codul CURENT. Se pune la zero la fiecare rotire.
   joinCodeUses      Int              @default(0)
+  /// CÂND i se cere omului să-și facă un cont, dacă a intrat pe un link de acces.
+  /// Clientul alege: unii vor date de contact din prima, alții vor ca omul să
+  /// guste materialul întâi. IMMEDIATE | MINUTES | QUESTIONS | END
+  signupGate        String           @default("IMMEDIATE")
+  /// Pragul, citit după `signupGate`: minute pentru MINUTES, număr de întrebări
+  /// pentru QUESTIONS. Ignorat pentru IMMEDIATE și END.
+  signupGateValue   Int?
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 
