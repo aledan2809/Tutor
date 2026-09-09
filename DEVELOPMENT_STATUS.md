@@ -1,8 +1,70 @@
 # Project Status - Tutor
-Last Updated: 2026-09-08 (cursul publicat pentru agenți; limba curățată în trei treceri; incident disc+memorie pe VPS2)
+Last Updated: 2026-09-09 (demo Poșta: invitație cu identitate, tablou manager, recuperare parolă, import în masă)
+<!-- anterior: 2026-09-08 (cursul publicat pentru agenți; limba curățată în trei treceri; demo Poșta) -->
 <!-- anterior: 2026-09-03 (conținutul memento-ului Telegram reparat; incident 502 provocat de mine, remediat în ~4 min) -->
 <!-- anterior: 2026-09-01 (treapta Telegram din cascadă -->
 <!--  — sărită tăcut pentru TOȚI utilizatorii; reparată, deployată, verificată pe date de producție) -->
+
+## Current State (Sesiunea 2026-09-09 — demo Poșta: de la pagină la flux complet)
+
+26 de commit-uri, toate livrate și verificate pe producție. Punctul de plecare a
+fost o pagină de prezentare; punctul de sosire e un flux întreg: invitație cu
+identitate → intrare fără parolă → curs → test → raport pentru manager.
+
+### Livrat
+
+- **Contact + PDF pe `/posta`.** `office@etutor.ro` + telefon; PDF de 5 pagini,
+  alb, cu datele firmei (Class RDA Impex SRL, luată din Legal Hub) în subsolul
+  FIECĂREI pagini. Se randează din pagina live, deci nu poate rămâne în urmă.
+- **Invitație pe WhatsApp cu link personal.** Fiecare destinatar are token propriu
+  — asta face atribuirea posibilă, fiindcă un cod comun nu poate spune cine a citit
+  ce. Pagina `/dashboard/admin/invitatii` trimite pe loc, în fața clientului.
+- **Intrare fără cont, apoi cont cu user+parolă.** Datele omului apar completate de
+  pe lista angajatorului și NU sunt editabile; el alege doar cum intră.
+  `User.username` există fiindcă oamenii de teren n-au email de serviciu.
+- **Tabloul managerului** (`/dashboard/admin/cursanti`): șase trepte colorate,
+  numărătoarea e și filtru, coloane per modul cu lecția citită și scorul ca fracție.
+  Fișa individuală arată greșelile ÎNAINTEA răspunsurilor corecte.
+- **Formatul lecției**, reparat în RANDARE, nu în conținut: cele 8 casete „Ipoteză
+  de lucru" devin note de subsol numerotate, adunate sub „De confirmat cu clientul";
+  replicile de spus ies galbene. Toate cele 9 lecții s-au îndreptat deodată.
+- **Recuperarea parolei** pe cod WhatsApp, tastat în aplicație: identificare după
+  telefon, nume de utilizator SAU marcă; cod hașurat, comparat în timp constant,
+  consumat la prima folosire.
+- **Import în masă** din Excel/CSV, în doi timpi: vezi ce am înțeles, apoi apeși.
+  Nu trimite niciun mesaj, deliberat.
+
+### Defecte găsite pe drum, toate prin probă reală, nu prin citit cod
+
+- **Demonstrația era blocată de propria poartă de plată.** `demo.posta@etutor.ro`
+  n-are abonament (ca orice angajat înscris de firmă) și primea „Funcție inclusă
+  într-un pachet" în loc de curs. Reparat cu `hasAnyOrgProvidedAccess`.
+- **Superadminul era blocat din materiile private** — șase rute cu verificare
+  scrisă de mână, inclusiv una ascunsă de un `head -3` în propria mea căutare.
+- **Trei tăceri de interfață**: pagina de lecții arunca pe răspuns de eroare,
+  `markComplete` avea `catch {}` cu comentariul „silently fail", iar poarta de modul
+  refuza fără să spună nimic.
+- **Două tăceri în codul scris de mine**, prinse la prima trimitere reală (L550).
+- **Munca celor intrați pe codul comun era invizibilă** în tablou.
+
+### Deschis, în ordinea priorității
+
+1. `/posta` + PDF de îmbunătățit dramatic — item propriu în TODO, cu punctele
+   userului (gamificare, notificări automate, fluxul pe verticală) plus ale mele.
+2. Rescrierea conținutului lecțiilor (scurtare). Formatul e aplicat; textul nu.
+3. Trimiterea invitațiilor în masă (importul le creează, nu le trimite).
+4. Facturarea B2B — schema începută, salvată ca patch, nedeployată.
+5. `Domain.signupGate` există în bază dar nu e nici impus, nici reglabil din panou.
+
+## Lessons Learned (sesiunea 2026-09-09)
+
+- **L548** — Meta rezervă șabloanele WhatsApp cu cod categoriei `AUTHENTICATION`;
+  trei respingeri consecutive pentru că aveam codul în corpul mesajului.
+- **L549** — Chromium din snap „scrie" fișiere invizibile: `/tmp` privat și
+  directoare ascunse refuzate, ambele cu exit 0.
+- **L550** — `normalizePhone` fără prefix de țară + `sendTemplate` care nu aruncă
+  la refuz = mesaje raportate ca trimise, care nu ajung nicăieri.
+- **L551** — `write_text` din Python peste un fișier CRLF rescrie tot fișierul.
 
 ## Current State (Sesiunea 2026-09-08 b — demo Poșta Română)
 
