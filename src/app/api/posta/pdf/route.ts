@@ -1,7 +1,6 @@
 import { spawn } from "node:child_process";
 import { mkdir, readFile, stat, unlink } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { homedir } from "node:os";
 import path from "node:path";
 import { NextResponse } from "next/server";
 import { withErrorHandler } from "@/lib/api-handler";
