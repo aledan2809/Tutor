@@ -434,7 +434,8 @@
     "superadminTitle": "SuperAdmin Panel",
     "sendInvite": "Send invite",
     "roster": "Learners",
-    "importLearners": "Import learners"
+    "importLearners": "Import learners",
+    "editPostaPage": "Poșta Română page"
   },
   "session": {
     "practice": "Practice",

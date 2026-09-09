@@ -5,6 +5,7 @@ import { homedir } from "node:os";
 import path from "node:path";
 import { NextResponse } from "next/server";
 import { withErrorHandler } from "@/lib/api-handler";
+import { cacheDirPdfPosta } from "@/lib/posta-pdf-cache";
 
 /**
  * GET /api/posta/pdf?locale=ro|en — prezentarea `/posta` ca fișier de trimis mai departe.
@@ -60,8 +61,9 @@ function chromiumBin(): string | null {
  * `/root/tutor-pdf-cache/` scrie fișierul. Deci fără punct la început.
  */
 function cacheDir(): string {
-  return process.env.POSTA_PDF_DIR || path.join(homedir(), "tutor-pdf-cache");
+  return cacheDirPdfPosta();
 }
+
 
 /** Cereri paralele pe aceeași limbă așteaptă aceeași generare, nu pornesc încă un browser. */
 const inFlight = new Map<Locale, Promise<Buffer>>();

@@ -1,9 +1,11 @@
 import { getTranslations } from "next-intl/server";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 
 export default async function AdminOverviewPage() {
   const t = await getTranslations("admin");
+  const esteSuperAdmin = (await auth())?.user?.isSuperAdmin === true;
   const [
     totalQuestions,
     draftCount,
@@ -106,6 +108,12 @@ export default async function AdminOverviewPage() {
             <QuickAction href="/dashboard/admin/invitatii" label={t("sendInvite")} accent="green" />
             <QuickAction href="/dashboard/admin/cursanti" label={t("roster")} />
             <QuickAction href="/dashboard/admin/import-cursanti" label={t("importLearners")} />
+            {/* Doar superadmin: e materialul de vânzare care ajunge la conducerea
+                clientului, nu conținut de curs. Pagina însăși redirecționează, dar
+                un link care duce la o redirecționare e o ușă care minte. */}
+            {esteSuperAdmin && (
+              <QuickAction href="/dashboard/admin/posta" label={t("editPostaPage")} accent="purple" />
+            )}
             {draftCount > 0 && (
               <QuickAction
                 href="/dashboard/admin/questions/review"

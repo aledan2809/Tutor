@@ -1729,3 +1729,21 @@ model WatcherReportSchedule {
   @@index([parentId])
   @@index([isActive])
 }
+
+/// Textele unei pagini publice, editate din panou.
+///
+/// Nu am refolosit `Setting`, deși are exact forma cheie/valoare: unicitatea lui e
+/// `@@unique([userId, key])`, iar o setare globală ar avea `userId = NULL`. În
+/// PostgreSQL două NULL-uri sunt distincte într-un index unic, deci s-ar fi putut
+/// crea în tăcere mai multe rânduri pentru aceeași pagină, iar citirea ar fi luat
+/// unul la întâmplare. Toate folosirile existente ale lui `Setting` sunt per-user.
+///
+/// `data` ține DOAR câmpurile schimbate față de textul din cod. Codul rămâne
+/// valoarea implicită, deci o pagină fără rând aici arată exact ca azi, iar un câmp
+/// golit din formular se întoarce singur la original.
+model PageCopy {
+  key       String   @id
+  data      Json
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}
