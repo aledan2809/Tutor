@@ -80,6 +80,11 @@ const PRINT_CSS = `
   /* Banner de cookie-uri, CTA WhatsApp, bara mobilă — plutesc peste conținut. */
   .fixed { display: none !important; }
 
+  /* Subsolul cu politici vine din layout, deci stă în afara zonei albite mai jos și
+     ieșea ca o bandă neagră în document. Pe hârtie, linkurile alea nu duc nicăieri.
+     Pe pagina asta nu există alt <footer>, iar regulile astea se încarcă doar aici. */
+  footer { display: none !important; }
+
   html, body { background: #ffffff !important; }
   [data-posta] { background: #ffffff !important; color: #111827 !important; }
   [data-posta] * {
