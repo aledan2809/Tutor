@@ -101,7 +101,28 @@ const PRINT_CSS = `
   [data-posta] .text-amber-300 { color: #92400e !important; }
   [data-posta] section { break-inside: avoid; }
 
-  @page { margin: 14mm; }
+  /* Marginea de jos e mărită ca să încapă subsolul repetat de mai jos.
+     Fără ea, textul ar trece pe sub el pe fiecare pagină. */
+  @page { margin: 14mm 14mm 22mm 14mm; }
+
+  /*
+    Datele firmei pe FIECARE pagină, nu doar pe ultima: paginile unui document
+    se despart — se tipăresc, se scanează, se trimit una singură mai departe.
+    \`position: fixed\` e mecanismul prin care motorul de tipărire repetă un
+    element pe toate paginile. Regulile stau la final ca să bată \`[data-posta] *\`
+    la specificitate egală.
+  */
+  .posta-print-footer {
+    display: block !important;
+    position: fixed !important;
+    bottom: 0; left: 0; right: 0;
+    border-top: 1px solid #d1d5db !important;
+    padding-top: 5px;
+    font-size: 8.5pt;
+    line-height: 1.35;
+  }
+  .posta-print-footer, .posta-print-footer * { color: #4b5563 !important; }
+  .posta-print-footer strong { color: #1f2937 !important; }
 }
 `;
 
@@ -470,20 +491,22 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
           </Link>
         </section>
 
-        {/*
-          Doar în PDF: cine primește documentul îl dă mai departe la juridic și achiziții,
-          iar acolo un text fără furnizor și fără contact se oprește.
-        */}
-        <section className="mt-12 hidden border-t border-gray-300 pt-4 text-sm print:block">
-          <p>
-            <span className="text-gray-500">{c.furnizorEticheta}:</span>{" "}
-            <span className="font-semibold">eTUTOR.ro — {FURNIZOR}</span>
-          </p>
-          <p className="mt-1">
-            {CONTACT_MAIL} · {CONTACT_TEL_AFISAT}
-          </p>
-        </section>
       </main>
+
+      {/*
+        Doar în PDF, repetat pe fiecare pagină (vezi `.posta-print-footer` din PRINT_CSS).
+        Cine primește documentul îl dă mai departe la juridic și achiziții, iar paginile
+        se despart pe drum — o singură foaie ruptă din teanc trebuie să spună tot cine e
+        furnizorul și pe cine sună.
+      */}
+      <div className="posta-print-footer hidden">
+        {c.furnizorEticheta}:{" "}
+        <strong>eTUTOR.ro — {FURNIZOR}</strong>
+        {" · "}
+        {CONTACT_MAIL}
+        {" · "}
+        {CONTACT_TEL_AFISAT}
+      </div>
     </div>
   );
 }
