@@ -185,6 +185,21 @@ export default function SignInPage() {
               </button>
             </form>
             <div className="mt-1 flex items-center justify-between">
+              {/* Recuperare pe telefon/marcă: omul de teren n-are email, deci calea pe
+
+                  email nu-l ajută cu nimic. */}
+
+              <Link
+
+                href="/auth/recuperare"
+
+                className="text-sm text-blue-400 hover:text-blue-300"
+
+              >
+
+                Nu ai email? Recuperează pe telefon
+
+              </Link>
               <Link
                 href="/auth/forgot-password"
                 className="inline-flex min-h-[44px] items-center text-sm font-medium text-blue-400 hover:text-blue-300"
