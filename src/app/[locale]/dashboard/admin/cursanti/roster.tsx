@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Link } from "@/i18n/navigation";
 
 export type ModuleCol = { id: string; order: number; title: string };
 
@@ -15,6 +16,8 @@ export type RosterRow = {
   dePeLista: boolean;
   /** Chiar nu știm cine e — fără nume, fără email, fără nume de utilizator. */
   anonim: boolean;
+  /** Contul lui, dacă a intrat. Fără el nu există rezultate de deschis. */
+  userId: string | null;
   stare: "netrimisa" | "trimisa" | "apasat" | "cont" | "invata" | "terminat";
   invitedAt: string | null;
   openedAt: string | null;
@@ -57,7 +60,15 @@ function culoareScor(ok: number, total: number): string {
   return "text-red-300";
 }
 
-export function Roster({ rows, cols }: { rows: RosterRow[]; cols: ModuleCol[] }) {
+export function Roster({
+  rows,
+  cols,
+  domainId,
+}: {
+  rows: RosterRow[];
+  cols: ModuleCol[];
+  domainId: string;
+}) {
   const [q, setQ] = useState("");
   const [filtru, setFiltru] = useState<"toti" | RosterRow["stare"]>("toti");
 
@@ -140,7 +151,16 @@ export function Roster({ rows, cols }: { rows: RosterRow[]; cols: ModuleCol[] })
             {vizibile.map((r) => (
               <tr key={r.id} className="border-t border-gray-800 align-top">
                 <td className="px-3 py-3">
-                  <div className="font-medium text-white">{r.nume}</div>
+                  {r.userId ? (
+                    <Link
+                      href={`/dashboard/admin/cursanti/${r.userId}?materie=${domainId}`}
+                      className="font-medium text-white hover:text-blue-300 hover:underline"
+                    >
+                      {r.nume}
+                    </Link>
+                  ) : (
+                    <div className="font-medium text-white">{r.nume}</div>
+                  )}
                   <div className="text-xs text-gray-500">
                     {r.dePeLista
                       ? [r.functie, r.marca ? `marca ${r.marca}` : null].filter(Boolean).join(" · ")

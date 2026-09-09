@@ -224,6 +224,7 @@ export default async function CursantiPage({
       telefon: r.phone,
       dePeLista: true,
       anonim: false,
+      userId: r.userId,
       stare: stareDin(c.lectiiFacute, c.testeDate, r),
       invitedAt: r.invitedAt ? r.invitedAt.toISOString() : null,
       openedAt: r.openedAt ? r.openedAt.toISOString() : null,
@@ -251,6 +252,7 @@ export default async function CursantiPage({
         unde: null,
         telefon: "",
         dePeLista: false,
+        userId: e.userId,
         stare: stareDin(c.lectiiFacute, c.testeDate, {
           invitedAt: null,
           openedAt: e.createdAt,
@@ -306,7 +308,7 @@ export default async function CursantiPage({
         </div>
       )}
 
-      <Roster rows={rows} cols={cols} />
+      <Roster rows={rows} cols={cols} domainId={active.id} />
     </div>
   );
 }
