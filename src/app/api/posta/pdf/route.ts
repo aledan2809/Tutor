@@ -51,9 +51,16 @@ function chromiumBin(): string | null {
   return candidates.find((p) => existsSync(p)) ?? null;
 }
 
-/** Sub HOME, nu în `/tmp` — vezi nota despre snap din capul fișierului. */
+/**
+ * Sub HOME, nu în `/tmp` — vezi nota despre snap din capul fișierului.
+ *
+ * Și numele directorului contează: interfața `home` a snap-ului NU dă acces la
+ * directoarele ascunse (cele care încep cu punct). Măsurat pe VPS2: cu
+ * `/root/.cache/...` chromium iese cu codul 0 și nu scrie nimic; cu
+ * `/root/tutor-pdf-cache/` scrie fișierul. Deci fără punct la început.
+ */
 function cacheDir(): string {
-  return process.env.POSTA_PDF_DIR || path.join(homedir(), ".cache", "tutor-pdf");
+  return process.env.POSTA_PDF_DIR || path.join(homedir(), "tutor-pdf-cache");
 }
 
 /** Cereri paralele pe aceeași limbă așteaptă aceeași generare, nu pornesc încă un browser. */
