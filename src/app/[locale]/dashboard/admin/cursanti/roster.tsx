@@ -11,6 +11,8 @@ export type RosterRow = {
   marca: string | null;
   unde: string | null;
   telefon: string;
+  /** Vine de pe lista clientului? Dacă nu, a intrat pe codul comun. */
+  dePeLista: boolean;
   stare: "netrimisa" | "trimisa" | "apasat" | "cont" | "invata" | "terminat";
   invitedAt: string | null;
   openedAt: string | null;
@@ -69,7 +71,7 @@ export function Roster({ rows, cols }: { rows: RosterRow[]; cols: ModuleCol[] })
     return rows.filter((r) => {
       if (filtru !== "toti" && r.stare !== filtru) return false;
       if (!t) return true;
-      return [r.nume, r.functie, r.marca, r.unde, r.telefon]
+      return [r.nume, r.functie, r.marca, r.unde, r.telefon || null]
         .filter(Boolean)
         .some((v) => (v as string).toLowerCase().includes(t));
     });
@@ -138,7 +140,9 @@ export function Roster({ rows, cols }: { rows: RosterRow[]; cols: ModuleCol[] })
                 <td className="px-3 py-3">
                   <div className="font-medium text-white">{r.nume}</div>
                   <div className="text-xs text-gray-500">
-                    {[r.functie, r.marca ? `marca ${r.marca}` : null].filter(Boolean).join(" · ")}
+                    {r.dePeLista
+                      ? [r.functie, r.marca ? `marca ${r.marca}` : null].filter(Boolean).join(" · ")
+                      : "a intrat pe codul comun — fără date de identificare"}
                   </div>
                   {r.unde && <div className="text-xs text-gray-500">{r.unde}</div>}
                 </td>

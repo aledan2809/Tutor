@@ -102,7 +102,33 @@ export default async function CursantiPage({
     },
   });
 
-  const userIds = recipients.map((r) => r.userId).filter((x): x is string => x !== null);
+  // TOȚI cei înscriși, nu doar cei de pe lista de invitații.
+  //
+  // Prima versiune lista doar destinatarii, iar cine intrase pe codul comun al
+  // materiei era invizibil — deși lecțiile citite și răspunsurile lui erau scrise
+  // în baza de date. Un tablou care ascunde muncă făcută e mai rău decât unul
+  // care lipsește: managerul ar trage concluzia că omul n-a lucrat.
+  const enrolled = await prisma.enrollment.findMany({
+    where: { domainId: active.id, isActive: true },
+    take: LIMIT,
+    select: {
+      userId: true,
+      createdAt: true,
+      user: {
+        select: { id: true, name: true, email: true, username: true, isGuest: true },
+      },
+    },
+  });
+
+  const recipientByUser = new Map(
+    recipients.filter((r) => r.userId).map((r) => [r.userId as string, r])
+  );
+  const userIds = Array.from(
+    new Set([
+      ...recipients.map((r) => r.userId).filter((x): x is string => x !== null),
+      ...enrolled.map((e) => e.userId),
+    ])
+  );
 
   const [progress, attempts] = await Promise.all([
     userIds.length
@@ -151,31 +177,13 @@ export default async function CursantiPage({
 
   const cols: ModuleCol[] = modules.map((m) => ({ id: m.id, order: m.order, title: m.title }));
 
-  const rows: RosterRow[] = recipients.map((r) => {
-    const done = r.userId ? doneByUser.get(r.userId) : undefined;
-    const sc = r.userId ? scoreByUser.get(r.userId) : undefined;
-    const lectiiFacute = done?.size ?? 0;
-    const testeDate = sc?.size ?? 0;
-
-    let stare: RosterRow["stare"] = "netrimisa";
-    if (r.invitedAt) stare = "trimisa";
-    if (r.openedAt) stare = "apasat";
-    if (r.userId) stare = "cont";
-    if (lectiiFacute > 0 || testeDate > 0) stare = "invata";
-    if (cols.length > 0 && lectiiFacute >= cols.length && testeDate >= cols.length) stare = "terminat";
-
+  /** Celulele pe module pentru un utilizator — aceleași, indiferent de unde vine rândul. */
+  const celule = (userId: string | null) => {
+    const done = userId ? doneByUser.get(userId) : undefined;
+    const sc = userId ? scoreByUser.get(userId) : undefined;
     return {
-      id: r.id,
-      nume: `${r.lastName} ${r.firstName}`,
-      functie: r.jobTitle,
-      marca: r.badgeNo,
-      unde: [r.postOffice, [r.city, r.county].filter(Boolean).join(", ") || null]
-        .filter(Boolean)
-        .join(" · ") || null,
-      telefon: r.phone,
-      stare,
-      invitedAt: r.invitedAt ? r.invitedAt.toISOString() : null,
-      openedAt: r.openedAt ? r.openedAt.toISOString() : null,
+      lectiiFacute: done?.size ?? 0,
+      testeDate: sc?.size ?? 0,
       moduleCells: cols.map((c) => {
         const at = done?.get(c.id) ?? null;
         const t = sc?.get(c.id) ?? null;
@@ -188,6 +196,74 @@ export default async function CursantiPage({
         };
       }),
     };
+  };
+
+  const stareDin = (
+    lectiiFacute: number,
+    testeDate: number,
+    have: { invitedAt: Date | null; openedAt: Date | null; userId: string | null }
+  ): RosterRow["stare"] => {
+    if (cols.length > 0 && lectiiFacute >= cols.length && testeDate >= cols.length) return "terminat";
+    if (lectiiFacute > 0 || testeDate > 0) return "invata";
+    if (have.userId) return "cont";
+    if (have.openedAt) return "apasat";
+    if (have.invitedAt) return "trimisa";
+    return "netrimisa";
+  };
+
+  const dinLista: RosterRow[] = recipients.map((r) => {
+    const c = celule(r.userId);
+    return {
+      id: r.id,
+      nume: `${r.lastName} ${r.firstName}`,
+      functie: r.jobTitle,
+      marca: r.badgeNo,
+      unde: [r.postOffice, [r.city, r.county].filter(Boolean).join(", ") || null]
+        .filter(Boolean)
+        .join(" · ") || null,
+      telefon: r.phone,
+      dePeLista: true,
+      stare: stareDin(c.lectiiFacute, c.testeDate, r),
+      invitedAt: r.invitedAt ? r.invitedAt.toISOString() : null,
+      openedAt: r.openedAt ? r.openedAt.toISOString() : null,
+      moduleCells: c.moduleCells,
+    };
+  });
+
+  // Cine a intrat pe codul comun n-are rând pe listă, dar are muncă făcută. Îl
+  // arătăm cu ce știm despre el — mai puțin decât ne-am dori, dar infinit mai
+  // mult decât să dispară.
+  const faraLista: RosterRow[] = enrolled
+    .filter((e) => !recipientByUser.has(e.userId))
+    .map((e) => {
+      const c = celule(e.userId);
+      const identitate =
+        e.user.name?.trim() || e.user.email || e.user.username || null;
+      return {
+        id: `u:${e.userId}`,
+        nume: identitate ?? "Fără identitate",
+        functie: null,
+        marca: null,
+        unde: null,
+        telefon: "",
+        dePeLista: false,
+        stare: stareDin(c.lectiiFacute, c.testeDate, {
+          invitedAt: null,
+          openedAt: e.createdAt,
+          userId: e.userId,
+        }),
+        invitedAt: null,
+        openedAt: e.createdAt.toISOString(),
+        moduleCells: c.moduleCells,
+      };
+    });
+
+  // Cine a lucrat apare primul: managerul caută munca, nu lista.
+  const rows: RosterRow[] = [...dinLista, ...faraLista].sort((a, b) => {
+    const scor = (r: RosterRow) =>
+      r.moduleCells.reduce((n, c) => n + (c.lectieLa ? 1 : 0) + (c.total ? 1 : 0), 0);
+    const d = scor(b) - scor(a);
+    return d !== 0 ? d : a.nume.localeCompare(b.nume, "ro");
   });
 
   return (

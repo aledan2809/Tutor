@@ -4,6 +4,7 @@ import Resend from "next-auth/providers/resend";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
+import { randomBytes } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { normalizeJoinCode } from "@/lib/join-code";
 import { isJoinCodeUsable } from "@/lib/join-code-policy";
@@ -66,7 +67,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Credentials({
       id: "guest-access",
       name: "Acces pe link",
-      credentials: { code: { type: "text" } },
+      credentials: {
+        code: { type: "text" },
+        lastName: { type: "text" },
+        firstName: { type: "text" },
+        phone: { type: "text" },
+      },
       async authorize(credentials) {
         const raw = credentials?.code;
         if (typeof raw !== "string" || !raw.trim()) return null;
@@ -96,10 +102,48 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         );
         if (!usable) return null;
 
+        // Cine e omul, spus de el. Prima versiune nu întreba nimic, iar rezultatul
+        // era un rând fără nume în tabloul managerului — muncă făcută de nimeni.
+        // Telefonul e cheia: e unic, iar dacă HR-ul l-a invitat deja, îl leagă de
+        // rândul LUI de pe listă, în loc să creeze un al doilea.
+        const nume = typeof credentials?.lastName === "string" ? credentials.lastName.trim() : "";
+        const prenume = typeof credentials?.firstName === "string" ? credentials.firstName.trim() : "";
+        const telefon = typeof credentials?.phone === "string" ? credentials.phone.trim() : "";
+        const telefonNormalizat = telefon ? telefon.replace(/\D/g, "").replace(/^0/, "40") : "";
+
         const guest = await prisma.user.create({
-          data: { isGuest: true, locale: "ro", accountRole: "STUDENT" },
+          data: {
+            isGuest: true,
+            locale: "ro",
+            accountRole: "STUDENT",
+            name: [prenume, nume].filter(Boolean).join(" ") || null,
+          },
           select: { id: true, name: true, email: true, image: true },
         });
+
+        if (telefonNormalizat && nume && prenume) {
+          // `upsert`: dacă HR-ul l-a invitat deja pe numărul ăsta, se leagă de
+          // rândul existent — omul care intră pe codul comun în loc de linkul lui
+          // ajunge tot în dreptul lui, nu într-un al doilea rând.
+          await prisma.recipient
+            .upsert({
+              where: { domainId_phone: { domainId: domain.id, phone: telefonNormalizat } },
+              create: {
+                domainId: domain.id,
+                phone: telefonNormalizat,
+                lastName: nume,
+                firstName: prenume,
+                token: randomBytes(16).toString("base64url"),
+                openedAt: new Date(),
+                userId: guest.id,
+              },
+              update: { userId: guest.id, openedAt: new Date() },
+            })
+            .catch(() => {
+              // Rândul e deja legat de altcineva. Nu blocăm intrarea pentru asta —
+              // omul învață, iar managerul vede un rând nelegat, nu un om oprit.
+            });
+        }
 
         // Înscrierea trece prin aceleași reguli ca tastarea codului: numără
         // folosirea, revendică atomic ultimul loc, lasă urmă în audit.
