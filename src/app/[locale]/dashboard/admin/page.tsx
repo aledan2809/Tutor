@@ -1,11 +1,9 @@
 import { getTranslations } from "next-intl/server";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 
 export default async function AdminOverviewPage() {
   const t = await getTranslations("admin");
-  const esteSuperAdmin = (await auth())?.user?.isSuperAdmin === true;
   const [
     totalQuestions,
     draftCount,
@@ -108,12 +106,18 @@ export default async function AdminOverviewPage() {
             <QuickAction href="/dashboard/admin/invitatii" label={t("sendInvite")} accent="green" />
             <QuickAction href="/dashboard/admin/cursanti" label={t("roster")} />
             <QuickAction href="/dashboard/admin/import-cursanti" label={t("importLearners")} />
-            {/* Doar superadmin: e materialul de vânzare care ajunge la conducerea
-                clientului, nu conținut de curs. Pagina însăși redirecționează, dar
-                un link care duce la o redirecționare e o ușă care minte. */}
-            {esteSuperAdmin && (
-              <QuickAction href="/dashboard/admin/posta" label={t("editPostaPage")} accent="purple" />
-            )}
+            {/* Fără poartă pe superadmin, deși pagina-țintă o are.
+
+                Prima variantă o avea, și butonul nu apărea deloc la un utilizator care
+                CHIAR e superadmin — dovedit: aceeași persoană a deschis pagina de editare
+                (care redirecționează pe oricine altcineva) și a salvat prin API (care dă
+                403 altfel). Deci steagul e corect în alte locuri; aici nu ajungea, cel mai
+                probabil fiindcă browserul servea pagina din memoria lui de navigare.
+
+                Un buton invizibil e mai rău decât unul care duce la o redirecționare: pe
+                ecranul ăsta ajung doar oameni din echipă, iar autorizarea rămâne pusă
+                acolo unde contează — pe pagina-țintă și pe API. */}
+            <QuickAction href="/dashboard/admin/posta" label={t("editPostaPage")} accent="purple" />
             {draftCount > 0 && (
               <QuickAction
                 href="/dashboard/admin/questions/review"
