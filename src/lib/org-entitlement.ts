@@ -35,3 +35,31 @@ export async function isOrgProvidedAccess(userId: string, domainId: string): Pro
 
   return Boolean(enrollment?.isActive && enrollment.domain.organizationId);
 }
+
+/**
+ * Are omul ăsta MĂCAR O materie plătită de o firmă?
+ *
+ * Regula de mai sus lucrează pe o materie anume, ceea ce e corect pentru ruta care
+ * deschide o lecție. Dar poarta de abonament a PAGINII de lecții rulează înainte de
+ * a se ști despre ce materie e vorba — deci întreba doar de pachetul consumatorului
+ * și răspundea „funcție inclusă într-un pachet".
+ *
+ * Efectul, măsurat pe producție 2026-09-09: contul demonstrativ al Poștei
+ * (`subscriptionStatus` gol, ca al oricărui angajat înscris de firmă) primea ecranul
+ * de vânzare în locul cursului. Aceeași boală ca la reparația de pe lecția
+ * individuală — „publicat, vizibil, necitibil" — doar cu un nivel mai sus.
+ *
+ * La fel de îngustă: doar înscrieri ACTIVE, doar în materii care aparțin unei
+ * organizații. Un elev care își cumpără singur pachetul trece prin exact aceeași
+ * poartă ca înainte.
+ */
+export async function hasAnyOrgProvidedAccess(userId: string): Promise<boolean> {
+  if (!userId) return false;
+
+  const found = await prisma.enrollment.findFirst({
+    where: { userId, isActive: true, domain: { organizationId: { not: null } } },
+    select: { id: true },
+  });
+
+  return found !== null;
+}

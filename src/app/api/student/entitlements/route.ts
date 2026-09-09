@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { featureMap } from "@/lib/plan-features";
+import { hasAnyOrgProvidedAccess } from "@/lib/org-entitlement";
 import { withErrorHandler } from "@/lib/api-handler";
 
 /**
@@ -26,6 +27,17 @@ async function _GET() {
     where: { id: session.user.id },
     select: { subscriptionStatus: true },
   });
+
+  // Cine e înscris într-o materie a unei firme are accesul plătit de firmă, nu de
+  // el. Fără linia asta, poarta paginii de lecții rulează înainte de a ști despre ce
+  // materie e vorba și arată ecranul de vânzare — inclusiv contului demonstrativ al
+  // Poștei, în chiar demonstrația de vânzare (măsurat pe producție 2026-09-09).
+  if (!user?.subscriptionStatus && (await hasAnyOrgProvidedAccess(session.user.id))) {
+    return NextResponse.json({
+      subscriptionStatus: "org",
+      features: featureMap("active"),
+    });
+  }
 
   return NextResponse.json({
     subscriptionStatus: user?.subscriptionStatus ?? null,
