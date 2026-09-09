@@ -26,7 +26,7 @@ export function CookieConsentBanner() {
     try {
       if (!parseStoredConsent(localStorage.getItem(COOKIE_CONSENT_KEY))) setShow(true);
     } catch {
-      /* ignore */
+      setShow(true);
     }
   }, []);
 
@@ -38,7 +38,9 @@ export function CookieConsentBanner() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type: "COOKIES", choice, locale }),
-    }).catch(() => {});
+    }).catch((err) => {
+      console.error("[CookieConsent] Failed to record consent:", err);
+    });
     setShow(false);
   };
 

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Brand } from "@/components/Brand";
 
 /**
@@ -13,12 +13,19 @@ import { Brand } from "@/components/Brand";
  * fără acces la procedurile lor, iar un factor care le-ar citi crezând că sunt regulament
  * ar face rău, nu bine.
  */
-export const metadata: Metadata = {
-  title: "eTutor pentru Poșta Română — demonstrație",
-  description:
-    "Trei trasee de curs pe roluri — factor poștal, ghișeu, diriginte de oficiu. Materiale demonstrative, scrise din surse publice, cu fiecare presupunere marcată în text.",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const isEn = locale === "en";
+  return {
+    title: isEn
+      ? "eTutor for Poșta Română — demo"
+      : "eTutor pentru Poșta Română — demonstrație",
+    description: isEn
+      ? "Three role-based course tracks — postman, counter clerk, post office manager. Demo materials written from public sources, with every assumption marked in the text."
+      : "Trei trasee de curs pe roluri — factor poștal, ghișeu, diriginte de oficiu. Materiale demonstrative, scrise din surse publice, cu fiecare presupunere marcată în text.",
+    robots: { index: false, follow: false },
+  };
+}
 
 type Copy = {
   badge: string;
@@ -228,17 +235,16 @@ const EN: Copy = {
 export default async function PostaPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const c = locale === "en" ? EN : RO;
-  const lp = locale === "en" ? "en" : "ro";
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
       <header className="border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-          <Link href={`/${lp}`} aria-label="eTUTOR.ro" className="inline-flex min-h-[44px] items-center">
+          <Link href="/" aria-label="eTUTOR.ro" className="inline-flex min-h-[44px] items-center">
             <Brand className="text-xl" />
           </Link>
           <Link
-            href={`/${lp}/auth/signin`}
+            href="/auth/signin"
             className="inline-flex min-h-[44px] items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
           >
             {c.ctaIn}
@@ -255,13 +261,13 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
           <p className="mt-4 text-lg text-gray-400">{c.subtitle}</p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link
-              href={`/${lp}/auth/signin`}
+              href="/auth/signin"
               className="inline-flex min-h-[44px] items-center rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-500"
             >
               {c.ctaIn}
             </Link>
             <Link
-              href={`/${lp}/auth/register`}
+              href="/auth/register"
               className="inline-flex min-h-[44px] items-center rounded-xl border border-gray-700 px-6 py-3 font-semibold text-gray-200 hover:border-gray-500"
             >
               {c.ctaCont}
@@ -269,7 +275,7 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
           </div>
         </div>
 
-        <section className="mt-10 rounded-2xl border border-amber-500/40 bg-amber-500/5 p-6">
+        <section role="note" aria-label={c.avertismentTitlu} className="mt-10 rounded-2xl border border-amber-500/40 bg-amber-500/5 p-6">
           <h2 className="text-lg font-semibold text-amber-300">{c.avertismentTitlu}</h2>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-gray-300">{c.avertisment}</p>
         </section>
@@ -351,7 +357,7 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
           <h2 className="text-2xl font-semibold">{c.finalTitlu}</h2>
           <p className="mt-2 text-gray-400">{c.finalSub}</p>
           <Link
-            href={`/${lp}/auth/signin`}
+            href="/auth/signin"
             className="mt-6 inline-flex min-h-[44px] items-center rounded-xl bg-blue-600 px-8 py-3 font-semibold text-white hover:bg-blue-500"
           >
             {c.ctaIn}

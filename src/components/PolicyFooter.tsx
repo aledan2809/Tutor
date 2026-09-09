@@ -1,9 +1,14 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 // Minimal, always-reachable policy links for internal pages (dashboard, auth,
 // pricing, etc.). The marketing landing has its own rich footer, so this strip is
 // suppressed there (see [locale]/layout.tsx). Closes the gap where a user who
 // already dismissed the cookie banner had no way to reach the policies.
+//
+// Link vine din @/i18n/navigation, NU din next/link: cu next/link, href="/privacy"
+// se randa fără prefixul de limbă și răspundea 404 pe fiecare pagină internă a
+// site-ului — exact pe banda al cărei scop e ca politicile să fie mereu accesibile.
+// (măsurat pe producție 2026-09-09; /ro/privacy răspundea 200)
 
 const LABELS = {
   ro: { privacy: "Confidențialitate", terms: "Termeni", cookies: "Cookie-uri" },
