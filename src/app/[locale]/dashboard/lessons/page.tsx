@@ -27,6 +27,8 @@ interface LessonsResponse {
   page: number;
   limit: number;
   totalPages: number;
+  /** Lecțiile materiei, ignorând filtrele. 0 = materia chiar nu are lecții. */
+  domainTotal: number;
   filters: {
     subjects: string[];
     topics: string[];
@@ -147,6 +149,20 @@ function LessonsBody() {
         // „Nicio lecție disponibilă" ar minți aici: lecțiile există, accesul lipsește.
         <div className="rounded-lg border border-amber-800/60 bg-amber-900/10 px-4 py-6 text-center text-sm text-amber-300">
           {t("lessons.noAccess")}
+        </div>
+      ) : data && data.domainTotal === 0 ? (
+        // Materia chiar N-ARE lecții — cazul Aviației, care are sute de grile și zero
+        // lecții. „Nicio lecție disponibilă" îl lăsa pe om într-un ecran gol, fără să-i
+        // spună că materia lui e de grile și unde sunt ele. Un utilizator care intră
+        // zilnic a citit asta ca aplicație căzută (raportat 2026-09-09).
+        <div className="rounded-lg border border-gray-700 bg-gray-900 px-4 py-8 text-center">
+          <p className="text-sm text-gray-300">{t("lessons.onlyQuestions")}</p>
+          <Link
+            href="/dashboard/practice"
+            className="mt-4 inline-flex min-h-[44px] items-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            {t("lessons.goToPractice")}
+          </Link>
         </div>
       ) : !data || data.lessons.length === 0 ? (
         <div className="py-12 text-center text-gray-500">{t("lessons.noLessons")}</div>

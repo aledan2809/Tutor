@@ -117,6 +117,11 @@ async function _GET(req: NextRequest) {
     page,
     limit,
     totalPages: Math.ceil(total / limit),
+    // Câte lecții are materia în TOTAL, indiferent de filtre. Fără numărul ăsta,
+    // pagina nu poate deosebi „materia asta n-are lecții deloc" (Aviația: are 440
+    // de grile și nicio lecție) de „filtrele tale n-au potrivit nimic" — și le
+    // spunea pe amândouă la fel: „Nicio lecție disponibilă".
+    domainTotal: allSources.length,
     filters: {
       subjects: Array.from(subjects).sort(),
       topics: Array.from(topics).sort(),

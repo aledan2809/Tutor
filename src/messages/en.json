@@ -815,7 +815,9 @@
     "previous": "Previous",
     "next": "Next",
     "noAccess": "This subject is not available for your account. If you were given an access code, use it under Domains → Join.",
-    "completeFailed": "Could not save. Try again; if it keeps failing, this subject is not available for your account."
+    "completeFailed": "Could not save. Try again; if it keeps failing, this subject is not available for your account.",
+    "onlyQuestions": "This subject has no lessons — its content is the question bank.",
+    "goToPractice": "Go to Questions"
   },
   "remarks": {
     "lines": {
