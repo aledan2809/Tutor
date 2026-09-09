@@ -13,6 +13,8 @@ export type RosterRow = {
   telefon: string;
   /** Vine de pe lista clientului? Dacă nu, a intrat pe codul comun. */
   dePeLista: boolean;
+  /** Chiar nu știm cine e — fără nume, fără email, fără nume de utilizator. */
+  anonim: boolean;
   stare: "netrimisa" | "trimisa" | "apasat" | "cont" | "invata" | "terminat";
   invitedAt: string | null;
   openedAt: string | null;
@@ -142,7 +144,9 @@ export function Roster({ rows, cols }: { rows: RosterRow[]; cols: ModuleCol[] })
                   <div className="text-xs text-gray-500">
                     {r.dePeLista
                       ? [r.functie, r.marca ? `marca ${r.marca}` : null].filter(Boolean).join(" · ")
-                      : "a intrat pe codul comun — fără date de identificare"}
+                      : r.anonim
+                        ? "a intrat pe codul comun — nu știm cine e"
+                        : "nu e pe lista de invitații"}
                   </div>
                   {r.unde && <div className="text-xs text-gray-500">{r.unde}</div>}
                 </td>

@@ -223,6 +223,7 @@ export default async function CursantiPage({
         .join(" · ") || null,
       telefon: r.phone,
       dePeLista: true,
+      anonim: false,
       stare: stareDin(c.lectiiFacute, c.testeDate, r),
       invitedAt: r.invitedAt ? r.invitedAt.toISOString() : null,
       openedAt: r.openedAt ? r.openedAt.toISOString() : null,
@@ -242,6 +243,9 @@ export default async function CursantiPage({
       return {
         id: `u:${e.userId}`,
         nume: identitate ?? "Fără identitate",
+        // Ce ȘTIM despre el, nu de unde a intrat: contul demonstrativ are nume și
+        // email, deci a-l eticheta „fără date de identificare" era o minciună.
+        anonim: identitate === null,
         functie: null,
         marca: null,
         unde: null,
