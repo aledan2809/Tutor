@@ -4,6 +4,51 @@
 
 ---
 
+## [ ] 🔴 `/posta` + PDF — pagina de prezentare trebuie îmbunătățită dramatic (cerut 2026-09-09)
+
+Cerut de user după ce a văzut pagina live. Se aplică ȘI paginii, ȘI PDF-ului, care
+se randează din ea — deci o singură muncă, două livrabile.
+
+**Ce lipsește, spus de user:**
+- [ ] **Gamificarea nu e pomenită deloc.** Aplicația are XP, niveluri, serii, provocări
+      zilnice, clasament (`UserGamification`, `LevelConfig`, `DailyChallenge`,
+      `LeaderboardEntry`) — nimic din toate astea nu apare în argument. La un client
+      cu mii de angajați care trebuie să termine un curs, „ce-i face să continue" e
+      chiar întrebarea decidentului.
+- [ ] **Notificările (semi)automate către cei care întârzie** nu sunt pomenite. Există
+      deja: cascada de escaladare (`EscalationEvent`, `escalation/engine.ts`), WhatsApp
+      cu șabloane aprobate, Telegram, memento-uri. Pentru un manager cu 3.000 de oameni,
+      asta e diferența între „am trimis cursul" și „s-a făcut cursul".
+- [ ] **Fluxul complet, vizibil pe verticală, lateral** — de la invitație până la
+      urmărirea rapoartelor. User-ul îl vrea ca element grafic, nu ca text: omul vede
+      dintr-o privire că lucrul ăsta are un capăt și un sfârșit, nu că e „încă o
+      aplicație".
+
+**Idei proprii, din practică — de discutat, nu bătute în cuie:**
+- [ ] **Dovada, nu promisiunea.** Pagina spune ce va face; nu arată nimic. O captură
+      reală din tabloul managerului (cu nume inventate) valorează mai mult decât trei
+      paragrafe: decidentul vede raportul pe care îl va primi.
+- [ ] **Costul de pornire, spus pe față.** Întrebarea nerostită a oricărui decident e
+      „cât mă costă pe mine, ca timp". Răspunsul e neobișnuit de bun aici (o listă de
+      angajați, nimic de instalat) — dar nu scrie nicăieri.
+- [ ] **Obiecțiile, tratate explicit.** „Oamenii mei n-au smartphone", „n-au email",
+      „nu vor să-și instaleze nimic", „datele lor unde ajung". Fiecare are un răspuns
+      real în produs; nescrise, rămân motive de refuz.
+- [ ] **Un singur îndemn la acțiune, repetat.** Azi pagina se termină cu „Aveți deja un
+      cod de acces?", care e pentru cursant, nu pentru decident. Al lui e altul:
+      „trimiteți-ne procedurile" sau „vedeți-l pe telefonul dumneavoastră, acum".
+- [ ] **Numerele lor, nu ale noastre.** Cifrele ANCOM din pagină sunt despre piață.
+      Mai tare ar fi o singură cifră despre EI, calculată din datele lor publice
+      (câți factori, câte oficii) — arată că ne-am uitat la ei, nu la industrie.
+- [ ] **Versiunea de tipar contează.** PDF-ul e ce ajunge la conducere; elementul
+      grafic cu fluxul trebuie să funcționeze și alb-negru, pe hârtie.
+
+**De ținut minte:** macheta de format a lecției (roșu poștal, ipoteze în note de
+subsol) e aprobată de user și se aplică separat, pe conținut — nu confunda cele două.
+
+---
+
+
 ## [~] 🔒📚 Conținut public/privat pe materii + cursuri generate din prompt (creat 2026-09-05)
 
 > ✅ **2026-09-07 — cele 5 gap-uri de audit, toate închise și verificate pe producție.**
