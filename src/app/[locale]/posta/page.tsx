@@ -52,9 +52,53 @@ type Copy = {
   contactLead: string;
   contactMailEticheta: string;
   contactTelEticheta: string;
+  pdfCta: string;
+  furnizorEticheta: string;
   finalTitlu: string;
   finalSub: string;
 };
+
+/** Datele firmei, așa cum le ține Legal Hub pentru aplicația `tutor` (biller + controller). */
+const FURNIZOR = "Class RDA Impex SRL";
+const CONTACT_MAIL = "office@etutor.ro";
+const CONTACT_TEL_AFISAT = "0712 383 492";
+const CONTACT_TEL_LINK = "+40712383492";
+
+/**
+ * Stratul de tipărire. Pagina rămâne întunecată pe ecran — doar PDF-ul iese alb,
+ * fiindcă ajunge la conducerea unui client instituțional, care îl tipărește.
+ *
+ * Regulile au fost scrise după ce am generat PDF-ul brut și m-am uitat la el:
+ * bannerul de cookie-uri acoperea începutul secțiunii cu cursurile, iar cele
+ * patru pagini negre arătau a captură de ecran, nu a propunere comercială.
+ *
+ * E CSS scris de noi, nu conținut din baza de date — dacă textele paginii ajung
+ * vreodată editabile din admin, ele NU au voie să treacă pe calea asta.
+ */
+const PRINT_CSS = `
+@media print {
+  /* Banner de cookie-uri, CTA WhatsApp, bara mobilă — plutesc peste conținut. */
+  .fixed { display: none !important; }
+
+  html, body { background: #ffffff !important; }
+  [data-posta] { background: #ffffff !important; color: #111827 !important; }
+  [data-posta] * {
+    background-color: transparent !important;
+    background-image: none !important;
+    color: #1f2937 !important;
+    border-color: #d1d5db !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+  [data-posta] h1, [data-posta] h2, [data-posta] h3 { color: #0f172a !important; }
+  /* Accentele rămân, altfel documentul devine o masă cenușie. */
+  [data-posta] .text-blue-400, [data-posta] .text-blue-300 { color: #1d4ed8 !important; }
+  [data-posta] .text-amber-300 { color: #92400e !important; }
+  [data-posta] section { break-inside: avoid; }
+
+  @page { margin: 14mm; }
+}
+`;
 
 const RO: Copy = {
   badge: "Demonstrație · eTutor pentru Poșta Română",
@@ -147,6 +191,8 @@ const RO: Copy = {
     "Scrieți-ne sau sunați și vă trimitem codurile de acces pentru câte oameni vreți să vadă materialul, plus răspunsul la orice întrebare din pagina asta.",
   contactMailEticheta: "E-mail",
   contactTelEticheta: "Telefon",
+  pdfCta: "Descarcă prezentarea (PDF)",
+  furnizorEticheta: "Furnizor",
   finalTitlu: "Aveți deja un cod de acces?",
   finalSub: "Intrați în cont și deschideți traseul rolului dumneavoastră.",
 };
@@ -242,6 +288,8 @@ const EN: Copy = {
     "Write or call us and we will send access codes for as many people as you want to see the material, plus an answer to any question on this page.",
   contactMailEticheta: "Email",
   contactTelEticheta: "Phone",
+  pdfCta: "Download the presentation (PDF)",
+  furnizorEticheta: "Provider",
   finalTitlu: "Already have an access code?",
   finalSub: "Sign in and open the track for your role.",
 };
@@ -251,7 +299,8 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
   const c = locale === "en" ? EN : RO;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100">
+    <div data-posta className="min-h-screen bg-gray-950 text-gray-100">
+      <style>{PRINT_CSS}</style>
       <header className="border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
           <Link href="/" aria-label="eTUTOR.ro" className="inline-flex min-h-[44px] items-center">
@@ -259,7 +308,7 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
           </Link>
           <Link
             href="/auth/signin"
-            className="inline-flex min-h-[44px] items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="inline-flex min-h-[44px] items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 print:hidden"
           >
             {c.ctaIn}
           </Link>
@@ -273,7 +322,7 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
           </span>
           <h1 className="mt-5 text-3xl font-bold sm:text-5xl">{c.hero}</h1>
           <p className="mt-4 text-lg text-gray-400">{c.subtitle}</p>
-          <div className="mt-7 flex flex-wrap gap-3">
+          <div className="mt-7 flex flex-wrap gap-3 print:hidden">
             <Link
               href="/auth/signin"
               className="inline-flex min-h-[44px] items-center rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-500"
@@ -286,6 +335,16 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
             >
               {c.ctaCont}
             </Link>
+            {/*
+              Rută API, nu `Link` cu prefix de limbă. Omul de la Poșta ia fișierul
+              și îl trimite mai departe conducerii — de-asta există pagina.
+            */}
+            <a
+              href={`/api/posta/pdf?locale=${locale === "en" ? "en" : "ro"}`}
+              className="inline-flex min-h-[44px] items-center rounded-xl border border-gray-700 px-6 py-3 font-semibold text-gray-200 hover:border-gray-500"
+            >
+              {c.pdfCta}
+            </a>
           </div>
         </div>
 
@@ -378,23 +437,24 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
           <p className="mt-2 text-sm text-gray-400">{c.contactLead}</p>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:gap-8">
             <a
-              href="mailto:office@etutor.ro"
+              href={`mailto:${CONTACT_MAIL}`}
               className="inline-flex min-h-[44px] items-center gap-2 text-blue-300 hover:text-blue-200 hover:underline"
             >
               <span className="text-gray-500">{c.contactMailEticheta}:</span>
-              <span className="font-semibold">office@etutor.ro</span>
+              <span className="font-semibold">{CONTACT_MAIL}</span>
             </a>
             <a
-              href="tel:+40712383492"
+              href={`tel:${CONTACT_TEL_LINK}`}
               className="inline-flex min-h-[44px] items-center gap-2 text-blue-300 hover:text-blue-200 hover:underline"
             >
               <span className="text-gray-500">{c.contactTelEticheta}:</span>
-              <span className="font-semibold">0712 383 492</span>
+              <span className="font-semibold">{CONTACT_TEL_AFISAT}</span>
             </a>
           </div>
         </section>
 
-        <section className="mt-16 text-center">
+        {/* Secțiunea asta se adresează cursantului cu cod, nu decidentului — în PDF n-are rost. */}
+        <section className="mt-16 text-center print:hidden">
           <h2 className="text-2xl font-semibold">{c.finalTitlu}</h2>
           <p className="mt-2 text-gray-400">{c.finalSub}</p>
           <Link
@@ -403,6 +463,20 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
           >
             {c.ctaIn}
           </Link>
+        </section>
+
+        {/*
+          Doar în PDF: cine primește documentul îl dă mai departe la juridic și achiziții,
+          iar acolo un text fără furnizor și fără contact se oprește.
+        */}
+        <section className="mt-12 hidden border-t border-gray-300 pt-4 text-sm print:block">
+          <p>
+            <span className="text-gray-500">{c.furnizorEticheta}:</span>{" "}
+            <span className="font-semibold">eTUTOR.ro — {FURNIZOR}</span>
+          </p>
+          <p className="mt-1">
+            {CONTACT_MAIL} · {CONTACT_TEL_AFISAT}
+          </p>
         </section>
       </main>
     </div>
