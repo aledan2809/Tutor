@@ -1,15 +1,19 @@
+import { randomBytes } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
-import { isJoinCodeUsable } from "@/lib/join-code-policy";
 import { logAudit } from "@/lib/audit";
 
 /**
- * POST /api/admin/course-invite { domainId, phone, inviterName? }
+ * POST /api/admin/course-invite { domainId, phone, lastName, firstName, ... }
  *
- * Trimite pe WhatsApp invitația la un curs: un mesaj cu buton care duce direct în
- * lecții, fără cont și fără cod de tastat.
+ * Trimite pe WhatsApp invitația la un curs, pe LINKUL PERSONAL al omului.
+ *
+ * Linkul personal e miezul, nu un amănunt: codul comun al materiei e același
+ * pentru toți, deci n-ar putea spune niciodată cine a citit ce. Cu link propriu,
+ * raportul managerului e complet din prima apăsare — fără să-i cerem omului să se
+ * prezinte, ceea ce la mii de angajați ar pierde exact oamenii de instruit.
  *
  * De ce există: până acum invitațiile se trimiteau cu mâna, din linia de comandă.
  * Într-o întâlnire cu clientul vrei să ceri numărul omului și să-i sune telefonul
@@ -48,17 +52,28 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: { domainId?: unknown; phone?: unknown; inviterName?: unknown } = {};
+  let body: Record<string, unknown> = {};
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Corp de cerere invalid." }, { status: 400 });
   }
 
-  const domainId = typeof body.domainId === "string" ? body.domainId : "";
-  const rawPhone = typeof body.phone === "string" ? body.phone : "";
-  if (!domainId || !rawPhone.trim()) {
+  const str = (k: string) => (typeof body[k] === "string" ? (body[k] as string).trim() : "");
+  const opt = (k: string) => str(k) || null;
+
+  const domainId = str("domainId");
+  const rawPhone = str("phone");
+  const lastName = str("lastName");
+  const firstName = str("firstName");
+  if (!domainId || !rawPhone) {
     return NextResponse.json({ error: "Alege materia și scrie numărul." }, { status: 400 });
+  }
+  if (!lastName || !firstName) {
+    return NextResponse.json(
+      { error: "Numele și prenumele sunt obligatorii — fără ele, raportul nu spune cine a făcut ce." },
+      { status: 400 }
+    );
   }
 
   const domain = await prisma.domain.findUnique({
@@ -68,10 +83,6 @@ async function _POST(req: NextRequest) {
       name: true,
       organizationId: true,
       isActive: true,
-      joinCode: true,
-      joinCodeExpiresAt: true,
-      joinCodeMaxUses: true,
-      joinCodeUses: true,
       organization: { select: { name: true } },
       courses: {
         where: { isPublished: true },
@@ -89,26 +100,10 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: "Nu ai drept de invitare pe materia asta." }, { status: 403 });
   }
 
-  if (!domain.joinCode) {
-    return NextResponse.json(
-      { error: "Materia n-are cod de acces emis. Emite unul întâi, din pagina materiei." },
-      { status: 409 }
-    );
-  }
-  const usable = isJoinCodeUsable(
-    {
-      expiresAt: domain.joinCodeExpiresAt,
-      maxUses: domain.joinCodeMaxUses,
-      uses: domain.joinCodeUses,
-    },
-    new Date()
-  );
-  if (!usable) {
-    return NextResponse.json(
-      { error: "Codul materiei a expirat sau s-a epuizat. Emite unul nou." },
-      { status: 409 }
-    );
-  }
+  // Codul comun al materiei NU mai e cerut aici: invitația pleacă pe linkul
+  // personal al destinatarului, care nu depinde de el. A-l cere ar fi însemnat să
+  // blochez o invitație perfect validă pentru că a expirat un cod pe care n-o
+  // folosește — exact genul de refuz inexplicabil în fața clientului.
 
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
@@ -143,6 +138,38 @@ async function _POST(req: NextRequest) {
       );
     }
 
+    // Destinatarul, cu link PROPRIU. Aici se naște atribuirea: din clipa în care
+    // omul apasă, raportul poate spune cine e — fără niciun formular de identitate
+    // pus în calea lui. Codul comun al materiei nu poate face asta, fiindcă e
+    // același pentru toți.
+    const recipient = await prisma.recipient.upsert({
+      where: { domainId_phone: { domainId: domain.id, phone: to } },
+      create: {
+        domainId: domain.id,
+        phone: to,
+        lastName,
+        firstName,
+        jobTitle: opt("jobTitle"),
+        badgeNo: opt("badgeNo"),
+        county: opt("county"),
+        city: opt("city"),
+        postOffice: opt("postOffice"),
+        token: randomBytes(16).toString("base64url"),
+      },
+      // Re-invitarea aceluiași om îi actualizează datele, dar NU-i schimbă
+      // tokenul: un link deja trimis trebuie să rămână valabil.
+      update: {
+        lastName,
+        firstName,
+        jobTitle: opt("jobTitle"),
+        badgeNo: opt("badgeNo"),
+        county: opt("county"),
+        city: opt("city"),
+        postOffice: opt("postOffice"),
+      },
+      select: { id: true, token: true },
+    });
+
     const result = await client.sendTemplate(to, TEMPLATE, "ro", [
       {
         type: "body" as const,
@@ -157,7 +184,7 @@ async function _POST(req: NextRequest) {
         type: "button" as const,
         sub_type: "url" as const,
         index: 0,
-        parameters: [{ type: "text" as const, text: `ro/acces/${domain.joinCode}` }],
+        parameters: [{ type: "text" as const, text: `ro/acces/${recipient.token}` }],
       },
     ]);
 
@@ -172,14 +199,25 @@ async function _POST(req: NextRequest) {
       );
     }
 
+    await prisma.recipient.update({
+      where: { id: recipient.id },
+      data: { invitedAt: new Date() },
+    });
+
     await logAudit({
       action: "COURSE_INVITE_WHATSAPP",
       performedById: session.user.id,
       targetType: "Domain",
-      metadata: { domainId: domain.id, courseTitle, to, messageId: result.messageId },
+      metadata: { domainId: domain.id, courseTitle, to, recipientId: recipient.id, messageId: result.messageId },
     });
 
-    return NextResponse.json({ sent: true, to, course: courseTitle, messageId: result.messageId });
+    return NextResponse.json({
+      sent: true,
+      to,
+      course: courseTitle,
+      person: `${firstName} ${lastName}`,
+      messageId: result.messageId,
+    });
   } catch (e) {
     // Meta răspunde cu motive utile (număr fără WhatsApp, șablon nepotrivit, cotă
     // depășită). Le arătăm, în loc să spunem „a eșuat" — ruta se folosește live.

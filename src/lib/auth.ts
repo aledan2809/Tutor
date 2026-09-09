@@ -128,9 +128,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-        });
+        const identifier = (credentials.email as string).trim();
+
+        // Câmpul se numește „email" fiindcă așa îl trimite ecranul de intrare de
+        // ani de zile, dar acceptă acum și numele de utilizator: oamenii de teren
+        // ai unui client instituțional n-au email de serviciu, iar fără asta nu
+        // s-ar putea autentifica a doua oară.
+        //
+        // Emailul se caută PRIMUL, deci pentru conturile de azi nimic nu se
+        // schimbă; numele de utilizator e o a doua încercare, nu o înlocuire.
+        const user =
+          (await prisma.user.findUnique({ where: { email: identifier } })) ??
+          (await prisma.user.findUnique({ where: { username: identifier } }));
         if (!user?.password) return null;
         const valid = await bcrypt.compare(
           credentials.password as string,

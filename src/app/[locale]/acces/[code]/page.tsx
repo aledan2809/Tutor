@@ -1,93 +1,79 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
-import { signIn, useSession } from "next-auth/react";
-import { useRouter } from "@/i18n/navigation";
-import { Link } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
-import { Brand } from "@/components/Brand";
+import { prisma } from "@/lib/prisma";
+import { GuestEnter } from "./guest-enter";
+import { ActivateForm } from "./activate-form";
 
 /**
- * /acces/<cod> — capătul linkului din invitația pe WhatsApp.
+ * /acces/<ceva> — capătul oricărui link de invitație.
  *
- * Un singur pas pentru om: apasă butonul din mesaj și e în curs. Nimic de tastat,
- * niciun cont de făcut acum. La un client instituțional, fiecare ecran pus înaintea
- * materialului pierde oameni — de-aia codul călătorește în link, nu în text.
+ * „Ceva" e una din două, iar diferența contează:
  *
- * Două căi, deliberat:
- * - are deja cont și e autentificat → răscumpărăm codul pe contul lui, ca să nu-i
- *   apară un al doilea profil gol care nu-i știe progresul;
- * - nu e autentificat → intră ca invitat (`guest-access`), adică un rând de
- *   utilizator real fără email. Contul i se cere mai târziu, în faza aleasă de
- *   client, iar atunci se completează ACELAȘI rând — nu pierde nimic.
+ * - un **link personal** (token de destinatar): știm cine e omul, de pe lista
+ *   clientului. Îi arătăm datele lui deja completate și îi cerem un singur lucru:
+ *   cum vrea să intre — nume de utilizator și parolă. Nu-l punem să se prezinte:
+ *   HR-ul clientului l-a prezentat deja, iar fiecare câmp pus în calea lui pierde
+ *   oameni pe care tocmai vrem să-i instruim.
  *
- * Orice eșec (cod greșit, expirat, epuizat) arată la fel, ca nimeni să nu afle prin
- * încercări care coduri sunt vii.
+ * - un **cod de materie** (comun, tipărit pe o hârtie sau dat pe loc): nu știm
+ *   cine e, deci intră ca invitat, ca până acum.
+ *
+ * Se caută întâi tokenul personal: e nesecvențial și lung, deci nu se poate
+ * confunda cu un cod de opt caractere.
  */
-export default function AccesPage() {
-  const params = useParams<{ code: string }>();
-  const router = useRouter();
-  const { status } = useSession();
-  const t = useTranslations();
-  const [failed, setFailed] = useState(false);
-  // React rulează efectele de două ori în dezvoltare; fără garda asta, al doilea
-  // apel ar consuma încă o folosire din cod.
-  const started = useRef(false);
+export const dynamic = "force-dynamic";
 
-  useEffect(() => {
-    if (status === "loading" || started.current) return;
-    started.current = true;
-    const code = params?.code;
-    if (!code) {
-      setFailed(true);
-      return;
+export default async function AccesPage({
+  params,
+}: {
+  params: Promise<{ code: string }>;
+}) {
+  const { code } = await params;
+
+  const recipient = await prisma.recipient.findUnique({
+    where: { token: code },
+    select: {
+      id: true,
+      token: true,
+      firstName: true,
+      lastName: true,
+      jobTitle: true,
+      badgeNo: true,
+      phone: true,
+      county: true,
+      city: true,
+      postOffice: true,
+      userId: true,
+      openedAt: true,
+      domain: { select: { name: true, isActive: true } },
+    },
+  });
+
+  if (recipient && recipient.domain.isActive) {
+    // „A apăsat linkul" e prima treaptă din raportul managerului, iar momentul ei
+    // e ACUM — nu când își termină contul. Se scrie o singură dată.
+    if (!recipient.openedAt) {
+      await prisma.recipient
+        .update({ where: { id: recipient.id }, data: { openedAt: new Date() } })
+        .catch(() => {});
     }
 
-    (async () => {
-      try {
-        if (status === "authenticated") {
-          const res = await fetch("/api/domains/join", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ code }),
-          });
-          if (!res.ok) {
-            setFailed(true);
-            return;
-          }
-        } else {
-          const res = await signIn("guest-access", { code, redirect: false });
-          if (!res || res.error) {
-            setFailed(true);
-            return;
-          }
-        }
-        router.replace("/dashboard/lessons");
-      } catch {
-        setFailed(true);
-      }
-    })();
-  }, [status, params?.code, router]);
+    return (
+      <ActivateForm
+        token={recipient.token}
+        alreadyActivated={recipient.userId !== null}
+        person={{
+          firstName: recipient.firstName,
+          lastName: recipient.lastName,
+          jobTitle: recipient.jobTitle,
+          badgeNo: recipient.badgeNo,
+          phone: recipient.phone,
+          county: recipient.county,
+          city: recipient.city,
+          postOffice: recipient.postOffice,
+          course: recipient.domain.name,
+        }}
+      />
+    );
+  }
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-950 px-4 text-gray-100">
-      <div className="w-full max-w-sm text-center">
-        <Brand className="text-2xl" />
-        {failed ? (
-          <>
-            <p className="mt-6 text-sm text-gray-300">{t("acces.invalid")}</p>
-            <Link
-              href="/auth/signin"
-              className="mt-6 inline-flex min-h-[44px] items-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-500"
-            >
-              {t("acces.signin")}
-            </Link>
-          </>
-        ) : (
-          <p className="mt-6 text-sm text-gray-400">{t("acces.loading")}</p>
-        )}
-      </div>
-    </div>
-  );
+  return <GuestEnter />;
 }

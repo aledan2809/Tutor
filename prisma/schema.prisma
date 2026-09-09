@@ -42,6 +42,13 @@ model User {
   id             String       @id @default(cuid())
   name           String?
   email          String?      @unique
+  /// Numele de utilizator ales de om la prima intrare pe linkul de invitație.
+  ///
+  /// Există pentru că într-o companie ca Poșta oamenii de teren n-au email de
+  /// serviciu — iar dacă identificatorul e emailul, jumătate dintre ei nu se pot
+  /// autentifica a doua oară. Aici numele de utilizator e cheia de intrare, iar
+  /// emailul rămâne opțional, ca și până acum.
+  username       String?      @unique
   emailVerified  DateTime?
   image          String?
   password       String?
@@ -68,6 +75,7 @@ model User {
 
   accounts               Account[]
   enrollments            Enrollment[]
+  recipient              Recipient?
   sessions               Session[]
   attempts               Attempt[]
   progress               Progress[]
@@ -370,6 +378,7 @@ model Domain {
 
   organization         Organization?         @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   enrollments          Enrollment[]
+  recipients        Recipient[]
   questions            Question[]
   contentSources       ContentSource[]
   examSimulations      ExamSimulation[]
@@ -437,6 +446,57 @@ model Enrollment {
 
   @@unique([userId, domainId])
   @@index([domainId, isActive])
+}
+
+/// Omul de pe lista clientului, înainte să fie utilizator.
+///
+/// De ce există: cu mii de cursanți, un număr de telefon nu spune nimic unui
+/// manager. Iar soluția nu e să-i cerem omului să se prezinte — HR-ul clientului
+/// știe deja cine e. Identitatea vine de pe lista LOR, nu dintr-un formular pus
+/// în calea omului.
+///
+/// Cheia întregii idei e `token`: fiecare invitat primește un LINK PROPRIU, nu
+/// codul comun al materiei. De-aia se poate spune „Ion Popescu a citit lecția 2"
+/// și nu doar „cineva a citit lecția 2" — linkul spune cine, din prima apăsare,
+/// fără niciun formular de înscriere.
+///
+/// Datele de aici sunt date cu caracter personal ale angajaților clientului:
+/// clientul e operatorul, noi suntem persoana împuternicită.
+model Recipient {
+  id         String   @id @default(cuid())
+  domainId   String
+  /// Identitatea, de pe lista clientului.
+  lastName   String
+  firstName  String
+  /// Funcția: factor, lucrător ghișeu, diriginte de oficiu.
+  jobTitle   String?
+  /// Marca / numărul de personal, dacă firma lucrează cu ele.
+  badgeNo    String?
+  phone      String
+  county     String?
+  city       String?
+  /// Oficiul poștal de care aparține.
+  postOffice String?
+
+  /// Linkul personal. Unic, nesecvențial, imposibil de ghicit.
+  token      String    @unique
+  /// Când a plecat invitația și când a apăsat omul linkul. Null = încă nu.
+  invitedAt  DateTime?
+  openedAt   DateTime?
+
+  /// Contul creat la prima intrare. Legătura care face raportul posibil.
+  userId     String?   @unique
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  /// Același om nu se invită de două ori la aceeași materie.
+  @@unique([domainId, phone])
+  @@index([domainId])
+  @@index([badgeNo])
 }
 
 enum QuestionSource {
