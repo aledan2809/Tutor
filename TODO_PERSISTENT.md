@@ -4,6 +4,48 @@
 
 ---
 
+## [ ] 🔴 Cascada implicită e periculoasă pentru un curs de serviciu (găsit 2026-09-10)
+
+Treptele implicite sunt la **10 minute** una de alta (`ESCALATION_LEVELS`), fiindcă mecanismul
+a fost construit pentru un elev care ratează o ședință în seara aceea. Dacă cascada pornește pe
+materiile Poștei, un factor care ratează o zi primește **patru mesaje în 30 de minute** —
+push, Telegram, e-mail, WhatsApp — inclusiv pe numărul lui real.
+
+**Nu e activ acum**: 0 evenimente de escaladare pe cursanții de la Poștă. Devine activ în ziua
+în care intră primii factori reali.
+
+Mecanismul de reglare EXISTĂ, dar doar pe om: `NotificationPreference.escalationSteps` (minute
+per treaptă, deci și pe zile) — un singur cont din toată platforma îl are setat. **Lipsește un
+ritm implicit pe MATERIE**, care e nivelul la care un client instituțional gândește.
+
+**De făcut**: `Domain.escalationSteps Json?` (aditiv) → preferat în ordinea om › materie ›
+implicit, la punctele de escaladare din `engine.ts` → reglaj în panoul materiei. Sesiune proprie:
+atinge motorul de notificări al unei aplicații live, cu WhatsApp plătit la capăt.
+
+Context complet: `Reports/VERIFICARE-ADEVAR-posta-2026-09-10.md`.
+
+---
+
+## [ ] ⚠️ Legal Hub: `terms` lipsește pentru tutor (găsit 2026-09-10)
+
+Pagina `/posta` spune clientului „politicile sunt publice și versionate". Verificat:
+`privacy` **200** (vE1.0, cu amprentă) · `cookies` **200** · **`terms` 404**.
+
+Legal Hub e **NO-TOUCH CRITIC** → seedarea documentului cere propose-confirm-apply într-o
+sesiune dedicată, nu se face autonom.
+
+---
+
+## [ ] ⚠️ SMS ca treaptă în cascadă — blocat pe credențiale (găsit 2026-09-10)
+
+Mecanismul există (`@aledan/sms`, SMSLink, cu plafon zilnic în `engine.ts`), dar
+`SMSLINK_CONNECTION_ID` și `SMSLINK_PASSWORD` **nu sunt setate pe producție**, iar SMS nu e
+treaptă în `ESCALATION_LEVELS`. Afirmația despre SMS a fost scoasă din pagina `/posta`.
+
+**Acțiune user**: credențialele SMSLink. Abia apoi are sens adăugarea treptei.
+
+---
+
 ## [ ] 🔴 `/posta` + PDF — pagina de prezentare trebuie îmbunătățită dramatic (cerut 2026-09-09)
 
 Cerut de user după ce a văzut pagina live. Se aplică ȘI paginii, ȘI PDF-ului, care
