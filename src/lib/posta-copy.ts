@@ -314,10 +314,10 @@ export const RO: Copy = {
     { caz: "Greșește 3, apoi le învață", calcul: "1 × 10 + 3 × 7", puncte: "31", raport: "Știe 4/4 · din prima 1/4 · 3 recuperări" },
     { caz: "Face 2 din 4 și se oprește", calcul: "2 × 10", puncte: "20", raport: "Știe 2/4 · din prima 2/4" },
     { caz: "Greșește tot, apoi învață tot", calcul: "4 × 7", puncte: "28", raport: "Știe 4/4 · din prima 0/4 · 4 recuperări" },
-    { caz: "Repetă mecanic de nouă ori", calcul: "4 × 10 + 4 × (3+2+1)", puncte: "64", raport: "Știe 4/4 · exersat" },
+    { caz: "Repetă mecanic de nouă ori", calcul: "4 × 10 + 4 × (3+2+1+0+0+0+0+0+0)", puncte: "64", raport: "Știe 4/4 · exersat" },
   ],
   scorConcluzie:
-    "Citiți rândul doi lângă rândul patru: amândoi au răspuns corect la exact două întrebări din prima. Cel care s-a întors ia 34, cel care s-a oprit ia 20 — cele paisprezece puncte diferență sunt strict determinarea de a reveni. Iar cel care repetă mecanic ia 64, nu 400: exersarea aduce ceva, dar se oprește acolo.",
+    "Citiți rândul doi lângă rândul patru: amândoi au răspuns corect la exact două întrebări din prima. Cel care s-a întors ia 34, cel care s-a oprit ia 20 — cele paisprezece puncte diferență sunt strict determinarea de a reveni. Iar cel care repetă mecanic ia 64, nu 400: numărați termenii din paranteză — sunt nouă, câte unul pentru fiecare reluare, dar doar primele trei din zi valorează ceva (3, apoi 2, apoi 1). De la a patra încolo, fiecare repetare aduce zero. Exersarea rămâne liberă; clasamentul nu se poate măcina din ea.",
   scorNota:
     "De-aia managementul vede trei numere, nu unul: ce știe omul acum, cât a nimerit din prima, și de câte ori s-a întors. Un procent singur le-ar ascunde pe toate trei.",
   cascadaTitlu: "Cine rămâne în urmă nu rămâne uitat",
@@ -617,10 +617,10 @@ export const EN: Copy = {
     { caz: "Gets 3 wrong, then learns them", calcul: "1 × 10 + 3 × 7", puncte: "31", raport: "Knows 4/4 · first try 1/4 · 3 recoveries" },
     { caz: "Gets 2 of 4 and stops", calcul: "2 × 10", puncte: "20", raport: "Knows 2/4 · first try 2/4" },
     { caz: "Gets everything wrong, then learns it all", calcul: "4 × 7", puncte: "28", raport: "Knows 4/4 · first try 0/4 · 4 recoveries" },
-    { caz: "Repeats mechanically nine times", calcul: "4 × 10 + 4 × (3+2+1)", puncte: "64", raport: "Knows 4/4 · practised" },
+    { caz: "Repeats mechanically nine times", calcul: "4 × 10 + 4 × (3+2+1+0+0+0+0+0+0)", puncte: "64", raport: "Knows 4/4 · practised" },
   ],
   scorConcluzie:
-    "Read row two against row four: both answered exactly two questions correctly on the first try. The one who came back gets 34, the one who stopped gets 20 — those fourteen points are purely the determination to return. And the one who repeats mechanically gets 64, not 400: practice earns something, and stops there.",
+    "Read row two against row four: both answered exactly two questions correctly on the first try. The one who came back gets 34, the one who stopped gets 20 — those fourteen points are purely the determination to return. And the one who repeats mechanically gets 64, not 400: count the terms in the bracket — there are nine, one per repetition, but only the first three of the day are worth anything (3, then 2, then 1). From the fourth on, every repeat earns zero. Practice stays free; a leaderboard cannot be ground out of it.",
   scorNota:
     "That is why management sees three numbers rather than one: what the person knows now, how much they got on the first try, and how many times they came back. A single percentage would hide all three.",
   cascadaTitlu: "Whoever falls behind is not forgotten",
