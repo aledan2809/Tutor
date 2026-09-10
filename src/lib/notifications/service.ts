@@ -10,6 +10,7 @@
  */
 
 import { prisma } from "@/lib/prisma";
+import { resolveSmsConfig, textReminderSms } from "./sms-provider";
 import type { EscalationChannel } from "@prisma/client";
 import { getTelegramClient } from "@/lib/telegram/connect";
 import { buildTelegramButtonUrl } from "@/lib/escalation/tap-link";
@@ -483,18 +484,22 @@ async function sendSMSNotification(
     return false;
   }
 
+  // Furnizorul se alege din mediu, nu se presupune. Vezi `sms-provider.ts`: până acum
+  // se cerea SMSLink și numai SMSLink, iar pe producție cheile lui nu există — deci
+  // treapta era moartă, în timp ce contul Twilio al ecosistemului livra SMS-uri.
+  const config = resolveSmsConfig(process.env);
+  if (!config) {
+    console.warn("[sms] niciun furnizor configurat — sar peste");
+    return false;
+  }
+
   try {
     const { SMSClient } = await import("@aledan/sms");
-    const client = new SMSClient({
-      primary: {
-        provider: "smslink",
-        connectionId: process.env.SMSLINK_CONNECTION_ID ?? "",
-        password: process.env.SMSLINK_PASSWORD ?? "",
-      },
-    });
+    const client = new SMSClient({ primary: config });
 
-    const userName = (payload.metadata.userName as string) ?? "Student";
-    const message = `Tutor: Hi ${userName}, you haven't studied recently. Open the app and keep your streak alive!`;
+    // Numele din BAZĂ, nu din `metadata.userName`: acolo motorul pune „Student" ca
+    // valoare de rezervă. (`metadata.domainName` nu se setează nicăieri — verificat.)
+    const message = textReminderSms(user?.name ?? undefined);
 
     await client.send({ to: phone, message });
     return true;

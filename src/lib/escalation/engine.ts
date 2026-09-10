@@ -8,6 +8,7 @@
 
 import { shouldEscalate, nextStep, resolveGraceMs } from "@aledan/notify-ladder";
 import { prisma } from "@/lib/prisma";
+import { smsConfigurat } from "@/lib/notifications/sms-provider";
 import {
   ESCALATION_LEVELS,
   isChannelEnabled,
@@ -197,9 +198,9 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
       whatsappConfigured: Boolean(
         process.env.WHATSAPP_PHONE_NUMBER_ID && process.env.WHATSAPP_ACCESS_TOKEN
       ),
-      smsConfigured: Boolean(
-        process.env.SMSLINK_CONNECTION_ID && process.env.SMSLINK_PASSWORD
-      ),
+      // Nu doar SMSLink: garda întreba de un singur furnizor, deci treapta SMS era
+      // considerată nelivrabilă chiar și cu Twilio configurat și funcțional.
+      smsConfigured: smsConfigurat(process.env),
       emailConfigured: Boolean(process.env.AUTH_RESEND_KEY || process.env.SMTP_HOST),
     });
     if (!deliverable) {
