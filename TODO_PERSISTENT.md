@@ -36,13 +36,54 @@ sesiune dedicată, nu se face autonom.
 
 ---
 
-## [ ] ⚠️ SMS ca treaptă în cascadă — blocat pe credențiale (găsit 2026-09-10)
+## [x] ✅ SMS ca treaptă în cascadă — LIVE 2026-09-10 (`cf534da`), pe Twilio
 
-Mecanismul există (`@aledan/sms`, SMSLink, cu plafon zilnic în `engine.ts`), dar
-`SMSLINK_CONNECTION_ID` și `SMSLINK_PASSWORD` **nu sunt setate pe producție**, iar SMS nu e
-treaptă în `ESCALATION_LEVELS`. Afirmația despre SMS a fost scoasă din pagina `/posta`.
+Blocajul nu era ce credeam: `@aledan/sms` **are** furnizor Twilio (`src/providers/twilio.ts`,
+exportat și construit în `dist/`), nu doar SMSLink. Iar credențialele Twilio existau deja.
+Garda de livrabilitate din `engine.ts` întreba însă de un singur furnizor, deci treapta SMS
+ar fi fost considerată nelivrabilă chiar cu Twilio funcțional — reparat cu `smsConfigurat()`.
 
-**Acțiune user**: credențialele SMSLink. Abia apoi are sens adăugarea treptei.
+SMS e acum treapta a 5-a din `ESCALATION_LEVELS`, cu `maxPerDay: 1`. Plafonul e obligatoriu:
+motorul îl caută cu `ESCALATION_LEVELS.find` pe canal, deci cât timp SMS lipsea din listă
+`find` întorcea `undefined` și plafonul nu se aplica niciodată. Intră în ritmurile STANDARD
+și INSISTENT, **nu** și în BLÂND — e treapta care costă bani de fiecare dată.
+
+Verificat pe producție: `{"twilio":true,"SMS_LIVRABIL":true,"furnizor":"twilio"}`.
+Afirmația despre SMS din pagina `/posta` e adevărată.
+
+---
+
+## [x] ✅ Poșta = client B2B facturat separat — poarta de canale, LIVE 2026-09-10 (`cf534da` + `94455cd`)
+
+Poarta canalelor plătite (WhatsApp, SMS) se uita DOAR la `User.subscriptionStatus`. Toți
+cursanții Poștei îl au gol — nu-și cumpără abonament, îi înscrie angajatorul. Cascada cu
+patru trepte promisă în pagina de prezentare nu le-ar fi trimis niciodată nici WhatsApp,
+nici SMS.
+
+`Organization.meteredIncluded` (migrare aditivă 0060) + un singur predicat,
+`meteredChannelsCovered`, ținut separat de `isPaidSubscriber` — acela răspunde la altă
+întrebare („are abonament plătit"), iar confundarea celor două era chiar bug-ul.
+
+**Trei capcane, toate găsite prin verificare, nu prin citit:**
+
+1. `/review` — motorul avea PROPRIA poartă premium pe WhatsApp, **înaintea** lui
+   `sendNotification`; o reparație doar în poarta de trimitere n-ar fi făcut nimic.
+2. `/review` — scrierea preferinței forța whatsapp/sms pe `false`, deci omul nu putea
+   nici măcar bifa canalul: poarta ar fi rămas deschisă spre o preferință stinsă.
+3. **Datele reale** — firma „Poșta Română (demo)" are 3 materii și **ZERO membri**.
+   Legătura cu clientul trece prin ÎNSCRIERE, nu prin `User.organizationId`. Prima
+   versiune a porții trecea toate testele și n-ar fi acoperit niciun om real.
+
+`User.organizationId` NU s-a atins pe conturi reale — e câmp de identitate, citit împreună
+cu `isOrgAdmin` pentru drepturi de administrare.
+
+Verificat pe producție, cu clientul Prisma real: cei 2 cursanți ai Poștei (4 înscrieri) —
+fără abonament, fără firmă pe cont — se rezolvă `ACOPERIT: true`; un martor din afară,
+`false`; **nimeni altcineva din toată baza** nu e acoperit.
+
+**Rămâne de decis cu clientul**: prețul și ritmul facturii separate. Comutatorul e pus
+(`meteredIncluded = true` pe organizația Poștei); nu există încă nici contorizare pe
+firmă, nici emitere de factură — mesajele plătite se strâng azi doar în `NotificationLog`.
 
 ---
 
