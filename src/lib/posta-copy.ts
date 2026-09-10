@@ -80,6 +80,15 @@ export type Copy = {
   motor: { titlu: string; text: string }[];
   motorNota: string;
 
+  scorTitlu: string;
+  scorLead: string;
+  /** Legenda punctajului: cât valorează fiecare situație și de ce. */
+  scorLegenda: { valoare: string; cand: string }[];
+  scorCazuriCap: { caz: string; calcul: string; puncte: string; raport: string };
+  scorCazuri: { caz: string; calcul: string; puncte: string; raport: string }[];
+  scorConcluzie: string;
+  scorNota: string;
+
   cascadaTitlu: string;
   cascadaLead: string;
   /**
@@ -278,6 +287,27 @@ export const RO: Copy = {
   motorNota:
     "Cifrele de mai sus nu sunt scrise de mână în pagina asta: se citesc din același fișier de configurare pe care îl folosește motorul care acordă punctele. Dacă se schimbă regula, se schimbă și pagina.",
 
+  scorTitlu: "Cine se întoarce să învețe e răsplătit, nu penalizat",
+  scorLead:
+    "Un curs nu e o fotografie a ce știai din prima, e ce știi la sfârșit. Majoritatea platformelor pedepsesc reluarea fără să vrea: adună toate încercările, deci cine greșește și apoi învață apare mai prost decât cine s-a oprit. La noi nu. Iar cine se întoarce primește puncte pentru asta — mai puține decât dacă știa din prima, ca greșeala să nu devină strategie, dar destule cât să merite drumul înapoi.",
+  scorLegenda: [
+    { valoare: "10", cand: "răspuns corect din prima (plus 5 dacă vine în mai puțin de cinci secunde — doar la prima întâlnire, fiindcă a doua oară viteza e așteptată și n-ar dovedi nimic)" },
+    { valoare: "7", cand: "a greșit, s-a întors și a corectat. Sub 10 dinadins: a ști din prima rămâne mai bun, altfel greșeala ar deveni strategie" },
+    { valoare: "3 · 2 · 1", cand: "exersarea a ceva deja știut, descrescător, cel mult de trei ori pe zi la aceeași întrebare. Exersarea rămâne gratuită, dar nu se poate măcina un clasament din ea" },
+  ],
+  scorCazuriCap: { caz: "Pe un modul de patru întrebări", calcul: "Cum se calculează", puncte: "Puncte", raport: "Ce vede conducerea" },
+  scorCazuri: [
+    { caz: "Știe din prima", calcul: "4 × 10", puncte: "40", raport: "Știe 4/4 · din prima 4/4" },
+    { caz: "Greșește 2, apoi le învață", calcul: "2 × 10 + 2 × 7", puncte: "34", raport: "Știe 4/4 · din prima 2/4 · 2 recuperări" },
+    { caz: "Greșește 3, apoi le învață", calcul: "1 × 10 + 3 × 7", puncte: "31", raport: "Știe 4/4 · din prima 1/4 · 3 recuperări" },
+    { caz: "Face 2 din 4 și se oprește", calcul: "2 × 10", puncte: "20", raport: "Știe 2/4 · din prima 2/4" },
+    { caz: "Greșește tot, apoi învață tot", calcul: "4 × 7", puncte: "28", raport: "Știe 4/4 · din prima 0/4 · 4 recuperări" },
+    { caz: "Repetă mecanic de nouă ori", calcul: "4 × 10 + 4 × (3+2+1)", puncte: "64", raport: "Știe 4/4 · exersat" },
+  ],
+  scorConcluzie:
+    "Citiți rândul doi lângă rândul patru: amândoi au răspuns corect la exact două întrebări din prima. Cel care s-a întors ia 34, cel care s-a oprit ia 20 — cele paisprezece puncte diferență sunt strict determinarea de a reveni. Iar cel care repetă mecanic ia 64, nu 400: exersarea aduce ceva, dar se oprește acolo.",
+  scorNota:
+    "De-aia conducerea vede trei numere, nu unul: ce știe omul acum, cât a nimerit din prima, și de câte ori s-a întors. Un procent singur le-ar ascunde pe toate trei.",
   cascadaTitlu: "Cine rămâne în urmă nu rămâne uitat",
   cascadaLead:
     "Partea pe care niciun curs trimis pe e-mail n-o are. După o zi fără activitate, platforma începe să-l caute pe om singură, urcând treptele una câte una.",
@@ -557,6 +587,27 @@ export const EN: Copy = {
   motorNota:
     "The figures above are not typed into this page: they are read from the same configuration file the engine uses to award the points. Change the rule and the page changes with it.",
 
+  scorTitlu: "Coming back to learn is rewarded, not penalised",
+  scorLead:
+    "A course is not a photograph of what you knew on the first try; it is what you know at the end. Most platforms punish repetition without meaning to: they average every attempt, so someone who gets it wrong and then learns looks worse than someone who stopped. Ours does not. And whoever comes back earns points for it — fewer than knowing it outright, so a wrong answer never becomes a strategy, but enough to make the trip back worth it.",
+  scorLegenda: [
+    { valoare: "10", cand: "correct on the first try (plus 5 under five seconds — first encounter only, because the second time speed is expected and proves nothing)" },
+    { valoare: "7", cand: "got it wrong, came back and fixed it. Deliberately under 10: knowing it outright stays better, otherwise a wrong answer becomes a strategy" },
+    { valoare: "3 · 2 · 1", cand: "practising something already known, decreasing, at most three times a day per question. Practice stays free, but a leaderboard cannot be ground out of it" },
+  ],
+  scorCazuriCap: { caz: "On a four-question module", calcul: "How it adds up", puncte: "Points", raport: "What management sees" },
+  scorCazuri: [
+    { caz: "Knows it on the first try", calcul: "4 × 10", puncte: "40", raport: "Knows 4/4 · first try 4/4" },
+    { caz: "Gets 2 wrong, then learns them", calcul: "2 × 10 + 2 × 7", puncte: "34", raport: "Knows 4/4 · first try 2/4 · 2 recoveries" },
+    { caz: "Gets 3 wrong, then learns them", calcul: "1 × 10 + 3 × 7", puncte: "31", raport: "Knows 4/4 · first try 1/4 · 3 recoveries" },
+    { caz: "Gets 2 of 4 and stops", calcul: "2 × 10", puncte: "20", raport: "Knows 2/4 · first try 2/4" },
+    { caz: "Gets everything wrong, then learns it all", calcul: "4 × 7", puncte: "28", raport: "Knows 4/4 · first try 0/4 · 4 recoveries" },
+    { caz: "Repeats mechanically nine times", calcul: "4 × 10 + 4 × (3+2+1)", puncte: "64", raport: "Knows 4/4 · practised" },
+  ],
+  scorConcluzie:
+    "Read row two against row four: both answered exactly two questions correctly on the first try. The one who came back gets 34, the one who stopped gets 20 — those fourteen points are purely the determination to return. And the one who repeats mechanically gets 64, not 400: practice earns something, and stops there.",
+  scorNota:
+    "That is why management sees three numbers rather than one: what the person knows now, how much they got on the first try, and how many times they came back. A single percentage would hide all three.",
   cascadaTitlu: "Whoever falls behind is not forgotten",
   cascadaLead:
     "The part no course emailed as an attachment has. After a day without activity, the platform starts looking for the person by itself, climbing the rungs one at a time.",

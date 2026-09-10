@@ -125,6 +125,34 @@ const SECTIUNI: Sectiune[] = [
     ],
   },
   {
+    titlu: "Punctajul reluării",
+    nota: "Cifrele din legendă și din coloana de calcul trebuie să rămână în acord cu ce face motorul de puncte. Dacă le schimbi aici, nu se schimbă și în produs.",
+    campuri: [
+      { cheie: "scorTitlu", eticheta: "Titlu" },
+      { cheie: "scorLead", eticheta: "Raționamentul", lung: true },
+      {
+        cheie: "scorLegenda",
+        eticheta: "Legenda punctajului",
+        subcampuri: [
+          { cheie: "valoare", eticheta: "Cât valorează" },
+          { cheie: "cand", eticheta: "Când se dă", lung: true },
+        ],
+      },
+      {
+        cheie: "scorCazuri",
+        eticheta: "Exemplele",
+        subcampuri: [
+          { cheie: "caz", eticheta: "Cazul" },
+          { cheie: "calcul", eticheta: "Cum se calculează" },
+          { cheie: "puncte", eticheta: "Puncte" },
+          { cheie: "raport", eticheta: "Ce vede conducerea" },
+        ],
+      },
+      { cheie: "scorConcluzie", eticheta: "Concluzia", lung: true },
+      { cheie: "scorNota", eticheta: "Nota de final", lung: true },
+    ],
+  },
+  {
     titlu: "Cine rămâne în urmă",
     nota: "Treptele cascadei (ce canal, la câte minute) se citesc din codul motorului și nu se editează aici — altfel pagina ar putea spune altceva decât face produsul.",
     campuri: [

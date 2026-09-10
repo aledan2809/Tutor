@@ -483,6 +483,55 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
         </section>
 
         {/*
+          Punctajul reluării. Stă imediat după gamificare fiindcă e răspunsul la
+          întrebarea pe care secțiunea de dinainte o ridică: „bine, dar ce se întâmplă cu
+          cine NU nimerește din prima?".
+
+          Tabelul are coloană de calcul dinadins — un punctaj fără aritmetică vizibilă
+          e o promisiune, iar decidentul are dreptul să verifice singur că cel care se
+          întoarce nu e păcălit.
+        */}
+        <section className="mt-16">
+          <h2 className="text-2xl font-semibold">{c.scorTitlu}</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-gray-400">{c.scorLead}</p>
+
+          <ul className="mt-6 space-y-2.5">
+            {c.scorLegenda.map((l) => (
+              <li key={l.valoare} className="flex gap-3 text-sm">
+                <span className="w-16 shrink-0 font-semibold tabular-nums text-blue-400">{l.valoare}</span>
+                <span className="text-gray-400">{l.cand}</span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-6 overflow-x-auto rounded-xl border border-gray-800">
+            <table className="tablou w-full min-w-[42rem] border-collapse text-sm">
+              <thead>
+                <tr className="bg-gray-900 text-left text-xs uppercase tracking-wide text-gray-500">
+                  <th className="px-3 py-2.5 font-semibold">{c.scorCazuriCap.caz}</th>
+                  <th className="px-3 py-2.5 font-semibold">{c.scorCazuriCap.calcul}</th>
+                  <th className="px-3 py-2.5 text-right font-semibold">{c.scorCazuriCap.puncte}</th>
+                  <th className="px-3 py-2.5 font-semibold">{c.scorCazuriCap.raport}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {c.scorCazuri.map((x) => (
+                  <tr key={x.caz} className="border-t border-gray-800 align-top">
+                    <td className="px-3 py-2.5 text-gray-200">{x.caz}</td>
+                    <td className="px-3 py-2.5 tabular-nums text-gray-400">{x.calcul}</td>
+                    <td className="px-3 py-2.5 text-right font-semibold tabular-nums text-blue-400">{x.puncte}</td>
+                    <td className="px-3 py-2.5 text-xs text-gray-400">{x.raport}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <p className="mt-4 max-w-3xl text-sm leading-relaxed text-gray-300">{c.scorConcluzie}</p>
+          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-gray-400">{c.scorNota}</p>
+        </section>
+
+        {/*
           Cascada. Treptele se citesc din `ESCALATION_LEVELS` — fișierul pe care îl execută
           motorul — nu din text scris aici, tocmai ca să nu poată ajunge să spună altceva
           decât face produsul.
