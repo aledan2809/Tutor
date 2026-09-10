@@ -7,9 +7,9 @@ import {
 } from "@/lib/escalation/config";
 
 describe("Escalation Configuration", () => {
-  describe("ESCALATION_LEVELS (cascade: App → Telegram → email → WhatsApp)", () => {
-    it("has 4 levels ordered 1-4", () => {
-      expect(ESCALATION_LEVELS.map((l) => l.level)).toEqual([1, 2, 3, 4]);
+  describe("ESCALATION_LEVELS (cascade: App → Telegram → email → WhatsApp → SMS)", () => {
+    it("has 5 levels ordered 1-5", () => {
+      expect(ESCALATION_LEVELS.map((l) => l.level)).toEqual([1, 2, 3, 4, 5]);
     });
 
     it("L1 is PUSH with no delay", () => {
@@ -17,17 +17,20 @@ describe("Escalation Configuration", () => {
       expect(ESCALATION_LEVELS[0].delayMinutes).toBe(0);
     });
 
-    it("follows the App → Telegram → email → WhatsApp order", () => {
+    it("follows the App → Telegram → email → WhatsApp → SMS order", () => {
       expect(ESCALATION_LEVELS.map((l) => l.channel)).toEqual([
         "PUSH",
         "TELEGRAM",
         "EMAIL",
         "WHATSAPP",
+        "SMS",
       ]);
     });
 
-    it("WhatsApp is the last (Premium-only) rung", () => {
-      expect(ESCALATION_LEVELS[ESCALATION_LEVELS.length - 1].channel).toBe("WHATSAPP");
+    it("SMS is the last rung — the one that costs money every time", () => {
+      // Era WhatsApp. SMS a fost adăugat DUPĂ el fiindcă ajunge la om și fără internet,
+      // dar se plătește de fiecare dată — deci e ultima încercare, nu una din drum.
+      expect(ESCALATION_LEVELS[ESCALATION_LEVELS.length - 1].channel).toBe("SMS");
     });
 
     it("each level has a templateId", () => {

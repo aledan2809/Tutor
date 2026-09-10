@@ -14,17 +14,18 @@ describe("resolveLadder", () => {
     expect(resolveLadder(undefined)).toBe(ESCALATION_LEVELS);
     expect(resolveLadder(null)).toBe(ESCALATION_LEVELS);
     expect(resolveLadder([])).toBe(ESCALATION_LEVELS);
-    expect(channels(ESCALATION_LEVELS)).toEqual(["PUSH", "TELEGRAM", "EMAIL", "WHATSAPP"]);
+    expect(channels(ESCALATION_LEVELS)).toEqual(["PUSH", "TELEGRAM", "EMAIL", "WHATSAPP", "SMS"]);
   });
 
   it("reorders the cascade to the user's preference (WhatsApp first)", () => {
     const out = resolveLadder(["WHATSAPP", "EMAIL", "TELEGRAM", "PUSH"]);
-    expect(channels(out)).toEqual(["WHATSAPP", "EMAIL", "TELEGRAM", "PUSH"]);
+    // SMS nu e în preferință, deci se adaugă la coadă în ordinea implicită.
+    expect(channels(out)).toEqual(["WHATSAPP", "EMAIL", "TELEGRAM", "PUSH", "SMS"]);
   });
 
   it("re-indexes level numbers 1..n in the new order", () => {
     const out = resolveLadder(["EMAIL", "PUSH", "WHATSAPP", "TELEGRAM"]);
-    expect(out.map((l) => l.level)).toEqual([1, 2, 3, 4]);
+    expect(out.map((l) => l.level)).toEqual([1, 2, 3, 4, 5]);
     expect(out[0].channel).toBe("EMAIL");
   });
 
@@ -38,7 +39,7 @@ describe("resolveLadder", () => {
 
   it("appends unlisted channels in default order (never drops a rung)", () => {
     const out = resolveLadder(["WHATSAPP"]);
-    expect(channels(out)).toEqual(["WHATSAPP", "PUSH", "TELEGRAM", "EMAIL"]);
+    expect(channels(out)).toEqual(["WHATSAPP", "PUSH", "TELEGRAM", "EMAIL", "SMS"]);
     expect(out).toHaveLength(ESCALATION_LEVELS.length);
   });
 
@@ -48,12 +49,13 @@ describe("resolveLadder", () => {
       "EMAIL",
       "PUSH",
       "TELEGRAM",
+      "SMS",
     ]);
   });
 
   it("ignores unknown and duplicate entries", () => {
     const out = resolveLadder(["BANANA", "EMAIL", "EMAIL", "SMS", "PUSH"]);
-    expect(channels(out)).toEqual(["EMAIL", "PUSH", "TELEGRAM", "WHATSAPP"]);
+    expect(channels(out)).toEqual(["EMAIL", "SMS", "PUSH", "TELEGRAM", "WHATSAPP"]);
     expect(out).toHaveLength(ESCALATION_LEVELS.length);
   });
 

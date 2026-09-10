@@ -21,7 +21,7 @@ import { resolveIsTest, resolveIsTestForUser } from "@/lib/notifications/test-ac
 import {
   ESCALATION_LADDER,
   isPaidChannelDeliverable,
-  isPaidSubscriber,
+  meteredChannelsCovered,
 } from "./segmentation";
 import { userIdsOnBreak } from "./breaks";
 import { scheduledTodayFilter } from "./scheduled-days";
@@ -135,7 +135,13 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     where: { id: eventId },
     include: {
       user: {
-        include: { notificationPreference: true },
+        include: {
+          notificationPreference: true,
+          // Firma plătitoare (B2B) — poarta de mai jos se uita doar la abonamentul
+          // individual, deci fără asta treapta WhatsApp era sărită pentru fiecare om
+          // înscris de un client instituțional.
+          organization: { select: { meteredIncluded: true } },
+        },
       },
     },
   });
@@ -209,7 +215,11 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     }
   }
 
-  // WhatsApp is PREMIUM-ONLY for a free (non-trialing) student. Since users can now
+  // WhatsApp is PREMIUM-ONLY for a free (non-trialing) student — dar „plătit" include
+  // și omul a cărui FIRMĂ are canalele contorizate incluse (B2B, factură separată).
+  // Poarta asta e ÎNAINTEA lui `sendNotification`, deci ea decide de fapt dacă
+  // WhatsApp pleacă; o reparație doar în `meteredChannelBlocked` n-ar fi făcut nimic.
+  // Since users can now
   // reorder their cascade, WhatsApp is no longer guaranteed to be the last rung — so
   // skip it and continue down the ladder instead of ending the chain here. In the
   // default order WhatsApp IS last, so skipping finds no next rung and the chain
@@ -219,7 +229,7 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     (event.metadata as Record<string, unknown> | null)?.parentAuthorized === true;
   if (
     event.channel === "WHATSAPP" &&
-    !isPaidSubscriber(event.user) &&
+    !meteredChannelsCovered(event.user) &&
     !event.isTest &&
     !parentAuthorized
   ) {

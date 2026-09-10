@@ -28,7 +28,7 @@ describe("sanitizeEscalationSteps", () => {
       { channel: "push", delayMinutes: 0 },
       { channel: "EMAIL", delayMinutes: 30 },
       { channel: "email", delayMinutes: 99 }, // dupe → dropped
-      { channel: "SMS", delayMinutes: 5 }, // not cascade-orderable → dropped
+      { channel: "CALL", delayMinutes: 5 }, // not cascade-orderable → dropped
     ]);
     expect(out).toEqual([
       { channel: "PUSH", delayMinutes: 0 },
@@ -104,12 +104,14 @@ describe("resolveUserLadder", () => {
       "PUSH",
       "TELEGRAM",
       "WHATSAPP",
+      "SMS",
     ]);
     expect(resolveUserLadder({ escalationSteps: [] }).map((l) => l.channel)).toEqual([
       "PUSH",
       "TELEGRAM",
       "EMAIL",
       "WHATSAPP",
+      "SMS",
     ]);
   });
 });

@@ -60,3 +60,32 @@ describe("meteredChannelBlocked — send-path plan gate", () => {
     }
   });
 });
+
+describe("meteredChannelBlocked — poarta B2B (firma plătește prin factură separată)", () => {
+  // Cazul real care a motivat ramura: TOȚI cursanții Poștei au `subscriptionStatus`
+  // gol — nu-și cumpără abonament, îi înscrie angajatorul. Fără asta, cele două
+  // canale plătite din cascada promisă în pagina de prezentare nu plecau niciodată.
+  const b2b = { ...free, organization: { meteredIncluded: true } };
+
+  it("lasă WhatsApp și SMS să treacă fără abonament individual", () => {
+    expect(meteredChannelBlocked(ch("WHATSAPP"), {}, b2b)).toBe(false);
+    expect(meteredChannelBlocked(ch("SMS"), {}, b2b)).toBe(false);
+  });
+
+  it("o firmă FĂRĂ canale incluse nu schimbă nimic", () => {
+    const org = { ...free, organization: { meteredIncluded: false } };
+    expect(meteredChannelBlocked(ch("WHATSAPP"), {}, org)).toBe(true);
+    expect(meteredChannelBlocked(ch("SMS"), {}, org)).toBe(true);
+  });
+
+  it("firma acoperă canalele și când abonamentul individual a expirat", () => {
+    expect(
+      meteredChannelBlocked(ch("WHATSAPP"), {}, { ...expired, organization: { meteredIncluded: true } }),
+    ).toBe(false);
+  });
+
+  it("un om fără firmă rămâne exact pe regula veche", () => {
+    expect(meteredChannelBlocked(ch("WHATSAPP"), {}, { ...free, organization: null })).toBe(true);
+    expect(meteredChannelBlocked(ch("WHATSAPP"), {}, { ...paidActive, organization: null })).toBe(false);
+  });
+});

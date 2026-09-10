@@ -4,6 +4,7 @@ import {
   isPaidSubscriber,
   isPaidChannelDeliverable,
   resolveCascadeWindow,
+  meteredChannelsCovered,
 } from "@/lib/escalation/segmentation";
 import { ESCALATION_LEVELS, CASCADE_GRACE_MINUTES } from "@/lib/escalation/config";
 
@@ -72,6 +73,7 @@ describe("Escalation segmentation", () => {
         "push",
         "email",
         "whatsapp",
+        "sms",
       ]);
     });
     it("graceMsFor resolves fast morning, slow evening", () => {
@@ -81,5 +83,38 @@ describe("Escalation segmentation", () => {
       expect(g("missed_session")).toBe(CASCADE_GRACE_MINUTES.default * 60_000);
       expect(g("morning_quiz")).toBeLessThan(g("evening_complex"));
     });
+  });
+});
+
+describe("meteredChannelsCovered — cine plătește canalele contorizate", () => {
+  const free = { subscriptionStatus: null, subscriptionEndsAt: null };
+
+  it("firma cu canale incluse acoperă un om fără abonament (cazul Poșta)", () => {
+    expect(meteredChannelsCovered({ ...free, organization: { meteredIncluded: true } })).toBe(true);
+  });
+
+  it("firma fără canale incluse nu acoperă pe nimeni", () => {
+    expect(meteredChannelsCovered({ ...free, organization: { meteredIncluded: false } })).toBe(false);
+  });
+
+  it("fără firmă, răspunde exact ca abonamentul individual", () => {
+    expect(meteredChannelsCovered(free)).toBe(false);
+    expect(meteredChannelsCovered({ subscriptionStatus: "active", subscriptionEndsAt: null })).toBe(true);
+    expect(
+      meteredChannelsCovered({
+        subscriptionStatus: "active",
+        subscriptionEndsAt: new Date(Date.now() - 86_400_000),
+      }),
+    ).toBe(false);
+  });
+
+  it("firma acoperă și peste un abonament expirat", () => {
+    expect(
+      meteredChannelsCovered({
+        subscriptionStatus: "active",
+        subscriptionEndsAt: new Date(Date.now() - 86_400_000),
+        organization: { meteredIncluded: true },
+      }),
+    ).toBe(true);
   });
 });

@@ -17,6 +17,13 @@ export const ESCALATION_LEVELS: EscalationLevel[] = [
   { level: 2, channel: "TELEGRAM", delayMinutes: 10, templateId: "reminder_telegram" },
   { level: 3, channel: "EMAIL", delayMinutes: 10, templateId: "reminder_email" },
   { level: 4, channel: "WHATSAPP", delayMinutes: 10, templateId: "reminder_whatsapp" },
+  // SMS, ultima treaptă: e canalul care ajunge la om și fără internet, dar și singurul
+  // care costă bani de fiecare dată. De-aia stă la capăt și de-aia are `maxPerDay`.
+  //
+  // Plafonul NU e decorativ: motorul îl citește de aici (`ESCALATION_LEVELS.find` pe
+  // canal), iar până acum SMS nu era în listă deloc — deci `find` întorcea `undefined`
+  // și plafonul nu se aplica niciodată. Adăugat fără el, canalul ar fi fost nemărginit.
+  { level: 5, channel: "SMS", delayMinutes: 10, templateId: "reminder_sms", maxPerDay: 1 },
 ];
 
 // Per-time-window grace (minutes) between cascade steps. Morning = short window
@@ -130,17 +137,22 @@ export const ESCALATION_PRESETS: Record<"BLAND" | "STANDARD" | "INSISTENT", Esca
     { channel: "PUSH", delayMinutes: 0 },
     { channel: "EMAIL", delayMinutes: 30 },
   ],
+  // STANDARD și INSISTENT merg până la capătul cascadei, deci includ și SMS. BLÂND
+  // rămâne fără el dinadins: e treapta care costă bani de fiecare dată, iar un ritm
+  // numit „blând" care ajunge la SMS ar minți.
   STANDARD: [
     { channel: "PUSH", delayMinutes: 0 },
     { channel: "TELEGRAM", delayMinutes: 10 },
     { channel: "EMAIL", delayMinutes: 10 },
     { channel: "WHATSAPP", delayMinutes: 10 },
+    { channel: "SMS", delayMinutes: 10 },
   ],
   INSISTENT: [
     { channel: "PUSH", delayMinutes: 0 },
     { channel: "TELEGRAM", delayMinutes: 5 },
     { channel: "WHATSAPP", delayMinutes: 5 },
     { channel: "EMAIL", delayMinutes: 5 },
+    { channel: "SMS", delayMinutes: 5 },
   ],
 };
 

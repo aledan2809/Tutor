@@ -32,6 +32,25 @@ export function isPaidSubscriber(u: {
 }
 
 /**
+ * Canalele contorizate (WhatsApp, SMS) sunt acoperite pentru omul ăsta — fie prin
+ * abonamentul lui individual, fie prin firma care îl înscrie și primește factură
+ * separată (B2B).
+ *
+ * Există ca predicat SEPARAT, nu ca ramură în `isPaidSubscriber`, fiindcă acela
+ * răspunde la altceva: „are abonament plătit". Un cursant al Poștei NU are, și n-o
+ * să aibă — dar canalele lui sunt plătite. Confundarea celor două întrebări e chiar
+ * bug-ul pe care îl repară: poarta de trimitere se uita doar la abonamentul individual.
+ */
+export function meteredChannelsCovered(u: {
+  subscriptionStatus: string | null;
+  subscriptionEndsAt: Date | null;
+  organization?: { meteredIncluded: boolean } | null;
+}): boolean {
+  if (u.organization?.meteredIncluded === true) return true;
+  return isPaidSubscriber(u);
+}
+
+/**
  * Whether a channel can actually deliver right now. Telegram needs a linked +
  * enabled chat; WhatsApp needs config; SMS needs its gateway. PUSH/EMAIL are
  * always deliverable (in-app / SMTP best-effort). The engine skips a rung that

@@ -130,6 +130,10 @@ const SECTIUNI: Sectiune[] = [
     campuri: [
       { cheie: "scorTitlu", eticheta: "Titlu" },
       { cheie: "scorLead", eticheta: "Raționamentul", lung: true },
+      { cheie: "scorCapCaz", eticheta: "Capul coloanei — cazurile" },
+      { cheie: "scorCapCalcul", eticheta: "Capul coloanei — calculul" },
+      { cheie: "scorCapPuncte", eticheta: "Capul coloanei — punctele" },
+      { cheie: "scorCapRaport", eticheta: "Capul coloanei — raportul" },
       {
         cheie: "scorLegenda",
         eticheta: "Legenda punctajului",
@@ -145,7 +149,7 @@ const SECTIUNI: Sectiune[] = [
           { cheie: "caz", eticheta: "Cazul" },
           { cheie: "calcul", eticheta: "Cum se calculează" },
           { cheie: "puncte", eticheta: "Puncte" },
-          { cheie: "raport", eticheta: "Ce vede conducerea" },
+          { cheie: "raport", eticheta: "Ce vede managementul" },
         ],
       },
       { cheie: "scorConcluzie", eticheta: "Concluzia", lung: true },
@@ -182,7 +186,7 @@ const SECTIUNI: Sectiune[] = [
         pastreaza: ["module"],
       },
       { cheie: "tabloLegenda", eticheta: "Explicația de sub tablou", lung: true },
-      { cheie: "tabloConducere", eticheta: "Ce vede conducerea", subcampuri: null },
+      { cheie: "tabloConducere", eticheta: "Ce vede managementul", subcampuri: null },
     ],
   },
   {

@@ -64,3 +64,47 @@ describe("clampChannelWrite", () => {
     expect(r.blocked).toEqual([]);
   });
 });
+
+describe("B2B — firma plătește prin factură separată", () => {
+  it("o firmă cu canale incluse deschide WhatsApp și SMS fără abonament individual", () => {
+    // Cazul real: cursanții Poștei au `subscriptionStatus` gol — sunt înscriși de
+    // angajator, care primește factură separată. Fără ramura asta, un client care
+    // PLĂTEȘTE n-ar fi primit canalele plătite.
+    expect(allowedChannels(null, true)).toEqual(["push", "email", "whatsapp", "sms"]);
+    expect(allowedChannels(undefined, true)).toContain("whatsapp");
+  });
+
+  it("fără firmă, poarta rămâne exact ca înainte", () => {
+    expect(allowedChannels(null, false)).toEqual(["push", "email"]);
+    expect(allowedChannels(null)).toEqual(["push", "email"]);
+    expect(allowedChannels("active")).toEqual(["push", "email", "whatsapp", "sms"]);
+  });
+
+  it("doar `true` deschide — nu orice valoare adevărată", () => {
+    expect(allowedChannels(null, null)).toEqual(["push", "email"]);
+  });
+});
+
+describe("clampChannelWrite — firma cu canale incluse", () => {
+  // Bug prins la /review: deschisesem doar poarta de TRIMITERE. Scrierea preferinței
+  // forța în continuare whatsapp/sms pe `false`, deci cursantul Poștei nu putea nici
+  // măcar să bifeze canalul — poarta ar fi rămas deschisă spre o preferință stinsă.
+  it("nu mai stinge whatsapp/sms pentru un om fără abonament, dar cu firmă plătitoare", () => {
+    const { applied, blocked } = clampChannelWrite(
+      { push: true, email: true, whatsapp: true, sms: true },
+      null,
+      true,
+    );
+    expect(applied).toEqual({ push: true, email: true, whatsapp: true, sms: true });
+    expect(blocked).toEqual([]);
+  });
+
+  it("fără firmă plătitoare, clamp-ul rămâne exact ca înainte", () => {
+    const { applied, blocked } = clampChannelWrite(
+      { push: true, email: true, whatsapp: true, sms: true },
+      null,
+    );
+    expect(applied).toEqual({ push: true, email: true, whatsapp: false, sms: false });
+    expect(blocked).toEqual(["whatsapp", "sms"]);
+  });
+});

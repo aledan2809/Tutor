@@ -29,7 +29,7 @@ async function readState(childId: string) {
   const [setting, prefs, child] = await Promise.all([
     prisma.setting.findUnique({ where: { userId_key: { userId: childId, key: "notifDelegation" } } }),
     prisma.notificationPreference.findUnique({ where: { userId: childId } }),
-    prisma.user.findUnique({ where: { id: childId }, select: { subscriptionStatus: true } }),
+    prisma.user.findUnique({ where: { id: childId }, select: { subscriptionStatus: true, organization: { select: { meteredIncluded: true } } } }),
   ]);
   const managedByParent = (setting?.value as { managedByParent?: boolean } | undefined)?.managedByParent === true;
   return {
@@ -42,7 +42,7 @@ async function readState(childId: string) {
     },
     channelOrder: prefs?.channelOrder ?? [],
     escalationSteps: (prefs?.escalationSteps as unknown) ?? null,
-    allowedChannels: allowedChannels(child?.subscriptionStatus),
+    allowedChannels: allowedChannels(child?.subscriptionStatus, child?.organization?.meteredIncluded),
   };
 }
 
@@ -83,10 +83,11 @@ async function _PUT(req: NextRequest, ctx: { params: Promise<{ childId: string }
 
   // Clamp the child's channels to the child's plan (a parent can't enable a metered
   // channel the child's package doesn't include).
-  const child = await prisma.user.findUnique({ where: { id: childId }, select: { subscriptionStatus: true } });
+  const child = await prisma.user.findUnique({ where: { id: childId }, select: { subscriptionStatus: true, organization: { select: { meteredIncluded: true } } } });
   const { applied } = clampChannelWrite(
     { push: body.push, email: body.email, whatsapp: body.whatsapp, sms: body.sms },
     child?.subscriptionStatus,
+    child?.organization?.meteredIncluded,
   );
   const cleanOrder = sanitizeChannelOrder(body.channelOrder);
   const prefUpdate: Record<string, unknown> = { ...applied };

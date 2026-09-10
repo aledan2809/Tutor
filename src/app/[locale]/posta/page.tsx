@@ -96,6 +96,14 @@ function logoExistent(caleaPublica: string): string | null {
  * vreodată editabile din admin, ele NU au voie să treacă pe calea asta.
  */
 const PRINT_CSS = `
+/*
+  Pe ECRAN foaia tipărită nu există: tabelul curge ca blocuri obișnuite, iar antetul și
+  subsolul de tipar stau ascunse. Regulile astea sunt ÎN AFARA lui @media print dinadins.
+*/
+.posta-foi, .posta-foi > thead, .posta-foi > tfoot, .posta-foi > tbody,
+.posta-foi > * > tr, .posta-foi > * > tr > td { display: block; }
+.posta-print-header-in, .posta-print-footer-in { display: none; }
+
 @media print {
   /* Banner de cookie-uri, CTA WhatsApp, bara mobilă — plutesc peste conținut. */
   .fixed { display: none !important; }
@@ -221,69 +229,37 @@ const PRINT_CSS = `
   @page { margin: 14mm; }
 
   /*
-    Datele firmei pe FIECARE pagină, nu doar pe ultima: paginile unui document
-    se despart — se tipăresc, se scanează, se trimit una singură mai departe.
-    \`position: fixed\` e mecanismul prin care motorul de tipărire repetă un
-    element pe toate paginile. Regulile stau la final ca să bată \`[data-posta] *\`
-    la specificitate egală.
+    Comutarea foii. Regulile de dinainte au fost ȘTERSE, nu comentate: \`position: fixed\`
+    repeta dar acoperea primul rând, iar grupul de tabel pe un \`div\` nu repeta deloc —
+    și, rămase amândouă, subsolul se repeta din motivul greșit.
   */
-  .posta-print-footer {
-    display: block !important;
-    position: fixed !important;
-    bottom: 0; left: 0; right: 0;
-    border-top: 1px solid #d1d5db !important;
-    padding-top: 5px;
-    font-size: 8.5pt;
-    line-height: 1.35;
-  }
-  /*
-    Antetul repetat. Regulile stau lângă cele de subsol și din același motiv: la
-    specificitate egală cu \`[data-posta] *\`, dar mai jos în fișier, deci câștigă.
-
-    Antetul de ecran se ascunde ca să nu iasă de două ori pe prima pagină. Marginea de
-    sus din \`@page\` a crescut de la 14 la 20 mm ca textul să nu treacă pe sub el.
-  */
-  [data-posta] .posta-ecran-header { display: none !important; }
-  /*
-    Antet și subsol repetate pe FIECARE pagină, prin GRUPURI DE TABEL.
-    Un grup de antet de tabel e singurul lucru din CSS care se repetă pe fiecare foaie
-    ȘI lasă textul să curgă dedesubt.
-
-    Prima variantă folosea \`position: fixed\`, ca subsolul. Măsurat pe PDF: elementul fix
-    se așază față de caseta de CONȚINUT, deci stă exact peste primul rând al fiecărei
-    pagini — se vedea rama unui card tăiată de linia antetului. Mărirea marginii din
-    \`@page\` nu ajută: coboară și antetul, și textul, împreună (probat la 20, 24 și 30 mm,
-    aceeași suprapunere). Iar un \`top\` negativ nu-l scoate în margine, ci îl aruncă la
-    baza foii, peste subsol (probat la -9 mm și -13 mm).
-
-    Nu e nevoie de niciun tabel în marcaj: pe hârtie, \`[data-posta]\` devine tabel, iar
-    \`<main>\` grupul de rânduri. Pe ecran nimic nu se schimbă — regulile trăiesc doar în
-    \`@media print\`.
-  */
-  [data-posta] { display: table !important; width: 100% !important; }
-  [data-posta] > main { display: table-row-group !important; }
-
-  .posta-print-header { display: table-header-group !important; }
-  .posta-print-footer { display: table-footer-group !important; }
+  .posta-foi { display: table !important; width: 100% !important; }
+  .posta-foi > thead { display: table-header-group !important; }
+  .posta-foi > tfoot { display: table-footer-group !important; }
+  .posta-foi > tbody { display: table-row-group !important; }
+  .posta-foi > * > tr { display: table-row !important; }
+  .posta-foi > * > tr > td { display: table-cell !important; padding: 0 !important; border: 0 !important; }
 
   .posta-print-header-in {
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex !important;
+    align-items: center; justify-content: space-between;
     border-bottom: 1px solid #d1d5db !important;
-    padding-bottom: 5px; margin-bottom: 10px;
+    padding-bottom: 5px; margin-bottom: 12px;
   }
-  .posta-print-marca {
-    font-size: 11pt; font-weight: 700; letter-spacing: -.01em;
-    color: #111827 !important;
-  }
-  .posta-print-header-logo { height: 24px; width: auto; }
+  .posta-print-marca { font-size: 11pt; font-weight: 700; color: #111827 !important; }
+  .posta-print-header-logo { height: 22px; width: auto; }
 
   .posta-print-footer-in {
+    display: block !important;
     border-top: 1px solid #d1d5db !important;
-    padding-top: 5px; margin-top: 10px;
+    padding-top: 5px; margin-top: 12px;
     font-size: 8.5pt; line-height: 1.35;
   }
-  .posta-print-footer, .posta-print-footer * { color: #4b5563 !important; }
-  .posta-print-footer strong { color: #1f2937 !important; }
+  .posta-print-footer-in, .posta-print-footer-in * { color: #4b5563 !important; }
+  .posta-print-footer-in strong { color: #1f2937 !important; }
+  .posta-print-logo { height: 13px; width: auto; vertical-align: -2px; margin: 0 7px; display: inline-block; }
+  .posta-print-client { float: right; }
+  .posta-print-client-logo { height: 15px; width: auto; }
 
   /* Marca clientului, la capătul din dreapta al subsolului repetat. */
   .posta-print-client { float: right; }
@@ -315,38 +291,6 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
         „Autentificare" a coborât la finalul paginii: aici concura cu logo-ul clientului
         și oricum nu e pentru decident.
       */}
-      {/*
-        Antetul, repetat pe FIECARE pagină tipărită — cerut de user după ce a văzut că
-        vechea randare punea doar subsolul pe toate foile. Aceeași unealtă ca la subsol:
-        un element `position: fixed`, singurul mecanism prin care motorul de tipărire
-        repetă ceva pe toate paginile.
-
-        Motivul e același ca la subsol: paginile unui document se despart pe drum. O foaie
-        ruptă din teanc trebuie să spună cine vorbește și cui i se adresează — altfel e o
-        pagină anonimă.
-      */}
-      <div className="posta-print-header hidden">
-        <div className="posta-print-header-in">
-        <span className="posta-print-marca">eTUTOR.ro</span>
-        {logoPosta ? (
-          /* eslint-disable-next-line @next/next/no-img-element -- fișier statuar din public/ */
-          <img src={logoPosta} alt="Poșta Română" className="logo-posta posta-print-header-logo" />
-        ) : (
-          <span className="posta-print-marca">Poșta Română</span>
-        )}
-        </div>
-      </div>
-
-      {/*
-        `sticky top-0`: cerut de user — logo-urile rămân sus la derulare. Contează pe
-        pagina asta mai mult decât pe altele: e un document de vânzare lung, iar cele
-        două mărci alăturate sunt chiar mesajul „asta e pentru voi", care altfel dispare
-        după primul ecran.
-
-        `z-50` ca să treacă peste cardurile cu umbră; fundalul semi-transparent și
-        `backdrop-blur` erau deja acolo, deci textul care trece pe dedesubt nu se
-        amestecă cu logo-urile. La tipar antetul e oricum ascuns (`posta-ecran-header`).
-      */}
       <header className="posta-ecran-header sticky top-0 z-50 border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
           <Link href="/" aria-label="eTUTOR.ro" className="inline-flex min-h-[44px] items-center">
@@ -361,6 +305,80 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
         </div>
       </header>
 
+      {/*
+        Foaia tipărită, ca TABEL REAL.
+
+        Antetul cu cele două mărci trebuie să apară pe FIECARE pagină a PDF-ului. Am probat
+        pe un fișier minimal ce repetă motorul de tipărire:
+          · position: fixed              — repetă, DAR se așază peste primul rând al paginii
+          · display: table-header-group pe un div — NU repetă deloc
+          · thead al unui TABEL REAL     — repetă ȘI lasă textul să curgă dedesubt
+        Doar a treia face amândouă lucrurile.
+
+        Pe ecran tabelul e făcut display:block, deci așezarea nu se schimbă cu nimic;
+        redevine tabel doar la tipar. role="presentation" îl scoate din arborele de
+        accesibilitate — e unealtă de paginare, nu date tabelare.
+      */}
+      <table className="posta-foi" role="presentation">
+        <thead>
+          <tr>
+            <td>
+              <div className="posta-print-header-in">
+        <span className="posta-print-marca">eTUTOR.ro</span>
+        {logoPosta ? (
+          /* eslint-disable-next-line @next/next/no-img-element -- fișier statuar din public/ */
+          <img src={logoPosta} alt="Poșta Română" className="logo-posta posta-print-header-logo" />
+        ) : (
+          <span className="posta-print-marca">Poșta Română</span>
+        )}
+        </div>
+            </td>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <td>
+              <div className="posta-print-footer-in">
+        {/*
+          Marca CLIENTULUI în subsolul repetat.
+
+          Userul a cerut antetul pe fiecare pagină. Nu se poate: motorul de tipărire nu
+          repetă un antet deasupra unui text care curge — probat cu `position: fixed`
+          (se așază peste primul rând al fiecărei pagini, iar mărirea marginii coboară și
+          antetul, și textul, la fel), cu `top` negativ (îl aruncă la baza foii, peste
+          subsol) și cu grup de antet de tabel (apare o singură dată, nu se repetă).
+          Subsolul, în schimb, se repetă corect ca grup de subsol de tabel.
+
+          Deci scopul — nicio pagină anonimă, o foaie ruptă din teanc să spună cine
+          vorbește ȘI cui — se atinge în subsol: firma noastră în stânga, marca lor în
+          dreapta, pe fiecare foaie. Antetul mare rămâne pe prima pagină.
+        */}
+        <span className="posta-print-client">
+          {logoPosta ? (
+            /* eslint-disable-next-line @next/next/no-img-element -- fișier statuar din public/ */
+            <img src={logoPosta} alt="Poșta Română" className="logo-posta posta-print-client-logo" />
+          ) : (
+            "Poșta Română"
+          )}
+        </span>
+        <strong>{FURNIZOR}</strong>
+        {" · "}
+        {CONSORTIU}
+        {logoKnowHow ? (
+          /* eslint-disable-next-line @next/next/no-img-element -- fișier statuar din public/ */
+          <img src={logoKnowHow} alt="" className="posta-print-logo" />
+        ) : null}
+        {" · "}
+        {CONTACT_MAIL}
+        {" · "}
+        {CONTACT_TEL_AFISAT}
+        </div>
+            </td>
+          </tr>
+        </tfoot>
+        <tbody>
+          <tr>
+            <td>
       <main className="mx-auto max-w-5xl px-4 py-14">
         <div className="max-w-3xl">
           <span className="inline-block rounded-full bg-amber-500/15 px-3 py-1 text-sm font-medium text-amber-300">
@@ -508,10 +526,10 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
             <table className="tablou w-full min-w-[42rem] border-collapse text-sm">
               <thead>
                 <tr className="bg-gray-900 text-left text-xs uppercase tracking-wide text-gray-500">
-                  <th className="px-3 py-2.5 font-semibold">{c.scorCazuriCap.caz}</th>
-                  <th className="px-3 py-2.5 font-semibold">{c.scorCazuriCap.calcul}</th>
-                  <th className="px-3 py-2.5 text-right font-semibold">{c.scorCazuriCap.puncte}</th>
-                  <th className="px-3 py-2.5 font-semibold">{c.scorCazuriCap.raport}</th>
+                  <th className="px-3 py-2.5 font-semibold">{c.scorCapCaz}</th>
+                  <th className="px-3 py-2.5 font-semibold">{c.scorCapCalcul}</th>
+                  <th className="px-3 py-2.5 text-right font-semibold">{c.scorCapPuncte}</th>
+                  <th className="px-3 py-2.5 font-semibold">{c.scorCapRaport}</th>
                 </tr>
               </thead>
               <tbody>
@@ -734,6 +752,10 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
         </section>
 
       </main>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
       {/*
         Subsolul paginii. NU e un `<footer>`: eticheta aia e ascunsă la tipar de regula
@@ -768,49 +790,6 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
         </div>
       </div>
 
-      {/*
-        Doar în PDF, repetat pe fiecare pagină (vezi `.posta-print-footer` din PRINT_CSS).
-        Cine primește documentul îl dă mai departe la juridic și achiziții, iar paginile
-        se despart pe drum — o singură foaie ruptă din teanc trebuie să spună tot cine e
-        furnizorul și pe cine sună.
-      */}
-      <div className="posta-print-footer hidden">
-        <div className="posta-print-footer-in">
-        {/*
-          Marca CLIENTULUI în subsolul repetat.
-
-          Userul a cerut antetul pe fiecare pagină. Nu se poate: motorul de tipărire nu
-          repetă un antet deasupra unui text care curge — probat cu `position: fixed`
-          (se așază peste primul rând al fiecărei pagini, iar mărirea marginii coboară și
-          antetul, și textul, la fel), cu `top` negativ (îl aruncă la baza foii, peste
-          subsol) și cu grup de antet de tabel (apare o singură dată, nu se repetă).
-          Subsolul, în schimb, se repetă corect ca grup de subsol de tabel.
-
-          Deci scopul — nicio pagină anonimă, o foaie ruptă din teanc să spună cine
-          vorbește ȘI cui — se atinge în subsol: firma noastră în stânga, marca lor în
-          dreapta, pe fiecare foaie. Antetul mare rămâne pe prima pagină.
-        */}
-        <span className="posta-print-client">
-          {logoPosta ? (
-            /* eslint-disable-next-line @next/next/no-img-element -- fișier statuar din public/ */
-            <img src={logoPosta} alt="Poșta Română" className="logo-posta posta-print-client-logo" />
-          ) : (
-            "Poșta Română"
-          )}
-        </span>
-        <strong>{FURNIZOR}</strong>
-        {" · "}
-        {CONSORTIU}
-        {logoKnowHow ? (
-          /* eslint-disable-next-line @next/next/no-img-element -- fișier statuar din public/ */
-          <img src={logoKnowHow} alt="" className="posta-print-logo" />
-        ) : null}
-        {" · "}
-        {CONTACT_MAIL}
-        {" · "}
-        {CONTACT_TEL_AFISAT}
-        </div>
-      </div>
     </div>
   );
 }

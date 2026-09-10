@@ -320,6 +320,14 @@ model Organization {
   domains Domain[]
   /// The accounts that belong to this merchant.
   members User[]
+
+  /// Canalele contorizate (WhatsApp, SMS) sunt incluse pentru oamenii acestei firme.
+  ///
+  /// Poarta de plată se uita DOAR la `User.subscriptionStatus`, adică la un abonament
+  /// individual de consumator. Un client B2B nu are așa ceva: își înscrie oamenii și
+  /// primește o factură separată. Măsurat pe cursanții Poștei — toți cu abonament gol,
+  /// deci WhatsApp-ul promis în pagina de prezentare nu le-ar fi plecat NICIODATĂ.
+  meteredIncluded Boolean @default(false)
 }
 
 /// Who may reach a domain's content.

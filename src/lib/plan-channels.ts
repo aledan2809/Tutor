@@ -18,12 +18,21 @@ export function isPaidStatus(subscriptionStatus: string | null | undefined): boo
 }
 
 /** The channels a user/child may use, given their subscription status. */
-export function allowedChannels(subscriptionStatus: string | null | undefined): NotifChannel[] {
+export function allowedChannels(
+  subscriptionStatus: string | null | undefined,
+  /** Firma din care face parte omul are canalele contorizate incluse (B2B, factură separată). */
+  orgMeteredIncluded?: boolean | null,
+): NotifChannel[] {
+  if (orgMeteredIncluded === true) return [...ALL_CHANNELS];
   return isPaidStatus(subscriptionStatus) ? [...ALL_CHANNELS] : [...FREE_CHANNELS];
 }
 
-export function isChannelAllowed(channel: NotifChannel, subscriptionStatus: string | null | undefined): boolean {
-  return allowedChannels(subscriptionStatus).includes(channel);
+export function isChannelAllowed(
+  channel: NotifChannel,
+  subscriptionStatus: string | null | undefined,
+  orgMeteredIncluded?: boolean | null,
+): boolean {
+  return allowedChannels(subscriptionStatus, orgMeteredIncluded).includes(channel);
 }
 
 /**
@@ -35,8 +44,10 @@ export function isChannelAllowed(channel: NotifChannel, subscriptionStatus: stri
 export function clampChannelWrite(
   requested: Partial<Record<NotifChannel, boolean>>,
   subscriptionStatus: string | null | undefined,
+  /** Firma din care face parte omul are canalele contorizate incluse (B2B). */
+  orgMeteredIncluded?: boolean | null,
 ): { applied: Partial<Record<NotifChannel, boolean>>; blocked: NotifChannel[] } {
-  const allowed = new Set(allowedChannels(subscriptionStatus));
+  const allowed = new Set(allowedChannels(subscriptionStatus, orgMeteredIncluded));
   const applied: Partial<Record<NotifChannel, boolean>> = {};
   const blocked: NotifChannel[] = [];
   for (const ch of ALL_CHANNELS) {

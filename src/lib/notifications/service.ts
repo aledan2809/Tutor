@@ -15,7 +15,7 @@ import type { EscalationChannel } from "@prisma/client";
 import { getTelegramClient } from "@/lib/telegram/connect";
 import { buildTelegramButtonUrl } from "@/lib/escalation/tap-link";
 import { sendAppEmail } from "@/lib/email";
-import { isPaidSubscriber } from "@/lib/escalation/segmentation";
+import { meteredChannelsCovered } from "@/lib/escalation/segmentation";
 
 interface NotificationPayload {
   userId: string;
@@ -34,11 +34,19 @@ interface NotificationPayload {
 export function meteredChannelBlocked(
   channel: EscalationChannel,
   metadata: Record<string, unknown>,
-  user: { subscriptionStatus: string | null; subscriptionEndsAt: Date | null } | null,
+  user:
+    | {
+        subscriptionStatus: string | null;
+        subscriptionEndsAt: Date | null;
+        /** Firma din care face parte are canalele contorizate incluse (B2B, factură separată). */
+        organization?: { meteredIncluded: boolean } | null;
+      }
+    | null,
 ): boolean {
   if (channel !== "WHATSAPP" && channel !== "SMS") return false;
   if (metadata?.isTest === true || metadata?.parentAuthorized === true) return false;
-  return !user || !isPaidSubscriber(user);
+  if (!user) return true;
+  return !meteredChannelsCovered(user);
 }
 
 /**
@@ -55,7 +63,7 @@ export async function sendNotification(
     // subscription, a parent nudge, an ad-hoc send) can leak a paid channel to a
     // free account. Honors the same exemptions the engine applies — test
     // accounts (journey-audit) and parent-authorized cascades — via metadata
-    // flags the callers pass through. Uses isPaidSubscriber (status + expiry) so
+    // flags the callers pass through. Uses meteredChannelsCovered (abonament sau firmă) so
     // a subscription that lapsed since the event was queued is caught live.
     if (payload.channel === "WHATSAPP" || payload.channel === "SMS") {
       const exempt =
@@ -66,7 +74,11 @@ export async function sendNotification(
         ? null
         : await prisma.user.findUnique({
             where: { id: payload.userId },
-            select: { subscriptionStatus: true, subscriptionEndsAt: true },
+            select: {
+              subscriptionStatus: true,
+              subscriptionEndsAt: true,
+              organization: { select: { meteredIncluded: true } },
+            },
           });
       if (meteredChannelBlocked(payload.channel, payload.metadata, user)) {
         console.warn(

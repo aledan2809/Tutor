@@ -27,10 +27,10 @@ async function _GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { subscriptionStatus: true },
+    select: { subscriptionStatus: true, organization: { select: { meteredIncluded: true } } },
   });
 
-  return NextResponse.json({ ...prefs, allowedChannels: allowedChannels(user?.subscriptionStatus) });
+  return NextResponse.json({ ...prefs, allowedChannels: allowedChannels(user?.subscriptionStatus, user?.organization?.meteredIncluded) });
 }
 
 /**
@@ -57,9 +57,13 @@ async function _PUT(req: NextRequest) {
   // WhatsApp/SMS via a direct call — only disable them).
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { subscriptionStatus: true },
+    select: { subscriptionStatus: true, organization: { select: { meteredIncluded: true } } },
   });
-  const { applied } = clampChannelWrite({ push, email, whatsapp, sms }, user?.subscriptionStatus);
+  const { applied } = clampChannelWrite(
+    { push, email, whatsapp, sms },
+    user?.subscriptionStatus,
+    user?.organization?.meteredIncluded,
+  );
 
   const data: Record<string, unknown> = { ...applied };
   // Telegram is free, so it takes no plan clamp — same shape as `call`.
@@ -89,7 +93,7 @@ async function _PUT(req: NextRequest) {
     create: { userId: session.user.id, ...data },
   });
 
-  return NextResponse.json({ ...prefs, allowedChannels: allowedChannels(user?.subscriptionStatus) });
+  return NextResponse.json({ ...prefs, allowedChannels: allowedChannels(user?.subscriptionStatus, user?.organization?.meteredIncluded) });
 }
 
 export const GET = withErrorHandler(_GET);

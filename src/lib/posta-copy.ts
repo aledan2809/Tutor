@@ -84,7 +84,16 @@ export type Copy = {
   scorLead: string;
   /** Legenda punctajului: cât valorează fiecare situație și de ce. */
   scorLegenda: { valoare: string; cand: string }[];
-  scorCazuriCap: { caz: string; calcul: string; puncte: string; raport: string };
+  /*
+   * Capul de tabel, aplatizat în patru texte simple. A fost o clipă un obiect — dar
+   * formularul de admin desenează fie text, fie listă repetabilă, și ar fi făcut `.map`
+   * pe el, adică ar fi aruncat la randare. Patru șiruri se editează la fel de bine și nu
+   * cer formularului să învețe un al treilea fel de câmp.
+   */
+  scorCapCaz: string;
+  scorCapCalcul: string;
+  scorCapPuncte: string;
+  scorCapRaport: string;
   scorCazuri: { caz: string; calcul: string; puncte: string; raport: string }[];
   scorConcluzie: string;
   scorNota: string;
@@ -295,7 +304,10 @@ export const RO: Copy = {
     { valoare: "7", cand: "a greșit, s-a întors și a corectat. Sub 10 dinadins: a ști din prima rămâne mai bun, altfel greșeala ar deveni strategie" },
     { valoare: "3 · 2 · 1", cand: "exersarea a ceva deja știut, descrescător, cel mult de trei ori pe zi la aceeași întrebare. Exersarea rămâne gratuită, dar nu se poate măcina un clasament din ea" },
   ],
-  scorCazuriCap: { caz: "Pe un modul de patru întrebări", calcul: "Cum se calculează", puncte: "Puncte", raport: "Ce vede conducerea" },
+  scorCapCaz: "Pe un modul de patru întrebări",
+  scorCapCalcul: "Cum se calculează",
+  scorCapPuncte: "Puncte",
+  scorCapRaport: "Ce vede managementul",
   scorCazuri: [
     { caz: "Știe din prima", calcul: "4 × 10", puncte: "40", raport: "Știe 4/4 · din prima 4/4" },
     { caz: "Greșește 2, apoi le învață", calcul: "2 × 10 + 2 × 7", puncte: "34", raport: "Știe 4/4 · din prima 2/4 · 2 recuperări" },
@@ -307,7 +319,7 @@ export const RO: Copy = {
   scorConcluzie:
     "Citiți rândul doi lângă rândul patru: amândoi au răspuns corect la exact două întrebări din prima. Cel care s-a întors ia 34, cel care s-a oprit ia 20 — cele paisprezece puncte diferență sunt strict determinarea de a reveni. Iar cel care repetă mecanic ia 64, nu 400: exersarea aduce ceva, dar se oprește acolo.",
   scorNota:
-    "De-aia conducerea vede trei numere, nu unul: ce știe omul acum, cât a nimerit din prima, și de câte ori s-a întors. Un procent singur le-ar ascunde pe toate trei.",
+    "De-aia managementul vede trei numere, nu unul: ce știe omul acum, cât a nimerit din prima, și de câte ori s-a întors. Un procent singur le-ar ascunde pe toate trei.",
   cascadaTitlu: "Cine rămâne în urmă nu rămâne uitat",
   cascadaLead:
     "Partea pe care niciun curs trimis pe e-mail n-o are. După o zi fără activitate, platforma începe să-l caute pe om singură, urcând treptele una câte una.",
@@ -595,7 +607,10 @@ export const EN: Copy = {
     { valoare: "7", cand: "got it wrong, came back and fixed it. Deliberately under 10: knowing it outright stays better, otherwise a wrong answer becomes a strategy" },
     { valoare: "3 · 2 · 1", cand: "practising something already known, decreasing, at most three times a day per question. Practice stays free, but a leaderboard cannot be ground out of it" },
   ],
-  scorCazuriCap: { caz: "On a four-question module", calcul: "How it adds up", puncte: "Points", raport: "What management sees" },
+  scorCapCaz: "On a four-question module",
+  scorCapCalcul: "How it adds up",
+  scorCapPuncte: "Points",
+  scorCapRaport: "What management sees",
   scorCazuri: [
     { caz: "Knows it on the first try", calcul: "4 × 10", puncte: "40", raport: "Knows 4/4 · first try 4/4" },
     { caz: "Gets 2 wrong, then learns them", calcul: "2 × 10 + 2 × 7", puncte: "34", raport: "Knows 4/4 · first try 2/4 · 2 recoveries" },
