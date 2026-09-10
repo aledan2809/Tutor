@@ -45,8 +45,6 @@ const SECTIUNI: Sectiune[] = [
       { cheie: "hero", eticheta: "Titlul mare", lung: true },
       { cheie: "subtitle", eticheta: "Paragraful de sub titlu", lung: true },
       { cheie: "ctaPdf", eticheta: "Butonul de descărcare" },
-      { cheie: "ctaScrie", eticheta: "Butonul de contact" },
-      { cheie: "ctaIn", eticheta: "Textul „Autentificare”" },
     ],
   },
   {
@@ -217,7 +215,6 @@ const SECTIUNI: Sectiune[] = [
     campuri: [
       { cheie: "contactTitlu", eticheta: "Titlul secțiunii de contact" },
       { cheie: "contactLead", eticheta: "Textul de contact", lung: true },
-      { cheie: "contactSubiect", eticheta: "Subiectul e-mailului precompletat" },
       { cheie: "finalTitlu", eticheta: "Titlul de final" },
       { cheie: "finalSub", eticheta: "Textul de final", lung: true },
       { cheie: "finalCta", eticheta: "Butonul de final" },

@@ -303,7 +303,6 @@ function culoareScor(corecte: number, total: number): string {
 export default async function PostaPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const c = await resolvePostaCopy(locale);
-  const mailto = `mailto:${CONTACT_MAIL}?subject=${encodeURIComponent(c.contactSubiect)}`;
   const logoPosta = logoExistent(LOGO_POSTA);
   const logoKnowHow = logoExistent(LOGO_KNOWHOW);
 
@@ -360,9 +359,11 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
           <h1 className="mt-5 text-3xl font-bold sm:text-5xl">{c.hero}</h1>
           <p className="mt-4 text-lg text-gray-400">{c.subtitle}</p>
           {/*
-            Cele două butoane sunt pentru DECIDENT, nu pentru cursant: el nu-și face cont
-            de pe pagina asta, el ia fișierul și scrie un e-mail. „Autentificare" a rămas
-            doar în antet, unde nu concurează cu îndemnul care contează.
+            UN singur buton sus: descărcarea PDF-ului.
+            „Trimiteți-ne procedurile" a fost aici și a fost scos la cererea userului — la
+            începutul lecturii e prea devreme pentru el. Omul abia a deschis pagina; nu are
+            de ce să trimită ceva înainte să afle despre ce e vorba. Îndemnul rămâne unde
+            e câștigat: la capătul lecturii.
           */}
           <div className="mt-7 flex flex-wrap gap-3 print:hidden">
             <a
@@ -370,12 +371,6 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
               className="inline-flex min-h-[44px] items-center rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-500"
             >
               {c.ctaPdf}
-            </a>
-            <a
-              href={mailto}
-              className="inline-flex min-h-[44px] items-center rounded-xl border border-gray-700 px-6 py-3 font-semibold text-gray-200 hover:border-gray-500"
-            >
-              {c.ctaScrie}
             </a>
           </div>
         </div>
@@ -637,7 +632,7 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
           <p className="mt-2 text-sm text-gray-400">{c.contactLead}</p>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:gap-8">
             <a
-              href={mailto}
+              href={`mailto:${CONTACT_MAIL}`}
               className="inline-flex min-h-[44px] items-center gap-2 text-blue-300 hover:text-blue-200 hover:underline"
             >
               <span className="text-gray-500">{c.contactMailEticheta}:</span>
@@ -660,12 +655,18 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
         <section className="mt-16 text-center">
           <h2 className="text-2xl font-semibold">{c.finalTitlu}</h2>
           <p className="mx-auto mt-3 max-w-2xl text-gray-400">{c.finalSub}</p>
-          <a
-            href={mailto}
+          {/*
+            Duce la o pagină de ÎNCĂRCARE, nu la un `mailto:`. Cerut de user, și are
+            dreptate: omul are documentele pe calculator, iar un `mailto:` îl scoate din
+            pagină, îi deschide alt program și îl lasă să se descurce cu atașamentele —
+            exact în clipa în care tocmai s-a hotărât.
+          */}
+          <Link
+            href="/posta/proceduri"
             className="mt-6 inline-flex min-h-[44px] items-center rounded-xl bg-blue-600 px-8 py-3 font-semibold text-white hover:bg-blue-500 print:hidden"
           >
             {c.finalCta}
-          </a>
+          </Link>
           <p className="mt-8 text-xs text-gray-600 print:hidden">
             <Link href="/auth/signin" className="hover:text-gray-400 hover:underline">
               {c.finalCursant}

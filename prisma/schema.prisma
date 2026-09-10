@@ -1747,3 +1747,26 @@ model PageCopy {
   updatedAt DateTime @updatedAt
   updatedBy String?
 }
+
+/// Procedurile trimise de un client, din pagina lui de prezentare.
+///
+/// Butonul final de pe `/posta` trimitea un e-mail. Userul a cerut încărcare directă:
+/// omul de la client are documentele pe calculator, iar un `mailto:` îl scoate din
+/// pagină, îi deschide alt program și îl lasă să se descurce cu atașamentele.
+model ProcedureUpload {
+  id        String   @id @default(cuid())
+  /// Pentru ce pagină de client. Azi doar `posta`, dar mecanismul e același oriunde.
+  appSlug   String   @default("posta")
+  name      String
+  email     String
+  phone     String?
+  /// Funcția celui care trimite — util ca să știm cu cine vorbim.
+  role      String?
+  note      String?  @db.Text
+  /// [{ path, originalName, size }] — calea e sub `PROCEDURI_UPLOAD_DIR`, numele e generat.
+  files     Json
+  handledAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([appSlug, createdAt])
+}

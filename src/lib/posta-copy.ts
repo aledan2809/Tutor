@@ -49,8 +49,14 @@ export type Copy = {
   hero: string;
   subtitle: string;
   ctaPdf: string;
-  ctaScrie: string;
-  ctaIn: string;
+  /*
+   * NU mai există `ctaScrie`, `ctaIn` și `contactSubiect`. Toate trei au dispărut odată
+   * cu ce comandau: butonul „Trimiteți-ne procedurile" din capul paginii (scos — la
+   * începutul lecturii e prea devreme pentru el), butonul de autentificare din antet
+   * (înlocuit de logo-ul clientului) și subiectul e-mailului precompletat (procedurile
+   * se încarcă acum, nu se trimit pe mail). Un câmp rămas în editor după ce comanda lui
+   * a dispărut e mai rău decât unul lipsă: userul îl completează și nu se întâmplă nimic.
+   */
   avertismentTitlu: string;
   avertisment: string;
 
@@ -127,7 +133,6 @@ export type Copy = {
   contactLead: string;
   contactMailEticheta: string;
   contactTelEticheta: string;
-  contactSubiect: string;
 
   finalTitlu: string;
   finalSub: string;
@@ -166,8 +171,6 @@ export const RO: Copy = {
   subtitle:
     "Clientul nu vede sistemul informatic. Vede factorul de la ușă și casiera de la geam — și pe ei îi compară, fără să vrea, cu ce a primit marți de la altcineva. Pagina asta arată cum se instruiesc oamenii aceia: pe telefon, în zece minute, cu dovadă că s-a făcut.",
   ctaPdf: "Descarcă prezentarea (PDF)",
-  ctaScrie: "Trimiteți-ne procedurile",
-  ctaIn: "Autentificare",
 
   avertismentTitlu: "Conținut simulat",
   avertisment:
@@ -433,7 +436,6 @@ export const RO: Copy = {
     "Scrieți-ne sau sunați și vă trimitem codurile de acces pentru câți oameni vreți să vadă materialul, plus răspunsul la orice întrebare din pagina asta.",
   contactMailEticheta: "E-mail",
   contactTelEticheta: "Telefon",
-  contactSubiect: "Poșta Română — procedurile pentru pilot",
 
   finalTitlu: "Un singur pas mai departe",
   finalSub:
@@ -448,8 +450,6 @@ export const EN: Copy = {
   subtitle:
     "The customer never sees the IT system. They see the postman at the door and the clerk at the counter — and they compare them, without meaning to, with what arrived on Tuesday from someone else. This page shows how those people are trained: on a phone, in ten minutes, with proof that it happened.",
   ctaPdf: "Download the presentation (PDF)",
-  ctaScrie: "Send us your procedures",
-  ctaIn: "Sign in",
 
   avertismentTitlu: "Simulated content",
   avertisment:
@@ -715,7 +715,6 @@ export const EN: Copy = {
     "Write or call us and we will send access codes for as many people as you want to see the material, plus an answer to any question on this page.",
   contactMailEticheta: "Email",
   contactTelEticheta: "Phone",
-  contactSubiect: "Poșta Română — procedures for the pilot",
 
   finalTitlu: "One step further",
   finalSub:
