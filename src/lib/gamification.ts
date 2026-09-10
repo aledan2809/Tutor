@@ -14,6 +14,7 @@ import {
   DEFAULT_LEVELS,
   STREAK_RECOVERY,
 } from "@/lib/gamification-constants";
+import { calculeazaPuncte, type FelPunctaj } from "@/lib/scor-reluare";
 
 export { XP_REWARDS };
 
@@ -87,18 +88,57 @@ function calculateLevel(xp: number, levels: { name: string; minXp: number }[]): 
 
 // ─── Award XP on correct answer ───
 
+/**
+ * `questionId` NU e opțional din întâmplare.
+ *
+ * Semnătura veche era `(userId, domainId, isCorrect, timeSpentMs)` — fără întrebare,
+ * deci funcția nu AVEA CUM să știe că omul o mai văzuse. Fiecare răspuns corect valora
+ * 10 puncte, la nesfârșit: pe un modul de 4 întrebări, cine relua tot lua 60 de puncte,
+ * mai multe decât cine le știuse din prima (40). Măcinarea plătea mai bine decât știutul.
+ *
+ * Cât valorează fiecare situație stă în `scor-reluare.ts`, funcție pură, cu teste care
+ * verifică chiar cifrele arătate clientului.
+ */
 export async function awardAnswerXp(
   userId: string,
   domainId: string,
   isCorrect: boolean,
-  timeSpentMs: number | null
-): Promise<{ xpAwarded: number }> {
-  if (!isCorrect) return { xpAwarded: 0 };
+  timeSpentMs: number | null,
+  questionId: string
+): Promise<{ xpAwarded: number; fel: FelPunctaj; detaliu: string }> {
+  if (!isCorrect) return { xpAwarded: 0, fel: "gresit", detaliu: "Răspuns greșit" };
 
-  let xp = XP_REWARDS.CORRECT_ANSWER;
-  if (timeSpentMs !== null && timeSpentMs < FAST_ANSWER_THRESHOLD_MS) {
-    xp += XP_REWARDS.FAST_ANSWER_BONUS;
-  }
+  const rapid = timeSpentMs !== null && timeSpentMs < FAST_ANSWER_THRESHOLD_MS;
+
+  // Istoricul întrebării, EXCLUZÂND răspunsul de acum: apelantul l-a scris deja, iar
+  // dacă l-am număra aici, orice primă încercare ar arăta ca o reluare.
+  const inceputZi = new Date();
+  inceputZi.setHours(0, 0, 0, 0);
+  const anterioare = await prisma.attempt.findMany({
+    where: { userId, questionId, voided: false },
+    select: { isCorrect: true, createdAt: true },
+    orderBy: { createdAt: "asc" },
+  });
+  const fara_ultima = anterioare.slice(0, -1);
+
+  const istoric = {
+    incercariAnterioare: fara_ultima.length,
+    aFostCorectVreodata: fara_ultima.some((a) => a.isCorrect),
+    // Repetițiile de azi: răspunsurile corecte de azi DUPĂ ce întrebarea era deja
+    // stăpânită. Se numără doar ele, fiindcă doar ele intră în plafonul zilnic.
+    repetitiiAzi: (() => {
+      let stapanita = false;
+      let n = 0;
+      for (const a of fara_ultima) {
+        if (stapanita && a.isCorrect && a.createdAt >= inceputZi) n += 1;
+        if (a.isCorrect) stapanita = true;
+      }
+      return n;
+    })(),
+  };
+
+  const punctaj = calculeazaPuncte(true, rapid, istoric);
+  const xp = punctaj.puncte;
 
   const gam = await getOrCreateGamification(userId, domainId);
 
@@ -107,15 +147,15 @@ export async function awardAnswerXp(
     data: { xp: { increment: xp } },
   });
 
-  // Check speed demon achievement
-  if (timeSpentMs !== null && timeSpentMs < FAST_ANSWER_THRESHOLD_MS) {
+  // Doar la PRIMA întâlnire: la a doua vedere viteza e așteptată și n-ar dovedi nimic.
+  if (rapid && punctaj.fel === "prima") {
     await tryUnlockAchievement(userId, domainId, "speed_demon");
   }
 
   // Update weekly leaderboard
   await updateLeaderboard(userId, domainId, xp);
 
-  return { xpAwarded: xp };
+  return { xpAwarded: xp, fel: punctaj.fel, detaliu: punctaj.detaliu };
 }
 
 // ─── Award XP on session complete ───

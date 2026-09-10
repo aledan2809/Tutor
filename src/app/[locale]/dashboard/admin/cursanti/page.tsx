@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { agregaGreseliPeModul, procentGreseli } from "@/lib/roster-aggregate";
+import { rezumaModul, type IncercareRezumat } from "@/lib/scor-reluare";
 
 /**
  * Numere ca în românește, pe un ecran care la un client mare arată patru cifre.
@@ -150,7 +151,7 @@ export default async function CursantiPage({
     userIds.length
       ? prisma.attempt.findMany({
           where: { userId: { in: userIds }, voided: false, question: { domainId: active.id } },
-          select: { userId: true, isCorrect: true, createdAt: true, question: { select: { topic: true } } },
+          select: { userId: true, questionId: true, isCorrect: true, createdAt: true, question: { select: { topic: true } } },
         })
       : Promise.resolve([]),
   ]);
@@ -171,18 +172,27 @@ export default async function CursantiPage({
   const topicModule = new Map(
     modules.filter((m) => m.questionTopic).map((m) => [m.questionTopic as string, m.id])
   );
-  type Tally = { ok: number; total: number; last: Date };
-  const scoreByUser = new Map<string, Map<string, Tally>>();
+  /*
+   * Încercările se strâng BRUT, pe (om, modul), și se rezumă cu `rezumaModul`.
+   *
+   * Înainte se aduna direct: `total += 1` la fiecare încercare. Efectul, măsurat pe date
+   * reale: cine făcea 2/4 și apoi învăța cele două greșite apărea cu 4/6 = 67%, deși
+   * ajunsese să știe 4 din 4 — cine se întorcea arăta mai prost decât cine se oprea.
+   */
+  const incercariPeModul = new Map<string, Map<string, IncercareRezumat[]>>();
+  const ultimaPeModul = new Map<string, Map<string, Date>>();
   for (const a of attempts) {
     const mid = topicModule.get(a.question.topic ?? "");
     if (!mid) continue;
-    const m = scoreByUser.get(a.userId) ?? new Map<string, Tally>();
-    const t = m.get(mid) ?? { ok: 0, total: 0, last: a.createdAt };
-    t.total += 1;
-    if (a.isCorrect) t.ok += 1;
-    if (a.createdAt > t.last) t.last = a.createdAt;
-    m.set(mid, t);
-    scoreByUser.set(a.userId, m);
+    const peUser = incercariPeModul.get(a.userId) ?? new Map<string, IncercareRezumat[]>();
+    const lista = peUser.get(mid) ?? [];
+    lista.push({ questionId: a.questionId, isCorrect: a.isCorrect, createdAt: a.createdAt });
+    peUser.set(mid, lista);
+    incercariPeModul.set(a.userId, peUser);
+    const uz = ultimaPeModul.get(a.userId) ?? new Map<string, Date>();
+    const prec = uz.get(mid);
+    if (!prec || a.createdAt > prec) uz.set(mid, a.createdAt);
+    ultimaPeModul.set(a.userId, uz);
   }
 
   const cols: ModuleCol[] = modules.map((m) => ({ id: m.id, order: m.order, title: m.title }));
@@ -202,19 +212,23 @@ export default async function CursantiPage({
   /** Celulele pe module pentru un utilizator — aceleași, indiferent de unde vine rândul. */
   const celule = (userId: string | null) => {
     const done = userId ? doneByUser.get(userId) : undefined;
-    const sc = userId ? scoreByUser.get(userId) : undefined;
+    const inc = userId ? incercariPeModul.get(userId) : undefined;
+    const ult = userId ? ultimaPeModul.get(userId) : undefined;
     return {
       lectiiFacute: done?.size ?? 0,
-      testeDate: sc?.size ?? 0,
+      testeDate: inc?.size ?? 0,
       moduleCells: cols.map((c) => {
         const at = done?.get(c.id) ?? null;
-        const t = sc?.get(c.id) ?? null;
+        const lista = inc?.get(c.id);
+        const rez = lista ? rezumaModul(lista) : null;
         return {
           moduleId: c.id,
           lectieLa: at ? at.toISOString() : null,
-          corecte: t?.ok ?? null,
-          total: t?.total ?? null,
-          testLa: t ? t.last.toISOString() : null,
+          stieAcum: rez?.stieAcum ?? null,
+          atinse: rez?.atinse ?? null,
+          dinPrima: rez?.dinPrima ?? null,
+          recuperari: rez?.recuperari ?? null,
+          testLa: ult?.get(c.id)?.toISOString() ?? null,
         };
       }),
     };
@@ -289,7 +303,7 @@ export default async function CursantiPage({
   // Cine a lucrat apare primul: managerul caută munca, nu lista.
   const rows: RosterRow[] = [...dinLista, ...faraLista].sort((a, b) => {
     const scor = (r: RosterRow) =>
-      r.moduleCells.reduce((n, c) => n + (c.lectieLa ? 1 : 0) + (c.total ? 1 : 0), 0);
+      r.moduleCells.reduce((n, c) => n + (c.lectieLa ? 1 : 0) + (c.atinse ? 1 : 0), 0);
     const d = scor(b) - scor(a);
     return d !== 0 ? d : a.nume.localeCompare(b.nume, "ro");
   });

@@ -24,8 +24,14 @@ export type RosterRow = {
   moduleCells: {
     moduleId: string;
     lectieLa: string | null;
-    corecte: number | null;
-    total: number | null;
+    /** Câte întrebări STĂPÂNEȘTE acum (le-a nimerit măcar o dată). */
+    stieAcum: number | null;
+    /** Câte a atins. */
+    atinse: number | null;
+    /** Dintre ele, câte corecte de la prima încercare. */
+    dinPrima: number | null;
+    /** Câte a greșit întâi și a corectat pe urmă — numărul de susținut. */
+    recuperari: number | null;
     testLa: string | null;
   }[];
 };
@@ -187,11 +193,30 @@ export function Roster({
                         <span className="text-gray-600">lecția −</span>
                       )}
                     </div>
+                    {/*
+                      Trei numere, nu unul. Înainte era `corecte/încercări`, adunat: cine
+                      făcea 2/4 și apoi învăța cele două greșite apărea cu 4/6 = 67%, deși
+                      ajunsese să știe 4 din 4. Acum scorul spune ce ȘTIE, iar reluarea se
+                      vede separat, ca merit — nu ca pată.
+                    */}
                     <div className="mt-0.5 text-xs font-medium tabular-nums">
-                      {c.total ? (
-                        <span className={culoareScor(c.corecte ?? 0, c.total)}>
-                          {c.corecte}/{c.total} · {zi(c.testLa)}
-                        </span>
+                      {c.atinse ? (
+                        <>
+                          <span className={culoareScor(c.stieAcum ?? 0, c.atinse)}>
+                            {c.stieAcum}/{c.atinse}
+                          </span>
+                          {c.recuperari ? (
+                            <span
+                              className="ml-1.5 text-amber-300"
+                              title={`A greșit întâi și a corectat pe urmă ${c.recuperari} ${
+                                c.recuperari === 1 ? "întrebare" : "întrebări"
+                              }. Din prima: ${c.dinPrima}.`}
+                            >
+                              ↻{c.recuperari}
+                            </span>
+                          ) : null}
+                          <span className="ml-1.5 text-gray-600">{zi(c.testLa)}</span>
+                        </>
                       ) : (
                         <span className="text-gray-600">test −</span>
                       )}

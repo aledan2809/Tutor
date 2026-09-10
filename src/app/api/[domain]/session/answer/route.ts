@@ -162,7 +162,8 @@ async function _POST(
       session.user.id,
       learningSession.domainId,
       isCorrect,
-      timeSpent
+      timeSpent,
+      question.id
     );
     xpAwarded = xpResult.xpAwarded;
   }
