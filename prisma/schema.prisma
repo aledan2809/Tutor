@@ -305,6 +305,14 @@ model TelegramConnectToken {
 /// A merchant on the platform: a company that owns its own subjects and its own
 /// people (e.g. an agency running a training course for its agents).
 ///
+/// Cât de des se emite factura către o firmă. Ritmul e o înțelegere comercială,
+/// nu o regulă de produs — de-aia stă pe firmă, nu în cod.
+enum RitmFacturare {
+  LUNAR
+  TRIMESTRIAL
+  ANUAL
+}
+
 /// Everything that existed before this belongs to no organization, which is what
 /// "platform-owned" means — administered only by the superadmin, exactly as before.
 /// An organization draws a boundary: its admin administers its subjects and its
@@ -328,6 +336,19 @@ model Organization {
   /// primește o factură separată. Măsurat pe cursanții Poștei — toți cu abonament gol,
   /// deci WhatsApp-ul promis în pagina de prezentare nu le-ar fi plecat NICIODATĂ.
   meteredIncluded Boolean @default(false)
+
+  /// Condițiile comerciale ale acestei firme. Toate opționale: o firmă poate exista
+  /// înainte să existe o înțelegere, iar un câmp gol înseamnă „încă nu s-a stabilit",
+  /// nu zero. Se completează doar de superadmin — clientul nu-și schimbă singur tarifele.
+  ///
+  /// Prețul se ține în BANI (întregi), nu în lei zecimali: aceeași alegere ca la
+  /// `Plan.price`, și singura care nu pierde rotunjiri la calcule.
+  billingPlan     String?
+  billingAmount   Int?
+  billingCurrency String         @default("RON")
+  billingPeriod   RitmFacturare?
+  billingStartsAt DateTime?
+  billingNote     String?        @db.Text
 }
 
 /// Who may reach a domain's content.

@@ -21,6 +21,24 @@ const patchSchema = z.union([
   z.object({ action: z.literal("releaseDomains"), domainIds: z.array(z.string().min(1)).min(1) }),
   z.object({ action: z.literal("grantAdmin"), userId: z.string().min(1) }),
   z.object({ action: z.literal("revokeAdmin"), userId: z.string().min(1) }),
+  /*
+   * Condițiile comerciale. Stau aici, la superadmin, nu în panoul firmei: clientul
+   * trebuie să VADĂ ce plătește, dar tarifele se schimbă în contract, nu din aplicație.
+   *
+   * `null` are înțeles propriu — „șterge, nu s-a stabilit" — și de-aia câmpurile sunt
+   * `nullable()`, nu doar `optional()`. Suma e în bani întregi (ca `Plan.price`), deci
+   * un preț zecimal de 4,50 lei se trimite ca 450.
+   */
+  z.object({
+    action: z.literal("setBilling"),
+    meteredIncluded: z.boolean().optional(),
+    billingPlan: z.string().trim().max(120).nullable().optional(),
+    billingAmount: z.number().int().min(0).max(100_000_000).nullable().optional(),
+    billingCurrency: z.enum(["RON", "EUR"]).optional(),
+    billingPeriod: z.enum(["LUNAR", "TRIMESTRIAL", "ANUAL"]).nullable().optional(),
+    billingStartsAt: z.string().datetime().nullable().optional(),
+    billingNote: z.string().trim().max(2000).nullable().optional(),
+  }),
 ]);
 
 async function _GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -98,6 +116,23 @@ async function _PATCH(req: NextRequest, { params }: { params: Promise<{ id: stri
       data: { organizationId: id, isOrgAdmin: true },
     });
     changed = 1;
+  } else if (body.action === "setBilling") {
+    // Se scriu DOAR câmpurile trimise. Fără filtrul ăsta, o salvare a prețului ar
+    // șterge nota și ritmul, fiindcă `undefined` ar ajunge în update ca „pune null".
+    const data: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(body)) {
+      if (k === "action" || k === "billingStartsAt" || v === undefined) continue;
+      data[k] = v;
+    }
+    if (body.billingStartsAt !== undefined) {
+      data.billingStartsAt =
+        body.billingStartsAt === null ? null : new Date(body.billingStartsAt);
+    }
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: "Nimic de schimbat" }, { status: 400 });
+    }
+    await prisma.organization.update({ where: { id }, data });
+    changed = Object.keys(data).length;
   } else {
     const res = await prisma.user.updateMany({
       where: { id: body.userId, organizationId: id },
