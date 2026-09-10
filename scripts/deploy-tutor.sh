@@ -38,7 +38,12 @@ echo "  HEAD: $HEAD_NOU"
 echo "── 2/5 arbore de build (hard-links) ──"
 rm -rf "$BUILD"
 cp -al "$LIVE" "$BUILD"
-rm -rf "$BUILD/.next"          # scoate DOAR link-urile din arborele de build
+# Scoate din arborele de build ce nu trebuie construit — și mai ales copiile de
+# revenire. `node_modules.old` conține fișiere `.ts` (ex. `@aledan/whatsapp/dashboard`),
+# iar directorul NU se numește `node_modules`, deci verificarea de tipuri din `next build`
+# intră în el și pică pe importuri care n-au ce căuta acolo. Pățit la prima livrare de
+# după ce comutarea a început să păstreze `node_modules.old` (2026-09-10).
+rm -rf "$BUILD/.next" "$BUILD/.next.old" "$BUILD/node_modules.old" "$BUILD/.next.broken" "$BUILD/node_modules.broken"
 cd "$BUILD"
 if ! npm install --no-audit --no-fund > /tmp/tutor-install.log 2>&1; then
   echo "  EȘEC la npm install — vezi /tmp/tutor-install.log (live-ul NU a fost atins)"
