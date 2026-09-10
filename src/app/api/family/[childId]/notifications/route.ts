@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { isGuardianOf } from "@/lib/guardian";
 import { allowedChannels, clampChannelWrite } from "@/lib/plan-channels";
+import { meteredChannelsCovered, SELECT_ACOPERIRE_CANALE } from "@/lib/escalation/segmentation";
 import { sanitizeChannelOrder, sanitizeEscalationSteps, ESCALATION_PRESETS } from "@/lib/escalation/config";
 
 /**
@@ -29,7 +30,7 @@ async function readState(childId: string) {
   const [setting, prefs, child] = await Promise.all([
     prisma.setting.findUnique({ where: { userId_key: { userId: childId, key: "notifDelegation" } } }),
     prisma.notificationPreference.findUnique({ where: { userId: childId } }),
-    prisma.user.findUnique({ where: { id: childId }, select: { subscriptionStatus: true, organization: { select: { meteredIncluded: true } } } }),
+    prisma.user.findUnique({ where: { id: childId }, select: SELECT_ACOPERIRE_CANALE }),
   ]);
   const managedByParent = (setting?.value as { managedByParent?: boolean } | undefined)?.managedByParent === true;
   return {
@@ -42,7 +43,7 @@ async function readState(childId: string) {
     },
     channelOrder: prefs?.channelOrder ?? [],
     escalationSteps: (prefs?.escalationSteps as unknown) ?? null,
-    allowedChannels: allowedChannels(child?.subscriptionStatus, child?.organization?.meteredIncluded),
+    allowedChannels: allowedChannels(child?.subscriptionStatus, child ? meteredChannelsCovered(child) : false),
   };
 }
 
@@ -83,11 +84,11 @@ async function _PUT(req: NextRequest, ctx: { params: Promise<{ childId: string }
 
   // Clamp the child's channels to the child's plan (a parent can't enable a metered
   // channel the child's package doesn't include).
-  const child = await prisma.user.findUnique({ where: { id: childId }, select: { subscriptionStatus: true, organization: { select: { meteredIncluded: true } } } });
+  const child = await prisma.user.findUnique({ where: { id: childId }, select: SELECT_ACOPERIRE_CANALE });
   const { applied } = clampChannelWrite(
     { push: body.push, email: body.email, whatsapp: body.whatsapp, sms: body.sms },
     child?.subscriptionStatus,
-    child?.organization?.meteredIncluded,
+    child ? meteredChannelsCovered(child) : false,
   );
   const cleanOrder = sanitizeChannelOrder(body.channelOrder);
   const prefUpdate: Record<string, unknown> = { ...applied };

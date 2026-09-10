@@ -5,6 +5,7 @@ import {
   isPaidChannelDeliverable,
   resolveCascadeWindow,
   meteredChannelsCovered,
+  SELECT_ACOPERIRE_CANALE,
 } from "@/lib/escalation/segmentation";
 import { ESCALATION_LEVELS, CASCADE_GRACE_MINUTES } from "@/lib/escalation/config";
 
@@ -116,5 +117,51 @@ describe("meteredChannelsCovered — cine plătește canalele contorizate", () =
         organization: { meteredIncluded: true },
       }),
     ).toBe(true);
+  });
+});
+
+describe("meteredChannelsCovered — legătura reală cu clientul B2B trece prin înscriere", () => {
+  // Măsurat pe producție: firma „Poșta Română (demo)" are 3 materii și ZERO membri.
+  // Cursanții sunt conturi obișnuite (`organizationId` null), legate de client prin
+  // înscrierea la materia lui. O poartă care s-ar fi uitat doar la apartenența
+  // contului ar fi trecut toate testele și n-ar fi acoperit niciun cursant real.
+  const cursantPosta = {
+    subscriptionStatus: null,
+    subscriptionEndsAt: null,
+    organization: null,
+    enrollments: [{ id: "inscriere-la-materia-postei" }],
+  };
+
+  it("un cursant fără abonament și fără firmă pe cont e acoperit prin înscriere", () => {
+    expect(meteredChannelsCovered(cursantPosta)).toBe(true);
+  });
+
+  it("fără nicio înscriere acoperită, rămâne pe regula veche", () => {
+    expect(meteredChannelsCovered({ ...cursantPosta, enrollments: [] })).toBe(false);
+    expect(meteredChannelsCovered({ ...cursantPosta, enrollments: null })).toBe(false);
+  });
+
+  it("cele două căi sunt independente — oricare singură ajunge", () => {
+    expect(
+      meteredChannelsCovered({
+        subscriptionStatus: null,
+        subscriptionEndsAt: null,
+        organization: { meteredIncluded: true },
+        enrollments: [],
+      }),
+    ).toBe(true);
+  });
+});
+
+describe("SELECT_ACOPERIRE_CANALE — filtrul e partea care contează", () => {
+  it("cere doar înscrierile active la materii ale unei firme cu canale incluse", () => {
+    // Fără `where`, `enrollments` ar fi toate înscrierile omului, iar predicatul de
+    // mai sus ar deschide canalele plătite pentru oricine e înscris undeva.
+    expect(SELECT_ACOPERIRE_CANALE.enrollments.where).toEqual({
+      isActive: true,
+      domain: { organization: { meteredIncluded: true } },
+    });
+    expect(SELECT_ACOPERIRE_CANALE.enrollments.take).toBe(1);
+    expect(SELECT_ACOPERIRE_CANALE.subscriptionEndsAt).toBe(true);
   });
 });

@@ -20,19 +20,22 @@ export function isPaidStatus(subscriptionStatus: string | null | undefined): boo
 /** The channels a user/child may use, given their subscription status. */
 export function allowedChannels(
   subscriptionStatus: string | null | undefined,
-  /** Firma din care face parte omul are canalele contorizate incluse (B2B, factură separată). */
-  orgMeteredIncluded?: boolean | null,
+  /**
+   * Canalele contorizate îi sunt deja acoperite — abonament individual SAU firma care
+   * l-a înscris (B2B, factură separată). Se calculează cu `meteredChannelsCovered`.
+   */
+  meteredCovered?: boolean | null,
 ): NotifChannel[] {
-  if (orgMeteredIncluded === true) return [...ALL_CHANNELS];
+  if (meteredCovered === true) return [...ALL_CHANNELS];
   return isPaidStatus(subscriptionStatus) ? [...ALL_CHANNELS] : [...FREE_CHANNELS];
 }
 
 export function isChannelAllowed(
   channel: NotifChannel,
   subscriptionStatus: string | null | undefined,
-  orgMeteredIncluded?: boolean | null,
+  meteredCovered?: boolean | null,
 ): boolean {
-  return allowedChannels(subscriptionStatus, orgMeteredIncluded).includes(channel);
+  return allowedChannels(subscriptionStatus, meteredCovered).includes(channel);
 }
 
 /**
@@ -44,10 +47,10 @@ export function isChannelAllowed(
 export function clampChannelWrite(
   requested: Partial<Record<NotifChannel, boolean>>,
   subscriptionStatus: string | null | undefined,
-  /** Firma din care face parte omul are canalele contorizate incluse (B2B). */
-  orgMeteredIncluded?: boolean | null,
+  /** Canalele contorizate îi sunt acoperite (abonament sau firma care l-a înscris). */
+  meteredCovered?: boolean | null,
 ): { applied: Partial<Record<NotifChannel, boolean>>; blocked: NotifChannel[] } {
-  const allowed = new Set(allowedChannels(subscriptionStatus, orgMeteredIncluded));
+  const allowed = new Set(allowedChannels(subscriptionStatus, meteredCovered));
   const applied: Partial<Record<NotifChannel, boolean>> = {};
   const blocked: NotifChannel[] = [];
   for (const ch of ALL_CHANNELS) {

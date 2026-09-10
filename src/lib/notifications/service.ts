@@ -15,7 +15,7 @@ import type { EscalationChannel } from "@prisma/client";
 import { getTelegramClient } from "@/lib/telegram/connect";
 import { buildTelegramButtonUrl } from "@/lib/escalation/tap-link";
 import { sendAppEmail } from "@/lib/email";
-import { meteredChannelsCovered } from "@/lib/escalation/segmentation";
+import { meteredChannelsCovered, SELECT_ACOPERIRE_CANALE } from "@/lib/escalation/segmentation";
 
 interface NotificationPayload {
   userId: string;
@@ -40,6 +40,8 @@ export function meteredChannelBlocked(
         subscriptionEndsAt: Date | null;
         /** Firma din care face parte are canalele contorizate incluse (B2B, factură separată). */
         organization?: { meteredIncluded: boolean } | null;
+        /** Înscrieri la materii ale unei firme plătitoare (filtrate — vezi SELECT_ACOPERIRE_CANALE). */
+        enrollments?: { id: string }[] | null;
       }
     | null,
 ): boolean {
@@ -74,11 +76,7 @@ export async function sendNotification(
         ? null
         : await prisma.user.findUnique({
             where: { id: payload.userId },
-            select: {
-              subscriptionStatus: true,
-              subscriptionEndsAt: true,
-              organization: { select: { meteredIncluded: true } },
-            },
+            select: SELECT_ACOPERIRE_CANALE,
           });
       if (meteredChannelBlocked(payload.channel, payload.metadata, user)) {
         console.warn(

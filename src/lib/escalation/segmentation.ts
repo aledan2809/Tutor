@@ -44,11 +44,47 @@ export function isPaidSubscriber(u: {
 export function meteredChannelsCovered(u: {
   subscriptionStatus: string | null;
   subscriptionEndsAt: Date | null;
+  /** Firma căreia îi APARȚINE contul — practic doar administratorii de firmă. */
   organization?: { meteredIncluded: boolean } | null;
+  /**
+   * Înscrierile ACOPERITE, adică deja filtrate de `SELECT_ACOPERIRE_CANALE`.
+   * Orice rând aici înseamnă „e înscris la o materie a unei firme care plătește".
+   * Nu trimite lista completă de înscrieri: ar deschide poarta pentru toată lumea.
+   */
+  enrollments?: { id: string }[] | null;
 }): boolean {
   if (u.organization?.meteredIncluded === true) return true;
+  if (u.enrollments && u.enrollments.length > 0) return true;
   return isPaidSubscriber(u);
 }
+
+/**
+ * Ce trebuie citit de pe un utilizator ca să știi cine îi plătește canalele.
+ *
+ * Există ca o singură constantă fiindcă partea care contează e ușor de scris greșit:
+ * legătura cu firma NU e `User.organizationId`. Măsurat pe producție — firma „Poșta
+ * Română (demo)" avea 3 materii și ZERO membri: cursanții sunt conturi obișnuite,
+ * legate de client prin ÎNSCRIEREA la materia lui. O poartă care s-ar fi uitat doar
+ * la apartenența contului ar fi trecut testele și n-ar fi făcut nimic pentru client.
+ *
+ * `where` de aici nu e decorativ: fără el, `enrollments` ar fi toate înscrierile
+ * omului, iar predicatul ar deschide canalele plătite pentru oricine e înscris undeva.
+ */
+export const SELECT_ACOPERIRE_CANALE_RELATII = {
+  organization: { select: { meteredIncluded: true } },
+  enrollments: {
+    where: { isActive: true, domain: { organization: { meteredIncluded: true } } },
+    select: { id: true },
+    take: 1,
+  },
+} as const;
+
+/** Același lucru, plus scalarii de abonament, pentru un `select` complet. */
+export const SELECT_ACOPERIRE_CANALE = {
+  subscriptionStatus: true,
+  subscriptionEndsAt: true,
+  ...SELECT_ACOPERIRE_CANALE_RELATII,
+} as const;
 
 /**
  * Whether a channel can actually deliver right now. Telegram needs a linked +

@@ -3,6 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { allowedChannels, clampChannelWrite } from "@/lib/plan-channels";
+import { meteredChannelsCovered, SELECT_ACOPERIRE_CANALE } from "@/lib/escalation/segmentation";
 import { sanitizeChannelOrder } from "@/lib/escalation/config";
 
 /**
@@ -27,10 +28,10 @@ async function _GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { subscriptionStatus: true, organization: { select: { meteredIncluded: true } } },
+    select: SELECT_ACOPERIRE_CANALE,
   });
 
-  return NextResponse.json({ ...prefs, allowedChannels: allowedChannels(user?.subscriptionStatus, user?.organization?.meteredIncluded) });
+  return NextResponse.json({ ...prefs, allowedChannels: allowedChannels(user?.subscriptionStatus, user ? meteredChannelsCovered(user) : false) });
 }
 
 /**
@@ -57,12 +58,12 @@ async function _PUT(req: NextRequest) {
   // WhatsApp/SMS via a direct call — only disable them).
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { subscriptionStatus: true, organization: { select: { meteredIncluded: true } } },
+    select: SELECT_ACOPERIRE_CANALE,
   });
   const { applied } = clampChannelWrite(
     { push, email, whatsapp, sms },
     user?.subscriptionStatus,
-    user?.organization?.meteredIncluded,
+    user ? meteredChannelsCovered(user) : false,
   );
 
   const data: Record<string, unknown> = { ...applied };
@@ -93,7 +94,7 @@ async function _PUT(req: NextRequest) {
     create: { userId: session.user.id, ...data },
   });
 
-  return NextResponse.json({ ...prefs, allowedChannels: allowedChannels(user?.subscriptionStatus, user?.organization?.meteredIncluded) });
+  return NextResponse.json({ ...prefs, allowedChannels: allowedChannels(user?.subscriptionStatus, user ? meteredChannelsCovered(user) : false) });
 }
 
 export const GET = withErrorHandler(_GET);

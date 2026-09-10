@@ -22,6 +22,7 @@ import {
   ESCALATION_LADDER,
   isPaidChannelDeliverable,
   meteredChannelsCovered,
+  SELECT_ACOPERIRE_CANALE_RELATII,
 } from "./segmentation";
 import { userIdsOnBreak } from "./breaks";
 import { scheduledTodayFilter } from "./scheduled-days";
@@ -137,10 +138,10 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
       user: {
         include: {
           notificationPreference: true,
-          // Firma plătitoare (B2B) — poarta de mai jos se uita doar la abonamentul
-          // individual, deci fără asta treapta WhatsApp era sărită pentru fiecare om
-          // înscris de un client instituțional.
-          organization: { select: { meteredIncluded: true } },
+          // Cine îi plătește canalele contorizate. Legătura cu clientul B2B trece prin
+          // ÎNSCRIERE, nu prin `User.organizationId` (cursanții au acolo null) — de-aia
+          // se folosește selectul comun, nu o listă scrisă de mână aici.
+          ...SELECT_ACOPERIRE_CANALE_RELATII,
         },
       },
     },
