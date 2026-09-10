@@ -43,7 +43,17 @@ export default async function AccesPage({
       postOffice: true,
       userId: true,
       openedAt: true,
-      domain: { select: { name: true, isActive: true } },
+      // Numele cursului, nu al materiei: exact șirul trimis pe telefon în invitație
+      // (`course-invite` → `domain.courses[0].title`). Erau două nume diferite pe
+      // același drum — omul primea „Ghișeu" pe WhatsApp și citea „Poșta — Ghișeu" pe
+      // pagina pe care ateriza.
+      domain: {
+        select: {
+          name: true,
+          isActive: true,
+          courses: { orderBy: { createdAt: "asc" }, take: 1, select: { title: true } },
+        },
+      },
     },
   });
 
@@ -69,7 +79,7 @@ export default async function AccesPage({
           county: recipient.county,
           city: recipient.city,
           postOffice: recipient.postOffice,
-          course: recipient.domain.name,
+          course: recipient.domain.courses[0]?.title || recipient.domain.name,
         }}
       />
     );
