@@ -11,6 +11,19 @@ export const TTS_RATE_DEFAULT = 0.6;
 export const TTS_RATE_MIN = 0.3;
 export const TTS_RATE_MAX = 1.1;
 export const TTS_RATE_STEP = 0.05;
+
+/**
+ * Cât de rar vorbește vocea față de viteza aleasă de om. 0.88 = cu 12% mai rar.
+ *
+ * Cerut de un cursant („mai încet" — lămurit cu el că vrea mai RAR), autorizat
+ * 10 septembrie 2026.
+ *
+ * Se aplică peste ce a ales fiecare, nu în locul lui: viteza stă în localStorage,
+ * pe dispozitiv, deci a schimba doar valoarea implicită n-ar fi făcut nimic pentru
+ * cine are deja una salvată — adică exact pentru omul care a cerut schimbarea.
+ * Slider-ul rămâne neatins, cu aceleași trepte; se mișcă doar ce iese pe difuzor.
+ */
+export const TTS_RITM_FACTOR = 0.88;
 // Pause inserted BETWEEN dictated items (ms). Scales inversely with rate so the
 // slowest setting also leaves the most time to memorize each number.
 export function gapForRate(rate: number): number {
@@ -65,7 +78,7 @@ export function speak(
   const mySeq = speakSeq;
   const u = new SpeechSynthesisUtterance(text);
   u.lang = lang;
-  u.rate = rate;
+  u.rate = rate * TTS_RITM_FACTOR;
   const finish = () => { if (mySeq === speakSeq) hooks?.onEnd?.(); };
   u.onend = finish;
   u.onerror = finish;
@@ -106,7 +119,7 @@ export function speakItems(
     }
     const u = new SpeechSynthesisUtterance(String(items[i]));
     u.lang = lang;
-    u.rate = rate;
+    u.rate = rate * TTS_RITM_FACTOR;
     const advance = () => {
       if (mySeq !== speakSeq) return;
       i++;
