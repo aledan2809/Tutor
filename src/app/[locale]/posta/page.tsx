@@ -337,7 +337,17 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
         </div>
       </div>
 
-      <header className="posta-ecran-header border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm">
+      {/*
+        `sticky top-0`: cerut de user — logo-urile rămân sus la derulare. Contează pe
+        pagina asta mai mult decât pe altele: e un document de vânzare lung, iar cele
+        două mărci alăturate sunt chiar mesajul „asta e pentru voi", care altfel dispare
+        după primul ecran.
+
+        `z-50` ca să treacă peste cardurile cu umbră; fundalul semi-transparent și
+        `backdrop-blur` erau deja acolo, deci textul care trece pe dedesubt nu se
+        amestecă cu logo-urile. La tipar antetul e oricum ascuns (`posta-ecran-header`).
+      */}
+      <header className="posta-ecran-header sticky top-0 z-50 border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
           <Link href="/" aria-label="eTUTOR.ro" className="inline-flex min-h-[44px] items-center">
             <Brand className="text-xl" />
