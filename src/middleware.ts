@@ -36,7 +36,7 @@ function buildCsp(nonce: string): string {
   );
 }
 
-const publicPaths = ["/", "/try", "/scor", "/grile", "/auth/signin", "/auth/verify", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/auth/recuperare", "/terms", "/privacy", "/cookies", "/creatori", "/parinte", "/elev", "/preturi", "/ghid-bac", "/family/join", "/posta"];
+const publicPaths = ["/", "/try", "/scor", "/grile", "/auth/signin", "/auth/verify", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/auth/recuperare", "/terms", "/privacy", "/cookies", "/creatori", "/parinte", "/elev", "/preturi", "/ghid-bac", "/family/join", "/posta", "/posta/proceduri"];
 // Public sections that carry a dynamic segment (e.g. /duel/<id>, /certificat/<id>, /grile/<slug>).
 // /family/accept/<token> must render for a logged-out invitee (the page itself
 // offers sign-in / sign-up); the accept POST stays auth-gated server-side.
