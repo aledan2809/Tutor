@@ -243,6 +243,38 @@ export default function LessonDetailPage() {
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
+              /*
+               * Titlurile, paragrafele și listele au stil scris aici, pe element.
+               *
+               * Motivul, măsurat: clasele `prose` de pe containerul de mai sus nu fac
+               * nimic — `@tailwindcss/typography` nu e instalat. Iar resetarea implicită
+               * din Tailwind aduce `h2` la mărimea și grosimea textului, fără margine.
+               * Efectul, raportat de un cursant: „nu e nicio pauză, nici nu-ți dai seama
+               * când se trece la alt subiect" — deși titlurile existau în lecție.
+               * Stilul pus pe element nu depinde de niciun plugin.
+               */
+              h2({ children }) {
+                return (
+                  <h2 className="not-prose mb-3 mt-10 border-t border-gray-800 pt-6 text-xl font-bold text-white first:mt-0 first:border-t-0 first:pt-0">
+                    {children}
+                  </h2>
+                );
+              },
+              h3({ children }) {
+                return <h3 className="not-prose mb-2 mt-6 text-base font-bold text-white">{children}</h3>;
+              },
+              p({ children }) {
+                return <p className="my-3 leading-relaxed text-gray-300">{children}</p>;
+              },
+              ul({ children }) {
+                return <ul className="my-3 list-disc space-y-1.5 pl-6 text-gray-300">{children}</ul>;
+              },
+              ol({ children }) {
+                return <ol className="my-3 list-decimal space-y-1.5 pl-6 text-gray-300">{children}</ol>;
+              },
+              strong({ children }) {
+                return <strong className="font-semibold text-white">{children}</strong>;
+              },
               // Replica de spus: singurul lucru de pe pagină pe care omul îl
               // ROSTEȘTE, nu îl citește. Galben, ca în macheta aprobată.
               blockquote({ children }) {
