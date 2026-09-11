@@ -4,6 +4,38 @@
 
 ---
 
+## [~] 🏢 B2B pe Fabulosos, B2C rămâne pe Class RDA — soluția temporară LIVE 2026-09-11 (`f836a1c`)
+
+**Decizie user**: Class RDA nu e plătitoare de TVA — bine pe B2C, prea mică pe B2B (Poșta).
+B2B merge pe **Fabulosos SRL** (RO33968578); Class RDA rămâne DOAR pe B2C.
+
+**Livrat și verificat pe producție:**
+- Pagina `/posta`, PDF-ul (subsol pe fiecare foaie) și `/posta/proceduri` arată Fabulosos SRL.
+  PDF live: „Fabulosos SRL" ×13, „Class RDA" ×0.
+- Răspunsul „Unde ajung datele oamenilor noștri?" nu mai spune „operatorul de date este X"
+  (pe B2B ar fi fost fals: Legal Hub are Class RDA pe `tutor`). Acum: clientul e operatorul
+  datelor angajaților, Fabulosos le prelucrează în numele lui, pe baza acordului de prelucrare.
+  Patch-uit ȘI în textul salvat de user în panou (copie: `VPS2:/root/backups/PageCopy-posta-pre-fabulosos-2026-09-11.json`).
+- `Organization.billingEntity` (migrare 0062, implicit `fabulosos`) + selector „Emite factura"
+  în SuperAdmin → Firme, cu CUI și Reg. Com. la vedere.
+- Neatinse deliberat: `/privacy` `/terms` `/cookies`, cererile GDPR, plata cu cardul prin broker — toate Class RDA.
+
+**Rămas deschis:**
+- [ ] **Brokerul Stripe** mapează un proiect pe o singură firmă (`tutor` → `class-rda`, live). Nu
+  blochează B2B azi (factură separată, nu card). Când un client B2B vrea plată cu cardul:
+  proiect nou `tutor-b2b` → `fabulosos` în brokerul existent (Fabulosos are deja chei live —
+  le folosește Notify). Doar configurare, fără cod — dar brokerul e **NO-TOUCH CRITIC** → propose-confirm.
+- [ ] **Legal Hub**: Poșta ca entitate `CLIENT` (operator) + Fabulosos împuternicit — exact planul
+  „al doilea etaj" din `Master/TODO_PERSISTENT.md` (F1–F5). Hub-ul e NO-TOUCH CRITIC.
+- [ ] **Hârtiile**: contractul + acordul de prelucrare (art. 28 GDPR) cu Poșta, pe Fabulosos —
+  pagina promite acum acordul.
+- [ ] `src/components/admin/markdown-preview.tsx` are aceeași problemă de afișare reparată azi în
+  lecții (`prose` fără `@tailwindcss/typography` → titlurile arată ca paragrafe). Doar în panoul de admin.
+- [ ] Pe ultima pagină a PDF-ului, subsolul stă imediat sub conținut, nu la baza foii
+  (comportamentul grupului de subsol de tabel). Cosmetic, neraportat de user.
+
+---
+
 ## [ ] 🔴 Cascada implicită e periculoasă pentru un curs de serviciu (găsit 2026-09-10)
 
 Treptele implicite sunt la **10 minute** una de alta (`ESCALATION_LEVELS`), fiindcă mecanismul
