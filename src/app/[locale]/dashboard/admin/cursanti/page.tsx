@@ -110,6 +110,8 @@ export default async function CursantiPage({
       id: true, lastName: true, firstName: true, jobTitle: true, badgeNo: true,
       phone: true, county: true, city: true, postOffice: true,
       invitedAt: true, openedAt: true, userId: true,
+      // Cu ce se loghează omul — ca managerul să i-l poată spune când l-a uitat.
+      user: { select: { username: true, email: true } },
     },
   });
 
@@ -258,6 +260,13 @@ export default async function CursantiPage({
         .filter(Boolean)
         .join(" · ") || null,
       telefon: r.phone,
+      recipientId: r.id,
+      numeFamilie: r.lastName,
+      prenume: r.firstName,
+      judet: r.county,
+      oras: r.city,
+      oficiu: r.postOffice,
+      utilizator: r.user?.username || r.user?.email || null,
       dePeLista: true,
       anonim: false,
       userId: r.userId,
@@ -287,6 +296,13 @@ export default async function CursantiPage({
         marca: null,
         unde: null,
         telefon: "",
+        recipientId: null,
+        numeFamilie: null,
+        prenume: null,
+        judet: null,
+        oras: null,
+        oficiu: null,
+        utilizator: e.user.username || e.user.email || null,
         dePeLista: false,
         userId: e.userId,
         stare: stareDin(c.lectiiFacute, c.testeDate, {

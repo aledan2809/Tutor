@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 
 export type ModuleCol = { id: string; order: number; title: string };
@@ -12,6 +13,15 @@ export type RosterRow = {
   marca: string | null;
   unde: string | null;
   telefon: string;
+  /** Rândul de pe lista de invitații — singurul care se poate corecta de aici. */
+  recipientId: string | null;
+  numeFamilie: string | null;
+  prenume: string | null;
+  judet: string | null;
+  oras: string | null;
+  oficiu: string | null;
+  /** Cu ce se loghează (nume de utilizator sau email) — pentru cine și-a uitat contul. */
+  utilizator: string | null;
   /** Vine de pe lista clientului? Dacă nu, a intrat pe codul comun. */
   dePeLista: boolean;
   /** Chiar nu știm cine e — fără nume, fără email, fără nume de utilizator. */
@@ -76,6 +86,8 @@ export function Roster({
   domainId: string;
 }) {
   const [q, setQ] = useState("");
+  const [editId, setEditId] = useState<string | null>(null);
+  const router = useRouter();
   const [filtru, setFiltru] = useState<"toti" | RosterRow["stare"]>("toti");
 
   const numarate = useMemo(() => {
@@ -86,13 +98,17 @@ export function Roster({
   }, [rows]);
 
   const vizibile = useMemo(() => {
-    const t = q.trim().toLowerCase();
+    // Căutare pe ORICE câmp, fără diacritice: la mii de oameni, „Ploiesti" trebuie să
+    // găsească „Ploiești", iar un telefon trebuie găsit scris și „0749…", nu doar „40749…".
+    const t = fara(q.trim());
     return rows.filter((r) => {
       if (filtru !== "toti" && r.stare !== filtru) return false;
       if (!t) return true;
-      return [r.nume, r.functie, r.marca, r.unde, r.telefon || null]
-        .filter(Boolean)
-        .some((v) => (v as string).toLowerCase().includes(t));
+      const campuri = [
+        r.nume, r.prenume, r.numeFamilie, r.functie, r.marca, r.unde, r.oficiu, r.oras, r.judet,
+        r.telefon, r.telefon ? telefonAfisat(r.telefon) : null, r.utilizator, STARI[r.stare].eticheta,
+      ];
+      return campuri.some((v) => v && fara(v).includes(t));
     });
   }, [rows, q, filtru]);
 
@@ -135,7 +151,7 @@ export function Roster({
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Caută după nume, marcă, oficiu, județ…"
+        placeholder="Caută după orice: nume, telefon, utilizator, funcție, marcă, oficiu, oraș, județ…"
         className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder:text-gray-600 sm:max-w-sm"
       />
 
@@ -155,7 +171,8 @@ export function Roster({
           </thead>
           <tbody>
             {vizibile.map((r) => (
-              <tr key={r.id} className="border-t border-gray-800 align-top">
+              <Fragment key={r.id}>
+              <tr className="border-t border-gray-800 align-top">
                 <td className="px-3 py-3">
                   {r.userId ? (
                     <Link
@@ -175,6 +192,30 @@ export function Roster({
                         : "nu e pe lista de invitații"}
                   </div>
                   {r.unde && <div className="text-xs text-gray-500">{r.unde}</div>}
+                  <div className="mt-1 space-y-0.5 text-xs">
+                    {r.telefon && (
+                      <div className="text-gray-400">
+                        <span className="text-gray-600">tel.</span> {telefonAfisat(r.telefon)}
+                      </div>
+                    )}
+                    <div className="text-gray-400">
+                      <span className="text-gray-600">cont</span>{" "}
+                      {r.utilizator ? (
+                        <span className="font-mono text-gray-300">{r.utilizator}</span>
+                      ) : (
+                        <span className="text-gray-600">încă necreat</span>
+                      )}
+                    </div>
+                  </div>
+                  {r.recipientId && (
+                    <button
+                      type="button"
+                      onClick={() => setEditId(editId === r.id ? null : r.id)}
+                      className="mt-1.5 text-xs text-blue-400 hover:underline"
+                    >
+                      {editId === r.id ? "Închide" : "Corectează datele"}
+                    </button>
+                  )}
                 </td>
                 <td className="px-3 py-3">
                   <span className={`inline-block whitespace-nowrap rounded-md border px-2 py-1 text-xs ${STARI[r.stare].clasa}`}>
@@ -224,6 +265,20 @@ export function Roster({
                   </td>
                 ))}
               </tr>
+              {editId === r.id && r.recipientId && (
+                <tr className="bg-gray-900/70">
+                  <td colSpan={2 + cols.length} className="px-3 py-4">
+                    <EditareDestinatar
+                      row={r}
+                      onGata={() => {
+                        setEditId(null);
+                        router.refresh();
+                      }}
+                    />
+                  </td>
+                </tr>
+              )}
+              </Fragment>
             ))}
           </tbody>
         </table>
@@ -232,6 +287,97 @@ export function Roster({
       {vizibile.length === 0 && (
         <p className="text-sm text-gray-500">Niciun cursant nu se potrivește filtrului.</p>
       )}
+    </div>
+  );
+}
+
+/** Fără diacritice și fără majuscule — căutarea nu trebuie să depindă de cum a scris cineva. */
+function fara(v: string): string {
+  return v.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+}
+
+/** 40749591399 → 0749 591 399: cum își știe omul numărul, nu cum îl ține sistemul. */
+function telefonAfisat(tel: string): string {
+  const local = tel.startsWith("40") ? `0${tel.slice(2)}` : tel;
+  return local.length === 10 ? `${local.slice(0, 4)} ${local.slice(4, 7)} ${local.slice(7)}` : local;
+}
+
+const CAMPURI_EDITABILE: { cheie: string; eticheta: string; din: (r: RosterRow) => string }[] = [
+  { cheie: "lastName", eticheta: "Nume", din: (r) => r.numeFamilie ?? "" },
+  { cheie: "firstName", eticheta: "Prenume", din: (r) => r.prenume ?? "" },
+  { cheie: "jobTitle", eticheta: "Funcție", din: (r) => r.functie ?? "" },
+  { cheie: "badgeNo", eticheta: "Marcă", din: (r) => r.marca ?? "" },
+  { cheie: "phone", eticheta: "Telefon", din: (r) => (r.telefon ? telefonAfisat(r.telefon) : "") },
+  { cheie: "postOffice", eticheta: "Oficiu", din: (r) => r.oficiu ?? "" },
+  { cheie: "city", eticheta: "Oraș", din: (r) => r.oras ?? "" },
+  { cheie: "county", eticheta: "Județ", din: (r) => r.judet ?? "" },
+];
+
+function EditareDestinatar({ row, onGata }: { row: RosterRow; onGata: () => void }) {
+  const [valori, setValori] = useState<Record<string, string>>(() =>
+    Object.fromEntries(CAMPURI_EDITABILE.map((c) => [c.cheie, c.din(row)]))
+  );
+  const [stare, setStare] = useState<string | null>(null);
+  const [salvez, setSalvez] = useState(false);
+
+  async function salveaza() {
+    // Se trimit doar câmpurile schimbate: o corectură de nume nu rescrie și telefonul.
+    const initial = Object.fromEntries(CAMPURI_EDITABILE.map((c) => [c.cheie, c.din(row)]));
+    const schimbate = Object.fromEntries(
+      Object.entries(valori).filter(([k, v]) => v.trim() !== (initial[k] ?? "").trim())
+    );
+    if (Object.keys(schimbate).length === 0) {
+      setStare("Nu ai schimbat nimic.");
+      return;
+    }
+    setSalvez(true);
+    setStare(null);
+    const res = await fetch(`/api/admin/destinatari/${row.recipientId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(schimbate),
+    });
+    setSalvez(false);
+    if (!res.ok) {
+      const j = await res.json().catch(() => ({}));
+      setStare(typeof j.error === "string" ? j.error : `Nu s-a salvat (${res.status}).`);
+      return;
+    }
+    onGata();
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {CAMPURI_EDITABILE.map((c) => (
+          <label key={c.cheie} className="block">
+            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-gray-500">
+              {c.eticheta}
+            </span>
+            <input
+              value={valori[c.cheie]}
+              onChange={(e) => setValori({ ...valori, [c.cheie]: e.target.value })}
+              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
+            />
+          </label>
+        ))}
+      </div>
+      {valori.phone.replace(/\D/g, "") !== (row.telefon ? telefonAfisat(row.telefon) : "").replace(/\D/g, "") && (
+        <p className="text-xs text-amber-300">
+          Invitația deja trimisă a plecat pe numărul vechi. Schimbarea contează pentru următoarea.
+        </p>
+      )}
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={salveaza}
+          disabled={salvez}
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50"
+        >
+          {salvez ? "Salvez…" : "Salvează"}
+        </button>
+        {stare && <span className="text-sm text-red-400">{stare}</span>}
+      </div>
     </div>
   );
 }
