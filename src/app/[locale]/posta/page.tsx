@@ -240,6 +240,13 @@ const PRINT_CSS = `
   .posta-foi > * > tr { display: table-row !important; }
   .posta-foi > * > tr > td { display: table-cell !important; padding: 0 !important; border: 0 !important; }
 
+  /*
+   * Antetul de ecran (cel lipicios, cu logo-uri mari) nu are ce căuta pe hârtie: pe
+   * prima pagină se tipărea DEASUPRA antetului repetat, deci logo-urile apăreau de două
+   * ori. Antetul repetat din <thead> acoperă singur fiecare foaie, inclusiv prima.
+   */
+  .posta-ecran-header { display: none !important; }
+
   .posta-print-header-in {
     display: flex !important;
     align-items: center; justify-content: space-between;
@@ -258,12 +265,6 @@ const PRINT_CSS = `
   .posta-print-footer-in, .posta-print-footer-in * { color: #4b5563 !important; }
   .posta-print-footer-in strong { color: #1f2937 !important; }
   .posta-print-logo { height: 13px; width: auto; vertical-align: -2px; margin: 0 7px; display: inline-block; }
-  .posta-print-client { float: right; }
-  .posta-print-client-logo { height: 15px; width: auto; }
-
-  /* Marca clientului, la capătul din dreapta al subsolului repetat. */
-  .posta-print-client { float: right; }
-  .posta-print-client-logo { height: 15px; width: auto; }
 }
 `;
 
@@ -340,27 +341,11 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
             <td>
               <div className="posta-print-footer-in">
         {/*
-          Marca CLIENTULUI în subsolul repetat.
-
-          Userul a cerut antetul pe fiecare pagină. Nu se poate: motorul de tipărire nu
-          repetă un antet deasupra unui text care curge — probat cu `position: fixed`
-          (se așază peste primul rând al fiecărei pagini, iar mărirea marginii coboară și
-          antetul, și textul, la fel), cu `top` negativ (îl aruncă la baza foii, peste
-          subsol) și cu grup de antet de tabel (apare o singură dată, nu se repetă).
-          Subsolul, în schimb, se repetă corect ca grup de subsol de tabel.
-
-          Deci scopul — nicio pagină anonimă, o foaie ruptă din teanc să spună cine
-          vorbește ȘI cui — se atinge în subsol: firma noastră în stânga, marca lor în
-          dreapta, pe fiecare foaie. Antetul mare rămâne pe prima pagină.
+          Subsolul repetat: doar firma noastră și datele de contact. Marca Poștei stă
+          EXCLUSIV în antet, dreapta sus — cerut explicit și repetat de user. O variantă
+          anterioară o punea și aici, în dreapta jos, ca soluție de rezervă pentru un
+          antet care nu se repeta; de când antetul e `<thead>` real, se repetă singur.
         */}
-        <span className="posta-print-client">
-          {logoPosta ? (
-            /* eslint-disable-next-line @next/next/no-img-element -- fișier statuar din public/ */
-            <img src={logoPosta} alt="Poșta Română" className="logo-posta posta-print-client-logo" />
-          ) : (
-            "Poșta Română"
-          )}
-        </span>
         <strong>{FURNIZOR}</strong>
         {" · "}
         {CONSORTIU}
