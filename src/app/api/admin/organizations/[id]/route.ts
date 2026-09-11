@@ -38,6 +38,9 @@ const patchSchema = z.union([
     billingPeriod: z.enum(["LUNAR", "TRIMESTRIAL", "ANUAL"]).nullable().optional(),
     billingStartsAt: z.string().datetime().nullable().optional(),
     billingNote: z.string().trim().max(2000).nullable().optional(),
+    // Care firmă a noastră emite factura. Listă închisă: un slug necunoscut ar produce
+    // o factură fără emitent valid, iar asta se descoperă abia la contabil.
+    billingEntity: z.enum(["fabulosos", "class-rda"]).optional(),
   }),
 ]);
 

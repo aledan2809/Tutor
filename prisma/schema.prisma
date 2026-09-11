@@ -349,6 +349,9 @@ model Organization {
   billingPeriod   RitmFacturare?
   billingStartsAt DateTime?
   billingNote     String?        @db.Text
+  /// Care dintre firmele NOASTRE emite factura acestui client. Implicit Fabulosos: B2B
+  /// cere emitent plătitor de TVA. Class RDA rămâne pe B2C, prin brokerul Stripe.
+  billingEntity   String         @default("fabulosos")
 }
 
 /// Who may reach a domain's content.

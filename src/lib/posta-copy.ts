@@ -161,8 +161,15 @@ export type Copy = {
 /** Grupul din care face parte furnizorul, cerut în subsol. */
 export const CONSORTIU = "part of Know How Consortium";
 
-/** Datele firmei, așa cum le ține Legal Hub pentru aplicația `tutor` (biller + controller). */
-export const FURNIZOR = "Class RDA Impex SRL";
+/**
+ * Firma care semnează contractul B2B și emite factura separată.
+ *
+ * NU e firma din Legal Hub pentru aplicația `tutor` — aceea rămâne Class RDA Impex SRL,
+ * pentru B2C (abonamente cu cardul prin broker, /privacy, /terms). Class nu e plătitoare
+ * de TVA, ceea ce e un avantaj pe consumator și o problemă pe un client instituțional,
+ * deci B2B merge pe Fabulosos. Decizie din 11.09.2026, înaintea întâlnirii cu Poșta.
+ */
+export const FURNIZOR = "Fabulosos SRL";
 export const CONTACT_MAIL = "office@etutor.ro";
 export const CONTACT_TEL_AFISAT = "0712 383 492";
 export const CONTACT_TEL_LINK = "+40712383492";
@@ -425,7 +432,7 @@ export const RO: Copy = {
     },
     {
       intrebare: "„Unde ajung datele oamenilor noștri?”",
-      raspuns: `Operatorul de date este ${FURNIZOR}, iar politicile sunt publice și versionate. Materia voastră e privată: nu apare în catalog, nu se poate căuta și nu există pentru cine nu are cod — nici măcar dacă îi ghicește numele.`,
+      raspuns: `Pentru oamenii voștri, operatorul datelor sunteți voi. ${FURNIZOR} le prelucrează în numele vostru, pe baza unui acord de prelucrare semnat odată cu contractul. Materia voastră e privată: nu apare în catalog, nu se poate căuta și nu există pentru cine nu are cod — nici măcar dacă îi ghicește numele.`,
     },
     {
       intrebare: "„N-avem timp să scoatem oamenii din tură.”",
@@ -728,7 +735,7 @@ export const EN: Copy = {
     },
     {
       intrebare: "“Where does our people's data end up?”",
-      raspuns: `The data controller is ${FURNIZOR}, and the policies are public and versioned. Your subject stays private: it is not in the catalogue, cannot be searched, and does not exist for anyone without a code — not even if they guess its name.`,
+      raspuns: `For your people, you are the data controller. ${FURNIZOR} processes their data on your behalf, under a data processing agreement signed together with the contract. Your subject stays private: it is not in the catalogue, cannot be searched, and does not exist for anyone without a code — not even if they guess its name.`,
     },
     {
       intrebare: "“We have no time to pull people off their rounds.”",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FIRME_EMITENTE, EMITENTI, type EmitentSlug } from "@/lib/firme-emitente";
 
 export type FirmaRand = {
   id: string;
@@ -15,6 +16,7 @@ export type FirmaRand = {
   billingPeriod: "LUNAR" | "TRIMESTRIAL" | "ANUAL" | null;
   billingStartsAt: string | null;
   billingNote: string | null;
+  billingEntity: string;
   whatsappLunaAsta: number;
   smsLunaAsta: number;
 };
@@ -70,7 +72,11 @@ export function FirmeManager({ firme, luna }: { firme: FirmaRand[]; luna: string
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-gray-500">
-                    {f.materii} materii · {f.cursanti} cursanți ·{" "}
+                    Emite factura:{" "}
+                    <span className="text-gray-300">
+                      {FIRME_EMITENTE[f.billingEntity as EmitentSlug]?.nume ?? f.billingEntity}
+                    </span>
+                    {" "}· {f.materii} materii · {f.cursanti} cursanți ·{" "}
                     {f.billingPlan || <span className="text-gray-600">plan nestabilit</span>}
                   </p>
                 </div>
@@ -113,6 +119,7 @@ function Formular({ firma }: { firma: FirmaRand }) {
   const [start, setStart] = useState(firma.billingStartsAt ?? "");
   const [nota, setNota] = useState(firma.billingNote ?? "");
   const [incluse, setIncluse] = useState(firma.meteredIncluded);
+  const [emitent, setEmitent] = useState(firma.billingEntity);
   const [stare, setStare] = useState<"gata" | "salvez" | "salvat" | string>("gata");
 
   async function salveaza() {
@@ -134,6 +141,7 @@ function Formular({ firma }: { firma: FirmaRand }) {
         billingPeriod: ritm === "" ? null : ritm,
         billingStartsAt: start === "" ? null : new Date(start + "T00:00:00.000Z").toISOString(),
         billingNote: nota.trim() || null,
+        billingEntity: emitent,
       }),
     });
     if (!res.ok) {
@@ -168,6 +176,18 @@ function Formular({ firma }: { firma: FirmaRand }) {
         </Camp>
         <Camp eticheta="Prima factură de la">
           <input type="date" value={start} onChange={(e) => setStart(e.target.value)} className={INPUT} />
+        </Camp>
+        <Camp eticheta="Emite factura">
+          <select value={emitent} onChange={(e) => setEmitent(e.target.value)} className={INPUT}>
+            {EMITENTI.map((slug) => (
+              <option key={slug} value={slug}>
+                {FIRME_EMITENTE[slug].nume} — {FIRME_EMITENTE[slug].tva ? "plătitoare de TVA" : "neplătitoare de TVA"}
+              </option>
+            ))}
+          </select>
+          <span className="mt-1 block text-xs text-gray-500">
+            CUI {FIRME_EMITENTE[emitent as EmitentSlug]?.cui} · {FIRME_EMITENTE[emitent as EmitentSlug]?.regCom}
+          </span>
         </Camp>
         <Camp eticheta="Canale contorizate">
           <label className="flex items-center gap-2 py-2 text-sm text-gray-300">

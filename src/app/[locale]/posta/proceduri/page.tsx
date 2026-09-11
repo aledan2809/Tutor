@@ -48,7 +48,7 @@ export default async function PaginaProceduri({
           <p className="font-medium text-gray-200">Ce se întâmplă cu fișierele</p>
           <p className="mt-2 leading-relaxed">
             Ajung pe serverul nostru și le citim doar noi, ca să rescriem materialul. Nu ajung la
-            niciun alt client și nu se publică nicăieri. Operatorul de date este {FURNIZOR}. Dacă
+            niciun alt client și nu se publică nicăieri. Le primește {FURNIZOR}, doar pentru oferta către voi. Dacă
             vă răzgândiți, scrieți-ne la {CONTACT_MAIL} și le ștergem.
           </p>
         </div>

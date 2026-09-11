@@ -24,6 +24,7 @@ export default async function FirmePage() {
       billingPeriod: true,
       billingStartsAt: true,
       billingNote: true,
+      billingEntity: true,
       domains: { select: { id: true } },
     },
   });
@@ -82,6 +83,7 @@ export default async function FirmePage() {
         billingPeriod: f.billingPeriod,
         billingStartsAt: f.billingStartsAt ? f.billingStartsAt.toISOString().slice(0, 10) : null,
         billingNote: f.billingNote,
+        billingEntity: f.billingEntity,
         whatsappLunaAsta: consum.find((c) => c.channel === "WHATSAPP")?._count ?? 0,
         smsLunaAsta: consum.find((c) => c.channel === "SMS")?._count ?? 0,
       };
