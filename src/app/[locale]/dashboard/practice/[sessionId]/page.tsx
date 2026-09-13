@@ -15,6 +15,11 @@ import { SessionResults } from "@/components/session/session-results";
 import { TtsCalibration } from "@/components/session/tts-calibration";
 import { countAudioQuestions } from "@/components/session/tts";
 import { DEFAULT_TONE, type RemarkTone } from "@/lib/remarks";
+import {
+  resolveSessionCompletion,
+  isAlreadyCompletedError,
+  type SessionCompletion,
+} from "@/lib/session-complete-result";
 
 interface QuestionData {
   id: string;
@@ -66,24 +71,6 @@ interface AnswerResult {
   sprintNext?: SprintNextPayload;
 }
 
-interface GamificationData {
-  xpAwarded: number;
-  totalXp: number;
-  level: string;
-  levelUp: boolean;
-  newAchievements: string[];
-}
-
-interface CompletionResult {
-  score: number;
-  totalQuestions: number;
-  correctAnswers: number;
-  duration: number;
-  gamification?: GamificationData | null;
-  /** Sprint only: results are withheld until the two-question debrief is in. */
-  sprintFeedbackRequired?: boolean;
-  timedOut?: number;
-}
 
 type Phase =
   | "loading"
@@ -111,7 +98,7 @@ export default function ActiveSessionPage() {
   const [answeredBase, setAnsweredBase] = useState(0);
   const [phase, setPhase] = useState<Phase>("loading");
   const [feedback, setFeedback] = useState<AnswerResult | null>(null);
-  const [results, setResults] = useState<CompletionResult | null>(null);
+  const [results, setResults] = useState<SessionCompletion | null>(null);
   const [answeredCount, setAnsweredCount] = useState(0);
   // Consecutive correct answers in this session — drives the momentum chip.
   const [correctStreak, setCorrectStreak] = useState(0);
@@ -136,6 +123,16 @@ export default function ActiveSessionPage() {
   const prefetchedNext = useRef<SprintNextPayload | null>(null);
   // Guards a timeout auto-submit from racing a manual answer on the same question.
   const answeredKey = useRef<string | null>(null);
+  // True once THIS session has been (or is being) marked complete. Guards two
+  // things at once: (a) `completeSession` sending a second request for a session
+  // already ended — the overall clock can run out while the LAST answer is still
+  // in flight, so `handleTimeUp` and `handleNext` can both reach for it within
+  // the same session; the server's second reply is `{error:"Session already
+  // completed"}`, which this page used to hand straight to `SessionResults` —
+  // no numeric fields, so score/correct/duration all render as NaN. (b) a late
+  // answer response (for that same in-flight question) flipping the phase back
+  // to "feedback" after the results screen is already up.
+  const sessionEndedRef = useRef(false);
 
   // Load the student's remark config once (best-effort; defaults stay if it fails).
   useEffect(() => {
@@ -169,6 +166,27 @@ export default function ActiveSessionPage() {
   // cleared / new device / crash) resume the in-progress session from the
   // server at the next unanswered question — never force a restart.
   useEffect(() => {
+    // This page component is NOT remounted when "Continuă cu încă o serie"
+    // pushes a new sessionId onto the same /practice/[sessionId] route (only the
+    // param changes) — so every piece of per-session state carries over from
+    // whatever the PREVIOUS session left it at unless reset here. Left unreset,
+    // `sessionEndedRef` alone would silently block the new session's own,
+    // legitimate `completeSession()` call (the guard would still read "true"
+    // from the session that just finished).
+    sessionEndedRef.current = false;
+    setCurrentIndex(0);
+    setAnsweredCount(0);
+    setResults(null);
+    setFeedback(null);
+    setCorrectStreak(0);
+    setCameBack(false);
+    setSprintNotes([]);
+    setLiveSignal(null);
+    setAnswerError(null);
+    lastWrong.current = false;
+    prefetchedNext.current = null;
+    answeredKey.current = null;
+
     // Arriving straight at the debrief (the sprint card's "answer 2 questions"):
     // the session is already finished, so there is nothing to load or resume.
     if (feedbackOnly) {
@@ -263,6 +281,11 @@ export default function ActiveSessionPage() {
           return;
         }
         const result = await res.json();
+        // The overall session clock can have expired while THIS request was in
+        // flight — `completeSession` already ended the session and put the
+        // results screen up. Showing this answer now would flip the UI back to
+        // a feedback screen for a session that's already scored; drop it.
+        if (sessionEndedRef.current) return;
         setAnswerError(null);
         prefetchedNext.current = result.sprintNext ?? null;
         setFeedback(result);
@@ -287,17 +310,35 @@ export default function ActiveSessionPage() {
   );
 
   const completeSession = useCallback(async () => {
+    // The session's overall clock and "this was the last question" can both
+    // decide to end it within moments of each other (the clock can run out
+    // while the last answer is still in flight) — set BEFORE the request, so
+    // whichever call site gets here first is the only one that ever sends it.
+    // Without this, the second call gets the server's `{error:"Session already
+    // completed"}` (no score/duration fields) and this page used to hand that
+    // straight to SessionResults — NaN% NaN NaN:NaN.
+    if (sessionEndedRef.current) return;
+    sessionEndedRef.current = true;
     try {
       const res = await fetch(`/api/${domainSlug}/session/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId }),
       });
-      const result = await res.json();
-      setResults(result);
-      setPhase(result.sprintFeedbackRequired ? "sprint_feedback" : "completed");
+      const body = await res.json();
+      const completion = resolveSessionCompletion(res.ok, body);
+      if (!completion) {
+        // A genuine failure (network hiccup, server error) — allow a retry.
+        // "Already completed" isn't one: it means the session is, in fact,
+        // done (just not through this call), so stay latched.
+        if (!isAlreadyCompletedError(body)) sessionEndedRef.current = false;
+        return;
+      }
+      setResults(completion);
+      setPhase(completion.sprintFeedbackRequired ? "sprint_feedback" : "completed");
       localStorage.removeItem(`session_${sessionId}`);
     } catch {
+      sessionEndedRef.current = false;
       // retry
     }
   }, [sessionId, domainSlug]);
