@@ -151,14 +151,41 @@ export function ActivateForm({
                 <label htmlFor="p1" className="mb-1 block text-sm text-gray-400">
                   Parolă
                 </label>
-                <input
-                  id="p1"
-                  type={show ? "text" : "password"}
-                  value={pass}
-                  onChange={(e) => setPass(e.target.value)}
-                  autoComplete="new-password"
-                  className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-white"
-                />
+                {/*
+                  Ochișorul de parolă, ca la /auth/register și /auth/signin — cerut
+                  explicit. Convenția de aici e iconița DIN interiorul câmpului, nu un
+                  link text sub el. Un singur `show` mișcă amândouă câmpurile: e aceeași
+                  parolă, scrisă de două ori, nu are sens să se dezvăluie separat.
+                */}
+                <div className="relative">
+                  <input
+                    id="p1"
+                    type={show ? "text" : "password"}
+                    value={pass}
+                    onChange={(e) => setPass(e.target.value)}
+                    autoComplete="new-password"
+                    className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 pr-10 text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShow((v) => !v)}
+                    aria-label={show ? "Ascunde parola" : "Arată parola"}
+                    title={show ? "Ascunde parola" : "Arată parola"}
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-200"
+                  >
+                    {show ? (
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                        <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" strokeLinecap="round" strokeLinejoin="round" />
+                        <line x1="1" y1="1" x2="23" y2="23" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    ) : (
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round" strokeLinejoin="round" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
                 <p className="mt-1 text-xs text-gray-500">Cel puțin 8 caractere.</p>
               </div>
 
@@ -166,23 +193,36 @@ export function ActivateForm({
                 <label htmlFor="p2" className="mb-1 block text-sm text-gray-400">
                   Scrie parola încă o dată
                 </label>
-                <input
-                  id="p2"
-                  type={show ? "text" : "password"}
-                  value={pass2}
-                  onChange={(e) => setPass2(e.target.value)}
-                  autoComplete="new-password"
-                  className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-white"
-                />
+                <div className="relative">
+                  <input
+                    id="p2"
+                    type={show ? "text" : "password"}
+                    value={pass2}
+                    onChange={(e) => setPass2(e.target.value)}
+                    autoComplete="new-password"
+                    className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 pr-10 text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShow((v) => !v)}
+                    aria-label={show ? "Ascunde parola" : "Arată parola"}
+                    title={show ? "Ascunde parola" : "Arată parola"}
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-200"
+                  >
+                    {show ? (
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                        <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" strokeLinecap="round" strokeLinejoin="round" />
+                        <line x1="1" y1="1" x2="23" y2="23" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    ) : (
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round" strokeLinejoin="round" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
-
-              <button
-                type="button"
-                onClick={() => setShow((v) => !v)}
-                className="text-xs text-blue-400 hover:text-blue-300"
-              >
-                {show ? "Ascunde parola" : "Arată parola"}
-              </button>
 
               {err && (
                 <div
