@@ -268,6 +268,107 @@ const PRINT_CSS = `
 }
 `;
 
+/**
+ * Tema pe ECRAN — separată de PRINT_CSS de mai sus, care nu se ocupă decât de hârtie.
+ *
+ * Cerut de Poșta, la întâlnire: pagina închisă la culoare nu li s-a părut potrivită —
+ * au vrut fond deschis, scris cu litere contrastante, iar la ei culorile din apropierea
+ * cromaticii lor.
+ *
+ * Nu se rescrie clasa de pe niciun element din pagină. Fiecare clasă întunecată folosită
+ * în JSX (bg-gray-900, text-gray-400, border-gray-800…) e prinsă aici, o singură dată, și
+ * dusă la echivalentul ei deschis — exact tehnica din PRINT_CSS de mai sus (care face
+ * asta pentru hârtie), dusă și pe ecran. Comutatorul e un singur atribut pe rădăcină,
+ * \`data-posta-theme\`; azi valoarea implicită e "light" pentru Poșta. Un client viitor cu
+ * pagina lui proprie poate porni de la același bloc și schimba doar variabilele de mai
+ * jos — de-aia stau numite pe CE ÎNSEAMNĂ culoarea (accent, text-stins), nu pe unde apar.
+ *
+ * Paleta de gri e prinsă direct din PRINT_CSS (aceleași hexadecimale), ca varianta de pe
+ * ecran și cea din PDF să semene — două fețe ale aceluiași document, nu două design-uri.
+ * Accentul albastru e o alegere sigură, profesională — NU e culoarea de brand verificată a
+ * Poștei (sigla lor, singura mostră pe care o avem, e monocromă albă — nu are ce culoare să
+ * dea). Se schimbă într-o linie, la \`--pt-accent\`, imediat ce vine un cod de culoare confirmat.
+ */
+const SCREEN_LIGHT_CSS = `
+[data-posta][data-posta-theme="light"] {
+  --pt-bg: #ffffff;
+  --pt-bg-card: #f8fafc;
+  --pt-bg-card-alt: #f1f5f9;
+  --pt-bg-track: #e2e8f0;
+  --pt-border: #e2e8f0;
+  --pt-border-strong: #cbd5e1;
+  --pt-text: #0f172a;
+  --pt-text-body: #1f2937;
+  --pt-text-muted: #475569;
+  --pt-text-dim: #64748b;
+  --pt-text-faint: #94a3b8;
+  --pt-accent: #1d4ed8;
+  --pt-accent-hover: #1e40af;
+  --pt-accent-soft-bg: #eff6ff;
+  --pt-accent-soft-border: #bfdbfe;
+  --pt-amber: #92400e;
+  --pt-amber-bg: #fffbeb;
+  --pt-amber-border: #fde68a;
+  --pt-emerald: #047857;
+}
+/* Rădăcina însăși poartă și atributul, și clasele întunecate — de-aia perechea de mai jos
+   are și varianta FĂRĂ spațiu (același element), nu doar cea cu spațiu (descendenți). */
+[data-posta][data-posta-theme="light"].bg-gray-950,
+[data-posta][data-posta-theme="light"] .bg-gray-950 { background-color: var(--pt-bg) !important; }
+[data-posta][data-posta-theme="light"].bg-gray-950\\/80,
+[data-posta][data-posta-theme="light"] .bg-gray-950\\/80 { background-color: rgba(255,255,255,.85) !important; }
+[data-posta][data-posta-theme="light"].text-gray-100,
+[data-posta][data-posta-theme="light"] .text-gray-100 { color: var(--pt-text-body) !important; }
+
+[data-posta][data-posta-theme="light"] .bg-gray-900,
+[data-posta][data-posta-theme="light"] .bg-gray-900\\/60 { background-color: var(--pt-bg-card) !important; }
+[data-posta][data-posta-theme="light"] .bg-gray-800 { background-color: var(--pt-bg-card-alt) !important; }
+[data-posta][data-posta-theme="light"] .bg-gray-700 { background-color: var(--pt-bg-track) !important; }
+[data-posta][data-posta-theme="light"] .border-gray-800 { border-color: var(--pt-border) !important; }
+[data-posta][data-posta-theme="light"] .border-gray-700 { border-color: var(--pt-border-strong) !important; }
+
+[data-posta][data-posta-theme="light"] .text-gray-200 { color: var(--pt-text) !important; }
+[data-posta][data-posta-theme="light"] .text-gray-300 { color: var(--pt-text-body) !important; }
+[data-posta][data-posta-theme="light"] .text-gray-400 { color: var(--pt-text-muted) !important; }
+[data-posta][data-posta-theme="light"] .text-gray-500 { color: var(--pt-text-dim) !important; }
+[data-posta][data-posta-theme="light"] .text-gray-600 { color: var(--pt-text-faint) !important; }
+[data-posta][data-posta-theme="light"] .text-gray-700 { color: var(--pt-text-muted) !important; }
+[data-posta][data-posta-theme="light"] .text-white { color: var(--pt-text) !important; }
+[data-posta][data-posta-theme="light"] h1,
+[data-posta][data-posta-theme="light"] h2,
+[data-posta][data-posta-theme="light"] h3 { color: var(--pt-text) !important; }
+
+/* Accentele își păstrează SENSUL (albastru = identitate, chihlimbar = atenție, verde/roșu =
+   scor) — doar tonul se schimbă, ca să nu se piardă pe fond alb. */
+[data-posta][data-posta-theme="light"] .text-blue-200,
+[data-posta][data-posta-theme="light"] .text-blue-300,
+[data-posta][data-posta-theme="light"] .text-blue-400 { color: var(--pt-accent) !important; }
+[data-posta][data-posta-theme="light"] .bg-blue-500,
+[data-posta][data-posta-theme="light"] .bg-blue-600 { background-color: var(--pt-accent) !important; }
+[data-posta][data-posta-theme="light"] .hover\\:bg-blue-500:hover { background-color: var(--pt-accent-hover) !important; }
+[data-posta][data-posta-theme="light"] .hover\\:text-blue-200:hover { color: var(--pt-accent-hover) !important; }
+[data-posta][data-posta-theme="light"] .bg-blue-950\\/20 { background-color: var(--pt-accent-soft-bg) !important; }
+[data-posta][data-posta-theme="light"] .border-blue-900\\/60 { border-color: var(--pt-accent-soft-border) !important; }
+
+[data-posta][data-posta-theme="light"] .text-amber-300 { color: var(--pt-amber) !important; }
+[data-posta][data-posta-theme="light"] .bg-amber-500\\/15,
+[data-posta][data-posta-theme="light"] .bg-amber-500\\/5 { background-color: var(--pt-amber-bg) !important; }
+[data-posta][data-posta-theme="light"] .border-amber-500\\/40 { border-color: var(--pt-amber-border) !important; }
+
+[data-posta][data-posta-theme="light"] .text-emerald-300 { color: var(--pt-emerald) !important; }
+[data-posta][data-posta-theme="light"] .text-red-300 { color: #b91c1c !important; }
+
+[data-posta][data-posta-theme="light"] .hover\\:text-gray-400:hover { color: var(--pt-text-body) !important; }
+
+/* Plăcuța albă din spatele logo-ului Know How exista ca sigla lor (închisă la culoare)
+   să nu se piardă pe fondul întunecat — pe fond alb e deja transparentă, la fel ca la tipar. */
+[data-posta][data-posta-theme="light"] .bg-white { background-color: transparent !important; }
+
+/* Sigla Poștei e albă pură (verificat: monocromă) — vizibilă direct pe fond întunecat,
+   invizibilă pe alb. Aceeași reparație ca la tipar. */
+[data-posta][data-posta-theme="light"] .logo-posta { filter: brightness(0) !important; }
+`;
+
 /** Aceleași praguri ca în tabloul real (`admin/cursanti/roster.tsx`). */
 function culoareScor(corecte: number, total: number): string {
   if (total === 0) return "text-gray-500";
@@ -284,8 +385,15 @@ export default async function PostaPage({ params }: { params: Promise<{ locale: 
   const logoKnowHow = logoExistent(LOGO_KNOWHOW);
 
   return (
-    <div data-posta className="min-h-screen bg-gray-950 text-gray-100">
+    <div
+      data-posta
+      // "light" = cerut de Poșta la întâlnire: fond deschis, scris contrastant. Nu se
+      // schimbă nicio clasă din pagină — vezi nota de la SCREEN_LIGHT_CSS mai sus.
+      data-posta-theme="light"
+      className="min-h-screen bg-gray-950 text-gray-100"
+    >
       <style>{PRINT_CSS}</style>
+      <style>{SCREEN_LIGHT_CSS}</style>
       {/*
         Antetul e al ÎNTÂLNIRII, nu al site-ului: marca noastră în stânga, a clientului
         în dreapta — cerut de user, ca omul de la Poșta să-și vadă casa pe document.
