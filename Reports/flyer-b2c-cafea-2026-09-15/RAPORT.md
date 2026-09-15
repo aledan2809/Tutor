@@ -4,6 +4,32 @@ Locație: `Tutor/Reports/flyer-b2c-cafea-2026-09-15/`
 
 ---
 
+## -1. v3 — o singură față, nu față+verso
+
+Ai spus: „flyerul se face doar pe fata, nu si pe verso". Tot ce era pe verso (QR-ul, cele 3
+puncte de „ce vezi concret" și amprenta legală) s-a mutat pe faimoasa unică pagină — n-a
+dispărut, doar s-a comprimat.
+
+**Ce am tăiat ca să încapă totul pe o singură față** (buget: 132mm utili din cele 140mm):
+- **Poza cu băiatul la teme** — scoasă de tot. Nu mai era loc pentru ea odată ce QR-ul +
+  îndemnul + amprenta legală au trebuit să încapă pe aceeași pagină; între „arată bine" și
+  „se vede clar codul de scanat + cine e firma", am ales pe-al doilea.
+- **Cele 3 puncte „Ce vezi, concret, în fiecare zi"** — scoase; ideea centrală (vezi azi ce a
+  lucrat, afli pe WhatsApp dacă se oprește) rămâne dusă de titlu + subtitlu.
+- Poza mamei ceva mai mică (51mm în loc de 70mm înălțime), titlul ceva mai mic (15,5pt în loc
+  de 18pt) — ajustări fine, nu tăieri.
+
+**Ce a rămas, neschimbat ca mesaj**: poza, ecusonul „7 zile gratuite", titlul, prețul tăiat +
+noul preț + codul V126S, QR-ul către `etutor.ro/cafea`, amprenta legală (acum condensată pe
+2 rânduri în loc de 3).
+
+Dacă la un moment dat vrei totuși și verso (de ex. tipografia oferă preț similar pentru
+față+verso, sau vrei să repui poza cu băiatul și cele 3 puncte), varianta cu 2 pagini e încă
+în istoricul git al acestui fișier (`git log -- Reports/flyer-b2c-cafea-2026-09-15/flyer.html`)
+— nu trebuie reconstruită de la zero.
+
+---
+
 ## 0. v2 (15.09 seara) — feedback-ul tău aplicat
 
 | Ce ai cerut | Ce am făcut |
@@ -116,14 +142,14 @@ Nimic din research-ul de mai sus nu e pe internet/presupunere — e din `src/lib
 
 ---
 
-## 5. Ce am construit — pozele (v2)
+## 5. Ce am construit — poza (v2, rămasă în v3)
 
-v1 avea o ilustrație vectorială proprie (fără poze externe). În v2 ai cerut poze reale, deci:
+v1 avea o ilustrație vectorială proprie (fără poze externe). Din v2 e o poză reală:
 
 - **Femeie + cafea + telefon**: `foto-mama-cafea-telefon.jpg` — Pexels, autor Los Muertos Crew (Cristian Rojas), [pexels.com/photo/a-woman-sitting-at-the-table-7487539](https://www.pexels.com/photo/a-woman-sitting-at-the-table-7487539/), licența Pexels (uz comercial voie, fără atribuire obligatorie). Am ales-o din ~8 candidate verificate vizual — majoritatea aveau doar telefon SAU doar cafea, nu ambele + fața vizibilă + o expresie caldă.
-- **Băiat la teme**: `foto-baiat-tema.jpg` — Unsplash, autor Vitaly Gariev ([@silverkblack](https://unsplash.com/@silverkblack)), [unsplash.com/photos/young-boy-doing-homework-at-a-desk-Vdoz_CbxB4g](https://unsplash.com/photos/young-boy-doing-homework-at-a-desk-Vdoz_CbxB4g), licența Unsplash (uz comercial voie, fără atribuire obligatorie).
-- Fișierele sunt referențiate ca `<img src="foto-....jpg">` (fișiere separate, nu base64) — dacă muți `flyer.html` în alt folder, mută și pozele odată cu el.
+- Fișierul e referențiat ca `<img src="foto-mama-cafea-telefon.jpg">` (fișier separat, nu base64) — dacă muți `flyer.html` în alt folder, mută și poza odată cu el.
 - **Fonturi**: neschimbat, doar stive de sistem, niciun `<link>` extern.
+- **(v3)** poza cu băiatul la teme (Unsplash, Vitaly Gariev) a fost scoasă din machetă — vezi §-1. Fișierul original a fost șters din folder (nemaifiind folosit); dacă vrei să-l repui, sursa era [unsplash.com/photos/young-boy-doing-homework-at-a-desk-Vdoz_CbxB4g](https://unsplash.com/photos/young-boy-doing-homework-at-a-desk-Vdoz_CbxB4g).
 
 ---
 
@@ -133,20 +159,19 @@ Toate în `Tutor/Reports/flyer-b2c-cafea-2026-09-15/`:
 
 | Fișier | Ce e |
 |---|---|
-| `flyer.html` | Sursa — HTML+CSS+2 poze, 105×140mm + bleed 5mm × 2 pagini (față/verso) |
-| `foto-mama-cafea-telefon.jpg` / `foto-baiat-tema.jpg` | Pozele reale (sursă+licență mai sus) |
+| `flyer.html` | Sursa — HTML+CSS+poza, **o singură pagină** 105×140mm + bleed 5mm (v3: doar față) |
+| `foto-mama-cafea-telefon.jpg` | Poza reală (sursă+licență mai sus) |
 | `qr-cafea.svg` | QR-ul generat pentru `etutor.ro/cafea`, sursă vectorială |
-| `eTUTOR-flyer-{fata,verso}-105x140mm-FARA-bleed-RGB-300dpi.png` | **Format real 10,5×14cm** (1241×1654px, verificat) — asta deschizi tu ca să verifici dimensiunea pe ecran |
-| `eTUTOR-flyer-{fata,verso}-115x150mm-CU-bleed-RGB-300dpi.png` | Cu bleed 5mm (1359×1772px) — pentru tipografie, dacă cere bleed |
-| `eTUTOR-flyer-{fata,verso}-115x150mm-CU-bleed-CMYK-300dpi.jpg` | Ca mai sus, dar CMYK — pentru tipar |
-| `eTUTOR-flyer-fata-verso-105x140-bleed5-300dpi.pdf` | Ambele pagini într-un PDF (115×150mm/pagină, CU bleed) |
+| `eTUTOR-flyer-105x140mm-FARA-bleed-RGB-300dpi.png` | **Format real 10,5×14cm** (1241×1654px, verificat) — asta deschizi tu ca să verifici dimensiunea pe ecran |
+| `eTUTOR-flyer-115x150mm-CU-bleed-RGB-300dpi.png` | Cu bleed 5mm (1359×1772px) — pentru tipografie, dacă cere bleed |
+| `eTUTOR-flyer-115x150mm-CU-bleed-CMYK-300dpi.jpg` | Ca mai sus, dar CMYK — pentru tipar |
+| `eTUTOR-flyer-115x150mm-CU-bleed.pdf` | O singură pagină, 115×150mm, CU bleed |
 | `export-print-files.mjs` | Scriptul care generează toate fișierele de mai sus — rulează-l din nou după orice modificare în `flyer.html` |
 
 **Verificat înainte de livrare** (nu doar generat, ci măsurat):
-- Fișierele FĂRĂ bleed: exact 1241×1654px = 10,5×14cm la 300dpi (măsurat cu `file`, nu presupus).
-- Fișierele CU bleed: exact 1359×1772px = 11,5×15cm la 300dpi.
-- JPG-urile sunt cu adevărat CMYK (4 canale, verificat cu `file` și cu `sharp`), nu doar redenumite.
-- PDF-ul are exact 2 pagini.
+- Fișierul FĂRĂ bleed: exact 1241×1654px = 10,5×14cm la 300dpi (măsurat cu `file`, nu presupus).
+- Fișierul CU bleed: exact 1359×1772px = 11,5×15cm la 300dpi.
+- JPG-ul e cu adevărat CMYK (4 canale, verificat cu `file`), nu doar redenumit.
 - Codul QR a fost decodat înapoi (OpenCV) din SVG-ul izolat ȘI din fișierul PNG final de tipar — confirmă `https://etutor.ro/cafea` de fiecare dată.
 
 **O mică diferență față de modelul REAL, ca să știi**: JPG-urile mele au un profil ICC generic „CMYK" atașat (REAL nu avea niciunul deloc). Am dat peste un comportament al bibliotecii (`sharp`) care, fără un profil atașat, revenea tăcut la RGB quando setam rezoluția de 300dpi — soluția a fost să atașez un profil CMYK generic. Majoritatea tipografiilor citesc asta fără probleme; dacă a ta cere explicit „fără profil" sau un profil anume (ISO Coated v2 / FOGRA39 / SWOP), spune-mi și schimb linia din script.
