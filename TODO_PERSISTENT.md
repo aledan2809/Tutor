@@ -47,16 +47,27 @@ lista. Dacă singurul commit nou e `dc358c7`: `git pull origin master && npm run
 (fără npm install, fără prisma migrate). Verifică `curl -s -o /dev/null -w "%{http_code}" https://etutor.ro/` = 200 și
 `grep -c "sc. C, et. 1" .next/server/**/*.js` > 0 (sau o factură Fabulosos cu Sector 6). Raportează HEAD înainte/după.
 **Starea reală la 15.09 seara**: VPS = `ba15904` (deploy-ul sesiunii de azi); `origin/master` = `ba15904` → `6de18b3` (docs,
-Reports/) → **`dc358c7`** → `8a4268c` (docs, Reports/). Deci „alte commit-uri" există, dar sunt **doar documente** din sesiunea
-asta — se poate deploya tot. ⚠️ pe VPS `package-lock.json` se murdărește la fiecare `npm install`: `git checkout -- package-lock.json`
+Reports/) → **`dc358c7`** → `8a4268c` (docs, Reports/) → `7df5349` (TODO) → **`090aeb5`** (fix real: `esteContinutPdfValid`,
+vezi itemul de mai jos). Deci „alte commit-uri" există, dar sunt **doar documente + fix-ul de mai jos** — se poate deploya
+tot într-un singur build. ⚠️ pe VPS `package-lock.json` se murdărește la fiecare `npm install`: `git checkout -- package-lock.json`
 înainte de pull, altfel pull-ul eșuează tăcut. Build-ul durează 60–85 min cât rulează orfanul `real` (PID 4066681).
 
-## [ ] ✅ De verificat live: ruta `/api/posta/pdf` după `b2e3730` (deployat 15.09 12:05 UTC, neprobat)
+## [x] ✅ Verificat live: ruta `/api/posta/pdf` — găsit + reparat un bug real, `090aeb5` (2026-09-15, nedeployat încă)
 
-Probă (a fost întreruptă): prima descărcare → `200` + antet `X-Posta-PDF: cache-vechi` (fișierul din 11.09 servit pe loc,
-regenerare în fundal); după ~4 min a doua → `X-Posta-PDF: cache` și `posta-ro.pdf` cu mtime nou, 12 pagini, „Fabulosos" ×13.
-`pm2 logs tutor | grep posta/pdf` fără „a depășit". Dacă regenerarea tot eșuează, Chromium-ul snap (pornire ~90 s) e cauza:
-vezi L555 în Master.
+Verificarea a găsit exact riscul pe care `b2e3730` voia să-l acopere, dar rămas neacoperit: la 12:44 UTC (39 min după
+deploy, probabil chiar în timpul probei întrerupte din sesiunea trecută) o generare a tipărit `about:blank` — Chromium
+a ieșit cu 0 înainte ca `/posta` să apuce să picteze ceva, a scris 856 octeți / 1 pagină goală, a trecut de singura
+gardă existentă (`lungime === 0`) și a rămas cache-uit ca „gata". Vizitatorii reali primeau fișierul stricat ca
+`cache-vechi`, fără nicio eroare vizibilă, timp de ~o oră — până când o regenerare naturală ulterioară l-a suprascris
+cu fișierul corect (231.714 octeți, **12 pagini, „Fabulosos" ×13** — verificat direct cu `pdfinfo`/`pdftotext`, nu doar
+pe antet). Postgres era sus tot timpul (`pg_isready` OK); liniile „a depășit 90s" din log erau vechi (limita de dinainte
+de `b2e3730` era 90s; codul curent are 240s) — zgomot rămas în bufferul pm2, nu o eroare curentă.
+
+Fix (`Tutor@090aeb5`, push-uit, **nedeployat**): `esteContinutPdfValid()` în `posta-pdf-cache.ts` — un fișier sub
+20 KB (praga real e ~230 KB) e tratat ca eșec, nu ca succes; pe calea de regenerare din fundal asta doar loghează și
+lasă fișierul bun neatins, pe calea la rece (fără cache deloc) întoarce 503 curat în loc să cache-uiască un rateu.
+Verificat: vitest 7/7 (`posta-pdf-cache.test.ts`, 4 cazuri noi), tsc curat pe fișierele atinse. **Se leagă de deploy-ul
+punctual de mai sus** — un singur build, nu două.
 
 
 ## [~] 🏢 B2B pe Fabulosos, B2C rămâne pe Class RDA — soluția temporară LIVE 2026-09-11 (`f836a1c`)
