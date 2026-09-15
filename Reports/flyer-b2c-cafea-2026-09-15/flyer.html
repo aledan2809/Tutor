@@ -118,6 +118,7 @@
     font-family: Georgia, serif; font-weight: 800; font-size: 14pt; color: var(--emerald-dark);
   }
   .price-card .new small { font-size: 7.2pt; font-weight: 600; color: var(--ink-soft); }
+  .price-card .new .ast { font-size: 0.62em; vertical-align: super; line-height: 0; }
   .price-card .right { flex: 1 1 auto; text-align: right; padding-left: 1.6mm; }
   .price-card .voucher-label { font-size: 6pt; color: var(--ink-soft); }
   .price-card .voucher-code {
@@ -146,6 +147,8 @@
   }
   .qr-block .cta .code { display: block; margin-top: 1.3mm; font-size: 6.8pt; color: var(--ink-soft); }
   .qr-block .cta .code b { color: var(--terracotta-dark); letter-spacing: 0.03em; }
+  /* v3.5: nota de la asteriscul prețului (condițiile voucherului, decise de Alex 15.09). */
+  .qr-block .cta .note { margin-top: 1.5mm; font-size: 5.6pt; line-height: 1.3; color: var(--ink-soft); }
 
   /* Amprenta legală, condensată — mutată de pe verso. */
   .legal {
@@ -190,7 +193,7 @@
     </svg>
     <div class="prices">
       <span class="old">33,20 lei</span>
-      <span class="new">24,90 lei<small>&nbsp;/ lună</small></span>
+      <span class="new">24,90 lei<span class="ast">*</span><small>&nbsp;/ lună</small></span>
     </div>
     <div class="right">
       <div class="voucher-label">cu codul</div>
@@ -210,6 +213,7 @@
       <div class="l1">Scanează</div>
       <div class="url">eTutor.ro/cafea</div>
       <div class="code">Fără scanare? Cod voucher: <b>V126S</b></div>
+      <div class="note">*Pentru o materie, cu codul V126S activat până la 30.11.2026. Reducerea rămâne lunar cât e activ abonamentul ales atunci; o singură folosire pe cont.</div>
     </div>
   </div>
 

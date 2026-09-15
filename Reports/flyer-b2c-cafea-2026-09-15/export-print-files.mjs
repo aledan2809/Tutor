@@ -33,14 +33,13 @@
 //      output profile is shown with shifted colours by most viewers, and the
 //      print shop's RIP converts RGB with its own profile anyway.
 //
-// NOTE on the CMYK JPEG: sharp/libvips silently drops back to sRGB if you
-// set output metadata (density) without also giving it a colour-managed ICC
-// tag — the fix is `icc: 'cmyk'` in the withMetadata() call below. That
-// embeds a generic CMYK ICC profile; if your print shop wants a named one
-// instead (ISO Coated v2 / FOGRA39 / SWOP) or none at all, say so and this
-// line is the one to change.
+// NOTE on CMYK: converted by macOS `sips` with the system "Generic CMYK Profile"
+// (a real ICC conversion, profile embedded) — the same method as the REAL1 flyer
+// the print shop already accepted. If they ask for a named profile (ISO Coated v2
+// / FOGRA39), CMYK_ICC below is the one line to change.
 import { createRequire } from "module";
 import { writeFile } from "fs/promises";
+import { execFileSync } from "child_process";
 const requireReal = createRequire("/Users/danciulescu/Projects/REAL/package.json");
 const requireOffer = createRequire("/Users/danciulescu/Projects/Offer/package.json");
 const { chromium } = requireReal("playwright");
@@ -83,18 +82,19 @@ async function out(name, promise) {
   console.log("wrote", name);
 }
 
-await out(
-  "eTUTOR-flyer-115x150mm-CU-bleed-RGB-300dpi.png",
-  sharp(bleed300).withMetadata({ density: DPI }).png().toFile(path.join(OUT_DIR, "eTUTOR-flyer-115x150mm-CU-bleed-RGB-300dpi.png"))
-);
-await out(
-  "eTUTOR-flyer-115x150mm-CU-bleed-CMYK-300dpi.jpg",
-  sharp(bleed300)
-    .toColourspace("cmyk")
-    .jpeg({ quality: 95, chromaSubsampling: "4:4:4" })
-    .withMetadata({ density: DPI, icc: "cmyk" })
-    .toFile(path.join(OUT_DIR, "eTUTOR-flyer-115x150mm-CU-bleed-CMYK-300dpi.jpg"))
-);
+// v3.5: print files named and converted exactly like the REAL1 flyer already sent to
+// the Poșta Română print shop ("105x140-bleed5", CMYK via the macOS "Generic CMYK
+// Profile", TIFF + JPEG) — same machetare requirements, same recipient.
+const RGB_BLEED = "eTUTOR-flyer-105x140-bleed5-RGB-300dpi.png";
+await out(RGB_BLEED, sharp(bleed300).withMetadata({ density: DPI }).png().toFile(path.join(OUT_DIR, RGB_BLEED)));
+const CMYK_ICC = "/System/Library/ColorSync/Profiles/Generic CMYK Profile.icc";
+for (const [name, fmt, opt] of [
+  ["eTUTOR-flyer-105x140-bleed5-CMYK-300dpi.tif", "tiff", "lzw"],
+  ["eTUTOR-flyer-105x140-bleed5-CMYK-300dpi.jpg", "jpeg", "95"],
+]) {
+  execFileSync("sips", ["-m", CMYK_ICC, "-s", "format", fmt, "-s", "formatOptions", opt, "-s", "dpiWidth", String(DPI), "-s", "dpiHeight", String(DPI), path.join(OUT_DIR, RGB_BLEED), "--out", path.join(OUT_DIR, name)], { stdio: "ignore" });
+  console.log("wrote", name);
+}
 await out(
   "eTUTOR-flyer-105x140mm-FARA-bleed-RGB-300dpi.png",
   sharp(bleed300)
@@ -134,7 +134,7 @@ const trimMasterJpg = await sharp(master)
   })
   .jpeg({ quality: 95, chromaSubsampling: "4:4:4" })
   .toBuffer();
-await pdfFrom(masterJpg, PAGE_MM, BLEED_MM, "eTUTOR-flyer-115x150mm-CU-bleed.pdf");
+await pdfFrom(masterJpg, PAGE_MM, BLEED_MM, "eTUTOR-flyer-105x140-bleed5.pdf");
 await pdfFrom(trimMasterJpg, TRIM_MM, 0, "eTUTOR-flyer-105x140mm-FARA-bleed.pdf");
 
 console.log("done");
