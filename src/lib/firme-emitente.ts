@@ -12,7 +12,7 @@ export const FIRME_EMITENTE = {
     nume: "Fabulosos SRL",
     cui: "RO33968578",
     regCom: "J2015000297404",
-    adresa: "Valea Oltului nr. 8, bl. A5, ap. 36, Sector 4, București",
+    adresa: "Str. Valea Oltului nr. 8, bl. A5, sc. C, et. 1, ap. 36, Sector 6, București",
     tva: true,
   },
   "class-rda": {
