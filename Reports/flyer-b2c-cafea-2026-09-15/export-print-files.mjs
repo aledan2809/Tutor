@@ -1,31 +1,37 @@
 // Re-export script for the eTUTOR.ro "cafea" flyer — regenerates the print
-// files (RGB PNG + CMYK JPG, with-bleed and trim-only + a PDF) from flyer.html.
+// files (RGB PNG + CMYK JPG + PDF, with-bleed and trim-only) from flyer.html.
 // Run again any time flyer.html is edited (copy text, colors, price, etc.).
 //
 // v3: ONE page only (Alex, 15.09: "flyerul se face doar pe fata, nu si pe
-// verso") — the old fata/verso split + the export loop over both are gone;
-// flyer.html itself now has a single `.page` div with everything folded in
-// (QR + legal footer moved off the old verso onto this one face).
+// verso") — flyer.html has a single `.page` div with everything folded in.
+//
+// v3.4 (15.09, size re-check): every output is now the EXACT physical size.
+// Before, the trim PNG was 1241 px wide (105.07 mm instead of 105) because the
+// crop was "canvas minus 2 × bleed" on a canvas that was itself 1 px too wide,
+// and Chromium's page.pdf() wrote a 327.12 × 426 pt page (115.4 × 150.3 mm,
+// thin white strips on three edges) with the trim box equal to the page —
+// nothing a print shop could cut to. Now: pixel sizes are computed from the
+// millimetres, and the PDFs are assembled with pdf-lib, so the page boxes are
+// exact (MediaBox 115 × 150 mm, TrimBox 105 × 140 mm, BleedBox = page).
 //
 // Usage:  node export-print-files.mjs
 // (run from anywhere — all paths below are absolute)
 //
-// Dependencies: needs `playwright` (with the Chromium browser already
-// downloaded) and `sharp` on this machine. Neither is a Tutor dependency —
-// this script borrows them, read-only, from another local project
-// (REAL/package.json) that already has both installed. See git history of
-// this file (v1/v2) for the fallback instructions if that project moves.
+// Dependencies: `playwright` (with Chromium downloaded) and `sharp`, borrowed
+// read-only from REAL/package.json; `pdf-lib`, borrowed from Offer/package.json.
+// None of them is a Tutor dependency.
 //
 // Pipeline:
-//   1. Chromium renders flyer.html at 300dpi (deviceScaleFactor = 300/96)
-//      and screenshots the one page.
-//   2. sharp stamps 300dpi density onto a plain RGB PNG (digital preview /
-//      email / WhatsApp use) and converts a second copy to a tagged 4-channel
-//      CMYK JPEG (print-ready — most RO print shops ask for CMYK + 300dpi).
-//      A third variant crops the 5mm bleed ring off each edge for the
-//      "what you'll actually hold" 105x140mm trim-size file.
-//   3. Playwright's own page.pdf() produces a 1-page PDF at the true
-//      115x150mm page size.
+//   1. Chromium renders flyer.html at 600dpi (deviceScaleFactor = 600/96) and
+//      screenshots the page; the screenshot is cropped to exactly 115 × 150 mm.
+//   2. sharp makes the 300dpi files from that master: RGB PNG (digital preview
+//      / email / WhatsApp), tagged CMYK JPEG (print shops that ask for CMYK),
+//      and the 105 × 140 mm trim-only PNG ("what you'll actually hold").
+//   3. pdf-lib wraps the 600dpi image in two PDFs with exact page boxes:
+//      one with bleed (+ TrimBox for the cut) and one at trim size. The image
+//      stays RGB inside the PDF on purpose: a CMYK image without an embedded
+//      output profile is shown with shifted colours by most viewers, and the
+//      print shop's RIP converts RGB with its own profile anyway.
 //
 // NOTE on the CMYK JPEG: sharp/libvips silently drops back to sRGB if you
 // set output metadata (density) without also giving it a colour-managed ICC
@@ -34,60 +40,101 @@
 // instead (ISO Coated v2 / FOGRA39 / SWOP) or none at all, say so and this
 // line is the one to change.
 import { createRequire } from "module";
-const REQUIRE_FROM = "/Users/danciulescu/Projects/REAL/package.json";
-const require = createRequire(REQUIRE_FROM);
-const { chromium } = require("playwright");
-const sharp = require("sharp");
+import { writeFile } from "fs/promises";
+const requireReal = createRequire("/Users/danciulescu/Projects/REAL/package.json");
+const requireOffer = createRequire("/Users/danciulescu/Projects/Offer/package.json");
+const { chromium } = requireReal("playwright");
+const sharp = requireReal("sharp");
+const { PDFDocument } = requireOffer("pdf-lib");
 import path from "path";
 import { fileURLToPath } from "url";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const FLYER = `file://${path.join(HERE, "flyer.html")}`;
 const OUT_DIR = HERE;
+
+const PAGE_MM = { w: 115, h: 150 }; // 105 × 140 finished + 5 mm bleed each side
+const BLEED_MM = 5;
+const TRIM_MM = { w: PAGE_MM.w - 2 * BLEED_MM, h: PAGE_MM.h - 2 * BLEED_MM };
+const MASTER_DPI = 600;
 const DPI = 300;
-const SCALE = DPI / 96;
-// 5mm bleed at 300dpi, in pixels — cropped off each edge for the trim-size file.
-const BLEED_PX = Math.round((5 / 25.4) * DPI);
+const px = (mm, dpi) => Math.round((mm / 25.4) * dpi);
+const pt = (mm) => (mm / 25.4) * 72;
 
 const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 435, height: 567 }, deviceScaleFactor: SCALE });
-
+// The viewport is whole CSS px (435 × 567); the page is 434.65 × 566.93, so the
+// screenshot carries a sliver past the right/bottom edge — cropped off below.
+const page = await browser.newPage({ viewport: { width: 435, height: 567 }, deviceScaleFactor: MASTER_DPI / 96 });
 await page.goto(FLYER, { waitUntil: "networkidle" });
-const rawPng = await page.screenshot();
-const meta = await sharp(rawPng).metadata();
-console.log("raw px (115x150mm, WITH bleed):", meta.width, "x", meta.height);
-
-const pngOut = path.join(OUT_DIR, "eTUTOR-flyer-115x150mm-CU-bleed-RGB-300dpi.png");
-await sharp(rawPng).withMetadata({ density: DPI }).png().toFile(pngOut);
-console.log("wrote", pngOut);
-
-const jpgOut = path.join(OUT_DIR, "eTUTOR-flyer-115x150mm-CU-bleed-CMYK-300dpi.jpg");
-await sharp(rawPng)
-  .toColourspace("cmyk")
-  .jpeg({ quality: 95, chromaSubsampling: "4:4:4" })
-  .withMetadata({ density: DPI, icc: "cmyk" })
-  .toFile(jpgOut);
-console.log("wrote", jpgOut);
-
-const trimmed = sharp(rawPng).extract({
-  left: BLEED_PX,
-  top: BLEED_PX,
-  width: meta.width - 2 * BLEED_PX,
-  height: meta.height - 2 * BLEED_PX,
-});
-const trimPngOut = path.join(OUT_DIR, "eTUTOR-flyer-105x140mm-FARA-bleed-RGB-300dpi.png");
-await trimmed.clone().withMetadata({ density: DPI }).png().toFile(trimPngOut);
-console.log("wrote", trimPngOut, "(check its own file size for the true 105x140mm px dims — sharp's own .metadata() here would misleadingly report the pre-crop size)");
-
-const pdfOut = path.join(OUT_DIR, "eTUTOR-flyer-115x150mm-CU-bleed.pdf");
-await page.pdf({
-  path: pdfOut,
-  width: "115mm",
-  height: "150mm",
-  printBackground: true,
-  margin: { top: 0, bottom: 0, left: 0, right: 0 },
-});
-console.log("wrote", pdfOut);
-
+const shot = await page.screenshot();
 await browser.close();
+
+const master = await sharp(shot)
+  .extract({ left: 0, top: 0, width: px(PAGE_MM.w, MASTER_DPI), height: px(PAGE_MM.h, MASTER_DPI) })
+  .png()
+  .toBuffer();
+const bleed300 = await sharp(master)
+  .resize(px(PAGE_MM.w, DPI), px(PAGE_MM.h, DPI), { fit: "fill", kernel: "lanczos3" })
+  .png()
+  .toBuffer();
+
+async function out(name, promise) {
+  await promise;
+  console.log("wrote", name);
+}
+
+await out(
+  "eTUTOR-flyer-115x150mm-CU-bleed-RGB-300dpi.png",
+  sharp(bleed300).withMetadata({ density: DPI }).png().toFile(path.join(OUT_DIR, "eTUTOR-flyer-115x150mm-CU-bleed-RGB-300dpi.png"))
+);
+await out(
+  "eTUTOR-flyer-115x150mm-CU-bleed-CMYK-300dpi.jpg",
+  sharp(bleed300)
+    .toColourspace("cmyk")
+    .jpeg({ quality: 95, chromaSubsampling: "4:4:4" })
+    .withMetadata({ density: DPI, icc: "cmyk" })
+    .toFile(path.join(OUT_DIR, "eTUTOR-flyer-115x150mm-CU-bleed-CMYK-300dpi.jpg"))
+);
+await out(
+  "eTUTOR-flyer-105x140mm-FARA-bleed-RGB-300dpi.png",
+  sharp(bleed300)
+    .extract({ left: px(BLEED_MM, DPI), top: px(BLEED_MM, DPI), width: px(TRIM_MM.w, DPI), height: px(TRIM_MM.h, DPI) })
+    .withMetadata({ density: DPI })
+    .png()
+    .toFile(path.join(OUT_DIR, "eTUTOR-flyer-105x140mm-FARA-bleed-RGB-300dpi.png"))
+);
+
+async function pdfFrom(jpeg, pageMm, trimInsetMm, name) {
+  const doc = await PDFDocument.create();
+  doc.setTitle("eTUTOR.ro — flyer „cât o cafea”");
+  doc.setCreator("export-print-files.mjs");
+  const img = await doc.embedJpg(jpeg);
+  const W = pt(pageMm.w);
+  const H = pt(pageMm.h);
+  const p = doc.addPage([W, H]);
+  p.drawImage(img, { x: 0, y: 0, width: W, height: H });
+  p.setBleedBox(0, 0, W, H);
+  if (trimInsetMm) {
+    const b = pt(trimInsetMm);
+    p.setTrimBox(b, b, W - 2 * b, H - 2 * b);
+  } else {
+    p.setTrimBox(0, 0, W, H);
+  }
+  await writeFile(path.join(OUT_DIR, name), await doc.save());
+  console.log("wrote", name);
+}
+
+const masterJpg = await sharp(master).jpeg({ quality: 95, chromaSubsampling: "4:4:4" }).toBuffer();
+const trimMasterJpg = await sharp(master)
+  .extract({
+    left: px(BLEED_MM, MASTER_DPI),
+    top: px(BLEED_MM, MASTER_DPI),
+    width: px(TRIM_MM.w, MASTER_DPI),
+    height: px(TRIM_MM.h, MASTER_DPI),
+  })
+  .jpeg({ quality: 95, chromaSubsampling: "4:4:4" })
+  .toBuffer();
+await pdfFrom(masterJpg, PAGE_MM, BLEED_MM, "eTUTOR-flyer-115x150mm-CU-bleed.pdf");
+await pdfFrom(trimMasterJpg, TRIM_MM, 0, "eTUTOR-flyer-105x140mm-FARA-bleed.pdf");
+
 console.log("done");
