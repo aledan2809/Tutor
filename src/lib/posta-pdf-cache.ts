@@ -28,6 +28,20 @@ export function stareCachePdf(mtimeMs: number | null | undefined, acumMs: number
   return acumMs - mtimeMs < CACHE_PROASPAT_MS ? "proaspat" : "vechi";
 }
 
+/**
+ * Sub atât, un fișier care a trecut de „nu e gol" e aproape sigur un `about:blank`
+ * tipărit de Chromium înainte ca `/posta` să apuce să se încarce — nu o prezentare
+ * mai scurtă. Măsurat pe VPS2 (2026-09-15): fișierul real are ~230 KB / 12 pagini;
+ * rateul prins avea 856 octeți / 1 pagină goală, dar trecea testul `lungime > 0`
+ * și rămânea cache-uit ca „gata" până la următoarea regenerare reușită.
+ */
+export const MARIME_MINIMA_VALIDA_BYTES = 20_000;
+
+/** Adevărul ăsta se cere ÎNAINTE de a redenumi fișierul temporar peste cache — vezi genereaza(). */
+export function esteContinutPdfValid(marimeBytes: number): boolean {
+  return Number.isFinite(marimeBytes) && marimeBytes >= MARIME_MINIMA_VALIDA_BYTES;
+}
+
 /** Aceeași regulă ca în generator: sub HOME, fără punct la început (vezi nota despre snap acolo). */
 export function cacheDirPdfPosta(): string {
   return process.env.POSTA_PDF_DIR || path.join(homedir(), "tutor-pdf-cache");

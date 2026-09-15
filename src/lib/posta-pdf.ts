@@ -28,7 +28,13 @@
 import { spawn } from "node:child_process";
 import { mkdir, readFile, rename, stat, unlink } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { caleCachePdfPosta, cacheDirPdfPosta, invalideazaPdfPosta, stareCachePdf } from "./posta-pdf-cache";
+import {
+  caleCachePdfPosta,
+  cacheDirPdfPosta,
+  esteContinutPdfValid,
+  invalideazaPdfPosta,
+  stareCachePdf,
+} from "./posta-pdf-cache";
 
 export const LOCALES_PDF = ["ro", "en"] as const;
 export type LocalePdf = (typeof LOCALES_PDF)[number];
@@ -115,6 +121,11 @@ async function genereaza(locale: LocalePdf): Promise<Buffer> {
     const buf = await readFile(tmp).catch(() => null);
     if (!buf || buf.length === 0) {
       throw new Error("Chromium a raportat succes, dar n-a lăsat niciun fișier.");
+    }
+    if (!esteContinutPdfValid(buf.length)) {
+      // Chromium a ieșit cu 0 dar a tipărit pagina înainte să se încarce (about:blank) —
+      // fișierul vechi din cache (dacă există) rămâne neatins, nu-l suprascriem cu un rateu.
+      throw new Error(`Chromium a scris doar ${buf.length} octeți — probabil about:blank, nu prezentarea.`);
     }
     if (ultimaInvalidare > pornitLa) {
       // Textele s-au schimbat cât timp randam: ce avem în mână e pagina veche.
