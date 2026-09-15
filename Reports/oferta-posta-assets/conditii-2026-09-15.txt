@@ -1,0 +1,53 @@
+CE ESTE INCLUS ÎN ABONAMENT
+• Acces nelimitat la platformă pentru fiecare cursant: lecții scurte (5–7 minute), cu exerciții și răspuns pe loc, pentru fiecare funcție (ghișeu, factor poștal, șef de oficiu etc.).
+• Conținutul de pornire: cele trei cursuri din prezentarea anexată (factor poștal, lucrător la ghișeu, șef de oficiu — 9 lecții cu grilele lor), rescrise de noi pe procedurile Poștei Române după primirea documentelor. Actualizarea acestor lecții ori de câte ori se schimbă o procedură este inclusă. Poșta Română își poate scrie și edita oricând propriul conținut din panou, fără cost.
+• Acces pentru fiecare cursant de pe propriul telefon, fără instalare și fără adresă de e-mail: primește un link personal de unică folosință, își alege un nume de utilizator și o parolă și intră.
+• Remindere automate, în cascadă: notificare pe telefon → Telegram → e-mail → WhatsApp → SMS. Primele trei trepte sunt gratuite și nelimitate; WhatsApp și SMS se folosesc doar dacă omul nu a reacționat la cele gratuite, cu cel mult un SMS pe zi.
+• Raportare pentru management, per oficiu și per om: cine a intrat, cine a terminat, unde se greșește; export. Se personalizeaza GRATUIT orice raport cerut in primele 60 de zile de abonament si contra cost pe urma.
+• Configurare inițială: conturi expeditor pentru: Whatsapp, email si SMS + import utilizatori ca listă (Excel/CSV) sau cod comun de acces ; • Suport pe e-mail și telefon în zilele lucrătoare pentru intreaga echipa HR a Postei Romane, care este implicata in acest proiect.
+
+CUM SE CALCULEAZĂ ABONAMENTUL
+• Abonament lunar = numărul de cursanți activi în luna respectivă × prețul treptei în care se încadrează acest număr (grila de mai sus). Prețul treptei se aplică tuturor cursanților activi, nu doar celor peste prag.
+• Cursant activ = persoană cu cont creat și acces în luna respectivă. Persoanele scoase din listă nu se mai facturează din luna următoare.
+• Facturare lunară, pe baza listei de cursanți la data facturii; diferențele se regularizează pe factura lunii următoare. Facturile se emit în lei, la cursul BNR din ziua facturii. Termen de plată: 30 de zile.
+
+MESAJELE WHATSAPP ȘI SMS — DOUĂ VARIANTE, LA ALEGEREA POȘTEI ROMÂNE
+Costul mesajelor WhatsApp și SMS nu este inclus în abonament; celelalte canale (notificări pe telefon, Telegram, e-mail) sunt gratuite și nelimitate.
+• Varianta A — refacturare la cost, fără adaos: mesajele pleacă de pe conturile Fabulosos și se refacturează lunar, la consum, la prețul plătit de noi furnizorilor: 0,30 lei/mesaj WhatsApp (Meta) și 0,37 lei/segment SMS (Twilio) — tarifele curente la data ofertei; orice modificare din partea furnizorilor se comunică în prealabil. Consumul se vede în panoul de administrare, mesaj cu mesaj.
+• Varianta B — conturi proprii ale Poștei Române: creăm și configurăm, pe numele Poștei Române și cu metoda de plată a Poștei, contul de WhatsApp Business (Meta) și contul de SMS. Furnizorii facturează direct Poșta Română, la tarifele lor; noi nu refacturăm nimic per mesaj. Crearea și configurarea conturilor sunt incluse. Șabloanele de mesaje se depun spre aprobare la Meta (de regulă 1–2 zile lucrătoare).
+• Ordin de mărime: la utilizare normală, un cursant primește 0–4 mesaje plătite pe lună. Exemplu: 3.000 de cursanți × 2 mesaje WhatsApp = 1.800 lei/lună, la cost.
+
+CONȚINUT DE CURS SUPLIMENTAR (OPȚIONAL, CONTRA COST)
+Dincolo de cele trei cursuri incluse, putem scrie noi lecții și grile noi, pe orice procedură sau temă dorită, pornind de la documentele Poștei Române — cu aceeași metodă folosită la demonstrație: documentare, redactare, verificare de către trei evaluatori independenți, grilă fără indicii de răspuns, o rundă de corecturi cu echipa Poștei înainte de publicare.
+• Lecție nouă (5–7 minute) cu grila ei (6–10 întrebări), verificată și publicată: 150 EUR / lecție.
+• Curs nou complet (3 module: 3 lecții + 3 grile + test final): 400 EUR / curs.
+• De la 20 de lecții comandate odată: 120 EUR / lecție.
+• Termen: 5 zile lucrătoare per curs de la primirea documentelor. Prețurile nu includ TVA.
+
+TRAINERI PE MATERII (OPȚIONAL, CONTRA COST)
+Instruirea de zi cu zi rămâne prin dirigenții și șefii direcți, așa cum e descris în prezentare; trainerii noștri intervin doar la cerere, pe teme punctuale.
+La cerere, organizam cursuri pe materii specifice (de exemplu: relația cu clientul la ghișeu, proceduri de curierat și colete, conducerea oficiului), în funcție de nevoi. Variante orientative, de stabilit per proiect:
+• Sesiune online de 90 de minute, grupă de până la 25 de persoane: 150-200 EUR / sesiune.
+• Zi de training la sediul Poștei Române (6 ore), grupă de până la 20 de persoane: 600 EUR / zi + cheltuieli de deplasare.
+• Trainer dedicat, lunar (8 sesiuni online + întrebări între sesiuni): 1.300 EUR / lună.
+Prețurile de mai sus nu includ TVA.
+
+MATERIALE AUDIO ȘI VIDEO (OPȚIUNE ÎN DEZVOLTARE, COTAȚIE SEPARATĂ)
+Lecția rămâne text — merge pe orice telefon și consumă puține date. La cererea Poștei Române dezvoltăm, ca opțiune, două formate în plus, generate direct din aplicație din textul fiecărei lecții: varianta audio (voce sintetică în limba română) și varianta video cu prezentator virtual, cu subtitrare. Cursantul alege formatul; progresul și raportarea rămân aceleași. Funcția nu e disponibilă astăzi; disponibilitate estimată: trimestrul I 2027.
+Cotație orientativă, de confirmat la activare, prin act adițional:
+• Activare (dezvoltare, configurare voce și prezentator, găzduire securizată): 4.900 EUR, o singură dată.
+• Audio: 1 EUR / minut generat. Video cu prezentator: 6 EUR / minut generat (o lecție de 6 minute ≈ 36 EUR; regenerarea după modificarea lecției se tarifează la fel).
+• Găzduirea și difuzarea materialelor sunt incluse până la 3.000 de ore vizionate pe lună; peste, 0,10 EUR / oră.
+• Materialele rămân private (acces doar din aplicație, cu linkuri semnate și cu expirare), stocate pe servere din Uniunea Europeană, și se șterg la încetarea contractului.
+Prețurile nu includ TVA.
+
+DATE ȘI CONFORMITATE
+• Pentru angajații Poștei Române, operatorul datelor este Poșta Română. Fabulosos SRL prelucrează datele în numele Poștei, pe baza unui acord de prelucrare (art. 28 GDPR) semnat odată cu contractul. Datele se șterg la încetarea contractului sau la cerere.
+• Ce avem nevoie de la Poșta Română pentru a porni: lista cu nume, funcție, oficiu și număr de telefon (Excel/CSV) — sau, fără listă, un cod comun de acces afișat la avizier.
+
+DURATĂ ȘI ÎNCETARE
+• Abonamentul este lunar, cu o perioada contractuala de minim 6 luni, și poate fi oprit cu un preaviz de 45 de zile. La suspendare, datele nu se șterg.
+• Prezenta ofertă este valabilă 30 de zile de la emitere. Contractul și acordul de prelucrare se semnează după acceptare.
+
+ANEXE
+• Anexa 1 — Prezentarea eTutor pentru Poșta Română (pagina etutor.ro/posta, versiunea din 11 septembrie 2026): descrierea produsului, fluxul de la listă la raport, cele trei cursuri demonstrative. Anexa descrie produsul; prețurile și condițiile comerciale sunt cele din prezenta ofertă. Etapa de pornire descrisă în anexă (un județ, câteva oficii, citirea materialului de către câțiva factori și un diriginte înainte de lansare) se derulează în cadrul abonamentului, pe cursanții activi din acea etapă, fără tarif separat.
