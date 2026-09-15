@@ -4,12 +4,16 @@ import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import { logAudit } from "@/lib/audit";
 import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
+import { VOUCHER_PLAN_KEYS, RECURRING_FULL_DISCOUNT_ERROR } from "@/lib/voucher-admin";
 
 const createVoucherSchema = z.object({
   code: z.string().min(3).max(50).toUpperCase(),
   discountPercent: z.number().int().min(1).max(100),
   maxUses: z.number().int().min(1).nullable().optional(),
   expiresAt: z.string().datetime().nullable().optional(),
+  recurring: z.boolean().optional(),
+  oncePerUser: z.boolean().optional(),
+  planKey: z.enum(VOUCHER_PLAN_KEYS).nullable().optional(),
 });
 
 async function _GET(req: NextRequest) {
@@ -26,7 +30,12 @@ async function _GET(req: NextRequest) {
       skip,
       take: limit,
       orderBy: { createdAt: "desc" },
-      include: { createdBy: { select: { id: true, name: true, email: true } } },
+      include: {
+        createdBy: { select: { id: true, name: true, email: true } },
+        // Accounts that actually activated with the code (usedCount also counts
+        // abandoned checkouts) — the real uptake of a flyer campaign.
+        _count: { select: { redemptions: true } },
+      },
     }),
     prisma.voucher.count(),
   ]);
@@ -44,6 +53,10 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
+  if (parsed.data.recurring && parsed.data.discountPercent === 100) {
+    return NextResponse.json({ error: RECURRING_FULL_DISCOUNT_ERROR }, { status: 400 });
+  }
+
   const existing = await prisma.voucher.findUnique({ where: { code: parsed.data.code } });
   if (existing) {
     return NextResponse.json({ error: "Voucher code already exists" }, { status: 409 });
@@ -55,6 +68,9 @@ async function _POST(req: NextRequest) {
       discountPercent: parsed.data.discountPercent,
       maxUses: parsed.data.maxUses ?? null,
       expiresAt: parsed.data.expiresAt ? new Date(parsed.data.expiresAt) : null,
+      recurring: parsed.data.recurring ?? false,
+      oncePerUser: parsed.data.oncePerUser ?? false,
+      planKey: parsed.data.planKey ?? null,
       createdById: session!.user.id,
     },
   });

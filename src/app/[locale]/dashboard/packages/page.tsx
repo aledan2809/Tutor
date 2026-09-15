@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { resolveFamilyPlanFromRecord, type FamilyPlan } from "@/lib/family";
+import { FAMILY_PLANS, resolveFamilyPlanFromRecord, type FamilyPlan } from "@/lib/family";
 import { Link } from "@/i18n/navigation";
 
 interface Plan {
@@ -22,6 +22,16 @@ interface PlansResponse {
   plans: Plan[];
   current: { subscriptionStatus: string | null; subscriptionPlanId: string | null };
 }
+
+// Checkout answers a refused voucher with a stable `code` (see lib/voucher-checkout.ts);
+// the page shows it in the user's language instead of the API's English message.
+const VOUCHER_ERROR_KEYS = {
+  VOUCHER_INVALID: "voucherInvalid",
+  VOUCHER_EXPIRED: "voucherExpired",
+  VOUCHER_LIMIT_REACHED: "voucherLimitReached",
+  VOUCHER_WRONG_PLAN: "voucherWrongPlan",
+  VOUCHER_ALREADY_USED: "voucherAlreadyUsed",
+} as const;
 
 function planFeatures(features: unknown): string[] {
   return Array.isArray(features) ? features.filter((f): f is string => typeof f === "string") : [];
@@ -88,7 +98,15 @@ export default function PackagesPage() {
         window.location.href = data.url;
         return;
       }
-      setError(data.error || t("checkoutError"));
+      const voucherKey = VOUCHER_ERROR_KEYS[data.code as keyof typeof VOUCHER_ERROR_KEYS];
+      if (voucherKey === "voucherWrongPlan") {
+        // Name the plan the code is for, as the parent sees it on this page.
+        const forPlan = plans.find((p) => resolveFamilyPlanFromRecord(p)?.key === data.planKey);
+        const label = FAMILY_PLANS[data.planKey as keyof typeof FAMILY_PLANS]?.label;
+        setError(t("voucherWrongPlan", { plan: forPlan?.name ?? label ?? String(data.planKey ?? "") }));
+      } else {
+        setError(voucherKey ? t(voucherKey) : data.error || t("checkoutError"));
+      }
     } catch {
       setError(t("checkoutError"));
     } finally {

@@ -26,6 +26,9 @@ export function GET(req: NextRequest) {
   const base = process.env.AUTH_URL || req.nextUrl.origin;
   const dest = new URL("/ro/auth/register", base);
   if (voucher) dest.searchParams.set("voucher", voucher);
+  // The flyer's price (and V126S) is for the Family plan: preselect it on the packages
+  // page, so a parent doesn't pick another plan first and get "code valid only for Family".
+  dest.searchParams.set("plan", req.nextUrl.searchParams.get("plan")?.trim() || "FAMILY");
 
   const res = NextResponse.redirect(dest, 307);
   // Persist Romanian for the rest of the visit (next-intl reads NEXT_LOCALE).

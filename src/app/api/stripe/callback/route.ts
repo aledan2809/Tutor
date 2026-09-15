@@ -128,6 +128,40 @@ async function createRenewalPayment(data: {
   }
 }
 
+/**
+ * Remember that this account used a oncePerUser voucher, so checkout refuses the code the
+ * next time (flyer V126S: one use per account). Other vouchers are not recorded. A broker
+ * retry hits the unique (voucher, user) pair and is a no-op. Never fails the callback —
+ * the payment already happened; a lost row only means the account could reuse the code,
+ * which is why renewals call this too (a missed row is repaired at the next renewal).
+ */
+async function recordVoucherRedemption(voucherId: string | undefined, userId: string, sessionId: string) {
+  if (!voucherId) return;
+  try {
+    const voucher = await prisma.voucher.findUnique({ where: { id: voucherId }, select: { oncePerUser: true } });
+    if (!voucher?.oncePerUser) return;
+    await prisma.voucherRedemption.create({ data: { voucherId, userId, sessionId } });
+  } catch (e) {
+    if ((e as { code?: string })?.code === "P2002") {
+      // Same session = a retry or a renewal: expected. Another session = the account opened
+      // two checkouts with the code before either activated → two subscriptions; flag it.
+      const existing = await prisma.voucherRedemption
+        .findUnique({ where: { voucherId_userId: { voucherId, userId } }, select: { sessionId: true } })
+        .catch(() => null);
+      if (existing?.sessionId && existing.sessionId !== sessionId) {
+        logger.warn("Voucher used on a second checkout by the same account — check for a double subscription", {
+          voucherId,
+          userId,
+          firstSessionId: existing.sessionId,
+          sessionId,
+        });
+      }
+      return;
+    }
+    logger.error("Voucher redemption record failed", e, { voucherId, userId });
+  }
+}
+
 async function _POST(req: NextRequest) {
   const raw = await req.text();
   const sig = req.headers.get("x-broker-signature") || "";
@@ -175,6 +209,7 @@ async function _POST(req: NextRequest) {
         type: "one_time",
       });
       if (isNew) await accrueReferral(payment);
+      await recordVoucherRedemption(p.metadata?.voucherId, userId, p.sessionId);
       break;
     }
 
@@ -206,6 +241,8 @@ async function _POST(req: NextRequest) {
             ...(p.stripeSubscriptionId ? { stripeSubscriptionId: p.stripeSubscriptionId } : {}),
           },
         });
+        // Counts as used from activation, a free trial included.
+        await recordVoucherRedemption(p.metadata?.voucherId, userId, p.sessionId);
       }
       // Accrue only on a real charge (a $0 trial activation carries no money);
       // recurring charges come back as subscription.renewed. isNew guards retries.
@@ -230,6 +267,7 @@ async function _POST(req: NextRequest) {
       // reactivate the main plan's status.
       if (!isChildAddon) {
         await prisma.user.update({ where: { id: userId }, data: { subscriptionStatus: "active" } });
+        await recordVoucherRedemption(p.metadata?.voucherId, userId, p.sessionId);
       }
       if (isNew) await accrueReferral(payment);
       break;

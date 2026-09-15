@@ -124,6 +124,7 @@ model User {
   organization           Organization?           @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   subscriptionPlan       SubscriptionPlan?       @relation(fields: [subscriptionPlanId], references: [id])
   vouchersCreated        Voucher[]
+  voucherRedemptions     VoucherRedemption[]
   auditLogs              AdminAuditLog[]         @relation("AuditPerformer")
   payments               Payment[]
   notificationRetries    NotificationRetry[]
@@ -1229,8 +1230,34 @@ model Voucher {
   createdById     String
   isActive        Boolean   @default(true)
   createdAt       DateTime  @default(now())
+  // Partial (card) vouchers only. recurring = the Stripe coupon stays on every invoice of
+  // the subscription it was used on (duration "forever"), not just the first one.
+  recurring       Boolean   @default(false)
+  // oncePerUser = one successful use per account: checkout refuses the code once a
+  // VoucherRedemption exists for (voucher, user); the row is written on activation.
+  oncePerUser     Boolean   @default(false)
+  // Only valid on this plan (a FamilyPlanKey: ELEV | FAMILY | FAMILY_DUO | TRIO | FAMILY_TRIO);
+  // null = any plan. V126S = FAMILY: the flyer's 24,90 is for Family, other plans pay full.
+  planKey         String?
 
-  createdBy User @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdBy   User                @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  redemptions VoucherRedemption[]
+}
+
+/// An account that activated a subscription (or paid a one-time purchase) with a
+/// oncePerUser voucher. Written by the broker callback, read by checkout.
+model VoucherRedemption {
+  id        String   @id @default(cuid())
+  voucherId String
+  userId    String
+  sessionId String? // broker checkout session that carried the code
+  createdAt DateTime @default(now())
+
+  voucher Voucher @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([voucherId, userId])
+  @@index([userId])
 }
 
 model AdPlacement {

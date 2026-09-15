@@ -4,6 +4,7 @@ import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import { logAudit } from "@/lib/audit";
 import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
+import { VOUCHER_PLAN_KEYS, RECURRING_FULL_DISCOUNT_ERROR } from "@/lib/voucher-admin";
 
 const patchSchema = z.object({
   code: z.string().min(3).max(50).optional(),
@@ -11,6 +12,9 @@ const patchSchema = z.object({
   maxUses: z.number().int().min(1).nullable().optional(),
   expiresAt: z.string().datetime().nullable().optional(),
   isActive: z.boolean().optional(),
+  recurring: z.boolean().optional(),
+  oncePerUser: z.boolean().optional(),
+  planKey: z.enum(VOUCHER_PLAN_KEYS).nullable().optional(),
 });
 
 async function _PATCH(
@@ -34,6 +38,9 @@ async function _PATCH(
     maxUses?: number | null;
     expiresAt?: Date | null;
     isActive?: boolean;
+    recurring?: boolean;
+    oncePerUser?: boolean;
+    planKey?: string | null;
   } = {};
 
   if (parsed.data.code !== undefined) {
@@ -49,6 +56,18 @@ async function _PATCH(
   if (parsed.data.expiresAt !== undefined)
     data.expiresAt = parsed.data.expiresAt ? new Date(parsed.data.expiresAt) : null;
   if (parsed.data.isActive !== undefined) data.isActive = parsed.data.isActive;
+  if (parsed.data.recurring !== undefined) data.recurring = parsed.data.recurring;
+  if (parsed.data.oncePerUser !== undefined) data.oncePerUser = parsed.data.oncePerUser;
+  if (parsed.data.planKey !== undefined) data.planKey = parsed.data.planKey;
+
+  if (data.recurring !== undefined || data.discountPercent !== undefined) {
+    const current = await prisma.voucher.findUnique({ where: { id }, select: { recurring: true, discountPercent: true } });
+    const recurring = data.recurring ?? current?.recurring ?? false;
+    const discountPercent = data.discountPercent ?? current?.discountPercent ?? 0;
+    if (recurring && discountPercent === 100) {
+      return NextResponse.json({ error: RECURRING_FULL_DISCOUNT_ERROR }, { status: 400 });
+    }
+  }
 
   const voucher = await prisma.voucher.update({ where: { id }, data });
 

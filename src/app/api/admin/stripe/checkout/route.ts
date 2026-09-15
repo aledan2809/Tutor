@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { checkVoucherForCheckout, normalizeVoucherCode, type BrokerCoupon } from "@/lib/voucher-checkout";
+import { resolveFamilyPlanFromRecord } from "@/lib/family";
 
 /**
  * Checkout via the central Stripe Checkout Broker (stripe.knowbest.ro).
@@ -37,22 +39,27 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: "Plan not found or inactive" }, { status: 404 });
   }
 
-  // Validate voucher locally (the broker creates the matching Stripe coupon).
-  let coupon: { percentOff: number; duration: "once"; metadata: { voucherId: string } } | undefined;
+  // Validate voucher locally (the broker creates the matching Stripe coupon). The rules
+  // live in voucher-checkout.ts; `code` lets the page show a translated message.
+  let coupon: BrokerCoupon | undefined;
   let voucherId: string | undefined;
-  if (voucherCode) {
-    const voucher = await prisma.voucher.findUnique({ where: { code: voucherCode } });
-    if (!voucher || !voucher.isActive) {
-      return NextResponse.json({ error: "Invalid voucher code" }, { status: 400 });
+  const code = normalizeVoucherCode(voucherCode);
+  if (code) {
+    const voucher = await prisma.voucher.findUnique({ where: { code } });
+    const alreadyUsedByUser = voucher?.oncePerUser
+      ? !!(await prisma.voucherRedemption.findUnique({
+          where: { voucherId_userId: { voucherId: voucher.id, userId: session.user.id } },
+        }))
+      : false;
+    const check = checkVoucherForCheckout(voucher, {
+      alreadyUsedByUser,
+      planKey: resolveFamilyPlanFromRecord(plan)?.key ?? null,
+    });
+    if (!check.ok) {
+      return NextResponse.json({ error: check.message, code: check.code, planKey: check.planKey }, { status: 400 });
     }
-    if (voucher.expiresAt && voucher.expiresAt < new Date()) {
-      return NextResponse.json({ error: "Voucher has expired" }, { status: 400 });
-    }
-    if (voucher.maxUses && voucher.usedCount >= voucher.maxUses) {
-      return NextResponse.json({ error: "Voucher usage limit reached" }, { status: 400 });
-    }
-    coupon = { percentOff: voucher.discountPercent, duration: "once", metadata: { voucherId: voucher.id } };
-    voucherId = voucher.id;
+    coupon = check.coupon;
+    voucherId = check.coupon.metadata.voucherId;
   }
 
   const isSubscription = plan.interval !== "ONE_TIME";
