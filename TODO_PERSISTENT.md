@@ -4,40 +4,49 @@
 
 ---
 
-## [ ] 🔴 Oferta Poșta — de aliniat la modelul docx al lui Alex + prețurile decise (creat 2026-09-15, sesiune dedicată)
+## [~] 🔴 Oferta Poșta — analiză completă + decizii luate; rămâne DOAR aplicarea (blocată pe deploy Offer)
 
-**Handoff complet: `Master/reports/handoffs/ST-2026-09-15-Posta.md`.** Alex a rescris prezentarea ofertei în
-`~/Library/CloudStorage/OneDrive-Personal/Proiecte/Tutor/Oferta_Fabulosos_Posta_Romana_eTutor_2026.docx`
-(15.09, 15:44) — **acesta e modelul**; oferta live OF-2026-0001 (Offer, `offer.knowbest.ro/o/o2_5YYaEiSa8jZA9BYr1cA`)
-se aduce la forma lui, cu cifrele decise azi (docx-ul le are pe cele vechi):
-- [ ] **Adresa Fabulosos în Offer e greșită**: șablonul „Fabulosos B2B" tipărește „bl. A5, ap. 36, Sector 4"; ONRC
-  (Tutor `dc358c7`): **„Str. Valea Oltului nr. 8, bl. A5, sc. C, et. 1, ap. 36, Sector 6, București"**. Se schimbă din
-  pagina de editare (secțiunea 5) sau cu `PATCH /api/templates/[id]`; apoi spec-ul `Reports/OFERTA-posta-2026-09-14.spec.json`
-  + memoria `project-posta-oferta-comerciala`.
-- [ ] Analiză atentă a docx-ului (structură: antet cu „Întâlnirea de referință 11.09.2026" + participanții Poștei,
-  „Propunerea într-o frază", „Ce este important", 1. Soluția propusă (4 pași), 2. Oferta financiară, 3. Extensii
-  opționale, …) și **lista diferențelor** față de textul live. Cea mai mare: în docx cele trei cursuri demo **NU** sunt
-  conținut inclus („rol exclusiv demonstrativ"; Poșta își introduce singură conținutul; Fabulosos creează contra cost) —
-  textul live spune că sunt incluse, rescrise pe procedurile lor. Se merge pe modelul lui Alex.
-- [ ] Prețurile decise 15.09 (după verificarea de piață): conținut TEXT **500 EUR/lecție · 1.300 EUR/curs · 400 EUR de la 20**
-  (lecție = 5–7 min de citit, 3.000–5.000 caractere + grilă 6–10 întrebări; modul = lecție + grilă; curs = 3 module + test
-  final); audio **9 EUR/min generat**, video **99 EUR/min generat**, dezvoltare + activare **7.900 EUR**, regenerare **50%**,
-  o lecție → 4–6 min generate (36–54 EUR audio / 396–594 EUR video). Docx-ul are 150/400/120 și (probabil) 1/6/4.900 → de înlocuit.
-- [ ] **Două afirmații noi din docx de verificat în produs înainte de trimitere** (metoda din `Reports/VERIFICARE-ADEVAR-posta-2026-09-10.md`):
-  „Mesagerie instantanee, separat de cursuri" (Tutor ca aplicație de mesaje independente de lecții) și „raportare agregată
-  oficiu → județ → regiune → național" (azi raportul e per om + per modul pe o organizație; ierarhia teritorială nu există).
-- [ ] Docx-ul păstrează un „EXEMPLU: 3.000 × 3,25 = 9.750 EUR/lună" — de decis cu Alex dacă rămâne (azi a cerut fără exemple/totaluri).
-- [ ] Propuneri de îmbunătățire după analiză (Alex le vrea): coerență cu prezentarea-anexă, un singur îndemn, clauza de anexă,
-  paginare PDF. Se aplică prin Offer (editare/CLI `offer:assets`), nu în docx; docx-ul rămâne referința de formă.
+**Analiza completă**: `Reports/OFERTA-posta-aliniere-docx-2026-09-15.md` (docx citit integral: 63 paragrafe + 16
+tabele + 4 imagini — doar logo-uri, nimic nou). **Textul nou, gata de aplicat**: `Reports/oferta-posta-assets/
+conditii-2026-09-15-v5.txt` (9.798 caractere, sub noul cap de 20.000).
 
-## [ ] 🎯 Flyer Tutor B2C „liniștea copilului tău, cât o cafea" (creat 2026-09-15, sesiune dedicată)
+**Decizii Alex (15.09 seara):**
+- **Cursurile demo NU sunt incluse** — au fost „pur demonstrative pt UI/UX". ⚠️ **Acțiune operațională nouă, de
+  făcut la începutul colaborării reale cu Poșta (NU acum)**: cele 3 cursuri demo (factor poștal/ghișeu/șef oficiu)
+  trebuie **dezactivate** pe organizația Poștei, ca să nu rămână vizibile cursanților reali. Text v5 reflectă deja
+  poziționarea corectă; dezactivarea propriu-zisă e un pas separat, de reamintit la semnare.
+- **Fără exemplul de calcul** (3.000×3,25=9.750) — deja `showExample:false`, rămâne așa.
+- **Structură**: text îmbogățit acum (pași, „Ce e important", mesagerie, raportare — toate în v5), NU se extinde
+  renderer-ul Offer acum.
+- **Aprobat**: scrierea live a textului complet + corectarea adresei Fabulosos (Sector 4→Sector 6).
 
-Modelul de producție = flyer-ul REAL (`REAL/Reports/flyer-posta-2026-09-15/`: `flyer.html` → PNG RGB + JPG CMYK, 105×140 mm,
-bleed 5 mm, 300 dpi; ideea în `Master/reports/handoffs/ST-2026-09-15-Posta.md` §2). Brief-ul lui Alex: pornim de la o
-cafea (peste 20 lei) vs. nivelul minim de abonament (19,90 lei/materie/lună, memoria `tutor-pricing-per-subject`) —
-„liniștea pentru copilul tău cât o cafea"; o mamă drăguță savurând o cafea, cu telefonul în față arătând rezultatele Tutor
-ale copilului. Livrabil: best practices de copywriting + idei proprii + machetă HTML → export tipar. Toate cifrele de pe flyer
-trec prin verificarea de adevăr (nr. de elevi, „gratuit", prețul cu/fără TVA — Class RDA e operatorul B2C). Fără cuvântul „AI".
+**Verificat în cod (subagent, citate exacte în raport)**: cascadă PUSH→Telegram→email→WhatsApp→SMS = adevărat
+exact · mesagerie instantanee separată = adevărat (nuanță: instructor→cursanții lui, nu broadcast universal) ·
+raportare oficiu→județ→regiune→național = **fals**, rămâne „per oficiu și per om" (adevărat azi).
+
+**Rămas de aplicat (blocat pe deploy Offer — vezi item deploy de mai jos):**
+- [ ] `npm run offer:assets -- --offer OF-2026-0001 --notes-file conditii-2026-09-15-v5.txt --issuer-address "Str. Valea Oltului nr. 8, bl. A5, sc. C, et. 1, ap. 36, Sector 6, București"`
+  pe VPS2, DUPĂ ce Offer e deployat cu `Offer@25d0b96`+`ef8666c` (cap 20.000 + flag-ul nou de adresă).
+- [ ] Backup înainte: `pg_dump`-ul obișnuit sau măcar `--print` salvat, ca la v2/v3/v4.
+- [ ] Verificare după: `curl` pagina publică, `pdftotext` pe PDF-ul ofertei, confirmă adresa + textul complet + „Fabulosos" pe subsol.
+- [ ] Numele/emailul „Elisa Palasca — elisa.pasasca@ro.post" (P6 docx) — ortografii diferite, de clarificat cu Alex
+  înainte de orice corespondență pe adresa asta (nesemnalat explicit, doar flag).
+
+## [~] 🎯 Flyer Tutor B2C „liniștea copilului tău, cât o cafea" — LIVRAT, o decizie de preț rămasă
+
+Livrat complet în `Reports/flyer-b2c-cafea-2026-09-15/`: `flyer.html` autonom + export PNG RGB/JPG CMYK/PDF la
+105×140mm, bleed 5mm, 300dpi (pipeline REAL replicat) + `RAPORT.md` (3 variante de titlu, verificare de adevăr
+per-afirmație, decizii deschise). Fără cuvântul „AI" nicăieri.
+
+🔴 **Preț de confirmat înainte de tipar** — brief-ul (și memoria `tutor-pricing-per-subject`) presupuneau 19,90
+lei/materie/lună, dar asta e planul **Elev/Student** (solo, copilul plătește, părintele nu vede nimic) — vizualul
+flyer-ului (mama urmărind progresul copilului) se potrivește cu planul **Family**. Verificat direct: `PROMO_END`
+în `src/lib/pricing.ts` = 2026-09-01 (trecut de 2 săptămâni). **Dar** `/ro/preturi` afișează ÎN CONTINUARE „19,90
+lei" live pe producție (verificat cu `curl` chiar acum) — deci fie 19,90 e prețul de pornire real și corect afișat
+(planul ieftin, marketing „de la"), fie pagina de prețuri e ea însăși neactualizată. Subagentul a calculat 33,20
+lei pentru Family din cod, dar NU am verificat independent că asta chiar iese la checkout. **Nu se tipărește nimic
+până nu confirmi ce preț/plan vrei pe flyer** — dacă răspunsul e „19,90 e corect, e planul de pornire", flyer-ul
+rămâne cum e; dacă vrei Family, se schimbă cifra + comparația „pe zi" înainte de export final.
 
 ## [ ] 🚀 Deploy punctual `dc358c7` pe etutor.ro (adresa Fabulosos după ONRC) — cerut de altă sesiune, 2026-09-15
 
