@@ -12,7 +12,7 @@ Prețurile furnizorilor sunt cele publicate la data de azi (surse la final); se 
 - **Ce livrăm**: fiecare lecție rămâne text (așa e promis în prezentare: merge pe orice telefon, consumă puține date). Din textul ei se generează, la apăsarea unui buton din panou, **varianta audio** (voce sintetică în română) și **varianta video** cu un **prezentator virtual** care „citește" lecția, cu subtitrare. Cursantul alege formatul; progresul și raportul rămân aceleași.
 - **Cu ce**: voce → Azure AI Speech (are voci românești, servere în UE, ~0,10 $ pe lecție); prezentator video → HeyGen API la început (1–4 $ pe minut, integrare rapidă), cu drum de rezervă spre un motor open-source găzduit de noi când volumul crește; difuzare → Bunny Stream sau Cloudflare Stream (linkuri semnate, cu expirare; **nu** YouTube, **nu** serverul nostru).
 - **Cât ne costă**: pentru ~100 de lecții a câte 6 minute, generarea video ≈ 1.800 $ o dată (HeyGen) sau ~150 $ (Elai/open-source); vocea ≈ 10 $; difuzarea către 20.000 de oameni ≈ 25–360 $ pe lună, după furnizor. Costurile mari sunt **generarea** (o dată per lecție) și **munca noastră** (adaptarea textului pentru citit cu voce, verificarea, regenerarea la fiecare modificare), nu vizionarea.
-- **Cum cotăm** (propunere, deja scrisă în ofertă ca „cotație orientativă"): activare 4.900 EUR o singură dată · audio 1 EUR / minut generat · video 6 EUR / minut generat · difuzare inclusă până la 3.000 de ore vizionate pe lună, apoi 0,10 EUR / oră. Disponibilitate estimată: trimestrul I 2027.
+- **Cum cotăm**: propunerea inițială (4.900 / 1 / 6) a fost respinsă de Alex ca prea mică; cifrele decise sunt în §4b (7.900 EUR activare · 9 EUR/min audio · 99 EUR/min video · regenerare 50%). Disponibilitate estimată: trimestrul I 2027.
 - **Ce nu trebuie uitat**: textul lecției nu e un scenariu vorbit (abrevieri, cifre, replici) · vizionarea trebuie să conteze în raport la fel ca cititul · orice modificare a lecției învechește filmul · consumul de date pe telefonul omului (6 minute de video ≈ 60–70 MB; audio ≈ 4 MB) · prezentatorul virtual trebuie declarat ca atare (AI Act) · procedurile Poștei sunt confidențiale — unde pleacă textul la generare contează.
 
 ---
@@ -124,6 +124,26 @@ Ce fac furnizorii de e-learning care vând așa ceva (Synthesia, Elai, Colossyan
 Variante de model, dacă preferi altceva: **preț fix pe lecție** (audio + video = 50 EUR / lecție, oricâte minute până la 8) — mai ușor de bugetat de Poșta, mai riscant pentru noi la lecții lungi; **taxă lunară pe cursant** (+0,20 EUR / cursant activ / lună, cu generarea inclusă până la 10 lecții noi pe lună) — se aliniază grilei, dar decuplează prețul de costul real.
 
 ---
+
+## 4b. Ce a decis Alex (15.09, după-amiază) și verificarea de piață
+
+Prima propunere (1 EUR/min audio, 6 EUR/min video, 4.900 EUR activare, 150 EUR/lecție) a fost respinsă ca prea mică.
+**Decis**: dezvoltare + activare **7.900 EUR** o dată · audio **9 EUR / minut generat** · video cu prezentator (audio și
+subtitrare incluse) **99 EUR / minut generat** (o lecție de 6 minute: 54 EUR audio, 594 EUR video) · regenerare după
+modificare **jumătate** din tarif · conținut nou scris de noi **250 EUR/lecție · 650 EUR/curs · 200 EUR de la 20**
+(în discuție: ridicarea la 350–500 EUR/lecție) · difuzarea rămâne inclusă până la 3.000 de ore pe lună, apoi 0,10 EUR/oră.
+
+| Ce | Piața (surse 2026) | Decis | Unde se așază |
+|---|---|---|---|
+| Video cu avatar, ca serviciu | agenții AI 2–5 USD/min cu editare, 20–30 USD/min premium; tool-uri AI 99–500 USD per video; producție clasică cu om în cadru 500–1.500 USD/min | 99 EUR/min | între „AI premium" și producția clasică; se susține ca serviciu complet (script, verificare, subtitrări, găzduire, versionare) |
+| Voce | narator uman e-learning 15–55 USD/min finit (tipic 30–55); modul de 5 min 80–250 USD | 9 EUR/min | un sfert din vocea umană, cu regenerare în minute |
+| Conținut la comandă | microlearning 500–3.000 USD/modul; modul de 5 min făcut intern 500–1.500 USD; 10.000–14.300 USD per oră de e-learning (1.000–1.430 USD per 6 min) | 250 EUR/lecție | sub piață (cca o cincime din limita de jos) |
+| Dezvoltare + activare | proiecte de microlearning la comandă de la ~4.000 USD; 10–14 zile × 600 EUR | 7.900 EUR | în linie |
+
+Surse: ai-content.agency (cost per minut avatar 2026) · dmakproductions.com (training video cost 2026) · colossyan.com
+(video production costs 2026) · vidico.com (educational video 2026) · voicecrafters.com + kimhandysidesvoiceover.com
+(tarife voice-over e-learning 2026) · trainingcost.com (microlearning 2026; e-learning per oră 2026) · allencomm.com și
+seriousfactory.com (custom e-learning 2026) · eesel.ai (HeyGen 2026) · arcade.software (Synthesia 2026).
 
 ## 5. Resurse suplimentare (10–20% din utilizatori simultan)
 

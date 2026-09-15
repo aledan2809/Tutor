@@ -19,9 +19,9 @@ Costul mesajelor WhatsApp și SMS nu este inclus în abonament; celelalte canale
 
 CONȚINUT DE CURS SUPLIMENTAR (OPȚIONAL, CONTRA COST)
 Dincolo de cele trei cursuri incluse, putem scrie noi lecții și grile noi, pe orice procedură sau temă dorită, pornind de la documentele Poștei Române — cu aceeași metodă folosită la demonstrație: documentare, redactare, verificare de către trei evaluatori independenți, grilă fără indicii de răspuns, o rundă de corecturi cu echipa Poștei înainte de publicare.
-• Lecție nouă (5–7 minute) cu grila ei (6–10 întrebări), verificată și publicată: 150 EUR / lecție.
-• Curs nou complet (3 module: 3 lecții + 3 grile + test final): 400 EUR / curs.
-• De la 20 de lecții comandate odată: 120 EUR / lecție.
+• Lecție nouă (5–7 minute) cu grila ei (6–10 întrebări), verificată și publicată: 250 EUR / lecție.
+• Curs nou complet (3 module: 3 lecții + 3 grile + test final): 650 EUR / curs.
+• De la 20 de lecții comandate odată: 200 EUR / lecție.
 • Termen: 5 zile lucrătoare per curs de la primirea documentelor. Prețurile nu includ TVA.
 
 TRAINERI PE MATERII (OPȚIONAL, CONTRA COST)
@@ -34,9 +34,10 @@ Prețurile de mai sus nu includ TVA.
 
 MATERIALE AUDIO ȘI VIDEO (OPȚIUNE ÎN DEZVOLTARE, COTAȚIE SEPARATĂ)
 Lecția rămâne text — merge pe orice telefon și consumă puține date. La cererea Poștei Române dezvoltăm, ca opțiune, două formate în plus, generate direct din aplicație din textul fiecărei lecții: varianta audio (voce sintetică în limba română) și varianta video cu prezentator virtual, cu subtitrare. Cursantul alege formatul; progresul și raportarea rămân aceleași. Funcția nu e disponibilă astăzi; disponibilitate estimată: trimestrul I 2027.
-Cotație orientativă, de confirmat la activare, prin act adițional:
-• Activare (dezvoltare, configurare voce și prezentator, găzduire securizată): 4.900 EUR, o singură dată.
-• Audio: 1 EUR / minut generat. Video cu prezentator: 6 EUR / minut generat (o lecție de 6 minute ≈ 36 EUR; regenerarea după modificarea lecției se tarifează la fel).
+Cotație, de contractat prin act adițional la activare:
+• Dezvoltare și activare (fluxul de generare, configurarea vocii și a prezentatorului, găzduirea securizată, testul pe trei lecții): 7.900 EUR, o singură dată.
+• Audio (voce sintetică în limba română): 9 EUR / minut generat. Video cu prezentator virtual, cu audio și subtitrare incluse: 99 EUR / minut generat. O lecție de 6 minute: 54 EUR audio sau 594 EUR video.
+• Regenerarea unui material după modificarea lecției: jumătate din tariful de mai sus.
 • Găzduirea și difuzarea materialelor sunt incluse până la 3.000 de ore vizionate pe lună; peste, 0,10 EUR / oră.
 • Materialele rămân private (acces doar din aplicație, cu linkuri semnate și cu expirare), stocate pe servere din Uniunea Europeană, și se șterg la încetarea contractului.
 Prețurile nu includ TVA.
