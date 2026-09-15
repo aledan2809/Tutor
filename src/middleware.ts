@@ -158,7 +158,15 @@ export default function middleware(request: NextRequest) {
   // Rate limiting for API routes
   if (pathname.startsWith("/api/")) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-    const { allowed, remaining } = checkRateLimit(clientKeyFor(request, ip), pathname);
+    // The broker callback is server-to-server, HMAC-signed and replay-checked in the
+    // route. It carries no session cookie, so every payment event for every user fell
+    // into ONE key capped at 3/min: a 4th event (or one event's broker retries) got 429
+    // and a paid subscription wasn't activated — and anyone could burn that key by
+    // spoofing X-Forwarded-For. Its own signature check is the protection here.
+    const { allowed, remaining } =
+      pathname === "/api/stripe/callback"
+        ? { allowed: true, remaining: 0 }
+        : checkRateLimit(clientKeyFor(request, ip), pathname);
 
     if (!allowed) {
       return new NextResponse(JSON.stringify({ error: "Too many requests" }), {
