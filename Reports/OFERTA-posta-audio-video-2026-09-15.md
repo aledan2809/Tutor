@@ -130,14 +130,16 @@ Variante de model, dacă preferi altceva: **preț fix pe lecție** (audio + vide
 Prima propunere (1 EUR/min audio, 6 EUR/min video, 4.900 EUR activare, 150 EUR/lecție) a fost respinsă ca prea mică.
 **Decis**: dezvoltare + activare **7.900 EUR** o dată · audio **9 EUR / minut generat** · video cu prezentator (audio și
 subtitrare incluse) **99 EUR / minut generat** (o lecție de 6 minute: 54 EUR audio, 594 EUR video) · regenerare după
-modificare **jumătate** din tarif · conținut nou scris de noi **250 EUR/lecție · 650 EUR/curs · 200 EUR de la 20**
-(în discuție: ridicarea la 350–500 EUR/lecție) · difuzarea rămâne inclusă până la 3.000 de ore pe lună, apoi 0,10 EUR/oră.
+modificare **jumătate** din tarif · conținut nou scris de noi, DOAR TEXT, **500 EUR/lecție · 1.300 EUR/curs · 400 EUR de la 20**
+(ridicat de la 250/650/200 după verificarea de piață; lecție = 5–7 min de citit, 3.000–5.000 de caractere + grilă de 6–10
+întrebări; modul = lecție + grilă; curs = 3 module + test final; conversia unei lecții în audio/video = 4–6 minute generate,
+adică 36–54 EUR audio sau 396–594 EUR video per lecție) · difuzarea rămâne inclusă până la 3.000 de ore pe lună, apoi 0,10 EUR/oră.
 
 | Ce | Piața (surse 2026) | Decis | Unde se așază |
 |---|---|---|---|
 | Video cu avatar, ca serviciu | agenții AI 2–5 USD/min cu editare, 20–30 USD/min premium; tool-uri AI 99–500 USD per video; producție clasică cu om în cadru 500–1.500 USD/min | 99 EUR/min | între „AI premium" și producția clasică; se susține ca serviciu complet (script, verificare, subtitrări, găzduire, versionare) |
 | Voce | narator uman e-learning 15–55 USD/min finit (tipic 30–55); modul de 5 min 80–250 USD | 9 EUR/min | un sfert din vocea umană, cu regenerare în minute |
-| Conținut la comandă | microlearning 500–3.000 USD/modul; modul de 5 min făcut intern 500–1.500 USD; 10.000–14.300 USD per oră de e-learning (1.000–1.430 USD per 6 min) | 250 EUR/lecție | sub piață (cca o cincime din limita de jos) |
+| Conținut la comandă | microlearning 500–3.000 USD/modul; modul de 5 min făcut intern 500–1.500 USD; 10.000–14.300 USD per oră de e-learning (1.000–1.430 USD per 6 min) | 500 EUR/lecție (era 250) | la limita de jos a pieței, justificat de metoda din demonstrație |
 | Dezvoltare + activare | proiecte de microlearning la comandă de la ~4.000 USD; 10–14 zile × 600 EUR | 7.900 EUR | în linie |
 
 Surse: ai-content.agency (cost per minut avatar 2026) · dmakproductions.com (training video cost 2026) · colossyan.com

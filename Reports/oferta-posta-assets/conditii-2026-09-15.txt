@@ -17,12 +17,16 @@ Costul mesajelor WhatsApp și SMS nu este inclus în abonament; celelalte canale
 • Varianta B — conturi proprii ale Poștei Române: creăm și configurăm, pe numele Poștei Române și cu metoda de plată a Poștei, contul de WhatsApp Business (Meta) și contul de SMS. Furnizorii facturează direct Poșta Română, la tarifele lor; noi nu refacturăm nimic per mesaj. Crearea și configurarea conturilor sunt incluse. Șabloanele de mesaje se depun spre aprobare la Meta (de regulă 1–2 zile lucrătoare).
 • Ordin de mărime: la utilizare normală, un cursant primește 0–4 mesaje plătite pe lună. Exemplu: 3.000 de cursanți × 2 mesaje WhatsApp = 1.800 lei/lună, la cost.
 
-CONȚINUT DE CURS SUPLIMENTAR (OPȚIONAL, CONTRA COST)
+CONȚINUT DE CURS SUPLIMENTAR (OPȚIONAL, CONTRA COST) — DOAR TEXT
 Dincolo de cele trei cursuri incluse, putem scrie noi lecții și grile noi, pe orice procedură sau temă dorită, pornind de la documentele Poștei Române — cu aceeași metodă folosită la demonstrație: documentare, redactare, verificare de către trei evaluatori independenți, grilă fără indicii de răspuns, o rundă de corecturi cu echipa Poștei înainte de publicare.
-• Lecție nouă (5–7 minute) cu grila ei (6–10 întrebări), verificată și publicată: 250 EUR / lecție.
-• Curs nou complet (3 module: 3 lecții + 3 grile + test final): 650 EUR / curs.
-• De la 20 de lecții comandate odată: 200 EUR / lecție.
-• Termen: 5 zile lucrătoare per curs de la primirea documentelor. Prețurile nu includ TVA.
+Ce înseamnă termenii:
+• Lecție = un text de citit în 5–7 minute (circa 3.000–5.000 de caractere, 500–800 de cuvinte), cu replici exacte și exemple din practica Poștei, însoțit de grila lui: 6–10 întrebări cu câte 4 variante și explicația răspunsului corect. Se livrează publicată în platformă, gata de trimis cursanților.
+• Modul = o lecție împreună cu grila ei. Curs = 3 module plus un test final de 10–15 întrebări din toate modulele.
+• Prețurile de mai jos sunt pentru conținut în format TEXT (lecție + grilă). Transformarea unei lecții în audio sau video se tarifează separat, la prețurile din secțiunea „Materiale audio și video".
+• Lecție nouă (un modul), verificată și publicată: 500 EUR.
+• Curs nou complet (3 module + test final): 1.300 EUR.
+• De la 20 de lecții comandate odată: 400 EUR / lecție.
+• Termen: 5 zile lucrătoare per curs de la primirea documentelor. Actualizarea unei lecții existente la schimbarea unei proceduri rămâne inclusă în abonament. Prețurile nu includ TVA.
 
 TRAINERI PE MATERII (OPȚIONAL, CONTRA COST)
 Instruirea de zi cu zi rămâne prin dirigenții și șefii direcți, așa cum e descris în prezentare; trainerii noștri intervin doar la cerere, pe teme punctuale.
@@ -36,7 +40,8 @@ MATERIALE AUDIO ȘI VIDEO (OPȚIUNE ÎN DEZVOLTARE, COTAȚIE SEPARATĂ)
 Lecția rămâne text — merge pe orice telefon și consumă puține date. La cererea Poștei Române dezvoltăm, ca opțiune, două formate în plus, generate direct din aplicație din textul fiecărei lecții: varianta audio (voce sintetică în limba română) și varianta video cu prezentator virtual, cu subtitrare. Cursantul alege formatul; progresul și raportarea rămân aceleași. Funcția nu e disponibilă astăzi; disponibilitate estimată: trimestrul I 2027.
 Cotație, de contractat prin act adițional la activare:
 • Dezvoltare și activare (fluxul de generare, configurarea vocii și a prezentatorului, găzduirea securizată, testul pe trei lecții): 7.900 EUR, o singură dată.
-• Audio (voce sintetică în limba română): 9 EUR / minut generat. Video cu prezentator virtual, cu audio și subtitrare incluse: 99 EUR / minut generat. O lecție de 6 minute: 54 EUR audio sau 594 EUR video.
+• Audio (voce sintetică în limba română): 9 EUR / minut generat. Video cu prezentator virtual, cu audio și subtitrare incluse: 99 EUR / minut generat.
+• Cât iese dintr-o lecție: un text de 5–7 minute de citit (500–800 de cuvinte) produce 4–6 minute de material vorbit, adică 36–54 EUR în varianta audio sau 396–594 EUR în varianta video, per lecție. Se generează din textul deja publicat; nu se rescrie conținutul.
 • Regenerarea unui material după modificarea lecției: jumătate din tariful de mai sus.
 • Găzduirea și difuzarea materialelor sunt incluse până la 3.000 de ore vizionate pe lună; peste, 0,10 EUR / oră.
 • Materialele rămân private (acces doar din aplicație, cu linkuri semnate și cu expirare), stocate pe servere din Uniunea Europeană, și se șterg la încetarea contractului.
