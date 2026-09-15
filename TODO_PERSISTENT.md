@@ -52,12 +52,17 @@ deploy după review (review independent: aprobat, 2 runde).
 
 **Rămas până pe 21.09 — ORDINEA contează** (un checkout cu V126S pornit cât Family e încă 24,90 îngheață 18,68 lei/lună
 în abonamentul Stripe):
-- [ ] Deploy Tutor cu migrarea `0063_voucher_recurring_once_per_user` (voucher `recurring` + `oncePerUser` + `planKey`,
-  callback-ul brokerului scos din limita de 3/min, `/cafea` preselectează Family).
-- [ ] `node Reports/flyer-b2c-cafea-2026-09-15/apply-prices-and-v126s.mjs` pe VPS2 (dry run, apoi `--apply`): backup
-  JSON → prețuri → V126S (25% · la fiecare plată · 1/cont · doar FAMILY · expiră 30.11.2026 23:59 ora RO).
-- [ ] Test cap-coadă pe cont de test: QR → înscriere → pachete (Family preselectat) → Stripe arată 33,20 − 25% = 24,90
-  → a doua încercare pe același cont refuzată. Fără plată reală.
+- [x] Deploy Tutor cu migrarea `0063_voucher_recurring_once_per_user` (voucher `recurring` + `oncePerUser` + `planKey`,
+  callback-ul brokerului scos din limita de 3/min, `/cafea` preselectează Family) — **LIVE 15.09 23:18 RO** (`887a016`
+  + `b655d2e`, VPS HEAD `54f29f3`). Verificat live: `/cafea?voucher=V126S` → 307 `…register?voucher=V126S&plan=FAMILY`;
+  checkout fără login 401; 6 callback-uri nesemnate la rând → 400 fiecare, niciun 429.
+- [x] `apply-prices-and-v126s.mjs --apply` pe VPS2 — **15.09 23:19 RO**. Backup
+  `VPS2:/root/backups/tutor-plans-vouchers-before-v126s-2026-09-15T20-19-37-476Z.json`. Prețuri 2653/3320/3987/5320/6653;
+  V126S creat. Verificat cu regulile din codul deployat pe rândurile reale: Family 33,20 → 25% forever → **24,90**;
+  celelalte 4 planuri → `VOUCHER_WRONG_PLAN`; același cont a doua oară → `VOUCHER_ALREADY_USED`; 01.12.2026 →
+  `VOUCHER_EXPIRED`. Audit: `EDIT_PLAN_PRICES` + `GENERATE_VOUCHER`.
+- [ ] **(Alex)** Test cap-coadă pe cont de test: QR → înscriere → pachete (Family preselectat) → pagina Stripe arată
+  33,20 − 25% = 24,90 → NU plăti; a doua încercare pe același cont se refuză doar după o activare reală.
 - [ ] De știut (neblocant): dacă se adaugă vreodată un plan Family ANUAL, V126S s-ar aplica și acolo (25% pe viață peste
   „2 luni gratis") — atunci se leagă și de intervalul lunar.
 
