@@ -4,6 +4,33 @@ Locație: `Tutor/Reports/flyer-b2c-cafea-2026-09-15/`
 
 ---
 
+## -2. v3.1 — poză nouă, „eTutor.ro" peste tot, footer minim
+
+Patru corecturi din feedback-ul tău de după v3:
+
+1. **404 pe QR și pe `etutor.ro/cafea`** — corect, nu e bug. Ruta e doar în cod (push-uit),
+   nu e încă pe server — Tutor e tot în deploy (vezi conversația live pentru stadiu). Va merge
+   singur în clipa în care deploy-ul termină, fără nicio altă acțiune.
+2. **Voucherul V126S** — nu poate fi testat până nu e ruta live, din același motiv. Rămâne pe
+   listă imediat ce deploy-ul termină.
+3. **Poză nouă**: `foto-mama-cafea.jpg` — Pexels, Karolina Grabowska (kaboompics.com),
+   [pexels.com/photo/smiling-woman-holding-a-cup-of-coffee-7680214](https://www.pexels.com/photo/smiling-woman-holding-a-cup-of-coffee-7680214/),
+   licența Pexels (comercial OK, fără atribuire). Zâmbet real (dinți vizibili), cafea clar în
+   mână. Compromis: nu mai are telefonul în cadru — poza veche (phone+coffee) nu avea și fața,
+   n-am găsit din aceeași ședință foto o poză cu toate trei (față + zâmbet + telefon + cafea în
+   mână) după ~10 candidate verificate vizual. Dacă vrei să caut mai departe specific pentru
+   asta, spune și continui.
+4. **„eTutor.ro" peste tot, nu „etutor.ro"** — aplicat în tot textul vizibil (URL-ul de sub QR,
+   footer). Logo-ul din colț (stilizat, „eTUTOR.ro" cu TUTOR mare) e neschimbat — e tratamentul
+   de brand deja folosit în aplicație (`src/components/Brand.tsx`), altă convenție decât textul
+   simplu. QR-ul însuși țintește tot `etutor.ro` (minuscul) — domeniul e case-insensitive tehnic,
+   deci nu contează pentru funcționare, doar pentru ce se vede scris.
+5. **Footer redus la un rând**: „Class RDA Impex SRL · office@eTutor.ro · eTutor.ro" — am scos
+   CUI, Reg. Com., adresa și „neplătitoare de TVA" (mențiunea că prețul e final, fără TVA
+   adăugat, dispare odată cu asta — dacă vrei să păstrezi ideea într-o formă scurtă, spune).
+
+---
+
 ## -1. v3 — o singură față, nu față+verso
 
 Ai spus: „flyerul se face doar pe fata, nu si pe verso". Tot ce era pe verso (QR-ul, cele 3
