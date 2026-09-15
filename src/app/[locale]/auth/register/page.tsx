@@ -194,15 +194,22 @@ export default function RegisterPage() {
             </p>
           )}
           <button
-            onClick={() =>
+            onClick={() => {
+              // Abonamentul (packages) e singurul loc unde un voucher sub 100% chiar
+              // duce la plată (checkout real cu cuponul Stripe aplicat) — "activare"
+              // doar arăta un mesaj static "în curând", fără cale spre plată.
+              const packagesParams = new URLSearchParams();
+              if (plan) packagesParams.set("plan", plan);
+              if (voucherCode && !voucherApplied) packagesParams.set("voucher", voucherCode);
+              const dest = packagesParams.toString()
+                ? `/dashboard/packages?${packagesParams.toString()}`
+                : null;
               router.push(
-                voucherCode && !voucherApplied
-                  ? `/auth/signin?callbackUrl=${encodeURIComponent(`/dashboard/activare?voucher=${voucherCode}`)}`
-                  : plan
-                    ? `/auth/signin?callbackUrl=${encodeURIComponent(`/dashboard/packages?plan=${plan}`)}`
-                    : "/auth/signin"
-              )
-            }
+                dest
+                  ? `/auth/signin?callbackUrl=${encodeURIComponent(dest)}`
+                  : "/auth/signin"
+              );
+            }}
             className="inline-block rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-500"
           >
             {ro ? "Autentifică-te" : "Sign in"}

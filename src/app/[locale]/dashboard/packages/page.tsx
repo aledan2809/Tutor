@@ -44,8 +44,13 @@ export default function PackagesPage() {
   const [preselect, setPreselect] = useState<string | null>(null);
 
   useEffect(() => {
-    const p = new URLSearchParams(window.location.search).get("plan");
+    const params = new URLSearchParams(window.location.search);
+    const p = params.get("plan");
     if (p) setPreselect(p);
+    // From a campaign link (flyer QR, register hand-off) — same "?voucher=" a
+    // visitor would otherwise have to retype by hand.
+    const v = params.get("voucher");
+    if (v) setVoucher(v.trim().toUpperCase());
   }, []);
 
   useEffect(() => {
