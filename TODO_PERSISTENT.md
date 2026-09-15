@@ -6,6 +6,12 @@
 
 ## [~] 🔴 Oferta Poșta — analiză completă + decizii luate; rămâne DOAR aplicarea (blocată pe deploy Offer)
 
+**Actualizare 15.09 seara — Alex a cerut ÎNTÂI varianta Word, apoi Offer după OK-ul lui.**
+Word v2 livrat (`1aaf95c`): `Reports/oferta-posta-word-2026-09-15/Oferta_eTutor_Posta_Romana_OF-2026-0001_v2.docx`
+(+ PDF, + copie lângă docx-ul lui în OneDrive/Proiecte/Tutor). 7 pagini A4, randat prin Word, 5 comentarii cu întrebări
+deschise: Palasca/pasasca · spunem clientului de dezactivarea demo-urilor? · promitem agregarea pe regiune? · treaptă
+peste 20.000? · „în avans" la facturare? **Offer NU se atinge până la OK-ul pe Word** — pașii de mai jos așteaptă.
+
 **Analiza completă**: `Reports/OFERTA-posta-aliniere-docx-2026-09-15.md` (docx citit integral: 63 paragrafe + 16
 tabele + 4 imagini — doar logo-uri, nimic nou). **Textul nou, gata de aplicat**: `Reports/oferta-posta-assets/
 conditii-2026-09-15-v5.txt` (9.798 caractere, sub noul cap de 20.000).
@@ -32,7 +38,28 @@ raportare oficiu→județ→regiune→național = **fals**, rămâne „per ofic
 - [ ] Numele/emailul „Elisa Palasca — elisa.pasasca@ro.post" (P6 docx) — ortografii diferite, de clarificat cu Alex
   înainte de orice corespondență pe adresa asta (nesemnalat explicit, doar flag).
 
-## [~] 🎯 Flyer Tutor B2C „liniștea copilului tău, cât o cafea" — LIVRAT, o decizie de preț rămasă
+## [~] 🎯 Flyer Tutor B2C „liniștea copilului tău, cât o cafea" — v3.5 LIVRAT; aplicația trebuie aliniată ÎNAINTE de 21.09
+
+**Stare 15.09 seara (înlocuiește întrebarea de preț de mai jos, rezolvată):** flyer v3.5 (`f49978a`) = modelul 2 la
+Poșta (tiraj 20.000, 48,60 lei/1.000, distribuție 21.09 → sfârșit noiembrie). Preț: 33,20 tăiat → 24,90* cu V126S;
+nota de la asterisc = o materie · activare până la 30.11.2026 · reducerea rămâne lunar cât e activ abonamentul ales ·
+o singură folosire pe cont (decizia Alex, varianta 1). QR = `etutor.ro/cafea?voucher=V126S`. Ciorna de e-mail către
+Alexandra Călin e în **webmail knowhow.best → Drafts** (NU s-a trimis) + `DRAFT-email-raspuns-Posta-model2.md`.
+
+**Decizii Alex 15.09 seara:** plata încasează prețurile de pe site la TOATE planurile (Elev 26,53 · Family 33,20 ·
+Family Duo 39,87 · Trio 53,20 · Family Trio 66,53); V126S merge DOAR pe Family; scrierile în DB le fac eu cu acordul lui;
+deploy după review (review independent: aprobat, 2 runde).
+
+**Rămas până pe 21.09 — ORDINEA contează** (un checkout cu V126S pornit cât Family e încă 24,90 îngheață 18,68 lei/lună
+în abonamentul Stripe):
+- [ ] Deploy Tutor cu migrarea `0063_voucher_recurring_once_per_user` (voucher `recurring` + `oncePerUser` + `planKey`,
+  callback-ul brokerului scos din limita de 3/min, `/cafea` preselectează Family).
+- [ ] `node Reports/flyer-b2c-cafea-2026-09-15/apply-prices-and-v126s.mjs` pe VPS2 (dry run, apoi `--apply`): backup
+  JSON → prețuri → V126S (25% · la fiecare plată · 1/cont · doar FAMILY · expiră 30.11.2026 23:59 ora RO).
+- [ ] Test cap-coadă pe cont de test: QR → înscriere → pachete (Family preselectat) → Stripe arată 33,20 − 25% = 24,90
+  → a doua încercare pe același cont refuzată. Fără plată reală.
+- [ ] De știut (neblocant): dacă se adaugă vreodată un plan Family ANUAL, V126S s-ar aplica și acolo (25% pe viață peste
+  „2 luni gratis") — atunci se leagă și de intervalul lunar.
 
 Livrat complet în `Reports/flyer-b2c-cafea-2026-09-15/`: `flyer.html` autonom + export PNG RGB/JPG CMYK/PDF la
 105×140mm, bleed 5mm, 300dpi (pipeline REAL replicat) + `RAPORT.md` (3 variante de titlu, verificare de adevăr
