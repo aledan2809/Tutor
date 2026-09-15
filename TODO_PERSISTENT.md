@@ -4,6 +4,61 @@
 
 ---
 
+## [ ] 🔴 Oferta Poșta — de aliniat la modelul docx al lui Alex + prețurile decise (creat 2026-09-15, sesiune dedicată)
+
+**Handoff complet: `Master/reports/handoffs/ST-2026-09-15-Posta.md`.** Alex a rescris prezentarea ofertei în
+`~/Library/CloudStorage/OneDrive-Personal/Proiecte/Tutor/Oferta_Fabulosos_Posta_Romana_eTutor_2026.docx`
+(15.09, 15:44) — **acesta e modelul**; oferta live OF-2026-0001 (Offer, `offer.knowbest.ro/o/o2_5YYaEiSa8jZA9BYr1cA`)
+se aduce la forma lui, cu cifrele decise azi (docx-ul le are pe cele vechi):
+- [ ] **Adresa Fabulosos în Offer e greșită**: șablonul „Fabulosos B2B" tipărește „bl. A5, ap. 36, Sector 4"; ONRC
+  (Tutor `dc358c7`): **„Str. Valea Oltului nr. 8, bl. A5, sc. C, et. 1, ap. 36, Sector 6, București"**. Se schimbă din
+  pagina de editare (secțiunea 5) sau cu `PATCH /api/templates/[id]`; apoi spec-ul `Reports/OFERTA-posta-2026-09-14.spec.json`
+  + memoria `project-posta-oferta-comerciala`.
+- [ ] Analiză atentă a docx-ului (structură: antet cu „Întâlnirea de referință 11.09.2026" + participanții Poștei,
+  „Propunerea într-o frază", „Ce este important", 1. Soluția propusă (4 pași), 2. Oferta financiară, 3. Extensii
+  opționale, …) și **lista diferențelor** față de textul live. Cea mai mare: în docx cele trei cursuri demo **NU** sunt
+  conținut inclus („rol exclusiv demonstrativ"; Poșta își introduce singură conținutul; Fabulosos creează contra cost) —
+  textul live spune că sunt incluse, rescrise pe procedurile lor. Se merge pe modelul lui Alex.
+- [ ] Prețurile decise 15.09 (după verificarea de piață): conținut TEXT **500 EUR/lecție · 1.300 EUR/curs · 400 EUR de la 20**
+  (lecție = 5–7 min de citit, 3.000–5.000 caractere + grilă 6–10 întrebări; modul = lecție + grilă; curs = 3 module + test
+  final); audio **9 EUR/min generat**, video **99 EUR/min generat**, dezvoltare + activare **7.900 EUR**, regenerare **50%**,
+  o lecție → 4–6 min generate (36–54 EUR audio / 396–594 EUR video). Docx-ul are 150/400/120 și (probabil) 1/6/4.900 → de înlocuit.
+- [ ] **Două afirmații noi din docx de verificat în produs înainte de trimitere** (metoda din `Reports/VERIFICARE-ADEVAR-posta-2026-09-10.md`):
+  „Mesagerie instantanee, separat de cursuri" (Tutor ca aplicație de mesaje independente de lecții) și „raportare agregată
+  oficiu → județ → regiune → național" (azi raportul e per om + per modul pe o organizație; ierarhia teritorială nu există).
+- [ ] Docx-ul păstrează un „EXEMPLU: 3.000 × 3,25 = 9.750 EUR/lună" — de decis cu Alex dacă rămâne (azi a cerut fără exemple/totaluri).
+- [ ] Propuneri de îmbunătățire după analiză (Alex le vrea): coerență cu prezentarea-anexă, un singur îndemn, clauza de anexă,
+  paginare PDF. Se aplică prin Offer (editare/CLI `offer:assets`), nu în docx; docx-ul rămâne referința de formă.
+
+## [ ] 🎯 Flyer Tutor B2C „liniștea copilului tău, cât o cafea" (creat 2026-09-15, sesiune dedicată)
+
+Modelul de producție = flyer-ul REAL (`REAL/Reports/flyer-posta-2026-09-15/`: `flyer.html` → PNG RGB + JPG CMYK, 105×140 mm,
+bleed 5 mm, 300 dpi; ideea în `Master/reports/handoffs/ST-2026-09-15-Posta.md` §2). Brief-ul lui Alex: pornim de la o
+cafea (peste 20 lei) vs. nivelul minim de abonament (19,90 lei/materie/lună, memoria `tutor-pricing-per-subject`) —
+„liniștea pentru copilul tău cât o cafea"; o mamă drăguță savurând o cafea, cu telefonul în față arătând rezultatele Tutor
+ale copilului. Livrabil: best practices de copywriting + idei proprii + machetă HTML → export tipar. Toate cifrele de pe flyer
+trec prin verificarea de adevăr (nr. de elevi, „gratuit", prețul cu/fără TVA — Class RDA e operatorul B2C). Fără cuvântul „AI".
+
+## [ ] 🚀 Deploy punctual `dc358c7` pe etutor.ro (adresa Fabulosos după ONRC) — cerut de altă sesiune, 2026-09-15
+
+Instrucțiunile primite, de urmat exact: pe VPS2 `cd /var/www/tutor && git fetch origin && git log --oneline origin/master -3`
+— confirmă că `dc358c7` e acolo. Dacă HEAD-ul de pe VPS e în urmă cu ALTE commit-uri nedeployate, OPREȘTE-TE și raportează
+lista. Dacă singurul commit nou e `dc358c7`: `git pull origin master && npm run build && pm2 restart tutor --update-env`
+(fără npm install, fără prisma migrate). Verifică `curl -s -o /dev/null -w "%{http_code}" https://etutor.ro/` = 200 și
+`grep -c "sc. C, et. 1" .next/server/**/*.js` > 0 (sau o factură Fabulosos cu Sector 6). Raportează HEAD înainte/după.
+**Starea reală la 15.09 seara**: VPS = `ba15904` (deploy-ul sesiunii de azi); `origin/master` = `ba15904` → `6de18b3` (docs,
+Reports/) → **`dc358c7`** → `8a4268c` (docs, Reports/). Deci „alte commit-uri" există, dar sunt **doar documente** din sesiunea
+asta — se poate deploya tot. ⚠️ pe VPS `package-lock.json` se murdărește la fiecare `npm install`: `git checkout -- package-lock.json`
+înainte de pull, altfel pull-ul eșuează tăcut. Build-ul durează 60–85 min cât rulează orfanul `real` (PID 4066681).
+
+## [ ] ✅ De verificat live: ruta `/api/posta/pdf` după `b2e3730` (deployat 15.09 12:05 UTC, neprobat)
+
+Probă (a fost întreruptă): prima descărcare → `200` + antet `X-Posta-PDF: cache-vechi` (fișierul din 11.09 servit pe loc,
+regenerare în fundal); după ~4 min a doua → `X-Posta-PDF: cache` și `posta-ro.pdf` cu mtime nou, 12 pagini, „Fabulosos" ×13.
+`pm2 logs tutor | grep posta/pdf` fără „a depășit". Dacă regenerarea tot eșuează, Chromium-ul snap (pornire ~90 s) e cauza:
+vezi L555 în Master.
+
+
 ## [~] 🏢 B2B pe Fabulosos, B2C rămâne pe Class RDA — soluția temporară LIVE 2026-09-11 (`f836a1c`)
 
 **Decizie user**: Class RDA nu e plătitoare de TVA — bine pe B2C, prea mică pe B2B (Poșta).
