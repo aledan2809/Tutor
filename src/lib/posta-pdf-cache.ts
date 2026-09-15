@@ -1,22 +1,40 @@
 /**
- * Unde stau PDF-urile deja generate pentru `/posta`, și cum se aruncă.
+ * Unde stau PDF-urile deja generate pentru `/posta`, cum se judecă vechimea lor și cum
+ * se aruncă. Fișierul e PUR (doar `fs` + `path`): ruta de PDF, editorul de texte și
+ * testele citesc aceleași reguli de aici.
  *
- * Fișierul există ca ruta de PDF și ecranul de editare să nu ajungă să aibă păreri
- * diferite despre același director. Ruta îl generează; salvarea textelor îl golește.
- *
- * De ce e nevoie de golire: cache-ul e pe VECHIME (10 minute), nu pe conținut. Fără
- * asta, cine schimbă o frază în panou și apasă imediat „Descarcă prezentarea" primește
- * documentul DINAINTE de modificare, fără nicio eroare și fără vreun semn — iar pagina
- * de pe ecran arată textul nou. Două artefacte care se contrazic în tăcere, exact
- * lucrul pe care editarea din panou trebuia să-l elimine.
+ * De ce e nevoie de golire la salvarea textelor: cache-ul e pe VECHIME, nu pe conținut.
+ * Fără asta, cine schimbă o frază în panou și apasă imediat „Descarcă prezentarea"
+ * primește documentul DINAINTE de modificare, fără nicio eroare — iar pagina de pe
+ * ecran arată textul nou. Două artefacte care se contrazic în tăcere.
  */
 import { readdir, unlink } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
 
-/** Aceeași regulă ca în ruta de PDF: sub HOME, fără punct la început (vezi nota despre snap acolo). */
+/** Cât timp e considerat proaspăt un PDF deja generat (nu se regenerează). */
+export const CACHE_PROASPAT_MS = 10 * 60 * 1000;
+
+export type StareCachePdf = "proaspat" | "vechi" | "lipsa";
+
+/**
+ * Judecata pe vechimea fișierului din cache. `vechi` NU înseamnă „nu-l folosi":
+ * înseamnă „servește-l acum și regenerează în fundal" — Chromium pe VPS pornește în
+ * ~90 s, iar omul care apasă pe buton nu trebuie să aștepte niciodată asta dacă
+ * există măcar o versiune de dat. Un fișier gol se tratează ca lipsă.
+ */
+export function stareCachePdf(mtimeMs: number | null | undefined, acumMs: number, marime = 1): StareCachePdf {
+  if (mtimeMs == null || !Number.isFinite(mtimeMs) || marime <= 0) return "lipsa";
+  return acumMs - mtimeMs < CACHE_PROASPAT_MS ? "proaspat" : "vechi";
+}
+
+/** Aceeași regulă ca în generator: sub HOME, fără punct la început (vezi nota despre snap acolo). */
 export function cacheDirPdfPosta(): string {
   return process.env.POSTA_PDF_DIR || path.join(homedir(), "tutor-pdf-cache");
+}
+
+export function caleCachePdfPosta(locale: string): string {
+  return path.join(cacheDirPdfPosta(), `posta-${locale}.pdf`);
 }
 
 /**

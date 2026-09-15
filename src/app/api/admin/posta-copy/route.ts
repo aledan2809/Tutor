@@ -13,7 +13,7 @@ import { prisma } from "@/lib/prisma";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import { withErrorHandler } from "@/lib/api-handler";
 import { CHEIE_POSTA, RO, imbinaCopy, normalizeazaLista } from "@/lib/posta-copy";
-import { invalideazaPdfPosta } from "@/lib/posta-pdf-cache";
+import { invalideazaSiRegenereazaPdfPosta } from "@/lib/posta-pdf";
 
 async function _GET() {
   const { error } = await requireSuperAdmin();
@@ -110,10 +110,11 @@ async function _PUT(req: Request) {
     update: { data, updatedBy: session?.user?.email ?? null },
   });
 
-  // PDF-ul se randează DIN pagină și e ținut în cache 10 minute după vechime, nu după
-  // conținut. Fără rândul ăsta, cine salvează și descarcă imediat primește documentul
-  // de dinainte de modificare, în tăcere.
-  const pdfAruncate = await invalideazaPdfPosta();
+  // PDF-ul se randează DIN pagină și e ținut în cache după vechime, nu după conținut.
+  // Fără rândul ăsta, cine salvează și descarcă imediat primește documentul de dinainte
+  // de modificare, în tăcere. Regenerarea pornește pe loc, în fundal (Chromium ia ~2 min
+  // pe VPS), ca următoarea descărcare să găsească deja versiunea nouă.
+  const pdfAruncate = await invalideazaSiRegenereazaPdfPosta();
 
   return NextResponse.json({
     ok: true,
