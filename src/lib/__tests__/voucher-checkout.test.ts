@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { checkVoucherForCheckout, normalizeVoucherCode, type VoucherForCheckout } from "@/lib/voucher-checkout";
+import {
+  checkVoucherForCheckout,
+  discountedMinorUnits,
+  normalizeVoucherCode,
+  previewAppliesToPlan,
+  previewVoucher,
+  type VoucherForCheckout,
+} from "@/lib/voucher-checkout";
 
 // V126S as decided for the flyer: 25%, every month, one use per account, Family only, until 30.11.2026 (RO).
 const v126s: VoucherForCheckout = {
@@ -79,5 +86,51 @@ describe("codul tastat de om", () => {
   it("orice altceva decât text devine gol (fără voucher)", () => {
     expect(normalizeVoucherCode(undefined)).toBe("");
     expect(normalizeVoucherCode(42)).toBe("");
+  });
+});
+
+describe("înainte de plată: ce preț are voie pagina să arate", () => {
+  const onv126s = { ...v126s, id: "v2", code: "ONV126S" };
+  const opts = { alreadyUsedByUser: false, now: beforeEnd };
+
+  it("codul online are aceleași condiții ca al flyerului: 25%, la fiecare plată, doar Family", () => {
+    expect(previewVoucher(onv126s, opts)).toEqual({
+      ok: true,
+      preview: { code: "ONV126S", discountPercent: 25, recurring: true, planKey: "FAMILY", expiresAt: v126s.expiresAt },
+    });
+  });
+  it("prețul redus e exact cel de pe pagina de plată: 33,20 lei minus 25% = 24,90 lei", () => {
+    expect(discountedMinorUnits(3320, 25)).toBe(2490);
+  });
+  it("reducerea se arată doar pe planul pe care îl numește codul", () => {
+    const r = previewVoucher(onv126s, opts);
+    if (!r.ok) throw new Error("expected a preview");
+    expect(previewAppliesToPlan(r.preview, "FAMILY")).toBe(true);
+    expect(previewAppliesToPlan(r.preview, "FAMILY_DUO")).toBe(false);
+    expect(previewAppliesToPlan({ ...r.preview, planKey: null }, "TRIO")).toBe(true);
+  });
+  it("un cod deja folosit pe cont, expirat sau oprit nu mai arată nicio reducere", () => {
+    expect(previewVoucher(onv126s, { ...opts, alreadyUsedByUser: true })).toMatchObject({ ok: false, code: "VOUCHER_ALREADY_USED" });
+    expect(previewVoucher(onv126s, { ...opts, now: new Date("2026-12-01T00:00:01+02:00") })).toMatchObject({
+      ok: false,
+      code: "VOUCHER_EXPIRED",
+    });
+    expect(previewVoucher({ ...onv126s, isActive: false }, opts)).toMatchObject({ ok: false, code: "VOUCHER_INVALID" });
+    expect(previewVoucher(null, opts)).toMatchObject({ ok: false, code: "VOUCHER_INVALID" });
+  });
+  it("folosirea codului de pe flyer nu blochează codul online: fiecare se verifică separat", () => {
+    // alreadyUsedByUser e calculat pe voucherul cerut, deci V126S folosit nu atinge ONV126S.
+    expect(previewVoucher(onv126s, { ...opts, alreadyUsedByUser: false }).ok).toBe(true);
+  });
+  it("un cod de acces gratuit (100%) nu se afișează ca reducere: are pagina lui de activare", () => {
+    expect(previewVoucher({ ...onv126s, discountPercent: 100 }, opts)).toMatchObject({ ok: false, code: "VOUCHER_FREE_ACCESS" });
+  });
+  it("aceeași ordine a refuzurilor ca la plată", () => {
+    expect(checkVoucherForCheckout({ ...v126s, isActive: false, expiresAt: new Date("2020-01-01") }, family)).toMatchObject({
+      code: "VOUCHER_INVALID",
+    });
+    expect(previewVoucher({ ...onv126s, isActive: false, expiresAt: new Date("2020-01-01") }, opts)).toMatchObject({
+      code: "VOUCHER_INVALID",
+    });
   });
 });

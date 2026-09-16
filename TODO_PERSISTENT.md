@@ -4,6 +4,65 @@
 
 ---
 
+## [~] 🏠 Pagina pentru părinți (/ro/parinte) — trecerea de la flyer la aplicație (decizii Alex 16.09.2026)
+
+**Macheta aprobată ca direcție**: `Reports/landing-parinte-cafea-2026-09-16/macheta-landing-parinte-cafea.html`
+(sursa `macheta.src.html` + `build-macheta.mjs`, capturi în `capturi/`). Regim de lucru: instrucțiuni mesh.
+
+**Ce a găsit verificarea paginii de acum** (16.09): vorbea doar de WhatsApp (în realitate: aplicație → Telegram → email →
+WhatsApp → SMS; SMS e pornit pe producție prin Twilio, cel mult unul pe zi, doar pachete plătite) · link „plan PROMOȚIONAL" după ce promoția s-a terminat ·
+promisiuni inexistente în aplicație: −30% dacă plătești în probă (cu cronometru), a 2-a materie −15%, plată anuală
+= 2 luni gratuite (niciun plan anual în DB), abonament −10% pe Telegram (doar în textul de ajutor) · „TUTOR"/„etutor.ro"
+în loc de eTutor.ro · la plată toate planurile dădeau 14 zile gratuite cu card, deși flyerul spune „7 zile, fără card".
+
+**Decizii Alex 16.09:**
+- Pagina nouă (femeia cu cafeaua, 24,90 lei) o văd **toți** vizitatorii. Codul **nu** e cel de pe flyer: pe site e
+  **ONV126S** (online), în aceleași condiții ca V126S (25% · la fiecare plată · o dată pe cont · doar Family ·
+  activare până la 30.11.2026 23:59). Cine vine de pe flyer (`/cafea`) vede V126S → se măsoară canalele separat.
+  Fiecare cod o dată pe cont; poate folosi unul, apoi celălalt.
+- Butonul principal: **plata pe Family** (24,90 lei). Al doilea: încercare fără card.
+- **7 zile gratuite și la plata cu card, 7 în total**: la plată se dau doar zilele rămase din cele 7 de la crearea contului.
+- Promisiunile lipsă **se construiesc** (nu se scot): −30% la plata în perioada de probă · −10% cu Telegram conectat
+  la plată (rămâne și dacă îl deconectează) · a 2-a materie −15% (a 3-a+ −25%) calculată din **prețul normal** ·
+  pachete **anuale** la prețul a 10 luni, **fără** alte reduceri.
+- Cum se combină: **pe viață, într-o singură reducere la plată** — cea mai mare dintre cod (25%) și proba (30%),
+  plus Telegram 10% peste (ex. Family: cod+Telegram 22,41 · probă+Telegram 20,92). Nu atinge brokerul de plăți.
+- Ordinea: **întâi livrarea 1 (până pe 21.09)**, apoi livrarea 2. Până la livrarea 2 pagina nu pomenește reducerile noi.
+
+**Livrarea 1 — până pe 21.09:**
+- [ ] `/cafea` → `/ro/parinte` (cu V126S + atribuirea campaniei), nu direct la înscriere
+- [ ] `/ro/parinte` rescrisă după machetă (RO + EN), cu faptele citite din config (canale, timpi, prețuri din DB)
+- [ ] Voucher ONV126S (script cu verificare, backup, audit) + `trialDays` 14 → 7 pe planurile active
+- [ ] Checkout: zilele gratuite = cele rămase din 7 de la crearea contului
+- [ ] Înscriere: formularul arată codul pentru orice link cu cod + text pentru părinte la planurile de familie
+- [ ] Fără a doua autentificare după crearea contului
+- [ ] Abonament: prețul cu codul aplicat (33,20 → 24,90) + zilele gratuite rămase
+- [ ] Codul rămâne salvat în cont până la plată
+- [ ] Review independent → deploy VPS2 → verificare live (ambele variante, telefon + calculator)
+
+**Livrarea 2 — după 21.09:** −30% la plata în probă (cu cronometru) · −10% Telegram · a 2-a/a 3-a materie · anual ·
+texte aliniate (/preturi, /elev, ajutor, Abonament).
+
+**Review independent 16.09 — reparat (necomis încă, mesh):** B2 copilul din familie acoperit de părintele plătitor
+(WhatsApp/SMS, simulări, lecții) + lanțuri blocate (email fără adresă, SMS neacoperit, trimiteri eșuate la nesfârșit) ·
+B3 promisiunile din livrarea 2 scoase de pe /preturi, /elev, ajutor, cardul Telegram · M1 Abonament trimite la plată doar
+codul afișat · m1–m8 + nits (ritmul real al mementourilor, ce oprește lanțul, alerta părintelui, butoane pentru cei
+autentificați, zilele gratuite calculate, limită pe verificarea codurilor, /cafea fără override, previzualizare link,
+prețul copilului 2). Teste 1051 verzi.
+
+**Decizii noi Alex 16.09 seara (de construit, în ordine):**
+- [ ] **Proba fără card, pe bune** (B1): părintele fără card își leagă copilul și are 7 zile tot pachetul, în afară de
+  WhatsApp/SMS (costă per mesaj). Azi un părinte fără abonament nu-și poate lega copilul → rămânea blocat.
+- [ ] **Ziua 8 fără plată = pauză pentru părinte ȘI copil**, cu „teasing": cifre clare dar insuficiente + detalii
+  estompate, ca să vrea să plătească. La toate abonamentele (individuale sau legate), **mai puțin meditator/instructor**.
+  Bune practici prezentate (reverse trial, cifre clare/detalii estompate, anunțuri cinstite la 3 zile/1 zi/ziua 8,
+  nimic șters). ⚠️ Copilului NU i se cere să-și convingă părintele să plătească (UE, UCPD Anexa I pct. 28) — oferta
+  merge doar la părinte. **Macheta întâi**, apoi construcție; trebuie live înainte de 28.09 (expiră primele probe din 21.09).
+- [ ] **Părintele poate schimba orele de studiu și materiile alese de copil** (marketing + funcționalitate). Orele le
+  poate schimba deja din Watcher (`/api/dashboard/watcher/[id]/reminders`); materiile nu. De pus și pe pagina pentru părinți.
+
+---
+
 ## [~] 🔴 Oferta Poșta — analiză completă + decizii luate; rămâne DOAR aplicarea (blocată pe deploy Offer)
 
 **Actualizare 15.09 seara — Alex a cerut ÎNTÂI varianta Word, apoi Offer după OK-ul lui.**

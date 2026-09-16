@@ -3,6 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { featureMap } from "@/lib/plan-features";
 import { hasAnyOrgProvidedAccess } from "@/lib/org-entitlement";
+import { coveredByPayingParent, SELECT_ACOPERIRE_CANALE_RELATII } from "@/lib/escalation/segmentation";
 import { withErrorHandler } from "@/lib/api-handler";
 
 /**
@@ -25,8 +26,16 @@ async function _GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { subscriptionStatus: true },
+    select: { subscriptionStatus: true, guardianLinks: SELECT_ACOPERIRE_CANALE_RELATII.guardianLinks },
   });
+
+  // Copilul unei familii care plătește are pachetul plătit de părinte (vezi coveredByPayingParent).
+  if (user && !["active", "trialing"].includes(user.subscriptionStatus ?? "") && coveredByPayingParent(user)) {
+    return NextResponse.json({
+      subscriptionStatus: "family",
+      features: featureMap("active"),
+    });
+  }
 
   // Cine e înscris într-o materie a unei firme are accesul plătit de firmă, nu de
   // el. Fără linia asta, poarta paginii de lecții rulează înainte de a ști despre ce

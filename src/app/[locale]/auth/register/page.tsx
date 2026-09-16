@@ -2,9 +2,33 @@
 
 import { useState, useEffect } from "react";
 import { useLocale } from "next-intl";
+import { signIn } from "next-auth/react";
 import { Link } from "@/i18n/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { Brand } from "@/components/Brand";
+import { FREE_TRIAL_DAYS } from "@/lib/free-trial";
+
+// Plans a parent buys for a child — a link carrying one of these starts on „Părinte".
+const PARENT_PLAN_KEYS = ["FAMILY", "FAMILY_DUO", "TRIO", "FAMILY_TRIO"];
+
+/**
+ * Where a brand-new account goes once signed in. A 100% code already opened access → the
+ * dashboard; the no-card path (?start=free) → add the child first; a chosen plan or a discount
+ * code → the packages page with both filled in; otherwise the dashboard.
+ */
+function nextPathAfterSignup(opts: {
+  plan: string | null;
+  voucherCode: string;
+  voucherApplied: boolean;
+  start: string | null;
+}): string {
+  if (opts.voucherApplied) return "/dashboard";
+  if (opts.start === "free") return "/dashboard/family";
+  const q = new URLSearchParams();
+  if (opts.plan) q.set("plan", opts.plan);
+  if (opts.voucherCode) q.set("voucher", opts.voucherCode);
+  return q.toString() ? `/dashboard/packages?${q.toString()}` : "/dashboard";
+}
 
 interface Domain {
   slug: string;
@@ -65,6 +89,8 @@ export default function RegisterPage() {
   // Plan chosen on /preturi (?plan=<key>) — carried through so the new user lands
   // on the packages page with that plan pre-selected instead of a generic dead end.
   const [plan, setPlan] = useState<string | null>(null);
+  // ?start=free — the parents' page "try without a card" button: account now, payment later.
+  const [start, setStart] = useState<string | null>(null);
 
   // Read campaign params (?exam=, ?subjects=, ?voucher=) once on mount.
   // window.location is used instead of useSearchParams() to avoid the
@@ -73,6 +99,10 @@ export default function RegisterPage() {
     const params = new URLSearchParams(window.location.search);
     const planParam = params.get("plan");
     if (planParam) setPlan(planParam);
+    // A family plan is bought by a parent for a child: without this the form started on „Elev"
+    // and a parent coming from the flyer got a student account unless they noticed the toggle.
+    if (planParam && PARENT_PLAN_KEYS.includes(planParam.toUpperCase())) setRole("PARENT");
+    setStart(params.get("start"));
     const exam = params.get("exam")?.toLowerCase();
     const preset = exam ? CAMPAIGNS[exam] : undefined;
     if (preset) {
@@ -133,6 +163,7 @@ export default function RegisterPage() {
     }
 
     setLoading(true);
+    let leaving = false;
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -150,6 +181,23 @@ export default function RegisterPage() {
       if (data.success) {
         setVoucherApplied(Boolean(data.voucherApplied));
         setVoucherDiscount(typeof data.voucherDiscount === "number" ? data.voucherDiscount : null);
+        // Straight in: the account was just created with this email and password, so asking for
+        // them again on a sign-in page was a step where parents from the flyer dropped out.
+        let signedIn = false;
+        try {
+          const r = await signIn("credentials", { email, password, redirect: false });
+          // Only an explicit success counts: an undefined result is not a signed-in session.
+          signedIn = Boolean(r?.ok && !r.error);
+        } catch {
+          signedIn = false;
+        }
+        if (signedIn) {
+          leaving = true; // keep the button busy while the next page loads
+          router.push(
+            nextPathAfterSignup({ plan, voucherCode, voucherApplied: Boolean(data.voucherApplied), start }),
+          );
+          return;
+        }
         setSuccess(true);
       } else {
         setError(data.error || (ro ? "Ceva nu a mers. Încearcă din nou." : "Something went wrong"));
@@ -157,7 +205,7 @@ export default function RegisterPage() {
     } catch {
       setError(ro ? "Eroare de rețea. Încearcă din nou." : "Network error. Please try again.");
     } finally {
-      setLoading(false);
+      if (!leaving) setLoading(false);
     }
   };
 
@@ -195,20 +243,10 @@ export default function RegisterPage() {
           )}
           <button
             onClick={() => {
-              // Abonamentul (packages) e singurul loc unde un voucher sub 100% chiar
-              // duce la plată (checkout real cu cuponul Stripe aplicat) — "activare"
-              // doar arăta un mesaj static "în curând", fără cale spre plată.
-              const packagesParams = new URLSearchParams();
-              if (plan) packagesParams.set("plan", plan);
-              if (voucherCode && !voucherApplied) packagesParams.set("voucher", voucherCode);
-              const dest = packagesParams.toString()
-                ? `/dashboard/packages?${packagesParams.toString()}`
-                : null;
-              router.push(
-                dest
-                  ? `/auth/signin?callbackUrl=${encodeURIComponent(dest)}`
-                  : "/auth/signin"
-              );
+              // Fallback only — normally the new account is signed in straight away. Abonamentul
+              // (packages) e singurul loc unde un voucher sub 100% chiar duce la plată.
+              const dest = nextPathAfterSignup({ plan, voucherCode, voucherApplied, start });
+              router.push(dest === "/dashboard" ? "/auth/signin" : `/auth/signin?callbackUrl=${encodeURIComponent(dest)}`);
             }}
             className="inline-block rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-500"
           >
@@ -233,13 +271,33 @@ export default function RegisterPage() {
             )}
           </div>
         )}
+        {/* A discount code from the flyer or the parents' page: say it made it here. Campaign
+            links (?exam=) show it inside their own banner above. */}
+        {!campaign && voucherCode && (
+          <div className="mb-4 rounded-lg border border-emerald-800/70 bg-emerald-900/20 p-3 text-center">
+            <p className="text-sm font-semibold text-emerald-200">
+              ✓ {ro ? `Codul ${voucherCode} e inclus` : `Code ${voucherCode} included`}
+            </p>
+            {/* The code isn't checked before the account exists (any link can carry one), so this
+                says what happens rather than promising a discount. */}
+            <p className="mt-0.5 text-xs text-emerald-300/80">
+              {ro
+                ? `Îl verificăm și îl aplicăm după ce îți faci contul. Primele ${FREE_TRIAL_DAYS} zile sunt gratuite.`
+                : `We check and apply it once your account is created. The first ${FREE_TRIAL_DAYS} days are free.`}
+            </p>
+          </div>
+        )}
         <h2 className="mb-2 text-center text-xl font-bold text-white">
-          {ro ? "Creează cont" : "Create account"}
+          {role === "PARENT" && !campaign
+            ? ro ? "Cont de părinte" : "Parent account"
+            : ro ? "Creează cont" : "Create account"}
         </h2>
         <p className="mb-6 text-center text-sm text-gray-400">
           {ro ? "Intră în " : "Join "}
           <Brand className="text-sm" />
-          {ro ? " și începe să înveți" : " and start learning"}
+          {role === "PARENT" && !campaign
+            ? ro ? " și vezi cum progresează copilul tău" : " and see how your child is progressing"
+            : ro ? " și începe să înveți" : " and start learning"}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-3">

@@ -8,6 +8,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "./prisma";
 import { hasFeature, type PlanFeature } from "./plan-features";
+import { coveredByPayingParent, SELECT_ACOPERIRE_CANALE_RELATII } from "./escalation/segmentation";
 
 /**
  * Returns a 403 response when the user's package doesn't include `feature`, or
@@ -23,10 +24,12 @@ export async function requireFeature(
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { subscriptionStatus: true },
+    select: { subscriptionStatus: true, guardianLinks: SELECT_ACOPERIRE_CANALE_RELATII.guardianLinks },
   });
 
   if (hasFeature(feature, user?.subscriptionStatus)) return null;
+  // The child of a paying family: the package was bought for them (see coveredByPayingParent).
+  if (user && coveredByPayingParent(user)) return null;
 
   return NextResponse.json(
     { error: "Această funcție face parte dintr-un pachet.", locked: true, feature },

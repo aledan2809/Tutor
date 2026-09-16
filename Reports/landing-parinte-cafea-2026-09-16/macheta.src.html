@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Machetă eTutor.ro — pagina pentru părinți, venind de pe flyerul „cât o cafea”</title>
+<!--
+  MACHETĂ, nu cod de producție. Pagina /ro/parinte pentru toți vizitatorii: pe site codul e
+  ONV126S, iar cine vine de pe flyer (eTutor.ro/cafea → /ro/parinte) vede V126S — aceleași
+  condiții, două canale măsurate separat (decizie Alex 16.09). Fișier autonom: fonturi de sistem,
+  imaginile se inlinează la build (build-macheta.mjs). Faptele din text sunt luate din
+  aplicație (src/lib/escalation/config.ts, src/content/help/*, prețurile din baza de date),
+  nu inventate. Notițele galbene („NOU / ACTUALIZAT / PĂSTRAT”) sunt doar pentru review.
+-->
+<style>
+  :root {
+    --cream: #f8f1e4; --cream-2: #fffdf8; --cream-line: rgba(36, 28, 20, 0.14);
+    --ink: #241c14; --ink-soft: #4a3f33;
+    --emerald: #0d7a54; --emerald-dark: #0a5f42;
+    --terracotta: #b5652f; --terracotta-dark: #8f4f24;
+    --flyer-blue: #2f5fd6; --flyer-blue-2: #5b82e6;
+    --blue: #3b82f6; --blue-2: #60a5fa; --blue-3: #93c5fd;
+    --bg: #030712; --panel: #111827; --panel-2: #0b1220; --line: #1f2937; --line-2: #334155;
+    --text: #f3f4f6; --muted: #9ca3af; --muted-2: #6b7280;
+    --serif: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+  h1, h2, h3, p { margin: 0; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; }
+  .narrow { max-width: 880px; }
+  .center { text-align: center; }
+
+  /* ── Stratul de review (se ascunde cu butonul) ───────────────────────── */
+  .review-bar {
+    position: relative; z-index: 50; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
+    padding: 9px 20px; background: #fde68a; color: #422006; font-size: 13px; line-height: 1.35;
+    border-bottom: 1px solid #f59e0b;
+  }
+  .review-bar button {
+    margin-left: auto; font: 700 12px/1 var(--sans); color: #422006; background: #fff7d6;
+    border: 1px solid #d97706; border-radius: 999px; padding: 7px 12px; cursor: pointer;
+  }
+  .note {
+    display: block; width: fit-content; max-width: 100%; margin: 0 auto 22px; text-align: left;
+    background: #fde68a; color: #422006; font: 600 12px/1.4 var(--sans); padding: 7px 10px;
+    border-radius: 7px; border: 1px solid #f59e0b; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+  }
+  .note b { font-weight: 800; letter-spacing: 0.02em; }
+  .channel-switch { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-weight: 650; }
+  .review-bar .channel-switch button { margin-left: 0; }
+  .review-bar .channel-switch button.on { background: #422006; color: #fde68a; border-color: #422006; }
+  body[data-channel="site"] [data-only="flyer"], body[data-channel="flyer"] [data-only="site"] { display: none !important; }
+  .code-name { display: inline !important; }
+  .hero .note, .final .note { margin: 20px 0 0; }
+  body.notes-off .note { display: none; }
+  body.notes-off .review-bar { position: fixed; z-index: 60; left: 12px; bottom: 88px; padding: 0; background: none; border: 0; }
+  body.notes-off .review-bar > span { display: none; }
+  body.notes-off .review-bar button { margin: 0; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35); }
+  @media (min-width: 960px) { body.notes-off .review-bar { bottom: 16px; } }
+  body.clean .review-bar { display: none; }
+
+  /* ── Marca ───────────────────────────────────────────────────────────── */
+  .brand { font-weight: 800; letter-spacing: -0.01em; color: var(--flyer-blue); font-size: 21px; white-space: nowrap; }
+  .brand .e { font-size: 0.72em; vertical-align: top; font-weight: 700; }
+  .brand .ro { font-size: 0.6em; font-weight: 700; color: var(--flyer-blue-2); }
+  .brand.on-dark { color: var(--blue); }
+  .brand.on-dark .ro { color: var(--blue-2); }
+
+  /* ── Butoane ─────────────────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px;
+    padding: 14px 24px; border-radius: 14px; background: var(--emerald); color: #fff;
+    font-weight: 700; font-size: 16.5px; letter-spacing: 0.005em;
+    box-shadow: 0 10px 24px rgba(13, 122, 84, 0.32), inset 0 -2px 0 rgba(0, 0, 0, 0.12);
+  }
+  .btn:hover { background: #0b6b4a; }
+  .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 50px; padding: 12px 20px;
+    border-radius: 14px; border: 1.5px solid rgba(36, 28, 20, 0.25); color: var(--ink);
+    font-weight: 650; font-size: 15.5px; background: rgba(255, 253, 248, 0.7);
+  }
+  .btn-ghost.on-dark { color: #f5efe6; border-color: rgba(245, 239, 230, 0.35); background: rgba(255, 255, 255, 0.06); }
+
+  /* ── 1. HERO — lumea flyerului ───────────────────────────────────────── */
+  .hero { position: relative; background: var(--cream); color: var(--ink); overflow: hidden; }
+  .hero-photo { position: relative; height: 470px; }
+  .hero-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 46% 12%; }
+  .hero-photo::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(248, 241, 228, 0) 46%, rgba(248, 241, 228, 0.78) 74%, var(--cream) 97%);
+  }
+  .topbar { position: absolute; top: 0; left: 0; right: 0; z-index: 4; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; }
+  .login {
+    font-size: 14px; font-weight: 650; color: var(--ink); background: rgba(255, 253, 248, 0.78);
+    border: 1px solid var(--cream-line); padding: 8px 14px; border-radius: 999px; backdrop-filter: blur(6px);
+  }
+  .pill {
+    display: inline-block; padding: 6px 12px; border-radius: 999px; border: 1.5px solid var(--emerald);
+    background: rgba(255, 253, 248, 0.75); color: var(--emerald-dark); font-size: 12px; font-weight: 800;
+    letter-spacing: 0.07em; text-transform: uppercase;
+  }
+  .pill-over { position: absolute; z-index: 4; left: 20px; top: 70px; }
+  .pill-inline { display: none; }
+  .trial-badge {
+    position: absolute; z-index: 4; right: 18px; top: 68px; background: var(--terracotta-dark); color: #fdf9f0;
+    border-radius: 10px; padding: 8px 12px 7px; text-align: center; box-shadow: 0 8px 20px rgba(36, 28, 20, 0.3);
+    transform: rotate(2deg);
+  }
+  .trial-badge b { display: block; font-family: var(--serif); font-size: 19px; line-height: 1; letter-spacing: 0.01em; }
+  .trial-badge span { display: block; font-size: 10.5px; font-weight: 800; letter-spacing: 0.08em; margin-top: 3px; }
+  .trial-badge small { display: block; font-size: 10.5px; opacity: 0.88; margin-top: 1px; }
+
+  .hero-sheet { position: relative; z-index: 3; margin-top: -128px; padding: 0 20px 34px; }
+  .arrival {
+    display: inline-flex; align-items: center; gap: 8px; background: var(--cream-2); border: 1px solid rgba(13, 122, 84, 0.35);
+    color: var(--emerald-dark); font-size: 13.5px; font-weight: 650; padding: 6px 12px 6px 7px; border-radius: 999px;
+    box-shadow: 0 3px 12px rgba(36, 28, 20, 0.1);
+  }
+  .arrival .tick { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 999px; background: var(--emerald); color: #fff; font-size: 12px; }
+  .hero-title {
+    font-family: var(--serif); font-weight: 700; color: var(--emerald-dark); font-size: clamp(31px, 8.2vw, 58px);
+    line-height: 1.04; letter-spacing: -0.015em; margin: 12px 0 10px;
+  }
+  .hero-sub { font-size: 16.5px; color: var(--ink-soft); max-width: 40ch; line-height: 1.45; }
+
+  .price-card {
+    display: flex; align-items: center; gap: 12px; margin-top: 16px; max-width: 470px; background: var(--cream-2);
+    border: 1.5px solid var(--emerald); border-radius: 16px; padding: 12px 14px; box-shadow: 0 10px 26px rgba(36, 28, 20, 0.09);
+  }
+  .cup { width: 38px; height: 38px; flex: none; }
+  .prices { display: flex; flex-direction: column; line-height: 1.02; }
+  .prices .old { font-family: var(--serif); font-size: 15px; font-weight: 600; color: #9a8f7d; text-decoration: line-through; text-decoration-thickness: 1.5px; }
+  .prices .new { font-family: var(--serif); font-weight: 800; font-size: 31px; color: var(--emerald-dark); white-space: nowrap; }
+  .prices .new sup { font-size: 0.5em; vertical-align: super; line-height: 0; }
+  .prices .new small { font-family: var(--sans); font-size: 14px; font-weight: 650; color: var(--ink-soft); margin-left: 4px; }
+  .code { margin-left: auto; text-align: right; }
+  .code-label { display: block; font-size: 12px; color: var(--ink-soft); }
+  .code-chip {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 3px; font-family: var(--serif); font-weight: 800; font-size: 17px;
+    letter-spacing: 0.05em; color: var(--terracotta-dark); border: 1.5px dashed var(--terracotta); border-radius: 8px; padding: 3px 8px; background: #fff8ee;
+  }
+  .code-chip i { font-style: normal; font-family: var(--sans); font-size: 11px; color: #fff; background: var(--emerald); border-radius: 999px; width: 17px; height: 17px; display: inline-grid; place-items: center; letter-spacing: 0; }
+
+  .cta-row { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 14px; }
+  @media (max-width: 420px) {
+    .price-card { gap: 9px; padding: 10px 11px; }
+    .cup { width: 30px; height: 30px; }
+    .prices .old { font-size: 13.5px; }
+    .prices .new { font-size: 26px; }
+    .prices .new small { font-size: 12.5px; margin-left: 3px; }
+    .code-label { font-size: 11px; }
+    .code-chip { font-size: 14.5px; padding: 2px 6px; gap: 4px; letter-spacing: 0.02em; }
+    .hero .btn-ghost { min-height: 46px; }
+  }
+  .hero .cta-row .btn, .hero .cta-row .btn-ghost { width: 100%; }
+  .fine { font-size: 12.5px; color: var(--ink-soft); max-width: 60ch; margin-top: 14px; line-height: 1.45; }
+  .trial-line { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; font-size: 14.5px; font-weight: 650; color: var(--emerald-dark); line-height: 1.4; }
+  .trial-line span { color: var(--emerald); font-weight: 800; }
+  .scroll-cue { display: inline-flex; align-items: center; gap: 8px; margin-top: 22px; font-size: 14px; font-weight: 650; color: var(--emerald-dark); }
+  .scroll-cue span { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 999px; border: 1.5px solid rgba(13, 122, 84, 0.4); }
+
+  /* Trecerea vizuală de la hârtia flyerului la ecranul aplicației */
+  .fade-to-app { height: 96px; background: linear-gradient(to bottom, var(--cream), var(--bg)); }
+
+  /* ── Secțiuni întunecate (lumea aplicației) ──────────────────────────── */
+  .s { position: relative; padding: 64px 0; }
+  .kicker { font-size: 12px; font-weight: 800; letter-spacing: 0.13em; text-transform: uppercase; color: var(--blue-2); }
+  .s-title { font-family: var(--serif); font-size: clamp(28px, 6vw, 42px); line-height: 1.12; letter-spacing: -0.01em; color: #fff; margin-top: 8px; text-wrap: balance; }
+  .s-title.sm { font-size: clamp(24px, 5vw, 32px); }
+  .s-lead { color: var(--muted); font-size: 17px; margin-top: 10px; max-width: 62ch; }
+  .center .s-lead { margin-inline: auto; }
+
+  /* 2. Grijile părintelui */
+  .worries { display: grid; gap: 14px; margin-top: 28px; }
+  .worry { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 20px; }
+  .worry .q { font-size: 17px; font-weight: 650; color: #fff; line-height: 1.38; }
+  .worry .a { margin-top: 14px; font-size: 15px; color: #d6e6ff; background: rgba(59, 130, 246, 0.07); border: 1px solid rgba(59, 130, 246, 0.26); border-radius: 12px; padding: 12px 14px; }
+  .worry .a b { color: var(--blue-3); }
+
+  /* 3. Cum funcționează */
+  .how { margin-top: 34px; display: grid; gap: 18px; }
+  .how-step { display: grid; grid-template-columns: 38px 1fr; column-gap: 12px; row-gap: 10px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 18px 16px; }
+  .how-body { grid-column: 1 / -1; }
+  .num { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: rgba(59, 130, 246, 0.14); color: var(--blue-2); font-weight: 800; font-size: 17px; }
+  .how-step h3 { font-size: 19px; color: #fff; line-height: 1.3; }
+  .how-body > p { color: #c9ced6; font-size: 15.5px; }
+  .how-step .dim { color: var(--muted); }
+
+  .chain { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 10px; }
+  .node {
+    position: relative; display: grid; grid-template-columns: 42px 1fr auto; column-gap: 12px; align-items: center;
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px; padding: 11px 12px;
+  }
+  .node .ic { grid-row: 1 / 3; width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; color: #e5e7eb; }
+  .node .ic svg { width: 21px; height: 21px; }
+  .ic.app { background: rgba(59, 130, 246, 0.18); color: var(--blue-3); }
+  .ic.tg { background: rgba(14, 165, 233, 0.18); color: #7dd3fc; }
+  .ic.mail { background: rgba(148, 163, 184, 0.16); color: #cbd5e1; }
+  .ic.wa { background: rgba(34, 197, 94, 0.16); color: #86efac; }
+  .ic.sms { background: rgba(168, 85, 247, 0.16); color: #d8b4fe; }
+  .node b { font-size: 15px; color: #fff; }
+  .node em { font-style: normal; font-size: 13px; color: var(--muted); grid-column: 2; }
+  .node .tag { grid-row: 1 / 3; grid-column: 3; font-size: 11px; font-weight: 750; padding: 4px 8px; border-radius: 999px; white-space: nowrap; }
+  .tag.free { color: #6ee7b7; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); }
+  .tag.paid { color: #fcd34d; background: rgba(245, 158, 11, 0.09); border: 1px solid rgba(245, 158, 11, 0.32); }
+  .node:not(:last-child)::after { content: ""; position: absolute; left: 32px; bottom: -11px; width: 2px; height: 10px; background: var(--line-2); }
+
+  .stop { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); color: #d1fae5; font-size: 15px; }
+  .stop svg { width: 20px; height: 20px; flex: none; color: #34d399; margin-top: 1px; }
+  .facts { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 9px; }
+  .facts li { position: relative; padding-left: 18px; font-size: 14.5px; color: #c9ced6; }
+  .facts li::before { content: ""; position: absolute; left: 3px; top: 9px; width: 6px; height: 6px; border-radius: 999px; background: var(--blue-2); }
+  .facts b { color: #fff; font-weight: 650; }
+
+  .see-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .see { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; }
+  .see b { display: block; font-size: 14px; color: #fff; }
+  .see span { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; line-height: 1.35; }
+
+  .report { margin-top: 14px; background: linear-gradient(180deg, #0f1a2e, #0b1220); border: 1px solid #22314a; border-radius: 16px; padding: 14px 16px; }
+  .report-h { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 10px; font-size: 12px; color: var(--muted); }
+  .report-h .ex { font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue-2); }
+  .report-name { margin-top: 6px; font-size: 16px; font-weight: 700; color: #fff; }
+  .report-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+  .report-stats div { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); border-radius: 10px; padding: 8px; text-align: center; }
+  .report-stats b { display: block; font-size: 22px; line-height: 1.1; }
+  .report-stats span { font-size: 12px; color: var(--muted); }
+  .st-ok b { color: #34d399; } .st-late b { color: #fbbf24; } .st-miss b { color: #f87171; }
+  .trend { margin-top: 10px; font-size: 13.5px; color: #86efac; }
+  .weak { margin-top: 6px; font-size: 13.5px; color: #c9ced6; }
+  .chip { display: inline-block; margin: 2px 4px 0 0; padding: 2px 8px; border-radius: 999px; background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.3); color: #fecaca; font-size: 12px; }
+  .legend { margin-top: 10px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .legend b { color: #d1d5db; font-weight: 650; }
+
+  /* 4. Test real (componenta existentă) */
+  .quiz { margin: 24px auto 0; max-width: 560px; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 18px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35); }
+  .quiz-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+  .quiz-select { color: #fff; background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 10px; padding: 7px 10px; font-weight: 650; }
+  .quiz-q { margin-top: 14px; font-size: 18px; font-weight: 650; color: #fff; }
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .opts span { border: 1px solid var(--line-2); border-radius: 10px; padding: 10px 12px; font-size: 15px; color: #d1d5db; }
+  .opts .ok { border-color: rgba(16, 185, 129, 0.6); background: rgba(16, 185, 129, 0.1); color: #a7f3d0; font-weight: 650; }
+  .quiz-why { margin-top: 12px; font-size: 13.5px; color: var(--muted); }
+
+  /* 5. De pe flyer în aplicație */
+  .journey { list-style: none; margin: 40px 0 0; padding: 0; position: relative; display: grid; gap: 34px; }
+  .journey::before { content: ""; position: absolute; left: 13px; top: 10px; bottom: 30px; width: 2px; background: linear-gradient(to bottom, var(--terracotta), var(--blue)); opacity: 0.75; }
+  .j { position: relative; display: grid; grid-template-columns: 28px 1fr; column-gap: 16px; align-content: start; }
+  .j-dot { width: 28px; height: 28px; border-radius: 999px; display: grid; place-items: center; font-size: 12.5px; font-weight: 800; color: #fff; background: var(--blue); box-shadow: 0 0 0 5px var(--bg); position: relative; z-index: 1; }
+  .j-flyer .j-dot { background: var(--terracotta); }
+  .j-body { display: flex; flex-direction: column; }
+  .j-label { order: 1; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-2); margin-top: 4px; }
+  .j-body > h3 { order: 2; font-size: 19px; color: #fff; margin-top: 3px; }
+  .j-body > p { order: 3; color: var(--muted); font-size: 15px; margin-top: 5px; }
+  .j-visual { order: 4; margin-top: 16px; }
+  .journey-cta { margin-top: 38px; }
+
+  .flyer-card { position: relative; width: 190px; transform: rotate(-3deg); border-radius: 6px; overflow: hidden; box-shadow: 0 22px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06); }
+  .flyer-card img { width: 100%; }
+  .qr-ring { position: absolute; left: 18%; top: 87%; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 999px; border: 3px solid #fbbf24; box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.25); animation: pulse 2.2s ease-in-out infinite; }
+  @keyframes pulse { 50% { transform: scale(1.12); box-shadow: 0 0 0 10px rgba(251, 191, 36, 0.05); } }
+  @media (prefers-reduced-motion: reduce) { .qr-ring { animation: none; } html { scroll-behavior: auto; } }
+
+  .phone {
+    position: relative; width: 236px; height: 304px; border-radius: 28px; background: #0b1220; border: 1px solid #2a3a55;
+    box-shadow: 0 22px 44px rgba(0, 0, 0, 0.5), inset 0 0 0 6px #111a2b; padding: 26px 16px 16px; overflow: hidden; font-size: 11.5px; color: #e5e7eb; text-align: left;
+  }
+  .phone::before { content: ""; position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 56px; height: 5px; border-radius: 9px; background: #22304a; }
+  .ph-brand { font-size: 12px; }
+  .ph-title { font-size: 14px; font-weight: 750; color: #fff; margin-top: 8px; }
+  .ph-dim { color: var(--muted); font-size: 11px; margin-top: 4px; line-height: 1.35; }
+  .ph-chip { display: inline-block; margin-top: 8px; padding: 3px 8px; border-radius: 999px; background: rgba(16, 185, 129, 0.14); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.35); font-size: 10.5px; font-weight: 700; }
+  .ph-field { margin-top: 8px; border: 1px solid var(--line-2); border-radius: 8px; padding: 5px 8px; }
+  .ph-field span { display: block; font-size: 9.5px; color: var(--muted-2); }
+  .ph-field i { font-style: normal; color: #e5e7eb; font-size: 11.5px; }
+  .ph-btn { margin-top: 10px; text-align: center; border-radius: 9px; background: var(--emerald); color: #fff; font-weight: 750; padding: 8px 6px; font-size: 11.5px; }
+  .ph-btn.ghost { background: transparent; border: 1px solid var(--line-2); color: #d1d5db; }
+  .ph-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .ph-plan { margin-top: 10px; border: 1.5px solid #3b82f6; border-radius: 12px; padding: 10px; background: rgba(59, 130, 246, 0.06); }
+  .ph-plan-h { display: flex; justify-content: space-between; align-items: center; }
+  .ph-plan-h b { font-size: 14px; color: #fff; }
+  .ph-badge { font-size: 9.5px; font-weight: 800; color: #fcd34d; border: 1px dashed rgba(252, 211, 77, 0.6); border-radius: 6px; padding: 1px 5px; }
+  .ph-price { margin-top: 8px; font-size: 11px; color: var(--muted); }
+  .ph-price s { color: var(--muted-2); }
+  .ph-price b { font-size: 19px; color: #fff; }
+  .ph-foot { margin-top: 8px; text-align: center; font-size: 10px; color: var(--muted-2); }
+  .ph-code { margin-top: 10px; text-align: center; font: 800 21px/1 ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: 0.12em; color: #fff; background: #111a2b; border: 1px dashed var(--line-2); border-radius: 10px; padding: 11px 6px; }
+  .ph-joined { margin-top: 10px; font-size: 11px; color: #d1d5db; }
+  .ph-joined .ok { color: #6ee7b7; font-weight: 700; }
+  .ph-lock { margin: -26px -16px 0; padding: 30px 12px 12px; height: 178px; background: radial-gradient(120% 90% at 30% 0%, #3b2a1a, #120d09 70%); }
+  .ph-time { text-align: center; font-size: 30px; font-weight: 300; color: #fdf6ec; letter-spacing: 0.02em; }
+  .ph-date { text-align: center; font-size: 10px; color: rgba(253, 246, 236, 0.7); }
+  .ph-notif { margin-top: 10px; background: rgba(255, 255, 255, 0.14); backdrop-filter: blur(8px); border-radius: 12px; padding: 7px 9px; color: #fff; }
+  .ph-notif b { display: block; font-size: 10px; opacity: 0.8; }
+  .ph-notif span { font-size: 11.5px; font-weight: 650; }
+  .ph-mini-report { margin-top: 10px; border: 1px solid #22314a; border-radius: 10px; padding: 8px; background: #0f1a2e; }
+  .ph-mini-report .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 5px; text-align: center; }
+  .ph-mini-report .row b { display: block; font-size: 15px; }
+  .ph-mini-report .row span { font-size: 9px; color: var(--muted); }
+
+  /* 6. Oferta */
+  .offer-grid { display: grid; gap: 16px; margin-top: 30px; }
+  .plan-card { position: relative; background: linear-gradient(180deg, #0f1f1a, #0b1220 60%); border: 1.5px solid rgba(16, 185, 129, 0.55); border-radius: 22px; padding: 22px 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35); }
+  .plan-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .plan-name { font-family: var(--serif); font-size: 26px; font-weight: 700; color: #fff; }
+  .plan-seats { font-size: 14px; color: var(--muted); }
+  .plan-flag { display: inline-block; margin-top: 6px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #fcd34d; }
+  .plan-price { margin-top: 12px; display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; }
+  .plan-price s { font-family: var(--serif); font-size: 18px; color: var(--muted-2); }
+  .plan-price b { font-family: var(--serif); font-size: clamp(36px, 9.5vw, 44px); line-height: 1; color: #fff; }
+  @media (max-width: 420px) { .plan-price s { flex-basis: 100%; } }
+  .plan-price span { font-size: 15px; color: var(--muted); }
+  .plan-note { font-size: 13px; color: #a7f3d0; margin-top: 6px; }
+  .ticks { list-style: none; padding: 0; margin: 18px 0 20px; display: grid; gap: 10px; }
+  .ticks li { position: relative; padding-left: 28px; font-size: 15px; color: #dbe2ea; }
+  .ticks li::before { content: "✓"; position: absolute; left: 0; top: 1px; width: 19px; height: 19px; border-radius: 999px; display: grid; place-items: center; background: rgba(16, 185, 129, 0.16); color: #34d399; font-size: 11.5px; font-weight: 800; }
+  .plan-card .btn { width: 100%; }
+  .plan-card .alt { display: block; margin-top: 12px; text-align: center; font-size: 14.5px; font-weight: 650; color: var(--blue-2); }
+
+  .terms { background: #1a130d; border: 1.5px dashed rgba(181, 101, 47, 0.7); border-radius: 22px; padding: 22px 20px; color: #f1e6d8; }
+  .terms h3 { font-family: var(--serif); font-size: 22px; color: #fff; }
+  .terms h3 .code-chip { font-size: 17px; margin: 0 0 0 4px; vertical-align: 2px; }
+  .terms ul { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 12px; }
+  .terms li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; font-size: 15px; line-height: 1.45; }
+  .terms li i { font-style: normal; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 10px; background: rgba(181, 101, 47, 0.2); color: #f0b27a; }
+  .terms li i svg { width: 17px; height: 17px; }
+  .terms li b { color: #fff; }
+
+  .offer-side { display: grid; gap: 16px; }
+  .others { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 20px; }
+  .others h3 { font-size: 18px; color: #fff; }
+  .others-grid { display: grid; gap: 8px; margin-top: 12px; }
+  .o { display: grid; grid-template-columns: 1fr auto; column-gap: 12px; align-items: center; background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; }
+  .o b { font-size: 15px; color: #fff; }
+  .o span { grid-column: 1; font-size: 13px; color: var(--muted); }
+  .o em { grid-row: 1 / 3; grid-column: 2; font-style: normal; font-weight: 750; color: #e5e7eb; white-space: nowrap; font-size: 15px; }
+  .o em small { font-weight: 500; color: var(--muted); font-size: 12px; }
+  .others .dim { margin-top: 12px; font-size: 13.5px; color: var(--muted); }
+  .others .dim a { color: var(--blue-2); font-weight: 650; }
+
+  /* 7. Întrebări */
+  .faq { margin-top: 26px; display: grid; gap: 10px; }
+  .faq details { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 0 18px; }
+  .faq summary { list-style: none; cursor: pointer; padding: 16px 30px 16px 0; font-size: 16.5px; font-weight: 650; color: #fff; position: relative; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; position: absolute; right: 0; top: 13px; font-size: 22px; font-weight: 400; color: var(--blue-2); }
+  .faq details[open] summary::after { content: "–"; }
+  .faq details p { padding: 0 0 16px; color: #c9ced6; font-size: 15.5px; margin-top: -4px; }
+
+  /* 8. Îndemnul final, cu fotografia */
+  .final { position: relative; overflow: hidden; background: #140e09; color: #f5efe6; }
+  .final-photo { position: relative; height: 420px; }
+  .final-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 46% 18%; }
+  .final-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(20, 14, 9, 0.12) 25%, rgba(20, 14, 9, 0.8) 70%, #140e09 98%); }
+  .final-inner { position: relative; z-index: 2; margin-top: -170px; padding-bottom: 64px; }
+  .final .kicker { color: #f0b27a; }
+  .final-title { font-family: var(--serif); font-size: clamp(36px, 9vw, 64px); line-height: 1.02; letter-spacing: -0.015em; color: #fff8ef; margin-top: 8px; }
+  .final-sub { margin-top: 12px; font-size: 17.5px; color: #eadfce; max-width: 38ch; }
+  .final-price { margin-top: 16px; display: inline-flex; align-items: baseline; gap: 10px; flex-wrap: wrap; background: rgba(255, 248, 238, 0.07); border: 1px solid rgba(240, 178, 122, 0.35); border-radius: 14px; padding: 8px 14px; }
+  .final-price s { font-family: var(--serif); color: #bfae98; font-size: 17px; }
+  .final-price b { font-family: var(--serif); font-size: 30px; color: #fff; }
+  .final-price span { color: #d8c8b4; font-size: 14.5px; }
+  .final .cta-row .btn, .final .cta-row .btn-ghost { width: 100%; }
+  .final .fine { color: #cdbda8; }
+
+  .foot { border-top: 1px solid var(--line); padding: 26px 0 110px; color: var(--muted); font-size: 13.5px; }
+  .foot .wrap { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; justify-content: space-between; }
+  .foot nav { display: flex; gap: 14px; }
+
+  /* Bara de jos, pe telefon */
+  .sticky {
+    position: fixed; left: 10px; right: 10px; bottom: 10px; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: rgba(17, 24, 39, 0.94); backdrop-filter: blur(10px); border: 1px solid var(--line-2); border-radius: 16px; padding: 9px 9px 9px 15px;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5); transform: translateY(150%); opacity: 0; visibility: hidden;
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s;
+  }
+  .sticky.show { transform: none; opacity: 1; visibility: visible; }
+  .sticky-text b { display: block; font-size: 16px; color: #fff; line-height: 1.2; }
+  .sticky-text span { display: block; font-size: 12px; color: var(--muted); }
+  .sticky .btn { min-height: 46px; padding: 10px 18px; font-size: 15px; box-shadow: none; }
+
+  /* ── Tabletă și calculator ───────────────────────────────────────────── */
+  @media (min-width: 640px) {
+    .hero .cta-row .btn, .hero .cta-row .btn-ghost, .final .cta-row .btn, .final .cta-row .btn-ghost { width: auto; }
+    .worries { grid-template-columns: repeat(3, 1fr); }
+    .offer-grid { grid-template-columns: 1.1fr 1fr; align-items: start; }
+  }
+  @media (min-width: 960px) {
+    .hero { min-height: 700px; }
+    .hero-photo { position: absolute; top: 0; right: 0; bottom: 0; width: 60%; height: auto; }
+    .hero-photo img { object-position: 50% 22%; }
+    .hero-photo::after {
+      background:
+        linear-gradient(90deg, var(--cream) 0%, rgba(248, 241, 228, 0.75) 16%, rgba(248, 241, 228, 0) 42%),
+        linear-gradient(to bottom, rgba(248, 241, 228, 0) 66%, var(--cream) 100%);
+    }
+    .topbar { padding: 22px max(20px, calc((100vw - 1120px) / 2 + 20px)); }
+    .pill-over { display: none; }
+    .pill-inline { display: inline-block; }
+    .trial-badge { right: 56px; top: 118px; padding: 12px 16px 10px; }
+    .trial-badge b { font-size: 26px; }
+    .trial-badge span { font-size: 12px; }
+    .trial-badge small { font-size: 12px; }
+    .hero-sheet { margin: 0 auto; max-width: 1120px; padding: 120px 20px 64px; }
+    .hero-sheet > * { max-width: 560px; }
+    .hero-sheet > .hero-title { max-width: 680px; }
+    .arrival { margin-left: 10px; }
+    .hero-sub { font-size: 19px; }
+
+    .s { padding: 88px 0; }
+    .fade-to-app { height: 130px; }
+    .how { gap: 20px; }
+    .how-step { grid-template-columns: 46px 1fr; column-gap: 16px; padding: 26px; }
+    .how-body { grid-column: 2; }
+    .num { width: 46px; height: 46px; font-size: 19px; }
+    .chain { grid-template-columns: repeat(5, 1fr); gap: 22px; }
+    .node { display: flex; flex-direction: column; align-items: flex-start; padding: 14px; }
+    .node .ic { margin-bottom: 10px; }
+    .node em { margin-bottom: 12px; }
+    .node .tag { margin-top: auto; }
+    .node:not(:last-child)::after { left: auto; right: -18px; top: 34px; bottom: auto; width: 14px; height: 2px; }
+    .see-grid { grid-template-columns: repeat(4, 1fr); }
+    .how-split { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; align-items: start; }
+
+    .journey { --n: 4; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 20px; }
+    body[data-channel="flyer"] .journey { --n: 5; }
+    .journey::before { left: calc(50% / var(--n)); right: calc(50% / var(--n)); top: 13px; bottom: auto; width: auto; height: 2px; background: linear-gradient(90deg, var(--terracotta), var(--blue)); }
+    body[data-channel="site"] .journey::before { background: linear-gradient(90deg, #60a5fa, var(--blue)); }
+    .j { grid-template-columns: 1fr; row-gap: 16px; justify-items: center; text-align: center; }
+    .j-body { align-items: center; }
+    .j-visual { order: 0; margin: 0 0 18px; height: 312px; display: flex; align-items: flex-end; }
+    .phone { width: 212px; height: 300px; padding: 24px 13px 14px; }
+    .phone .ph-price b { font-size: 17px; }
+    .phone .ph-dim { font-size: 10.5px; }
+    .flyer-card { width: 176px; }
+
+    .final { min-height: 600px; }
+    .final-photo { position: absolute; top: 0; right: 0; bottom: 0; width: 58%; height: auto; }
+    .final-photo::after { background: linear-gradient(90deg, #140e09 0%, rgba(20, 14, 9, 0.7) 22%, rgba(20, 14, 9, 0.05) 55%); }
+    .final-inner { margin-top: 0; padding: 110px 20px; }
+    .final-inner > * { max-width: 540px; }
+    .sticky { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="review-bar">
+  <span><b>Machetă</b> · pagina eTutor.ro/ro/parinte. Butoanele nu duc nicăieri.</span>
+  <span class="channel-switch" role="group" aria-label="De unde vine vizitatorul">Vizitatorul vine
+    <button type="button" data-set-channel="site">de pe site · ONV126S</button>
+    <button type="button" data-set-channel="flyer">de pe flyer · V126S</button>
+  </span>
+  <span class="hint">Notițele galbene spun ce e nou, ce s-a actualizat și ce a rămas.</span>
+  <button id="notesToggle" type="button">Ascunde notițele</button>
+</div>
+
+<!-- 1. HERO — continuarea flyerului -->
+<header class="hero" id="sus">
+  <div class="hero-photo" aria-hidden="true"><img src="assets/mama-cafea-web.jpg" alt=""></div>
+  <nav class="topbar">
+    <span class="brand"><span class="e">e</span>TUTOR<span class="ro">.ro</span></span>
+    <a class="login" href="#">Intră în cont</a>
+  </nav>
+  <span class="pill pill-over">Pentru părinți</span>
+  <div class="trial-badge" aria-label="7 zile gratuite, fără card"><b>7 ZILE</b><span>GRATUITE</span><small>fără card</small></div>
+
+  <div class="hero-sheet">
+    <span class="pill pill-inline">Pentru părinți</span>
+    <p class="arrival"><span class="tick">✓</span><span data-only="flyer">Codul V126S de pe flyer e deja pus</span><span data-only="site">Codul online ONV126S se aplică singur</span></p>
+    <h1 class="hero-title">Liniștea ta,<br>cât o cafea pe lună.</h1>
+    <p class="hero-sub">Vezi azi ce a lucrat copilul tău și cum progresează, din telefon — nu doar ce-ți spune el.</p>
+
+    <div class="price-card">
+      <svg class="cup" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="6" y="16" width="22" height="18" rx="3" fill="#6b4226"/>
+        <path d="M28 20 q8 0 8 6 q0 6 -8 6" fill="none" stroke="#6b4226" stroke-width="3"/>
+        <path d="M12 14 c-2 -4 2 -4 0 -8" fill="none" stroke="#b5652f" stroke-width="2" stroke-linecap="round"/>
+        <path d="M18 14 c-2 -4 2 -4 0 -8" fill="none" stroke="#b5652f" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <div class="prices">
+        <span class="old">33,20 lei</span>
+        <span class="new">24,90 lei<sup>*</sup><small>/ lună</small></span>
+      </div>
+      <div class="code"><span class="code-label">cu codul</span><span class="code-chip"><span class="code-name">ONV126S</span> <i>✓</i></span></div>
+    </div>
+
+    <div class="cta-row">
+      <a class="btn" href="#">Începe cu 24,90 lei/lună <span aria-hidden="true">→</span></a>
+      <a class="btn-ghost" href="#">Încearcă fără card</a>
+    </div>
+    <p class="trial-line"><span aria-hidden="true">✓</span>Primele 7 zile sunt gratuite. Dacă anulezi înainte, nu plătești nimic.</p>
+    <p class="fine">*Family (1 părinte + 1 copil), pentru o materie. Activezi codul <span class="code-name">ONV126S</span> până la 30.11.2026; reducerea rămâne în fiecare lună cât ții abonamentul ales atunci. O singură folosire pe cont. Cele 7 zile gratuite se socotesc o singură dată, de la crearea contului.</p>
+    <a class="scroll-cue" href="#cum">Vezi cum funcționează <span aria-hidden="true">↓</span></a>
+    <p class="note"><b>NOU</b> · Pentru toți vizitatorii: fotografia de pe flyer pe fundal, prețul și condițiile. Codul se schimbă după proveniență: ONV126S pe site, V126S de pe flyer (comutatorul de sus).</p>
+  </div>
+</header>
+<div class="fade-to-app" aria-hidden="true"></div>
+
+<!-- 2. Grijile părintelui -->
+<section class="s" id="sinceri">
+  <div class="wrap">
+    <p class="note"><b>PĂSTRAT, corectat</b> · „eTutor.ro” în loc de „TUTOR”; semnalul nu mai vine „doar pe WhatsApp”.</p>
+    <div class="center">
+      <p class="kicker">Hai să fim sinceri</p>
+      <h2 class="s-title">Nu nota te frământă, ci „oare chiar învață?”</h2>
+    </div>
+    <div class="worries">
+      <article class="worry">
+        <p class="q">Stă o oră „la învățat”. Dar a învățat ceva sau doar a ținut manualul deschis?</p>
+        <p class="a"><b>Cu eTutor.ro</b> vezi negru pe alb câte exerciții a făcut azi, la ce capitol și unde a greșit.</p>
+      </article>
+      <article class="worry">
+        <p class="q">De obicei afli că n-a înțeles un capitol abia la teză — când e prea târziu.</p>
+        <p class="a"><b>Cu eTutor.ro</b> afli la timp, pe telefon, dacă sare peste exerciții zile la rând.</p>
+      </article>
+      <article class="worry">
+        <p class="q">Plătești meditații lună de lună. De unde știi că lecțiile chiar prind?</p>
+        <p class="a"><b>Cu eTutor.ro</b> vezi capitolele la care greșește des — ora de meditații se face pe ce nu știe, nu pe ghicite.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Cum funcționează, pe larg -->
+<section class="s" id="cum">
+  <div class="wrap narrow">
+    <p class="note"><b>ACTUALIZAT</b> · Toate canalele pornite azi pe server, cu timpii reali din aplicație — inclusiv SMS (Twilio), ultima treaptă, cel mult unul pe zi.</p>
+    <div class="center">
+      <p class="kicker">Cum funcționează, pe larg</p>
+      <h2 class="s-title">Nu mai ești tu cel care întreabă „ai învățat?”</h2>
+      <p class="s-lead">Patru lucruri se întâmplă singure, în fiecare zi în care copilul are program.</p>
+    </div>
+
+    <div class="how">
+      <div class="how-step">
+        <span class="num">1</span>
+        <h3>Copilul își pune orele de studiu</h3>
+        <div class="how-body">
+          <p>Alege zilele și orele în program. La ora aceea primește primul memento. În zilele de vacanță pe care le marchezi nu pleacă nimic.</p>
+        </div>
+      </div>
+
+      <div class="how-step">
+        <span class="num">2</span>
+        <h3>Dacă nu reacționează, mementoul trece pe alt canal</h3>
+        <div class="how-body">
+          <ol class="chain">
+            <li class="node">
+              <span class="ic app"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span>
+              <b>Notificare în aplicație</b><em>imediat</em><span class="tag free">gratuit</span>
+            </li>
+            <li class="node">
+              <span class="ic tg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></span>
+              <b>Telegram</b><em>după 10 minute</em><span class="tag free">gratuit</span>
+            </li>
+            <li class="node">
+              <span class="ic mail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>
+              <b>Email</b><em>după încă 10 minute</em><span class="tag free">gratuit</span>
+            </li>
+            <li class="node">
+              <span class="ic wa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5z"/></svg></span>
+              <b>WhatsApp</b><em>după încă 10 minute</em><span class="tag paid">inclus în Family</span>
+            </li>
+            <li class="node">
+              <span class="ic sms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M10 18h4"/></svg></span>
+              <b>SMS</b><em>după încă 10 minute · cel mult unul pe zi</em><span class="tag paid">inclus în Family</span>
+            </li>
+          </ol>
+          <div class="stop">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
+            <span>Lanțul se oprește în clipa în care apasă pe mesaj sau începe exercițiile. Nu trebuie să termine — apăsarea e de ajuns.</span>
+          </div>
+          <ul class="facts">
+            <li><b>Noaptea e liniște.</b> Între 22:00 și 07:00 pleacă doar notificarea din aplicație; restul așteaptă dimineața.</li>
+            <li><b>Ritmul îl alegi tu.</b> Blând (aplicație, apoi email după 30 de minute), Standard (ca mai sus) sau Insistent (câte 5 minute între canale).</li>
+            <li><b>Nimic de instalat, dacă nu vrei.</b> Mementourile pot veni doar pe Telegram; legătura se face o singură dată, într-un minut.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="how-step">
+        <span class="num">3</span>
+        <h3>Pe tine te anunțăm doar când contează</h3>
+        <div class="how-body">
+          <p>Nu pentru un memento ratat, ci pentru o zi ratată: doar dacă a ignorat tot lanțul, într-o zi cu program.</p>
+          <ul class="facts">
+            <li><b>Cât timp nu reacționează,</b> te anunțăm din nou la 30 de minute — sau cum alegi: din câteva în câteva ore, o dată pe zi, ori o singură dată.</li>
+            <li><b>Vrei să-l împingi chiar tu?</b> Trimiți un memento pe loc, din aplicație. Se repetă până reacționează și se oprește singur după 24 de ore.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="how-step">
+        <span class="num">4</span>
+        <h3>Vezi tot, oricând deschizi aplicația</h3>
+        <div class="how-body">
+          <p>Fiecare copil are capitolul lui. Datele sunt la zi — nu aștepți raportul ca să vezi cum a fost azi.</p>
+          <div class="see-grid">
+            <div class="see"><b>Sesiuni</b><span>ce a lucrat și cu ce scor</span></div>
+            <div class="see"><b>Remindere</b><span>ce a primit și dacă a reacționat</span></div>
+            <div class="see"><b>Program</b><span>zilele și orele de studiu</span></div>
+            <div class="see"><b>Vacanță</b><span>zilele fără mementouri</span></div>
+          </div>
+          <div class="report">
+            <div class="report-h"><span class="ex">Exemplu de raport</span><span>duminică, 19:00</span></div>
+            <p class="report-name">Andrei · Matematică</p>
+            <div class="report-stats">
+              <div class="st-ok"><b>4</b><span>la timp</span></div>
+              <div class="st-late"><b>1</b><span>întârziată</span></div>
+              <div class="st-miss"><b>0</b><span>ignorate</span></div>
+            </div>
+            <p class="trend">↑ Mai bine decât în ultimele 5 săptămâni</p>
+            <p class="weak">Greșește des la: <span class="chip">fracții</span><span class="chip">puteri</span></p>
+          </div>
+          <p class="legend">Raportul vine <b>zilnic sau săptămânal</b>, în ziua și la ora alese de tine. <b>La timp</b> = a început în cel mult 90 de minute de la memento · <b>întârziată</b> = mai târziu, în aceeași zi · <b>ignorată</b> = nicio reacție în ziua aceea.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Test real, fără cont (componenta existentă) -->
+<section class="s" id="test">
+  <div class="wrap narrow center">
+    <p class="note"><b>PĂSTRAT</b> · Testul real, fără cont — componenta de acum, neschimbată (aici e doar desenată).</p>
+    <h2 class="s-title sm">Vezi exact ce exersează copilul</h2>
+    <p class="s-lead">Alege o materie și încearcă un test real chiar acum — fără cont.</p>
+    <div class="quiz">
+      <div class="quiz-top"><span class="quiz-select">Matematică · clasa a VIII-a ▾</span><span>1 din 5</span></div>
+      <p class="quiz-q">Cât reprezintă 3/4 din 120?</p>
+      <div class="opts"><span>A. 80</span><span class="ok">B. 90 ✓</span><span>C. 100</span><span>D. 60</span></div>
+      <p class="quiz-why"><b>De ce:</b> 120 : 4 = 30, iar 30 × 3 = 90.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5. De pe flyer în aplicație -->
+<section class="s" id="pasi">
+  <div class="wrap">
+    <p class="note"><b>NOU</b> · Trecerea în aplicație. Pasul „Ai scanat flyerul” apare doar pentru cine vine de pe flyer. Ca pașii 1 și 2 să arate așa, se repară și ecranele din aplicație (livrarea 1).</p>
+    <div class="center">
+      <p class="kicker"><span data-only="flyer">Ce urmează după ce ai scanat</span><span data-only="site">Ce urmează după un click</span></p>
+      <h2 class="s-title"><span data-only="flyer">De pe flyer în aplicație, în 4 pași</span><span data-only="site">De aici în aplicație, în 4 pași</span></h2>
+      <p class="s-lead">Durează cam 5 minute. Codul <span class="code-name">ONV126S</span> te urmează singur până la plată.</p>
+    </div>
+
+    <ol class="journey">
+      <li class="j j-flyer" data-only="flyer">
+        <span class="j-dot">✓</span>
+        <div class="j-body">
+          <div class="j-visual"><div class="flyer-card"><img src="assets/flyer-thumb.jpg" alt="Flyerul eTutor.ro „cât o cafea”"><span class="qr-ring" aria-hidden="true"></span></div></div>
+          <span class="j-label">Ai făcut deja</span>
+          <h3>Ai scanat flyerul</h3>
+          <p>Sau ai scris eTutor.ro/cafea. Ai ajuns aici, cu codul pus.</p>
+        </div>
+      </li>
+
+      <li class="j">
+        <span class="j-dot">1</span>
+        <div class="j-body">
+          <div class="j-visual">
+            <div class="phone">
+              <span class="brand on-dark ph-brand"><span class="e">e</span>TUTOR<span class="ro">.ro</span></span>
+              <p class="ph-title">Cont de părinte</p>
+              <span class="ph-chip">✓ Codul <span class="code-name">ONV126S</span> e inclus</span>
+              <div class="ph-field"><span>Nume</span><i>Maria Popescu</i></div>
+              <div class="ph-field"><span>Email</span><i>maria@exemplu.ro</i></div>
+              <div class="ph-field"><span>Parolă</span><i>••••••••••</i></div>
+              <div class="ph-btn">Creează contul</div>
+            </div>
+          </div>
+          <span class="j-label">Pasul 1</span>
+          <h3>Îți faci contul</h3>
+          <p>Nume, email și o parolă. Codul e deja trecut.</p>
+        </div>
+      </li>
+
+      <li class="j">
+        <span class="j-dot">2</span>
+        <div class="j-body">
+          <div class="j-visual">
+            <div class="phone">
+              <p class="ph-title">Alege pachetul</p>
+              <div class="ph-plan">
+                <div class="ph-plan-h"><b>Family</b><span class="ph-badge"><span class="code-name">ONV126S</span> −25%</span></div>
+                <p class="ph-dim">1 părinte + 1 copil</p>
+                <p class="ph-price"><s>33,20</s> <b>24,90 lei</b> / lună</p>
+                <p class="ph-dim">o materie · primele 7 zile gratuite</p>
+              </div>
+              <div class="ph-btn">Începe cele 7 zile gratuite</div>
+              <p class="ph-foot">🔒 Plată securizată · anulezi oricând</p>
+            </div>
+          </div>
+          <span class="j-label">Pasul 2</span>
+          <h3>Alegi Family</h3>
+          <p>Vezi direct 24,90 lei pe lună. Pui cardul, iar primele 7 zile sunt gratuite.</p>
+        </div>
+      </li>
+
+      <li class="j">
+        <span class="j-dot">3</span>
+        <div class="j-body">
+          <div class="j-visual">
+            <div class="phone">
+              <p class="ph-title">Invită copilul</p>
+              <p class="ph-dim">Îi trimiți codul pe email sau i-l dai tu. Expiră în 7 zile.</p>
+              <div class="ph-code">K7M 2QX</div>
+              <div class="ph-row"><div class="ph-btn">Trimite</div><div class="ph-btn ghost">Copiază</div></div>
+              <p class="ph-joined">👦 Andrei · <span class="ok">s-a alăturat ✓</span></p>
+            </div>
+          </div>
+          <span class="j-label">Pasul 3</span>
+          <h3>Îți inviți copilul</h3>
+          <p>Are contul lui și vede doar ce e al lui.</p>
+        </div>
+      </li>
+
+      <li class="j">
+        <span class="j-dot">4</span>
+        <div class="j-body">
+          <div class="j-visual">
+            <div class="phone">
+              <div class="ph-lock">
+                <p class="ph-time">16:00</p>
+                <p class="ph-date">marți, 22 septembrie</p>
+                <div class="ph-notif"><b>eTutor.ro · acum</b><span>E ora de matematică. Te așteaptă 5 întrebări.</span></div>
+              </div>
+              <div class="ph-mini-report">
+                <p class="ph-dim" style="margin-top:0">Raportul tău de duminică</p>
+                <div class="row">
+                  <div><b style="color:#34d399">4</b><span>la timp</span></div>
+                  <div><b style="color:#fbbf24">1</b><span>întârziată</span></div>
+                  <div><b style="color:#f87171">0</b><span>ignorate</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <span class="j-label">Pasul 4</span>
+          <h3>Îi pui programul — gata</h3>
+          <p>Mementourile pleacă singure; tu primești raportul.</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="center journey-cta"><a class="btn" href="#">Începe cu 24,90 lei/lună <span aria-hidden="true">→</span></a></div>
+  </div>
+</section>
+
+<!-- 6. Oferta, pe înțeles -->
+<section class="s" id="oferta">
+  <div class="wrap">
+    <p class="note"><b>ACTUALIZAT</b> · Condițiile codului, pe înțeles. Reducerile noi (−30% la plata în perioada de probă, −10% cu Telegram, a doua materie, plata anuală) apar aici în livrarea 2, după ce sunt construite.</p>
+    <div class="center">
+      <p class="kicker"><span data-only="flyer">Oferta de pe flyer</span><span data-only="site">Oferta online</span></p>
+      <h2 class="s-title">Ce primești pentru 24,90 lei pe lună</h2>
+    </div>
+
+    <div class="offer-grid">
+      <div class="plan-card">
+        <div class="plan-top"><span class="plan-name">Family</span><span class="plan-seats">1 părinte + 1 copil · o materie</span></div>
+        <span class="plan-flag">Cu codul <span class="code-name">ONV126S</span></span>
+        <div class="plan-price"><s>33,20 lei</s><b>24,90 lei</b><span>/ lună</span></div>
+        <p class="plan-note">Primele 7 zile gratuite, apoi 24,90 lei în fiecare lună — cât ții abonamentul, nu doar prima lună.</p>
+        <ul class="ticks">
+          <li>Cont pentru tine și cont separat pentru copil</li>
+          <li>Mementouri în aplicație, pe Telegram, pe email, pe WhatsApp și prin SMS</li>
+          <li>Te anunțăm doar când ignoră o zi întreagă</li>
+          <li>Raport zilnic sau săptămânal, cu locurile unde greșește des</li>
+          <li>Simulări de examen și lecții structurate, la materiile care le au</li>
+          <li>Anulezi oricând, din pagina Abonament</li>
+        </ul>
+        <a class="btn" href="#">Începe cu 24,90 lei/lună <span aria-hidden="true">→</span></a>
+        <a class="alt" href="#">sau încearcă fără card</a>
+      </div>
+
+      <div class="offer-side">
+      <div class="terms">
+        <h3>Codul <span class="code-chip"><span class="code-name">ONV126S</span></span>, pe înțeles</h3>
+        <ul>
+          <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></i><span><b>Îl activezi până pe 30 noiembrie 2026.</b> După această dată codul nu se mai poate folosi.</span></li>
+          <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg></i><span><b>Plătești 24,90 lei în fiecare lună</b> cât timp păstrezi abonamentul ales atunci.</span></li>
+          <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 21v-1a6 6 0 0 1 12 0v1"/><circle cx="17.5" cy="9.5" r="2.5"/><path d="M16 21v-.5a4.5 4.5 0 0 1 5-4.47"/></svg></i><span><b>E doar pentru Family</b> (1 părinte + 1 copil), pentru o materie.</span></li>
+          <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 7l3-2v14"/><path d="M9 19h7"/></svg></i><span><b>O singură folosire pe cont.</b> Codul de pe flyer (V126S) și cel de pe site (ONV126S) au exact aceleași condiții.</span></li>
+          <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></i><span><b>Primele 7 zile sunt gratuite.</b> Dacă anulezi înainte, nu plătești nimic.</span></li>
+        </ul>
+      </div>
+
+      <div class="others">
+      <h3>Vrei și al doilea părinte sau meditatorul?</h3>
+      <div class="others-grid">
+        <div class="o"><b>Family Duo</b><span>2 părinți + 1 copil</span><em>39,87 lei <small>/ lună</small></em></div>
+        <div class="o"><b>Trio</b><span>1 părinte + 1 copil + meditator</span><em>53,20 lei <small>/ lună</small></em></div>
+        <div class="o"><b>Family Trio</b><span>2 părinți + 1 copil + meditator</span><em>66,53 lei <small>/ lună</small></em></div>
+      </div>
+      <p class="dim">Prețuri pentru o materie. Codul <span class="code-name">ONV126S</span> nu se aplică acestor pachete. Al doilea copil se adaugă cu 20% reducere, al treilea cu 30%. Ești elev și plătești singur? <a href="#">Vezi pagina pentru elevi →</a></p>
+      </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. Întrebări -->
+<section class="s" id="intrebari">
+  <div class="wrap narrow">
+    <p class="note"><b>NOU</b> · Răspunsuri la ce nu încape pe flyer.</p>
+    <h2 class="s-title center">Întrebări pe care și le pun părinții</h2>
+    <div class="faq">
+      <details open>
+        <summary>Pot încerca înainte să plătesc?</summary>
+        <p>Da. Primele 7 zile sunt gratuite, o singură dată: fie fără card, cu un cont gratuit, fie cu cardul pus, direct pe Family. Dacă anulezi în cele 7 zile, nu plătești nimic. Codul rămâne salvat în cont până plătești.</p>
+      </details>
+      <details>
+        <summary>Când plătesc prima dată?</summary>
+        <p>După cele 7 zile gratuite, socotite de la crearea contului. Apoi o dată pe lună, cât ții abonamentul.</p>
+      </details>
+      <details>
+        <summary>Ce se întâmplă dacă nu activez codul până pe 30 noiembrie?</summary>
+        <p>Family revine la prețul normal, 33,20 lei pe lună. Contul și tot ce a lucrat copilul rămân.</p>
+      </details>
+      <details>
+        <summary>Copilul are nevoie de telefon?</summary>
+        <p>Nu neapărat. Poate exersa și de pe calculator, iar mementourile îi pot veni pe email sau pe Telegram.</p>
+      </details>
+      <details>
+        <summary>Vedeți conversațiile noastre de pe Telegram sau WhatsApp?</summary>
+        <p>Nu. Doar trimitem mementourile. Pe Telegram te dezabonezi oricând scriind /stop.</p>
+      </details>
+      <details>
+        <summary>Cum anulez?</summary>
+        <p>Din pagina Abonament, cu butonul „Gestionează abonamentul”. Fără telefoane și fără formulare.</p>
+      </details>
+      <details>
+        <summary>Am doi copii. Pot folosi codul pentru amândoi?</summary>
+        <p>Codul se folosește o singură dată pe cont. Al doilea copil se adaugă din aplicație, cu 20% reducere.</p>
+      </details>
+      <details>
+        <summary>Pe flyer e alt cod. E alt preț?</summary>
+        <p>Nu. V126S (de pe flyer) și ONV126S (de pe site) au exact aceleași condiții.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- 8. Îndemnul final, cu fotografia -->
+<section class="final" id="final">
+  <div class="final-photo" aria-hidden="true"><img src="assets/mama-cafea-web.jpg" alt=""></div>
+  <div class="wrap final-inner">
+    <p class="kicker">Cât o cafea pe lună</p>
+    <h2 class="final-title">Liniștea ta<br>începe azi.</h2>
+    <p class="final-sub">Îți faci contul în 2 minute. Codul <span class="code-name">ONV126S</span> e deja pus, iar primele 7 zile sunt gratuite.</p>
+    <div class="final-price"><s>33,20</s><b>24,90 lei</b><span>/ lună*</span></div>
+    <div class="cta-row">
+      <a class="btn" href="#">Începe cu 24,90 lei/lună <span aria-hidden="true">→</span></a>
+      <a class="btn-ghost on-dark" href="#">Încearcă fără card</a>
+    </div>
+    <p class="fine">*Family (1 părinte + 1 copil), pentru o materie, cu codul <span class="code-name">ONV126S</span> activat până la 30.11.2026. Reducerea rămâne în fiecare lună cât ții abonamentul. O singură folosire pe cont. Primele 7 zile gratuite se socotesc de la crearea contului.</p>
+    <p class="note"><b>NOU</b> · Îndemnul de la final, cu femeia cu cafeaua pe fundal. Pe telefon, un buton „Începe” rămâne jos cât derulezi.</p>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>Class RDA Impex SRL · office@eTutor.ro · eTutor.ro</span>
+    <nav><a href="#">Termeni</a><a href="#">Confidențialitate</a><a href="#">Cookies</a></nav>
+  </div>
+</footer>
+
+<div class="sticky" id="sticky" aria-hidden="true">
+  <div class="sticky-text"><b>24,90 lei / lună</b><span>7 zile gratuite · cod <span class="code-name">ONV126S</span></span></div>
+  <a class="btn" href="#">Începe</a>
+</div>
+
+<script>
+  (function () {
+    var body = document.body;
+    function setChannel(ch) {
+      body.dataset.channel = ch;
+      var code = ch === "flyer" ? "V126S" : "ONV126S";
+      document.querySelectorAll(".code-name").forEach(function (el) { el.textContent = code; });
+      document.querySelectorAll("[data-set-channel]").forEach(function (b) { b.classList.toggle("on", b.dataset.setChannel === ch); });
+    }
+    setChannel(/[?&]canal=flyer\b/.test(location.search) ? "flyer" : "site");
+    document.querySelectorAll("[data-set-channel]").forEach(function (b) {
+      b.addEventListener("click", function () { setChannel(b.dataset.setChannel); });
+    });
+    var toggle = document.getElementById("notesToggle");
+    if (/[?&]notes=off\b/.test(location.search)) { body.classList.add("notes-off", "clean"); toggle.textContent = "Arată notițele"; }
+    toggle.addEventListener("click", function () {
+      body.classList.toggle("notes-off");
+      toggle.textContent = body.classList.contains("notes-off") ? "Arată notițele" : "Ascunde notițele";
+    });
+
+    // Bara de jos apare după primul ecran și dispare când ajungi la îndemnul final.
+    var sticky = document.getElementById("sticky");
+    var hero = document.getElementById("sus");
+    var finalSec = document.getElementById("final");
+    function update() {
+      var pastHero = window.scrollY > hero.offsetTop + hero.offsetHeight - 40;
+      var r = finalSec.getBoundingClientRect();
+      var atFinal = r.top < window.innerHeight * 0.85 && r.bottom > 0;
+      sticky.classList.toggle("show", pastHero && !atFinal);
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+  })();
+</script>
+</body>
+</html>

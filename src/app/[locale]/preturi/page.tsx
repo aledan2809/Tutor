@@ -4,9 +4,9 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { isPromoActive, normalFromPromo, fmtPrice } from "@/lib/pricing";
 
 export const metadata: Metadata = {
-  title: "Prețuri — gratuit la start, plătești când vrei | eTUTOR.ro",
+  title: "Prețuri — gratuit la start, plătești când vrei | eTutor.ro",
   description:
-    "Începe gratuit 7 zile, fără card. Apoi alegi planul: Elev/Student, Părinte + copil, Părinți + copil sau cu meditator. Reduceri pentru mai mulți copii și plată anuală.",
+    "Începe gratuit 7 zile, fără card. Apoi alegi planul: Elev/Student, Părinte + copil, Părinți + copil sau cu meditator. Reduceri pentru mai mulți copii.",
 };
 
 // Displayed amounts are the −25% promo price; normal = amount / 0.75. See @/lib/pricing.
@@ -55,7 +55,6 @@ const RO: Copy = {
     "Demo public oricând — alegi o materie și faci un test din grile reale, fără cont",
     "Trial 7 zile cu cont gratuit",
     "2 materii pe zi × 5 întrebări — și astea contează la puncte și streak",
-    "−30% dacă plătești orice materie în perioada de probă",
   ],
   freeCta: "Începe gratuit",
   paidTitle: "Planuri plătite",
@@ -125,9 +124,7 @@ const RO: Copy = {
   ],
   discountsTitle: "Discounturi:",
   discountsList: [
-    "Pentru copii: al 2-lea copil −20%, începând cu al 3-lea copil −30%;",
-    "Pentru materii: a 2-a materie −15%; începând cu a 3-a materie −25%;",
-    "Pentru plată anuală anticipată: 2 luni gratuite — plătești doar 10 luni pe an.",
+    "Pentru copii: al 2-lea copil −20%, începând cu al 3-lea copil −30%.",
   ],
   note: "O singură factură pe familie.",
   promo:
@@ -146,7 +143,6 @@ const EN: Copy = {
     "Public demo anytime — pick a subject and take a real quiz, no account",
     "7-day trial with a free account",
     "2 subjects per day × 5 questions — and they count toward points and streaks",
-    "−30% if you pay for any subject during the trial",
   ],
   freeCta: "Start free",
   paidTitle: "Paid plans",
@@ -216,9 +212,7 @@ const EN: Copy = {
   ],
   discountsTitle: "Discounts:",
   discountsList: [
-    "Per child: 2nd child −20%, from the 3rd child −30%;",
-    "Per subject: 2nd subject −15%; from the 3rd subject −25%;",
-    "Annual upfront: 2 months free — you pay only 10 months a year.",
+    "Per child: 2nd child −20%, from the 3rd child −30%.",
   ],
   note: "One bill per family.",
   promo:

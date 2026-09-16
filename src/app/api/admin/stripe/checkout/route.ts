@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { checkVoucherForCheckout, normalizeVoucherCode, type BrokerCoupon } from "@/lib/voucher-checkout";
 import { resolveFamilyPlanFromRecord } from "@/lib/family";
+import { checkoutTrialDays } from "@/lib/free-trial";
 
 /**
  * Checkout via the central Stripe Checkout Broker (stripe.knowbest.ro).
@@ -68,6 +69,11 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: `Unsupported plan interval: ${plan.interval}` }, { status: 400 });
   }
 
+  // „7 zile gratuite" is counted once per account (decizie Alex 16.09.2026): paying on day 3 of a
+  // free account gets the 4 days still owed, not a fresh week on top.
+  const account = await prisma.user.findUnique({ where: { id: session.user.id }, select: { createdAt: true } });
+  const trialDays = isSubscription ? checkoutTrialDays(plan.trialDays, account?.createdAt ?? new Date()) : 0;
+
   const successUrl = `${process.env.STRIPE_SUCCESS_URL || process.env.AUTH_URL + "/dashboard"}?session_id={CHECKOUT_SESSION_ID}`;
   const cancelUrl = process.env.STRIPE_CANCEL_URL || process.env.AUTH_URL + "/dashboard";
   const callbackUrl = `${process.env.AUTH_URL}/api/stripe/callback`;
@@ -84,7 +90,7 @@ async function _POST(req: NextRequest) {
         ...(isSubscription ? { interval, intervalCount: 1 } : {}),
       },
     ],
-    ...(isSubscription && plan.trialDays ? { trialDays: plan.trialDays } : {}),
+    ...(trialDays > 0 ? { trialDays } : {}),
     ...(coupon ? { coupon } : {}),
     successUrl,
     cancelUrl,

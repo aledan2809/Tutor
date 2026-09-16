@@ -239,6 +239,8 @@ async function _POST(req: NextRequest) {
             subscriptionStatus: p.subscriptionStatus === "trialing" ? "trialing" : "active",
             // Persist the subscription id so /api/stripe/portal can open the portal.
             ...(p.stripeSubscriptionId ? { stripeSubscriptionId: p.stripeSubscriptionId } : {}),
+            // The code kept since signup has done its job (used or not): the plan is paid for.
+            pendingVoucherCode: null,
           },
         });
         // Counts as used from activation, a free trial included.

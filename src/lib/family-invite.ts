@@ -32,6 +32,7 @@ import {
   canAddParent,
   canAddChild,
   canAddTutor,
+  FAMILY_INVITE_TTL_DAYS,
 } from "@/lib/family";
 import { sendAppEmail, isEmailConfigured } from "@/lib/email";
 import {
@@ -40,7 +41,7 @@ import {
 } from "@/lib/telegram/connect";
 import { inviteBlurb } from "@/content/help";
 
-const DEFAULT_TTL_SEC = 7 * 24 * 3600; // 7 days
+const DEFAULT_TTL_SEC = FAMILY_INVITE_TTL_DAYS * 24 * 3600;
 
 /** Prisma client type (injectable for tests). */
 type Db = typeof prisma;

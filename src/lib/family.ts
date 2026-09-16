@@ -45,6 +45,9 @@ export const INVITE_CHANNEL = {
 export type InviteChannel =
   (typeof INVITE_CHANNEL)[keyof typeof INVITE_CHANNEL];
 
+/** How long a family invitation stays valid (the parents' page quotes it). */
+export const FAMILY_INVITE_TTL_DAYS = 7;
+
 export interface FamilyPlanFeatures {
   /** Scheduled KPI report to the parent (sessions / discipline / weaknesses). */
   watcherReports: boolean;

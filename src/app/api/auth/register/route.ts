@@ -11,6 +11,7 @@ import {
 } from "@/lib/campaign-attribution";
 import { logger } from "@/lib/logger";
 import { SIGNUP_ROLES, accountRoleForSignup, enrollmentsForSignup } from "@/lib/signup-role";
+import { loadVoucherPreview } from "@/lib/voucher-preview-server";
 
 const schema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -97,6 +98,25 @@ async function _POST(req: NextRequest) {
   // the user to /dashboard/activare with the code prefilled.
   let voucherApplied = false;
   let voucherDiscount: number | null = null;
+
+  // A partial discount (V126S from the flyer, ONV126S from the site) is paid with later, maybe
+  // days later after trying without a card: keep it on the account so the packages page has it
+  // filled in. No subject needed for this — a parent often picks the child's subjects afterwards.
+  if (voucherCode) {
+    try {
+      const preview = await loadVoucherPreview(voucherCode, user.id);
+      if (preview?.ok) {
+        voucherDiscount = preview.preview.discountPercent;
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { pendingVoucherCode: preview.preview.code },
+        });
+      }
+    } catch (err) {
+      logger.error("Signup pending voucher save failed", err, { userId: user.id });
+    }
+  }
+
   if (voucherCode && enrolledCount > 0) {
     try {
       const code = voucherCode.toUpperCase();

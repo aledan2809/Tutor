@@ -8,9 +8,11 @@
 
 import { shouldEscalate, nextStep, resolveGraceMs } from "@aledan/notify-ladder";
 import { prisma } from "@/lib/prisma";
-import { smsConfigurat } from "@/lib/notifications/sms-provider";
+import type { Prisma } from "@prisma/client";
+import { serverChannelAvailability } from "./channel-availability";
 import {
   ESCALATION_LEVELS,
+  MAX_SEND_FAILURES,
   isChannelEnabled,
   resolveUserLadder,
   resolveUserGraceMs,
@@ -22,6 +24,7 @@ import {
   ESCALATION_LADDER,
   isPaidChannelDeliverable,
   meteredChannelsCovered,
+  rungCannotReach,
   SELECT_ACOPERIRE_CANALE_RELATII,
 } from "./segmentation";
 import { userIdsOnBreak } from "./breaks";
@@ -197,18 +200,14 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     event.channel === "SMS" ||
     event.channel === "EMAIL"
   ) {
+    // Același răspuns îl folosește și pagina pentru părinți, ca să nu promită un canal oprit.
+    const available = serverChannelAvailability(process.env);
     const deliverable = isPaidChannelDeliverable(event.channel, {
       telegramLinked: Boolean(event.user.telegramChatId),
-      telegramEnabled:
-        process.env.FEATURE_TELEGRAM_NUDGES === "true" &&
-        Boolean(process.env.TELEGRAM_BOT_TOKEN),
-      whatsappConfigured: Boolean(
-        process.env.WHATSAPP_PHONE_NUMBER_ID && process.env.WHATSAPP_ACCESS_TOKEN
-      ),
-      // Nu doar SMSLink: garda întreba de un singur furnizor, deci treapta SMS era
-      // considerată nelivrabilă chiar și cu Twilio configurat și funcțional.
-      smsConfigured: smsConfigurat(process.env),
-      emailConfigured: Boolean(process.env.AUTH_RESEND_KEY || process.env.SMTP_HOST),
+      telegramEnabled: available.telegram,
+      whatsappConfigured: available.whatsapp,
+      smsConfigured: available.sms,
+      emailConfigured: available.email,
     });
     if (!deliverable) {
       await escalateToNextLevel(event.id, event.level);
@@ -228,14 +227,25 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
   // (journey-audit), and a parent-authorized extra cascade may use WhatsApp regardless.
   const parentAuthorized =
     (event.metadata as Record<string, unknown> | null)?.parentAuthorized === true;
-  if (
-    event.channel === "WHATSAPP" &&
-    !meteredChannelsCovered(event.user) &&
-    !event.isTest &&
-    !parentAuthorized
-  ) {
-    await escalateToNextLevel(event.id, event.level);
-    return;
+  // Same gate for SMS (it used to reach `sendNotification`, get blocked there, fall back to
+  // PENDING and retry forever), plus the rungs that cannot reach this person at all: no email
+  // address, no phone number. A „no" skips to the next rung instead of blocking the chain.
+  if (event.channel === "EMAIL" || event.channel === "WHATSAPP" || event.channel === "SMS") {
+    const needsPhone = event.channel !== "EMAIL";
+    const phone = needsPhone
+      ? await prisma.setting.findFirst({ where: { userId: event.userId, key: "phone" }, select: { value: true } })
+      : null;
+    const unreachable = rungCannotReach(event.channel, {
+      hasEmail: Boolean(event.user.email),
+      hasPhone: typeof phone?.value === "string" && phone.value.trim().length > 0,
+      covered: meteredChannelsCovered(event.user),
+      isTest: event.isTest,
+      parentAuthorized,
+    });
+    if (unreachable) {
+      await escalateToNextLevel(event.id, event.level);
+      return;
+    }
   }
 
   const sendTemplateId = event.templateId ?? "";
@@ -318,10 +328,19 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
       },
     });
   } else {
-    // Failed — revert to PENDING for retry
+    // Failed — retry a few times, then move on: an endless PENDING keeps the chain „active",
+    // so no new reminder starts and the parent is never alerted.
+    const failures = Number((event.metadata as Record<string, unknown> | null)?.sendFailures ?? 0) + 1;
+    if (failures >= MAX_SEND_FAILURES) {
+      await escalateToNextLevel(event.id, event.level);
+      return;
+    }
     await prisma.escalationEvent.update({
       where: { id: event.id },
-      data: { status: "PENDING" },
+      data: {
+        status: "PENDING",
+        metadata: { ...((event.metadata as Record<string, unknown> | null) ?? {}), sendFailures: failures },
+      },
     });
   }
 }
@@ -352,6 +371,9 @@ async function escalateToNextLevel(
   );
   if (!nextLevelConfig) return; // No more levels
 
+  // The failure count belongs to the rung that failed, not to the next one.
+  const carried: Record<string, unknown> = { ...((current.metadata as Record<string, unknown> | null) ?? {}) };
+  delete carried.sendFailures;
   await prisma.escalationEvent.create({
     data: {
       userId: current.userId,
@@ -361,7 +383,7 @@ async function escalateToNextLevel(
       status: "PENDING",
       channel: nextLevelConfig.channel,
       templateId: nextLevelConfig.templateId,
-      metadata: current.metadata ?? undefined,
+      metadata: current.metadata ? (carried as Prisma.InputJsonObject) : undefined,
     },
   });
 }

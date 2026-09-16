@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { FAMILY_PLANS, resolveFamilyPlanFromRecord, type FamilyPlan } from "@/lib/family";
 import { Link } from "@/i18n/navigation";
+import { fmtPrice } from "@/lib/pricing";
+import { discountedMinorUnits, previewAppliesToPlan, type VoucherPreview } from "@/lib/voucher-checkout";
 
 interface Plan {
   id: string;
@@ -18,19 +20,29 @@ interface Plan {
   maxTutors: number | null;
 }
 
+/** The preview as it comes over JSON (dates are strings). */
+type PreviewJson = Omit<VoucherPreview, "expiresAt"> & { expiresAt: string | null };
+
 interface PlansResponse {
   plans: Plan[];
-  current: { subscriptionStatus: string | null; subscriptionPlanId: string | null };
+  current: {
+    subscriptionStatus: string | null;
+    subscriptionPlanId: string | null;
+    freeTrialDaysLeft?: number;
+    pendingVoucher?: { ok: true; preview: PreviewJson } | { ok: false; code: string; voucherCode: string | null } | null;
+  };
 }
 
-// Checkout answers a refused voucher with a stable `code` (see lib/voucher-checkout.ts);
-// the page shows it in the user's language instead of the API's English message.
+// Checkout and the pending-code API answer a refused voucher with a stable `code` (see
+// lib/voucher-checkout.ts); the page shows it in the user's language instead of the API's English.
 const VOUCHER_ERROR_KEYS = {
   VOUCHER_INVALID: "voucherInvalid",
   VOUCHER_EXPIRED: "voucherExpired",
   VOUCHER_LIMIT_REACHED: "voucherLimitReached",
   VOUCHER_WRONG_PLAN: "voucherWrongPlan",
   VOUCHER_ALREADY_USED: "voucherAlreadyUsed",
+  VOUCHER_FREE_ACCESS: "voucherFreeAccess",
+  VOUCHER_TOO_MANY: "voucherTooMany",
 } as const;
 
 function planFeatures(features: unknown): string[] {
@@ -39,6 +51,7 @@ function planFeatures(features: unknown): string[] {
 
 export default function PackagesPage() {
   const t = useTranslations("packages");
+  const locale = useLocale();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [current, setCurrent] = useState<PlansResponse["current"]>({
     subscriptionStatus: null,
@@ -46,6 +59,12 @@ export default function PackagesPage() {
   });
   const [loading, setLoading] = useState(true);
   const [voucher, setVoucher] = useState("");
+  // The last code checked for this account (and kept on it).
+  const [savedPreview, setSavedPreview] = useState<PreviewJson | null>(null);
+  // A discount is shown only while that code is what the box says: the box is what the parent
+  // believes they are paying with, so editing it hides the discount until the new code is checked.
+  const preview = savedPreview && voucher.trim().toUpperCase() === savedPreview.code ? savedPreview : null;
+  const [voucherBusy, setVoucherBusy] = useState(false);
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
   const [portalBusy, setPortalBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,14 +72,86 @@ export default function PackagesPage() {
   // + scroll to it so the pricing→signup→packages hand-off keeps continuity.
   const [preselect, setPreselect] = useState<string | null>(null);
 
+  const voucherErrorText = (code: string | undefined, fallback?: string): string => {
+    const key = VOUCHER_ERROR_KEYS[code as keyof typeof VOUCHER_ERROR_KEYS];
+    if (!key) return fallback || t("checkoutError");
+    return key === "voucherWrongPlan" ? t(key, { plan: "" }) : t(key);
+  };
+
+  /**
+   * Checks a code for this account and keeps it on the account (it survives a reload or a later
+   * visit). An empty code forgets it. Answers the preview when the code may be shown as a discount.
+   */
+  const applyVoucher = async (raw: string): Promise<PreviewJson | null> => {
+    const code = raw.trim().toUpperCase();
+    setVoucher(code);
+    setVoucherBusy(true);
+    try {
+      if (!code) {
+        await fetch("/api/vouchers/pending", { method: "DELETE" });
+        setSavedPreview(null);
+        setError(null);
+        return null;
+      }
+      const res = await fetch("/api/vouchers/pending", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.preview) {
+        setSavedPreview(data.preview as PreviewJson);
+        setError(null);
+        return data.preview as PreviewJson;
+      }
+      setSavedPreview(null);
+      setError(voucherErrorText(data.code, data.error));
+      return null;
+    } catch {
+      setSavedPreview(null);
+      setError(t("checkoutError"));
+      return null;
+    } finally {
+      setVoucherBusy(false);
+    }
+  };
+
+  const wrongPlanText = (planKey: string | null | undefined): string => {
+    // Name the plan the code is for, as the parent sees it on this page.
+    const forPlan = plans.find((p) => resolveFamilyPlanFromRecord(p)?.key === planKey);
+    const label = FAMILY_PLANS[planKey as keyof typeof FAMILY_PLANS]?.label;
+    return t("voucherWrongPlan", { plan: forPlan?.name ?? label ?? String(planKey ?? "") });
+  };
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const p = params.get("plan");
     if (p) setPreselect(p);
-    // From a campaign link (flyer QR, register hand-off) — same "?voucher=" a
-    // visitor would otherwise have to retype by hand.
-    const v = params.get("voucher");
-    if (v) setVoucher(v.trim().toUpperCase());
+    // From a campaign link (flyer QR, signup hand-off): same "?voucher=" a visitor would
+    // otherwise have to retype — checked and kept on the account straight away.
+    const fromLink = params.get("voucher");
+
+    fetch("/api/plans")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: PlansResponse | null) => {
+        if (!data) return;
+        setPlans(data.plans || []);
+        setCurrent(data.current || { subscriptionStatus: null, subscriptionPlanId: null });
+        const pending = data.current?.pendingVoucher;
+        if (fromLink && fromLink.trim().toUpperCase() !== (pending?.ok ? pending.preview.code : pending?.voucherCode)) {
+          void applyVoucher(fromLink);
+        } else if (pending?.ok) {
+          setVoucher(pending.preview.code);
+          setSavedPreview(pending.preview);
+        } else if (pending && !pending.ok && pending.voucherCode) {
+          // Kept since signup but no longer usable (expired, already used). The account has already
+          // forgotten it; say why, once. The box stays empty, so checkout can't send a dead code.
+          setError(t("voucherRemovedFromAccount", { code: pending.voucherCode, reason: voucherErrorText(pending.code) }));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -72,26 +163,29 @@ export default function PackagesPage() {
     }
   }, [preselect, plans]);
 
-  useEffect(() => {
-    fetch("/api/plans")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data: PlansResponse | null) => {
-        if (!data) return;
-        setPlans(data.plans || []);
-        setCurrent(data.current || { subscriptionStatus: null, subscriptionPlanId: null });
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  const subscribe = async (planId: string) => {
-    setCheckingOut(planId);
+  const subscribe = async (plan: Plan) => {
+    setCheckingOut(plan.id);
     setError(null);
     try {
+      const planKey = resolveFamilyPlanFromRecord(plan)?.key ?? null;
+      let active = preview;
+      if (!active && voucher.trim()) {
+        // Typed but not checked yet: check it now. The parent meant this code, so a refusal — or a
+        // code for another plan — stops here with the reason, instead of charging the full price.
+        active = await applyVoucher(voucher);
+        if (!active) return;
+        if (!previewAppliesToPlan(active, planKey)) {
+          setError(wrongPlanText(active.planKey));
+          return;
+        }
+      }
+      // Only the code whose discount this card shows goes to checkout. A code for another plan
+      // (this card shows the full price) stays out, rather than turning the payment into a refusal.
+      const voucherCode = active && previewAppliesToPlan(active, planKey) ? active.code : undefined;
       const res = await fetch("/api/admin/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId, voucherCode: voucher.trim() || undefined }),
+        body: JSON.stringify({ planId: plan.id, voucherCode }),
       });
       const data = await res.json();
       if (res.ok && data.url) {
@@ -99,13 +193,14 @@ export default function PackagesPage() {
         return;
       }
       const voucherKey = VOUCHER_ERROR_KEYS[data.code as keyof typeof VOUCHER_ERROR_KEYS];
-      if (voucherKey === "voucherWrongPlan") {
-        // Name the plan the code is for, as the parent sees it on this page.
-        const forPlan = plans.find((p) => resolveFamilyPlanFromRecord(p)?.key === data.planKey);
-        const label = FAMILY_PLANS[data.planKey as keyof typeof FAMILY_PLANS]?.label;
-        setError(t("voucherWrongPlan", { plan: forPlan?.name ?? label ?? String(data.planKey ?? "") }));
+      if (voucherKey) {
+        // The code stopped working after it was checked (used in another tab, just expired). Drop it,
+        // so the next click pays the price the card then shows instead of hitting the same refusal.
+        setSavedPreview(null);
+        setVoucher("");
+        setError(voucherKey === "voucherWrongPlan" ? wrongPlanText(data.planKey) : t(voucherKey));
       } else {
-        setError(voucherKey ? t(voucherKey) : data.error || t("checkoutError"));
+        setError(data.error || t("checkoutError"));
       }
     } catch {
       setError(t("checkoutError"));
@@ -146,6 +241,21 @@ export default function PackagesPage() {
     return parts.join(" • ");
   };
 
+  // Prices come in major units (33.2); integer minor units keep 33,20 − 25% at exactly 24,90.
+  const minor = (lei: number) => Math.round(lei * 100);
+  const lei = (amount: number) => fmtPrice(amount, locale);
+  const discountFor = (plan: Plan): number | null => {
+    if (!preview) return null;
+    const key = resolveFamilyPlanFromRecord(plan)?.key ?? null;
+    if (!previewAppliesToPlan(preview, key)) return null;
+    return discountedMinorUnits(minor(plan.price), preview.discountPercent) / 100;
+  };
+  const trialFor = (plan: Plan): number =>
+    plan.interval === "ONE_TIME" ? 0 : Math.min(plan.trialDays ?? 0, current.freeTrialDaysLeft ?? 0);
+
+  const bannerPlan = preview?.planKey ? plans.find((p) => resolveFamilyPlanFromRecord(p)?.key === preview.planKey) : null;
+  const bannerPrice = bannerPlan ? discountFor(bannerPlan) : null;
+
   if (loading) {
     return <div className="py-12 text-center text-gray-500">{t("loading")}</div>;
   }
@@ -172,6 +282,23 @@ export default function PackagesPage() {
         </div>
       )}
 
+      {!isPaid && preview && (
+        <div className="rounded-xl border border-emerald-800/60 bg-emerald-900/15 px-4 py-3 text-sm text-emerald-200">
+          <p className="font-semibold">
+            {bannerPlan && bannerPrice !== null
+              ? t("voucherBanner", {
+                  code: preview.code,
+                  plan: bannerPlan.name,
+                  price: lei(bannerPrice),
+                  normal: lei(bannerPlan.price),
+                  interval: intervalLabel(bannerPlan.interval),
+                })
+              : t("voucherBannerAnyPlan", { code: preview.code, percent: preview.discountPercent })}
+          </p>
+          {preview.recurring && <p className="mt-0.5 text-xs text-emerald-300/80">{t("voucherEveryPayment")}</p>}
+        </div>
+      )}
+
       {error && (
         <div className="rounded-xl border border-red-900/50 bg-red-900/10 px-4 py-3 text-sm text-red-400">
           {error}
@@ -190,6 +317,8 @@ export default function PackagesPage() {
               const isCurrent = current.subscriptionPlanId === plan.id;
               const isPreselected = !!preselect && !isCurrent && fam?.key === preselect;
               const features = planFeatures(plan.features);
+              const discounted = isCurrent ? null : discountFor(plan);
+              const trial = trialFor(plan);
               return (
                 <div
                   key={plan.id}
@@ -202,22 +331,32 @@ export default function PackagesPage() {
                         : "border-gray-800"
                   }`}
                 >
-                  <div className="mb-1 flex items-center justify-between">
+                  <div className="mb-1 flex items-center justify-between gap-2">
                     <h2 className="text-lg font-semibold text-white">{plan.name}</h2>
-                    {isCurrent && (
+                    {isCurrent ? (
                       <span className="rounded bg-green-900/30 px-2 py-0.5 text-xs text-green-400">
                         {t("currentPlan")}
                       </span>
+                    ) : (
+                      discounted !== null &&
+                      preview && (
+                        <span className="rounded-md border border-dashed border-amber-400/60 px-2 py-0.5 text-xs font-semibold text-amber-300">
+                          {t("voucherBadge", { code: preview.code, percent: preview.discountPercent })}
+                        </span>
+                      )
                     )}
                   </div>
 
                   <p className="mb-1">
-                    <span className="text-2xl font-bold text-white">{plan.price} lei</span>
+                    {discounted !== null && (
+                      <span className="mr-2 text-base text-gray-500 line-through">{lei(plan.price)} lei</span>
+                    )}
+                    <span className="text-2xl font-bold text-white">{lei(discounted ?? plan.price)} lei</span>
                     <span className="text-sm text-gray-400"> {intervalLabel(plan.interval)}</span>
                   </p>
                   <p className="mb-1 text-xs text-gray-500">{t("perSubject")}</p>
-                  {plan.trialDays ? (
-                    <p className="mb-3 text-xs text-blue-400">{t("trial", { n: plan.trialDays })}</p>
+                  {trial > 0 ? (
+                    <p className="mb-3 text-xs text-blue-400">{t("trial", { n: trial })}</p>
                   ) : (
                     <div className="mb-3" />
                   )}
@@ -242,8 +381,8 @@ export default function PackagesPage() {
                   )}
 
                   <button
-                    onClick={() => subscribe(plan.id)}
-                    disabled={checkingOut === plan.id || isCurrent}
+                    onClick={() => subscribe(plan)}
+                    disabled={checkingOut === plan.id || isCurrent || voucherBusy}
                     className="mt-auto min-h-[44px] w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
                   >
                     {isCurrent
@@ -261,28 +400,52 @@ export default function PackagesPage() {
             {t("discounts")}
           </div>
 
-          <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+          <form
+            className="rounded-xl border border-gray-800 bg-gray-900 p-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void applyVoucher(voucher);
+            }}
+          >
             <label className="mb-1 block text-xs font-medium text-gray-400" htmlFor="voucher">
               {t("voucher")}
             </label>
-            <input
-              id="voucher"
-              type="text"
-              value={voucher}
-              onChange={(e) => setVoucher(e.target.value)}
-              placeholder={t("voucherPlaceholder")}
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
-            />
+            <div className="flex gap-2">
+              <input
+                id="voucher"
+                type="text"
+                value={voucher}
+                onChange={(e) => setVoucher(e.target.value)}
+                placeholder={t("voucherPlaceholder")}
+                className="min-w-0 flex-1 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
+              />
+              <button
+                type="submit"
+                disabled={voucherBusy}
+                className="min-h-[40px] shrink-0 rounded-lg border border-gray-700 bg-gray-800 px-4 text-sm font-medium text-gray-200 hover:bg-gray-700 disabled:opacity-50"
+              >
+                {voucherBusy ? t("voucherChecking") : t("voucherApply")}
+              </button>
+            </div>
+            {preview && (
+              <button
+                type="button"
+                onClick={() => void applyVoucher("")}
+                className="mt-2 text-xs text-gray-400 underline-offset-2 hover:text-gray-200 hover:underline"
+              >
+                {t("voucherRemove")}
+              </button>
+            )}
             {/* "Activare acces" and "Pachete" were two menu entries for one intention.
                 They merged into Abonament (this page); the per-subject 100% voucher
                 flow stays a live route and is reachable from here. */}
             <Link
               href="/dashboard/activare"
-              className="mt-2 inline-block text-xs text-blue-400 hover:text-blue-300"
+              className="mt-2 block text-xs text-blue-400 hover:text-blue-300"
             >
               {t("activateLink")}
             </Link>
-          </div>
+          </form>
         </>
       )}
     </div>

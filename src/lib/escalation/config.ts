@@ -46,6 +46,19 @@ export const ON_TIME_WINDOW_MIN = 90;
 /** How often a parent is re-notified while the child has not reacted. */
 export const PARENT_RENOTIFY_MIN = 30;
 
+/**
+ * How long after the child was last reached a silent chain counts as ignored and the parent is
+ * alerted. Lives here, not in parent-monitor, so the parents' page can quote it.
+ */
+export const PARENT_ALERT_STALL_MIN = 45;
+
+/**
+ * A rung whose send keeps failing (provider down, template rejected) is retried this many times,
+ * then skipped to the next rung. Unbounded retries kept the whole chain "active" forever, which
+ * stopped new reminders and the parent's alert (found in production, 16.09.2026).
+ */
+export const MAX_SEND_FAILURES = 3;
+
 /** Safety caps on a parent-triggered nudge series. */
 export const NUDGE_MAX_FIRES = 12;
 export const NUDGE_MAX_AGE_HOURS = 24;

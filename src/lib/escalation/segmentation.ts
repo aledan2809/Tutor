@@ -52,10 +52,54 @@ export function meteredChannelsCovered(u: {
    * Nu trimite lista completă de înscrieri: ar deschide poarta pentru toată lumea.
    */
   enrollments?: { id: string }[] | null;
+  /** Legăturile de copil către un PĂRINTE (vezi `coveredByPayingParent`). */
+  guardianLinks?: { parent: { subscriptionStatus: string | null; subscriptionEndsAt: Date | null } | null }[] | null;
 }): boolean {
   if (u.organization?.meteredIncluded === true) return true;
   if (u.enrollments && u.enrollments.length > 0) return true;
+  if (coveredByPayingParent(u)) return true;
   return isPaidSubscriber(u);
+}
+
+/**
+ * Copilul dintr-un pachet de familie (Family, Family Duo, Trio, Family Trio) e acoperit de
+ * părintele care plătește.
+ *
+ * Mementourile, WhatsApp/SMS-ul și funcțiile plătite ajung la contul COPILULUI, dar abonamentul
+ * stă pe contul părintelui — iar legarea copilului nu-i scrie acestuia niciun abonament. Fără
+ * predicatul ăsta, tot ce vinde pagina Family („mementouri pe WhatsApp", simulări de examen)
+ * era refuzat exact copilului pentru care s-a plătit (găsit la review-ul din 16.09.2026).
+ *
+ * Doar legăturile PARENT active numără: un meditator (TUTOR) nu plătește pachetul copilului.
+ * O legătură PARENT se creează numai prin locurile unui pachet de familie (vezi checkSeat).
+ */
+export function coveredByPayingParent(u: {
+  guardianLinks?: { parent: { subscriptionStatus: string | null; subscriptionEndsAt: Date | null } | null }[] | null;
+}): boolean {
+  return Boolean(u.guardianLinks?.some((g) => g.parent && isPaidSubscriber(g.parent)));
+}
+
+export type RungUnreachable = "no_email" | "no_phone" | "not_covered";
+
+/**
+ * Poate ajunge treapta asta la om? Un „nu" aici se sare pe loc, spre treapta următoare.
+ *
+ * Înainte, o trimitere imposibilă (elev fără adresă de email, fără număr de telefon, sau SMS pe
+ * un cont neacoperit — poarta blochează SMS-ul în `sendNotification`) eșua, evenimentul revenea
+ * la PENDING și se reîncerca la fiecare rulare, la nesfârșit. Cât timp lanțul e „activ",
+ * `startEscalation` nu pornește altul și părintele nu e anunțat: pe producție, patru conturi
+ * reale stăteau așa de pe 11 și 14 septembrie 2026.
+ */
+export function rungCannotReach(
+  channel: EscalationChannel,
+  ctx: { hasEmail: boolean; hasPhone: boolean; covered: boolean; isTest: boolean; parentAuthorized: boolean },
+): RungUnreachable | null {
+  if (channel === "EMAIL" && !ctx.hasEmail) return "no_email";
+  if (channel === "WHATSAPP" || channel === "SMS") {
+    if (!ctx.covered && !ctx.isTest && !ctx.parentAuthorized) return "not_covered";
+    if (!ctx.hasPhone) return "no_phone";
+  }
+  return null;
 }
 
 /**
@@ -76,6 +120,13 @@ export const SELECT_ACOPERIRE_CANALE_RELATII = {
     where: { isActive: true, domain: { organization: { meteredIncluded: true } } },
     select: { id: true },
     take: 1,
+  },
+  // Copilul unei familii care plătește (vezi `coveredByPayingParent`). Filtrul pe status e doar
+  // o scurtătură; decizia finală o ia predicatul, care verifică și data de expirare.
+  guardianLinks: {
+    where: { status: "active", relation: "PARENT", parent: { subscriptionStatus: { in: ["active", "trialing"] as string[] } } },
+    select: { parent: { select: { subscriptionStatus: true, subscriptionEndsAt: true } } },
+    take: 5,
   },
 } as const;
 

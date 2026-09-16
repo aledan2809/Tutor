@@ -79,7 +79,7 @@ export const HOW_IT_WORKS: Record<HowItWorksKey, Record<Locale, HowItWorksBlock>
       more: "alerte",
       steps: [
         `Copilul primește în ordinea: aplicație (imediat) → Telegram (după ${TG} min) → email (după încă ${EM}) → WhatsApp (după încă ${WA}, doar în pachetele plătite).`,
-        `Lanțul se oprește când apasă pe mesaj sau începe o sesiune. Între ${QUIET_HOURS_DEFAULT.start} și ${QUIET_HOURS_DEFAULT.end} pleacă doar notificarea din aplicație.`,
+        `Lanțul se oprește când apasă pe notificarea din aplicație sau pe butonul din Telegram, ori termină o sesiune. Între ${QUIET_HOURS_DEFAULT.start} și ${QUIET_HOURS_DEFAULT.end} pleacă doar notificarea din aplicație.`,
         `Ritmuri: Blând = aplicație → email după ${BLAND} min · Standard = cel de mai sus · Insistent = câte ${INSISTENT} min între canale. La mementourile programate: ~${CASCADE_GRACE_MINUTES.morning} min dimineața, ~${CASCADE_GRACE_MINUTES.evening} seara.`,
         `Tu ești anunțat doar dacă a ignorat tot lanțul, într-o zi cu program — apoi re-anunțat la ${PARENT_RENOTIFY_MIN} de minute, sau cum alegi mai jos.`,
       ],
@@ -88,7 +88,7 @@ export const HOW_IT_WORKS: Record<HowItWorksKey, Record<Locale, HowItWorksBlock>
       more: "alerte",
       steps: [
         `Your child gets: app (immediately) → Telegram (after ${TG} min) → email (after another ${EM}) → WhatsApp (after another ${WA}, paid plans only).`,
-        `The chain stops when they tap the message or start a session. Between ${QUIET_HOURS_DEFAULT.start} and ${QUIET_HOURS_DEFAULT.end} only the in-app notification goes out.`,
+        `The chain stops when they tap the in-app notification or the Telegram button, or finish a session. Between ${QUIET_HOURS_DEFAULT.start} and ${QUIET_HOURS_DEFAULT.end} only the in-app notification goes out.`,
         `Pace: Gentle = app → email after ${BLAND} min · Standard = the above · Insistent = ${INSISTENT} min between channels. For scheduled reminders: ~${CASCADE_GRACE_MINUTES.morning} min in the morning, ~${CASCADE_GRACE_MINUTES.evening} in the evening.`,
         `You are alerted only if the whole chain was ignored on a scheduled day — then re-alerted every ${PARENT_RENOTIFY_MIN} minutes, or as you choose below.`,
       ],
@@ -121,18 +121,18 @@ export const HOW_IT_WORKS: Record<HowItWorksKey, Record<Locale, HowItWorksBlock>
       more: "mementouri",
       steps: [
         `Ordinea implicită: aplicație → Telegram → email → WhatsApp. Dacă nu reacționezi pe primul canal, trecem la următorul; ordinea o schimbi mai jos.`,
-        "Telegram e gratuit și instant; WhatsApp costă la fiecare mesaj — de aceea abonamentul e cu 10% mai ieftin cât timp comunicarea merge pe Telegram.",
+        "Telegram e gratuit și instant, iar butonul din mesaj oprește restul lanțului dintr-o apăsare.",
         `Programul de studiu decide când pleacă primul memento; între ${QUIET_HOURS_DEFAULT.start} și ${QUIET_HOURS_DEFAULT.end} restul lanțului așteaptă dimineața.`,
-        "Apeși pe memento sau începi o sesiune — lanțul se oprește acolo.",
+        "Apeși pe notificarea din aplicație sau pe butonul din Telegram, ori termini o sesiune — lanțul se oprește acolo.",
       ],
     },
     en: {
       more: "mementouri",
       steps: [
         "Default order: app → Telegram → email → WhatsApp. If you do not react on the first channel we move to the next; you can reorder below.",
-        "Telegram is free and instant; WhatsApp costs per message — which is why the subscription is 10% cheaper while communication goes over Telegram.",
+        "Telegram is free and instant, and the button in the message stops the rest of the chain with one tap.",
         `Your study schedule decides when the first reminder goes out; between ${QUIET_HOURS_DEFAULT.start} and ${QUIET_HOURS_DEFAULT.end} the rest of the chain waits until morning.`,
-        "Tap the reminder or start a session — the chain stops there.",
+        "Tap the in-app notification or the Telegram button, or finish a session — the chain stops there.",
       ],
     },
   },

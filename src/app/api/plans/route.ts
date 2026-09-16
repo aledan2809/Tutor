@@ -2,12 +2,19 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { remainingFreeTrialDays } from "@/lib/free-trial";
+import { loadVoucherPreview, serializePreview } from "@/lib/voucher-preview-server";
 
 /**
  * GET /api/plans
  * Active packages for the student-facing packages page. Login required (it's a
  * dashboard surface); only safe fields are returned (no stripeId). Price is in
  * major units (RON). Checkout itself goes through /api/admin/stripe/checkout.
+ *
+ * `current` also says how many of the 7 free days this account is still owed (checkout gives
+ * no more than that) and which discount code is kept on the account, checked again now — so the
+ * page never shows a discounted price that checkout would refuse. A kept code that no longer
+ * works is reported here once and removed from the account.
  */
 async function _GET() {
   const session = await getSession();
@@ -34,14 +41,31 @@ async function _GET() {
 
   const me = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { subscriptionStatus: true, subscriptionPlanId: true },
+    select: { subscriptionStatus: true, subscriptionPlanId: true, createdAt: true, pendingVoucherCode: true },
   });
+
+  const pending = me?.pendingVoucherCode ? await loadVoucherPreview(me.pendingVoucherCode, session.user.id) : null;
+  if (me?.pendingVoucherCode && pending && !pending.ok) {
+    // The kept code can no longer be used (expired, already used on this account, switched off).
+    // This response says why, once; the account forgets it, so the page stops offering a price
+    // checkout would refuse. Guarded on the same code, so a code saved meanwhile stays.
+    await prisma.user.updateMany({
+      where: { id: session.user.id, pendingVoucherCode: me.pendingVoucherCode },
+      data: { pendingVoucherCode: null },
+    });
+  }
 
   return NextResponse.json({
     plans: plans.map((p) => ({ ...p, price: p.price / 100 })),
     current: {
       subscriptionStatus: me?.subscriptionStatus ?? null,
       subscriptionPlanId: me?.subscriptionPlanId ?? null,
+      freeTrialDaysLeft: me ? remainingFreeTrialDays(me.createdAt) : 0,
+      pendingVoucher: pending
+        ? pending.ok
+          ? { ok: true as const, preview: serializePreview(pending.preview) }
+          : { ok: false as const, code: pending.code, voucherCode: me?.pendingVoucherCode ?? null }
+        : null,
     },
   });
 }

@@ -125,6 +125,10 @@ model User {
   subscriptionPlan       SubscriptionPlan?       @relation(fields: [subscriptionPlanId], references: [id])
   vouchersCreated        Voucher[]
   voucherRedemptions     VoucherRedemption[]
+  // A discount code (e.g. V126S from the flyer) brought at signup or typed on the packages page
+  // and not paid with yet — kept so a parent who tries first doesn't have to find the flyer
+  // again. Cleared once a payment with that code is recorded.
+  pendingVoucherCode     String?
   auditLogs              AdminAuditLog[]         @relation("AuditPerformer")
   payments               Payment[]
   notificationRetries    NotificationRetry[]

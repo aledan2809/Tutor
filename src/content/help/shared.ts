@@ -38,8 +38,8 @@ export function cascadeSection(locale: Locale, audience: "self" | "child"): Help
           `La ora din program pleacă primul memento, apoi urcăm pe rând, doar dacă ${who} nu reacționează: ` +
             `notificarea din aplicație (imediat) → Telegram (după ${TELEGRAM_AFTER} minute) → ` +
             `email (după încă ${EMAIL_AFTER}) → WhatsApp (după încă ${WHATSAPP_AFTER}, doar în pachetele plătite).`,
-          `Lanțul se oprește în clipa în care apeși pe mesaj sau începi o sesiune. Nu trebuie să termini ` +
-            `sesiunea ca să se oprească — apăsarea e de ajuns.`,
+          `Lanțul se oprește când apeși pe notificarea din aplicație sau pe butonul din mesajul de pe ` +
+            `Telegram, ori când termini o sesiune. Deschiderea emailului sau a mesajului de pe WhatsApp nu-l oprește.`,
           `Între ${QUIET_HOURS_DEFAULT.start} și ${QUIET_HOURS_DEFAULT.end} sunt orele de liniște: pleacă ` +
             `doar notificarea din aplicație, restul lanțului așteaptă dimineața.`,
         ],
@@ -59,8 +59,8 @@ export function cascadeSection(locale: Locale, audience: "self" | "child"): Help
             `if there is no reaction: in-app notification (immediately) → Telegram (after ${TELEGRAM_AFTER} ` +
             `minutes) → email (after another ${EMAIL_AFTER}) → WhatsApp (after another ${WHATSAPP_AFTER}, ` +
             `paid plans only).`,
-          `The chain stops the moment the message is tapped or a session is started. Finishing the session ` +
-            `is not required — the tap is enough.`,
+          `The chain stops when the in-app notification or the button in the Telegram message is tapped, or ` +
+            `when a session is finished. Opening the email or the WhatsApp message does not stop it.`,
           `Between ${QUIET_HOURS_DEFAULT.start} and ${QUIET_HOURS_DEFAULT.end} only the in-app notification ` +
             `goes out; the rest of the chain waits until morning.`,
         ],
@@ -80,8 +80,7 @@ export function telegramSection(locale: Locale, settingsHref: string): HelpSecti
         id: "telegram",
         title: "De ce merită Telegram",
         paragraphs: [
-          "Telegram e gratuit și ajunge instant. WhatsApp costă la fiecare mesaj — de aceea abonamentul e " +
-            "cu 10% mai ieftin cât timp comunicarea merge pe Telegram.",
+          "Telegram e gratuit și ajunge instant, iar butonul din mesaj oprește restul lanțului dintr-o apăsare.",
           "Conectarea durează un minut și se face o singură dată: de pe telefon apeși linkul, de pe " +
             "calculator scanezi codul QR cu telefonul pe care ai Telegram.",
           "Nu-ți cerem parola și nu vedem conversațiile tale — botul îți poate doar trimite mesaje. " +
@@ -93,8 +92,7 @@ export function telegramSection(locale: Locale, settingsHref: string): HelpSecti
         id: "telegram",
         title: "Why Telegram is worth it",
         paragraphs: [
-          "Telegram is free and instant. WhatsApp costs per message — which is why the subscription is 10% " +
-            "cheaper while communication goes over Telegram.",
+          "Telegram is free and instant, and the button in the message stops the rest of the chain with one tap.",
           "Connecting takes a minute, once: on a phone you tap the link, on a computer you scan the QR code " +
             "with the phone that has Telegram.",
           "We never ask for your password and cannot see your conversations — the bot can only send you " +

@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
+import { isPromoActive, normalFromPromo, fmtPrice } from "@/lib/pricing";
+
+// The Elev/Student promo amount, as on /preturi; `{price}` in the copy shows the price in force.
+const ELEV_PROMO_AMOUNT = 19.9;
 
 export const metadata: Metadata = {
-  title: "Pentru elevi și studenți — ține-te de ritm, vezi-ți progresul | etutor.ro",
+  title: "Pentru elevi și studenți — ține-te de ritm, vezi-ți progresul | eTutor.ro",
   description:
     "Înveți pe cont propriu? Exersezi zilnic pe grile reale, îți salvezi progresul și streak-urile, și primești remindere blânde ca să nu pierzi ritmul. Începe gratuit, fără card.",
 };
@@ -44,8 +48,8 @@ const RO: Copy = {
   planLead: "Plan pentru elevi și studenți responsabili, care își gestionează singuri învățatul.",
   planPoints: [
     "Cont propriu — îți urmărești singur progresul",
-    "De la 19,90 lei / materie / lună (orientativ, set în panou)",
-    "A 2-a materie −15%; plată anuală ≈ −2 luni; oferte sezoniere pe parcurs",
+    "De la {price} lei / materie / lună",
+    "Oferte sezoniere pe parcurs",
     "Remindere și notificări configurate de tine",
   ],
   parentTitle: "Te susține un părinte sau un meditator?",
@@ -56,7 +60,6 @@ const RO: Copy = {
     "7 zile gratuit",
     "2 materii pe zi, câte 5 întrebări / materie — și astea contează la puncte și streak",
     "Îți alegi cele 2 materii cu un cont gratuit",
-    "−30% dacă plătești orice materie în perioada de probă (cronometru afișat)",
   ],
   trialNote: "Vrei mai mult de atât? Treci la Premium oricând, cu un click.",
   ctaTitle: "Gata să-ți iei învățatul în mâini?",
@@ -80,8 +83,8 @@ const EN: Copy = {
   planLead: "A plan for responsible students who manage their own learning.",
   planPoints: [
     "Your own account — you track your own progress",
-    "From 19.90 lei / subject / month (indicative, set in the panel)",
-    "2nd subject −15%; annual ≈ −2 months; seasonal offers along the way",
+    "From {price} lei / subject / month",
+    "Seasonal offers along the way",
     "Reminders and notifications configured by you",
   ],
   parentTitle: "Backed by a parent or a tutor?",
@@ -92,7 +95,6 @@ const EN: Copy = {
     "7 days free",
     "2 subjects per day, 5 questions / subject — and these count toward points and streaks",
     "Pick your 2 subjects with a free account",
-    "−30% if you pay for any subject during the trial (countdown shown)",
   ],
   trialNote: "Want more than that? Upgrade to Premium anytime, in one click.",
   ctaTitle: "Ready to take your learning into your own hands?",
@@ -104,6 +106,8 @@ export default async function ElevPage({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   const c = locale === "en" ? EN : RO;
   const lp = locale === "en" ? "en" : "ro";
+  const elevPrice = fmtPrice(isPromoActive() ? ELEV_PROMO_AMOUNT : normalFromPromo(ELEV_PROMO_AMOUNT), locale);
+  const planPoints = c.planPoints.map((pt) => pt.replace("{price}", elevPrice));
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
@@ -145,7 +149,7 @@ export default async function ElevPage({ params }: { params: Promise<{ locale: s
           <p className="mt-2 text-center text-sm text-gray-400 max-w-2xl mx-auto">{c.planLead}</p>
           <div className="mt-6 mx-auto max-w-xl rounded-2xl border border-blue-500 bg-gray-900 p-6 ring-1 ring-blue-500/40">
             <ul className="space-y-2">
-              {c.planPoints.map((pt) => (
+              {planPoints.map((pt) => (
                 <li key={pt} className="flex gap-2 text-sm text-gray-300">
                   <span className="text-blue-400">✓</span>
                   <span>{pt}</span>

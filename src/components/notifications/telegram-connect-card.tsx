@@ -112,9 +112,8 @@ export function TelegramConnectCard() {
     <div id="telegram" className="mb-6 rounded-lg border border-blue-800 bg-blue-950/20 p-4">
       <h3 className="text-sm font-medium text-white">Primește notificările pe Telegram</h3>
       <p className="mt-1 text-xs text-gray-400">
-        E gratuit și ajunge instant. WhatsApp costă la fiecare mesaj — de asta abonamentul
-        e cu <strong className="text-emerald-300">10% mai ieftin</strong> cât timp
-        comunicarea merge pe Telegram.
+        E gratuit și ajunge instant, iar butonul din mesaj oprește restul mementourilor
+        dintr-o apăsare.
       </p>
 
       {!invite ? (

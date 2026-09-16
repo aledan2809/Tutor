@@ -5,6 +5,8 @@ import {
   isPaidChannelDeliverable,
   resolveCascadeWindow,
   meteredChannelsCovered,
+  coveredByPayingParent,
+  rungCannotReach,
   SELECT_ACOPERIRE_CANALE,
 } from "@/lib/escalation/segmentation";
 import { ESCALATION_LEVELS, CASCADE_GRACE_MINUTES } from "@/lib/escalation/config";
@@ -163,5 +165,92 @@ describe("SELECT_ACOPERIRE_CANALE — filtrul e partea care contează", () => {
     });
     expect(SELECT_ACOPERIRE_CANALE.enrollments.take).toBe(1);
     expect(SELECT_ACOPERIRE_CANALE.subscriptionEndsAt).toBe(true);
+  });
+
+  it("citește doar legăturile PARENT active, cu data de expirare a părintelui", () => {
+    // Fără `relation: "PARENT"`, un meditator cu abonament ar acoperi toți elevii lui.
+    // Fără `subscriptionEndsAt`, predicatul n-ar putea vedea un abonament expirat.
+    expect(SELECT_ACOPERIRE_CANALE.guardianLinks.where.status).toBe("active");
+    expect(SELECT_ACOPERIRE_CANALE.guardianLinks.where.relation).toBe("PARENT");
+    expect(SELECT_ACOPERIRE_CANALE.guardianLinks.select.parent.select).toEqual({
+      subscriptionStatus: true,
+      subscriptionEndsAt: true,
+    });
+  });
+});
+
+describe("coveredByPayingParent — copilul dintr-un pachet de familie", () => {
+  const free = { subscriptionStatus: null, subscriptionEndsAt: null };
+  const link = (parent: { subscriptionStatus: string | null; subscriptionEndsAt: Date | null } | null) => ({ parent });
+
+  it("un părinte cu abonament activ sau în perioada gratuită acoperă copilul", () => {
+    expect(coveredByPayingParent({ guardianLinks: [link({ subscriptionStatus: "active", subscriptionEndsAt: null })] })).toBe(true);
+    expect(coveredByPayingParent({ guardianLinks: [link({ subscriptionStatus: "trialing", subscriptionEndsAt: null })] })).toBe(true);
+  });
+
+  it("un abonament anulat, restant sau expirat nu acoperă", () => {
+    const past = new Date(Date.now() - 86_400_000);
+    expect(coveredByPayingParent({ guardianLinks: [link({ subscriptionStatus: "canceled", subscriptionEndsAt: null })] })).toBe(false);
+    expect(coveredByPayingParent({ guardianLinks: [link({ subscriptionStatus: "past_due", subscriptionEndsAt: null })] })).toBe(false);
+    expect(coveredByPayingParent({ guardianLinks: [link({ subscriptionStatus: "active", subscriptionEndsAt: past })] })).toBe(false);
+  });
+
+  it("fără legături, sau cu un părinte lipsă, nu acoperă", () => {
+    expect(coveredByPayingParent({})).toBe(false);
+    expect(coveredByPayingParent({ guardianLinks: null })).toBe(false);
+    expect(coveredByPayingParent({ guardianLinks: [] })).toBe(false);
+    expect(coveredByPayingParent({ guardianLinks: [link(null)] })).toBe(false);
+  });
+
+  it("ajunge un singur părinte plătitor dintre mai mulți", () => {
+    expect(
+      coveredByPayingParent({
+        guardianLinks: [link(free), link({ subscriptionStatus: "active", subscriptionEndsAt: null })],
+      }),
+    ).toBe(true);
+  });
+
+  it("meteredChannelsCovered deschide canalele pentru copilul unei familii care plătește", () => {
+    expect(meteredChannelsCovered(free)).toBe(false);
+    expect(
+      meteredChannelsCovered({ ...free, guardianLinks: [link({ subscriptionStatus: "active", subscriptionEndsAt: null })] }),
+    ).toBe(true);
+    expect(
+      meteredChannelsCovered({ ...free, guardianLinks: [link({ subscriptionStatus: "canceled", subscriptionEndsAt: null })] }),
+    ).toBe(false);
+  });
+});
+
+describe("rungCannotReach — treptele care nu pot ajunge la om se sar", () => {
+  const ok = { hasEmail: true, hasPhone: true, covered: true, isTest: false, parentAuthorized: false };
+
+  it("emailul fără adresă nu poate ajunge", () => {
+    expect(rungCannotReach("EMAIL", { ...ok, hasEmail: false })).toBe("no_email");
+    expect(rungCannotReach("EMAIL", ok)).toBeNull();
+  });
+
+  it("WhatsApp și SMS pe un cont neacoperit nu pot ajunge", () => {
+    for (const channel of ["WHATSAPP", "SMS"] as const) {
+      expect(rungCannotReach(channel, { ...ok, covered: false })).toBe("not_covered");
+    }
+  });
+
+  it("contul de test și părintele care a autorizat trec de acoperire", () => {
+    for (const channel of ["WHATSAPP", "SMS"] as const) {
+      expect(rungCannotReach(channel, { ...ok, covered: false, isTest: true })).toBeNull();
+      expect(rungCannotReach(channel, { ...ok, covered: false, parentAuthorized: true })).toBeNull();
+    }
+  });
+
+  it("WhatsApp și SMS fără număr de telefon nu pot ajunge", () => {
+    for (const channel of ["WHATSAPP", "SMS"] as const) {
+      expect(rungCannotReach(channel, { ...ok, hasPhone: false })).toBe("no_phone");
+    }
+  });
+
+  it("notificarea din aplicație și Telegram nu depind de email sau telefon", () => {
+    const nimic = { hasEmail: false, hasPhone: false, covered: false, isTest: false, parentAuthorized: false };
+    expect(rungCannotReach("PUSH", nimic)).toBeNull();
+    expect(rungCannotReach("TELEGRAM", nimic)).toBeNull();
   });
 });
