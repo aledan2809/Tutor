@@ -29,22 +29,35 @@ promisiuni inexistente în aplicație: −30% dacă plătești în probă (cu cr
   plus Telegram 10% peste (ex. Family: cod+Telegram 22,41 · probă+Telegram 20,92). Nu atinge brokerul de plăți.
 - Ordinea: **întâi livrarea 1 (până pe 21.09)**, apoi livrarea 2. Până la livrarea 2 pagina nu pomenește reducerile noi.
 
-**Livrarea 1 — până pe 21.09:**
-- [ ] `/cafea` → `/ro/parinte` (cu V126S + atribuirea campaniei), nu direct la înscriere
-- [ ] `/ro/parinte` rescrisă după machetă (RO + EN), cu faptele citite din config (canale, timpi, prețuri din DB)
-- [ ] Voucher ONV126S (script cu verificare, backup, audit) + `trialDays` 14 → 7 pe planurile active
-- [ ] Checkout: zilele gratuite = cele rămase din 7 de la crearea contului
-- [ ] Înscriere: formularul arată codul pentru orice link cu cod + text pentru părinte la planurile de familie
-- [ ] Fără a doua autentificare după crearea contului
-- [ ] Abonament: prețul cu codul aplicat (33,20 → 24,90) + zilele gratuite rămase
-- [ ] Codul rămâne salvat în cont până la plată
-- [ ] Review independent → deploy VPS2 → verificare live (ambele variante, telefon + calculator)
+**Livrarea 1 — până pe 21.09:** ✅ **LIVE pe etutor.ro din 17.09, 01:30 UTC** (commit-uri `0f25dbe` + `390a4f7`)
+- [x] `/cafea` → `/ro/parinte` (cu V126S + atribuirea campaniei), nu direct la înscriere — 17.09 `0f25dbe`
+- [x] `/ro/parinte` rescrisă după machetă (RO + EN), cu faptele citite din config (canale, timpi, prețuri din DB) — 17.09 `0f25dbe`
+- [x] Voucher ONV126S (script cu verificare, backup, audit) + `trialDays` 14 → 7 pe planurile active — aplicat pe prod 17.09
+  (backup `/root/backups/tutor-plans-vouchers-before-onv126s-trial7-2026-09-17T01-31-23-120Z.json`)
+- [x] Checkout: zilele gratuite = cele rămase din 7 de la crearea contului — 17.09 `0f25dbe`
+- [x] Înscriere: formularul arată codul pentru orice link cu cod + text pentru părinte la planurile de familie — 17.09 `0f25dbe`
+- [x] Fără a doua autentificare după crearea contului — 17.09 `0f25dbe`
+- [x] Abonament: prețul cu codul aplicat (33,20 → 24,90) + zilele gratuite rămase — 17.09 `0f25dbe`
+- [x] Codul rămâne salvat în cont până la plată — 17.09 `0f25dbe`
+- [x] Review independent (5 runde) → deploy VPS2 → verificare live: ambele variante (flyer V126S / site ONV126S), telefon +
+  calculator, fără depășire orizontală — 17.09 (capturi în `Reports/landing-parinte-cafea-2026-09-16/capturi-live/`)
+
+**Deploy 17.09 (VPS2), făcut:** backup DB `/root/backups/tutor-pre-trial-pause-2026-09-17.dump` · migrațiile 0064–0067
+aplicate · build + restart (`/root/tutor-deploy3-run.sh`, log `/root/tutor-deploy-2026-09-17-trial.log`) · crontab nou
+`* * * * *` cu flock → `/api/cron/escalation/fast` (ieșirea ultimei rulări în `/var/log/tutor-escalation-fast.log`; backup
+crontab `/root/backups/crontab.bak-2026-09-17-pre-tutor-fast`) · nginx: `/api/cron/` răspunde 404 din internet (backup
+`/root/backups/nginx-etutor.bak-2026-09-17-pre-cron-block`) · ONV126S + 7 zile aplicate. **Comutatorul probei e OPRIT**
+(verificat: nicio setare `accessTrial`; 0 conturi „Gratuit permanent" din 42).
+
+**Rămâne pentru Alex, înainte de 28.09:** (1) bifează „Gratuit permanent" la prieteni/testeri (Administrare → Utilizatori);
+(2) pornește comutatorul „Pornește proba și pauza" din aceeași pagină; (3) verificările din Stripe (decizia 8 de mai jos) și
+deciziile 6–7; (4) opțional, privește pagina Stripe cu un cont de test.
 
 **Livrarea 2 — după 21.09:** −30% la plata în probă (cu cronometru) · −10% Telegram · a 2-a/a 3-a materie · anual ·
 texte aliniate (/preturi, /elev, ajutor, Abonament).
 
 **Stare 17.09, 00:40:** livrarea 1 e **comisă local** în `0f25dbe` (nedeployată): tsc, eslint, 1051 de teste și 50/50
-verificări E2E pe build-ul de producție local. Bifele de mai sus rămân deschise până la deploy și verificarea live.
+verificări E2E pe build-ul de producție local. *(Depășit: deployat 17.09, 01:30 UTC — vezi mai sus.)*
 
 **Review independent 2 (pe `0f25dbe`) — reparat, necomis (intră în commitul probei fără card):**
 - M1: la reactivare/reînnoire se șterge data veche de încheiere. Altfel o familie care anula și plătea din nou era tratată
@@ -70,15 +83,18 @@ autentificați, zilele gratuite calculate, limită pe verificarea codurilor, /ca
 prețul copilului 2). Teste 1051 verzi.
 
 **Decizii noi Alex 16.09 seara (de construit, în ordine):**
-- [ ] **Proba fără card, pe bune** (B1): părintele fără card își leagă copilul și are 7 zile tot pachetul, în afară de
+- [x] **Proba fără card, pe bune** (B1): părintele fără card își leagă copilul și are 7 zile tot pachetul, în afară de
   WhatsApp/SMS (costă per mesaj). Azi un părinte fără abonament nu-și poate lega copilul → rămânea blocat.
-- [ ] **Ziua 8 fără plată = pauză pentru părinte ȘI copil**, cu „teasing": cifre clare dar insuficiente + detalii
+  — 17.09 `390a4f7`, LIVE (comutatorul oprit până îl pornește Alex)
+- [x] **Ziua 8 fără plată = pauză pentru părinte ȘI copil**, cu „teasing": cifre clare dar insuficiente + detalii
   estompate, ca să vrea să plătească. La toate abonamentele (individuale sau legate), **mai puțin meditator/instructor**.
   Bune practici prezentate (reverse trial, cifre clare/detalii estompate, anunțuri cinstite la 3 zile/1 zi/ziua 8,
   nimic șters). ⚠️ Copilului NU i se cere să-și convingă părintele să plătească (UE, UCPD Anexa I pct. 28) — oferta
   merge doar la părinte. **Macheta întâi**, apoi construcție; trebuie live înainte de 28.09 (expiră primele probe din 21.09).
-- [ ] **Părintele poate schimba orele de studiu și materiile alese de copil** (marketing + funcționalitate). Orele le
+- [x] **Părintele poate schimba orele de studiu și materiile alese de copil** (marketing + funcționalitate). Orele le
   poate schimba deja din Watcher (`/api/dashboard/watcher/[id]/reminders`); materiile nu. De pus și pe pagina pentru părinți.
+  — 17.09 `390a4f7`, LIVE: ce stabilește părintele rămâne blocat pentru copil (fără cereri prin aplicație); pe /ro/parinte
+  „Programul îl face copilul, ultimul cuvânt e al tău".
 
 **Stare 17.09, 01:10 — toate trei construite, necomise (review independent în curs):**
 - Macheta aprobată + decizii (AskUserQuestion 16.09): proba = tot pachetul fără WhatsApp/SMS · ziua 8 = pauză totală, nimic
