@@ -6,6 +6,7 @@ import { withErrorHandler } from "@/lib/api-handler";
 import { getFamilyOverview } from "@/lib/family-invite";
 import { childDiscountPercent } from "@/lib/family";
 import { isPaidSubscriber } from "@/lib/escalation/segmentation";
+import { individualPlan } from "@/lib/access";
 
 /**
  * Per-child add-on checkout via the Stripe Checkout Broker.
@@ -40,7 +41,9 @@ async function _POST() {
     select: {
       subscriptionStatus: true,
       subscriptionEndsAt: true,
-      subscriptionPlan: { select: { name: true, price: true, interval: true, isActive: true } },
+      subscriptionPlan: {
+        select: { name: true, price: true, interval: true, isActive: true, familyPlanKey: true, maxParents: true, maxChildren: true },
+      },
     },
   });
   const plan = u?.subscriptionPlan;
@@ -49,6 +52,14 @@ async function _POST() {
   if (!u || !plan || !plan.isActive || !isPaidSubscriber(u)) {
     return NextResponse.json(
       { error: "Ai nevoie de un pachet de familie activ ca să adaugi un copil." },
+      { status: 400 }
+    );
+  }
+  // Elev pays for one learner and covers no child (access.ts): a seat bought next to it would be
+  // charged every month for a child who stays paused (review r6, P4).
+  if (individualPlan(plan)) {
+    return NextResponse.json(
+      { error: "Pachetul Elev e pentru un singur cursant. Treci la Family ca să adaugi un copil." },
       { status: 400 }
     );
   }

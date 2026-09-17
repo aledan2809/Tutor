@@ -8,32 +8,14 @@
  */
 import Link from "next/link";
 import { fmtPrice } from "@/lib/pricing";
+import { countRo } from "@/lib/ro-count";
 import type { TeaserOffer, TeaserStats } from "@/lib/access-teaser";
 import type { SeatHolderNote } from "@/lib/access-server";
+import { firstName, holderWords } from "@/components/access/holder-words";
 
 type Locale = "ro" | "en";
 
 const card = "rounded-2xl border border-gray-800 bg-gray-900 p-5";
-
-/**
- * For a parent the family's plan leaves out (loadSeatHolder): who has the plan, and what would take
- * this parent in. Nothing here is a price or a payment button — the plan is the other parent's.
- */
-function holderWords(holder: SeatHolderNote, ro: boolean) {
-  const first = holder.name?.split(" ")[0] ?? null;
-  const Who = first ?? (ro ? "Celălalt părinte" : "The other parent");
-  const who = first ?? (ro ? "celălalt părinte" : "the other parent");
-  const plan =
-    holder.parents <= 1
-      ? ro
-        ? `${Who} are pachetul ${holder.plan}, care include un singur părinte.`
-        : `${Who} has the ${holder.plan} plan, which includes one parent.`
-      : ro
-        ? `${Who} are pachetul ${holder.plan}, iar locurile de părinte din el sunt ocupate.`
-        : `${Who} has the ${holder.plan} plan, and its parent seats are taken.`;
-  const noLargerPlan = ro ? "Nu există un pachet cu mai mulți părinți." : "There is no plan with more parents.";
-  return { who, plan, noLargerPlan };
-}
 
 function Kpis({ items }: { items: { value: string; label: string }[] }) {
   return (
@@ -186,7 +168,7 @@ export function PausedLearnerScreen({
   const ro = locale === "ro";
   return (
     <div className="mx-auto max-w-md space-y-3">
-      <h1 className="text-2xl font-bold text-white">{ro ? `Salut${name ? `, ${name.split(" ")[0]}` : ""}!` : `Hi${name ? `, ${name.split(" ")[0]}` : ""}!`}</h1>
+      <h1 className="text-2xl font-bold text-white">{ro ? `Salut${firstName(name) ? `, ${firstName(name)}` : ""}!` : `Hi${firstName(name) ? `, ${firstName(name)}` : ""}!`}</h1>
       <div className={card}>
         <span className="rounded-full border border-gray-600 bg-gray-800 px-2.5 py-1 text-xs font-semibold text-gray-200">
           {ro ? "Perioada de probă s-a încheiat" : "The trial has ended"}
@@ -251,7 +233,7 @@ export function PausedParentScreen({
   holder?: SeatHolderNote | null;
 }) {
   const ro = locale === "ro";
-  const first = kids[0]?.name?.split(" ")[0] ?? null;
+  const first = firstName(kids[0]?.name);
   const left = holder ? holderWords(holder, ro) : null;
   const unlock = left ? (ro ? "când intri în pachet" : "once you're on the plan") : ro ? "după activare" : "after activation";
   return (
@@ -293,9 +275,7 @@ export function PausedParentScreen({
             <div className={card}>
               <h3 className="font-semibold text-white">
                 {ro
-                  ? child.stats.weakTopics === 1
-                    ? "Greșește des la un capitol"
-                    : `Greșește des la ${child.stats.weakTopics} capitole`
+                  ? `Greșește des la ${countRo(child.stats.weakTopics, "un capitol", "capitole")}`
                   : child.stats.weakTopics === 1
                     ? "Often gets one topic wrong"
                     : `Often gets ${child.stats.weakTopics} topics wrong`}
@@ -312,11 +292,11 @@ export function PausedParentScreen({
             <p className="mt-1 text-sm text-gray-400">
               {left
                 ? ro
-                  ? `${child.name?.split(" ")[0] ?? "Copilul"} primește în continuare reminderele din program; tu nu mai primești alerte cât contul tău e în pauză.`
-                  : `${child.name?.split(" ")[0] ?? "Your child"} still gets the scheduled reminders; you get no alerts while your account is paused.`
+                  ? `${firstName(child.name) ?? "Copilul"} primește în continuare reminderele din program; tu nu mai primești alerte cât contul tău e în pauză.`
+                  : `${firstName(child.name) ?? "Your child"} still gets the scheduled reminders; you get no alerts while your account is paused.`
                 : ro
-                  ? `În pauză: ${child.name?.split(" ")[0] ?? "copilul"} nu mai primește reminderele din program, iar tu nu mai primești alerte.`
-                  : `Paused: ${child.name?.split(" ")[0] ?? "your child"} no longer gets the scheduled reminders, and you get no alerts.`}
+                  ? `În pauză: ${firstName(child.name) ?? "copilul"} nu mai primește reminderele din program, iar tu nu mai primești alerte.`
+                  : `Paused: ${firstName(child.name) ?? "your child"} no longer gets the scheduled reminders, and you get no alerts.`}
             </p>
           </div>
         </div>

@@ -9,6 +9,7 @@ import type { EscalationChannel } from "@prisma/client";
 import type { ChainStep, LandingChannel, LandingOffer } from "@/lib/parent-landing";
 import { discountedMinorUnits } from "@/lib/voucher-checkout";
 import { fmtPrice } from "@/lib/pricing";
+import { countRo } from "@/lib/ro-count";
 
 export type Locale = "ro" | "en";
 
@@ -63,12 +64,6 @@ const price = (minor: number, locale: Locale) => fmtPrice(minor / 100, locale);
 
 const lowerFirst = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
 
-/** Romanian puts „de" between a number and its noun from 20 on (20 de minute, but 101 minute). */
-function countRo(n: number, one: string, many: string): string {
-  if (n === 1) return one;
-  const rest = n % 100;
-  return `${n}${n >= 20 && (rest === 0 || rest >= 20) ? " de" : ""} ${many}`;
-}
 const minutesRo = (n: number) => countRo(n, "un minut", "minute");
 const hoursRo = (n: number) => countRo(n, "o oră", "ore");
 const daysRo = (n: number) => countRo(n, "o zi", "zile");

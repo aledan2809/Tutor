@@ -21,6 +21,7 @@ import { webPushToUser, telegramAlertToUser } from "@/lib/notifications/service"
 import { sendAppEmail } from "@/lib/email";
 import { coveredAsSecondParent, parentPaysForMetered } from "./parent-nudge";
 import { pausedUserIds } from "@/lib/access-server";
+import { escapeHtml } from "@/lib/sanitize";
 
 const PARENT_ALERT_URL = "/dashboard/watcher/notifications";
 
@@ -82,8 +83,8 @@ export async function resolveUserAlertChannels(userId: string): Promise<string[]
 export type AlertLink = { url: string; label: string };
 const ALERTS_LINK: AlertLink = { url: PARENT_ALERT_URL, label: "Vezi alertele" };
 
-/** Text people typed (a child's name) put into an email's HTML stays text. */
-export const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+/** Text people typed (a child's name) put into an email's HTML stays text — the platform's one escape (review r6, K8). */
+export { escapeHtml };
 
 /** Send one alert on one concrete channel. Returns whether the send succeeded. */
 async function sendAlertOnChannel(
@@ -290,8 +291,10 @@ async function notifyGuardians(
     where: { childId, status: "active", ...(opts?.relation ? { relation: opts.relation } : {}) },
     select: { parentId: true },
   });
-  // A paused parent (access.ts) gets no alert from any step of an episode, its resolution included.
-  const paused = await pausedUserIds(links.map((l) => l.parentId));
+  // A paused parent (access.ts) gets no alert from any step of an episode, its resolution included —
+  // and nobody gets one about a paused child (review r6, X5).
+  const paused = await pausedUserIds([childId, ...links.map((l) => l.parentId)]);
+  if (paused.has(childId)) return 0;
   const reached = links.filter((l) => !paused.has(l.parentId));
   for (const l of reached) {
     await notifyParent(l.parentId, childId, childName, alert);
@@ -520,9 +523,11 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
     awaiting.map((e) => e.childId),
     now
   );
-  const pausedAwaiting = await pausedUserIds(awaiting.map((e) => e.parentId), now);
+  const pausedAwaiting = await pausedUserIds(awaiting.flatMap((e) => [e.parentId, e.childId]), now);
   for (const esc of awaiting) {
-    if (pausedAwaiting.has(esc.parentId)) continue; // părinte în pauză: fără re-anunțuri
+    // Părinte în pauză sau copil în pauză: fără re-anunțuri. Checked only on the parent, a paused
+    // child's episode re-alerted a parent covered some other way every 30 minutes (review r6, X5).
+    if (pausedAwaiting.has(esc.parentId) || pausedAwaiting.has(esc.childId)) continue;
     if (onBreak.has(esc.childId)) continue; // vacanță
     if (!scheduledAwaiting.has(esc.childId)) continue; // zi fără program: nu re-notificăm
     // Cadence is the parent's own choice (decizia 03): every 30 min / every N hours /

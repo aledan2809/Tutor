@@ -53,7 +53,6 @@ describe("what a rung passes on to the next one", () => {
       url: "/dashboard/practice?start=quick",
       sendFailures: 2,
       nextAttemptAt: at(5).toISOString(),
-      deferredOnce: true,
       retryCount: 1,
       lastRetryAt: at(-3).toISOString(),
       answered: true,
@@ -61,6 +60,13 @@ describe("what a rung passes on to the next one", () => {
       closed: "paused",
     });
     expect(next).toEqual({ reason: "evening_quick", url: "/dashboard/practice?start=quick" });
+  });
+
+  it("the wait for the child's study time happens once per chain, so the mark travels (review r6, X1)", () => {
+    // Stripped per rung, every later rung waited another quarter of an hour: the chain reached the
+    // parent much later than the 6 / 18 minutes the page promises.
+    const next = withoutRungState({ reason: "evening_quick", deferredOnce: true, nextAttemptAt: at(5).toISOString() });
+    expect(next).toEqual({ reason: "evening_quick", deferredOnce: true });
   });
 });
 

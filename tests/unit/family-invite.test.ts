@@ -10,6 +10,7 @@ import {
   getFamilyOverview,
   checkSeat,
   canBecomeParent,
+  familyBuyer,
 } from "@/lib/family-invite";
 import { INVITE_TARGET_ROLE } from "@/lib/family";
 
@@ -40,6 +41,8 @@ function makeDb(opts: {
   accountRole?: "PARENT" | "STUDENT" | "TUTOR" | null;
   /** The account learns itself (an active STUDENT enrollment). */
   learning?: boolean;
+  /** The account is someone's child (an active PARENT link where it is the child). */
+  isChild?: boolean;
   /** children directly owned (relation=PARENT links the owner holds) */
   children?: { id: string; name?: string; email?: string }[];
   /** other adults linked to the owner's children */
@@ -61,6 +64,7 @@ function makeDb(opts: {
         paidExtraChildSeats: 0,
         subscriptionPlan: opts.planName ? { name: opts.planName } : null,
         enrollments: opts.learning ? [{ id: "e1" }] : [],
+        guardianLinks: opts.isChild ? [{ id: "g1" }] : [],
       }),
     },
     guardian: {
@@ -184,6 +188,12 @@ describe("getFamilyOverview seat math", () => {
     expect(parent.seats.children.max).toBe(1);
   });
 
+  it("someone's child gets no free-week family seats, even without a role or a subject (a child created by the parent)", async () => {
+    const child = await getFamilyOverview("direct-child", makeDb({ createdAt: new Date(Date.now() - DAY), accountRole: null, isChild: true }));
+    expect(child.trial).toBe(false);
+    expect(child.seats.children.max).toBe(0);
+  });
+
   it("an older account gets its week from the day the pause was switched on", async () => {
     pauseSwitch.startsAt = new Date(Date.now() - 1 * DAY);
     const o = await getFamilyOverview("old-parent", makeDb({}));
@@ -273,6 +283,18 @@ describe("checkSeat", () => {
     const r = await checkSeat("u", INVITE_TARGET_ROLE.TUTOR, one);
     expect(r.allowed).toBe(false);
     expect(r.reason).toBe("tutor_limit");
+  });
+});
+
+describe("cui i se oferă un pachet de familie", () => {
+  it("niciodată unui elev sau copilului cuiva (UCPD); da unui adult fără rol care nu învață", () => {
+    expect(familyBuyer({ accountRole: "PARENT", learning: false, isChild: false })).toBe(true);
+    expect(familyBuyer({ accountRole: null, learning: false, isChild: false })).toBe(true);
+    expect(familyBuyer({ accountRole: "STUDENT", learning: false, isChild: false })).toBe(false);
+    expect(familyBuyer({ accountRole: null, learning: true, isChild: false })).toBe(false);
+    // Copilul legat de un părinte, chiar fără rol și fără materie (creat direct de părinte).
+    expect(familyBuyer({ accountRole: null, learning: false, isChild: true })).toBe(false);
+    expect(familyBuyer({ accountRole: "PARENT", learning: false, isChild: true })).toBe(false);
   });
 });
 

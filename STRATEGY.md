@@ -420,6 +420,13 @@ model FamilyMember {
 > brokerul Stripe (`stripe.knowbest.ro`, firma Class RDA) + portal self-service (Batch B).
 > **Sezonierul + planurile dedicate de meditator NU sunt în cod** → rămân idei deferate,
 > nu promisiuni. Tabelul de mai jos = aspirațional/istoric, NU starea live.
+>
+> **DECIZIE 2026-09-16/17 (Alex) — proba și pauza, LIVE în cod, comutator încă oprit.** Proba e de
+> **7 zile fără card** la nivel de cont (nu „Stripe Checkout per materie cu trial 7 zile", cum scrie mai
+> jos), fără WhatsApp/SMS; în ziua 8 fără plată contul părintelui și al copilului intră în pauză (nimic
+> nu se șterge; copilului nu i se arată preț). „Gratuit permanent", meditatorii și cursanții plătiți de
+> firmă nu intră în pauză. Detalii + locuri + ultimul cuvânt al părintelui:
+> `knowledge/MONETIZATION-FAMILY-PLANS.md` §4.
 
 **Pricing Strategy — PER MATERIE, NU PER LUNĂ:**
 

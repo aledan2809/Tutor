@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { Brand } from "@/components/Brand";
 import { FREE_TRIAL_DAYS } from "@/lib/free-trial";
+import { normalizeVoucherCode, plausibleVoucherCode } from "@/lib/voucher-checkout";
 
 // Plans a parent buys for a child — a link carrying one of these starts on „Părinte".
 const PARENT_PLAN_KEYS = ["FAMILY", "FAMILY_DUO", "TRIO", "FAMILY_TRIO"];
@@ -114,8 +115,9 @@ export default function RegisterPage() {
         setDomainSlugs(subjects.split(",").map((s) => s.trim()).filter(Boolean));
       }
     }
-    const voucher = params.get("voucher");
-    if (voucher) setVoucherCode(voucher.trim().toUpperCase());
+    // Only something shaped like a code: the page shows it as „included" before any check.
+    const voucher = normalizeVoucherCode(params.get("voucher"));
+    if (plausibleVoucherCode(voucher)) setVoucherCode(voucher);
   }, []);
 
   useEffect(() => {

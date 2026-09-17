@@ -52,6 +52,15 @@ export function normalizeVoucherCode(raw: unknown): string {
   return typeof raw === "string" ? raw.trim().toUpperCase() : "";
 }
 
+/**
+ * Pure: could this be one of our codes (letters, digits, - or _, 3 to 50 long)? A link can carry any
+ * text as `?voucher=`, and the signup page shows it in a green „✓ Codul … e inclus" box before any
+ * check: „GRATUIT SUNATI LA 07…" must not appear there (review r6, sweep S4).
+ */
+export function plausibleVoucherCode(code: string): boolean {
+  return /^[A-Z0-9][A-Z0-9_-]{2,49}$/.test(code);
+}
+
 type UsabilityProblem = {
   code: "VOUCHER_INVALID" | "VOUCHER_EXPIRED" | "VOUCHER_LIMIT_REACHED";
   message: string;

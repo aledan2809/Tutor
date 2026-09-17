@@ -150,6 +150,39 @@
       "daysSince": "{n} zile de la ultima sesiune",
       "examIn": "Examen peste {n} zile",
       "weakAreas": "{n} puncte slabe detectate"
+    },
+    "reminderManager": {
+      "loading": "Se încarcă…",
+      "empty": "Niciun reminder programat încă.",
+      "guardianInfo": "Ce stabilești sau schimbi tu rămâne așa: copilul nu îl mai poate modifica. Remindere puse de copil le poate schimba el, până le modifici tu.",
+      "lockedBy": "🔒 Stabilit de {name}. Ca să-l schimbați, vorbiți împreună.",
+      "lockedByFallback": "părintele tău",
+      "setByYou": "Stabilit de tine",
+      "setByGuardian": "Stabilit de {name}",
+      "setByGuardianFallback": "celălalt adult din familie",
+      "setByTutor": "Pus de {name}",
+      "setByTutorFallback": "meditator",
+      "setByChild": "Pus de copil",
+      "labelPlaceholder": "Etichetă",
+      "active": "Activ",
+      "domainTitle": "Domeniul pe care îl deschide reminderul",
+      "domainDefault": "Domeniu implicit",
+      "delete": "Șterge",
+      "save": "Salvează",
+      "saving": "Se salvează…",
+      "add": "+ Adaugă reminder",
+      "newLabel": "Reminder nou",
+      "saveError": "Nu s-a putut salva.",
+      "deleteError": "Nu s-a putut șterge.",
+      "days": {
+        "d1": "Lu",
+        "d2": "Ma",
+        "d3": "Mi",
+        "d4": "Jo",
+        "d5": "Vi",
+        "d6": "Sâ",
+        "d0": "Du"
+      }
     }
   },
   "feedback": {
@@ -564,7 +597,12 @@
     "selfAlertOnce": "O singură alertă, fără renotificare",
     "channelTelegram": "Telegram",
     "moveUp": "Mută mai sus",
-    "moveDown": "Mută mai jos"
+    "moveDown": "Mută mai jos",
+    "accessMessages": {
+      "title": "Abonament",
+      "body": "Anunțurile cu câte zile gratuite mai ai, când contul intră în pauză și cât costă pachetul. Alertele despre copil nu depind de asta.",
+      "label": "Mesaje despre proba gratuită și abonament"
+    }
   },
   "calendar": {
     "title": "Calendar",
@@ -654,7 +692,29 @@
     "pushTitle": "Notificări în browser",
     "pushHint": "Primești alertele în timp real, chiar și cu aplicația închisă.",
     "phoneLabel": "Numărul meu de telefon (WhatsApp)",
-    "phoneHint": "Adaugă un număr dacă vrei să primești alerte și pe WhatsApp."
+    "phoneHint": "Adaugă un număr dacă vrei să primești alerte și pe WhatsApp.",
+    "subjectManager": {
+      "heading": "Materii",
+      "loading": "Se încarcă materiile…",
+      "loadError": "Nu s-au putut încărca materiile.",
+      "saveError": "Nu s-a putut salva.",
+      "confirmRemove": "Scoți {name}? Copilul nu o mai poate adăuga înapoi singur; ce a lucrat rămâne salvat.",
+      "intro": "Ce adaugi sau scoți tu rămâne așa: copilul nu poate adăuga înapoi o materie pe care ai scos-o.",
+      "empty": "Copilul nu are încă nicio materie.",
+      "originYou": "adăugată de tine",
+      "originGuardian": "adăugată de {name}",
+      "originChild": "aleasă de copil",
+      "otherAdult": "celălalt adult",
+      "managedElsewhere": "de la școală sau firmă",
+      "remove": "Scoate",
+      "removedLabel": "Scoase:",
+      "removedByYou": "de tine",
+      "removedBy": "de {name}",
+      "addBack": "adaugă înapoi",
+      "pickLabel": "Materie de adăugat",
+      "pickPlaceholder": "Alege o materie…",
+      "addSubject": "Adaugă materia"
+    }
   },
   "instructor": {
     "title": "Panou Instructor",

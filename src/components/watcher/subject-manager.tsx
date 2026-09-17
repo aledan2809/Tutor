@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 type SubjectRow = {
   domainId: string;
@@ -19,6 +20,7 @@ type Available = { id: string; name: string; slug: string; icon: string | null }
  * /api/dashboard/watcher/[id]/subjects.
  */
 export function SubjectManager({ childId, onChange }: { childId: string; onChange?: () => void }) {
+  const t = useTranslations("watcher.subjectManager");
   const [subjects, setSubjects] = useState<SubjectRow[]>([]);
   const [removed, setRemoved] = useState<SubjectRow[]>([]);
   const [available, setAvailable] = useState<Available[]>([]);
@@ -37,11 +39,11 @@ export function SubjectManager({ childId, onChange }: { childId: string; onChang
       setRemoved(d.removed ?? []);
       setAvailable(d.available ?? []);
     } catch {
-      setError("Nu s-au putut încărca materiile.");
+      setError(t("loadError"));
     } finally {
       setLoading(false);
     }
-  }, [api]);
+  }, [api, t]);
 
   useEffect(() => {
     void load();
@@ -54,7 +56,7 @@ export function SubjectManager({ childId, onChange }: { childId: string; onChang
       const res = await fetch(url, init);
       if (!res.ok) {
         const d = await res.json().catch(() => ({}));
-        setError(d?.error ?? "Nu s-a putut salva.");
+        setError(d?.error ?? t("saveError"));
       } else {
         onChange?.();
       }
@@ -67,31 +69,33 @@ export function SubjectManager({ childId, onChange }: { childId: string; onChang
   const add = (domainId: string) =>
     act({ method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ domainId }) });
   const remove = (s: SubjectRow) => {
-    if (!window.confirm(`Scoți ${s.name}? Copilul nu o mai poate adăuga înapoi singur; ce a lucrat rămâne salvat.`)) return;
+    if (!window.confirm(t("confirmRemove", { name: s.name }))) return;
     void act({ method: "DELETE" }, `${api}?domainId=${encodeURIComponent(s.domainId)}`);
   };
 
   const origin = (s: SubjectRow) =>
-    s.setBy === "you" ? "adăugată de tine" : s.setBy === "guardian" ? `adăugată de ${s.setByName?.trim() || "celălalt adult"}` : "aleasă de copil";
+    s.setBy === "you"
+      ? t("originYou")
+      : s.setBy === "guardian"
+        ? t("originGuardian", { name: s.setByName?.trim() || t("otherAdult") })
+        : t("originChild");
 
-  if (loading) return <p className="text-sm text-gray-500">Se încarcă materiile…</p>;
+  if (loading) return <p className="text-sm text-gray-500">{t("loading")}</p>;
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-gray-400">
-        Ce adaugi sau scoți tu rămâne așa: copilul nu poate adăuga înapoi o materie pe care ai scos-o.
-      </p>
+      <p className="text-xs text-gray-400">{t("intro")}</p>
       {error && <p className="text-sm text-amber-400">{error}</p>}
 
       {subjects.length === 0 ? (
-        <p className="text-sm text-gray-500">Copilul nu are încă nicio materie.</p>
+        <p className="text-sm text-gray-500">{t("empty")}</p>
       ) : (
         <ul className="divide-y divide-gray-800 rounded-lg border border-gray-800 bg-gray-900">
           {subjects.map((s) => (
             <li key={s.domainId} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5">
               <span className="text-sm text-white">
                 {s.icon ? `${s.icon} ` : ""}
-                {s.name} <span className="text-xs text-gray-500">· {s.managedElsewhere ? "de la școală sau firmă" : origin(s)}</span>
+                {s.name} <span className="text-xs text-gray-500">· {s.managedElsewhere ? t("managedElsewhere") : origin(s)}</span>
               </span>
               {!s.managedElsewhere && (
                 <button
@@ -100,7 +104,7 @@ export function SubjectManager({ childId, onChange }: { childId: string; onChang
                   disabled={busy}
                   className="min-h-[36px] text-xs text-gray-400 hover:text-red-400 disabled:opacity-50"
                 >
-                  Scoate
+                  {t("remove")}
                 </button>
               )}
             </li>
@@ -110,13 +114,13 @@ export function SubjectManager({ childId, onChange }: { childId: string; onChang
 
       {removed.length > 0 && (
         <div className="text-xs text-gray-400">
-          Scoase:{" "}
+          {t("removedLabel")}{" "}
           {removed.map((s, i) => (
             <span key={s.domainId}>
               {i > 0 && " · "}
-              {s.name} ({s.setBy === "you" ? "de tine" : `de ${s.setByName?.trim() || "celălalt adult"}`}){" "}
+              {s.name} ({s.setBy === "you" ? t("removedByYou") : t("removedBy", { name: s.setByName?.trim() || t("otherAdult") })}){" "}
               <button type="button" onClick={() => void add(s.domainId)} disabled={busy} className="text-blue-400 hover:text-blue-300">
-                adaugă înapoi
+                {t("addBack")}
               </button>
             </span>
           ))}
@@ -126,7 +130,7 @@ export function SubjectManager({ childId, onChange }: { childId: string; onChang
       {available.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           <label htmlFor={`add-subject-${childId}`} className="sr-only">
-            Materie de adăugat
+            {t("pickLabel")}
           </label>
           <select
             id={`add-subject-${childId}`}
@@ -134,7 +138,7 @@ export function SubjectManager({ childId, onChange }: { childId: string; onChang
             onChange={(e) => setPick(e.target.value)}
             className="min-h-[40px] rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
           >
-            <option value="">Alege o materie…</option>
+            <option value="">{t("pickPlaceholder")}</option>
             {available
               .filter((d) => !removed.some((r) => r.domainId === d.id))
               .map((d) => (
@@ -152,7 +156,7 @@ export function SubjectManager({ childId, onChange }: { childId: string; onChang
             disabled={!pick || busy}
             className="min-h-[40px] rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-200 hover:bg-gray-800 disabled:opacity-50"
           >
-            Adaugă materia
+            {t("addSubject")}
           </button>
         </div>
       )}

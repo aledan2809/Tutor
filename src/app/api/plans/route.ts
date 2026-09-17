@@ -7,6 +7,7 @@ import { payingForAccess, trialStartOf } from "@/lib/access";
 import { loadPauseStartsAt } from "@/lib/access-server";
 import { loadVoucherPreview, serializePreview } from "@/lib/voucher-preview-server";
 import { paysByCard } from "@/lib/card-subscription";
+import { isPaidSubscriber } from "@/lib/escalation/segmentation";
 
 /**
  * GET /api/plans
@@ -66,11 +67,16 @@ async function _GET() {
     });
   }
 
+  // The plan the account pays for right now. A cancelled package or an expired year from a code keeps
+  // its plan on the row: shown as „current", the family couldn't buy again the very package the pause
+  // screen sends them to (review r6, P2).
+  const paid = me !== null && isPaidSubscriber(me);
   return NextResponse.json({
     plans: plans.map((p) => ({ ...p, price: p.price / 100 })),
     current: {
       subscriptionStatus: me?.subscriptionStatus ?? null,
-      subscriptionPlanId: me?.subscriptionPlanId ?? null,
+      paid,
+      subscriptionPlanId: me && payingForAccess(me) ? me.subscriptionPlanId : null,
       // Another package on top of a card subscription would be a second one: the page doesn't offer it.
       byCard: me ? await paysByCard(me) : false,
       // Stripe is still retrying a declined renewal (inside the grace). Past it, nothing is being

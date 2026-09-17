@@ -5,7 +5,7 @@ import { withErrorHandler } from "@/lib/api-handler";
 import { isGuardianOf } from "@/lib/guardian";
 import { upcomingReminders, buildReminderUrl } from "@/lib/escalation/reminders";
 import { refuseIfPaused } from "@/lib/access-gate";
-import { parentPaysForMetered } from "@/lib/escalation/parent-nudge";
+import { nudgeOffersMetered } from "@/lib/escalation/parent-nudge";
 
 const WINDOW_MIN = 240; // 4h
 const TYPE_RO: Record<string, string> = {
@@ -110,9 +110,9 @@ async function _GET(_req: NextRequest, { params }: { params: Promise<{ id: strin
       };
     });
 
-  // WhatsApp costs per message: offered only to a parent whose account pays for it (the send is
-  // refused otherwise anyway — see fireNudge).
-  return NextResponse.json({ recent, upcoming, meteredAllowed: await parentPaysForMetered(session.user.id, childId) });
+  // WhatsApp costs per message: offered only when someone pays for it — this guardian, or the child's
+  // own package (the send is refused otherwise anyway — see fireNudge).
+  return NextResponse.json({ recent, upcoming, meteredAllowed: await nudgeOffersMetered(session.user.id, childId) });
 }
 
 export const GET = withErrorHandler(_GET);

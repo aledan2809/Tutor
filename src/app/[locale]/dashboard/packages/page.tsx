@@ -27,6 +27,9 @@ interface PlansResponse {
   plans: Plan[];
   current: {
     subscriptionStatus: string | null;
+    /** Paid right now (active or trialing, not past its end). A cancelled or expired package isn't. */
+    paid?: boolean;
+    /** The plan paid for right now; null once it has ended, so it can be bought again. */
     subscriptionPlanId: string | null;
     /** The current subscription is paid by card: another package would start a second one. */
     byCard?: boolean;
@@ -246,7 +249,7 @@ export default function PackagesPage() {
   };
 
   const isPaid =
-    current.subscriptionStatus === "active" || current.subscriptionStatus === "trialing";
+    current.paid ?? (current.subscriptionStatus === "active" || current.subscriptionStatus === "trialing");
   // A renewal the bank declined while Stripe keeps retrying: the way out is a new card, not a
   // second package.
   // Past the grace nothing is retried any more: the family chooses a package again.

@@ -217,6 +217,46 @@ export function resolveFamilyPlanFromRecord(
 }
 
 /**
+ * How many children a payer's plan seats: the plan's own plus the add-on seats paid for. No limit for
+ * „Gratuit permanent", the administrator, or a row without a family plan (accounts marked paid by hand).
+ */
+export function childSeatsOf(p: {
+  isSuperAdmin?: boolean | null;
+  freeForever?: boolean | null;
+  subscriptionPlan?: SubscriptionPlanSeatFields | null;
+  paidExtraChildSeats?: number | null;
+}): number {
+  if (p.isSuperAdmin || p.freeForever) return Infinity;
+  const resolved = resolveFamilyPlanFromRecord(p.subscriptionPlan);
+  return resolved === null ? Infinity : resolved.maxChildren + (p.paidExtraChildSeats ?? 0);
+}
+
+/**
+ * Does the payer's plan seat this child? Children take the seats in the order they were linked
+ * (`childIds`): Family seats the first, an add-on seat the next. A cancelled add-on frees a seat, so
+ * the last child linked stops being covered — before, every linked child was covered whatever the
+ * seats (review r6, sweep S1). Unknown child or order: seated, as before.
+ */
+export function seatsChild(
+  p: Parameters<typeof childSeatsOf>[0],
+  childId: string | null | undefined,
+  childIds: string[] | null | undefined
+): boolean {
+  if (!childId || !childIds) return true;
+  const rank = childIds.indexOf(childId);
+  return rank === -1 || rank < childSeatsOf(p);
+}
+
+/**
+ * A plan for one learner only (Elev): it pays for its own account, not for a family's. Here, next to
+ * the plan resolver, so the access rules and the channel rules share it (review r6, K2).
+ */
+export function individualPlan(plan: SubscriptionPlanSeatFields | null | undefined): boolean {
+  const resolved = resolveFamilyPlanFromRecord(plan);
+  return resolved !== null && resolved.maxChildren === 0 && resolved.maxParents === 0;
+}
+
+/**
  * Discount for the N-th child on a family plan (1-based child index). The first
  * child is the base seat (no discount); the 2nd is −20%, the 3rd and beyond −30%.
  * Mirrors the /parinte pricing copy.
@@ -296,6 +336,17 @@ export function canAddChild(
   currentChildren: number
 ): SeatCheck {
   if (!plan) return NO_PLAN;
+  // A plan for one learner (Elev) covers no child (access.ts individualPlan): a paid seat next to it
+  // would bill for a child who stays paused. The way to add a child is Family (review r6, P4).
+  // maxParents, not maxChildren: paid add-on seats raise the latter.
+  if (plan.maxParents === 0) {
+    return {
+      allowed: false,
+      reason: "no_family_plan",
+      upgradeTo: "FAMILY",
+      message: `Pachetul „${plan.label}" e pentru un singur cursant. Treci la „${FAMILY_PLANS.FAMILY.label}" ca să adaugi un copil.`,
+    };
+  }
   if (currentChildren < plan.maxChildren) return { allowed: true };
   // Beyond the base seat → paid add-on with a loyalty discount.
   const nextIndex = currentChildren + 1;

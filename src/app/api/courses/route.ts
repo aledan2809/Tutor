@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { refuseIfPaused } from "@/lib/access-gate";
 import { resolveDomainOrForbid } from "@/lib/domain-gate";
 
 /**
@@ -16,6 +17,9 @@ async function _GET(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // A paused account (access.ts) has no lessons: the page shows the pause screen (review r6, U7).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
 
   const domainSlug = req.nextUrl.searchParams.get("domain")?.trim();
   if (!domainSlug) {

@@ -23,6 +23,7 @@ export type TeaserStats = {
 };
 
 const dayKey = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: "Europe/Bucharest" });
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Counts for one learner, all time or inside `window` (e.g. the trial week before a pause). */
 export async function teaserStats(userId: string, window?: { since: Date; until: Date }): Promise<TeaserStats> {
@@ -37,9 +38,12 @@ export async function teaserStats(userId: string, window?: { since: Date; until:
     prisma.weakArea.count({ where: { userId } }),
   ]);
   const best = [...gamification].sort((a, b) => b.xp - a.xp)[0];
+  const days = new Set(sessions.map((s) => (s.endedAt ? dayKey(s.endedAt) : ""))).size;
   return {
     exercises,
-    practicedDays: new Set(sessions.map((s) => (s.endedAt ? dayKey(s.endedAt) : ""))).size,
+    // A week of 7×24 hours ending in the evening touches 8 calendar dates; the screen says „N/7"
+    // (review r6, sweep S5).
+    practicedDays: window ? Math.min(days, Math.ceil((window.until.getTime() - window.since.getTime()) / DAY_MS)) : days,
     streak: gamification.reduce((max, g) => Math.max(max, g.streak), 0),
     level: best?.level ?? null,
     weakTopics,

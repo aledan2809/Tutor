@@ -38,6 +38,7 @@ import {
 } from "@/lib/family";
 import { payingForAccess, trialDaysLeft } from "@/lib/access";
 import { loadPauseStartsAt } from "@/lib/access-server";
+import { closeChainsOf } from "@/lib/escalation/engine";
 import { sendAppEmail, isEmailConfigured } from "@/lib/email";
 import {
   getTelegramClient,
@@ -137,6 +138,7 @@ export async function resolveOwnerPlan(
         },
       },
       enrollments: { where: { isActive: true, roles: { has: "STUDENT" } }, select: { id: true }, take: 1 },
+      guardianLinks: { where: { status: "active", relation: GUARDIAN_RELATION.PARENT }, select: { id: true }, take: 1 },
     },
   });
   // Prefer the seat composition stored on the plan record (familyPlanKey + seat
@@ -145,12 +147,13 @@ export async function resolveOwnerPlan(
   // A renewal Stripe is still retrying keeps the family as it is (access.ts), seats included.
   let plan = u && payingForAccess(u) ? recordPlan : null;
   let trial = false;
-  // A learner is an account registered as a pupil, or one without a role (Google, One Tap and
-  // email-link sign-ups get none) that is learning itself. A pupil who signs in with Google and
-  // links a classmate as „child" would otherwise make one Family cover two learners.
-  const learner = u?.accountRole === "STUDENT" || (u?.accountRole == null && (u?.enrollments?.length ?? 0) > 0);
-  if (!plan && u && !u.isSuperAdmin && !u.freeForever && !learner) {
-    const pauseStartsAt = await loadPauseStartsAt();
+  // Neither a learner nor someone's child gets the free week's family seats: a pupil who signs in
+  // with Google and links a classmate as „child" would otherwise make one Family cover two learners.
+  const buysForFamily =
+    u !== null &&
+    familyBuyer({ accountRole: u.accountRole, learning: u.enrollments.length > 0, isChild: u.guardianLinks.length > 0 });
+  if (!plan && u && !u.isSuperAdmin && !u.freeForever && buysForFamily) {
+    const pauseStartsAt = await loadPauseStartsAt(db);
     if (trialDaysLeft(u.createdAt, pauseStartsAt, new Date()) > 0) {
       plan = FAMILY_PLANS.FAMILY;
       trial = true;
@@ -178,7 +181,18 @@ export function canBecomeParent(u: { accountRole: string | null; isChild: boolea
   return u.accountRole == null && !u.isChild && u.learning && !u.practised;
 }
 
-async function becomeParentFacts(userId: string, db: Pick<Db, "user">) {
+/**
+ * Pure: may this account be offered a family package — the free week's seats, the buttons and links
+ * to buy one? Not a learner (registered as a pupil, or role-less and learning itself) and not someone's
+ * child: a child is never pushed to buy (UCPD Annex I point 28), and the parent who pays adds the family.
+ */
+export function familyBuyer(u: { accountRole: string | null; learning: boolean; isChild: boolean }): boolean {
+  const learner = u.accountRole === "STUDENT" || (u.accountRole == null && u.learning);
+  return !learner && !u.isChild;
+}
+
+/** Who is looking at the family page: what decides the offers and the „Sunt părinte" card. */
+export async function familyViewerFacts(userId: string, db: Pick<Db, "user">) {
   const u = await db.user.findUnique({
     where: { id: userId },
     select: {
@@ -199,7 +213,7 @@ async function becomeParentFacts(userId: string, db: Pick<Db, "user">) {
 }
 
 export async function loadCanBecomeParent(userId: string, db: Db = prisma): Promise<boolean> {
-  const facts = await becomeParentFacts(userId, db);
+  const facts = await familyViewerFacts(userId, db);
   return facts !== null && canBecomeParent(facts);
 }
 
@@ -211,7 +225,7 @@ export async function loadCanBecomeParent(userId: string, db: Db = prisma): Prom
  */
 export async function becomeParent(userId: string, db: Db = prisma): Promise<boolean> {
   return db.$transaction(async (tx) => {
-    const facts = await becomeParentFacts(userId, tx);
+    const facts = await familyViewerFacts(userId, tx);
     if (!facts || !canBecomeParent(facts)) return false;
     // Conditional, so two clicks at once change the account once.
     const changed = await tx.user.updateMany({ where: { id: userId, accountRole: null }, data: { accountRole: "PARENT" } });
@@ -223,14 +237,8 @@ export async function becomeParent(userId: string, db: Db = prisma): Promise<boo
       await tx.enrollment.update({ where: { id: row.id }, data: { roles } });
     }
     await tx.studyReminder.updateMany({ where: { userId, isActive: true }, data: { isActive: false } });
-    // A rung still waiting is closed unsent; the latest sent rungs are marked as the end of their
-    // chain (the engine's `closed` mark), so none leads to another rung.
-    await tx.escalationEvent.updateMany({ where: { userId, status: "PENDING" }, data: { status: "COMPLETED" } });
-    await tx.$executeRaw`
-      UPDATE "EscalationEvent"
-      SET "metadata" = COALESCE("metadata", '{}'::jsonb) || jsonb_build_object('closed', 'parent'::text),
-          "updatedAt" = NOW()
-      WHERE "userId" = ${userId} AND "status" = 'COMPLETED' AND "sentAt" >= ${new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)}`;
+    // Its chains end with it: none leads to another rung (the engine's own `closed` mark).
+    await closeChainsOf(userId, "parent", tx);
     return true;
   });
 }
@@ -826,6 +834,9 @@ export async function createChildDirectly(params: {
         email: params.email,
         password: params.passwordHash,
         emailVerified: new Date(),
+        // A child's account: without a role it was taken for a possible parent (the free week's
+        // family seats, the offers) until it picked a subject.
+        accountRole: "STUDENT",
       },
       select: { id: true },
     });

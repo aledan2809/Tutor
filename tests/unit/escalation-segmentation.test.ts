@@ -176,8 +176,13 @@ describe("SELECT_ACOPERIRE_CANALE — filtrul e partea care contează", () => {
       subscriptionStatus: true,
       subscriptionEndsAt: true,
       freeForever: true,
+      isSuperAdmin: true,
       subscriptionPlan: { select: { name: true, familyPlanKey: true, maxParents: true, maxChildren: true } },
+      paidExtraChildSeats: true,
+      childrenLinks: { where: { status: "active", relation: "PARENT" }, orderBy: { createdAt: "asc" }, select: { childId: true } },
     });
+    // Without the child's own id the seat order can't be read.
+    expect(SELECT_ACOPERIRE_CANALE.id).toBe(true);
   });
 });
 
@@ -209,6 +214,24 @@ describe("coveredByPayingParent — copilul dintr-un pachet de familie", () => {
     expect(coveredByPayingParent({ guardianLinks: [link({ ...free, freeForever: true })] })).toBe(true);
     expect(SELECT_ACOPERIRE_CANALE.freeForever).toBe(true);
     expect(SELECT_ACOPERIRE_CANALE.guardianLinks.select.parent.select.freeForever).toBe(true);
+  });
+
+  it("Family acoperă copilul pentru care are loc: al doilea copil cere loc suplimentar plătit (review r6, S1)", () => {
+    const family = { subscriptionStatus: "active", subscriptionEndsAt: null, subscriptionPlan: { name: "Family", familyPlanKey: "FAMILY" } };
+    const kids = [{ childId: "c1" }, { childId: "c2" }];
+    const covered = (id: string, paidExtraChildSeats = 0) =>
+      coveredByPayingParent({ id, guardianLinks: [link({ ...family, childrenLinks: kids, paidExtraChildSeats } as never)] });
+    expect(covered("c1")).toBe(true);
+    expect(covered("c2")).toBe(false);
+    // The add-on seat covers the second child; cancelled (0 again), it doesn't.
+    expect(covered("c2", 1)).toBe(true);
+    // „Gratuit permanent" has no child limit.
+    expect(coveredByPayingParent({ id: "c2", guardianLinks: [link({ ...free, freeForever: true, childrenLinks: kids } as never)] })).toBe(true);
+  });
+
+  it("administratorul platformei acoperă copilul, cum îl socotește și accesul (review r6, A7)", () => {
+    expect(coveredByPayingParent({ guardianLinks: [link({ ...free, isSuperAdmin: true } as never)] })).toBe(true);
+    expect(SELECT_ACOPERIRE_CANALE.guardianLinks.where.parent.OR).toContainEqual({ isSuperAdmin: true });
   });
 
   it("un abonament Elev (pentru un singur cont) nu acoperă copilul; un pachet de familie sau unul fără plan înregistrat da", () => {

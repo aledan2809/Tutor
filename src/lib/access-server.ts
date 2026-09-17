@@ -20,21 +20,31 @@ const PERSON_SELECT = {
 // The switch changes once, by hand; re-reading it on every request would cost a query per answer.
 const SWITCH_TTL_MS = 30_000;
 let cachedSwitch: { value: Date | null; readAt: number } | null = null;
+/** Bumped when the switch changes: a read that started before it doesn't cache the old value. */
+let switchGeneration = 0;
 
-/** When the 7-day trial + pause was switched on for the platform, or null while it is off. */
-export async function loadPauseStartsAt(): Promise<Date | null> {
+/**
+ * When the 7-day trial + pause was switched on for the platform, or null while it is off. Inside a
+ * transaction, pass it (`db`): on a cache miss the read otherwise takes a second connection while
+ * the transaction holds one (review r6, A4).
+ */
+export async function loadPauseStartsAt(db: Pick<typeof prisma, "appSetting"> = prisma): Promise<Date | null> {
   if (cachedSwitch && Date.now() - cachedSwitch.readAt < SWITCH_TTL_MS) return cachedSwitch.value;
-  const row = await prisma.appSetting.findUnique({ where: { key: ACCESS_TRIAL_SETTING }, select: { value: true } });
+  const generation = switchGeneration;
+  const row = await db.appSetting.findUnique({ where: { key: ACCESS_TRIAL_SETTING }, select: { value: true } });
   const raw = (row?.value as { startsAt?: unknown } | null)?.startsAt;
   const date = typeof raw === "string" ? new Date(raw) : null;
   const value = date && !Number.isNaN(date.getTime()) ? date : null;
-  cachedSwitch = { value, readAt: Date.now() };
+  // A read that was under way while the administrator changed the switch returns what it saw, but
+  // doesn't keep it for 30 seconds (review r6, A5).
+  if (generation === switchGeneration) cachedSwitch = { value, readAt: Date.now() };
   return value;
 }
 
 /** Forget the cached switch (after the administrator changes it). */
 export function forgetPauseSwitch(): void {
   cachedSwitch = null;
+  switchGeneration++;
 }
 
 /**
@@ -45,11 +55,20 @@ export function forgetPauseSwitch(): void {
 export async function pausedUserIds(userIds: Iterable<string>, now: Date = new Date()): Promise<Set<string>> {
   const paused = new Set<string>();
   if (!(await loadPauseStartsAt())) return paused;
-  for (const id of new Set(userIds)) {
-    if ((await loadAccess(id, now))?.kind === "paused") paused.add(id);
+  // A few accounts at a time instead of one after another (each is a handful of reads), without
+  // taking the whole connection pool away from the pages (review r6, F1).
+  const ids = [...new Set(userIds)];
+  for (let i = 0; i < ids.length; i += PAUSE_READS_AT_ONCE) {
+    const batch = ids.slice(i, i + PAUSE_READS_AT_ONCE);
+    const kinds = await Promise.all(batch.map(async (id) => (await loadAccess(id, now))?.kind));
+    batch.forEach((id, j) => {
+      if (kinds[j] === "paused") paused.add(id);
+    });
   }
   return paused;
 }
+
+const PAUSE_READS_AT_ONCE = 5;
 
 /** Who has the family's plan when it leaves this parent out, as the dashboard and messages name it. */
 export type SeatHolderNote = { name: string | null; plan: string; parents: number; upgrade: string | null };
@@ -84,10 +103,27 @@ export async function loadAccess(userId: string, now: Date = new Date()): Promis
     prisma.user.findUnique({
       where: { id: userId },
       select: {
+        id: true,
         ...PERSON_SELECT,
         isOrgAdmin: true,
         accountRole: true,
-        guardianLinks: { where: { status: "active", relation: "PARENT" }, select: { parent: { select: PERSON_SELECT } } },
+        guardianLinks: {
+          where: { status: "active", relation: "PARENT" },
+          select: {
+            parent: {
+              select: {
+                ...PERSON_SELECT,
+                // Which of the parent's children the plan seats (family.ts seatsChild).
+                paidExtraChildSeats: true,
+                childrenLinks: {
+                  where: { status: "active", relation: "PARENT" },
+                  orderBy: { createdAt: "asc" },
+                  select: { childId: true },
+                },
+              },
+            },
+          },
+        },
         // As a parent: the other parents of the same children (the second parent of Family Duo /
         // Family Trio is covered by the first one's plan). As a family tutor: they don't buy a package.
         childrenLinks: {
@@ -125,7 +161,7 @@ export async function loadAccess(userId: string, now: Date = new Date()): Promis
     now,
     pauseStartsAt,
     self: user,
-    parents: user.guardianLinks.map((g) => g.parent),
+    parents: user.guardianLinks.map((g) => ({ ...g.parent, childIds: g.parent.childrenLinks.map((l) => l.childId) })),
     coParentGroups: user.childrenLinks
       .filter((l) => l.relation === "PARENT")
       .map((l) => ({ linkedAt: l.createdAt, others: l.child.guardianLinks.map((g) => ({ person: g.parent, linkedAt: g.createdAt })) })),

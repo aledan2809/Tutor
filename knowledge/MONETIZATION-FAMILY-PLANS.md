@@ -3,6 +3,7 @@
 > Sursa de adevăr pentru build-ul Părinte/Elev/Meditator. Co-design 2026-06; build fazat.
 >
 > **Changelog**
+> - 2026-09-17: §4 actualizat cu starea LIVE din 16–17.09 (deciziile lui Alex): proba de **7 zile fără card** pe tot pachetul (fără WhatsApp/SMS), **pauza din ziua 8** pentru părinte ȘI copil (cu „teasing" — cifre reale + zone blurate, fără preț arătat copilului), conturile existente primesc 7 zile de la pornirea comutatorului (nu „Gratuit permanent"), **ultimul cuvânt al părintelui** peste programul și materiile copilului (blocate pentru copil, fără flux de cerere), locurile din pachet (plătitorul ține mereu un loc; Family Duo = 2 părinți). Comutatorul pauzei e încă OPRIT. Fluturașul V126S (Family 24,90 lunar, o dată pe cont, până la 30.11) e LIVE.
 > - 2026-06-03: actualizat §2 + §3 cu pachetele LIVE (5 planuri: Elev de la 19,90 / Family 24,90 / Family Duo 29,90 / Trio 39,90 / Family Trio 49,90) + reducerile reale (copil #2 −20% / #3+ −30%; materie a 2-a −15% / a 3-a+ −25%; anual = 2 luni gratuite) + promo −25% până 31.08.2026. Aliniat cu `/preturi` (sursa canonică) + `/parinte` (corectat în aceeași sesiune). Prețurile sunt acum afișate hardcodat pe cele 2 pagini (config-driven la checkout = build viitor).
 
 ## 0. Poziționare (FĂCUT — Faza A, commit c0e1ae9)
@@ -39,6 +40,15 @@ Pagina Părinte TREBUIE să explice clar opțiunea **Trio** + faptul că **pări
 - **Psihologie**: evidențiat Family/Trio ca „Cel mai ales", preț/copil care scade vizibil, o singură factură, toggle Lunar/Anual cu economia afișată, charm pricing, free trial fără card.
 
 ## 4. Free + Trial → conversie
+
+> **Stare LIVE 2026-09-17 (înlocuiește planul de mai jos acolo unde diferă).** Cod: `src/lib/access.ts` (reguli), `src/lib/access-server.ts` (citiri), `src/components/access/*` (ecrane), `src/lib/guardian-lock.ts` (ultimul cuvânt al părintelui).
+> - **7 zile fără card**, tot pachetul, fără WhatsApp/SMS (costă per mesaj). Copilul legat în săptămâna părintelui o împarte cu el.
+> - **Ziua 8 fără plată → pauză** pentru părinte și copil: fără exerciții, remindere, alerte, rapoarte. Nimic nu se șterge. Copilului nu i se arată niciodată un preț (UCPD anexa I pct. 28); oferta merge la cine plătește.
+> - **Nu intră în pauză**: „Gratuit permanent" (bifă de administrator), meditatorii/instructorii, cursanții plătiți de o firmă.
+> - **Conturile existente** primesc 7 zile de la pornirea comutatorului `accessTrial.startsAt` (încă oprit).
+> - **Locuri**: plătitorul ține mereu un loc; ceilalți adulți ai copilului iau locurile rămase în ordinea legării (Family = 1 părinte, Family Duo = 2). Elev nu acoperă niciun copil și nu vinde loc de copil suplimentar.
+> - **Ultimul cuvânt al părintelui**: ce stabilește sau schimbă un părinte (program, materii) e blocat pentru copil; ce a pus copilul rămâne al lui până îl schimbă părintele. Meditatorul poate ajuta, dar nu blochează.
+> - **Rămas pentru livrarea 2**: −30% dacă plătește în timpul probei (cu numărătoare inversă), −10% cu Telegram conectat, materia a 2-a −15% / a 3-a+ −25%, abonament anual = 10 luni.
 - **Free** (cont gratuit): max **2 materii/zi**, câte **5 întrebări/materie/zi** (deci 10 întrebări/zi pe 2 materii alese). Întrebările **contorizează + intră în gamification** (XP, streak).
 - **Alegerea celor 2 materii necesită cont gratuit** (fără cont = doar demo-ul public; ca să-ți alegi materiile, îți faci cont).
 - Scop: să-l facă **dornic să vadă mai mult ȘI să plătească**.

@@ -12,7 +12,7 @@
 import type { LadderConfig, LadderStep } from "@aledan/notify-ladder";
 import type { EscalationChannel, Prisma } from "@prisma/client";
 import { ESCALATION_LEVELS, CASCADE_GRACE_MINUTES } from "./config";
-import { resolveFamilyPlanFromRecord, type SubscriptionPlanSeatFields } from "@/lib/family";
+import { individualPlan, seatsChild, type SubscriptionPlanSeatFields } from "@/lib/family";
 
 /**
  * A subscriber gets the paid channels (incl. WhatsApp). "trialing" counts as
@@ -43,6 +43,8 @@ export function isPaidSubscriber(u: {
  * bug-ul pe care îl repară: poarta de trimitere se uita doar la abonamentul individual.
  */
 export function meteredChannelsCovered(u: {
+  /** Which child of a paying parent this is (coveredByPayingParent seats children in link order). */
+  id?: string;
   subscriptionStatus: string | null;
   subscriptionEndsAt: Date | null;
   /** Firma căreia îi APARȚINE contul — practic doar administratorii de firmă. */
@@ -79,18 +81,18 @@ export function meteredChannelsCovered(u: {
  * deci legătura nu mai garantează un pachet de familie — un abonament Elev (pentru un singur cont)
  * nu acoperă copilul.
  */
-export function coveredByPayingParent(u: { guardianLinks?: { parent: PayingParent | null }[] | null }): boolean {
+export function coveredByPayingParent(u: { id?: string; guardianLinks?: { parent: PayingParent | null }[] | null }): boolean {
   return Boolean(
     u.guardianLinks?.some(
-      (g) => g.parent && (g.parent.freeForever === true || (isPaidSubscriber(g.parent) && !soloPlan(g.parent.subscriptionPlan))),
+      (g) =>
+        g.parent &&
+        (g.parent.isSuperAdmin === true ||
+          g.parent.freeForever === true ||
+          (isPaidSubscriber(g.parent) && !individualPlan(g.parent.subscriptionPlan))) &&
+        // Only a child the plan has a seat for, as access.ts counts it (family.ts seatsChild).
+        seatsChild(g.parent, u.id, g.parent.childrenLinks?.map((l) => l.childId)),
     ),
   );
-}
-
-/** Elev: a plan for one learner (no parent or child seats). */
-function soloPlan(plan: SubscriptionPlanSeatFields | null | undefined): boolean {
-  const resolved = resolveFamilyPlanFromRecord(plan);
-  return resolved !== null && resolved.maxChildren === 0 && resolved.maxParents === 0;
 }
 
 /** What a parent row needs to say whether it pays for its child. */
@@ -99,6 +101,11 @@ export type PayingParent = {
   subscriptionEndsAt: Date | null;
   /** A parent marked „Gratuit permanent" covers the child like a paid plan. */
   freeForever?: boolean | null;
+  /** The platform administrator covers the child too, as access.ts counts them (review r6, A7). */
+  isSuperAdmin?: boolean | null;
+  /** Add-on child seats paid for, and the parent's children in link order: which children are seated. */
+  paidExtraChildSeats?: number | null;
+  childrenLinks?: { childId: string }[] | null;
   /** The plan paid for; an individual (Elev) plan doesn't cover a child. */
   subscriptionPlan?: SubscriptionPlanSeatFields | null;
 };
@@ -151,7 +158,9 @@ export const SELECT_ACOPERIRE_CANALE_RELATII = {
     where: {
       status: "active",
       relation: "PARENT",
-      parent: { OR: [{ subscriptionStatus: { in: ["active", "trialing"] } }, { freeForever: true }] as Prisma.UserWhereInput[] },
+      parent: {
+        OR: [{ subscriptionStatus: { in: ["active", "trialing"] } }, { freeForever: true }, { isSuperAdmin: true }] as Prisma.UserWhereInput[],
+      },
     },
     select: {
       parent: {
@@ -159,7 +168,14 @@ export const SELECT_ACOPERIRE_CANALE_RELATII = {
           subscriptionStatus: true,
           subscriptionEndsAt: true,
           freeForever: true,
+          isSuperAdmin: true,
           subscriptionPlan: { select: { name: true, familyPlanKey: true, maxParents: true, maxChildren: true } },
+          paidExtraChildSeats: true,
+          childrenLinks: {
+            where: { status: "active", relation: "PARENT" },
+            orderBy: { createdAt: "asc" },
+            select: { childId: true },
+          },
         },
       },
     },
@@ -169,6 +185,8 @@ export const SELECT_ACOPERIRE_CANALE_RELATII = {
 
 /** Același lucru, plus scalarii de abonament, pentru un `select` complet. */
 export const SELECT_ACOPERIRE_CANALE = {
+  // Which of a paying parent's children this one is (coveredByPayingParent).
+  id: true,
   subscriptionStatus: true,
   subscriptionEndsAt: true,
   freeForever: true,

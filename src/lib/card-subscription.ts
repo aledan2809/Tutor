@@ -4,6 +4,7 @@
  * subscription's plan, and the first one isn't stopped — and a 100% code applied over it would
  * replace the plan the card keeps paying for.
  */
+import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { payingForAccess } from "@/lib/access";
 
@@ -43,4 +44,40 @@ export async function paysByCard(user: CardPayerFields, db: Pick<typeof prisma, 
  */
 export function eventIsForCurrentSubscription(stored: string | null | undefined, incoming: string | null | undefined): boolean {
   return !stored || !incoming || stored === incoming;
+}
+
+/** Setting key: the Stripe subscriptions this account has seen cancelled (a list of ids). */
+export const ENDED_SUBSCRIPTIONS_KEY = "stripeEndedSubscriptions";
+
+/**
+ * Pure: has the account already seen this subscription end? A cancellation is final — Stripe neither
+ * renews nor retries a deleted subscription — so anything arriving for it later is late. The account
+ * row alone can't tell: the cancellation clears the stored id, and a year from a 100% code then makes
+ * the account look active again (review r6, P1).
+ */
+export function subscriptionEnded(endedIds: unknown, incoming: string | null | undefined): boolean {
+  return Boolean(incoming) && Array.isArray(endedIds) && endedIds.includes(incoming);
+}
+
+/** The subscriptions this account has seen cancelled. */
+export async function endedSubscriptionIds(userId: string, db: Pick<typeof prisma, "setting"> = prisma): Promise<unknown> {
+  const row = await db.setting.findUnique({
+    where: { userId_key: { userId, key: ENDED_SUBSCRIPTIONS_KEY } },
+    select: { value: true },
+  });
+  return row?.value ?? [];
+}
+
+/** Remember a cancelled subscription. One statement, so two cancellations at once both land. */
+export async function recordEndedSubscription(userId: string, subscriptionId: string): Promise<void> {
+  await prisma.$executeRaw`
+    INSERT INTO "Setting" ("id", "userId", "key", "value", "createdAt", "updatedAt")
+    VALUES (${randomUUID()}, ${userId}, ${ENDED_SUBSCRIPTIONS_KEY}, jsonb_build_array(${subscriptionId}::text), NOW(), NOW())
+    ON CONFLICT ("userId", "key") DO UPDATE
+    SET "value" = CASE
+          WHEN jsonb_typeof("Setting"."value") = 'array' AND "Setting"."value" @> jsonb_build_array(${subscriptionId}::text) THEN "Setting"."value"
+          WHEN jsonb_typeof("Setting"."value") = 'array' THEN "Setting"."value" || jsonb_build_array(${subscriptionId}::text)
+          ELSE jsonb_build_array(${subscriptionId}::text)
+        END,
+        "updatedAt" = NOW()`;
 }

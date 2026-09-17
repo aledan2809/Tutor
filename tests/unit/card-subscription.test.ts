@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cardShaped, eventIsForCurrentSubscription } from "@/lib/card-subscription";
+import { cardShaped, eventIsForCurrentSubscription, subscriptionEnded } from "@/lib/card-subscription";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -32,5 +32,25 @@ describe("evenimentele unui abonament lăsat în urmă", () => {
     expect(eventIsForCurrentSubscription(null, "sub_x")).toBe(true);
     expect(eventIsForCurrentSubscription("sub_x", null)).toBe(true);
     expect(eventIsForCurrentSubscription(undefined, undefined)).toBe(true);
+  });
+});
+
+describe("un abonament oprit rămâne oprit (review r6, P1)", () => {
+  it("ce vine după anulare e întârziat, chiar dacă un cod de 100% a făcut contul activ din nou", () => {
+    // Anularea golește id-ul din cont, deci doar lista abonamentelor încheiate mai știe de el.
+    expect(eventIsForCurrentSubscription(null, "sub_old")).toBe(true);
+    expect(subscriptionEnded(["sub_old"], "sub_old")).toBe(true);
+  });
+
+  it("un abonament nou, sau un eveniment fără id, nu e oprit", () => {
+    expect(subscriptionEnded(["sub_old"], "sub_new")).toBe(false);
+    expect(subscriptionEnded(["sub_old"], null)).toBe(false);
+    expect(subscriptionEnded([], "sub_old")).toBe(false);
+  });
+
+  it("o valoare stricată în setări nu oprește nimic", () => {
+    expect(subscriptionEnded("sub_old", "sub_old")).toBe(false);
+    expect(subscriptionEnded(null, "sub_old")).toBe(false);
+    expect(subscriptionEnded({ sub_old: true }, "sub_old")).toBe(false);
   });
 });

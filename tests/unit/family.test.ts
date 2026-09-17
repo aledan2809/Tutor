@@ -101,6 +101,15 @@ describe("canAddChild", () => {
   it("third child add-on carries 30%", () => {
     expect(canAddChild(FAMILY_PLANS.FAMILY, 2).discountPercent).toBe(30);
   });
+
+  it("on Elev no child seat is sold: the child would stay paused; Family is the way (review r6, P4)", () => {
+    const r = canAddChild(FAMILY_PLANS.ELEV, 0);
+    expect(r.allowed).toBe(false);
+    expect(r.addon).toBeUndefined();
+    expect(r.upgradeTo).toBe("FAMILY");
+    // Paid seats raise maxChildren; the plan is still for one learner.
+    expect(canAddChild({ ...FAMILY_PLANS.ELEV, maxChildren: 1 }, 0).upgradeTo).toBe("FAMILY");
+  });
 });
 
 describe("trialChildCheck", () => {

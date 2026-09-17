@@ -11,7 +11,7 @@ import {
 } from "@/lib/campaign-attribution";
 import { logger } from "@/lib/logger";
 import { SIGNUP_ROLES, accountRoleForSignup, enrollmentsForSignup } from "@/lib/signup-role";
-import { loadVoucherPreview } from "@/lib/voucher-preview-server";
+import { loadVoucherPreview, planForCodeYear } from "@/lib/voucher-preview-server";
 
 const schema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -135,6 +135,11 @@ async function _POST(req: NextRequest) {
           return;
         }
 
+        // Same plan rule as /api/activate: without it an Elev code gave a family's worth of access
+        // for a year (review r6, P3). A code whose package is gone isn't applied at signup.
+        const plan = await planForCodeYear(tx, voucher.planKey);
+        if (plan === "missing") return;
+
         await tx.voucher.update({
           where: {
             id: voucher.id,
@@ -146,7 +151,7 @@ async function _POST(req: NextRequest) {
         endsAt.setFullYear(endsAt.getFullYear() + 1);
         await tx.user.update({
           where: { id: user.id },
-          data: { subscriptionStatus: "active", subscriptionEndsAt: endsAt },
+          data: { subscriptionStatus: "active", subscriptionEndsAt: endsAt, ...(plan ? { subscriptionPlanId: plan.id } : {}) },
         });
         voucherApplied = true;
       });

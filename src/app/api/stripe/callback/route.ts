@@ -6,7 +6,12 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { accrueCommissionForPayment } from "@/lib/referral";
 import { logger } from "@/lib/logger";
-import { eventIsForCurrentSubscription } from "@/lib/card-subscription";
+import {
+  endedSubscriptionIds,
+  eventIsForCurrentSubscription,
+  recordEndedSubscription,
+  subscriptionEnded,
+} from "@/lib/card-subscription";
 
 /**
  * Stripe Checkout Broker → Tutor callback.
@@ -178,15 +183,48 @@ async function recordVoucherRedemption(voucherId: string | undefined, userId: st
  * means the family pays twice, and only the billing account can stop it.
  */
 async function currentSubscription(userId: string, p: BrokerCallback, what: string): Promise<boolean> {
-  const account = await prisma.user.findUnique({ where: { id: userId }, select: { stripeSubscriptionId: true } });
-  if (eventIsForCurrentSubscription(account?.stripeSubscriptionId, p.stripeSubscriptionId)) return true;
-  logger.warn("Subscription event for a subscription the account no longer has — left unchanged", {
+  const [account, ended] = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId }, select: { stripeSubscriptionId: true } }),
+    endedSubscriptionIds(userId),
+  ]);
+  // Checked before the stored id: a cancellation clears it, and an empty id counts as „this one".
+  const late = subscriptionEnded(ended, p.stripeSubscriptionId);
+  if (!late && eventIsForCurrentSubscription(account?.stripeSubscriptionId, p.stripeSubscriptionId)) return true;
+  logger.warn(
+    late
+      ? "Subscription event for a subscription that already ended — left unchanged"
+      : "Subscription event for a subscription the account no longer has — left unchanged",
+    {
+      userId,
+      event: what,
+      subscriptionId: p.stripeSubscriptionId ?? "",
+      currentSubscriptionId: account?.stripeSubscriptionId ?? "",
+    }
+  );
+  return false;
+}
+
+/**
+ * An activation that must not rewrite the account: one for a subscription already cancelled (a broker
+ * retry arriving after the cancellation would set it active with no end date — access forever), or a
+ * retry of an older activation arriving after the account moved on to another subscription. A first
+ * activation is always a new checkout session, so a retry is one whose payment already existed.
+ */
+async function staleActivation(userId: string, p: BrokerCallback, isNew: boolean): Promise<boolean> {
+  const [account, ended] = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId }, select: { stripeSubscriptionId: true } }),
+    endedSubscriptionIds(userId),
+  ]);
+  const late = subscriptionEnded(ended, p.stripeSubscriptionId);
+  const older = !isNew && !eventIsForCurrentSubscription(account?.stripeSubscriptionId, p.stripeSubscriptionId);
+  if (!late && !older) return false;
+  logger.warn("Activation retry for a subscription the account no longer has — payment recorded, account unchanged", {
     userId,
-    event: what,
     subscriptionId: p.stripeSubscriptionId ?? "",
     currentSubscriptionId: account?.stripeSubscriptionId ?? "",
+    ended: late,
   });
-  return false;
+  return true;
 }
 
 async function _POST(req: NextRequest) {
@@ -258,6 +296,8 @@ async function _POST(req: NextRequest) {
             data: { paidExtraChildSeats: { increment: 1 } },
           });
         }
+      } else if (await staleActivation(userId, p, isNew)) {
+        // Recorded as a payment above; the account keeps the subscription it has now.
       } else {
         await prisma.user.update({
           where: { id: userId },
@@ -356,16 +396,20 @@ async function _POST(req: NextRequest) {
         break;
       }
       // The end of a subscription the account left behind doesn't end the one it pays now.
-      if (!(await currentSubscription(userId, p, "canceled"))) break;
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          subscriptionStatus: "canceled",
-          subscriptionEndsAt: new Date(),
-          // Nothing is charged any more: a later year from a code isn't taken for a card subscription.
-          ...(p.stripeSubscriptionId ? { stripeSubscriptionId: null } : {}),
-        },
-      });
+      if (await currentSubscription(userId, p, "canceled")) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            subscriptionStatus: "canceled",
+            subscriptionEndsAt: new Date(),
+            // Nothing is charged any more: a later year from a code isn't taken for a card subscription.
+            ...(p.stripeSubscriptionId ? { stripeSubscriptionId: null } : {}),
+          },
+        });
+      }
+      // Either way the subscription has ended: whatever arrives for it later is late. Recorded after
+      // the account's own change, so a retry of a cancellation that failed midway still applies it.
+      if (p.stripeSubscriptionId) await recordEndedSubscription(userId, p.stripeSubscriptionId);
       break;
     }
 

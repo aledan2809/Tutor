@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { refuseIfPaused } from "@/lib/access-gate";
 import { canSeePrivateDomains } from "@/lib/domain-access";
 import { activeSetters, lockedText } from "@/lib/guardian-lock";
 import { ensureWatcherEnrollments } from "@/lib/family-invite";
@@ -25,6 +26,9 @@ async function _POST(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // A paused account (access.ts) picks no subjects: the page shows the pause screen (review r6, U7).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
 
   const rawParams = await params;
   const parsed = paramsSchema.safeParse(rawParams);

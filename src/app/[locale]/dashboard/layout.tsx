@@ -7,8 +7,9 @@ import { teaserOffer, teaserStats } from "@/lib/access-teaser";
 import { PausedLearnerScreen, PausedParentScreen, TrialBanner } from "@/components/access/access-screens";
 import { PauseGate, RefreshAt } from "@/components/access/pause-gate";
 import { prisma } from "@/lib/prisma";
-import { isPaidStatus } from "@/lib/plan-channels";
+import { payingForAccess } from "@/lib/access";
 import { resolveFamilyPlanFromRecord } from "@/lib/family";
+import { FREE_TRIAL_DAYS } from "@/lib/free-trial";
 import { Sidebar } from "@/components/sidebar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { NotificationBell } from "@/components/notifications/notification-bell";
@@ -45,21 +46,32 @@ export default async function DashboardLayout({
   // A paying parent unlocks the family section from their subscription plan, even
   // before any WATCHER enrollment exists (buying a Family/Trio plan grants seats,
   // not a role) — so the "Familia mea" nav follows the plan, not just the role.
-  const sub = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      subscriptionStatus: true,
-      subscriptionPlan: {
-        select: { name: true, familyPlanKey: true, maxParents: true, maxChildren: true, maxTutors: true },
+  // The reads that don't depend on each other go out together: this layout renders on every
+  // dashboard page (review r6, F6).
+  const [sub, locale, access, parentLinks] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        subscriptionStatus: true,
+        subscriptionEndsAt: true,
+        subscriptionPlan: {
+          select: { name: true, familyPlanKey: true, maxParents: true, maxChildren: true, maxTutors: true },
+        },
       },
-    },
-  });
+    }),
+    getLocale().then((l): "ro" | "en" => (l === "en" ? "en" : "ro")),
+    loadAccess(session.user.id),
+    prisma.guardian.findMany({
+      where: { childId: session.user.id, status: "active", relation: "PARENT" },
+      select: { parent: { select: { name: true } } },
+      take: 2,
+    }),
+  ]);
   const fam = resolveFamilyPlanFromRecord(sub?.subscriptionPlan);
   // A renewal Stripe is still retrying keeps the menu: the parent must reach the family, not lose it.
-  const hasFamilyPlan =
-    (isPaidStatus(sub?.subscriptionStatus) || sub?.subscriptionStatus === "past_due") &&
-    !!fam &&
-    (fam.maxChildren > 0 || fam.maxParents > 0);
+  // Past its end (an expired year from a code, a retry period that ran out) the plan is gone, and the
+  // menu with it — the same rule as access (payingForAccess; review r6, A6).
+  const hasFamilyPlan = sub !== null && payingForAccess(sub) && !!fam && (fam.maxChildren > 0 || fam.maxParents > 0);
 
   const isWatcher = session.user.enrollments?.some((e) =>
     e.roles.includes("WATCHER" as never)
@@ -80,14 +92,7 @@ export default async function DashboardLayout({
   const showLinkChild =
     (!!isWatcher || hasFamilyPlan || isParentAccount) && !session.user.isSuperAdmin;
 
-  // The 7-day trial and the pause (access.ts, decisions of 16.09.2026).
-  const locale = (await getLocale()) === "en" ? "en" : "ro";
-  const access = await loadAccess(session.user.id);
-  const parentLinks = await prisma.guardian.findMany({
-    where: { childId: session.user.id, status: "active", relation: "PARENT" },
-    select: { parent: { select: { name: true } } },
-    take: 2,
-  });
+  // The 7-day trial and the pause (access.ts, decisions of 16.09.2026) — read above.
   // A parent in the free week gets the family menu like a paying one.
   const familyNav = hasFamilyPlan || (isParentAccount && access?.kind === "trial");
   const bannerAudience: "parent" | "self" | null =
@@ -114,7 +119,7 @@ export default async function DashboardLayout({
       session.user.accountRole !== "STUDENT" &&
       (isWatcherOnly || isParentAccount || links.length > 0);
     if (asParent) {
-      const week = { since: new Date(access.since.getTime() - 7 * 24 * 60 * 60 * 1000), until: access.since };
+      const week = { since: new Date(access.since.getTime() - FREE_TRIAL_DAYS * 24 * 60 * 60 * 1000), until: access.since };
       const [kids, holder] = await Promise.all([
         Promise.all(links.map(async (l) => ({ id: l.child.id, name: l.child.name, stats: await teaserStats(l.child.id, week) }))),
         loadSeatHolder(session.user.id),
@@ -164,7 +169,7 @@ export default async function DashboardLayout({
               holder={trialHolder}
             />
           )}
-          <RefreshAt at={access?.kind === "trial" ? access.endsAt.toISOString() : null} />
+          <RefreshAt at={access?.kind === "trial" ? access.endsAt.toISOString() : null} now={new Date().toISOString()} />
           <PauseGate screen={pausedScreen}>{children}</PauseGate>
         </main>
       </div>

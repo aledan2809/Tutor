@@ -17,11 +17,13 @@
  * Pure (no DB): the loader in access-server.ts reads the rows and calls resolveAccess.
  */
 import { isPaidSubscriber } from "@/lib/escalation/segmentation";
-import { FREE_TRIAL_DAYS } from "@/lib/free-trial";
+import { FREE_TRIAL_DAYS, remainingFreeTrialDays } from "@/lib/free-trial";
 import {
   canAddParent,
   getFamilyPlan,
+  individualPlan,
   resolveFamilyPlanFromRecord,
+  seatsChild,
   type FamilyPlan,
   type SubscriptionPlanSeatFields,
 } from "@/lib/family";
@@ -30,6 +32,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** The fields of an account that decide its own access. */
 export type AccessPerson = {
+  id?: string;
   createdAt: Date;
   subscriptionStatus: string | null;
   subscriptionEndsAt: Date | null;
@@ -37,6 +40,9 @@ export type AccessPerson = {
   isSuperAdmin: boolean;
   /** The plan it pays for — an individual plan (Elev) covers only its own account. */
   subscriptionPlan?: SubscriptionPlanSeatFields | null;
+  /** As a parent: add-on seats paid for next to the plan, and their children in link order (seatsChild). */
+  paidExtraChildSeats?: number | null;
+  childIds?: string[];
 };
 
 export type AccessInput = {
@@ -94,8 +100,8 @@ export function trialEndOf(createdAt: Date, pauseStartsAt: Date | null): Date {
  * see free-trial.ts): 7 on the first day, 1 on the seventh, 0 from the moment the week is over.
  */
 export function trialDaysLeft(createdAt: Date, pauseStartsAt: Date | null, now: Date): number {
-  const elapsed = Math.floor((now.getTime() - trialStartOf(createdAt, pauseStartsAt).getTime()) / DAY_MS);
-  return Math.min(FREE_TRIAL_DAYS, Math.max(0, FREE_TRIAL_DAYS - Math.max(0, elapsed)));
+  // The same count as card checkout, from the same start (review r6, K4).
+  return remainingFreeTrialDays(trialStartOf(createdAt, pauseStartsAt), now);
 }
 
 /**
@@ -109,11 +115,7 @@ export function payingForAccess(p: Pick<AccessPerson, "subscriptionStatus" | "su
   return p.subscriptionStatus === "past_due" && !(p.subscriptionEndsAt && p.subscriptionEndsAt.getTime() < Date.now());
 }
 
-/** A plan for one learner only (Elev): it pays for its own account, not for a family's. */
-export function individualPlan(plan: SubscriptionPlanSeatFields | null | undefined): boolean {
-  const resolved = resolveFamilyPlanFromRecord(plan);
-  return resolved !== null && resolved.maxChildren === 0 && resolved.maxParents === 0;
-}
+export { individualPlan };
 
 /**
  * Access another account in the family can lend: a family plan paid for (or retrying), „Gratuit
@@ -143,10 +145,28 @@ export function paysForSecondParent(p: AccessPerson): boolean {
 }
 
 /** How many parents the payer's plan takes: no limit for „Gratuit permanent", the administrator, or a row without a family plan. */
-function parentSeats(p: AccessPerson): number {
+function parentSeats(p: Pick<AccessPerson, "isSuperAdmin" | "freeForever" | "subscriptionPlan">): number {
   if (p.isSuperAdmin || p.freeForever) return Infinity;
   const resolved = resolveFamilyPlanFromRecord(p.subscriptionPlan);
   return resolved === null ? Infinity : resolved.maxParents;
+}
+
+/**
+ * The other parents of one child whose plan seats the parent linked at `linkedAt`. The payer always
+ * holds a seat of their own; the child's other adults take the rest in the order they were linked.
+ * Family Duo seats the payer and ONE more parent — also when the payer linked the child last (the
+ * other two were linked in the free week): counted by link order alone, all three were covered
+ * (review r6, A2). Shared by access (resolveAccess) and the paid channels (coveredAsSecondParent),
+ * so the two can't disagree about who holds the second seat (A1).
+ */
+export function seatingPayers<P extends AccessPerson>(linkedAt: Date, others: { person: P; linkedAt: Date }[]): P[] {
+  return others
+    .filter((payer) => {
+      if (!paysForSecondParent(payer.person)) return false;
+      const earlier = others.filter((o) => o !== payer && o.linkedAt.getTime() < linkedAt.getTime()).length;
+      return 1 + earlier + 1 <= parentSeats(payer.person);
+    })
+    .map((payer) => payer.person);
 }
 
 /** The plan has a seat for a tutor (Trio, Family Trio); a row without a family plan keeps covering. */
@@ -192,18 +212,17 @@ export function resolveAccess(input: AccessInput): Access {
   const groups: CoParentGroup[] =
     input.coParentGroups ??
     (input.coParents?.length ? [{ linkedAt: now, others: input.coParents.map((person) => ({ person, linkedAt: new Date(0) })) }] : []);
-  // A second parent is covered while their place among the child's parents (in link order) fits the
-  // payer's seats: Family Duo takes two parents, not every adult who links the child.
-  const seatPayers = groups.flatMap(({ linkedAt, others }) => {
-    const place = others.filter((o) => o.linkedAt.getTime() < linkedAt.getTime()).length + 1;
-    return others.map((o) => o.person).filter((p) => paysForSecondParent(p) && place <= parentSeats(p));
-  });
+  // A second parent is covered while the payer's plan has a seat for them (seatingPayers): Family Duo
+  // takes two parents, not every adult who links the child.
+  const seatPayers = groups.flatMap(({ linkedAt, others }) => seatingPayers(linkedAt, others));
   const tutorFamilies = input.tutorFamilies ?? [];
 
   if (self.isSuperAdmin) return { kind: "full", reason: "staff" };
   if (self.freeForever) return { kind: "full", reason: "free_forever" };
   if (payingForAccess(self)) return { kind: "full", reason: "paid" };
-  if (parents.some(paysForFamily)) return { kind: "full", reason: familyReason(parents.filter(paysForFamily)) };
+  // A parent's plan covers the children it has seats for, in link order (family.ts seatsChild).
+  const seatedParents = parents.filter((p) => paysForFamily(p) && seatsChild(p, self.id, p.childIds));
+  if (seatedParents.length > 0) return { kind: "full", reason: familyReason(seatedParents) };
   if (seatPayers.length > 0) return { kind: "full", reason: familyReason(seatPayers) };
   if (tutorFamilies.some(paysForTutor)) return { kind: "full", reason: familyReason(tutorFamilies.filter(paysForTutor)) };
   if (input.orgCovered) return { kind: "full", reason: "org" };

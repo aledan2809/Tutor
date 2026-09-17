@@ -142,8 +142,8 @@ export async function notifyCurriculumLag(now: Date = new Date()): Promise<LagHi
         },
       });
       if (existing) return false;
-      await deliverThresholdAlert(recipientId, title, message, metadata, dest, "curriculum_lag");
-      return true;
+      // False when nothing went out: a paused recipient or a paused student (access.ts).
+      return deliverThresholdAlert(recipientId, title, message, metadata, dest, "curriculum_lag");
     };
 
     let recipients = 0;

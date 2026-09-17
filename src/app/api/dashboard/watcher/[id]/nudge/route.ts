@@ -22,10 +22,16 @@ const nudgeInput = z.object({
 
 const MAX_SERIES_HOURS = 12;
 
-/** GET — active nudges for this child (guardian only). */
+/**
+ * GET — active nudges for this child (guardian only). Refused while the parent is paused, like the
+ * rest of the child's page (review r6, U7). Stopping a nudge (nudge/[nid] DELETE) stays open: it
+ * only turns something off.
+ */
 async function _GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
   const { id: childId } = await params;
   if (!(await isGuardianOf(session.user.id, childId))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

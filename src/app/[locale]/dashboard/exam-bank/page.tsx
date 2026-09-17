@@ -1,11 +1,16 @@
 import { prisma } from "@/lib/prisma";
 import { getTranslations } from "next-intl/server";
+import { auth } from "@/lib/auth";
+import { accountPaused } from "@/lib/access-gate";
 import { EXAM_LEVELS, EXAM_LEVEL_LABEL, stripLevelSuffix } from "@/lib/exam-level";
 import { ExamBankBrowser, type SubjectGroup } from "@/components/exam-bank/exam-bank-browser";
 
 // Simulări (elev) — examene oficiale. Categorie (nivel) → Subcategorie (materie) prin dropdown,
 // ca la Grile, ca să nu se scroleze o listă lungă. O singură materie afișată o dată.
 export default async function ExamBankStudentPage() {
+  // Same as the paper page: the pause screen shows in the browser, so the list isn't sent either.
+  const session = await auth();
+  if (session?.user && (await accountPaused(session.user.id))) return null;
   const tPage = await getTranslations("dashboard");
   const papers = await prisma.examPaper.findMany({
     where: { isActive: true },

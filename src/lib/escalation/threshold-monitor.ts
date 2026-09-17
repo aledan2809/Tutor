@@ -98,12 +98,17 @@ export async function deliverThresholdAlert(
   // Reused by the curriculum-lag notifier (same in-app row + own-channel
   // cascade semantics); the default keeps every existing caller unchanged.
   type: string = "threshold_alert"
-): Promise<void> {
+): Promise<boolean> {
   try {
+    // Nothing for a paused account, and nothing about a paused child, to anyone (access.ts): a family
+    // that stopped paying isn't told every day that the child doesn't practise — the curriculum-lag
+    // notifier and the instructor's alert used to check no one (review r6, X2 / X5).
+    const about = typeof metadata.studentId === "string" ? metadata.studentId : null;
+    if ((await pausedUserIds(about ? [userId, about] : [userId])).size > 0) return false;
     await prisma.notification.create({
       data: { userId, type, title, message, metadata },
     });
-    if (await userInQuietHours(userId)) return;
+    if (await userInQuietHours(userId)) return true;
     for (const channel of await resolveUserAlertChannels(userId)) {
       let ok = false;
       if (channel === "PUSH") {
@@ -122,16 +127,19 @@ export async function deliverThresholdAlert(
           ok = await sendAppEmail({
             to: user.email,
             subject: title,
-            html: `<p>${escapeHtml(message)}</p><p><a href="${escapeHtml(`${base}${dest.url}`)}">${escapeHtml(dest.label)}</a></p>`,
+            // The link is ours (base URL + a fixed dashboard path), written like parent alerts write it.
+            html: `<p>${escapeHtml(message)}</p><p><a href="${base}${dest.url}">${escapeHtml(dest.label)}</a></p>`,
           });
         }
       }
       // WHATSAPP is intentionally not sent for threshold alerts (single informative
       // alert/day — the free channels cover it; keeps the metered path off this cron).
-      if (ok) return;
+      if (ok) return true;
     }
+    return true;
   } catch (e) {
     console.error("deliverThresholdAlert error:", e);
+    return false;
   }
 }
 
@@ -180,9 +188,8 @@ export async function runThresholdChecks(now: Date = new Date()): Promise<number
         where: { childId: th.studentId, status: "active", relation: "PARENT" },
         select: { parentId: true },
       });
-      const pausedParents = await pausedUserIds(parents.map((p) => p.parentId), now);
+      // A paused parent, or a paused child, gets skipped inside deliverThresholdAlert.
       for (const p of parents) {
-        if (pausedParents.has(p.parentId)) continue; // părinte în pauză: fără alerte (access.ts)
         // Parents can't open instructor pages — point them at their watcher view.
         await deliverThresholdAlert(p.parentId, title, message, metadata, {
           url: "/dashboard/watcher",

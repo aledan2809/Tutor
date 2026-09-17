@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { accountPaused } from "@/lib/access-gate";
 import { sanitizeForTake } from "@/lib/exam-bank/sanitize";
 import { ExamBankTake } from "@/components/exam-bank/exam-bank-take";
 
@@ -11,6 +13,10 @@ export default async function ExamBankTakePage({
   params: Promise<{ paperId: string }>;
 }) {
   const { paperId } = await params;
+  // The pause screen replaces this page in the browser (PauseGate), but a server page is sent whole:
+  // a paused account still received the paper. Nothing is sent to it (review r6, U2).
+  const session = await auth();
+  if (session?.user && (await accountPaused(session.user.id))) return null;
   const paper = await prisma.examPaper.findUnique({
     where: { id: paperId },
     include: {

@@ -25,8 +25,11 @@ async function _GET(req: NextRequest) {
   const url = new URL(req.url);
   const unreadOnly = url.searchParams.get("unread") === "true";
   const audience = url.searchParams.get("audience"); // "self" | "child" | null
-  // A paused parent (access.ts) doesn't see the alerts about the child: the bell stays, empty.
-  if (audience === "child" && (await accountPaused(session.user.id))) {
+  // A paused parent (access.ts) doesn't see the alerts about the child: the bell stays, empty. Not
+  // through the full feed either (no audience), and no „Alerte" tab that would open an empty list
+  // with no way back (review r6, U6).
+  const paused = (await accountPaused(session.user.id)) !== null;
+  if (audience === "child" && paused) {
     return NextResponse.json({ notifications: [], total: 0, unreadCount: 0, childTotal: 0, limit: 0, offset: 0 });
   }
   const limit = Math.min(Number(url.searchParams.get("limit") ?? 50), 100);
@@ -35,7 +38,7 @@ async function _GET(req: NextRequest) {
   const audienceWhere =
     audience === "child"
       ? { type: { in: PARENT_ALERT_TYPES } }
-      : audience === "self"
+      : audience === "self" || paused
         ? { type: { notIn: PARENT_ALERT_TYPES } }
         : {};
 
@@ -58,10 +61,12 @@ async function _GET(req: NextRequest) {
     prisma.notification.count({
       where: { userId: session.user.id, ...audienceWhere, isRead: false },
     }),
-    // Whether this user receives child alerts at all → drives the UI tab.
-    prisma.notification.count({
-      where: { userId: session.user.id, type: { in: PARENT_ALERT_TYPES } },
-    }),
+    // Whether this user receives child alerts at all → drives the UI tab (none while paused).
+    paused
+      ? Promise.resolve(0)
+      : prisma.notification.count({
+          where: { userId: session.user.id, type: { in: PARENT_ALERT_TYPES } },
+        }),
   ]);
 
   return NextResponse.json({

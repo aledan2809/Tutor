@@ -21,15 +21,8 @@ interface Reminder {
   setByName?: string | null;
 }
 
-const DAYS: { v: number; ro: string }[] = [
-  { v: 1, ro: "Lu" },
-  { v: 2, ro: "Ma" },
-  { v: 3, ro: "Mi" },
-  { v: 4, ro: "Jo" },
-  { v: 5, ro: "Vi" },
-  { v: 6, ro: "Sâ" },
-  { v: 0, ro: "Du" },
-];
+/** Monday first; the labels come from the messages (reminderManager.days.d0 … d6). */
+const DAYS = [1, 2, 3, 4, 5, 6, 0] as const;
 const SESSION_TYPES = ["micro", "quick", "deep", "repair", "recovery", "intensive"];
 const hhmm = (h: number, m: number) =>
   `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
@@ -48,6 +41,7 @@ export function ReminderManager({
   viewer?: "self" | "guardian";
 }) {
   const t = useTranslations("sessions");
+  const tr = useTranslations("sessions.reminderManager");
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -99,10 +93,13 @@ export function ReminderManager({
       if (!res.ok) {
         // e.g. a parent set this reminder meanwhile: say why and show it as it is now.
         const d = await res.json().catch(() => ({}));
-        setNotice(d?.error ?? "Nu s-a putut salva.");
+        setNotice(d?.error ?? tr("saveError"));
         await load();
       } else if (viewer === "guardian") {
-        patch(r.id, { setBy: "you", setByName: null });
+        // The server says who the reminder belongs to now: a parent's change makes it theirs, a
+        // tutor's leaves it as it was.
+        const d = await res.json().catch(() => null);
+        if (d?.reminder?.setBy) patch(r.id, { setBy: d.reminder.setBy, setByName: d.reminder.setByName ?? null });
       }
     } finally {
       setSavingId(null);
@@ -114,7 +111,7 @@ export function ReminderManager({
     const res = await fetch(`${apiBase}/${id}`, { method: "DELETE" });
     if (!res.ok) {
       const d = await res.json().catch(() => ({}));
-      setNotice(d?.error ?? "Nu s-a putut șterge.");
+      setNotice(d?.error ?? tr("deleteError"));
       await load();
       return;
     }
@@ -126,7 +123,7 @@ export function ReminderManager({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        label: "Reminder nou",
+        label: tr("newLabel"),
         window: "morning",
         sessionType: "quick",
         daysOfWeek: [1, 2, 3, 4, 5],
@@ -138,18 +135,15 @@ export function ReminderManager({
     if (d?.reminder) setReminders((rs) => [...rs, d.reminder]);
   };
 
-  if (loading) return <p className="text-gray-400">Se încarcă…</p>;
+  if (loading) return <p className="text-gray-400">{tr("loading")}</p>;
 
   return (
     <div className="space-y-4">
       {reminders.length === 0 && (
-        <p className="text-sm text-gray-500">Niciun reminder programat încă.</p>
+        <p className="text-sm text-gray-500">{tr("empty")}</p>
       )}
       {viewer === "guardian" && reminders.length > 0 && (
-        <p className="text-xs text-gray-400">
-          Ce stabilești sau schimbi tu rămâne așa: copilul nu îl mai poate modifica. Remindere puse de copil le poate
-          schimba el, până le modifici tu.
-        </p>
+        <p className="text-xs text-gray-400">{tr("guardianInfo")}</p>
       )}
       {notice && <p className="text-sm text-amber-400">{notice}</p>}
 
@@ -166,18 +160,18 @@ export function ReminderManager({
         >
           {locked && (
             <p className="text-xs text-amber-300">
-              🔒 Stabilit de {r.lockedBy?.name?.trim() || "părintele tău"}. Ca să-l schimbați, vorbiți împreună.
+              {tr("lockedBy", { name: r.lockedBy?.name?.trim() || tr("lockedByFallback") })}
             </p>
           )}
           {viewer === "guardian" && r.setBy && (
             <p className="text-xs text-gray-400">
               {r.setBy === "you"
-                ? "Stabilit de tine"
+                ? tr("setByYou")
                 : r.setBy === "guardian"
-                  ? `Stabilit de ${r.setByName?.trim() || "celălalt adult din familie"}`
+                  ? tr("setByGuardian", { name: r.setByName?.trim() || tr("setByGuardianFallback") })
                   : r.setBy === "tutor"
-                    ? `Pus de ${r.setByName?.trim() || "meditator"}`
-                    : "Pus de copil"}
+                    ? tr("setByTutor", { name: r.setByName?.trim() || tr("setByTutorFallback") })
+                    : tr("setByChild")}
             </p>
           )}
           <fieldset disabled={locked} className="contents">
@@ -194,7 +188,7 @@ export function ReminderManager({
             <input
               value={r.label ?? ""}
               onChange={(e) => patch(r.id, { label: e.target.value })}
-              placeholder="Etichetă"
+              placeholder={tr("labelPlaceholder")}
               className="flex-1 min-w-[140px] rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
             />
             <label className="flex items-center gap-1.5 text-xs text-gray-400">
@@ -203,7 +197,7 @@ export function ReminderManager({
                 checked={r.isActive}
                 onChange={(e) => patch(r.id, { isActive: e.target.checked })}
               />
-              Activ
+              {tr("active")}
             </label>
           </div>
 
@@ -211,15 +205,15 @@ export function ReminderManager({
             <div className="flex gap-1">
               {DAYS.map((d) => (
                 <button
-                  key={d.v}
-                  onClick={() => toggleDay(r, d.v)}
+                  key={d}
+                  onClick={() => toggleDay(r, d)}
                   className={`h-8 w-8 rounded-lg text-xs font-medium ${
-                    r.daysOfWeek.includes(d.v)
+                    r.daysOfWeek.includes(d)
                       ? "bg-blue-600 text-white"
                       : "bg-gray-800 text-gray-400 hover:bg-gray-700"
                   }`}
                 >
-                  {d.ro}
+                  {tr(`days.d${d}`)}
                 </button>
               ))}
             </div>
@@ -253,9 +247,9 @@ export function ReminderManager({
                 value={r.domainSlug ?? ""}
                 onChange={(e) => patch(r.id, { domainSlug: e.target.value || null })}
                 className="rounded-lg border border-gray-700 bg-gray-800 px-2 py-2 text-xs text-white"
-                title="Domeniul pe care îl deschide reminderul"
+                title={tr("domainTitle")}
               >
-                <option value="">Domeniu implicit</option>
+                <option value="">{tr("domainDefault")}</option>
                 {domains.map((dm) => (
                   <option key={dm.slug} value={dm.slug}>
                     {dm.name}
@@ -272,14 +266,14 @@ export function ReminderManager({
               onClick={() => remove(r.id)}
               className="text-xs text-gray-500 hover:text-red-400"
             >
-              Șterge
+              {tr("delete")}
             </button>
             <button
               onClick={() => save(r)}
               disabled={savingId === r.id || r.daysOfWeek.length === 0}
               className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
             >
-              {savingId === r.id ? "Se salvează…" : "Salvează"}
+              {savingId === r.id ? tr("saving") : tr("save")}
             </button>
           </div>
           )}
@@ -291,7 +285,7 @@ export function ReminderManager({
         onClick={add}
         className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800"
       >
-        + Adaugă reminder
+        {tr("add")}
       </button>
     </div>
   );

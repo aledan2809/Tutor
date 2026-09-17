@@ -17,6 +17,7 @@ import { trialStartOf } from "@/lib/access";
 import { loadAccess, loadPauseStartsAt, loadSeatHolder } from "@/lib/access-server";
 import { teaserOffer, teaserStats, type TeaserOffer, type TeaserStats } from "@/lib/access-teaser";
 import { fmtPrice } from "@/lib/pricing";
+import { countRo } from "@/lib/ro-count";
 import { withCronLease } from "@/lib/cron-lease";
 import { deliverParentAlert, userInQuietHours } from "@/lib/escalation/parent-monitor";
 import { ACCESS_MESSAGES_PAGE, ACCESS_MESSAGES_SETTING, accessMessagesOff } from "@/lib/access-messages";
@@ -75,8 +76,7 @@ export type LifecycleKid = {
 };
 
 /** „o zi", „2 zile", „20 de zile", „101 zile", „120 de zile". */
-const plural = (n: number, one: string, many: string) =>
-  n === 1 ? one : n !== 0 && (n % 100 === 0 || n % 100 >= 20) ? `${n} de ${many}` : `${n} ${many}`;
+const plural = countRo;
 
 function kidLine(kid: LifecycleKid): string {
   const who = kid.name?.trim() || "Copilul tău";

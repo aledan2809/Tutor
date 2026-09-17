@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { holderWords } from "@/components/access/holder-words";
+import type { SeatHolderNote } from "@/lib/access-server";
 import { useSession } from "next-auth/react";
 import {
   getFamilyPlan,
@@ -61,6 +63,10 @@ interface Overview {
   }[];
   /** A role-less account taken for a learner, which may say it is a parent's (family-invite.ts). */
   canBecomeParent?: boolean;
+  /** May be offered a family package: never a learner or someone's child (family-invite.ts familyBuyer). */
+  offersFamily?: boolean;
+  /** The other parent whose plan covers the children but has no seat for this one (access-server.ts). */
+  seatHolder?: SeatHolderNote | null;
 }
 
 const ROLE_RO: Record<string, string> = {
@@ -112,9 +118,15 @@ export default function FamilyPage() {
 
   const plan = data.planKey ? getFamilyPlan(data.planKey) : null;
   const admin = data.unlimited;
-  // A child (or second parent) whose family's plan covers them, or who waits for their parent.
-  const coveredByFamily =
-    data.access?.reason === "family_paid" || data.access?.via === "family" || data.access?.payer === "parent";
+  // No offer to buy: a learner or someone's child (the server decides, never a child: UCPD Annex I
+  // point 28), or an adult the family's plan already covers or who waits for the parent who pays.
+  const noOffer =
+    data.offersFamily === false ||
+    Boolean(data.seatHolder) ||
+    data.access?.reason === "family_paid" ||
+    data.access?.via === "family" ||
+    data.access?.payer === "parent";
+  const holder = data.seatHolder ? holderWords(data.seatHolder, true) : null;
   const packageLabel = data.isSuperAdmin
     ? "Administrator"
     : data.freeForever
@@ -132,7 +144,7 @@ export default function FamilyPage() {
   // Someone the family covers (a child, a second parent) without a package of their own adds nobody:
   // the parent who holds the package does. So no „choose a package" under their buttons either.
   const byHolder: SeatCheck | null =
-    !admin && !plan && !data.trial && coveredByFamily
+    !admin && !plan && !data.trial && noOffer
       ? { allowed: false, reason: "no_family_plan", message: "Membrii familiei îi adaugă părintele care are pachetul." }
       : null;
   const childCheck: SeatCheck = admin
@@ -174,10 +186,18 @@ export default function FamilyPage() {
         )}
         {/* Someone the family covers (a child, a second parent) is never sent to buy: a child
             must not be pushed to purchase (UCPD Annex I point 28), and the family already pays. */}
-        {!plan && !admin && coveredByFamily && data.access?.kind === "paused" && (
+        {!plan && !admin && noOffer && data.access?.kind === "paused" && (
           <p className="mt-3 text-sm text-amber-400">Proba gratuită s-a încheiat. Tot ce ai lucrat e păstrat.</p>
         )}
-        {!plan && !admin && !coveredByFamily && (
+        {!plan && !admin && holder && data.seatHolder && (
+          <p className="mt-3 text-sm text-gray-300">
+            {holder.plan}{" "}
+            {data.seatHolder.upgrade
+              ? `Ca să intri și tu în pachet, ${holder.who} poate trece pe ${data.seatHolder.upgrade}, fără plată separată pentru tine.`
+              : holder.noLargerPlan}
+          </p>
+        )}
+        {!plan && !admin && !noOffer && (
           <p className="mt-3 text-sm text-amber-400">
             {data.access?.kind === "paused"
               ? "Proba gratuită s-a încheiat, iar contul e în pauză. Tot ce ați lucrat e păstrat."

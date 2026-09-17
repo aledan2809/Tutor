@@ -6,6 +6,7 @@ import { z } from "zod";
 import { markCampaignActivated } from "@/lib/campaign-attribution";
 import { activeSetters } from "@/lib/guardian-lock";
 import { paysByCard } from "@/lib/card-subscription";
+import { planForCodeYear } from "@/lib/voucher-preview-server";
 
 /**
  * POST /api/activate — voucher-based activation (no Stripe needed for 100% vouchers).
@@ -87,6 +88,23 @@ async function _POST(req: NextRequest) {
       };
     }
 
+    // A code made for one plan activates that plan: an Elev code must not cover a whole family
+    // (access.ts). A code without a plan keeps today's behaviour; one whose plan is gone isn't used.
+    const plan = await planForCodeYear(tx, voucher.planKey);
+    if (plan === "missing") {
+      return { error: "Pachetul pentru care e făcut codul nu mai e disponibil. Scrie-ne și îl rezolvăm.", status: 409 };
+    }
+
+    // Subjects the parent removed stay removed: if every chosen subject is one of them, nothing
+    // would be activated — the code isn't spent on that (review r6, P8).
+    const activated = domains.filter((d) => !lockedDomainIds.has(d.id));
+    if (activated.length === 0) {
+      return {
+        error: "Materiile alese au fost scoase de părinte. Vorbește cu el ca să le repună, apoi folosește codul.",
+        status: 409,
+      };
+    }
+
     // 100% → redeem atomically (guard against races on maxUses)
     await tx.voucher.update({
       where: {
@@ -108,12 +126,7 @@ async function _POST(req: NextRequest) {
       });
     }
 
-    // Mark subscription active (1 year — tester/grandfathered access). A code made for one plan
-    // activates that plan: an Elev code must not cover a whole family (access.ts). A code without a
-    // plan keeps today's behaviour.
-    const plan = voucher.planKey
-      ? await tx.subscriptionPlan.findFirst({ where: { familyPlanKey: voucher.planKey, isActive: true }, select: { id: true } })
-      : null;
+    // Mark subscription active (1 year — tester/grandfathered access), on the code's plan if it has one.
     const endsAt = new Date();
     endsAt.setFullYear(endsAt.getFullYear() + 1);
     await tx.user.update({
@@ -124,7 +137,8 @@ async function _POST(req: NextRequest) {
     return {
       success: true,
       status: "active",
-      activated: domains.map((d) => d.name),
+      // Only what was turned on: a subject the parent removed is left off and isn't reported.
+      activated: activated.map((d) => d.name),
       voucherCode: voucher.code,
     };
   });

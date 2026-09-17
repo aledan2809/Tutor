@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { reminderInput } from "@/lib/reminder-schema";
 import { isGuardianOf, isParentOf } from "@/lib/guardian";
+import { activeSetters, setByLabel } from "@/lib/guardian-lock";
 import { refuseIfPaused } from "@/lib/access-gate";
 
 /** The reminder must belong to this child (defence-in-depth alongside the guardian gate). */
@@ -33,8 +34,11 @@ async function _PATCH(req: NextRequest, { params }: { params: Promise<{ id: stri
     where: { id: rid },
     data: { ...parsed.data, ...(asParent ? { setById: session.user.id } : {}) },
   });
-  const mine = asParent || reminder.setById === session.user.id;
-  return NextResponse.json({ reminder: { ...reminder, setBy: mine ? "you" : reminder.setById ? "guardian" : "child", setByName: null } });
+  // Labelled exactly as the list labels it (setByLabel): a tutor's change of a reminder the other
+  // parent set still shows that parent, not „you" (review r6, U5).
+  const setBy = reminder.setById ? [reminder.setById] : [];
+  const [owners, tutors] = await Promise.all([activeSetters(childId, setBy), activeSetters(childId, setBy, "TUTOR")]);
+  return NextResponse.json({ reminder: { ...reminder, ...setByLabel(reminder.setById, session.user.id, owners, tutors) } });
 }
 
 async function _DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string; rid: string }> }) {

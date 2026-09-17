@@ -26,9 +26,24 @@ export function pausedResponse(access: Paused, extra: Record<string, unknown> = 
  */
 export async function accountPaused(userId: string): Promise<Paused | null> {
   if (!(await loadPauseStartsAt())) return null;
+  // With the pause on, this runs on every answered question. An account found not paused is
+  // remembered for a few seconds; a paused one never is, so a family that has just paid isn't
+  // refused for a moment longer (review r6, F2).
+  const seen = notPausedAt.get(userId);
+  if (seen !== undefined && Date.now() - seen < NOT_PAUSED_TTL_MS) return null;
   const access = await loadAccess(userId);
-  return access?.kind === "paused" ? access : null;
+  if (access?.kind === "paused") {
+    notPausedAt.delete(userId);
+    return access;
+  }
+  if (notPausedAt.size >= NOT_PAUSED_MAX) notPausedAt.clear();
+  notPausedAt.set(userId, Date.now());
+  return null;
 }
+
+const NOT_PAUSED_TTL_MS = 15_000;
+const NOT_PAUSED_MAX = 10_000;
+const notPausedAt = new Map<string, number>();
 
 /** A 403 for an account in pause, or null to go on. `bypass` for staff who are never paused. */
 export async function refuseIfPaused(userId: string, opts?: { bypass?: boolean }): Promise<NextResponse | null> {

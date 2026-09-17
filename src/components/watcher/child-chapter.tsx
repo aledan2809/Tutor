@@ -113,6 +113,7 @@ function fmtDay(d: string): string {
 type Tab = "sesiuni" | "rezultate" | "remindere" | "program";
 
 export function ChildChapter({ child }: { child: ChildLite }) {
+  const tw = useTranslations("watcher");
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("sesiuni");
   const [detail, setDetail] = useState<Detail | null>(null);
@@ -270,7 +271,7 @@ export function ChildChapter({ child }: { child: ChildLite }) {
                 />
                 {detail.canManageSubjects && (
                   <div>
-                    <h3 className="mb-2 text-sm font-medium text-gray-400">Materii</h3>
+                    <h3 className="mb-2 text-sm font-medium text-gray-400">{tw("subjectManager.heading")}</h3>
                     <SubjectManager childId={child.id} onChange={() => void loadDetail()} />
                   </div>
                 )}

@@ -91,8 +91,11 @@ export async function buildReportsForSchedule(
     childIds = await getLinkedChildIds(schedule.parentId);
   }
 
+  // No report about a paused child (access.ts): the parent who reads it may be covered another way,
+  // but the child has nothing to report on until the family pays (review r6, X5).
+  const pausedChildren = await pausedUserIds(childIds, now);
   const reports = await Promise.all(
-    childIds.map((id) => buildChildReport(id, since, periodLabel, sections))
+    childIds.filter((id) => !pausedChildren.has(id)).map((id) => buildChildReport(id, since, periodLabel, sections))
   );
   return { reports, sections, periodLabel };
 }

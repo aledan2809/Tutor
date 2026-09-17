@@ -23,13 +23,15 @@ export interface ReminderLike {
 // cron tick without firing hours late. lastFiredOn prevents same-day re-fire.
 const FIRE_WINDOW_MIN = 60;
 
-function tzParts(now: Date, timezone: string): {
-  weekday: number;
-  minutesOfDay: number;
-  today: string;
-} {
-  const parts = Object.fromEntries(
-    new Intl.DateTimeFormat("en-CA", {
+/**
+ * One formatter per time zone: building an Intl.DateTimeFormat costs ten times formatting with one,
+ * and every active reminder is checked every minute (review r6, F7).
+ */
+const formatters = new Map<string, Intl.DateTimeFormat>();
+function formatterFor(timezone: string): Intl.DateTimeFormat {
+  let f = formatters.get(timezone);
+  if (!f) {
+    f = new Intl.DateTimeFormat("en-CA", {
       timeZone: timezone,
       year: "numeric",
       month: "2-digit",
@@ -37,7 +39,19 @@ function tzParts(now: Date, timezone: string): {
       hour: "2-digit",
       minute: "2-digit",
       hourCycle: "h23",
-    })
+    });
+    formatters.set(timezone, f);
+  }
+  return f;
+}
+
+function tzParts(now: Date, timezone: string): {
+  weekday: number;
+  minutesOfDay: number;
+  today: string;
+} {
+  const parts = Object.fromEntries(
+    formatterFor(timezone)
       .formatToParts(now)
       .map((p) => [p.type, p.value])
   ) as Record<string, string>;
@@ -174,16 +188,15 @@ function reminderCopy(r: {
 export async function runDueReminders(now: Date = new Date()): Promise<number> {
   const reminders = await prisma.studyReminder.findMany({ where: { isActive: true } });
   const onBreak = await userIdsOnBreak(now);
+  // vacanță: nu trimitem remindere. Each reminder's due check once per run.
+  const due = reminders
+    .filter((r) => !onBreak.has(r.userId))
+    .map((r) => ({ r, ...isReminderDue(r, now) }))
+    .filter((x) => x.due);
   // Only the reminders due now need the (per-account) pause check.
-  const paused = await pausedUserIds(
-    reminders.filter((r) => !onBreak.has(r.userId) && isReminderDue(r, now).due).map((r) => r.userId),
-    now
-  );
+  const paused = await pausedUserIds(due.map(({ r }) => r.userId), now);
   let fired = 0;
-  for (const r of reminders) {
-    if (onBreak.has(r.userId)) continue; // vacanță: nu trimitem remindere
-    const { due, today } = isReminderDue(r, now);
-    if (!due) continue;
+  for (const { r, today } of due) {
     if (paused.has(r.userId)) {
       // Proba gratuită s-a încheiat fără plată: contul e în pauză. Marked as done for today, so the
       // account isn't checked again on every minute of the reminder's hour.

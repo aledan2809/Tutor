@@ -31,6 +31,7 @@ import {
 import { userIdsOnBreak } from "./breaks";
 import { scheduledTodayFilter } from "./scheduled-days";
 import { pausedUserIds } from "@/lib/access-server";
+import { getUserPhone } from "@/lib/phone-setting";
 
 interface EscalationContext {
   userId: string;
@@ -137,20 +138,7 @@ export async function startEscalation(ctx: EscalationContext): Promise<string> {
  * Process a single escalation event — send notification and advance state.
  */
 export async function processEscalationEvent(eventId: string): Promise<void> {
-  const event = await prisma.escalationEvent.findUnique({
-    where: { id: eventId },
-    include: {
-      user: {
-        include: {
-          notificationPreference: true,
-          // Cine îi plătește canalele contorizate. Legătura cu clientul B2B trece prin
-          // ÎNSCRIERE, nu prin `User.organizationId` (cursanții au acolo null) — de-aia
-          // se folosește selectul comun, nu o listă scrisă de mână aici.
-          ...SELECT_ACOPERIRE_CANALE_RELATII,
-        },
-      },
-    },
-  });
+  const event = await loadRungForSend(eventId);
 
   // Only a PENDING rung is picked up: an ESCALATING one is being sent by another run right now.
   if (!event || event.status !== "PENDING") return;
@@ -179,16 +167,6 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     // Looked at again in a quarter of an hour, not every minute all night.
     await waitRung(event.id, stored, {}, now);
     return;
-  }
-
-  // For L2+ non-urgent levels, prefer sending during user's study time
-  if (event.level >= 2 && event.level <= 3) {
-    const isOptimal = await isOptimalNotificationTime(event.userId, timezone);
-    // If not optimal time, defer once (but don't block indefinitely)
-    if (!isOptimal && !stored.deferredOnce) {
-      await waitRung(event.id, stored, { deferredOnce: true }, now);
-      return;
-    }
   }
 
   // Check channel preference. The map lives in config.ts as a pure, total function so it
@@ -241,13 +219,10 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
   // PENDING and retry forever), plus the rungs that cannot reach this person at all: no email
   // address, no phone number. A „no" skips to the next rung instead of blocking the chain.
   if (event.channel === "EMAIL" || event.channel === "WHATSAPP" || event.channel === "SMS") {
-    const needsPhone = event.channel !== "EMAIL";
-    const phone = needsPhone
-      ? await prisma.setting.findFirst({ where: { userId: event.userId, key: "phone" }, select: { value: true } })
-      : null;
+    const phone = event.channel !== "EMAIL" ? await getUserPhone(event.userId) : null;
     const unreachable = rungCannotReach(event.channel, {
       hasEmail: Boolean(event.user.email),
-      hasPhone: typeof phone?.value === "string" && phone.value.trim().length > 0,
+      hasPhone: typeof phone === "string" && phone.trim().length > 0,
       covered: meteredChannelsCovered(event.user),
       isTest: event.isTest,
       parentAuthorized,
@@ -283,6 +258,16 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     }
   }
 
+  // For L2+ non-urgent levels, prefer sending during the child's study time: wait once per chain
+  // (the mark travels with the chain), and only for a rung that will actually be sent — a rung the
+  // checks above skip must not hold the next one back.
+  if (event.level >= 2 && event.level <= 3 && !stored.deferredOnce) {
+    if (!(await isOptimalNotificationTime(event.userId, timezone))) {
+      await waitRung(event.id, stored, { deferredOnce: true }, now);
+      return;
+    }
+  }
+
   // Claim the rung: only the run that moves it from PENDING sends it. Two runs at once (one that
   // outlived its lease, or a new chain started outside the lease) would otherwise both send it.
   const claimed = await prisma.escalationEvent.updateMany({
@@ -291,6 +276,64 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
   });
   if (claimed.count === 0) return;
 
+  // A claimed rung must never stay ESCALATING because of an error in this run (a database hiccup):
+  // closed later as stuck, with no send time, its chain would never lead further. Failing before the
+  // send, it goes back to waiting; after a send that went out, it is recorded as sent; after a send
+  // that failed, the failure counts.
+  const progress: SendProgress = { phase: "before" };
+  try {
+    await sendClaimedRung(event, stored, parentAuthorized, sendTemplateId, now, progress);
+  } catch (err) {
+    const data: Prisma.EscalationEventUpdateManyMutationInput =
+      progress.phase === "sent"
+        ? { status: "COMPLETED", sentAt: new Date() }
+        : {
+            status: "PENDING",
+            metadata: {
+              ...stored,
+              ...(progress.phase === "failed" ? { sendFailures: progress.failures } : {}),
+              nextAttemptAt: laterIso(now),
+            } as Prisma.InputJsonObject,
+          };
+    await prisma.escalationEvent
+      .updateMany({ where: { id: event.id, status: "ESCALATING" }, data })
+      .catch((e) => console.error("[escalation] claimed rung not released", event.id, e));
+    throw err;
+  }
+}
+
+/** One rung with what its send needs: the person, their preferences, who pays their metered channels. */
+function loadRungForSend(eventId: string) {
+  return prisma.escalationEvent.findUnique({
+    where: { id: eventId },
+    include: {
+      user: {
+        include: {
+          notificationPreference: true,
+          // Cine îi plătește canalele contorizate. Legătura cu clientul B2B trece prin
+          // ÎNSCRIERE, nu prin `User.organizationId` (cursanții au acolo null) — de-aia
+          // se folosește selectul comun, nu o listă scrisă de mână aici.
+          ...SELECT_ACOPERIRE_CANALE_RELATII,
+        },
+      },
+    },
+  });
+}
+
+type ClaimedRung = NonNullable<Awaited<ReturnType<typeof loadRungForSend>>>;
+
+/** How far the send of a claimed rung got, for putting it back right if this run fails midway. */
+type SendProgress = { phase: "before" | "sent" | "failed"; failures?: number };
+
+/** The send of a rung this run has claimed, and what it leaves behind (sent / retry / next rung). */
+async function sendClaimedRung(
+  event: ClaimedRung,
+  stored: Record<string, unknown>,
+  parentAuthorized: boolean,
+  sendTemplateId: string,
+  now: Date,
+  progress: SendProgress
+): Promise<void> {
   // The Telegram nudge carries the reminder's OWN copy (title/message, Romanian,
   // session-specific — exactly what push already uses) plus at most one encouraging
   // line. It used to carry an English pressure blob instead; see encouragementFor().
@@ -300,7 +343,7 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     if (encouragement) metadata.encouragement = encouragement;
   }
 
-  // Send notification
+  // Send notification (never throws: a failed send returns false)
   const success = await sendNotification({
     userId: event.userId,
     channel: event.channel,
@@ -324,6 +367,7 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
   });
 
   if (success) {
+    progress.phase = "sent";
     await prisma.escalationEvent.update({
       where: { id: event.id },
       data: { status: "COMPLETED", sentAt: new Date() },
@@ -345,6 +389,8 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     // hour apart, as when the cron ran every 15 minutes: a minute's outage must not move a child
     // on to WhatsApp or SMS (review 3, minor 3).
     const failures = Number(stored.sendFailures ?? 0) + 1;
+    progress.phase = "failed";
+    progress.failures = failures;
     if (failures >= MAX_SEND_FAILURES) {
       await escalateToNextLevel(event.id, event.level, "ESCALATING");
       return;
@@ -543,13 +589,15 @@ export async function advancePendingEscalations(now: Date = new Date()): Promise
     pausedUserIds(userIds, now),
   ]);
   for (const { tip, next } of toCreate) {
-    if (!scheduled.has(tip.userId)) continue; // zi fără program: pauză
+    // The pause before the day without a schedule: checked after it, a chain paused on a weekend
+    // stayed open and picked up on the first scheduled day after the family paid (review r6, X7).
     if (paused.has(tip.userId)) {
       // Proba gratuită s-a încheiat fără plată (access.ts): the chain ends here. Left as it was, it
       // would pick up days later, the minute the family pays, for a session long gone.
       await closeChain(tip.id, "paused");
       continue;
     }
+    if (!scheduled.has(tip.userId)) continue; // zi fără program: pauză
     try {
       const created = await prisma.$transaction(async (tx) => {
         // Two runs at once (one that outlived its lease): the second waits here for the first to
@@ -605,12 +653,12 @@ export async function advancePendingEscalations(now: Date = new Date()): Promise
     ]);
 
     for (const p of ready) {
-      if (!scheduledPending.has(p.userId)) continue; // zi fără program: nu trimitem
       if (paused.has(p.userId)) {
         // A paused account gets nothing; the chain ends here instead of firing late after payment.
         await prisma.escalationEvent.updateMany({ where: { id: p.id, status: "PENDING" }, data: { status: "COMPLETED" } });
         continue;
       }
+      if (!scheduledPending.has(p.userId)) continue; // zi fără program: nu trimitem
       try {
         await processEscalationEvent(p.id);
       } catch (err) {
@@ -670,8 +718,11 @@ export function withoutRungState(metadata: Prisma.JsonValue): Prisma.InputJsonVa
   return copy as Prisma.InputJsonObject;
 }
 
-/** Set on one rung only: retries, waits, and the marks of how it or its chain ended. */
-const RUNG_STATE_KEYS = ["sendFailures", "nextAttemptAt", "deferredOnce", "retryCount", "lastRetryAt", "answered", "stuck", "closed"];
+/**
+ * Set on one rung only: retries, waits, and the marks of how it or its chain ended. `deferredOnce` is
+ * not among them: the wait for the child's study time happens once per chain, not once per rung.
+ */
+const RUNG_STATE_KEYS = ["sendFailures", "nextAttemptAt", "retryCount", "lastRetryAt", "answered", "stuck", "closed"];
 
 /** Pure: was this sent rung marked as the end of its chain? */
 export function chainClosed(metadata: Prisma.JsonValue | null | undefined): boolean {
@@ -685,6 +736,26 @@ async function closeChain(tipId: string, why: "answered" | "paused"): Promise<vo
     SET "metadata" = COALESCE("metadata", '{}'::jsonb) || jsonb_build_object('closed', ${why}::text),
         "updatedAt" = NOW()
     WHERE "id" = ${tipId} AND "status" = 'COMPLETED'`;
+}
+
+/**
+ * End every chain of one account (it became a parent: it no longer does the sessions the reminders
+ * call for). A rung still waiting is closed unsent; every sent rung that could still lead to another
+ * one (CHAIN_MAX_AGE_DAYS) gets the same `closed` mark as closeChain. Run inside the caller's
+ * transaction (`db`), so it happens together with the account's change (review r6, K6).
+ */
+export async function closeChainsOf(
+  userId: string,
+  why: "parent",
+  db: Pick<typeof prisma, "escalationEvent" | "$executeRaw"> = prisma,
+  now: Date = new Date()
+): Promise<void> {
+  await db.escalationEvent.updateMany({ where: { userId, status: "PENDING" }, data: { status: "COMPLETED" } });
+  await db.$executeRaw`
+    UPDATE "EscalationEvent"
+    SET "metadata" = COALESCE("metadata", '{}'::jsonb) || jsonb_build_object('closed', ${why}::text),
+        "updatedAt" = NOW()
+    WHERE "userId" = ${userId} AND "status" = 'COMPLETED' AND "sentAt" >= ${new Date(now.getTime() - CHAIN_MAX_AGE_DAYS * DAY_MS)}`;
 }
 
 type LastStudy = { startedAt: Date | null; endedAt: Date | null };

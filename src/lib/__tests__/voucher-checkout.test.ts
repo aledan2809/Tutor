@@ -3,6 +3,7 @@ import {
   checkVoucherForCheckout,
   discountedMinorUnits,
   normalizeVoucherCode,
+  plausibleVoucherCode,
   previewAppliesToPlan,
   previewVoucher,
   type VoucherForCheckout,
@@ -132,5 +133,21 @@ describe("înainte de plată: ce preț are voie pagina să arate", () => {
     expect(previewVoucher({ ...onv126s, isActive: false, expiresAt: new Date("2020-01-01") }, opts)).toMatchObject({
       code: "VOUCHER_INVALID",
     });
+  });
+});
+
+describe("ce poate apărea ca „cod inclus” pe pagina de înscriere (review r6, S4)", () => {
+  it("codurile noastre trec", () => {
+    expect(plausibleVoucherCode(normalizeVoucherCode(" v126s "))).toBe(true);
+    expect(plausibleVoucherCode("ONV126S")).toBe(true);
+    expect(plausibleVoucherCode("BAC-2026_X")).toBe(true);
+  });
+
+  it("text oarecare dintr-un link nu trece: spații, prea scurt, prea lung", () => {
+    expect(plausibleVoucherCode(normalizeVoucherCode("gratuit sunati la 0722000000"))).toBe(false);
+    expect(plausibleVoucherCode("AB")).toBe(false);
+    expect(plausibleVoucherCode("A".repeat(51))).toBe(false);
+    expect(plausibleVoucherCode("")).toBe(false);
+    expect(plausibleVoucherCode("<B>X</B>")).toBe(false);
   });
 });

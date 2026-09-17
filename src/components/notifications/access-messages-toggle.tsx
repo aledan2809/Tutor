@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 /**
  * The parent's switch for the messages about the free week and the subscription. Every one of those
  * messages points here (access-messages.ts). Styled like the channel switches above it.
  */
 export function AccessMessagesToggle() {
+  const t = useTranslations("notifications.accessMessages");
   const [off, setOff] = useState<boolean | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -35,14 +37,11 @@ export function AccessMessagesToggle() {
   const on = !off;
   return (
     <div id="mesaje-abonament">
-      <h2 className="text-lg font-semibold text-white">Abonament</h2>
-      <p className="text-sm text-gray-500">
-        Anunțurile cu câte zile gratuite mai ai, când contul intră în pauză și cât costă pachetul. Alertele despre copil
-        nu depind de asta.
-      </p>
+      <h2 className="text-lg font-semibold text-white">{t("title")}</h2>
+      <p className="text-sm text-gray-500">{t("body")}</p>
       <div className="mt-3 flex items-center justify-between gap-4 rounded-lg border border-gray-800 px-4 py-3">
         <span id="access-messages-label" className="text-sm text-gray-300">
-          Mesaje despre proba gratuită și abonament
+          {t("label")}
         </span>
         <button
           type="button"

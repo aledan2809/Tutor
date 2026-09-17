@@ -10,9 +10,9 @@ import { sendNotification } from "@/lib/notifications/service";
 import { userIdsOnBreak } from "./breaks";
 import { reminderImminent } from "./reminders";
 import { NUDGE_MAX_FIRES, NUDGE_MAX_AGE_HOURS } from "./config";
-import { isPaidSubscriber } from "./segmentation";
-import { loadAccess } from "@/lib/access-server";
-import { individualPlan, secondParentSeat } from "@/lib/access";
+import { isPaidSubscriber, meteredChannelsCovered, SELECT_ACOPERIRE_CANALE } from "./segmentation";
+import { pausedUserIds } from "@/lib/access-server";
+import { individualPlan, seatingPayers } from "@/lib/access";
 
 const MAX_FIRES = NUDGE_MAX_FIRES; // safety cap on repeats
 const MAX_AGE_HOURS = NUDGE_MAX_AGE_HOURS; // auto-stop a nudge after a day
@@ -56,7 +56,20 @@ export async function parentPaysForMetered(parentId: string, childId?: string): 
   return coveredAsSecondParent(parentId, childId);
 }
 
+/**
+ * Whether the nudge form offers WhatsApp to this guardian: the guardian pays for it, or the child's
+ * own channels are already paid (their own Elev, a company, the family's plan) — then the send goes
+ * out anyway (service.ts meteredChannelBlocked). A family's tutor of a Trio child lost the option when
+ * only the guardian's own payment counted (review r6, A3).
+ */
+export async function nudgeOffersMetered(guardianId: string, childId: string): Promise<boolean> {
+  if (await parentPaysForMetered(guardianId, childId)) return true;
+  const child = await prisma.user.findUnique({ where: { id: childId }, select: SELECT_ACOPERIRE_CANALE });
+  return child !== null && meteredChannelsCovered(child);
+}
+
 const PAYER_SELECT = {
+  createdAt: true,
   subscriptionStatus: true,
   subscriptionEndsAt: true,
   freeForever: true,
@@ -66,26 +79,31 @@ const PAYER_SELECT = {
 
 /**
  * The second parent of Family Duo / Family Trio: the plan sits on the other parent's account. It
- * lends the paid channels only when it has a seat for a second parent (access.ts), and only while it
- * is paid — not while a renewal is failing (WhatsApp and SMS cost per message). `childId` narrows it
- * to the other parents of that child.
+ * lends the paid channels only when it has a seat for this parent — the same seat rule as access
+ * (seatingPayers): a third adult of a Duo family gets no WhatsApp on the family's plan (review r6,
+ * A1) — and only while it is paid, not while a renewal is failing (WhatsApp and SMS cost per
+ * message). `childId` narrows it to that child.
  */
 export async function coveredAsSecondParent(parentId: string, childId?: string): Promise<boolean> {
-  const others = await prisma.guardian.findMany({
-    where: {
-      relation: "PARENT",
-      status: "active",
-      parentId: { not: parentId },
-      ...(childId ? { childId } : {}),
-      child: { guardianLinks: { some: { parentId, relation: "PARENT", status: "active" } } },
+  const mine = await prisma.guardian.findMany({
+    where: { parentId, relation: "PARENT", status: "active", ...(childId ? { childId } : {}) },
+    select: {
+      createdAt: true,
+      child: {
+        select: {
+          guardianLinks: {
+            where: { relation: "PARENT", status: "active", parentId: { not: parentId } },
+            select: { createdAt: true, parent: { select: PAYER_SELECT } },
+          },
+        },
+      },
     },
-    select: { parent: { select: PAYER_SELECT } },
   });
-  return others.some(
-    ({ parent: o }) =>
-      o.isSuperAdmin ||
-      o.freeForever ||
-      (isPaidSubscriber(o) && !individualPlan(o.subscriptionPlan) && secondParentSeat(o.subscriptionPlan)),
+  return mine.some((link) =>
+    seatingPayers(
+      link.createdAt,
+      link.child.guardianLinks.map((g) => ({ person: g.parent, linkedAt: g.createdAt })),
+    ).some((o) => o.isSuperAdmin || o.freeForever || isPaidSubscriber(o)),
   );
 }
 
@@ -134,6 +152,9 @@ export async function runParentNudges(now: Date = new Date()): Promise<{ fired: 
   if (active.length === 0) return { fired, stopped };
 
   const onBreak = await userIdsOnBreak(now);
+  // Once for the whole sweep, and one cached read while the pause is switched off: it used to load
+  // two accounts' access for every running nudge on every run (review r6, F8).
+  const paused = await pausedUserIds(active.flatMap((n) => [n.parentId, n.childId]), now);
 
   for (const n of active) {
     // Per-row isolation: a transient error on one nudge must not abort the sweep
@@ -160,8 +181,7 @@ export async function runParentNudges(now: Date = new Date()): Promise<{ fired: 
       if (onBreak.has(n.childId)) continue; // vacanță: pauză, fără a opri
 
       // Proba gratuită s-a încheiat pentru părinte sau copil: seria se oprește (access.ts).
-      const [parentAccess, childAccess] = await Promise.all([loadAccess(n.parentId, now), loadAccess(n.childId, now)]);
-      if (parentAccess?.kind === "paused" || childAccess?.kind === "paused") {
+      if (paused.has(n.parentId) || paused.has(n.childId)) {
         await prisma.parentNudge.update({ where: { id: n.id }, data: { active: false } });
         stopped++;
         continue;

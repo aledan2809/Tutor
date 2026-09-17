@@ -102,6 +102,32 @@ describe("cine are acces complet, fără probă și fără pauză", () => {
     ).toEqual({ kind: "full", reason: "free_forever" });
   });
 
+  it("Family acoperă copiii pentru care are loc, în ordinea legării; un loc suplimentar anulat nu mai acoperă (review r6, S1)", () => {
+    const later = at("2026-10-15T00:00:00Z");
+    const parent = (paidExtraChildSeats: number) =>
+      person({ subscriptionStatus: "active", subscriptionPlan: { name: "Family", familyPlanKey: "FAMILY" }, paidExtraChildSeats, childIds: ["c1", "c2"] });
+    const first = person({ id: "c1", createdAt: at("2025-05-01T00:00:00Z") });
+    const second = person({ id: "c2", createdAt: at("2025-05-01T00:00:00Z") });
+    expect(resolveAccess(input({ self: first, now: later, parents: [parent(0)] }))).toEqual({ kind: "full", reason: "family_paid" });
+    expect(resolveAccess(input({ self: second, now: later, parents: [parent(1)] }))).toEqual({ kind: "full", reason: "family_paid" });
+    expect(resolveAccess(input({ self: second, now: later, parents: [parent(0)] }))).toEqual({ kind: "paused", since: expect.any(Date), payer: "parent" });
+  });
+
+  it("cel care plătește ține mereu un loc, chiar legat ultimul: Family Duo tot doi părinți acoperă (review r6, A2)", () => {
+    const later = at("2026-10-15T00:00:00Z");
+    // Father and grandmother linked the child in the free week; the mother bought Family Duo after.
+    const mother = person({ subscriptionStatus: "active", subscriptionPlan: { name: "Family Duo", familyPlanKey: "FAMILY_DUO" } });
+    const father = person({ createdAt: at("2025-05-01T00:00:00Z") });
+    const grandma = person({ createdAt: at("2025-05-01T00:00:00Z") });
+    const d = (iso: string) => at(iso);
+    expect(
+      resolveAccess(input({ self: father, now: later, coParentGroups: [{ linkedAt: d("2026-09-01T10:00:00Z"), others: [{ person: grandma, linkedAt: d("2026-09-02T10:00:00Z") }, { person: mother, linkedAt: d("2026-09-10T10:00:00Z") }] }] })),
+    ).toEqual({ kind: "full", reason: "family_paid" });
+    expect(
+      resolveAccess(input({ self: grandma, now: later, coParentGroups: [{ linkedAt: d("2026-09-02T10:00:00Z"), others: [{ person: father, linkedAt: d("2026-09-01T10:00:00Z") }, { person: mother, linkedAt: d("2026-09-10T10:00:00Z") }] }] })).kind,
+    ).toBe("paused");
+  });
+
   it("meditatorul unei familii care plătește un loc de meditator e acoperit, chiar dacă e și elev", () => {
     const later = at("2026-10-15T00:00:00Z");
     const tutor = person({ createdAt: at("2025-05-01T00:00:00Z") });
