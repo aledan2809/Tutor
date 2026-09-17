@@ -35,7 +35,8 @@
     "useMagicLink": "Folosește magic link",
     "usePassword": "Folosește parola",
     "invalidCredentials": "Email sau parolă incorectă",
-    "networkError": "Nu am putut trimite cererea. Verifică conexiunea și încearcă din nou."
+    "networkError": "Nu am putut trimite cererea. Verifică conexiunea și încearcă din nou.",
+    "phoneRecovery": "Nu ai email? Recuperează pe telefon"
   },
   "nav": {
     "dashboard": "Panou de control",

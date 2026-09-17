@@ -35,7 +35,8 @@
     "useMagicLink": "Use magic link instead",
     "usePassword": "Use password instead",
     "invalidCredentials": "Invalid email or password",
-    "networkError": "We could not send the request. Check your connection and try again."
+    "networkError": "We could not send the request. Check your connection and try again.",
+    "phoneRecovery": "No email? Recover by phone"
   },
   "nav": {
     "dashboard": "Dashboard",

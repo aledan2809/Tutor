@@ -14,6 +14,7 @@
  * child's PARENT guardians. Dedup: fires at most once per calendar day per threshold.
  */
 
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { escapeHtml, resolveUserAlertChannels, userInQuietHours } from "./parent-monitor";
 import { webPushToUser, telegramAlertToUser } from "@/lib/notifications/service";
@@ -79,7 +80,8 @@ async function computeMetric(
     });
     if (!last?.endedAt) return 30; // never completed a session
     const days = Math.floor((now.getTime() - last.endedAt.getTime()) / (24 * 60 * 60 * 1000));
-    return Math.min(days, 30);
+    // A session stamped a little in the future (a clock off by minutes) mustn't read as negative days.
+    return Math.min(Math.max(days, 0), 30);
   }
   return null;
 }
@@ -158,50 +160,65 @@ export async function runThresholdChecks(now: Date = new Date()): Promise<number
 
   let fired = 0;
   for (const th of thresholds) {
-    if (th.lastFiredOn && sameRoDay(th.lastFiredOn, now)) continue; // once per RO day
-    // During the instructor's quiet hours skip the whole threshold WITHOUT
-    // consuming lastFiredOn — it re-evaluates (and actually delivers) at the
-    // first tick after the quiet window instead of burning the day's alert at 2AM.
-    if (await userInQuietHours(th.instructorId)) continue;
-    const value = await computeMetric(th.metric, th.studentId, th.domainId, now);
-    if (value === null) continue; // no signal
-    if (!compare(value, th.operator, th.value)) continue;
-
-    const studentName = th.student.name ?? th.student.email ?? "Elevul";
-    const title = `Prag atins: ${studentName}`;
-    const message = `${studentName} (${th.domain.name}): ${METRIC_RO[th.metric] ?? th.metric} = ${value}, ${OP_RO[th.operator] ?? th.operator} pragul de ${th.value}.`;
-    const metadata = {
-      thresholdId: th.id,
-      studentId: th.studentId,
-      domainId: th.domainId,
-      metric: th.metric,
-      value,
-      threshold: th.value,
-    };
-
-    await deliverThresholdAlert(th.instructorId, title, message, metadata, {
-      url: "/dashboard/instructor/students",
-      label: "Vezi elevii",
-    });
-    if (th.action === "notify_watcher") {
-      const parents = await prisma.guardian.findMany({
-        where: { childId: th.studentId, status: "active", relation: "PARENT" },
-        select: { parentId: true },
-      });
-      // A paused parent, or a paused child, gets skipped inside deliverThresholdAlert.
-      for (const p of parents) {
-        // Parents can't open instructor pages — point them at their watcher view.
-        await deliverThresholdAlert(p.parentId, title, message, metadata, {
-          url: "/dashboard/watcher",
-          label: "Vezi copilul",
-        });
-      }
+    // Per-threshold isolation, as in the nudge sweep: one threshold's database error must not stop
+    // the checks of all the others in this run.
+    try {
+      if (await checkThreshold(th, now)) fired++;
+    } catch (err) {
+      console.error("[threshold-monitor] threshold failed", th.id, err);
     }
-    await prisma.escalationThreshold.update({
-      where: { id: th.id },
-      data: { lastFiredOn: now },
-    });
-    fired++;
   }
   return fired;
+}
+
+type ThresholdRow = Prisma.EscalationThresholdGetPayload<{
+  include: { student: { select: { name: true; email: true } }; domain: { select: { name: true } } };
+}>;
+
+/** Evaluate one threshold and alert when it is breached. True when an alert fired. */
+async function checkThreshold(th: ThresholdRow, now: Date): Promise<boolean> {
+  if (th.lastFiredOn && sameRoDay(th.lastFiredOn, now)) return false; // once per RO day
+  // During the instructor's quiet hours skip the whole threshold WITHOUT
+  // consuming lastFiredOn — it re-evaluates (and actually delivers) at the
+  // first tick after the quiet window instead of burning the day's alert at 2AM.
+  if (await userInQuietHours(th.instructorId)) return false;
+  const value = await computeMetric(th.metric, th.studentId, th.domainId, now);
+  if (value === null) return false; // no signal
+  if (!compare(value, th.operator, th.value)) return false;
+
+  const studentName = th.student.name ?? th.student.email ?? "Elevul";
+  const title = `Prag atins: ${studentName}`;
+  const message = `${studentName} (${th.domain.name}): ${METRIC_RO[th.metric] ?? th.metric} = ${value}, ${OP_RO[th.operator] ?? th.operator} pragul de ${th.value}.`;
+  const metadata = {
+    thresholdId: th.id,
+    studentId: th.studentId,
+    domainId: th.domainId,
+    metric: th.metric,
+    value,
+    threshold: th.value,
+  };
+
+  await deliverThresholdAlert(th.instructorId, title, message, metadata, {
+    url: "/dashboard/instructor/students",
+    label: "Vezi elevii",
+  });
+  if (th.action === "notify_watcher") {
+    const parents = await prisma.guardian.findMany({
+      where: { childId: th.studentId, status: "active", relation: "PARENT" },
+      select: { parentId: true },
+    });
+    // A paused parent, or a paused child, gets skipped inside deliverThresholdAlert.
+    for (const p of parents) {
+      // Parents can't open instructor pages — point them at their watcher view.
+      await deliverThresholdAlert(p.parentId, title, message, metadata, {
+        url: "/dashboard/watcher",
+        label: "Vezi copilul",
+      });
+    }
+  }
+  await prisma.escalationThreshold.update({
+    where: { id: th.id },
+    data: { lastFiredOn: now },
+  });
+  return true;
 }

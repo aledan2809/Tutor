@@ -197,7 +197,7 @@ export default function SignInPage() {
 
               >
 
-                Nu ai email? Recuperează pe telefon
+                {t("phoneRecovery")}
 
               </Link>
               <Link
