@@ -312,7 +312,7 @@ export function SetupChecklist({ showLinkChild = false }: { showLinkChild?: bool
         : pushBlockedByInstall
           ? t("Instalează aplicația întâi (pas 1).", "Install the app first (step 1).")
           : pushSupported
-            ? t("Mementouri gratuite pe telefon.", "Free reminders on your phone.")
+            ? t("Remindere gratuite pe telefon.", "Free reminders on your phone.")
             : t("Neacceptat pe acest browser.", "Not supported on this browser."),
       action: pushOn || pushBlockedByInstall || !pushSupported ? null : { label: t("Activează", "Enable"), on: doPush },
       canSkip: true,
@@ -327,7 +327,7 @@ export function SetupChecklist({ showLinkChild = false }: { showLinkChild?: bool
               ? t("Conectat ✓", "Connected ✓")
               : tgWaiting
                 ? t("Apasă „Start” în Telegram…", "Tap “Start” in Telegram…")
-                : t("Mementouri gratuite (necesită cont Telegram).", "Free reminders (needs a Telegram account)."),
+                : t("Remindere gratuite (necesită cont Telegram).", "Free reminders (needs a Telegram account)."),
             action: tgLinked ? null : { label: t("Conectează", "Connect"), on: doTelegram },
             canSkip: true,
           },

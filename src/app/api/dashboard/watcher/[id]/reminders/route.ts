@@ -4,15 +4,23 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { reminderInput } from "@/lib/reminder-schema";
 import { isGuardianOf } from "@/lib/guardian";
+import { activeSetters, setByLabel } from "@/lib/guardian-lock";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 /**
  * Guardian-scoped study schedule for a child. A parent manages the child's
  * "Program" from the Watcher; mirrors /api/student/reminders but operates on
  * the child's userId and is gated by an active guardian link.
+ *
+ * What a PARENT creates or changes is marked as theirs, and the child can no longer change it
+ * (guardian-lock.ts); the child's own reminders stay the child's until a parent edits one. A family
+ * tutor can help with the schedule, but their edits don't lock anything.
  */
 async function _GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
   const { id: childId } = await params;
   if (!(await isGuardianOf(session.user.id, childId))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -21,12 +29,20 @@ async function _GET(_req: NextRequest, { params }: { params: Promise<{ id: strin
     where: { userId: childId },
     orderBy: [{ hour: "asc" }, { minute: "asc" }],
   });
-  return NextResponse.json({ reminders });
+  const [owners, tutors] = await Promise.all([
+    activeSetters(childId, reminders.map((r) => r.setById)),
+    activeSetters(childId, reminders.map((r) => r.setById), "TUTOR"),
+  ]);
+  return NextResponse.json({
+    reminders: reminders.map((r) => ({ ...r, ...setByLabel(r.setById, session.user.id, owners, tutors) })),
+  });
 }
 
 async function _POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
   const { id: childId } = await params;
   if (!(await isGuardianOf(session.user.id, childId))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -47,9 +63,11 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ id: strin
       domainSlug: parsed.data.domainSlug ?? null,
       timezone: "Europe/Bucharest",
       isActive: parsed.data.isActive ?? true,
+      // Who added it: a parent's locks for the child, a tutor's is only named (guardian-lock.ts).
+      setById: session.user.id,
     },
   });
-  return NextResponse.json({ reminder }, { status: 201 });
+  return NextResponse.json({ reminder: { ...reminder, setBy: "you", setByName: null } }, { status: 201 });
 }
 
 export const GET = withErrorHandler(_GET);

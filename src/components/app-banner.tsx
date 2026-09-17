@@ -180,7 +180,7 @@ export function AppBanner({ isWatcherOnly = false }: { isWatcherOnly?: boolean }
           ? "Activează notificările"
           : "Turn on notifications";
   const desc = ro
-    ? "Acces rapid de pe ecranul principal + mementouri gratuite ca să-ți păstrezi ritmul de studiu."
+    ? "Acces rapid de pe ecranul principal + remindere gratuite ca să-ți păstrezi ritmul de studiu."
     : "One-tap access from your home screen + free reminders to keep your study rhythm.";
 
   const iosSteps = ro

@@ -45,6 +45,19 @@ async function _PATCH(
     });
   }
 
+  // „Gratuit permanent" (friends, testers): never in the 7-day trial, never paused, no trial
+  // messages — and the children linked to this account are covered too (access.ts).
+  if (typeof body.freeForever === "boolean") {
+    updateData.freeForever = body.freeForever;
+
+    await logAudit({
+      action: body.freeForever ? "FREE_FOREVER_ON" : "FREE_FOREVER_OFF",
+      performedById: session!.user.id,
+      targetUserId: id,
+      targetType: "User",
+    });
+  }
+
   const user = await prisma.user.update({
     where: { id },
     data: updateData,
@@ -55,6 +68,7 @@ async function _PATCH(
       isSuperAdmin: true,
       isBanned: true,
       bannedReason: true,
+      freeForever: true,
     },
   });
 

@@ -8,7 +8,7 @@
 
 import { shouldEscalate, nextStep, resolveGraceMs } from "@aledan/notify-ladder";
 import { prisma } from "@/lib/prisma";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { serverChannelAvailability } from "./channel-availability";
 import {
   ESCALATION_LEVELS,
@@ -16,10 +16,11 @@ import {
   isChannelEnabled,
   resolveUserLadder,
   resolveUserGraceMs,
+  type EscalationLevel,
 } from "./config";
 import { isQuietHours, isOptimalNotificationTime } from "./timing";
 import { sendNotification } from "@/lib/notifications/service";
-import { resolveIsTest, resolveIsTestForUser } from "@/lib/notifications/test-account";
+import { resolveIsTestForUser } from "@/lib/notifications/test-account";
 import {
   ESCALATION_LADDER,
   isPaidChannelDeliverable,
@@ -29,6 +30,7 @@ import {
 } from "./segmentation";
 import { userIdsOnBreak } from "./breaks";
 import { scheduledTodayFilter } from "./scheduled-days";
+import { pausedUserIds } from "@/lib/access-server";
 
 interface EscalationContext {
   userId: string;
@@ -150,7 +152,22 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     },
   });
 
-  if (!event || event.status === "COMPLETED") return;
+  // Only a PENDING rung is picked up: an ESCALATING one is being sent by another run right now.
+  if (!event || event.status !== "PENDING") return;
+  const now = new Date();
+  const stored = (event.metadata as Record<string, unknown> | null) ?? {};
+  if (waitsUntilLater(event.metadata, now)) return;
+
+  // A rung created earlier and sent only now (after quiet hours, a failed send, study time) is
+  // dropped when the child tapped a notification of this chain or studied since the chain started.
+  // Checked before any skip: skipping would create the next rung (review 3, minor 2a).
+  if (!shouldEscalate(await chainAnswered(event.userId, event.level, event.createdAt))) {
+    await prisma.escalationEvent.updateMany({
+      where: { id: event.id, status: "PENDING" },
+      data: { status: "COMPLETED", metadata: { ...stored, answered: true } as Prisma.InputJsonObject },
+    });
+    return;
+  }
 
   const prefs = event.user.notificationPreference;
   const timezone = prefs?.timezone ?? "Europe/Bucharest";
@@ -159,7 +176,8 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
 
   // Check quiet hours (skip for L1 push — always instant)
   if (event.level > 1 && isQuietHours(timezone, quietStart, quietEnd)) {
-    // Defer — will be picked up by next cron run after quiet hours
+    // Looked at again in a quarter of an hour, not every minute all night.
+    await waitRung(event.id, stored, {}, now);
     return;
   }
 
@@ -167,16 +185,8 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
   if (event.level >= 2 && event.level <= 3) {
     const isOptimal = await isOptimalNotificationTime(event.userId, timezone);
     // If not optimal time, defer once (but don't block indefinitely)
-    if (!isOptimal && !((event.metadata as Record<string, unknown>)?.deferredOnce)) {
-      await prisma.escalationEvent.update({
-        where: { id: event.id },
-        data: {
-          metadata: {
-            ...((event.metadata as Record<string, unknown>) ?? {}),
-            deferredOnce: true,
-          },
-        },
-      });
+    if (!isOptimal && !stored.deferredOnce) {
+      await waitRung(event.id, stored, { deferredOnce: true }, now);
       return;
     }
   }
@@ -186,7 +196,7 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
   // TELEGRAM rung shipped for months behind an inline, untestable lookup).
   if (!isChannelEnabled(event.channel, prefs)) {
     // User disabled this channel — skip to next level
-    await escalateToNextLevel(event.id, event.level);
+    await escalateToNextLevel(event.id, event.level, "PENDING");
     return;
   }
 
@@ -210,7 +220,7 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
       emailConfigured: available.email,
     });
     if (!deliverable) {
-      await escalateToNextLevel(event.id, event.level);
+      await escalateToNextLevel(event.id, event.level, "PENDING");
       return;
     }
   }
@@ -243,7 +253,7 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
       parentAuthorized,
     });
     if (unreachable) {
-      await escalateToNextLevel(event.id, event.level);
+      await escalateToNextLevel(event.id, event.level, "PENDING");
       return;
     }
   }
@@ -267,22 +277,24 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
       });
       if (smsCount >= levelConfig.maxPerDay) {
         // Skip SMS, try next level
-        await escalateToNextLevel(event.id, event.level);
+        await escalateToNextLevel(event.id, event.level, "PENDING");
         return;
       }
     }
   }
 
-  // Mark as ESCALATING
-  await prisma.escalationEvent.update({
-    where: { id: event.id },
+  // Claim the rung: only the run that moves it from PENDING sends it. Two runs at once (one that
+  // outlived its lease, or a new chain started outside the lease) would otherwise both send it.
+  const claimed = await prisma.escalationEvent.updateMany({
+    where: { id: event.id, status: "PENDING" },
     data: { status: "ESCALATING" },
   });
+  if (claimed.count === 0) return;
 
   // The Telegram nudge carries the reminder's OWN copy (title/message, Romanian,
   // session-specific — exactly what push already uses) plus at most one encouraging
   // line. It used to carry an English pressure blob instead; see encouragementFor().
-  const metadata = (event.metadata as Record<string, unknown>) ?? {};
+  const metadata: Record<string, unknown> = { ...stored };
   if (event.channel === "TELEGRAM") {
     const encouragement = await studentEncouragement(event.userId);
     if (encouragement) metadata.encouragement = encouragement;
@@ -329,187 +341,443 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
     });
   } else {
     // Failed — retry a few times, then move on: an endless PENDING keeps the chain „active",
-    // so no new reminder starts and the parent is never alerted.
-    const failures = Number((event.metadata as Record<string, unknown> | null)?.sendFailures ?? 0) + 1;
+    // so no new reminder starts and the parent is never alerted. The retries are a quarter of an
+    // hour apart, as when the cron ran every 15 minutes: a minute's outage must not move a child
+    // on to WhatsApp or SMS (review 3, minor 3).
+    const failures = Number(stored.sendFailures ?? 0) + 1;
     if (failures >= MAX_SEND_FAILURES) {
-      await escalateToNextLevel(event.id, event.level);
+      await escalateToNextLevel(event.id, event.level, "ESCALATING");
       return;
     }
-    await prisma.escalationEvent.update({
-      where: { id: event.id },
+    await prisma.escalationEvent.updateMany({
+      where: { id: event.id, status: "ESCALATING" },
       data: {
         status: "PENDING",
-        metadata: { ...((event.metadata as Record<string, unknown> | null) ?? {}), sendFailures: failures },
+        metadata: { ...stored, sendFailures: failures, nextAttemptAt: laterIso(now) } as Prisma.InputJsonObject,
       },
     });
   }
 }
 
 /**
- * Escalate to next level by creating a new event.
+ * Escalate to next level by creating a new event. `from` is the status the caller saw: only the
+ * caller that moves the rung on from it creates the next one, so two runs skipping the same rung at
+ * once don't both create it.
  */
 async function escalateToNextLevel(
   currentEventId: string,
-  currentLevel: number
+  currentLevel: number,
+  from: "PENDING" | "ESCALATING"
 ): Promise<void> {
   const current = await prisma.escalationEvent.findUnique({
     where: { id: currentEventId },
-    include: { user: { select: { notificationPreference: { select: { channelOrder: true, escalationSteps: true } } } } },
+    select: {
+      userId: true,
+      sessionId: true,
+      metadata: true,
+      user: { select: { notificationPreference: { select: { channelOrder: true, escalationSteps: true } } } },
+    },
   });
   if (!current) return;
-
-  // Mark current as completed (skipped)
-  await prisma.escalationEvent.update({
-    where: { id: currentEventId },
-    data: { status: "COMPLETED" },
-  });
 
   // Advance along THIS user's ladder — a parent's custom cascade if set, else their
   // channel priority order, else the code default.
   const nextLevelConfig = resolveUserLadder(current.user.notificationPreference ?? {}).find(
     (l) => l.level === currentLevel + 1
   );
-  if (!nextLevelConfig) return; // No more levels
+  const isTest = nextLevelConfig ? await resolveIsTestForUser(current.userId) : false;
 
-  // The failure count belongs to the rung that failed, not to the next one.
-  const carried: Record<string, unknown> = { ...((current.metadata as Record<string, unknown> | null) ?? {}) };
-  delete carried.sendFailures;
-  await prisma.escalationEvent.create({
-    data: {
-      userId: current.userId,
-      isTest: await resolveIsTestForUser(current.userId),
-      sessionId: current.sessionId,
-      level: nextLevelConfig.level,
-      status: "PENDING",
-      channel: nextLevelConfig.channel,
-      templateId: nextLevelConfig.templateId,
-      metadata: current.metadata ? (carried as Prisma.InputJsonObject) : undefined,
-    },
+  await prisma.$transaction(async (tx) => {
+    // Mark current as completed (skipped)
+    const moved = await tx.escalationEvent.updateMany({
+      where: { id: currentEventId, status: from },
+      data: { status: "COMPLETED" },
+    });
+    if (moved.count === 0 || !nextLevelConfig) return; // moved on by another run, or no more levels
+
+    // The failure count belongs to the rung that failed, not to the next one.
+    await tx.escalationEvent.create({
+      data: {
+        userId: current.userId,
+        isTest,
+        sessionId: current.sessionId,
+        level: nextLevelConfig.level,
+        status: "PENDING",
+        channel: nextLevelConfig.channel,
+        templateId: nextLevelConfig.templateId,
+        metadata: current.metadata ? withoutRungState(current.metadata) : undefined,
+      },
+    });
   });
+}
+
+/** A child's latest sent rung: the tip of the chain that is still running for them, if any. */
+type ChainTip = {
+  id: string;
+  userId: string;
+  level: number;
+  sentAt: Date;
+  createdAt: Date;
+  acknowledgedAt: Date | null;
+  sessionId: string | null;
+  metadata: Prisma.JsonValue;
+  isTest: boolean;
+};
+
+/**
+ * A rung claimed for sending by a run that died (a restart during a deploy) stays ESCALATING, and the
+ * child's chain then looks active forever: no new reminder starts, no parent alert. After a while it
+ * is closed without another attempt — it may well have gone out before the run died.
+ *
+ * Runs before the due reminders (chains-run.ts): a reminder coming due next to a stuck rung would
+ * otherwise find the chain „active", be marked done for the day, and start nothing. The retry cron
+ * uses the same rule — sending such a rung again could send it twice.
+ */
+export async function closeStuckSends(now: Date = new Date()): Promise<number> {
+  return prisma.$executeRaw`
+    UPDATE "EscalationEvent"
+    SET "status" = 'COMPLETED',
+        "metadata" = COALESCE("metadata", '{}'::jsonb) || '{"stuck": true}'::jsonb,
+        "updatedAt" = NOW()
+    WHERE "status" = 'ESCALATING' AND "updatedAt" < ${new Date(now.getTime() - STUCK_SEND_MS)}`;
 }
 
 /**
  * Check for pending escalations that need advancement.
- * Called by cron — finds COMPLETED events whose next level delay has passed.
+ * Called by cron — finds sent rungs whose next level delay has passed.
+ *
+ * Every minute, so it must stay a handful of queries whatever the number of children. It used to
+ * load every rung sent in the last two weeks, each with its user, and query each one (review 3, M4).
  */
-export async function advancePendingEscalations(): Promise<number> {
-  // Find users with active escalation chains
-  const completedEvents = await prisma.escalationEvent.findMany({
-    where: {
-      status: "COMPLETED",
-      sentAt: { not: null },
-      level: { lt: 6 },
-    },
-    orderBy: { sentAt: "desc" },
-    include: { user: { include: { notificationPreference: { select: { channelOrder: true, escalationSteps: true } } } } },
-  });
+export async function advancePendingEscalations(now: Date = new Date()): Promise<number> {
+  // One chain at a time per child: only their latest sent rung can lead further. An older sent rung
+  // already has its next rung, or belongs to a chain a newer reminder replaced. Only recent tips can
+  // still lead anywhere: the longest chain (six rungs of at most a day each, paused over days without
+  // a schedule) ends well inside CHAIN_MAX_AGE_DAYS.
+  const since = new Date(now.getTime() - CHAIN_MAX_AGE_DAYS * DAY_MS);
+  const tips = await prisma.$queryRaw<ChainTip[]>`
+    SELECT DISTINCT ON ("userId")
+      "id", "userId", "level", "sentAt", "createdAt", "acknowledgedAt", "sessionId", "metadata", "isTest"
+    FROM "EscalationEvent"
+    WHERE "status" = 'COMPLETED' AND "sentAt" >= ${since}
+    ORDER BY "userId", "sentAt" DESC`;
 
-  const onBreak = await userIdsOnBreak();
-  // Zile fără program (weekend / nimic programat): lanțul se pune pe pauză și
-  // reia la următoarea zi programată — nu nag-uim copilul în off-days.
-  const scheduledAdvance = await scheduledTodayFilter(
-    completedEvents.map((e) => e.userId)
+  const prefsByUser = new Map(
+    tips.length === 0
+      ? []
+      : (
+          await prisma.notificationPreference.findMany({
+            where: { userId: { in: tips.map((t) => t.userId) } },
+            select: { userId: true, channelOrder: true, escalationSteps: true },
+          })
+        ).map((p) => [p.userId, p] as const)
   );
-  let advanced = 0;
 
-  for (const event of completedEvents) {
-    if (onBreak.has(event.userId)) continue; // vacanță: nu escaladăm
-    if (!scheduledAdvance.has(event.userId)) continue; // zi fără program: pauză
-    // Check if user has resumed activity (completed a session since escalation).
-    // A late/resumed session has an old startedAt, so also count one that FINISHED
-    // after the escalation — the completion is the real "studied" signal.
-    const recentSession = await prisma.session.findFirst({
-      where: {
-        userId: event.userId,
-        endedAt: { not: null },
-        OR: [
-          { startedAt: { gt: event.createdAt } },
-          { endedAt: { gt: event.createdAt } },
-        ],
-      },
-    });
-
-    // Push-first cost gate via @aledan/notify-ladder: escalate to the next
-    // (paid) rung only when the user neither tapped the push (acknowledged) nor
-    // resumed studying (a completed session = the domain "done" signal). When
-    // either gate passes the chain stops here — the next level is only ever
-    // created from this event.
-    if (
-      !shouldEscalate({
-        acknowledged: !!event.acknowledgedAt,
-        actionDone: !!recentSession,
-      })
-    ) {
-      continue;
-    }
-
-    // Check if next level already exists
-    const nextLevel = event.level + 1;
-    const existingNext = await prisma.escalationEvent.findFirst({
-      where: {
-        userId: event.userId,
-        level: nextLevel,
-        createdAt: { gt: event.createdAt },
-      },
-    });
-
-    if (existingNext) continue;
-
+  // The checks that need no query first: a closed or tapped tip, the last rung, a wait not over yet.
+  const due: { tip: ChainTip; next: EscalationLevel }[] = [];
+  for (const tip of tips) {
+    if (chainClosed(tip.metadata)) continue; // answered, or ended by the pause (see below)
+    if (tip.acknowledgedAt) continue; // tapped: the chain stops here
     // Resolve the next rung + its grace from the shared ladder. currentIndex is
     // 0-based (level - 1); resolveGraceMs(currentIndex) = wait after this step
     // before escalating to the next.
-    const currentIndex = event.level - 1;
+    const currentIndex = tip.level - 1;
     if (!nextStep(ESCALATION_LADDER, currentIndex)) continue; // terminal rung
-    const nextConfig = resolveUserLadder(event.user.notificationPreference ?? {})[currentIndex + 1];
-    if (!nextConfig) continue;
+    const prefs = prefsByUser.get(tip.userId);
+    const next = resolveUserLadder(prefs ?? {})[currentIndex + 1];
+    if (!next) continue;
 
     const messageType =
-      ((event.metadata as Record<string, unknown> | null)?.reason as string) ??
+      ((tip.metadata as Record<string, unknown> | null)?.reason as string) ??
       "missed_session";
     // A parent's custom cascade sets the wait to the next rung's own delayMinutes,
     // overriding the window grace; otherwise fall back to the time-window grace.
-    const customGrace = resolveUserGraceMs(
-      event.user.notificationPreference?.escalationSteps,
-      currentIndex,
-    );
+    const customGrace = resolveUserGraceMs(prefs?.escalationSteps, currentIndex);
     const grace =
       customGrace !== undefined
         ? customGrace
         : resolveGraceMs(ESCALATION_LADDER, currentIndex, messageType);
     if (grace == null) continue;
-    if (Date.now() - event.sentAt!.getTime() < grace) continue;
-
-    // Create next level event
-    await prisma.escalationEvent.create({
-      data: {
-        userId: event.userId,
-        // event.user already loaded via include above — avoid an N+1 lookup in this loop.
-        isTest: resolveIsTest(event.user.email),
-        sessionId: event.sessionId,
-        level: nextConfig.level,
-        status: "PENDING",
-        channel: nextConfig.channel,
-        templateId: nextConfig.templateId,
-        metadata: event.metadata ?? undefined,
-      },
-    });
-
-    advanced++;
+    if (now.getTime() - tip.sentAt.getTime() < grace) continue;
+    due.push({ tip, next });
   }
 
-  // Process all pending events (skip students on a break — no delivery during vacanță)
-  const pending = await prisma.escalationEvent.findMany({
-    where: { status: "PENDING" },
+  const onBreak = await userIdsOnBreak(now);
+  let advanced = 0;
+  // Then the checks that cost one query for everyone, cheapest first; the per-account ones (the
+  // pause reads each account's access) only for the few rungs about to be created.
+  const facts = await chainFacts(
+    [...new Set(due.map((d) => d.tip.userId))],
+    new Date(since.getTime() - CHAIN_MAX_AGE_DAYS * DAY_MS)
+  );
+  // A rung created after the tip: the next rung exists (waiting, or skipped), or a new chain started.
+  const leading = due.filter(({ tip }) => {
+    const last = facts.get(tip.userId)?.lastCreatedAt;
+    return !(last && last > tip.createdAt);
   });
-  const scheduledPending = await scheduledTodayFilter(pending.map((p) => p.userId));
+  // No rung after the tip, so the latest level-1 rung is where the tip's chain started.
+  const startOf = (tip: ChainTip) => facts.get(tip.userId)?.chainStart ?? tip.createdAt;
+  const studied = await lastStudy(
+    leading.map(({ tip }) => tip.userId),
+    leading.reduce((min, { tip }) => (startOf(tip) < min ? startOf(tip) : min), now)
+  );
+  const unanswered: typeof leading = [];
+  for (const d of leading) {
+    // Push-first cost gate via @aledan/notify-ladder: escalate to the next (paid) rung only when
+    // the child neither tapped a notification of this chain nor studied since it started (a
+    // completed session = the domain "done" signal). A tap on any notification counts, not only
+    // on the latest one: the child may open the first push after the Telegram message went out,
+    // or the push of the reminder five minutes earlier.
+    const answer = answeredSince(startOf(d.tip), facts.get(d.tip.userId)?.lastAckAt ?? null, studied.get(d.tip.userId) ?? null);
+    if (shouldEscalate(answer)) unanswered.push(d);
+    // Answered chains stay answered: closed, so they aren't read again every minute for two weeks.
+    else await closeChain(d.tip.id, "answered");
+  }
 
-  for (const p of pending) {
-    if (onBreak.has(p.userId)) continue;
-    if (!scheduledPending.has(p.userId)) continue; // zi fără program: nu trimitem
-    await processEscalationEvent(p.id);
+  const toCreate = unanswered.filter(({ tip }) => !onBreak.has(tip.userId)); // vacanță: nu escaladăm
+  const userIds = [...new Set(toCreate.map(({ tip }) => tip.userId))];
+  const [scheduled, paused] = await Promise.all([
+    // Zile fără program (weekend / nimic programat): lanțul se pune pe pauză și
+    // reia la următoarea zi programată — nu nag-uim copilul în off-days.
+    scheduledTodayFilter(userIds, now),
+    pausedUserIds(userIds, now),
+  ]);
+  for (const { tip, next } of toCreate) {
+    if (!scheduled.has(tip.userId)) continue; // zi fără program: pauză
+    if (paused.has(tip.userId)) {
+      // Proba gratuită s-a încheiat fără plată (access.ts): the chain ends here. Left as it was, it
+      // would pick up days later, the minute the family pays, for a session long gone.
+      await closeChain(tip.id, "paused");
+      continue;
+    }
+    try {
+      const created = await prisma.$transaction(async (tx) => {
+        // Two runs at once (one that outlived its lease): the second waits here for the first to
+        // finish, then sees the rung it created.
+        await tx.$queryRaw`SELECT "id" FROM "EscalationEvent" WHERE "id" = ${tip.id} FOR UPDATE`;
+        const after = await tx.escalationEvent.findFirst({
+          where: { userId: tip.userId, createdAt: { gt: tip.createdAt } },
+          select: { id: true },
+        });
+        if (after) return false;
+        await tx.escalationEvent.create({
+          data: {
+            userId: tip.userId,
+            // Same person as the tip, so the same flag — no lookup per rung.
+            isTest: tip.isTest,
+            sessionId: tip.sessionId,
+            level: next.level,
+            status: "PENDING",
+            channel: next.channel,
+            templateId: next.templateId,
+            // The failure count and waits belong to the rung they happened on, not the next one.
+            metadata: tip.metadata ? withoutRungState(tip.metadata) : undefined,
+          },
+        });
+        return true;
+      });
+      if (created) advanced++;
+    } catch (err) {
+      // One child's failure doesn't stop the rest of the minute's run.
+      console.error("[escalation] next rung failed", tip.userId, err);
+    }
+  }
+
+  // Process all pending events (skip students on a break — no delivery during vacanță). A rung that
+  // can't reach the person is skipped by creating the next one; that one goes out in the same run
+  // (another pass) instead of waiting for the next cron call. Each event is tried once per run. A
+  // rung waiting for later (a failed send, quiet hours, study time) isn't loaded until then.
+  const seen = new Set<string>();
+  for (let pass = 0; pass < MAX_LADDER_PASSES; pass++) {
+    const pending = await prisma.escalationEvent.findMany({
+      where: { status: "PENDING", ...(seen.size > 0 ? { id: { notIn: [...seen] } } : {}) },
+      select: { id: true, userId: true, metadata: true },
+    });
+    if (pending.length === 0) break;
+    for (const p of pending) seen.add(p.id);
+    const ready = pending.filter((p) => !onBreak.has(p.userId) && !waitsUntilLater(p.metadata, now));
+    // Nothing sent or skipped in this pass, so no new rung for another one.
+    if (ready.length === 0) break;
+    const userIds = [...new Set(ready.map((p) => p.userId))];
+    const [scheduledPending, paused] = await Promise.all([
+      scheduledTodayFilter(userIds, now),
+      pausedUserIds(userIds, now),
+    ]);
+
+    for (const p of ready) {
+      if (!scheduledPending.has(p.userId)) continue; // zi fără program: nu trimitem
+      if (paused.has(p.userId)) {
+        // A paused account gets nothing; the chain ends here instead of firing late after payment.
+        await prisma.escalationEvent.updateMany({ where: { id: p.id, status: "PENDING" }, data: { status: "COMPLETED" } });
+        continue;
+      }
+      try {
+        await processEscalationEvent(p.id);
+      } catch (err) {
+        // One rung's failure doesn't stop the rest of the minute's run.
+        console.error("[escalation] rung failed", p.id, err);
+      }
+    }
   }
 
   return advanced;
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+/** How far back a sent step can still start the next rung (see advancePendingEscalations). */
+const CHAIN_MAX_AGE_DAYS = 14;
+/** A send takes seconds; a rung ESCALATING longer than this was claimed by a run that died. */
+const STUCK_SEND_MS = 15 * 60_000;
+/** One pass per rung at most: a chain can't skip more rungs than the ladder has. */
+const MAX_LADDER_PASSES = 6;
+/**
+ * How long a rung waits before it is looked at again: after a failed send, in quiet hours, and when
+ * it waits once for the child's study time. These waits came from the 15-minute cron; running the
+ * chains every minute must not shrink them to a minute.
+ */
+export const RUNG_WAIT_MS = 15 * 60_000;
+
+function laterIso(now: Date): string {
+  return new Date(now.getTime() + RUNG_WAIT_MS).toISOString();
+}
+
+/** Pure: does this rung's metadata ask to be left alone until a later time? */
+export function waitsUntilLater(metadata: Prisma.JsonValue | null | undefined, now: Date): boolean {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) return false;
+  const at = (metadata as Record<string, unknown>).nextAttemptAt;
+  const ms = typeof at === "string" ? Date.parse(at) : NaN;
+  return Number.isFinite(ms) && ms > now.getTime();
+}
+
+/** Put a PENDING rung aside for RUNG_WAIT_MS (unless another run has claimed it meanwhile). */
+async function waitRung(
+  eventId: string,
+  stored: Record<string, unknown>,
+  extra: Record<string, unknown>,
+  now: Date
+): Promise<void> {
+  await prisma.escalationEvent.updateMany({
+    where: { id: eventId, status: "PENDING" },
+    data: { metadata: { ...stored, ...extra, nextAttemptAt: laterIso(now) } as Prisma.InputJsonObject },
+  });
+}
+
+/** The bookkeeping of one rung (failures, waits, how it ended) doesn't travel to the next one. */
+export function withoutRungState(metadata: Prisma.JsonValue): Prisma.InputJsonValue {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) return metadata as Prisma.InputJsonValue;
+  const copy: Record<string, unknown> = { ...(metadata as Record<string, unknown>) };
+  for (const key of RUNG_STATE_KEYS) delete copy[key];
+  return copy as Prisma.InputJsonObject;
+}
+
+/** Set on one rung only: retries, waits, and the marks of how it or its chain ended. */
+const RUNG_STATE_KEYS = ["sendFailures", "nextAttemptAt", "deferredOnce", "retryCount", "lastRetryAt", "answered", "stuck", "closed"];
+
+/** Pure: was this sent rung marked as the end of its chain? */
+export function chainClosed(metadata: Prisma.JsonValue | null | undefined): boolean {
+  return Boolean(metadata && typeof metadata === "object" && !Array.isArray(metadata) && (metadata as Record<string, unknown>).closed);
+}
+
+/** Mark a chain's latest sent rung as its end, so it never leads to another rung. */
+async function closeChain(tipId: string, why: "answered" | "paused"): Promise<void> {
+  await prisma.$executeRaw`
+    UPDATE "EscalationEvent"
+    SET "metadata" = COALESCE("metadata", '{}'::jsonb) || jsonb_build_object('closed', ${why}::text),
+        "updatedAt" = NOW()
+    WHERE "id" = ${tipId} AND "status" = 'COMPLETED'`;
+}
+
+type LastStudy = { startedAt: Date | null; endedAt: Date | null };
+
+/**
+ * Pure: did the child answer the chain that started at `start` — a tap on any notification since
+ * then, or a session finished since then? A late/resumed session has an old startedAt, so a session
+ * that FINISHED after the start counts too: the completion is the real "studied" signal. Earlier
+ * chains don't count, so yesterday's tap doesn't silence today's reminder.
+ */
+export function answeredSince(
+  start: Date,
+  lastAckAt: Date | null,
+  study: LastStudy | null
+): { acknowledged: boolean; actionDone: boolean } {
+  const after = (d: Date | null | undefined) => d != null && d.getTime() > start.getTime();
+  return {
+    acknowledged: lastAckAt != null && lastAckAt.getTime() >= start.getTime(),
+    actionDone: study != null && (after(study.startedAt) || after(study.endedAt)),
+  };
+}
+
+/**
+ * Per child, in one query: their latest rung, where their latest chain started, their latest tap.
+ * Only rungs created since `from`: this runs every minute, and a child's older history can't start
+ * or answer a chain still running.
+ */
+async function chainFacts(
+  userIds: string[],
+  from: Date
+): Promise<Map<string, { lastCreatedAt: Date | null; chainStart: Date | null; lastAckAt: Date | null }>> {
+  if (userIds.length === 0) return new Map();
+  const rows = await prisma.$queryRaw<
+    { userId: string; lastCreatedAt: Date | null; chainStart: Date | null; lastAckAt: Date | null }[]
+  >`
+    SELECT "userId",
+      MAX("createdAt") AS "lastCreatedAt",
+      MAX("createdAt") FILTER (WHERE "level" = 1) AS "chainStart",
+      MAX("acknowledgedAt") AS "lastAckAt"
+    FROM "EscalationEvent"
+    WHERE "userId" IN (${Prisma.join(userIds)}) AND "createdAt" >= ${from}
+    GROUP BY "userId"`;
+  return new Map(rows.map((r) => [r.userId, r] as const));
+}
+
+/**
+ * Per child, in one query: the latest start and end among their finished sessions — only sessions
+ * that started or ended after `from` (the earliest chain start asked about) can answer a chain.
+ */
+async function lastStudy(userIds: string[], from: Date): Promise<Map<string, LastStudy>> {
+  if (userIds.length === 0) return new Map();
+  const rows = await prisma.session.groupBy({
+    by: ["userId"],
+    where: {
+      userId: { in: [...new Set(userIds)] },
+      endedAt: { not: null },
+      OR: [{ startedAt: { gt: from } }, { endedAt: { gt: from } }],
+    },
+    _max: { startedAt: true, endedAt: true },
+  });
+  return new Map(rows.map((r) => [r.userId, { startedAt: r._max.startedAt, endedAt: r._max.endedAt }] as const));
+}
+
+/**
+ * For one rung about to be sent: did the child answer its chain? The chain starts at the latest
+ * level-1 rung created up to this one.
+ */
+async function chainAnswered(
+  userId: string,
+  level: number,
+  createdAt: Date
+): Promise<{ acknowledged: boolean; actionDone: boolean }> {
+  const start =
+    level <= 1
+      ? createdAt
+      : ((
+          await prisma.escalationEvent.findFirst({
+            where: { userId, level: 1, createdAt: { lte: createdAt } },
+            orderBy: { createdAt: "desc" },
+            select: { createdAt: true },
+          })
+        )?.createdAt ?? createdAt);
+  const [tap, study] = await Promise.all([
+    prisma.escalationEvent.findFirst({
+      where: { userId, acknowledgedAt: { gte: start } },
+      select: { acknowledgedAt: true },
+    }),
+    prisma.session.findFirst({
+      where: { userId, endedAt: { not: null }, OR: [{ startedAt: { gt: start } }, { endedAt: { gt: start } }] },
+      select: { startedAt: true, endedAt: true },
+    }),
+  ]);
+  return answeredSince(start, tap?.acknowledgedAt ?? null, study);
 }
 
 /**
@@ -583,9 +851,11 @@ export async function detectMissedSessions(): Promise<string[]> {
     now
   );
   const userIds: string[] = [];
+  const paused = await pausedUserIds(inactiveUsers.map((u) => u.id), now);
 
   for (const user of inactiveUsers) {
     if (onBreak.has(user.id)) continue; // vacanță: nu deschidem lanț nou
+    if (paused.has(user.id)) continue; // cont în pauză: nimic nou
     if (!scheduledToday.has(user.id)) continue; // zi fără program: nu deschidem lanț nou
     await startEscalation({
       userId: user.id,

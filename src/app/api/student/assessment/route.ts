@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { resolveDomainByIdOrForbid } from "@/lib/domain-gate";
 import { z } from "zod";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 const assessmentSchema = z.object({
   domainId: z.string().min(1),
@@ -20,6 +21,9 @@ async function _POST(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
 
   let body: unknown;
   try {
@@ -152,6 +156,9 @@ async function _GET(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
 
   const { searchParams } = new URL(req.url);
   const domainId = searchParams.get("domainId");

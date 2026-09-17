@@ -309,6 +309,22 @@ export function canAddChild(
   };
 }
 
+/**
+ * During the 7 free days without a card an extra child can't be bought yet: the add-on is billed
+ * next to a paid Family subscription, which a trial doesn't have. Point to Family instead of
+ * starting a payment the add-on checkout would refuse.
+ */
+export function trialChildCheck(check: SeatCheck): SeatCheck {
+  if (check.allowed || check.reason !== "child_addon") return check;
+  return {
+    allowed: false,
+    reason: "child_addon",
+    upgradeTo: "FAMILY",
+    discountPercent: check.discountPercent,
+    message: `Mai adaugi un copil, cu ${check.discountPercent}% reducere, după ce continui cu Family.`,
+  };
+}
+
 /** Can the account owner add a tutor? */
 export function canAddTutor(
   plan: FamilyPlan | null,

@@ -4,7 +4,8 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { isGuardianOf } from "@/lib/guardian";
-import { fireNudge } from "@/lib/escalation/parent-nudge";
+import { fireNudge, parentPaysForMetered } from "@/lib/escalation/parent-nudge";
+import { refuseIfPaused } from "@/lib/access-gate";
 import { reminderImminent } from "@/lib/escalation/reminders";
 
 const nudgeInput = z.object({
@@ -45,6 +46,9 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ id: strin
   if (!(await isGuardianOf(session.user.id, childId))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+  // A paused family sends no reminders (access.ts): neither the parent's account nor the child's.
+  const paused = (await refuseIfPaused(session.user.id)) ?? (await refuseIfPaused(childId));
+  if (paused) return paused;
   const parsed = nudgeInput.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Date invalide" }, { status: 400 });
 
@@ -76,7 +80,9 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ id: strin
   const channels = parsed.data.channels ?? ["PUSH", "TELEGRAM"];
   const url = parsed.data.url ?? "/dashboard/practice";
   // Fire the first one now so the parent sees instant effect; cron handles repeats.
-  await fireNudge(childId, parsed.data.message, channels, url);
+  await fireNudge(childId, parsed.data.message, channels, url, {
+    meteredAllowed: await parentPaysForMetered(session.user.id, childId),
+  });
   const nudge = await prisma.parentNudge.create({
     data: {
       parentId: session.user.id,

@@ -7,6 +7,7 @@ import { isGuardianOf } from "@/lib/guardian";
 import { allowedChannels, clampChannelWrite } from "@/lib/plan-channels";
 import { meteredChannelsCovered, SELECT_ACOPERIRE_CANALE } from "@/lib/escalation/segmentation";
 import { sanitizeChannelOrder, sanitizeEscalationSteps, ESCALATION_PRESETS } from "@/lib/escalation/config";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 /**
  * Per-child notification delegation, set by a parent.
@@ -20,6 +21,9 @@ import { sanitizeChannelOrder, sanitizeEscalationSteps, ESCALATION_PRESETS } fro
 async function guard(childId: string) {
   const session = await getSession();
   if (!session?.user) return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return { error: paused };
   if (!(await isGuardianOf(session.user.id, childId))) {
     return { error: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
   }

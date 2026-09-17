@@ -3,11 +3,19 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { canSeePrivateDomains } from "@/lib/domain-access";
+import { activeSetters, lockedText } from "@/lib/guardian-lock";
+import { ensureWatcherEnrollments } from "@/lib/family-invite";
 import { z } from "zod";
 
 const paramsSchema = z.object({
   id: z.string().min(1, "Domain ID required"),
 });
+
+/** The family's adults follow the child into a new subject, as they do into the first ones. */
+async function familyFollows(childId: string, domainId: string) {
+  const guardians = await prisma.guardian.findMany({ where: { childId, status: "active" }, select: { parentId: true } });
+  for (const g of guardians) await ensureWatcherEnrollments(g.parentId, [domainId]);
+}
 
 async function _POST(
   _req: Request,
@@ -71,12 +79,20 @@ async function _POST(
     if (existing.isActive) {
       return NextResponse.json({ error: "Already enrolled" }, { status: 409 });
     }
-    // Re-activate enrollment
+    // A subject a parent removed stays removed while they're the child's parent (guardian-lock.ts).
+    if (existing.setById) {
+      const owner = (await activeSetters(session.user.id, [existing.setById])).get(existing.setById);
+      if (owner) {
+        return NextResponse.json({ error: lockedText(owner, "subject"), locked: true }, { status: 403 });
+      }
+    }
+    // Re-activate enrollment — the child's own choice again.
     const updated = await prisma.enrollment.update({
       where: { id: existing.id },
-      data: { isActive: true },
+      data: { isActive: true, setById: null },
       include: { domain: true },
     });
+    await familyFollows(session.user.id, domainId);
     return NextResponse.json({
       id: updated.id,
       domainId: updated.domainId,
@@ -97,6 +113,7 @@ async function _POST(
     },
     include: { domain: true },
   });
+  if (enrollment.roles.includes("STUDENT")) await familyFollows(session.user.id, domainId);
 
   return NextResponse.json({
     id: enrollment.id,

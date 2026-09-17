@@ -5,6 +5,7 @@ import { recommendSessionType } from "@/lib/session-engine";
 import { getXpInfo, getStreakInfo } from "@/lib/gamification";
 import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 const dashboardQuerySchema = z.object({
   domainId: z.string().uuid().optional(),
@@ -15,6 +16,9 @@ async function _GET(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
 
   const { searchParams } = new URL(req.url);
   const parsed = dashboardQuerySchema.safeParse({

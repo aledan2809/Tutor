@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { AccessTrialPanel } from "@/components/admin/access-trial-panel";
+
+/** The access the server computed for the row (see access.ts; dates arrive as strings). */
+type AccessView =
+  | { kind: "full"; reason: "paid" | "family_paid" | "free_forever" | "staff" | "org" }
+  | { kind: "trial"; daysLeft: number; endsAt: string; via: "own" | "family" }
+  | { kind: "free" }
+  | { kind: "paused"; since: string; payer: "self" | "parent" }
+  | null;
 
 interface UserRow {
   id: string;
@@ -12,6 +21,8 @@ interface UserRow {
   isBanned: boolean;
   bannedReason: string | null;
   subscriptionStatus: string | null;
+  freeForever: boolean;
+  access: AccessView;
   createdAt: string;
   enrollments: { roles: string[]; domain: { id: string; name: string; slug: string } }[];
   subscriptionPlan: { name: string } | null;
@@ -27,11 +38,16 @@ const ROLES = ["STUDENT", "WATCHER", "INSTRUCTOR", "ADMIN"] as const;
 
 export function UserManagement() {
   const t = useTranslations("admin");
+  const locale = useLocale();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [onlyFreeForever, setOnlyFreeForever] = useState(false);
+  const [savingFreeForever, setSavingFreeForever] = useState<string | null>(null);
+  // Bumped after a mark/unmark, so the trial panel re-counts.
+  const [panelKey, setPanelKey] = useState(0);
   const [banModal, setBanModal] = useState<{ id: string; name: string | null } | null>(null);
   const [banReason, setBanReason] = useState("");
   const [showCreate, setShowCreate] = useState(false);
@@ -46,13 +62,60 @@ export function UserManagement() {
   const [enrollError, setEnrollError] = useState("");
   const [enrollLoading, setEnrollLoading] = useState(false);
 
-  const fetchUsers = async (p = page, s = search) => {
+  const fetchUsers = async (p = page, s = search, ff = onlyFreeForever) => {
     setLoading(true);
-    const res = await fetch(`/api/admin/users?page=${p}&search=${encodeURIComponent(s)}`);
+    const res = await fetch(`/api/admin/users?page=${p}&search=${encodeURIComponent(s)}${ff ? "&freeForever=1" : ""}`);
     const data = await res.json();
     setUsers(data.users);
     setTotalPages(data.totalPages);
     setLoading(false);
+  };
+
+  const handleFreeForever = async (userId: string, value: boolean) => {
+    // The box ticks at once; a refused save puts it back when the list reloads.
+    setUsers((us) => us.map((u) => (u.id === userId ? { ...u, freeForever: value } : u)));
+    setSavingFreeForever(userId);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ freeForever: value }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || t("trialSaveError"));
+      }
+    } finally {
+      setSavingFreeForever(null);
+      setPanelKey((k) => k + 1);
+      // Reload the badges quietly (no „loading" flash over the table).
+      const res = await fetch(`/api/admin/users?page=${page}&search=${encodeURIComponent(search)}${onlyFreeForever ? "&freeForever=1" : ""}`);
+      if (res.ok) setUsers((await res.json()).users);
+    }
+  };
+
+  const fmtDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(locale === "en" ? "en-GB" : "ro-RO", { timeZone: "Europe/Bucharest", day: "numeric", month: "short" });
+
+  const accessBadge = (access: AccessView) => {
+    if (!access) return null;
+    const [label, tone] =
+      access.kind === "full"
+        ? access.reason === "free_forever"
+          ? [t("accessFreeForever"), "bg-emerald-600/20 text-emerald-300"]
+          : access.reason === "family_paid"
+            ? [t("accessFamilyPaid"), "bg-green-600/20 text-green-300"]
+            : access.reason === "org"
+              ? [t("accessOrg"), "bg-green-600/20 text-green-300"]
+              : access.reason === "staff"
+                ? [t("accessStaff"), "bg-gray-600/30 text-gray-300"]
+                : [t("accessPaid"), "bg-green-600/20 text-green-300"]
+        : access.kind === "trial"
+          ? [t("accessTrial", { days: access.daysLeft }), "bg-blue-600/20 text-blue-300"]
+          : access.kind === "paused"
+            ? [t("accessPaused", { date: fmtDate(access.since) }), "bg-amber-600/20 text-amber-300"]
+            : [t("accessFree"), "bg-gray-600/30 text-gray-300"];
+    return <span className={`mt-1 inline-block rounded px-1.5 py-0.5 text-xs ${tone}`}>{label}</span>;
   };
 
   const fetchDomains = async () => {
@@ -167,6 +230,8 @@ export function UserManagement() {
 
   return (
     <div className="space-y-4">
+      <AccessTrialPanel refreshKey={panelKey} />
+
       <div className="flex justify-between items-center">
         <button
           onClick={() => setShowCreate(!showCreate)}
@@ -247,6 +312,19 @@ export function UserManagement() {
           {t("search")}
         </button>
       </form>
+      <label className="flex items-center gap-2 text-sm text-gray-300">
+        <input
+          type="checkbox"
+          checked={onlyFreeForever}
+          onChange={(e) => {
+            setOnlyFreeForever(e.target.checked);
+            setPage(1);
+            void fetchUsers(1, search, e.target.checked);
+          }}
+          className="h-4 w-4 accent-emerald-500"
+        />
+        {t("onlyFreeForever")}
+      </label>
 
       {loading ? (
         <p className="text-gray-400">{t("loading")}</p>
@@ -309,6 +387,7 @@ export function UserManagement() {
                         ({user.subscriptionStatus})
                       </span>
                     )}
+                    <div>{accessBadge(user.access)}</div>
                   </td>
                   <td className="px-4 py-3">
                     {user.isBanned ? (
@@ -322,6 +401,18 @@ export function UserManagement() {
                     )}
                   </td>
                   <td className="px-4 py-3">
+                    {!user.isSuperAdmin && (
+                      <label className="mb-2 flex items-center gap-2 text-xs text-gray-300" title={t("freeForeverHint")}>
+                        <input
+                          type="checkbox"
+                          checked={user.freeForever}
+                          disabled={savingFreeForever === user.id}
+                          onChange={(e) => void handleFreeForever(user.id, e.target.checked)}
+                          className="h-4 w-4 accent-emerald-500"
+                        />
+                        {t("freeForever")}
+                      </label>
+                    )}
                     <div className="flex flex-wrap gap-1">
                       <button
                         onClick={() => openEnrollModal(user.id, user.name)}

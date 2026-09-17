@@ -3,6 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { isGuardianOf } from "@/lib/guardian";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 /** The break must belong to this child (defence-in-depth alongside the guardian gate). */
 async function breakOfChild(childId: string, bid: string) {
@@ -13,6 +14,9 @@ async function breakOfChild(childId: string, bid: string) {
 async function _DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string; bid: string }> }) {
   const session = await getSession();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
   const { id: childId, bid } = await params;
   if (!(await isGuardianOf(session.user.id, childId))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

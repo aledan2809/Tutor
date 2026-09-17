@@ -17,6 +17,8 @@ export type LandingFacts = {
   freeTrialDays: number;
   /** The whole free period, counted once per account. */
   trialTotalDays: number;
+  /** The day-8 pause is switched on (access.ts). Off, an unpaid account keeps the free tier instead. */
+  pauseOn: boolean;
   chain: ChainStep[];
   /** Minutes between channels for a morning / an evening study reminder. */
   graceMorningMin: number;
@@ -29,6 +31,8 @@ export type LandingFacts = {
   parentAlertAfterMin: number;
   parentRenotifyMin: number;
   nudgeMaxAgeHours: number;
+  /** A parent's repeating reminder also stops after this many sends (often well before the hours). */
+  nudgeMaxFires: number;
   onTimeWindowMin: number;
   inviteValidDays: number;
   secondChildPct: number;
@@ -49,6 +53,8 @@ export type LandingContext = {
   codeFamilyOnly: boolean;
   /** The visitor already has an account and is signed in. */
   signedIn: boolean;
+  /** The channel's own code was used on this account, so the page offers the other one (pickLandingCode). */
+  codeSwapped?: boolean;
 };
 
 export type Lead = { lead: string; text: string };
@@ -192,9 +198,13 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
     hero: {
       pill: ro ? "Pentru părinți" : "For parents",
       arrival: code
-        ? ro
-          ? flyer ? `Codul ${code} de pe flyer e deja pus` : `Codul online ${code} se aplică singur`
-          : flyer ? `The ${code} code from the flyer is already in` : `Online code ${code} applies by itself`
+        ? ctx.codeSwapped
+          ? ro
+            ? `Codul ${code} se aplică singur`
+            : `Code ${code} applies by itself`
+          : ro
+            ? flyer ? `Codul ${code} de pe flyer e deja pus` : `Codul online ${code} se aplică singur`
+            : flyer ? `The ${code} code from the flyer is already in` : `Online code ${code} applies by itself`
         : null,
       titleLines: ro ? ["Liniștea ta,", "cât o cafea pe lună."] : ["Peace of mind,", "for the price of a coffee."],
       sub: ro
@@ -240,10 +250,16 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
       title: ro ? "Nu mai ești tu cel care întreabă „ai învățat?”" : "You're no longer the one asking “did you study?”",
       lead: ro ? "Patru lucruri se întâmplă singure, în fiecare zi în care copilul are program." : "Four things happen on their own, every day your child has study time scheduled.",
       step1: ro
-        ? { title: "Copilul își pune orele de studiu", text: "Alege zilele și orele în program. La ora aceea primește primul memento. În zilele de vacanță pe care le marchezi nu pleacă nimic." }
-        : { title: "Your child sets their study hours", text: "They pick the days and times. At that time the first reminder goes out. On the holidays you mark, nothing is sent." },
+        ? {
+            title: "Programul îl face copilul, ultimul cuvânt e al tău",
+            text: "Copilul își alege zilele, orele și materiile. Tu le poți schimba oricând, din telefon, iar ce ai stabilit tu rămâne așa. La ora din program primește primul reminder. În zilele de vacanță pe care le marchezi nu pleacă nimic.",
+          }
+        : {
+            title: "Your child makes the schedule; you have the last word",
+            text: "They pick the days, times and subjects. You can change them any time from your phone, and what you set stays that way. At the scheduled time the first reminder goes out. On the holidays you mark, nothing is sent.",
+          },
       step2: {
-        title: ro ? "Dacă nu reacționează, mementoul trece pe alt canal" : "If they don't react, the reminder moves to another channel",
+        title: ro ? "Dacă nu reacționează, reminderul trece pe alt canal" : "If they don't react, the reminder moves to another channel",
         channelLabel: CHANNEL_LABEL[locale],
         free: ro ? "gratuit" : "free",
         paid: ro ? "inclus în Family" : "included in Family",
@@ -252,7 +268,7 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
           : `The chain stops when they tap the in-app notification${hasTelegram ? " or the button in the Telegram message" : ""}, or finish a session. Just reading an email or a message doesn't stop it.`,
         facts: [
           ro
-            ? { lead: "Ritmul ține de ora mementoului.", text: `Dimineața, când timpul e scurt, trecem la canalul următor după ${minutesRo(facts.graceMorningMin)}; seara, după ${minutesRo(facts.graceEveningMin)}.` }
+            ? { lead: "Ritmul ține de ora reminderului.", text: `Dimineața, când timpul e scurt, trecem la canalul următor după ${minutesRo(facts.graceMorningMin)}; seara, după ${minutesRo(facts.graceEveningMin)}.` }
             : { lead: "The pace follows the time of day.", text: `In the morning, when time is short, we move to the next channel after ${minutesEn(facts.graceMorningMin)}; in the evening, after ${minutesEn(facts.graceEveningMin)}.` },
           ro
             ? { lead: "Sau îl alegi tu.", text: `Blând (aplicație, apoi email după ${minutesRo(facts.gentleEmailAfterMin)}), Standard (câte ${minutesRo(facts.standardStepMin)} între canale) sau Insistent (câte ${minutesRo(facts.insistentStepMin)}).` }
@@ -263,24 +279,24 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
           ...(hasTelegram
             ? [
                 ro
-                  ? { lead: "Nimic de instalat, dacă nu vrei.", text: "Mementourile pot veni doar pe Telegram; legătura se face o singură dată, într-un minut." }
+                  ? { lead: "Nimic de instalat, dacă nu vrei.", text: "Reminderele pot veni doar pe Telegram; legătura se face o singură dată, într-un minut." }
                   : { lead: "Nothing to install if you'd rather not.", text: "Reminders can come over Telegram alone; connecting takes a minute, once." },
               ]
             : []),
         ] as Lead[],
       },
       step3: {
-        title: ro ? "Pe tine te anunțăm la final, nu la fiecare memento" : "We tell you at the end, not at every reminder",
+        title: ro ? "Pe tine te anunțăm la final, nu la fiecare reminder" : "We tell you at the end, not at every reminder",
         text: ro
-          ? `Nu primești fiecare memento al copilului. Afli pe ce canal a reacționat — iar dacă a ignorat tot lanțul, într-o zi cu program, primești o alertă la ${minutesRo(facts.parentAlertAfterMin)} după ultimul memento.`
+          ? `Nu primești fiecare reminder al copilului. Afli pe ce canal a reacționat — iar dacă a ignorat tot lanțul, într-o zi cu program, primești o alertă la ${minutesRo(facts.parentAlertAfterMin)} după ultimul reminder.`
           : `You don't get every reminder your child gets. You find out which channel they reacted on — and if they ignored the whole chain on a scheduled day, you get an alert ${minutesEn(facts.parentAlertAfterMin)} after the last reminder.`,
         facts: [
           ro
             ? { lead: "Cât timp nu reacționează,", text: `te anunțăm din nou la fiecare ${minutesRo(facts.parentRenotifyMin)} — sau cum alegi: din câteva în câteva ore, o dată pe zi, ori o singură dată.` }
             : { lead: "While there's still no reaction,", text: `we alert you again every ${minutesEn(facts.parentRenotifyMin)} — or as you choose: every few hours, once a day, or only once.` },
           ro
-            ? { lead: "Vrei să-l împingi chiar tu?", text: `Trimiți un memento pe loc, din aplicație. Se repetă până reacționează și se oprește singur după ${hoursRo(facts.nudgeMaxAgeHours)}.` }
-            : { lead: "Want to nudge them yourself?", text: `Send a reminder right away from the app. It repeats until they react and stops on its own after ${hoursEn(facts.nudgeMaxAgeHours)}.` },
+            ? { lead: "Vrei să-l împingi chiar tu?", text: `Trimiți un reminder pe loc, din aplicație. Se repetă până reacționează, de cel mult ${facts.nudgeMaxFires} ori și cel mult ${hoursRo(facts.nudgeMaxAgeHours)}.` }
+            : { lead: "Want to nudge them yourself?", text: `Send a reminder right away from the app. It repeats until they react, at most ${facts.nudgeMaxFires} times and for at most ${hoursEn(facts.nudgeMaxAgeHours)}.` },
         ] as Lead[],
       },
       step4: {
@@ -291,7 +307,7 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
               { title: "Sesiuni", text: "ce a lucrat și cu ce scor" },
               { title: "Remindere", text: "ce a primit și dacă a reacționat" },
               { title: "Program", text: "zilele și orele de studiu" },
-              { title: "Vacanță", text: "zilele fără mementouri" },
+              { title: "Vacanță", text: "zilele fără remindere" },
             ]
           : [
               { title: "Sessions", text: "what they worked on and the score" },
@@ -303,12 +319,14 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
           ? { label: "Exemplu de raport", when: "duminică, 19:00", name: "Andrei · Matematică", onTime: "la timp", late: "întârziată", ignored: "ignorate", trend: "↑ Mai bine decât în ultimele 5 săptămâni", weak: "Greșește des la:", chips: ["fracții", "puteri"] }
           : { label: "Sample report", when: "Sunday, 7 pm", name: "Andrei · Maths", onTime: "on time", late: "late", ignored: "ignored", trend: "↑ Better than the last 5 weeks", weak: "Often gets wrong:", chips: ["fractions", "powers"] },
         legend: ro
-          ? `Raportul vine zilnic sau săptămânal, în ziua și la ora alese de tine. La timp = a început în cel mult ${minutesRo(facts.onTimeWindowMin)} de la memento · întârziată = mai târziu, în aceeași zi · ignorată = nicio reacție în ziua aceea.`
+          ? `Raportul vine zilnic sau săptămânal, în ziua și la ora alese de tine. La timp = a început în cel mult ${minutesRo(facts.onTimeWindowMin)} de la reminder · întârziată = mai târziu, în aceeași zi · ignorată = nicio reacție în ziua aceea.`
           : `The report comes daily or weekly, on the day and at the time you choose. On time = started within ${minutesEn(facts.onTimeWindowMin)} of the reminder · late = later the same day · ignored = no reaction that day.`,
       },
     },
 
     quiz: {
+      // Signed in: the button leads to the family page, not to a new account.
+      cta: ctx.signedIn ? (ro ? "Continuă în contul tău" : "Continue in your account") : null,
       title: ro ? "Vezi exact ce exersează copilul" : "See exactly what your child practises",
       sub: ro ? "Alege o materie și încearcă un test real chiar acum — fără cont." : "Pick a subject and try a real quiz right now — no account.",
     },
@@ -331,7 +349,7 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
               text: `${mainPrice ? `Vezi direct ${mainPrice} lei pe lună. ` : ""}Pui cardul${hasTrial ? `, iar ${lowerFirst(trial.sentence)}` : " și plătești lunar"}.`,
             },
             { label: "Pasul 3", title: "Îți inviți copilul", text: "Are contul lui și vede doar ce e al lui." },
-            { label: "Pasul 4", title: "Îi pui programul — gata", text: "Mementourile pleacă singure; tu primești raportul." },
+            { label: "Pasul 4", title: "Îi pui programul — gata", text: "Reminderele pleacă singure; tu primești raportul." },
           ]
         : [
             { label: "Step 1", title: "Create your account", text: code ? "Name, email and a password. The code is already in." : "Name, email and a password." },
@@ -416,14 +434,16 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
       ticks: ro
         ? [
             "Cont pentru tine și cont separat pentru copil",
-            `Mementouri ${listChannels(facts.chain, "ro")}`,
-            "Alertă pentru tine doar când ignoră tot lanțul de mementouri",
+            "Tu ai ultimul cuvânt la orele și materiile copilului",
+            `Remindere ${listChannels(facts.chain, "ro")}`,
+            "Alertă pentru tine doar când ignoră tot lanțul de remindere",
             "Raport zilnic sau săptămânal, cu locurile unde greșește des",
             "Simulări de examen și lecții structurate, la materiile care le au",
             "Anulezi oricând, din pagina Abonament",
           ]
         : [
             "An account for you and a separate one for your child",
+            "You have the last word on your child's hours and subjects",
             `Reminders ${listChannels(facts.chain, "en")}`,
             "An alert for you only when they ignore the whole reminder chain",
             "Daily or weekly report, with the topics they often get wrong",
@@ -530,19 +550,27 @@ function faqItems(locale: Locale, ctx: LandingContext, trial: ReturnType<typeof 
   const hasEmail = ctx.facts.chain.some((s) => s.channel === "EMAIL");
 
   const items: { q: string; a: string }[] = [];
+  // What happens after the free days without a card depends on whether the pause is switched on.
+  const afterTrial = ctx.facts.pauseOn
+    ? ro
+      ? " Dacă nu alegi un abonament până atunci, contul intră în pauză, al tău și al copilului. Nimic nu se șterge: tot ce a lucrat revine imediat ce plătești."
+      : " If you don't choose a subscription by then, the account is paused, yours and your child's. Nothing is deleted: everything they did comes back as soon as you pay."
+    : ro
+      ? " După ele, fără abonament, contul rămâne pe varianta gratuită."
+      : " After that, without a subscription, the account keeps the free tier.";
   items.push(
     ro
       ? {
           q: "Pot încerca înainte să plătesc?",
           a: hasTrial
-            ? `Da. ${trial.sentence}, o singură dată: fie fără card, cu un cont gratuit, fie cu cardul pus, direct pe Family. Dacă anulezi până atunci, nu plătești nimic.${offer ? " Codul rămâne salvat în cont până plătești." : ""}`
-            : `Zilele gratuite (${ctx.facts.trialTotalDays}) se socotesc de la crearea contului, iar la contul tău au trecut. Poți anula oricând, din pagina Abonament.`,
+            ? `Da. ${trial.sentence}, fără card: tot pachetul Family, în afară de WhatsApp și SMS (acolo plătim fiecare mesaj).${afterTrial} Poți pune și cardul de la început, direct pe Family; dacă anulezi în zilele gratuite, nu plătești nimic.${offer ? " Codul rămâne salvat în cont până plătești." : ""}`
+            : `Zilele gratuite ale contului tău (${ctx.facts.trialTotalDays}) au trecut. Poți anula oricând, din pagina Abonament.`,
         }
       : {
           q: "Can I try before I pay?",
           a: hasTrial
-            ? `Yes. ${trial.sentence}, once: either without a card, with a free account, or with your card added, straight on Family. Cancel before then and you pay nothing.${offer ? " The code stays saved on your account until you pay." : ""}`
-            : `The free days (${ctx.facts.trialTotalDays}) count from the day the account is created, and yours have passed. You can cancel any time from the Subscription page.`,
+            ? `Yes. ${trial.sentence}, without a card: the whole Family package, except WhatsApp and SMS (we pay for each of those messages).${afterTrial} You can also add your card from the start, straight on Family; cancel within the free days and you pay nothing.${offer ? " The code stays saved on your account until you pay." : ""}`
+            : `Your account's free days (${ctx.facts.trialTotalDays}) have passed. You can cancel any time from the Subscription page.`,
         },
     ro
       ? {
@@ -579,7 +607,7 @@ function faqItems(locale: Locale, ctx: LandingContext, trial: ReturnType<typeof 
       : [hasEmail ? "by email" : null, hasTelegram ? "on Telegram" : null].filter(Boolean).join(" or ");
     items.push(
       ro
-        ? { q: "Copilul are nevoie de telefon?", a: `Nu neapărat. Poate exersa și de pe calculator, iar mementourile îi pot veni ${where}.` }
+        ? { q: "Copilul are nevoie de telefon?", a: `Nu neapărat. Poate exersa și de pe calculator, iar reminderele îi pot veni ${where}.` }
         : { q: "Does my child need a phone?", a: `Not necessarily. They can practise on a computer too, and reminders can reach them ${where}.` },
     );
   }
@@ -588,7 +616,7 @@ function faqItems(locale: Locale, ctx: LandingContext, trial: ReturnType<typeof 
     : `A second child is added from the app at ${ctx.facts.secondChildPct}% off the plan's normal price${secondChild ? `: ${secondChild} lei a month on Family` : ""}.`;
   items.push(
     ro
-      ? { q: "Vedeți conversațiile noastre de pe Telegram sau WhatsApp?", a: "Nu. Doar trimitem mementourile. Pe Telegram te dezabonezi oricând scriind /stop." }
+      ? { q: "Vedeți conversațiile noastre de pe Telegram sau WhatsApp?", a: "Nu. Doar trimitem reminderele. Pe Telegram te dezabonezi oricând scriind /stop." }
       : { q: "Can you see our Telegram or WhatsApp conversations?", a: "No. We only send the reminders. On Telegram you can unsubscribe any time by sending /stop." },
     ro
       ? { q: "Cum anulez?", a: "Din pagina Abonament, cu butonul „Gestionează abonamentul”. Fără telefoane și fără formulare." }

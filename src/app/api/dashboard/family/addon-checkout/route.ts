@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { getFamilyOverview } from "@/lib/family-invite";
 import { childDiscountPercent } from "@/lib/family";
+import { isPaidSubscriber } from "@/lib/escalation/segmentation";
 
 /**
  * Per-child add-on checkout via the Stripe Checkout Broker.
@@ -37,11 +38,15 @@ async function _POST() {
   const u = await prisma.user.findUnique({
     where: { id: userId },
     select: {
+      subscriptionStatus: true,
+      subscriptionEndsAt: true,
       subscriptionPlan: { select: { name: true, price: true, interval: true, isActive: true } },
     },
   });
   const plan = u?.subscriptionPlan;
-  if (!plan || !plan.isActive) {
+  // A cancelled or expired subscription keeps its plan on the account; an add-on billed next to
+  // it would charge for a family that no longer pays. The 7-day trial has no plan at all.
+  if (!u || !plan || !plan.isActive || !isPaidSubscriber(u)) {
     return NextResponse.json(
       { error: "Ai nevoie de un pachet de familie activ ca să adaugi un copil." },
       { status: 400 }

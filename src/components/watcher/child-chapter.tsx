@@ -8,6 +8,7 @@ import { BreaksManager } from "@/components/watcher/breaks-manager";
 import { PhoneCapture } from "@/components/phone-capture";
 import { ParentAlertActions } from "@/components/watcher/parent-alert-actions";
 import { ParentNudgeManager } from "@/components/watcher/parent-nudge-manager";
+import { SubjectManager } from "@/components/watcher/subject-manager";
 
 const KNOWN_SESSION_TYPES = ["micro", "quick", "deep", "repair", "recovery", "intensive"];
 
@@ -80,6 +81,7 @@ interface Memento {
 }
 interface Detail {
   canManageSchedule: boolean;
+  canManageSubjects?: boolean;
   scheduledSessions: ScheduledSession[];
   reminderLog: ReminderTouch[];
   sessionLog: SessionItem[];
@@ -163,7 +165,7 @@ export function ChildChapter({ child }: { child: ChildLite }) {
       const key = `${t.reminderId ?? t.reason ?? "—"}|${day}`;
       let g = map.get(key);
       if (!g) {
-        g = { name: t.name ?? "Memento", day, firstAt: t.at, touches: [] };
+        g = { name: t.name ?? "Reminder", day, firstAt: t.at, touches: [] };
         map.set(key, g);
       }
       if (new Date(t.at) < new Date(g.firstAt)) g.firstAt = t.at;
@@ -264,13 +266,20 @@ export function ChildChapter({ child }: { child: ChildLite }) {
                 <ReminderManager
                   apiBase={`/api/dashboard/watcher/${child.id}/reminders`}
                   domains={child.domains.map((d) => ({ slug: d.slug, name: d.name }))}
+                  viewer="guardian"
                 />
+                {detail.canManageSubjects && (
+                  <div>
+                    <h3 className="mb-2 text-sm font-medium text-gray-400">Materii</h3>
+                    <SubjectManager childId={child.id} onChange={() => void loadDetail()} />
+                  </div>
+                )}
                 <div>
                   <h3 className="mb-2 text-sm font-medium text-gray-400">Vacanță / excepții</h3>
                   <BreaksManager apiBase={`/api/dashboard/watcher/${child.id}/breaks`} />
                 </div>
                 <div>
-                  <h3 className="mb-2 text-sm font-medium text-gray-400">Trimite memento acum</h3>
+                  <h3 className="mb-2 text-sm font-medium text-gray-400">Trimite reminder acum</h3>
                   <ParentNudgeManager apiBase={`/api/dashboard/watcher/${child.id}/nudge`} />
                 </div>
               </div>
@@ -285,7 +294,7 @@ export function ChildChapter({ child }: { child: ChildLite }) {
             <div className="space-y-4">
               {detail.canManageSchedule && (
                 <div>
-                  <h3 className="mb-2 text-sm font-medium text-gray-400">Trimite un memento</h3>
+                  <h3 className="mb-2 text-sm font-medium text-gray-400">Trimite un reminder</h3>
                   <ParentAlertActions childId={child.id} />
                 </div>
               )}
@@ -335,10 +344,10 @@ function SesiuniTab({
     <div className="space-y-5">
       <div>
         <h3 className="mb-2 text-sm font-medium text-gray-400">
-          Sesiuni programate (memento → rezultat)
+          Sesiuni programate (reminder → rezultat)
         </h3>
         {scheduled.length === 0 ? (
-          <p className="text-sm text-gray-500">Niciun memento programat declanșat încă.</p>
+          <p className="text-sm text-gray-500">Niciun reminder programat declanșat încă.</p>
         ) : (
           <div className="space-y-1">
             {scheduled.map((s) => (
@@ -491,7 +500,7 @@ function MementosLog({ mementos }: { mementos: Memento[] }) {
     });
   return (
     <div>
-      <h3 className="mb-2 text-sm font-medium text-gray-400">Mementouri trimise de tine</h3>
+      <h3 className="mb-2 text-sm font-medium text-gray-400">Remindere trimise de tine</h3>
       <div className="space-y-1">
         {mementos.map((m) => (
           <div key={m.id} className="flex flex-wrap items-center justify-between gap-2 rounded bg-gray-800 px-3 py-2">
@@ -522,7 +531,7 @@ function RemindereTab({
   episodes: { name: string; day: string; firstAt: string; touches: ReminderTouch[]; mementoCount?: number }[];
 }) {
   if (episodes.length === 0) {
-    return <p className="text-sm text-gray-500">Niciun memento încă.</p>;
+    return <p className="text-sm text-gray-500">Niciun reminder încă.</p>;
   }
   const hm = (d: string) =>
     new Date(d).toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" });
@@ -540,7 +549,7 @@ function RemindereTab({
               <span className="flex shrink-0 items-center gap-2">
                 {mc > 0 && (
                   <span className="rounded bg-blue-600/20 px-2 py-0.5 text-xs text-blue-300">
-                    📨 {mc === 1 ? "memento trimis" : `${mc} mementouri`}
+                    📨 {mc === 1 ? "reminder trimis" : `${mc} remindere`}
                   </span>
                 )}
                 <span
@@ -634,7 +643,7 @@ function ChildSynthesis({
           onClick={onAct}
           className="mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 min-h-[40px]"
         >
-          {weak ? `Trimite-i un memento pe „${weak.topic}” →` : "Trimite-i un memento →"}
+          {weak ? `Trimite-i un reminder pe „${weak.topic}” →` : "Trimite-i un reminder →"}
         </button>
       )}
     </div>

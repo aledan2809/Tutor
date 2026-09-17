@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import {
   getFamilyPlan,
   canAddParent,
   canAddChild,
   canAddTutor,
+  trialChildCheck,
   INVITE_TARGET_ROLE,
   INVITE_CHANNEL,
   type FamilyPlanKey,
@@ -28,6 +30,16 @@ interface Overview {
   planKey: FamilyPlanKey | null;
   planLabel: string | null;
   isSuperAdmin: boolean;
+  freeForever: boolean;
+  unlimited: boolean;
+  trial: boolean;
+  access: {
+    kind: "full" | "trial" | "free" | "paused";
+    daysLeft?: number;
+    reason?: string;
+    via?: "own" | "family";
+    payer?: "self" | "parent";
+  } | null;
   paidExtraChildSeats: number;
   children: Member[];
   coParents: Member[];
@@ -47,6 +59,8 @@ interface Overview {
     expiresAt: string;
     createdAt: string;
   }[];
+  /** A role-less account taken for a learner, which may say it is a parent's (family-invite.ts). */
+  canBecomeParent?: boolean;
 }
 
 const ROLE_RO: Record<string, string> = {
@@ -97,22 +111,41 @@ export default function FamilyPage() {
     return <p className="text-gray-500">Nu am putut încărca familia.</p>;
 
   const plan = data.planKey ? getFamilyPlan(data.planKey) : null;
-  const admin = data.isSuperAdmin;
+  const admin = data.unlimited;
+  // A child (or second parent) whose family's plan covers them, or who waits for their parent.
+  const coveredByFamily =
+    data.access?.reason === "family_paid" || data.access?.via === "family" || data.access?.payer === "parent";
+  const packageLabel = data.isSuperAdmin
+    ? "Administrator"
+    : data.freeForever
+      ? "Gratuit permanent"
+      : data.trial
+        ? "Family · probă gratuită"
+        : data.planLabel ?? "Fără pachet de familie";
 
   // Pure seat checks (admin bypasses everything). Paid add-on seats extend the base
   // child entitlement, so a child linked into an already-paid seat is a free invite.
   const effectiveChildPlan = plan
     ? { ...plan, maxChildren: plan.maxChildren + data.paidExtraChildSeats }
     : plan;
+  const childSeat = canAddChild(effectiveChildPlan, data.children.length);
+  // Someone the family covers (a child, a second parent) without a package of their own adds nobody:
+  // the parent who holds the package does. So no „choose a package" under their buttons either.
+  const byHolder: SeatCheck | null =
+    !admin && !plan && !data.trial && coveredByFamily
+      ? { allowed: false, reason: "no_family_plan", message: "Membrii familiei îi adaugă părintele care are pachetul." }
+      : null;
   const childCheck: SeatCheck = admin
     ? { allowed: true }
-    : canAddChild(effectiveChildPlan, data.children.length);
+    : byHolder ?? (data.trial
+      ? trialChildCheck(childSeat)
+      : childSeat);
   const parentCheck: SeatCheck = admin
     ? { allowed: true }
-    : canAddParent(plan, data.seats.parents.used);
+    : byHolder ?? canAddParent(plan, data.seats.parents.used);
   const tutorCheck: SeatCheck = admin
     ? { allowed: true }
-    : canAddTutor(plan, data.tutors.length);
+    : byHolder ?? canAddTutor(plan, data.tutors.length);
 
   return (
     <div>
@@ -122,26 +155,38 @@ export default function FamilyPage() {
         propriu și vede doar ce i se cuvine.
       </p>
 
+      {data.canBecomeParent && <BecomeParentCard />}
+
       {/* Plan + seats */}
       <div className="mb-6 rounded-lg border border-gray-700 bg-gray-800 p-4">
         <div className="flex flex-wrap items-center gap-4">
           <span className="text-sm text-gray-300">
             Pachet:{" "}
-            <strong className="text-white">
-              {admin ? "Administrator" : data.planLabel ?? "Fără pachet de familie"}
-            </strong>
+            <strong className="text-white">{packageLabel}</strong>
           </span>
           <Seat label="Părinți" used={data.seats.parents.used} max={data.seats.parents.max} admin={admin} />
           <Seat label="Copii" used={data.seats.children.used} max={data.seats.children.max} admin={admin} />
           <Seat label="Meditatori" used={data.seats.tutors.used} max={data.seats.tutors.max} admin={admin} />
         </div>
-        {!plan && !admin && (
+        {/* The days left and the payment button are in the trial banner above the page. */}
+        {data.trial && (
+          <p className="mt-3 text-sm text-blue-300">În proba gratuită îți poți lega copilul acum, fără card.</p>
+        )}
+        {/* Someone the family covers (a child, a second parent) is never sent to buy: a child
+            must not be pushed to purchase (UCPD Annex I point 28), and the family already pays. */}
+        {!plan && !admin && coveredByFamily && data.access?.kind === "paused" && (
+          <p className="mt-3 text-sm text-amber-400">Proba gratuită s-a încheiat. Tot ce ai lucrat e păstrat.</p>
+        )}
+        {!plan && !admin && !coveredByFamily && (
           <p className="mt-3 text-sm text-amber-400">
-            Nu ai un pachet de familie activ.{" "}
-            <Link href="/parinte" className="underline">
+            {data.access?.kind === "paused"
+              ? "Proba gratuită s-a încheiat, iar contul e în pauză. Tot ce ați lucrat e păstrat."
+              : "Nu ai un pachet de familie activ."}{" "}
+            {/* Paused: the pause screen names the package that fits this account (Family or Elev). */}
+            <Link href={data.access?.kind === "paused" ? "/dashboard/packages" : "/dashboard/packages?plan=FAMILY"} className="underline">
               Vezi pachetele
             </Link>{" "}
-            ca să adaugi membri.
+            {data.access?.kind === "paused" ? "ca să continuați." : "ca să adaugi membri."}
           </p>
         )}
       </div>
@@ -181,11 +226,56 @@ export default function FamilyPage() {
         />
       )}
 
-      <MemberSection title="Copii" members={data.children} onRemove={load} showToneControl />
+      <MemberSection title="Copii" members={data.children} onRemove={load} showToneControl={data.access?.kind !== "paused"} />
       <MemberSection title="Părinți" members={data.coParents} onRemove={load} />
       <MemberSection title="Meditatori" members={data.tutors} onRemove={load} />
 
       <PendingInvites invites={data.pendingInvites} onChange={load} />
+    </div>
+  );
+}
+
+/**
+ * An account that signed up without a role and picked a subject is taken for a learner: no family
+ * seats in the free week. The parent behind it says so here, once.
+ */
+function BecomeParentCard() {
+  const { update } = useSession();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const become = async () => {
+    if (!confirm("Schimbi contul în cont de părinte? Materiile alese la înscriere le vei urmări, nu le vei mai exersa tu.")) return;
+    setBusy(true);
+    setError(null);
+    const r = await fetch("/api/dashboard/family/parent-role", { method: "POST" }).catch(() => null);
+    if (!r?.ok) {
+      const d = await r?.json().catch(() => null);
+      setError(d?.error ?? "Nu am putut schimba contul. Încearcă din nou.");
+      setBusy(false);
+      return;
+    }
+    // The menu and the seats follow the role kept in the session: refresh it, then the page.
+    await update();
+    window.location.reload();
+  };
+
+  return (
+    <div className="mb-6 rounded-lg border border-blue-800 bg-blue-950/30 p-4">
+      <h2 className="font-semibold text-white">Ești părinte?</h2>
+      <p className="mt-1 text-sm text-gray-300">
+        Contul tău arată ca unul de elev, pentru că ai ales o materie la înscriere. Dacă îl folosești ca
+        părinte, schimbă-l în cont de părinte: îți legi copilul în proba gratuită, iar materia aleasă o
+        urmărești, nu o exersezi tu.
+      </p>
+      <button
+        onClick={become}
+        disabled={busy}
+        className="mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50"
+      >
+        {busy ? "Se schimbă…" : "Sunt părinte"}
+      </button>
+      {error && <p className="mt-2 text-sm text-amber-400">{error}</p>}
     </div>
   );
 }

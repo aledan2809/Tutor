@@ -102,9 +102,13 @@ async function _POST(req: NextRequest) {
   // A partial discount (V126S from the flyer, ONV126S from the site) is paid with later, maybe
   // days later after trying without a card: keep it on the account so the packages page has it
   // filled in. No subject needed for this — a parent often picks the child's subjects afterwards.
-  if (voucherCode) {
+  // A link that dropped the query string (the quiz on another page, a bookmark) still carries the
+  // code in the campaign cookie /cafea set — keep that one too. Only kept, never redeemed: the 100%
+  // path below still needs the code on the form.
+  const keptCode = voucherCode ?? parseAttribution(req.cookies.get(CAMPAIGN_COOKIE)?.value)?.voucher;
+  if (keptCode) {
     try {
-      const preview = await loadVoucherPreview(voucherCode, user.id);
+      const preview = await loadVoucherPreview(keptCode, user.id);
       if (preview?.ok) {
         voucherDiscount = preview.preview.discountPercent;
         await prisma.user.update({

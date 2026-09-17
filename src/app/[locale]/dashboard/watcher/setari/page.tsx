@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { NotificationPreferences } from "@/components/notifications/notification-preferences";
 import { TelegramConnectCard } from "@/components/notifications/telegram-connect-card";
+import { AccessMessagesToggle } from "@/components/notifications/access-messages-toggle";
 import { PushSubscribeButton } from "@/components/push-subscribe";
 import { PhoneCapture } from "@/components/phone-capture";
 import { HowItWorks } from "@/components/ui/how-it-works";
@@ -39,6 +40,10 @@ export default async function WatcherSettingsPage() {
       <TelegramConnectCard />
 
       <NotificationPreferences showSelfAlert />
+
+      <div className="mt-6">
+        <AccessMessagesToggle />
+      </div>
     </div>
   );
 }

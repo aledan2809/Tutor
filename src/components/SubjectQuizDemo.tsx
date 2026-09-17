@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import NextLink from "next/link";
 import { Link } from "@/i18n/navigation";
 
 // No-account demo: pick a subject from the real PUBLISHED question bank and take
@@ -19,7 +20,18 @@ type Subject = { subject: string; count: number; display?: string };
 type Group = { level: string; label: string; subjects: Subject[] };
 type Phase = "select" | "take" | "score";
 
-export default function SubjectQuizDemo({ locale }: { locale?: string }) {
+export default function SubjectQuizDemo({
+  locale,
+  cta,
+}: {
+  locale?: string;
+  /**
+   * Where the result's button goes, as a full localized href. The parents' page passes its own
+   * signup link, so the plan, the code and the parent role survive the quiz; elsewhere the plain
+   * signup form.
+   */
+  cta?: { href: string; label?: string };
+}) {
   const ro = locale !== "en";
   const L = ro
     ? {
@@ -190,12 +202,21 @@ export default function SubjectQuizDemo({ locale }: { locale?: string }) {
           })}
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Link
-            href="/auth/register"
-            className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-center font-medium text-white hover:bg-blue-700"
-          >
-            {L.cta}
-          </Link>
+          {cta ? (
+            <NextLink
+              href={cta.href}
+              className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-center font-medium text-white hover:bg-blue-700"
+            >
+              {cta.label ?? L.cta}
+            </NextLink>
+          ) : (
+            <Link
+              href="/auth/register"
+              className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-center font-medium text-white hover:bg-blue-700"
+            >
+              {L.cta}
+            </Link>
+          )}
           <button
             onClick={reset}
             className="rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 font-medium text-gray-200 hover:bg-gray-800"

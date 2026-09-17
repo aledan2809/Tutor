@@ -3,7 +3,8 @@ import { requireWatcherOrInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { getStudentProgressSummary } from "@/lib/predictive-analytics";
 import { withErrorHandler } from "@/lib/api-handler";
-import { isGuardianOf, watcherSeesAllStudents } from "@/lib/guardian";
+import { isGuardianOf, isParentOf, watcherSeesAllStudents } from "@/lib/guardian";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 async function _GET(
   req: NextRequest,
@@ -11,6 +12,9 @@ async function _GET(
 ) {
   const { error, session } = await requireWatcherOrInstructor();
   if (error) return error;
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session!.user.id);
+  if (paused) return paused;
 
   const { id: studentId } = await params;
 
@@ -199,7 +203,7 @@ async function _GET(
     const reminderId = (meta?.reminderId as string) ?? null;
     const cur = reminderId ? remById.get(reminderId) : undefined;
     const sessionType = cur?.sessionType ?? (reason ? reason.split("_").slice(1).join("_") : "");
-    const name = cur?.label?.trim() || (sessionType ? TYPE_RO[sessionType] ?? sessionType : "Memento");
+    const name = cur?.label?.trim() || (sessionType ? TYPE_RO[sessionType] ?? sessionType : "Reminder");
     return {
       id: e.id,
       channel: e.channel,
@@ -344,6 +348,8 @@ async function _GET(
       domains: studentEnrollments.map((e) => e.domain),
     },
     canManageSchedule: isGuardian,
+    // Subjects are the parent's call only, not a family tutor's (guardian-lock.ts).
+    canManageSubjects: isGuardian && (await isParentOf(session!.user.id, studentId)),
     domainSummaries,
     schedule,
     scheduledSessions,

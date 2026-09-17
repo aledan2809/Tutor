@@ -6,6 +6,7 @@ import { updateWeakAreas } from "@/lib/session-engine";
 import { withErrorHandler } from "@/lib/api-handler";
 import { resolveDomainByIdOrForbid } from "@/lib/domain-gate";
 import { z } from "zod";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 const progressSchema = z.object({
   domainId: z.string().min(1),
@@ -20,6 +21,9 @@ async function _PATCH(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
 
   let body: unknown;
   try {

@@ -6,6 +6,9 @@ import { withErrorHandler } from "@/lib/api-handler";
 import { checkVoucherForCheckout, normalizeVoucherCode, type BrokerCoupon } from "@/lib/voucher-checkout";
 import { resolveFamilyPlanFromRecord } from "@/lib/family";
 import { checkoutTrialDays } from "@/lib/free-trial";
+import { trialStartOf } from "@/lib/access";
+import { loadPauseStartsAt } from "@/lib/access-server";
+import { paysByCard } from "@/lib/card-subscription";
 
 /**
  * Checkout via the central Stripe Checkout Broker (stripe.knowbest.ro).
@@ -40,6 +43,27 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: "Plan not found or inactive" }, { status: 404 });
   }
 
+  // Not on top of a subscription the card already pays: the broker can't switch its plan, so this
+  // would start a second subscription next to it, charged under another Stripe customer the portal
+  // doesn't show. A declined renewal is fixed with a new card; a change of package waits for the
+  // current subscription to end.
+  const payer = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true, subscriptionStatus: true, subscriptionEndsAt: true, stripeSubscriptionId: true },
+  });
+  if (payer && (await paysByCard(payer))) {
+    const pastDue = payer.subscriptionStatus === "past_due";
+    return NextResponse.json(
+      {
+        error: pastDue
+          ? "Plata abonamentului tău n-a trecut, iar banca o reîncearcă. Actualizează cardul din „Gestionează abonamentul” — un pachet nou ar porni un al doilea abonament."
+          : "Ai deja un abonament plătit cu cardul. Ca să treci pe alt pachet, oprește-l din „Gestionează abonamentul” și alege pachetul nou după ce se încheie — altfel ai plăti două abonamente.",
+        code: pastDue ? "PAST_DUE" : "CARD_SUBSCRIPTION",
+      },
+      { status: 409 },
+    );
+  }
+
   // Validate voucher locally (the broker creates the matching Stripe coupon). The rules
   // live in voucher-checkout.ts; `code` lets the page show a translated message.
   let coupon: BrokerCoupon | undefined;
@@ -70,9 +94,15 @@ async function _POST(req: NextRequest) {
   }
 
   // „7 zile gratuite" is counted once per account (decizie Alex 16.09.2026): paying on day 3 of a
-  // free account gets the 4 days still owed, not a fresh week on top.
-  const account = await prisma.user.findUnique({ where: { id: session.user.id }, select: { createdAt: true } });
-  const trialDays = isSubscription ? checkoutTrialDays(plan.trialDays, account?.createdAt ?? new Date()) : 0;
+  // free account gets the 4 days still owed, not a fresh week on top. The week starts where the
+  // no-card trial's does (access.ts): an account older than the pause switch got it from the switch.
+  const [account, pauseStartsAt] = await Promise.all([
+    prisma.user.findUnique({ where: { id: session.user.id }, select: { createdAt: true } }),
+    loadPauseStartsAt(),
+  ]);
+  const trialDays = isSubscription
+    ? checkoutTrialDays(plan.trialDays, trialStartOf(account?.createdAt ?? new Date(), pauseStartsAt))
+    : 0;
 
   const successUrl = `${process.env.STRIPE_SUCCESS_URL || process.env.AUTH_URL + "/dashboard"}?session_id={CHECKOUT_SESSION_ID}`;
   const cancelUrl = process.env.STRIPE_CANCEL_URL || process.env.AUTH_URL + "/dashboard";

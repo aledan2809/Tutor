@@ -4,10 +4,14 @@ import { prisma } from "@/lib/prisma";
 import { getStudentProgressSummary } from "@/lib/predictive-analytics";
 import { withErrorHandler } from "@/lib/api-handler";
 import { getLinkedChildIds, watcherSeesAllStudents } from "@/lib/guardian";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 async function _GET(req: NextRequest) {
   const { error, session } = await requireWatcherOrInstructor();
   if (error) return error;
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session!.user.id);
+  if (paused) return paused;
 
   const userId = session!.user.id;
   const { searchParams } = new URL(req.url);

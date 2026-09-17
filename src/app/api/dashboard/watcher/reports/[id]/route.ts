@@ -4,6 +4,7 @@ import { requireWatcher } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { isGuardianOf } from "@/lib/guardian";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 const patchInput = z.object({
   childId: z.string().nullable().optional(),
@@ -26,6 +27,9 @@ async function _PATCH(req: NextRequest, { params }: { params: Promise<{ id: stri
   const { error, session } = await requireWatcher();
   if (error) return error;
   const parentId = session!.user.id;
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(parentId);
+  if (paused) return paused;
   const { id } = await params;
   if (!(await ownSchedule(parentId, id)))
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -59,6 +63,9 @@ async function _DELETE(_req: NextRequest, { params }: { params: Promise<{ id: st
   const { error, session } = await requireWatcher();
   if (error) return error;
   const parentId = session!.user.id;
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(parentId);
+  if (paused) return paused;
   const { id } = await params;
   if (!(await ownSchedule(parentId, id)))
     return NextResponse.json({ error: "Not found" }, { status: 404 });

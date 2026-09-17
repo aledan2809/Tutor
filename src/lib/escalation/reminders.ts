@@ -8,6 +8,7 @@
 import { prisma } from "@/lib/prisma";
 import { startEscalation } from "./engine";
 import { userIdsOnBreak } from "./breaks";
+import { pausedUserIds } from "@/lib/access-server";
 
 export interface ReminderLike {
   isActive: boolean;
@@ -173,12 +174,30 @@ function reminderCopy(r: {
 export async function runDueReminders(now: Date = new Date()): Promise<number> {
   const reminders = await prisma.studyReminder.findMany({ where: { isActive: true } });
   const onBreak = await userIdsOnBreak(now);
+  // Only the reminders due now need the (per-account) pause check.
+  const paused = await pausedUserIds(
+    reminders.filter((r) => !onBreak.has(r.userId) && isReminderDue(r, now).due).map((r) => r.userId),
+    now
+  );
   let fired = 0;
   for (const r of reminders) {
     if (onBreak.has(r.userId)) continue; // vacanță: nu trimitem remindere
     const { due, today } = isReminderDue(r, now);
     if (!due) continue;
+    if (paused.has(r.userId)) {
+      // Proba gratuită s-a încheiat fără plată: contul e în pauză. Marked as done for today, so the
+      // account isn't checked again on every minute of the reminder's hour.
+      await prisma.studyReminder.update({ where: { id: r.id }, data: { lastFiredOn: today } }).catch(() => {});
+      continue;
+    }
     const { title, message } = reminderCopy(r);
+    // Marked as fired before its chain starts, and only by the run that marks it: two runs at once
+    // (one that outlived its lease) would otherwise both start a chain for the same reminder.
+    const claimed = await prisma.studyReminder.updateMany({
+      where: { id: r.id, OR: [{ lastFiredOn: null }, { lastFiredOn: { not: today } }] },
+      data: { lastFiredOn: today },
+    });
+    if (claimed.count === 0) continue;
     try {
       await startEscalation({
         userId: r.userId,
@@ -191,13 +210,12 @@ export async function runDueReminders(now: Date = new Date()): Promise<number> {
           reminderId: r.id,
         },
       });
-      await prisma.studyReminder.update({
-        where: { id: r.id },
-        data: { lastFiredOn: today },
-      });
       fired++;
     } catch {
-      // Never let one bad reminder block the rest.
+      // Never let one bad reminder block the rest; the next minute tries it again.
+      await prisma.studyReminder
+        .updateMany({ where: { id: r.id, lastFiredOn: today }, data: { lastFiredOn: r.lastFiredOn } })
+        .catch(() => {});
     }
   }
   return fired;

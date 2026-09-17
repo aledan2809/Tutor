@@ -15,9 +15,10 @@
  */
 
 import { prisma } from "@/lib/prisma";
-import { resolveUserAlertChannels, userInQuietHours } from "./parent-monitor";
+import { escapeHtml, resolveUserAlertChannels, userInQuietHours } from "./parent-monitor";
 import { webPushToUser, telegramAlertToUser } from "@/lib/notifications/service";
 import { sendAppEmail } from "@/lib/email";
+import { pausedUserIds } from "@/lib/access-server";
 
 const METRIC_RO: Record<string, string> = {
   streak: "seria",
@@ -121,7 +122,7 @@ export async function deliverThresholdAlert(
           ok = await sendAppEmail({
             to: user.email,
             subject: title,
-            html: `<p>${message}</p><p><a href="${base}${dest.url}">${dest.label}</a></p>`,
+            html: `<p>${escapeHtml(message)}</p><p><a href="${escapeHtml(`${base}${dest.url}`)}">${escapeHtml(dest.label)}</a></p>`,
           });
         }
       }
@@ -179,7 +180,9 @@ export async function runThresholdChecks(now: Date = new Date()): Promise<number
         where: { childId: th.studentId, status: "active", relation: "PARENT" },
         select: { parentId: true },
       });
+      const pausedParents = await pausedUserIds(parents.map((p) => p.parentId), now);
       for (const p of parents) {
+        if (pausedParents.has(p.parentId)) continue; // părinte în pauză: fără alerte (access.ts)
         // Parents can't open instructor pages — point them at their watcher view.
         await deliverThresholdAlert(p.parentId, title, message, metadata, {
           url: "/dashboard/watcher",

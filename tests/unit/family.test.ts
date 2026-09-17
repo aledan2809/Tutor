@@ -10,6 +10,7 @@ import {
   canAddParent,
   canAddChild,
   canAddTutor,
+  trialChildCheck,
 } from "@/lib/family";
 
 /**
@@ -99,6 +100,21 @@ describe("canAddChild", () => {
 
   it("third child add-on carries 30%", () => {
     expect(canAddChild(FAMILY_PLANS.FAMILY, 2).discountPercent).toBe(30);
+  });
+});
+
+describe("trialChildCheck", () => {
+  it("during the free week an extra child points to Family instead of the add-on checkout", () => {
+    const r = trialChildCheck(canAddChild(FAMILY_PLANS.FAMILY, 1));
+    expect(r.allowed).toBe(false);
+    expect(r.addon).toBeUndefined();
+    expect(r.upgradeTo).toBe("FAMILY");
+    expect(r.message).toContain("20%");
+  });
+
+  it("leaves an allowed seat and other refusals alone", () => {
+    expect(trialChildCheck(canAddChild(FAMILY_PLANS.FAMILY, 0))).toEqual({ allowed: true });
+    expect(trialChildCheck(canAddChild(null, 0)).reason).toBe("no_family_plan");
   });
 });
 

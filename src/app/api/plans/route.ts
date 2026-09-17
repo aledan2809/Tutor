@@ -3,7 +3,10 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { remainingFreeTrialDays } from "@/lib/free-trial";
+import { payingForAccess, trialStartOf } from "@/lib/access";
+import { loadPauseStartsAt } from "@/lib/access-server";
 import { loadVoucherPreview, serializePreview } from "@/lib/voucher-preview-server";
+import { paysByCard } from "@/lib/card-subscription";
 
 /**
  * GET /api/plans
@@ -41,7 +44,15 @@ async function _GET() {
 
   const me = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { subscriptionStatus: true, subscriptionPlanId: true, createdAt: true, pendingVoucherCode: true },
+    select: {
+      id: true,
+      subscriptionStatus: true,
+      subscriptionEndsAt: true,
+      subscriptionPlanId: true,
+      stripeSubscriptionId: true,
+      createdAt: true,
+      pendingVoucherCode: true,
+    },
   });
 
   const pending = me?.pendingVoucherCode ? await loadVoucherPreview(me.pendingVoucherCode, session.user.id) : null;
@@ -60,7 +71,13 @@ async function _GET() {
     current: {
       subscriptionStatus: me?.subscriptionStatus ?? null,
       subscriptionPlanId: me?.subscriptionPlanId ?? null,
-      freeTrialDaysLeft: me ? remainingFreeTrialDays(me.createdAt) : 0,
+      // Another package on top of a card subscription would be a second one: the page doesn't offer it.
+      byCard: me ? await paysByCard(me) : false,
+      // Stripe is still retrying a declined renewal (inside the grace). Past it, nothing is being
+      // retried any more and the family must be able to choose a package again.
+      retrying: me?.subscriptionStatus === "past_due" && payingForAccess(me),
+      // Same start as the no-card week and as checkout (access.ts trialStartOf).
+      freeTrialDaysLeft: me ? remainingFreeTrialDays(trialStartOf(me.createdAt, await loadPauseStartsAt())) : 0,
       pendingVoucher: pending
         ? pending.ok
           ? { ok: true as const, preview: serializePreview(pending.preview) }

@@ -129,6 +129,9 @@ model User {
   // and not paid with yet — kept so a parent who tries first doesn't have to find the flyer
   // again. Cleared once a payment with that code is recorded.
   pendingVoucherCode     String?
+  // „Gratuit permanent", bifat de administrator (prieteni, testeri): nu intră în proba de 7 zile,
+  // nu intră în pauză și nu primește mesaje despre probă. Contează ca un abonament plătit.
+  freeForever            Boolean                 @default(false)
   auditLogs              AdminAuditLog[]         @relation("AuditPerformer")
   payments               Payment[]
   notificationRetries    NotificationRetry[]
@@ -207,6 +210,9 @@ model StudyReminder {
   timezone    String   @default("Europe/Bucharest")
   isActive    Boolean  @default(true)
   lastFiredOn String? // YYYY-MM-DD in timezone (anti double-fire)
+  /// The parent (or family tutor) who set or last changed this reminder; null = the child's own.
+  /// While that adult is still an active guardian, the child can't change or delete it (Alex, 16.09.2026).
+  setById     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -475,6 +481,10 @@ model Enrollment {
   domainId  String
   roles     EnrollmentRole[]
   isActive  Boolean          @default(true)
+  /// The parent (or family tutor) who added or removed this subject for the child; null = the child's
+  /// own choice. A subject a guardian removed can't be added back by the child while that adult is
+  /// still an active guardian.
+  setById   String?
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
 
@@ -806,6 +816,7 @@ model EscalationEvent {
 
   @@index([userId, status])
   @@index([status, createdAt])
+  @@index([status, sentAt])
 }
 
 model NotificationPreference {
@@ -1832,4 +1843,14 @@ model ProcedureUpload {
   createdAt DateTime @default(now())
 
   @@index([appSlug, createdAt])
+}
+
+/// Setări ale întregii platforme, câte un rând pe cheie, schimbate din administrare.
+/// Prima: `accessTrial` = { startsAt } — din momentul acela conturile fără plată au 7 zile de probă,
+/// apoi intră în pauză. Fără rând, pauza e oprită și totul merge ca înainte.
+model AppSetting {
+  key         String   @id
+  value       Json
+  updatedById String?
+  updatedAt   DateTime @updatedAt
 }

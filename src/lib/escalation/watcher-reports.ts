@@ -16,6 +16,7 @@ import {
   type ChildReport,
   type ReportSection,
 } from "@/lib/watcher-report";
+import { pausedUserIds } from "@/lib/access-server";
 
 // Cron runs ~every 15 min; a report fires at-or-after its time within this
 // window so a missed tick doesn't skip the day.
@@ -154,8 +155,11 @@ export async function sendScheduleNow(scheduleId: string, now: Date = new Date()
 /** Fire all due schedules (called from the cron). Returns how many sent. */
 export async function runWatcherReports(now: Date = new Date()): Promise<number> {
   const schedules = await prisma.watcherReportSchedule.findMany({ where: { isActive: true } });
+  // A paused parent gets no report (access.ts); the schedule stays, so it resumes after payment.
+  const paused = await pausedUserIds(schedules.filter((s) => isReportDue(s, now).due).map((s) => s.parentId), now);
   let sent = 0;
   for (const s of schedules) {
+    if (paused.has(s.parentId)) continue;
     const { due, today } = isReportDue(s, now);
     if (!due) continue;
     try {

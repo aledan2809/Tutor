@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { normalizeJoinCode } from "@/lib/join-code";
 import { isJoinCodeUsable } from "@/lib/join-code-policy";
 import { logAudit } from "@/lib/audit";
+import { activeSetters } from "@/lib/guardian-lock";
 
 /**
  * Răscumpărarea unui cod de acces → înscriere activă ca STUDENT.
@@ -59,8 +60,13 @@ export async function redeemJoinCode(
 
   const existing = await prisma.enrollment.findUnique({
     where: { userId_domainId: { userId, domainId: domain.id } },
-    select: { isActive: true },
+    select: { isActive: true, setById: true },
   });
+  // A subject the child's parent removed stays removed (guardian-lock.ts) — a code doesn't undo it,
+  // and no use of the code is spent on it.
+  if (existing && !existing.isActive && existing.setById && (await activeSetters(userId, [existing.setById])).size > 0) {
+    return null;
+  }
 
   if (!existing || !existing.isActive) {
     const claimed = await prisma.domain.updateMany({

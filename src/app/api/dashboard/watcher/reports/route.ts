@@ -4,6 +4,7 @@ import { requireWatcher } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { isGuardianOf, getLinkedChildIds } from "@/lib/guardian";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 const scheduleInput = z.object({
   childId: z.string().nullable().optional(), // null = toți copiii
@@ -20,6 +21,9 @@ const scheduleInput = z.object({
 async function _GET() {
   const { error, session } = await requireWatcher();
   if (error) return error;
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session!.user.id);
+  if (paused) return paused;
   const parentId = session!.user.id;
 
   const [schedules, childIds] = await Promise.all([
@@ -43,6 +47,9 @@ async function _GET() {
 async function _POST(req: NextRequest) {
   const { error, session } = await requireWatcher();
   if (error) return error;
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session!.user.id);
+  if (paused) return paused;
   const parentId = session!.user.id;
 
   const parsed = scheduleInput.safeParse(await req.json().catch(() => null));

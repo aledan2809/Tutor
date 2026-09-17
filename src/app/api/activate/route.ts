@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 import { markCampaignActivated } from "@/lib/campaign-attribution";
+import { activeSetters } from "@/lib/guardian-lock";
+import { paysByCard } from "@/lib/card-subscription";
 
 /**
  * POST /api/activate — voucher-based activation (no Stripe needed for 100% vouchers).
@@ -50,6 +52,14 @@ async function _POST(req: NextRequest) {
   if (domains.length === 0) {
     return NextResponse.json({ error: "Nicio materie validă selectată" }, { status: 400 });
   }
+  // A subject the child's parent removed stays removed (guardian-lock.ts): activating a voucher
+  // doesn't turn it back on.
+  const removedByParent = await prisma.enrollment.findMany({
+    where: { userId, domainId: { in: domains.map((d) => d.id) }, isActive: false, setById: { not: null } },
+    select: { domainId: true, setById: true },
+  });
+  const setters = await activeSetters(userId, removedByParent.map((e) => e.setById));
+  const lockedDomainIds = new Set(removedByParent.filter((e) => e.setById && setters.has(e.setById)).map((e) => e.domainId));
 
   const result = await prisma.$transaction(async (tx) => {
     const voucher = await tx.voucher.findUnique({ where: { code } });
@@ -61,6 +71,20 @@ async function _POST(req: NextRequest) {
     // < 100% → needs the Stripe card flow (not handled here)
     if (voucher.discountPercent < 100) {
       return { requiresPayment: true, discountPercent: voucher.discountPercent };
+    }
+
+    // Not over a subscription paid by card: the code would replace the plan the family pays for (a
+    // Family Trio turned into the code's plan) while the card keeps being charged for the old one.
+    const me = await tx.user.findUnique({
+      where: { id: userId },
+      select: { id: true, accountRole: true, subscriptionStatus: true, subscriptionEndsAt: true, stripeSubscriptionId: true },
+    });
+    if (me && (await paysByCard(me, tx))) {
+      return {
+        error:
+          "Contul are deja un abonament plătit cu cardul, iar codul l-ar înlocui în timp ce cardul e taxat în continuare. Îl poți folosi după ce abonamentul se încheie: îl oprești din Pachete → Gestionează abonamentul.",
+        status: 409,
+      };
     }
 
     // 100% → redeem atomically (guard against races on maxUses)
@@ -75,25 +99,26 @@ async function _POST(req: NextRequest) {
     // Enroll in chosen subjects (idempotent via composite unique).
     // A parent activating their child's subject must NOT be turned into a learner:
     // one STUDENT row is enough to flip them back to the student menu.
-    const me = await tx.user.findUnique({
-      where: { id: userId },
-      select: { accountRole: true },
-    });
     const role = me?.accountRole === "PARENT" ? "WATCHER" : "STUDENT";
     for (const d of domains) {
       await tx.enrollment.upsert({
         where: { userId_domainId: { userId, domainId: d.id } },
         create: { userId, domainId: d.id, roles: [role], isActive: true },
-        update: { isActive: true },
+        update: lockedDomainIds.has(d.id) ? {} : { isActive: true },
       });
     }
 
-    // Mark subscription active (1 year — tester/grandfathered access)
+    // Mark subscription active (1 year — tester/grandfathered access). A code made for one plan
+    // activates that plan: an Elev code must not cover a whole family (access.ts). A code without a
+    // plan keeps today's behaviour.
+    const plan = voucher.planKey
+      ? await tx.subscriptionPlan.findFirst({ where: { familyPlanKey: voucher.planKey, isActive: true }, select: { id: true } })
+      : null;
     const endsAt = new Date();
     endsAt.setFullYear(endsAt.getFullYear() + 1);
     await tx.user.update({
       where: { id: userId },
-      data: { subscriptionStatus: "active", subscriptionEndsAt: endsAt },
+      data: { subscriptionStatus: "active", subscriptionEndsAt: endsAt, ...(plan ? { subscriptionPlanId: plan.id } : {}) },
     });
 
     return {

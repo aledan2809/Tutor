@@ -6,6 +6,7 @@ import { awardSessionCompleteXp } from "@/lib/gamification";
 import { withErrorHandler } from "@/lib/api-handler";
 import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import { cancelEscalation } from "@/lib/escalation/engine";
+import { refuseIfPaused } from "@/lib/access-gate";
 import {
   SPRINT_SESSION_TYPE,
   SPRINT_TIMEOUT_ANSWER,
@@ -20,6 +21,9 @@ async function _POST(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
 
   const { domain: domainSlug } = await params;
 

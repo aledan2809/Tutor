@@ -30,6 +30,7 @@ import {
   tierForIndex,
   type Tier,
 } from "@/lib/mental-chain";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 async function _POST(
   req: NextRequest,
@@ -39,6 +40,9 @@ async function _POST(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
 
   const { domain: domainSlug } = await params;
   let body: Record<string, unknown> = {};

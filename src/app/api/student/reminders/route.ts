@@ -3,6 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { reminderInput } from "@/lib/reminder-schema";
+import { activeSetters } from "@/lib/guardian-lock";
 
 async function _GET() {
   const session = await getSession();
@@ -13,7 +14,14 @@ async function _GET() {
     where: { userId: session.user.id },
     orderBy: [{ hour: "asc" }, { minute: "asc" }],
   });
-  return NextResponse.json({ reminders });
+  // What a parent set is shown read-only, with who set it (guardian-lock.ts).
+  const owners = await activeSetters(session.user.id, reminders.map((r) => r.setById));
+  return NextResponse.json({
+    reminders: reminders.map((r) => {
+      const owner = r.setById ? owners.get(r.setById) : undefined;
+      return { ...r, lockedBy: owner ? { name: owner.name } : null };
+    }),
+  });
 }
 
 async function _POST(req: NextRequest) {

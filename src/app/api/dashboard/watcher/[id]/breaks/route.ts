@@ -4,6 +4,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { isGuardianOf } from "@/lib/guardian";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const breakInput = z
@@ -21,6 +22,9 @@ const toYmd = (d: Date) => d.toISOString().slice(0, 10);
 async function _GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
   const { id: childId } = await params;
   if (!(await isGuardianOf(session.user.id, childId))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -42,6 +46,9 @@ async function _GET(_req: NextRequest, { params }: { params: Promise<{ id: strin
 async function _POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
   const { id: childId } = await params;
   if (!(await isGuardianOf(session.user.id, childId))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

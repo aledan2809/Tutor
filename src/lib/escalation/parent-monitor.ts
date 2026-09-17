@@ -16,9 +16,11 @@ import { scheduledTodayFilter } from "./scheduled-days";
 import { isQuietHours } from "./timing";
 import { PARENT_ALERT_STALL_MIN, PARENT_RENOTIFY_MIN } from "./config";
 import { resolveLadder } from "./config";
-import { isPaidStatus } from "@/lib/plan-channels";
+import { meteredChannelsCovered, SELECT_ACOPERIRE_CANALE } from "./segmentation";
 import { webPushToUser, telegramAlertToUser } from "@/lib/notifications/service";
 import { sendAppEmail } from "@/lib/email";
+import { coveredAsSecondParent, parentPaysForMetered } from "./parent-nudge";
+import { pausedUserIds } from "@/lib/access-server";
 
 const PARENT_ALERT_URL = "/dashboard/watcher/notifications";
 
@@ -34,7 +36,7 @@ export async function resolveUserAlertChannels(userId: string): Promise<string[]
   const [user, prefs, phoneSetting] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
-      select: { email: true, telegramChatId: true, subscriptionStatus: true },
+      select: { email: true, telegramChatId: true, ...SELECT_ACOPERIRE_CANALE },
     }),
     prisma.notificationPreference.findUnique({ where: { userId } }),
     prisma.setting.findUnique({ where: { userId_key: { userId, key: "phone" } } }),
@@ -61,7 +63,11 @@ export async function resolveUserAlertChannels(userId: string): Promise<string[]
           typeof phoneSetting?.value === "string" &&
           phoneSetting.value &&
           whatsappConfigured &&
-          isPaidStatus(user?.subscriptionStatus)
+          // The send gate's own answer (service.ts): a plan still paid for, „Gratuit permanent", a
+          // company that pays for the channels. A lapsed „active" row doesn't count. The second
+          // parent of Family Duo / Family Trio is paid for by the other parent's plan.
+          user !== null &&
+          (meteredChannelsCovered(user) || (await coveredAsSecondParent(userId)))
         ) {
           out.push("WHATSAPP");
         }
@@ -72,33 +78,42 @@ export async function resolveUserAlertChannels(userId: string): Promise<string[]
   return out;
 }
 
+/** Where an alert's button leads. Parent alerts open the alert list; other messages pass their own. */
+export type AlertLink = { url: string; label: string };
+const ALERTS_LINK: AlertLink = { url: PARENT_ALERT_URL, label: "Vezi alertele" };
+
+/** Text people typed (a child's name) put into an email's HTML stays text. */
+export const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
 /** Send one alert on one concrete channel. Returns whether the send succeeded. */
 async function sendAlertOnChannel(
   userId: string,
   channel: string,
   title: string,
-  message: string
+  message: string,
+  link: AlertLink = ALERTS_LINK
 ): Promise<boolean> {
   const base = (process.env.AUTH_URL ?? "").replace(/\/$/, "");
   switch (channel) {
     case "PUSH":
       // webPushToUser returns the delivered-subscription count.
-      return (await webPushToUser(userId, { title, body: message, url: PARENT_ALERT_URL })) > 0;
+      return (await webPushToUser(userId, { title, body: message, url: link.url })) > 0;
     case "TELEGRAM":
       return await telegramAlertToUser(userId, {
         text: `${title}\n${message}`,
-        url: PARENT_ALERT_URL,
-        buttonLabel: "Vezi alertele",
+        url: link.url,
+        buttonLabel: link.label,
       });
     case "EMAIL": {
       const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
       if (!user?.email) return false;
       // sendAppEmail reports provider failure — propagate it so the cascade can
       // fall through to the next channel instead of silently "succeeding".
+      // The message carries names people typed (a child's name): escaped, so it stays text.
       return await sendAppEmail({
         to: user.email,
         subject: title,
-        html: `<p>${message}</p><p><a href="${base}${PARENT_ALERT_URL}">Vezi alertele</a></p>`,
+        html: `<p>${escapeHtml(message).replace(/\n/g, "<br>")}</p><p><a href="${base}${link.url}">${escapeHtml(link.label)}</a></p>`,
       });
     }
     case "WHATSAPP": {
@@ -143,26 +158,28 @@ export async function userInQuietHours(userId: string): Promise<boolean> {
  * fails, tries the remaining channels — wrapping around to the start — so every
  * channel gets one attempt and the alert is never silently lost. Respects quiet
  * hours. Best-effort — never throws (alert delivery must not break the monitoring
- * sweep).
+ * sweep). Answers whether some channel took it.
  */
-async function deliverParentAlert(
+export async function deliverParentAlert(
   parentId: string,
   title: string,
   message: string,
-  rung = 0
-): Promise<void> {
+  rung = 0,
+  link: AlertLink = ALERTS_LINK
+): Promise<boolean> {
   try {
-    if (await userInQuietHours(parentId)) return;
+    if (await userInQuietHours(parentId)) return false;
 
     const channels = await resolveUserAlertChannels(parentId);
     const start = Math.min(rung, channels.length - 1);
     for (let k = 0; k < channels.length; k++) {
       const i = (start + k) % channels.length;
-      if (await sendAlertOnChannel(parentId, channels[i], title, message)) return;
+      if (await sendAlertOnChannel(parentId, channels[i], title, message, link)) return true;
     }
   } catch (e) {
     console.error("deliverParentAlert error:", e);
   }
+  return false;
 }
 
 export const RENOTIFY_MIN = PARENT_RENOTIFY_MIN; // re-nag the parent at this interval
@@ -273,10 +290,13 @@ async function notifyGuardians(
     where: { childId, status: "active", ...(opts?.relation ? { relation: opts.relation } : {}) },
     select: { parentId: true },
   });
-  for (const l of links) {
+  // A paused parent (access.ts) gets no alert from any step of an episode, its resolution included.
+  const paused = await pausedUserIds(links.map((l) => l.parentId));
+  const reached = links.filter((l) => !paused.has(l.parentId));
+  for (const l of reached) {
     await notifyParent(l.parentId, childId, childName, alert);
   }
-  return links.length;
+  return reached.length;
 }
 
 /** Whether the child engaged since `since`, and via which channel (attribution). */
@@ -386,7 +406,7 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
       {
         alertType: "reacted_negative",
         title: "Nu a reacționat ❌",
-        message: `${esc.child.name ?? "Copilul"} nu a reacționat nici după mementoul suplimentar.`,
+        message: `${esc.child.name ?? "Copilul"} nu a reacționat nici după reminderul suplimentar.`,
       },
       { relation: "PARENT" }
     );
@@ -418,10 +438,14 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
     if (chain.active) continue; // chain still running
     // Episodes (and the authorize-extra-memento flow) belong to PARENT-relation
     // guardians only; a TUTOR-relation guardian stays on threshold alerts.
-    const guardians = await prisma.guardian.findMany({
+    const linked = await prisma.guardian.findMany({
       where: { childId, status: "active", relation: "PARENT" },
       select: { parentId: true },
     });
+    // A paused family (access.ts) gets no alerts: neither a paused parent nor about a paused child.
+    const pausedHere = await pausedUserIds([childId, ...linked.map((g) => g.parentId)], now);
+    if (pausedHere.has(childId)) continue;
+    const guardians = linked.filter((g) => !pausedHere.has(g.parentId));
     if (guardians.length === 0) continue;
 
     const reaction = await childReactionSince(childId, chain.start);
@@ -479,8 +503,8 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
       child?.name ?? null,
       {
         alertType: "no_reaction",
-        title: "Nu a reacționat la memento",
-        message: `${child?.name ?? "Copilul"} nu a reacționat la niciun canal. Poți autoriza un memento suplimentar.`,
+        title: "Nu a reacționat la reminder",
+        message: `${child?.name ?? "Copilul"} nu a reacționat la niciun canal. Poți autoriza un reminder suplimentar.`,
       },
       { relation: "PARENT" }
     );
@@ -496,7 +520,9 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
     awaiting.map((e) => e.childId),
     now
   );
+  const pausedAwaiting = await pausedUserIds(awaiting.map((e) => e.parentId), now);
   for (const esc of awaiting) {
+    if (pausedAwaiting.has(esc.parentId)) continue; // părinte în pauză: fără re-anunțuri
     if (onBreak.has(esc.childId)) continue; // vacanță
     if (!scheduledAwaiting.has(esc.childId)) continue; // zi fără program: nu re-notificăm
     // Cadence is the parent's own choice (decizia 03): every 30 min / every N hours /
@@ -523,7 +549,7 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
       {
         alertType: "no_reaction_reminder",
         title: "Încă nu a reacționat",
-        message: `${esc.child.name ?? "Copilul"} încă nu a reacționat. Autorizează un memento suplimentar?`,
+        message: `${esc.child.name ?? "Copilul"} încă nu a reacționat. Autorizează un reminder suplimentar?`,
       },
       esc.parentAlertRung
     );
@@ -561,9 +587,10 @@ export async function authorizeExtraMemento(
     userId: childId,
     reason: "parent_authorized",
     metadata: {
-      parentAuthorized: true,
+      // WhatsApp/SMS only when the parent pays; a parent on the free trial gets the free channels.
+      parentAuthorized: await parentPaysForMetered(parentId, childId),
       url: "/dashboard/practice",
-      title: "Un memento de la părinte",
+      title: "Un reminder de la părinte",
       message: "Hai să facem un quiz scurt acum.",
     },
   });

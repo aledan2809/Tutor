@@ -1,15 +1,18 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
-import { prisma } from "@/lib/prisma";
 import { featureMap } from "@/lib/plan-features";
-import { hasAnyOrgProvidedAccess } from "@/lib/org-entitlement";
-import { coveredByPayingParent, SELECT_ACOPERIRE_CANALE_RELATII } from "@/lib/escalation/segmentation";
+import { accessOpensPaidFeatures } from "@/lib/access";
+import { loadAccess } from "@/lib/access-server";
 import { withErrorHandler } from "@/lib/api-handler";
 
 /**
  * GET /api/student/entitlements
  * Server-truth for the per-plan function soft-lock: which functions the logged-in
- * user's package unlocks. Superadmins get everything. The UI renders what this says.
+ * user's access unlocks (access.ts decides: paid, family, company, staff, „Gratuit permanent",
+ * the 7-day trial; free and paused accounts stay locked). The UI renders what this says.
+ *
+ * `subscriptionStatus` keeps its old meaning for existing readers: "family" for the child of a
+ * paying family, "org" for a company-paid learner, "active" for everything else that is open.
  */
 async function _GET() {
   const session = await getSession();
@@ -17,40 +20,25 @@ async function _GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (session.user.isSuperAdmin) {
-    return NextResponse.json({
-      subscriptionStatus: "active",
-      features: featureMap("active"),
-    });
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { subscriptionStatus: true, guardianLinks: SELECT_ACOPERIRE_CANALE_RELATII.guardianLinks },
-  });
-
-  // Copilul unei familii care plătește are pachetul plătit de părinte (vezi coveredByPayingParent).
-  if (user && !["active", "trialing"].includes(user.subscriptionStatus ?? "") && coveredByPayingParent(user)) {
-    return NextResponse.json({
-      subscriptionStatus: "family",
-      features: featureMap("active"),
-    });
-  }
-
-  // Cine e înscris într-o materie a unei firme are accesul plătit de firmă, nu de
-  // el. Fără linia asta, poarta paginii de lecții rulează înainte de a ști despre ce
-  // materie e vorba și arată ecranul de vânzare — inclusiv contului demonstrativ al
-  // Poștei, în chiar demonstrația de vânzare (măsurat pe producție 2026-09-09).
-  if (!user?.subscriptionStatus && (await hasAnyOrgProvidedAccess(session.user.id))) {
-    return NextResponse.json({
-      subscriptionStatus: "org",
-      features: featureMap("active"),
-    });
-  }
+  const access = await loadAccess(session.user.id);
+  const open = access ? accessOpensPaidFeatures(access) : false;
+  const subscriptionStatus =
+    access?.kind === "full"
+      ? access.reason === "family_paid"
+        ? "family"
+        : access.reason === "org"
+          ? "org"
+          : "active"
+      : access?.kind === "trial"
+        ? "trial"
+        : access?.kind === "paused"
+          ? "paused"
+          : null;
 
   return NextResponse.json({
-    subscriptionStatus: user?.subscriptionStatus ?? null,
-    features: featureMap(user?.subscriptionStatus),
+    subscriptionStatus,
+    features: featureMap(open ? "active" : null),
+    access,
   });
 }
 

@@ -549,7 +549,7 @@ async function sendEmailNotification(
         <p>E timpul pentru un quiz scurt — păstrează-ți seria de studiu.</p>
         <p><a href="${ctaUrl}" style="display:inline-block;background:#3b82f6;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none">Începe quiz-ul</a></p>
         <hr>
-        <p style="color:#888;font-size:12px">Memento automat de la eTutor.</p>
+        <p style="color:#888;font-size:12px">Reminder automat de la eTutor.</p>
       `,
   });
 }

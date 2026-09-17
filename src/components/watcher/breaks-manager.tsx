@@ -82,7 +82,7 @@ export function BreaksManager({ apiBase }: { apiBase: string }) {
   return (
     <div className="space-y-3">
       <p className="text-xs text-gray-500">
-        În zilele de vacanță nu se trimit memento-uri și nu primești alerte.
+        În zilele de vacanță nu se trimit remindere și nu primești alerte.
       </p>
 
       {breaks.length === 0 ? (

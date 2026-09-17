@@ -57,10 +57,10 @@ const CHANNEL_RO: Record<string, string> = {
   CALL: "Apel",
 };
 function reasonRO(reason: string | null): string {
-  if (!reason) return "memento";
-  if (reason.startsWith("morning")) return "memento dimineață";
-  if (reason.startsWith("evening")) return "memento seară";
-  if (reason === "parent_authorized") return "memento autorizat de părinte";
+  if (!reason) return "reminder";
+  if (reason.startsWith("morning")) return "reminder dimineață";
+  if (reason.startsWith("evening")) return "reminder seară";
+  if (reason === "parent_authorized") return "reminder autorizat de părinte";
   if (reason === "missed_session") return "sesiune ratată";
   return reason;
 }
@@ -245,11 +245,11 @@ export default function WatcherStudentDetailPage({
         </div>
       )}
 
-      {/* Jurnal mementouri — fiecare memento + canalul + rezultatul */}
+      {/* Jurnal remindere — fiecare reminder + canalul + rezultatul */}
       <div className="mb-6 rounded-xl border border-gray-800 bg-gray-900 p-5">
-        <h2 className="mb-3 text-lg font-semibold text-white">Jurnal mementouri</h2>
+        <h2 className="mb-3 text-lg font-semibold text-white">Jurnal remindere</h2>
         {reminderLog.length === 0 ? (
-          <p className="text-sm text-gray-500">Niciun memento încă.</p>
+          <p className="text-sm text-gray-500">Niciun reminder încă.</p>
         ) : (
           <div className="space-y-1">
             {reminderLog.map((r) => (

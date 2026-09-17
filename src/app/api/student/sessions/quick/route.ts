@@ -11,6 +11,7 @@ import { bandForDomainSlug } from "@/lib/curriculum";
 import { visibleTopicsFor } from "@/lib/curriculum-service";
 import { resolveDomainByIdOrForbid } from "@/lib/domain-gate";
 import { z } from "zod";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 const quickSessionSchema = z.object({
   domainId: z.string().min(1),
@@ -22,6 +23,9 @@ async function _POST(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
 
   let body: unknown;
   try {

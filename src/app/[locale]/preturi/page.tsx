@@ -53,8 +53,8 @@ const RO: Copy = {
   freePrice: "0 lei",
   freePoints: [
     "Demo public oricând — alegi o materie și faci un test din grile reale, fără cont",
-    "Trial 7 zile cu cont gratuit",
-    "2 materii pe zi × 5 întrebări — și astea contează la puncte și streak",
+    "7 zile cu tot pachetul (în afară de WhatsApp și SMS), cu un cont gratuit, fără card",
+    "Apoi alegi un plan — tot ce ai lucrat rămâne salvat",
   ],
   freeCta: "Începe gratuit",
   paidTitle: "Planuri plătite",
@@ -141,8 +141,8 @@ const EN: Copy = {
   freePrice: "0 lei",
   freePoints: [
     "Public demo anytime — pick a subject and take a real quiz, no account",
-    "7-day trial with a free account",
-    "2 subjects per day × 5 questions — and they count toward points and streaks",
+    "7 days with the whole package (except WhatsApp and SMS), on a free account, no card",
+    "Then pick a plan — everything you did stays saved",
   ],
   freeCta: "Start free",
   paidTitle: "Paid plans",

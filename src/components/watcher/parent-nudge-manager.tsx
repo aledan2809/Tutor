@@ -74,7 +74,7 @@ export function ParentNudgeManager({ apiBase }: { apiBase: string }) {
   const stop = async (id: string) => {
     const r = await fetch(`${apiBase}/${id}`, { method: "DELETE" });
     if (!r.ok) {
-      setError("Nu am putut opri mementoul. Reîncearcă.");
+      setError("Nu am putut opri reminderul. Reîncearcă.");
       return;
     }
     setNudges((n) => n.filter((x) => x.id !== id));
@@ -133,7 +133,7 @@ export function ParentNudgeManager({ apiBase }: { apiBase: string }) {
             disabled={sending || !message.trim()}
             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
           >
-            {sending ? "Se trimite…" : "Trimite memento acum"}
+            {sending ? "Se trimite…" : "Trimite reminder acum"}
           </button>
           {sent && <span className="text-xs text-green-400">Trimis ✓</span>}
         </div>

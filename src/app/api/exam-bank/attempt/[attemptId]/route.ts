@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { scoreExamPaper, answerKey, type ExamItemForScoring, type AnswerInput } from "@/lib/exam-bank/score";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 // PATCH /api/exam-bank/attempt/[attemptId]
 // Body: { selfScores: { [itemId]: number } } — auto-notarea itemilor deschiși.
@@ -14,6 +15,9 @@ export async function PATCH(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
   const { attemptId } = await params;
 
   let body: { selfScores?: Record<string, number> };

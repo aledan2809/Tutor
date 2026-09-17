@@ -11,7 +11,7 @@ export default function RemindersSettingsPage() {
       </div>
       <h1 className="mb-1 text-2xl font-bold text-white">Programul de studiu</h1>
       <p className="mb-6 text-sm text-gray-400">
-        Setează zilele și ora la care primești mementouri (ex. 13:15 în loc de 8:00).
+        Setează zilele și ora la care primești remindere (ex. 13:15 în loc de 8:00).
       </p>
       <ReminderManager />
     </div>

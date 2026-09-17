@@ -94,7 +94,7 @@ export function TelegramConnectCard() {
             ✅ Telegram conectat{status.username ? ` — @${status.username}` : ""}
           </h3>
           <p className="text-xs text-gray-400">
-            Mementourile și răspunsurile la feedback ajung aici, gratuit.
+            Reminderele și răspunsurile la feedback ajung aici, gratuit.
           </p>
         </div>
         <button
@@ -112,7 +112,7 @@ export function TelegramConnectCard() {
     <div id="telegram" className="mb-6 rounded-lg border border-blue-800 bg-blue-950/20 p-4">
       <h3 className="text-sm font-medium text-white">Primește notificările pe Telegram</h3>
       <p className="mt-1 text-xs text-gray-400">
-        E gratuit și ajunge instant, iar butonul din mesaj oprește restul mementourilor
+        E gratuit și ajunge instant, iar butonul din mesaj oprește restul reminderelor
         dintr-o apăsare.
       </p>
 

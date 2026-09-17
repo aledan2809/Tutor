@@ -3,12 +3,16 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { SPRINT_SESSION_TYPE } from "@/lib/sprint-session";
 import { withErrorHandler } from "@/lib/api-handler";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 async function _POST() {
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
 
   // Find last incomplete session
   const lastSession = await prisma.session.findFirst({

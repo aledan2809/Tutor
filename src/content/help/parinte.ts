@@ -1,4 +1,4 @@
-import { NUDGE_MAX_AGE_HOURS, PARENT_RENOTIFY_MIN } from "@/lib/escalation/config";
+import { NUDGE_MAX_AGE_HOURS, NUDGE_MAX_FIRES, PARENT_RENOTIFY_MIN } from "@/lib/escalation/config";
 import { cascadeSection, reportSection, setupSection, telegramSection } from "./shared";
 import type { HelpContent } from "./types";
 
@@ -41,7 +41,7 @@ export const PARINTE: HelpContent = {
       paragraphs: [
         "Fiecare copil are un capitol cu patru părți: Sesiuni (ce a lucrat și cu ce scor), Remindere " +
           "(ce a primit și dacă a reacționat), Program (zilele și orele de studiu) și Vacanță (zile fără " +
-          "mementouri).",
+          "remindere).",
         "Datele sunt la zi de fiecare dată când deschizi pagina — nu trebuie să aștepți raportul ca să " +
           "vezi cum a fost azi.",
       ],
@@ -49,11 +49,11 @@ export const PARINTE: HelpContent = {
     },
     {
       id: "program",
-      title: "Programul copilului și ritmul mementourilor",
+      title: "Programul copilului și ritmul reminderelor",
       paragraphs: [
-        "Orele de studiu decid când pleacă primul memento. Ritmul dintre canale îl alegi tu, cu trei " +
+        "Orele de studiu decid când pleacă primul reminder. Ritmul dintre canale îl alegi tu, cu trei " +
           "preseturi, și îl poți schimba oricând.",
-        "În zilele de vacanță pe care le marchezi nu se trimit mementouri și nu primești alerte.",
+        "În zilele de vacanță pe care le marchezi nu se trimit remindere și nu primești alerte.",
       ],
       links: [{ label: "Cadență alerte", href: "/dashboard/watcher/setari" }],
     },
@@ -62,12 +62,12 @@ export const PARINTE: HelpContent = {
       id: "alerte",
       title: "Când te anunțăm pe tine",
       paragraphs: [
-        "Doar când copilul a ignorat tot lanțul, într-o zi cu program. Nu te anunțăm pentru un memento " +
+        "Doar când copilul a ignorat tot lanțul, într-o zi cu program. Nu te anunțăm pentru un reminder " +
           "ratat, ci pentru o zi ratată.",
         `Cât timp nu reacționează, te re-anunțăm la ${PARENT_RENOTIFY_MIN} de minute — sau la intervalul ` +
           `pe care îl alegi tu: din X în X ore, o dată pe zi la o oră fixă, ori o singură dată.`,
-        `Din capitolul copilului poți trimite un memento chiar acum, pe canalele gratuite. Se repetă până ` +
-          `reacționează și se oprește singur după ${NUDGE_MAX_AGE_HOURS} de ore.`,
+        `Din capitolul copilului poți trimite un reminder chiar acum, pe canalele gratuite. Se repetă până ` +
+          `reacționează, de cel mult ${NUDGE_MAX_FIRES} ori și cel mult ${NUDGE_MAX_AGE_HOURS} de ore.`,
         "Dacă ai pachet Trio, meditatorul primește alerte separate, pe pragurile lui (serie, scor, zile " +
           "fără sesiune) — nu episodul tău.",
       ],
@@ -141,7 +141,7 @@ export const PARINTE: HelpContent = {
         `While there is still no reaction we re-alert you every ${PARENT_RENOTIFY_MIN} minutes — or at the ` +
           `interval you choose: every X hours, once a day at a fixed time, or only once.`,
         `From your child's chapter you can send a reminder right now, on the free channels. It repeats until ` +
-          `they react and stops on its own after ${NUDGE_MAX_AGE_HOURS} hours.`,
+          `they react, at most ${NUDGE_MAX_FIRES} times and for at most ${NUDGE_MAX_AGE_HOURS} hours.`,
         "On a Trio plan the tutor gets their own alerts, on their own thresholds (streak, score, days " +
           "without a session) — not your episode.",
       ],

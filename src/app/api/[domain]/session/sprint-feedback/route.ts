@@ -24,6 +24,7 @@ import {
   isTimeAnswer,
 } from "@/lib/sprint-adapt";
 import { TIER_LABELS, tierForIndex, type Tier } from "@/lib/mental-chain";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 /**
  * The mandatory two-question debrief at the end of a sprint: was it too easy /
@@ -39,6 +40,9 @@ async function _POST(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
 
   const { domain: domainSlug } = await params;
   if (domainSlug !== SPRINT_DOMAIN_SLUG) {

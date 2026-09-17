@@ -182,9 +182,6 @@ const DOVADA_LANTURI = 817;
 const DOVADA_DATA_RO = "9 septembrie 2026";
 const DOVADA_DATA_EN = "9 September 2026";
 
-/** Cadența cronului care duce cascada mai departe (crontab VPS2, la fiecare 15 minute). */
-const CRON_MINUTE = 15;
-
 const PRAG_RASPUNS_RAPID_SEC = Math.round(FAST_ANSWER_THRESHOLD_MS / 1000);
 const RECUPERARE_MINUTE = Math.round(STREAK_RECOVERY.timeLimitMs / 60_000);
 const NIVELE_PRAGURI = DEFAULT_LEVELS.map((n) => n.minXp.toLocaleString("ro-RO")).join(" · ");
@@ -243,7 +240,7 @@ export const RO: Copy = {
     },
     {
       titlu: "Cine se oprește este căutat",
-      text: "După o zi fără nicio activitate pornește o cascadă de memento-uri, pe patru canale, una după alta. Se oprește singură în clipa în care omul reia. Nimeni de la voi nu ține evidența celor rămași în urmă.",
+      text: "După o zi fără nicio activitate pornește o cascadă de remindere, pe patru canale, una după alta. Se oprește singură în clipa în care omul reia. Nimeni de la voi nu ține evidența celor rămași în urmă.",
       automat: true,
     },
     {
@@ -345,7 +342,7 @@ export const RO: Copy = {
   cascadaRitm:
     "Ritmul îl fixați voi. Implicit treptele sunt apropiate, fiindcă mecanismul a fost construit pentru un elev care ratează o ședință în seara aceea; pentru un curs de serviciu se așază pe zile.",
   cascadaDovadaTitlu: "Nu e o funcție de pe listă",
-  cascadaDovada: `Mecanismul rulează la fiecare ${CRON_MINUTE} minute și a dus până la capăt ${DOVADA_LANTURI.toLocaleString("ro-RO")} de lanțuri de memento-uri pe cealaltă latură a platformei, pe toate cele patru canale — notificare pe telefon, Telegram, e-mail și WhatsApp. Cifră numărată în baza de producție la ${DOVADA_DATA_RO}, nu estimată.`,
+  cascadaDovada: `Mecanismul rulează în fiecare minut și a dus până la capăt ${DOVADA_LANTURI.toLocaleString("ro-RO")} de lanțuri de remindere pe cealaltă latură a platformei, pe toate cele patru canale — notificare pe telefon, Telegram, e-mail și WhatsApp. Cifră numărată în baza de producție la ${DOVADA_DATA_RO}, nu estimată.`,
 
   tabloTitlu: "Ce primiți voi: tabloul, nu o promisiune",
   tabloLead:
@@ -648,7 +645,7 @@ export const EN: Copy = {
   cascadaRitm:
     "You set the pace. By default the rungs sit close together, because the mechanism was built for a pupil missing a study session that evening; for a workplace course you space them out in days.",
   cascadaDovadaTitlu: "Not a line on a feature list",
-  cascadaDovada: `The mechanism runs every ${CRON_MINUTE} minutes and has carried ${DOVADA_LANTURI.toLocaleString("en-US")} reminder chains through to the end on the other side of the platform, across all four channels — phone notification, Telegram, email and WhatsApp. Counted in the production database on ${DOVADA_DATA_EN}, not estimated.`,
+  cascadaDovada: `The mechanism runs every minute and has carried ${DOVADA_LANTURI.toLocaleString("en-US")} reminder chains through to the end on the other side of the platform, across all four channels — phone notification, Telegram, email and WhatsApp. Counted in the production database on ${DOVADA_DATA_EN}, not estimated.`,
 
   tabloTitlu: "What you get: the table, not a promise",
   tabloLead:

@@ -4,6 +4,7 @@ import { getValidAccessToken, getCalendarClient } from "@/lib/calendar";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { resolveDomainOrForbid } from "@/lib/domain-gate";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 /**
  * GET /api/[domain]/calendar/events
@@ -18,6 +19,9 @@ async function _GET(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
 
   const { domain: domainSlug } = await params;
   const gate = await resolveDomainOrForbid(domainSlug, session.user);

@@ -3,26 +3,33 @@ import { prisma } from "@/lib/prisma";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import type { Prisma } from "@prisma/client";
 import { withErrorHandler } from "@/lib/api-handler";
+import { loadAccess } from "@/lib/access-server";
 
 async function _GET(req: NextRequest) {
   const { error } = await requireSuperAdmin();
   if (error) return error;
 
   const searchParams = req.nextUrl.searchParams;
-  const page = parseInt(searchParams.get("page") || "1");
-  const limit = parseInt(searchParams.get("limit") || "20");
+  const page = Math.max(1, parseInt(searchParams.get("page") || "1") || 1);
+  // Every row also reads the account's access: a page stays small whatever the query asks for.
+  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "20") || 20));
   const search = searchParams.get("search") || "";
+  const onlyFreeForever = searchParams.get("freeForever") === "1";
   const skip = (page - 1) * limit;
 
-  const where = search
-    ? {
-        OR: [
-          { name: { contains: search, mode: "insensitive" as const } },
-          { email: { contains: search, mode: "insensitive" as const } },
-        ],
-      }
-    : {};
+  const where: Prisma.UserWhereInput = {
+    ...(search
+      ? {
+          OR: [
+            { name: { contains: search, mode: "insensitive" as const } },
+            { email: { contains: search, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+    ...(onlyFreeForever ? { freeForever: true } : {}),
+  };
 
   const [users, total] = await Promise.all([
     prisma.user.findMany({
@@ -40,6 +47,7 @@ async function _GET(req: NextRequest) {
         bannedReason: true,
         subscriptionStatus: true,
         subscriptionPlanId: true,
+        freeForever: true,
         createdAt: true,
         enrollments: {
           select: {
@@ -53,7 +61,10 @@ async function _GET(req: NextRequest) {
     prisma.user.count({ where }),
   ]);
 
-  return NextResponse.json({ users, total, page, totalPages: Math.ceil(total / limit) });
+  // What each listed account gets right now (trial day, pause, paid…): one page, so a handful of reads.
+  const withAccess = await Promise.all(users.map(async (u) => ({ ...u, access: await loadAccess(u.id) })));
+
+  return NextResponse.json({ users: withAccess, total, page, totalPages: Math.ceil(total / limit) });
 }
 
 const createUserSchema = z.object({

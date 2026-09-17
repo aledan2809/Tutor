@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { NotificationPreferences } from "@/components/notifications/notification-preferences";
 import { TelegramConnectCard } from "@/components/notifications/telegram-connect-card";
+import { AccessMessagesToggle } from "@/components/notifications/access-messages-toggle";
 import { PushSubscribeButton } from "@/components/push-subscribe";
 import { InstallAppButton } from "@/components/install-app-button";
 import { PhoneCapture } from "@/components/phone-capture";
@@ -59,7 +60,7 @@ export default async function NotificationSettingsPage() {
       >
         <div>
           <h3 className="text-sm font-medium text-white">Programul de studiu</h3>
-          <p className="text-xs text-gray-500">Zilele și ora mementourilor (ex. 13:15)</p>
+          <p className="text-xs text-gray-500">Zilele și ora reminderelor (ex. 13:15)</p>
         </div>
         <span className="text-gray-500">&rarr;</span>
       </Link>
@@ -73,6 +74,13 @@ export default async function NotificationSettingsPage() {
         </div>
       ) : (
         <NotificationPreferences />
+      )}
+
+      {/* The messages about the free week go to parents; every one of them points here. */}
+      {session?.user?.accountRole !== "STUDENT" && (
+        <div className="mt-6">
+          <AccessMessagesToggle />
+        </div>
       )}
     </div>
   );

@@ -3,6 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { withErrorHandler } from "@/lib/api-handler";
 import { isGuardianOf } from "@/lib/guardian";
 import { authorizeExtraMemento } from "@/lib/escalation/parent-monitor";
+import { refuseIfPaused } from "@/lib/access-gate";
 import { z } from "zod";
 
 const schema = z.object({ childId: z.string().min(1) });
@@ -27,6 +28,8 @@ async function _POST(req: NextRequest) {
   if (!(await isGuardianOf(session.user.id, parsed.data.childId))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+  const paused = (await refuseIfPaused(session.user.id)) ?? (await refuseIfPaused(parsed.data.childId));
+  if (paused) return paused;
 
   const result = await authorizeExtraMemento(session.user.id, parsed.data.childId);
   if (!result.ok) {

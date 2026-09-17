@@ -58,6 +58,36 @@ export function resolveLandingChannel(input: {
   return { channel: "site", code: input.onlineCode };
 }
 
+/**
+ * The code a signed-in parent is offered (a visitor without an account keeps resolveLandingChannel's).
+ *
+ * - The code kept on the account wins over how they reached the page: signup forgets the flyer's
+ *   cookie, so a flyer parent who comes back through the site's menu would otherwise pay with
+ *   ONV126S and overwrite the V126S kept since signup.
+ * - A code this account has already used is swapped for the other one: each works once per
+ *   account and the two are the same offer (Alex, 16.09.2026). Both used → no code.
+ *
+ * The channel stays the one they came through (the flyer's steps, the flyer's wording); `swapped`
+ * tells the page not to call the other code „the one from the flyer" or „the online one".
+ */
+export function pickLandingCode(input: {
+  channel: LandingChannel;
+  flyerCode: string;
+  onlineCode: string;
+  pendingCode?: string | null;
+  usedCodes?: ReadonlySet<string>;
+}): { channel: LandingChannel; code: string | null; swapped: boolean } {
+  const used = input.usedCodes ?? new Set<string>();
+  const kept = normalizeVoucherCode(input.pendingCode);
+  const channel: LandingChannel =
+    kept === input.flyerCode ? "flyer" : kept === input.onlineCode ? "site" : input.channel;
+  const own = channel === "flyer" ? input.flyerCode : input.onlineCode;
+  const other = channel === "flyer" ? input.onlineCode : input.flyerCode;
+  if (!used.has(own)) return { channel, code: own, swapped: false };
+  if (!used.has(other)) return { channel, code: other, swapped: true };
+  return { channel, code: null, swapped: false };
+}
+
 export type LandingOffer = {
   code: string;
   percentOff: number;

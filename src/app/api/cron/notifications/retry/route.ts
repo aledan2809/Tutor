@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { sendNotification } from "@/lib/notifications/service";
 import { withErrorHandler } from "@/lib/api-handler";
 import { logger } from "@/lib/logger";
+import { closeStuckSends } from "@/lib/escalation/engine";
 
 const RETRY_DELAYS_MS = [60_000, 300_000, 600_000]; // 1m, 5m, 10m
 const BATCH_LIMIT = 100;
@@ -97,46 +98,15 @@ async function _POST(req: NextRequest) {
     retried++;
   }
 
-  // Also handle stuck ESCALATING events (>5 min without completion)
-  const stuckThreshold = new Date(now.getTime() - 5 * 60 * 1000);
-  const stuckEvents = await prisma.escalationEvent.findMany({
-    where: {
-      status: "ESCALATING",
-      updatedAt: { lt: stuckThreshold },
-    },
-    take: BATCH_LIMIT,
-  });
-
-  let stuckReset = 0;
-  for (const event of stuckEvents) {
-    const meta = (event.metadata as Record<string, unknown>) ?? {};
-    const retryCount = (meta.retryCount as number) ?? 0;
-
-    if (retryCount >= 3) {
-      await prisma.escalationEvent.update({
-        where: { id: event.id },
-        data: {
-          status: "COMPLETED",
-          metadata: { ...meta, retryExhausted: true, lastRetryAt: now.toISOString() },
-        },
-      });
-    } else {
-      await prisma.escalationEvent.update({
-        where: { id: event.id },
-        data: {
-          status: "PENDING",
-          metadata: { ...meta, retryCount: retryCount + 1, lastRetryAt: now.toISOString() },
-        },
-      });
-    }
-    stuckReset++;
-  }
+  // Rungs left ESCALATING by a run that died: closed, never sent again — the send may have gone out
+  // before the run died (closeStuckSends; the minute cron applies the same rule).
+  const stuckClosed = await closeStuckSends(now);
 
   logger.info("Notification retry cron completed", {
     retried: retried as unknown as string,
     succeeded: succeeded as unknown as string,
     exhausted: exhausted as unknown as string,
-    stuckReset: stuckReset as unknown as string,
+    stuckClosed: stuckClosed as unknown as string,
   });
 
   return NextResponse.json({
@@ -144,7 +114,7 @@ async function _POST(req: NextRequest) {
     retried,
     succeeded,
     exhausted,
-    stuckReset,
+    stuckClosed,
     timestamp: now.toISOString(),
   });
 }

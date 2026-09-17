@@ -3,6 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { canListDomain } from "@/lib/domain-access";
+import { accountPaused } from "@/lib/access-gate";
 
 async function _GET() {
   const session = await getSession();
@@ -35,9 +36,35 @@ async function _GET() {
     e.roles.some((r) => ["ADMIN", "INSTRUCTOR"].includes(r))
   );
 
+  // A paused account (access.ts) still gets its subjects — the subject switcher and the activation
+  // page stay open — but not its own numbers, which the pause screen only shows blurred.
+  const paused = await accountPaused(session.user.id);
+
   // Get progress for each domain
   const domains = await Promise.all(
     enrollments.map(async (enrollment) => {
+      if (paused) {
+        return {
+          id: enrollment.domain.id,
+          name: enrollment.domain.name,
+          slug: enrollment.domain.slug,
+          icon: enrollment.domain.icon,
+          description: enrollment.domain.description,
+          roles: enrollment.roles,
+          enrolledAt: enrollment.createdAt,
+          stats: {
+            questionsAvailable: enrollment.domain._count.questions,
+            totalStudents: enrollment.domain._count.enrollments,
+            topicsStudied: 0,
+            accuracy: 0,
+            sessionsCompleted: 0,
+            avgScore: 0,
+            xp: 0,
+            level: "Cadet",
+            streak: 0,
+          },
+        };
+      }
       // Get domain-specific topics to scope progress
       const domainQuestions = await prisma.question.findMany({
         where: isContentEditor

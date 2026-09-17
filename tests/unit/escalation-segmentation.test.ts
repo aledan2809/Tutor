@@ -175,13 +175,15 @@ describe("SELECT_ACOPERIRE_CANALE — filtrul e partea care contează", () => {
     expect(SELECT_ACOPERIRE_CANALE.guardianLinks.select.parent.select).toEqual({
       subscriptionStatus: true,
       subscriptionEndsAt: true,
+      freeForever: true,
+      subscriptionPlan: { select: { name: true, familyPlanKey: true, maxParents: true, maxChildren: true } },
     });
   });
 });
 
 describe("coveredByPayingParent — copilul dintr-un pachet de familie", () => {
   const free = { subscriptionStatus: null, subscriptionEndsAt: null };
-  const link = (parent: { subscriptionStatus: string | null; subscriptionEndsAt: Date | null } | null) => ({ parent });
+  const link = (parent: { subscriptionStatus: string | null; subscriptionEndsAt: Date | null; freeForever?: boolean } | null) => ({ parent });
 
   it("un părinte cu abonament activ sau în perioada gratuită acoperă copilul", () => {
     expect(coveredByPayingParent({ guardianLinks: [link({ subscriptionStatus: "active", subscriptionEndsAt: null })] })).toBe(true);
@@ -200,6 +202,22 @@ describe("coveredByPayingParent — copilul dintr-un pachet de familie", () => {
     expect(coveredByPayingParent({ guardianLinks: null })).toBe(false);
     expect(coveredByPayingParent({ guardianLinks: [] })).toBe(false);
     expect(coveredByPayingParent({ guardianLinks: [link(null)] })).toBe(false);
+  });
+
+  it("contul „Gratuit permanent” acoperă ca un abonament: al lui și al copilului lui", () => {
+    expect(meteredChannelsCovered({ ...free, freeForever: true })).toBe(true);
+    expect(coveredByPayingParent({ guardianLinks: [link({ ...free, freeForever: true })] })).toBe(true);
+    expect(SELECT_ACOPERIRE_CANALE.freeForever).toBe(true);
+    expect(SELECT_ACOPERIRE_CANALE.guardianLinks.select.parent.select.freeForever).toBe(true);
+  });
+
+  it("un abonament Elev (pentru un singur cont) nu acoperă copilul; un pachet de familie sau unul fără plan înregistrat da", () => {
+    const elev = { name: "Self (elev)", familyPlanKey: "ELEV" };
+    const family = { name: "Family", familyPlanKey: "FAMILY" };
+    expect(coveredByPayingParent({ guardianLinks: [link({ subscriptionStatus: "active", subscriptionEndsAt: null, subscriptionPlan: elev } as never)] })).toBe(false);
+    expect(coveredByPayingParent({ guardianLinks: [link({ subscriptionStatus: "active", subscriptionEndsAt: null, subscriptionPlan: family } as never)] })).toBe(true);
+    // Accounts activated by hand have a paid status but no plan row: they keep covering (2 on production, 17.09).
+    expect(coveredByPayingParent({ guardianLinks: [link({ subscriptionStatus: "active", subscriptionEndsAt: null, subscriptionPlan: null } as never)] })).toBe(true);
   });
 
   it("ajunge un singur părinte plătitor dintre mai mulți", () => {

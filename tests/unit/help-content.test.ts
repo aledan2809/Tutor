@@ -173,6 +173,6 @@ describe("invite blurb and bot help", () => {
     const r = telegramHelpReply();
     expect(r).toContain("/help");
     expect(r).toContain("/stop");
-    expect(r).toMatch(/memento/i);
+    expect(r).toMatch(/reminder/i);
   });
 });

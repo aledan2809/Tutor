@@ -9,6 +9,7 @@ import {
   ESCALATION_LEVELS,
   ESCALATION_PRESETS,
   NUDGE_MAX_AGE_HOURS,
+  NUDGE_MAX_FIRES,
   ON_TIME_WINDOW_MIN,
   PARENT_ALERT_STALL_MIN,
   PARENT_RENOTIFY_MIN,
@@ -17,12 +18,15 @@ import {
 import { serverChannelAvailability } from "@/lib/escalation/channel-availability";
 import { FAMILY_INVITE_TTL_DAYS, FAMILY_PLANS, childDiscountPercent, type FamilyPlanKey } from "@/lib/family";
 import { FREE_TRIAL_DAYS, checkoutTrialDays } from "@/lib/free-trial";
+import { trialStartOf } from "@/lib/access";
+import { loadPauseStartsAt } from "@/lib/access-server";
 import { fmtPrice } from "@/lib/pricing";
 import {
   familyLandingOffer,
   flyerVoucherCode,
   landingButtonHrefs,
   onlineVoucherCode,
+  pickLandingCode,
   reminderChainForDisplay,
   resolveLandingChannel,
 } from "@/lib/parent-landing";
@@ -93,7 +97,7 @@ export default async function ParintePage({
   const flyerCode = flyerVoucherCode();
   const onlineCode = onlineVoucherCode();
   const campaign = parseAttribution((await cookies()).get(CAMPAIGN_COOKIE)?.value)?.campaign ?? null;
-  const { channel, code: channelCode } = resolveLandingChannel({
+  const arrival = resolveLandingChannel({
     voucherParam: query.voucher,
     campaign,
     flyerCode,
@@ -120,12 +124,35 @@ export default async function ParintePage({
       },
     }),
     loadMonthlyFamilyPlans(),
-    signedInUserId ? prisma.user.findUnique({ where: { id: signedInUserId }, select: { createdAt: true } }) : null,
+    signedInUserId
+      ? prisma.user.findUnique({
+          where: { id: signedInUserId },
+          select: {
+            createdAt: true,
+            pendingVoucherCode: true,
+            voucherRedemptions: {
+              where: { voucher: { code: { in: [flyerCode, onlineCode] } } },
+              select: { voucher: { select: { code: true } } },
+            },
+          },
+        })
+      : null,
   ]);
+
+  // A signed-in parent: the code kept on the account, never one the account has already used.
+  const { channel, code: channelCode, swapped } = account
+    ? pickLandingCode({
+        channel: arrival.channel,
+        flyerCode,
+        onlineCode,
+        pendingCode: account.pendingVoucherCode,
+        usedCodes: new Set(account.voucherRedemptions.map((r) => r.voucher.code)),
+      })
+    : { ...arrival, swapped: false };
 
   const family = plans.find((p) => p.familyPlanKey === "FAMILY") ?? null;
   const now = new Date();
-  const voucherFor = (code: string) => vouchers.find((v) => v.code === code) ?? null;
+  const voucherFor = (code: string | null) => (code ? vouchers.find((v) => v.code === code) ?? null : null);
   const offer = familyLandingOffer(voucherFor(channelCode), family?.price ?? null, now);
 
   // Both codes live and on identical terms → the page may say the flyer's and the site's are the same deal.
@@ -146,13 +173,18 @@ export default async function ParintePage({
   );
 
   // What checkout would give this visitor: a new account gets the Family plan's free days (at most
-  // FREE_TRIAL_DAYS); a signed-in account gets what is left of its own.
+  // FREE_TRIAL_DAYS); a signed-in account gets what is left of its own week (from the pause switch
+  // for an account older than it, like the no-card trial).
   const signedIn = Boolean(account);
-  const freeTrialDays = family ? checkoutTrialDays(family.trialDays, account?.createdAt ?? now, now) : 0;
+  const pauseStartsAt = await loadPauseStartsAt();
+  const freeTrialDays = family
+    ? checkoutTrialDays(family.trialDays, account ? trialStartOf(account.createdAt, pauseStartsAt) : now, now)
+    : 0;
 
   const facts: LandingFacts = {
     freeTrialDays,
     trialTotalDays: FREE_TRIAL_DAYS,
+    pauseOn: pauseStartsAt !== null,
     chain: reminderChainForDisplay(ESCALATION_LEVELS, serverChannelAvailability(process.env)),
     graceMorningMin: CASCADE_GRACE_MINUTES.morning,
     graceEveningMin: CASCADE_GRACE_MINUTES.evening,
@@ -164,6 +196,7 @@ export default async function ParintePage({
     parentAlertAfterMin: PARENT_ALERT_STALL_MIN,
     parentRenotifyMin: PARENT_RENOTIFY_MIN,
     nudgeMaxAgeHours: NUDGE_MAX_AGE_HOURS,
+    nudgeMaxFires: NUDGE_MAX_FIRES,
     onTimeWindowMin: ON_TIME_WINDOW_MIN,
     inviteValidDays: FAMILY_INVITE_TTL_DAYS,
     secondChildPct: childDiscountPercent(2),
@@ -180,6 +213,7 @@ export default async function ParintePage({
     onlineCode,
     codeFamilyOnly: voucherFor(channelCode)?.planKey === "FAMILY",
     signedIn,
+    codeSwapped: swapped,
   });
 
   const otherPlans: OtherPlanRow[] = OTHER_PLAN_KEYS.flatMap((key) => {

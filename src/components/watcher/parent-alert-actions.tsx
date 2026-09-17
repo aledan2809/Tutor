@@ -22,6 +22,8 @@ export function ParentAlertActions({ childId }: { childId: string }) {
   const [until, setUntil] = useState("2h");
   const [channels, setChannels] = useState<string[]>(["PUSH", "TELEGRAM"]);
   const [targets, setTargets] = useState<{ recent: NudgeTarget[]; upcoming: NudgeTarget[] }>({ recent: [], upcoming: [] });
+  // WhatsApp is paid per message: only offered when the parent's account pays for it.
+  const [meteredAllowed, setMeteredAllowed] = useState(false);
   const [selected, setSelected] = useState<string[]>([]); // [] = mesaj liber
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<string | null>(null);
@@ -30,7 +32,11 @@ export function ParentAlertActions({ childId }: { childId: string }) {
   useEffect(() => {
     fetch(`/api/dashboard/watcher/${childId}/nudge-targets`)
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (d) setTargets({ recent: d.recent ?? [], upcoming: d.upcoming ?? [] }); })
+      .then((d) => {
+        if (!d) return;
+        setTargets({ recent: d.recent ?? [], upcoming: d.upcoming ?? [] });
+        setMeteredAllowed(d.meteredAllowed === true);
+      })
       .catch(() => {});
   }, [childId]);
 
@@ -51,7 +57,7 @@ export function ParentAlertActions({ childId }: { childId: string }) {
   const CHANNELS: { v: string; label: string }[] = [
     { v: "PUSH", label: "Aplicație" },
     { v: "TELEGRAM", label: "Telegram" },
-    { v: "WHATSAPP", label: "WhatsApp" },
+    ...(meteredAllowed ? [{ v: "WHATSAPP", label: "WhatsApp" }] : []),
     { v: "EMAIL", label: "Email" },
   ];
   const toggleChannel = (v: string) =>
@@ -99,7 +105,7 @@ export function ParentAlertActions({ childId }: { childId: string }) {
     setDone(null);
     try {
       if (selected.length === 0) {
-        if (await postOne({ message: msg })) setDone("Memento trimis ✅");
+        if (await postOne({ message: msg })) setDone("Reminder trimis ✅");
         return;
       }
       let ok = 0;
@@ -109,7 +115,7 @@ export function ParentAlertActions({ childId }: { childId: string }) {
         if (await postOne({ message: t.message, url: t.url })) ok++;
         else break;
       }
-      if (ok > 0) setDone(`${ok} ${ok === 1 ? "memento trimis" : "mementouri trimise"} ✅`);
+      if (ok > 0) setDone(`${ok} ${ok === 1 ? "reminder trimis" : "remindere trimise"} ✅`);
     } finally {
       setBusy(false);
     }
@@ -181,7 +187,7 @@ export function ParentAlertActions({ childId }: { childId: string }) {
           )}
           {selected.length > 1 && (
             <p className="text-[11px] text-blue-300">
-              {selected.length} sesiuni selectate — se trimite câte un memento pentru fiecare.
+              {selected.length} sesiuni selectate — se trimite câte un reminder pentru fiecare.
             </p>
           )}
         </div>
@@ -210,13 +216,13 @@ export function ParentAlertActions({ childId }: { childId: string }) {
           onClick={sendNow}
           className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-60"
         >
-          {selected.length > 1 ? `Trimite ${selected.length} mementouri acum` : "Trimite memento acum"}
+          {selected.length > 1 ? `Trimite ${selected.length} remindere acum` : "Trimite reminder acum"}
         </button>
         <button
           onClick={() => setOpen((o) => !o)}
           className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-800"
         >
-          Serie de mementouri…
+          Serie de remindere…
         </button>
       </div>
 

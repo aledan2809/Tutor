@@ -28,6 +28,10 @@ interface PlansResponse {
   current: {
     subscriptionStatus: string | null;
     subscriptionPlanId: string | null;
+    /** The current subscription is paid by card: another package would start a second one. */
+    byCard?: boolean;
+    /** A declined renewal Stripe is still retrying (within the grace). */
+    retrying?: boolean;
     freeTrialDaysLeft?: number;
     pendingVoucher?: { ok: true; preview: PreviewJson } | { ok: false; code: string; voucherCode: string | null } | null;
   };
@@ -82,7 +86,10 @@ export default function PackagesPage() {
    * Checks a code for this account and keeps it on the account (it survives a reload or a later
    * visit). An empty code forgets it. Answers the preview when the code may be shown as a discount.
    */
-  const applyVoucher = async (raw: string): Promise<PreviewJson | null> => {
+  const applyVoucher = async (
+    raw: string,
+    opts?: { fromLink?: boolean; kept?: PreviewJson | null },
+  ): Promise<PreviewJson | null> => {
     const code = raw.trim().toUpperCase();
     setVoucher(code);
     setVoucherBusy(true);
@@ -103,6 +110,17 @@ export default function PackagesPage() {
         setSavedPreview(data.preview as PreviewJson);
         setError(null);
         return data.preview as PreviewJson;
+      }
+      if (opts?.fromLink) {
+        // Nobody typed this code: leaving it in the box would re-check and refuse it on every
+        // click on a package, and the parent couldn't pay at all. A refusal doesn't touch the code
+        // already kept on the account, so a valid one goes back in the box and still applies.
+        const kept = opts.kept ?? null;
+        setVoucher(kept?.code ?? "");
+        setSavedPreview(kept);
+        const reason = voucherErrorText(data.code, data.error);
+        setError(kept ? t("voucherLinkRefusedKept", { code, reason, kept: kept.code }) : t("voucherLinkRefused", { code, reason }));
+        return kept;
       }
       setSavedPreview(null);
       setError(voucherErrorText(data.code, data.error));
@@ -139,7 +157,7 @@ export default function PackagesPage() {
         setCurrent(data.current || { subscriptionStatus: null, subscriptionPlanId: null });
         const pending = data.current?.pendingVoucher;
         if (fromLink && fromLink.trim().toUpperCase() !== (pending?.ok ? pending.preview.code : pending?.voucherCode)) {
-          void applyVoucher(fromLink);
+          void applyVoucher(fromLink, { fromLink: true, kept: pending?.ok ? pending.preview : null });
         } else if (pending?.ok) {
           setVoucher(pending.preview.code);
           setSavedPreview(pending.preview);
@@ -229,6 +247,12 @@ export default function PackagesPage() {
 
   const isPaid =
     current.subscriptionStatus === "active" || current.subscriptionStatus === "trialing";
+  // A renewal the bank declined while Stripe keeps retrying: the way out is a new card, not a
+  // second package.
+  // Past the grace nothing is retried any more: the family chooses a package again.
+  const isRetrying = current.retrying ?? current.subscriptionStatus === "past_due";
+  // Paid by card: the broker can't switch the plan, so another package would be a second subscription.
+  const cardSubscription = isPaid && current.byCard === true;
 
   const intervalLabel = (interval: Plan["interval"]) =>
     interval === "YEAR" ? t("perYear") : interval === "ONE_TIME" ? t("oneTime") : t("perMonth");
@@ -269,9 +293,12 @@ export default function PackagesPage() {
 
       {isPaid && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-green-900/50 bg-green-900/10 px-4 py-3 text-sm text-green-400">
-          <span>
-            {current.subscriptionStatus === "trialing" ? t("currentTrial") : t("currentActive")}
-          </span>
+          <div>
+            <span>
+              {current.subscriptionStatus === "trialing" ? t("currentTrial") : t("currentActive")}
+            </span>
+            {cardSubscription && <p className="mt-1 text-xs text-green-300/80">{t("switchPlanByCard")}</p>}
+          </div>
           <button
             onClick={openPortal}
             disabled={portalBusy}
@@ -282,7 +309,20 @@ export default function PackagesPage() {
         </div>
       )}
 
-      {!isPaid && preview && (
+      {isRetrying && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-800/60 bg-amber-900/15 px-4 py-3 text-sm text-amber-200">
+          <span>{t("currentPastDue")}</span>
+          <button
+            onClick={openPortal}
+            disabled={portalBusy}
+            className="min-h-[40px] rounded-lg border border-amber-700/60 bg-amber-900/30 px-4 py-2 text-sm font-medium text-amber-100 transition-colors hover:bg-amber-900/50 disabled:opacity-50"
+          >
+            {portalBusy ? t("portalOpening") : t("manageSubscription")}
+          </button>
+        </div>
+      )}
+
+      {!isPaid && !isRetrying && preview && (
         <div className="rounded-xl border border-emerald-800/60 bg-emerald-900/15 px-4 py-3 text-sm text-emerald-200">
           <p className="font-semibold">
             {bannerPlan && bannerPrice !== null
@@ -382,7 +422,8 @@ export default function PackagesPage() {
 
                   <button
                     onClick={() => subscribe(plan)}
-                    disabled={checkingOut === plan.id || isCurrent || voucherBusy}
+                    // Never a second subscription next to one the card pays or retries (banner above).
+                    disabled={checkingOut === plan.id || isCurrent || voucherBusy || isRetrying || cardSubscription}
                     className="mt-auto min-h-[44px] w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
                   >
                     {isCurrent
@@ -427,7 +468,9 @@ export default function PackagesPage() {
                 {voucherBusy ? t("voucherChecking") : t("voucherApply")}
               </button>
             </div>
-            {preview && (
+            {/* Also for a refused code: a typed code is re-checked on every click, so without this the
+                parent could only pay after emptying the box by hand. */}
+            {voucher.trim() && (
               <button
                 type="button"
                 onClick={() => void applyVoucher("")}

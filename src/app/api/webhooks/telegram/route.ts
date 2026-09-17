@@ -54,10 +54,10 @@ async function _POST(req: NextRequest) {
     let reply: string | null = null;
     if (outcome.action === "linked") {
       reply =
-        "✅ Cont conectat! De acum vei primi mementourile eTutor aici, pe Telegram — gratuit.\n\n" +
+        "✅ Cont conectat! De acum vei primi reminderele eTutor aici, pe Telegram — gratuit.\n\n" +
         "Trimite /stop oricând pentru a te dezabona.";
     } else if (outcome.action === "unlinked") {
-      reply = "Te-ai dezabonat de la mementourile Telegram. Le poți reactiva oricând din setări.";
+      reply = "Te-ai dezabonat de la reminderele Telegram. Le poți reactiva oricând din setări.";
     } else if (outcome.action === "ignored" && outcome.reason === "invalid-token") {
       reply =
         "Linkul de conectare a expirat sau a fost deja folosit. " +

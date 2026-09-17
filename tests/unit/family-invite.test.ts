@@ -1,9 +1,15 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+// The platform switch for the 7-day trial + pause lives in the real database; the tests set it.
+const pauseSwitch = vi.hoisted(() => ({ startsAt: null as Date | null }));
+vi.mock("@/lib/access-server", () => ({ loadPauseStartsAt: async () => pauseSwitch.startsAt }));
+
 import {
   appBaseUrl,
   inviteAcceptUrl,
   getFamilyOverview,
   checkSeat,
+  canBecomeParent,
 } from "@/lib/family-invite";
 import { INVITE_TARGET_ROLE } from "@/lib/family";
 
@@ -15,10 +21,25 @@ import { INVITE_TARGET_ROLE } from "@/lib/family";
 
 type AnyRec = Record<string, unknown>;
 
+const DAY = 24 * 60 * 60 * 1000;
+/** An account old enough that its free week is long over. */
+const LONG_AGO = new Date("2025-01-01T00:00:00Z");
+
+beforeEach(() => {
+  pauseSwitch.startsAt = null;
+});
+
 /** Minimal fake of the bits of the prisma client these functions touch. */
 function makeDb(opts: {
   planName?: string | null;
   isSuperAdmin?: boolean;
+  freeForever?: boolean;
+  /** Default "active" when a plan is set; a plan with "canceled" gives no seats. */
+  subscriptionStatus?: string | null;
+  createdAt?: Date;
+  accountRole?: "PARENT" | "STUDENT" | "TUTOR" | null;
+  /** The account learns itself (an active STUDENT enrollment). */
+  learning?: boolean;
   /** children directly owned (relation=PARENT links the owner holds) */
   children?: { id: string; name?: string; email?: string }[];
   /** other adults linked to the owner's children */
@@ -31,7 +52,15 @@ function makeDb(opts: {
     user: {
       findUnique: async () => ({
         isSuperAdmin: opts.isSuperAdmin ?? false,
+        freeForever: opts.freeForever ?? false,
+        accountRole: opts.accountRole ?? null,
+        createdAt: opts.createdAt ?? LONG_AGO,
+        subscriptionStatus:
+          opts.subscriptionStatus !== undefined ? opts.subscriptionStatus : opts.planName ? "active" : null,
+        subscriptionEndsAt: null,
+        paidExtraChildSeats: 0,
         subscriptionPlan: opts.planName ? { name: opts.planName } : null,
+        enrollments: opts.learning ? [{ id: "e1" }] : [],
       }),
     },
     guardian: {
@@ -118,6 +147,57 @@ describe("getFamilyOverview seat math", () => {
     expect(o.isSuperAdmin).toBe(true);
     expect(o.seats.children.max).toBeGreaterThan(100);
   });
+
+  it("„Gratuit permanent” has no seat limit either", async () => {
+    const db = makeDb({ freeForever: true, children: [{ id: "c1" }] });
+    const o = await getFamilyOverview("friend", db);
+    expect(o.freeForever).toBe(true);
+    expect(o.unlimited).toBe(true);
+    expect(o.trial).toBe(false);
+    expect(o.seats.children.max).toBeGreaterThan(100);
+  });
+
+  it("a parent inside the 7 free days gets Family's seats without a card", async () => {
+    const db = makeDb({ createdAt: new Date(Date.now() - 2 * DAY) });
+    const o = await getFamilyOverview("new-parent", db);
+    expect(o.trial).toBe(true);
+    expect(o.planKey).toBe("FAMILY");
+    expect(o.seats.parents.max).toBe(1);
+    expect(o.seats.children.max).toBe(1);
+  });
+
+  it("a learner account in its free week gets no family seats (no classmate as „child”)", async () => {
+    const db = makeDb({ createdAt: new Date(Date.now() - DAY), accountRole: "STUDENT" });
+    const o = await getFamilyOverview("student", db);
+    expect(o.trial).toBe(false);
+    expect(o.planKey).toBeNull();
+    expect(o.seats.children.max).toBe(0);
+  });
+
+  it("an account without a role that learns itself (a pupil signed in with Google) gets no family seats", async () => {
+    const pupil = await getFamilyOverview("google-pupil", makeDb({ createdAt: new Date(Date.now() - DAY), accountRole: null, learning: true }));
+    expect(pupil.trial).toBe(false);
+    expect(pupil.seats.children.max).toBe(0);
+    // Without a role and not learning (a parent signed in with Google): the free week's seats.
+    const parent = await getFamilyOverview("google-parent", makeDb({ createdAt: new Date(Date.now() - DAY), accountRole: null }));
+    expect(parent.trial).toBe(true);
+    expect(parent.seats.children.max).toBe(1);
+  });
+
+  it("an older account gets its week from the day the pause was switched on", async () => {
+    pauseSwitch.startsAt = new Date(Date.now() - 1 * DAY);
+    const o = await getFamilyOverview("old-parent", makeDb({}));
+    expect(o.trial).toBe(true);
+    expect(o.planKey).toBe("FAMILY");
+  });
+
+  it("a cancelled subscription keeps its plan on the account but gives no seats", async () => {
+    const db = makeDb({ planName: "Family Trio", subscriptionStatus: "canceled", children: [] });
+    const o = await getFamilyOverview("left", db);
+    expect(o.planKey).toBeNull();
+    expect(o.trial).toBe(false);
+    expect(o.seats.children.max).toBe(0);
+  });
 });
 
 describe("checkSeat", () => {
@@ -132,6 +212,26 @@ describe("checkSeat", () => {
     const r = await checkSeat("u", INVITE_TARGET_ROLE.CHILD, db);
     expect(r.allowed).toBe(false);
     expect(r.reason).toBe("no_family_plan");
+  });
+
+  it("„Gratuit permanent” always allowed", async () => {
+    const db = makeDb({ freeForever: true, children: [{ id: "c1" }] });
+    expect((await checkSeat("friend", INVITE_TARGET_ROLE.PARENT, db)).allowed).toBe(true);
+  });
+
+  it("free week: the first child links, a second one points to Family (no add-on checkout)", async () => {
+    const recent = new Date(Date.now() - DAY);
+    expect((await checkSeat("u", INVITE_TARGET_ROLE.CHILD, makeDb({ createdAt: recent }))).allowed).toBe(true);
+
+    const r = await checkSeat("u", INVITE_TARGET_ROLE.CHILD, makeDb({ createdAt: recent, children: [{ id: "c1" }] }));
+    expect(r.allowed).toBe(false);
+    expect(r.addon).toBeUndefined();
+    expect(r.upgradeTo).toBe("FAMILY");
+  });
+
+  it("cancelled plan → child seat denied with no_family_plan", async () => {
+    const db = makeDb({ planName: "Family", subscriptionStatus: "canceled" });
+    expect((await checkSeat("u", INVITE_TARGET_ROLE.CHILD, db)).reason).toBe("no_family_plan");
   });
 
   it("Family plan: 1st child ok, 2nd child is a discounted add-on", async () => {
@@ -173,5 +273,21 @@ describe("checkSeat", () => {
     const r = await checkSeat("u", INVITE_TARGET_ROLE.TUTOR, one);
     expect(r.allowed).toBe(false);
     expect(r.reason).toBe("tutor_limit");
+  });
+});
+
+describe("„Sunt părinte” — contul fără rol luat drept elev", () => {
+  it("se oferă doar contului fără rol care a ales o materie, n-a exersat și nu e copilul cuiva", () => {
+    const base = { accountRole: null, isChild: false, learning: true, practised: false };
+    expect(canBecomeParent(base)).toBe(true);
+    // Fără materie aleasă nu e luat drept elev: are deja locurile din proba gratuită.
+    expect(canBecomeParent({ ...base, learning: false })).toBe(false);
+    // Un elev legat de un părinte nu-și poate face un coleg „copil".
+    expect(canBecomeParent({ ...base, isChild: true })).toBe(false);
+    // Cine a răspuns deja la întrebări învață el însuși: schimbarea nu se poate desface, și-ar pierde exersarea.
+    expect(canBecomeParent({ ...base, practised: true })).toBe(false);
+    // Un cont înregistrat cu rol nu se schimbă de aici.
+    expect(canBecomeParent({ ...base, accountRole: "STUDENT" })).toBe(false);
+    expect(canBecomeParent({ ...base, accountRole: "PARENT" })).toBe(false);
   });
 });

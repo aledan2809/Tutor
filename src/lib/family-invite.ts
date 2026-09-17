@@ -32,8 +32,12 @@ import {
   canAddParent,
   canAddChild,
   canAddTutor,
+  trialChildCheck,
   FAMILY_INVITE_TTL_DAYS,
+  FAMILY_PLANS,
 } from "@/lib/family";
+import { payingForAccess, trialDaysLeft } from "@/lib/access";
+import { loadPauseStartsAt } from "@/lib/access-server";
 import { sendAppEmail, isEmailConfigured } from "@/lib/email";
 import {
   getTelegramClient,
@@ -88,11 +92,27 @@ export interface OwnerPlan {
   key: FamilyPlanKey | null;
   plan: FamilyPlan | null;
   isSuperAdmin: boolean;
+  /** Marked „Gratuit permanent" by an administrator. */
+  freeForever: boolean;
+  /** No seat limit: the platform superadmin, or an account marked „Gratuit permanent". */
+  unlimited: boolean;
   /** Child seats bought as an add-on beyond the plan base (see canAddChild). */
   paidExtraChildSeats: number;
+  /** The seats come from the 7-day trial without a card, not from a payment. */
+  trial: boolean;
 }
 
-/** Resolve the owner's family plan from their billing plan name (+ admin flag). */
+/**
+ * Resolve the owner's family seats.
+ *
+ * - A paid family plan (active or trialing, not expired) gives its seats. A cancelled or expired
+ *   subscription keeps its plan id on the account, but no longer gives seats for new members.
+ * - Without one, a parent still inside the 7 free days gets Family's seats (1 parent + 1 child):
+ *   the no-card trial (Alex, 16.09.2026). Before this, a parent without a card could not link
+ *   the child at all. Not a learner account: a student can't make a classmate their „child" in
+ *   the free week.
+ * - The superadmin and accounts marked „Gratuit permanent" have no seat limit.
+ */
 export async function resolveOwnerPlan(
   ownerId: string,
   db: Db = prisma
@@ -101,6 +121,11 @@ export async function resolveOwnerPlan(
     where: { id: ownerId },
     select: {
       isSuperAdmin: true,
+      freeForever: true,
+      accountRole: true,
+      createdAt: true,
+      subscriptionStatus: true,
+      subscriptionEndsAt: true,
       paidExtraChildSeats: true,
       subscriptionPlan: {
         select: {
@@ -111,17 +136,103 @@ export async function resolveOwnerPlan(
           maxTutors: true,
         },
       },
+      enrollments: { where: { isActive: true, roles: { has: "STUDENT" } }, select: { id: true }, take: 1 },
     },
   });
   // Prefer the seat composition stored on the plan record (familyPlanKey + seat
   // columns); fall back to deriving from the plan name for legacy rows.
-  const plan = resolveFamilyPlanFromRecord(u?.subscriptionPlan);
+  const recordPlan = resolveFamilyPlanFromRecord(u?.subscriptionPlan);
+  // A renewal Stripe is still retrying keeps the family as it is (access.ts), seats included.
+  let plan = u && payingForAccess(u) ? recordPlan : null;
+  let trial = false;
+  // A learner is an account registered as a pupil, or one without a role (Google, One Tap and
+  // email-link sign-ups get none) that is learning itself. A pupil who signs in with Google and
+  // links a classmate as „child" would otherwise make one Family cover two learners.
+  const learner = u?.accountRole === "STUDENT" || (u?.accountRole == null && (u?.enrollments?.length ?? 0) > 0);
+  if (!plan && u && !u.isSuperAdmin && !u.freeForever && !learner) {
+    const pauseStartsAt = await loadPauseStartsAt();
+    if (trialDaysLeft(u.createdAt, pauseStartsAt, new Date()) > 0) {
+      plan = FAMILY_PLANS.FAMILY;
+      trial = true;
+    }
+  }
   return {
     key: plan?.key ?? null,
     plan,
     isSuperAdmin: u?.isSuperAdmin ?? false,
+    freeForever: u?.freeForever ?? false,
+    unlimited: Boolean(u?.isSuperAdmin || u?.freeForever),
     paidExtraChildSeats: u?.paidExtraChildSeats ?? 0,
+    trial,
   };
+}
+
+/**
+ * A role-less account (Google, One Tap and email-link sign-ups get none) that picked a subject is
+ * taken for a learner, so it gets no family seats in the free week. The parent behind it can say
+ * so — never an account registered with a role, never someone's child (a pupil linked to a parent
+ * can't make a classmate their „child"), and never one that has answered questions itself: the
+ * change can't be undone from the app, and a pupil who pressed it would lose their practice.
+ */
+export function canBecomeParent(u: { accountRole: string | null; isChild: boolean; learning: boolean; practised: boolean }): boolean {
+  return u.accountRole == null && !u.isChild && u.learning && !u.practised;
+}
+
+async function becomeParentFacts(userId: string, db: Pick<Db, "user">) {
+  const u = await db.user.findUnique({
+    where: { id: userId },
+    select: {
+      accountRole: true,
+      guardianLinks: { where: { status: "active", relation: GUARDIAN_RELATION.PARENT }, select: { id: true }, take: 1 },
+      enrollments: { where: { isActive: true, roles: { has: "STUDENT" } }, select: { id: true }, take: 1 },
+      _count: { select: { attempts: true, dailyChallengeAttempts: true, examSessions: true } },
+    },
+  });
+  if (!u) return null;
+  const { attempts, dailyChallengeAttempts, examSessions } = u._count;
+  return {
+    accountRole: u.accountRole,
+    isChild: u.guardianLinks.length > 0,
+    learning: u.enrollments.length > 0,
+    practised: attempts + dailyChallengeAttempts + examSessions > 0,
+  };
+}
+
+export async function loadCanBecomeParent(userId: string, db: Db = prisma): Promise<boolean> {
+  const facts = await becomeParentFacts(userId, db);
+  return facts !== null && canBecomeParent(facts);
+}
+
+/**
+ * Turn such an account into a parent's: the role, and the subjects it picked become ones it follows
+ * (WATCHER) rather than practises (STUDENT) — what /api/activate gives a parent. Its own study
+ * reminders stop, and so do their chains: a parent account can't do the sessions they call for.
+ * Nothing is deleted. False when the account doesn't qualify (or no longer does).
+ */
+export async function becomeParent(userId: string, db: Db = prisma): Promise<boolean> {
+  return db.$transaction(async (tx) => {
+    const facts = await becomeParentFacts(userId, tx);
+    if (!facts || !canBecomeParent(facts)) return false;
+    // Conditional, so two clicks at once change the account once.
+    const changed = await tx.user.updateMany({ where: { id: userId, accountRole: null }, data: { accountRole: "PARENT" } });
+    if (changed.count === 0) return false;
+    // Inactive ones too: activating a subject again keeps the roles the row has.
+    const rows = await tx.enrollment.findMany({ where: { userId, roles: { has: "STUDENT" } }, select: { id: true, roles: true } });
+    for (const row of rows) {
+      const roles = [...new Set([...row.roles.filter((r) => r !== "STUDENT"), "WATCHER" as const])];
+      await tx.enrollment.update({ where: { id: row.id }, data: { roles } });
+    }
+    await tx.studyReminder.updateMany({ where: { userId, isActive: true }, data: { isActive: false } });
+    // A rung still waiting is closed unsent; the latest sent rungs are marked as the end of their
+    // chain (the engine's `closed` mark), so none leads to another rung.
+    await tx.escalationEvent.updateMany({ where: { userId, status: "PENDING" }, data: { status: "COMPLETED" } });
+    await tx.$executeRaw`
+      UPDATE "EscalationEvent"
+      SET "metadata" = COALESCE("metadata", '{}'::jsonb) || jsonb_build_object('closed', 'parent'::text),
+          "updatedAt" = NOW()
+      WHERE "userId" = ${userId} AND "status" = 'COMPLETED' AND "sentAt" >= ${new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)}`;
+    return true;
+  });
 }
 
 /** Active child user ids of the owner (relation=PARENT links the owner holds). */
@@ -155,8 +266,13 @@ export interface FamilyOverview {
   planKey: FamilyPlanKey | null;
   planLabel: string | null;
   isSuperAdmin: boolean;
+  freeForever: boolean;
+  /** No seat limit (superadmin or „Gratuit permanent"). */
+  unlimited: boolean;
   /** Child seats bought as a paid add-on beyond the plan base. */
   paidExtraChildSeats: number;
+  /** The seats come from the 7-day trial without a card. */
+  trial: boolean;
   children: FamilyMember[];
   coParents: FamilyMember[];
   tutors: FamilyMember[];
@@ -180,7 +296,7 @@ export async function getFamilyOverview(
   ownerId: string,
   db: Db = prisma
 ): Promise<FamilyOverview> {
-  const { key, plan, isSuperAdmin, paidExtraChildSeats } = await resolveOwnerPlan(
+  const { key, plan, isSuperAdmin, freeForever, unlimited, paidExtraChildSeats, trial } = await resolveOwnerPlan(
     ownerId,
     db
   );
@@ -250,19 +366,22 @@ export async function getFamilyOverview(
     orderBy: { createdAt: "desc" },
   });
 
-  const maxParents = isSuperAdmin ? UNLIMITED : plan?.maxParents ?? 0;
+  const maxParents = unlimited ? UNLIMITED : plan?.maxParents ?? 0;
   // Paid add-on child seats extend the base entitlement (only meaningful with a plan).
-  const maxChildren = isSuperAdmin
+  const maxChildren = unlimited
     ? UNLIMITED
     : (plan?.maxChildren ?? 0) + (plan ? paidExtraChildSeats : 0);
-  const maxTutors = isSuperAdmin ? UNLIMITED : plan?.maxTutors ?? 0;
+  const maxTutors = unlimited ? UNLIMITED : plan?.maxTutors ?? 0;
 
   return {
     ownerId,
     planKey: key,
     planLabel: plan?.label ?? null,
     isSuperAdmin,
+    freeForever,
+    unlimited,
     paidExtraChildSeats: plan ? paidExtraChildSeats : 0,
+    trial,
     children,
     coParents,
     tutors,
@@ -285,11 +404,11 @@ export async function checkSeat(
   target: InviteTargetRole,
   db: Db = prisma
 ): Promise<SeatCheck> {
-  const { plan, isSuperAdmin, paidExtraChildSeats } = await resolveOwnerPlan(
+  const { plan, unlimited, paidExtraChildSeats, trial } = await resolveOwnerPlan(
     ownerId,
     db
   );
-  if (isSuperAdmin) return { allowed: true };
+  if (unlimited) return { allowed: true };
   const overview = await getFamilyOverview(ownerId, db);
   if (target === INVITE_TARGET_ROLE.CHILD) {
     // Already-paid add-on seats count toward the base entitlement, so linking a
@@ -298,7 +417,8 @@ export async function checkSeat(
     const effective = plan
       ? { ...plan, maxChildren: plan.maxChildren + paidExtraChildSeats }
       : plan;
-    return canAddChild(effective, overview.children.length);
+    const check = canAddChild(effective, overview.children.length);
+    return trial ? trialChildCheck(check) : check;
   }
   if (target === INVITE_TARGET_ROLE.TUTOR)
     return canAddTutor(plan, overview.tutors.length);
@@ -322,10 +442,10 @@ async function studentDomainIds(userId: string, db: Db): Promise<string[]> {
  * enrollment without dropping any role; creates one when missing. Never grants
  * INSTRUCTOR — a family tutor is scoped per-child, not domain-wide.
  */
-async function ensureWatcherEnrollments(
+export async function ensureWatcherEnrollments(
   watcherId: string,
   domainIds: string[],
-  db: Db
+  db: Db = prisma
 ): Promise<void> {
   for (const domainId of domainIds) {
     const existing = await db.enrollment.findUnique({

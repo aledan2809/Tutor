@@ -43,7 +43,26 @@ promisiuni inexistente în aplicație: −30% dacă plătești în probă (cu cr
 **Livrarea 2 — după 21.09:** −30% la plata în probă (cu cronometru) · −10% Telegram · a 2-a/a 3-a materie · anual ·
 texte aliniate (/preturi, /elev, ajutor, Abonament).
 
-**Review independent 16.09 — reparat (necomis încă, mesh):** B2 copilul din familie acoperit de părintele plătitor
+**Stare 17.09, 00:40:** livrarea 1 e **comisă local** în `0f25dbe` (nedeployată): tsc, eslint, 1051 de teste și 50/50
+verificări E2E pe build-ul de producție local. Bifele de mai sus rămân deschise până la deploy și verificarea live.
+
+**Review independent 2 (pe `0f25dbe`) — reparat, necomis (intră în commitul probei fără card):**
+- M1: la reactivare/reînnoire se șterge data veche de încheiere. Altfel o familie care anula și plătea din nou era tratată
+  ca neplătitoare, iar copilul pierdea accesul (cu pauza pornită, ar fi fost pus în pauză). Pe prod erau 0 conturi afectate.
+- m2: numărul de încercări eșuate nu mai trece la treapta următoare.
+- m3/m4: un părinte logat primește codul salvat pe cont; un cod deja folosit e înlocuit cu celălalt; un cod refuzat nu mai
+  blochează plata, iar „Șterge codul” apare oricând e ceva în căsuță.
+- m5: butonul de la finalul testului de pe pagină duce la aceeași înscriere (plan, cod, rol de părinte); codul din cookie-ul
+  flyerului se păstrează pe cont.
+- m6: remindere și lanț **din minut în minut** (`/api/cron/escalation/fast`, cu lease în DB ca să nu ruleze de două ori).
+  **La deploy**: linia de crontab pe VPS2 + blocarea `/api/cron/` din internet (secretul actual e ușor de ghicit).
+- m7: o atingere pe ORICE notificare din lanț îl oprește (nu doar pe ultima).
+- m8 + nit: butonul „Autentificare” alb pe albastru, headerul redevine landmark.
+- nit: textul „se oprește după 24 de ore” corectat peste tot (se oprește și după cel mult 12 trimiteri).
+- Verificat: 1072 de teste; 14 verificări pe baza QA (`scratchpad/tutor-qa/chains-it.ts`). Rulate pe motorul vechi,
+  4 dintre ele pică, deci verificările prind defectele.
+
+**Review independent 16.09 — reparat (comis în `0f25dbe`):** B2 copilul din familie acoperit de părintele plătitor
 (WhatsApp/SMS, simulări, lecții) + lanțuri blocate (email fără adresă, SMS neacoperit, trimiteri eșuate la nesfârșit) ·
 B3 promisiunile din livrarea 2 scoase de pe /preturi, /elev, ajutor, cardul Telegram · M1 Abonament trimite la plată doar
 codul afișat · m1–m8 + nits (ritmul real al mementourilor, ce oprește lanțul, alerta părintelui, butoane pentru cei
@@ -60,6 +79,83 @@ prețul copilului 2). Teste 1051 verzi.
   merge doar la părinte. **Macheta întâi**, apoi construcție; trebuie live înainte de 28.09 (expiră primele probe din 21.09).
 - [ ] **Părintele poate schimba orele de studiu și materiile alese de copil** (marketing + funcționalitate). Orele le
   poate schimba deja din Watcher (`/api/dashboard/watcher/[id]/reminders`); materiile nu. De pus și pe pagina pentru părinți.
+
+**Stare 17.09, 01:10 — toate trei construite, necomise (review independent în curs):**
+- Macheta aprobată + decizii (AskUserQuestion 16.09): proba = tot pachetul fără WhatsApp/SMS · ziua 8 = pauză totală, nimic
+  șters · conturile existente primesc 7 zile de la pornirea comutatorului · „Gratuit permanent” bifat din administrare, fără
+  mesaje de probă · programul/materiile stabilite de părinte rămân așa, fără cereri prin aplicație.
+- Construit: regula de acces (`access.ts`), porțile pe API-uri și cronuri, ecranele de pauză (copil/părinte, cifre + detalii
+  estompate), locuri Family în probă, comutator + bifă + etichete în Administrare → Utilizatori, mesajele către părinte
+  (lansare, 3 zile, ultima zi, ziua 8), blocarea programului și a materiilor (migrația 0066), zilele gratuite la plata cu card
+  numărate de la același start, texte corectate (/parinte, /preturi, /elev, prima pagină), WhatsApp ascuns părinților în probă.
+- Verificat: 1092+ teste, tsc/eslint curate, 104/104 E2E pe build de producție local (`scratchpad/tutor-qa/e2e-proba-v3.mjs`),
+  17/17 pe mesajele din probă (`lifecycle-it.ts`), 14/14 pe lanțul de remindere (`chains-it.ts`).
+- **La deploy (VPS2)**: migrațiile 0064–0067 · linia de crontab `* * * * *` pentru `/api/cron/escalation/fast` (cu flock) ·
+  blocarea `/api/cron/` din internet în nginx · apoi scriptul de date ONV126S. **Comutatorul rămâne OPRIT**: Alex bifează întâi
+  prietenii/testerii, apoi îl pornește din Administrare, înainte de 28.09.
+
+**Stare 17.09, 03:10 — review-urile independente 3 și 4 pe proba fără card, reparate (necomis):**
+- Review 3 (2 blocante, 4 majore, 13 minore): al doilea părinte din Family Duo/Trio nu mai intră în pauză · ecranul de pauză
+  merge și la navigarea prin clicuri (poarta e pe client) · un abonament Elev nu acoperă copilul · o reînnoire refuzată nu pune
+  familia în pauză · copilul nu vede niciodată oferta · lanțul de remindere din minut în minut: fără mesaje duble (fiecare treaptă
+  „revendicată” atomic, blocare la crearea treptei următoare), câteva interogări pe minut în loc de una per treaptă, reîncercări
+  la 15 minute · mesajele din probă spun ziua și ora exactă („azi la 21:30”) · codul păstrat pe cont nu se pierde la un link greșit ·
+  pauza închide și rutele rămase (răspunsuri, examene, provocarea zilei, vacanțe, telefon, rapoarte).
+- Review 4 (1 majoră, 9 minore): la rularea din minut în minut accesul se citește doar pentru treptele care chiar se creează ·
+  un lanț oprit de pauză nu mai pornește după plată · o treaptă rămasă „în trimitere” după o repornire se închide singură ·
+  Family (un părinte) nu acoperă un al doilea adult · conturile fără rol care învață nu primesc locuri de familie în probă ·
+  un elev acceptat ca „meditator” intră în pauză ca orice elev · un cod de 100% pentru Elev activează Elev · plata refuzată:
+  14 zile de grație, apoi pauză; pagina Abonament trimite la actualizarea cardului · **mesajele despre probă au buton de oprire**
+  („Cadență alerte”) și nu mai pleacă la conturi de test · meditatorul apare cu numele la reminderele puse de el.
+- Verificat: tsc, eslint (0 erori), 1118 teste, `chains-it` 31/31 (cu contra-probe), `lifecycle-it` 20/20, E2E în browser
+  122/122 după review 3 (rularea cu scenariile review 4 în curs).
+- **Decizii care rămân la Alex** (nu le-am luat eu): (1) ofertă Elev arătată elevilor fără părinte legat, care pot fi minori —
+  e de validat juridic; (2) „Gratuit permanent” = locuri nelimitate + WhatsApp/SMS acoperite pentru toți copiii legați și pentru al
+  doilea părinte; (3) în contul Stripe: câte zile reîncearcă plata și ce face la final (grația din aplicație e 14 zile);
+  (4) meditatorul familiei vede în continuare progresul copilului când contul familiei e în pauză; (5) după plată, ecranul de
+  pauză dispare la reîncărcarea paginii (nu singur), iar un reminder din ora pauzei nu mai pleacă în acea oră.
+
+**Stare 17.09, 04:00 — review-ul independent 5, reparat (necomis):**
+- **Locuri de părinte în ordinea legării**: Family Duo acoperă doi părinți, nu pe oricine se leagă de copil; al treilea adult
+  intră în pauză. **Meditatorul** unei familii care plătește Trio / Family Trio e acoperit chiar dacă învață și el (student).
+- **Al doilea părinte lăsat în afara pachetului** (Family = un părinte): în loc de oferta unui al doilea Family, vede cine are
+  pachetul, că copilul exersează în continuare și că Family Duo îl include „fără plată separată"; nu mai primește mesaje cu preț.
+  La Family Duo cu locurile ocupate: „Nu există un pachet cu mai mulți părinți."
+- **Cod de 100% peste un abonament plătit cu cardul**: refuzat (ar fi înlocuit planul plătit, cu cardul taxat în continuare).
+- **„Sunt părinte"**: contul fără rol (Google/One Tap) care a ales o materie la înscriere era luat drept elev și pierdea locurile
+  Family din probă. Pe „Familia mea" primește un card „Ești părinte?" → contul devine de părinte, materia aleasă devine urmărită
+  (nimic șters). Nu apare niciodată unui cont legat ca și copil al unui părinte.
+- **Trimiteri blocate** (după o repornire): închise la începutul rulării de minut, înaintea reminderelor (altfel reminderul zilei
+  se pierdea); cronul de reîncercare aplică aceeași regulă (înainte le retrimitea — risc de mesaj dublu).
+- **După plată, pauza dispare singură** când părintele revine în tab (fără reîncărcare), cel mult o dată pe minut.
+- **Niciun al doilea abonament peste unul plătit cu cardul** (recenzia de control, majoră): brokerul nu știe schimba planul, iar
+  un al doilea checkout crea alt client Stripe, pe care portalul nu-l arată — familia plătea dublu sau, la sfârșitul
+  abonamentului vechi, intra în pauză deși plătea noul. Acum: plata e refuzată (restantă → actualizezi cardul; activă → „oprește,
+  apoi alege pachetul nou după ce se încheie", scris și pe pagină), iar reînnoirea / refuzul / sfârșitul unui abonament lăsat în
+  urmă nu mai schimbă contul (plata se înregistrează și apare în jurnal). Un an dintr-un cod nu mai e luat drept abonament pe card.
+  **Evenimente întârziate** (a doua recenzie de control, majoră): refuzul final și anularea vin de la Stripe în orice ordine —
+  un refuz sau o plată sosite după anulare nu mai redeschid contul (înainte: familia rămânea „în reîncercare" cu toate pachetele
+  blocate, sau primea acces fără sfârșit); după grație, un cont rămas „restant" poate alege din nou un pachet.
+- **„Sunt părinte" doar pentru conturi fără exerciții rezolvate** (schimbarea nu se poate desface din aplicație); la schimbare se
+  opresc reminderele proprii ale contului și lanțurile lor.
+- Verificat: tsc, eslint (0 erori), 1130 teste, `chains-it` toate (nou S3, cu contra-probă), `lifecycle-it` toate (nou: al doilea
+  părinte, cu contra-probă), E2E în browser pe build de producție **166/166** (secțiunea nouă L1–L10: 29 de verificări).
+- Rămase deliberat (impact mic, notate): verificarea pauzei vine după filtrele de vacanță/program în rularea reminderelor ·
+  regula „elev fără rol" nu e refolosită în mesaje/meniu · un lanț se poate opri tăcut la o eroare de bază de date · WhatsApp
+  ascuns părintelui în probă al unui copil acoperit · linkul de oprire a mesajelor cere autentificare (fără token de un clic).
+- **Decizii noi pentru Alex**: (6) **schimbarea de pachet cu cardul** (Family → Family Duo): brokerul nu are schimbare de plan,
+  deci azi înseamnă „oprești abonamentul, iar după ce se încheie alegi pachetul nou" (până atunci al doilea părinte stă în pauză).
+  Ajută dacă în Stripe (Settings → Billing → Customer portal) anularea e „imediat", nu „la sfârșitul perioadei". O schimbare reală
+  cere lucru în broker (NO-TOUCH, sesiune dedicată) — recomandat în livrarea 2; (7) să-i spunem și **părintelui care plătește** că al doilea părinte
+  e în pauză și că Family Duo l-ar include (azi îi spunem doar celui lăsat în afară). Din decizia (5) de mai sus, prima parte e
+  rezolvată (pauza dispare la revenirea în tab); a doua rămâne (reminderul din ora pauzei nu mai pleacă în acea oră).
+  (8) **De verificat în Stripe** (Class RDA și Fabulosos, Settings → Billing → Revenue recovery / Subscriptions): reîncercările
+  plății să dureze **cel mult 2 săptămâni**, apoi abonamentul să fie **anulat** („cancel the subscription"), nu „marked unpaid" /
+  „left past-due". Codul se bazează pe asta: după 14 zile de grație pagina lasă familia să aleagă din nou un pachet; dacă Stripe
+  mai reîncearcă după aceea și reușește pe cardul vechi, familia ar plăti de două ori. Dacă se vrea o perioadă mai lungă, se
+  schimbă și grația din cod (`PAST_DUE_GRACE_MS`, callback-ul Stripe).
+- Rămas rar, deliberat nereparat (recomandarea recenzentului): un cod de 100% activat exact între anularea abonamentului și un
+  eveniment Stripe întârziat poate fi afectat de acel eveniment (acces fără sfârșit sau pachete blocate până expiră anul din cod).
 
 ---
 

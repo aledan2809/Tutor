@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { accountPaused } from "@/lib/access-gate";
 
 // Notifications a parent receives ABOUT a child (parent-monitor alerts). These
 // must be separable from the user's own student notifications so the two
@@ -24,6 +25,10 @@ async function _GET(req: NextRequest) {
   const url = new URL(req.url);
   const unreadOnly = url.searchParams.get("unread") === "true";
   const audience = url.searchParams.get("audience"); // "self" | "child" | null
+  // A paused parent (access.ts) doesn't see the alerts about the child: the bell stays, empty.
+  if (audience === "child" && (await accountPaused(session.user.id))) {
+    return NextResponse.json({ notifications: [], total: 0, unreadCount: 0, childTotal: 0, limit: 0, offset: 0 });
+  }
   const limit = Math.min(Number(url.searchParams.get("limit") ?? 50), 100);
   const offset = Number(url.searchParams.get("offset") ?? 0);
 

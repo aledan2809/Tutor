@@ -6,6 +6,7 @@ import { requireFeature } from "@/lib/plan-gate";
 import { isOrgProvidedAccess } from "@/lib/org-entitlement";
 import { resolveDomainByIdOrForbid } from "@/lib/domain-gate";
 import { z } from "zod";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 const paramsSchema = z.object({
   id: z.string().min(1, "Lesson ID is required"),
@@ -245,6 +246,9 @@ async function _PATCH(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
 
   const rawParams = await params;
   const parsed = paramsSchema.safeParse(rawParams);

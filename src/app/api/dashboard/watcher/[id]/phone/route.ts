@@ -3,11 +3,15 @@ import { getSession } from "@/lib/authorization";
 import { withErrorHandler } from "@/lib/api-handler";
 import { isGuardianOf } from "@/lib/guardian";
 import { getUserPhone, setUserPhone, clearUserPhone, normalizePhoneInput } from "@/lib/phone-setting";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 /** GET — the child's WhatsApp phone (guardian only). */
 async function _GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
   const { id: childId } = await params;
   if (!(await isGuardianOf(session.user.id, childId))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -19,6 +23,9 @@ async function _GET(_req: NextRequest, { params }: { params: Promise<{ id: strin
 async function _PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
   const { id: childId } = await params;
   if (!(await isGuardianOf(session.user.id, childId))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

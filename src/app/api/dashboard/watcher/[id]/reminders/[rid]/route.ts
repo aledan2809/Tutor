@@ -3,7 +3,8 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { reminderInput } from "@/lib/reminder-schema";
-import { isGuardianOf } from "@/lib/guardian";
+import { isGuardianOf, isParentOf } from "@/lib/guardian";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 /** The reminder must belong to this child (defence-in-depth alongside the guardian gate). */
 async function reminderOfChild(childId: string, rid: string) {
@@ -14,6 +15,8 @@ async function reminderOfChild(childId: string, rid: string) {
 async function _PATCH(req: NextRequest, { params }: { params: Promise<{ id: string; rid: string }> }) {
   const session = await getSession();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
   const { id: childId, rid } = await params;
   if (!(await isGuardianOf(session.user.id, childId))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -23,13 +26,22 @@ async function _PATCH(req: NextRequest, { params }: { params: Promise<{ id: stri
   }
   const parsed = reminderInput.partial().safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Date invalide" }, { status: 400 });
-  const reminder = await prisma.studyReminder.update({ where: { id: rid }, data: parsed.data });
-  return NextResponse.json({ reminder });
+  // A change by a parent makes the reminder theirs: the child can no longer change it. A family
+  // tutor's change leaves it as it was (guardian-lock.ts).
+  const asParent = await isParentOf(session.user.id, childId);
+  const reminder = await prisma.studyReminder.update({
+    where: { id: rid },
+    data: { ...parsed.data, ...(asParent ? { setById: session.user.id } : {}) },
+  });
+  const mine = asParent || reminder.setById === session.user.id;
+  return NextResponse.json({ reminder: { ...reminder, setBy: mine ? "you" : reminder.setById ? "guardian" : "child", setByName: null } });
 }
 
 async function _DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string; rid: string }> }) {
   const session = await getSession();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
   const { id: childId, rid } = await params;
   if (!(await isGuardianOf(session.user.id, childId))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

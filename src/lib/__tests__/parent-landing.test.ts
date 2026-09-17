@@ -8,6 +8,7 @@ import {
   landingButtonHrefs,
   landingSignupHref,
   onlineVoucherCode,
+  pickLandingCode,
   reminderChainForDisplay,
   resolveLandingChannel,
 } from "@/lib/parent-landing";
@@ -34,6 +35,28 @@ describe("ce cod vede vizitatorul", () => {
     expect(onlineVoucherCode({})).toBe("ONV126S");
     expect(flyerVoucherCode({ CAFEA_VOUCHER: "v227s" })).toBe("V227S");
     expect(onlineVoucherCode({ PARENT_ONLINE_VOUCHER: " onv227s" })).toBe("ONV227S");
+  });
+});
+
+describe("ce cod vede un părinte deja logat", () => {
+  it("codul păstrat pe cont câștigă: părintele de pe flyer rămâne pe V126S chiar dacă vine din meniul site-ului", () => {
+    expect(pickLandingCode({ ...codes, channel: "site", pendingCode: "V126S" })).toEqual({ channel: "flyer", code: "V126S", swapped: false });
+    expect(pickLandingCode({ ...codes, channel: "flyer", pendingCode: "onv126s" })).toEqual({ channel: "site", code: "ONV126S", swapped: false });
+  });
+  it("fără cod pe cont: cel al canalului prin care a venit", () => {
+    expect(pickLandingCode({ ...codes, channel: "flyer" })).toEqual({ channel: "flyer", code: "V126S", swapped: false });
+    expect(pickLandingCode({ ...codes, channel: "site", pendingCode: "ALTCOD" })).toEqual({ channel: "site", code: "ONV126S", swapped: false });
+  });
+  it("un cod folosit deja pe cont e înlocuit cu celălalt (aceeași ofertă); canalul rămâne cel prin care a venit", () => {
+    expect(pickLandingCode({ ...codes, channel: "flyer", usedCodes: new Set(["V126S"]) })).toEqual({ channel: "flyer", code: "ONV126S", swapped: true });
+    expect(pickLandingCode({ ...codes, channel: "site", pendingCode: "ONV126S", usedCodes: new Set(["ONV126S"]) })).toEqual({
+      channel: "site",
+      code: "V126S",
+      swapped: true,
+    });
+  });
+  it("ambele coduri folosite: niciun cod, prețul normal", () => {
+    expect(pickLandingCode({ ...codes, channel: "flyer", usedCodes: new Set(["V126S", "ONV126S"]) })).toEqual({ channel: "flyer", code: null, swapped: false });
   });
 });
 
@@ -103,14 +126,14 @@ describe("unde duc butoanele", () => {
   });
 });
 
-describe("lanțul de mementouri, așa cum îl arată pagina", () => {
+describe("lanțul de remindere, așa cum îl arată pagina", () => {
   const all = { telegram: true, email: true, whatsapp: true, sms: true };
 
   it("toate canalele pornite: aplicație → Telegram → email → WhatsApp → SMS", () => {
     const chain = reminderChainForDisplay(ESCALATION_LEVELS, all);
     expect(chain.map((s) => s.channel)).toEqual(["PUSH", "TELEGRAM", "EMAIL", "WHATSAPP", "SMS"]);
   });
-  it("timpii arătați sunt cei ai mementoului de studiu: dimineața mai des, seara mai rar", () => {
+  it("timpii arătați sunt cei ai reminderului de studiu: dimineața mai des, seara mai rar", () => {
     const chain = reminderChainForDisplay(ESCALATION_LEVELS, all);
     const grace = { morning: CASCADE_GRACE_MINUTES.morning, evening: CASCADE_GRACE_MINUTES.evening };
     const span = `${grace.morning}⁠–⁠${grace.evening}`;

@@ -6,6 +6,7 @@ import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import { isParentOf } from "@/lib/guardian";
 import { bandForDomainSlug, BAND_YEARS, unitsForStudent } from "@/lib/curriculum";
 import { getCurriculumState, saveChecklist } from "@/lib/curriculum-service";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 // Cine poate citi/scrie checklistul unui COPIL (?childId=). Reguli întărite
 // după review-ul de securitate (2026-08-25):
@@ -68,6 +69,9 @@ async function _GET(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
   const { domain: domainSlug } = await params;
 
   // ?childId= — părintele/meditatorul citește checklistul copilului. Accesul
@@ -120,6 +124,9 @@ async function _PUT(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
   const { domain: domainSlug } = await params;
   const band = bandForDomainSlug(domainSlug);
   if (!band) {

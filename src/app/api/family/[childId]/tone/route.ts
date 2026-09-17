@@ -3,6 +3,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { isGuardianOf } from "@/lib/guardian";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 /**
  * GET/PUT /api/family/[childId]/tone — parent control over a child's encouragement tone.
@@ -12,6 +13,9 @@ import { isGuardianOf } from "@/lib/guardian";
 async function guard(childId: string) {
   const session = await getSession();
   if (!session?.user) return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return { error: paused };
   const ok = await isGuardianOf(session.user.id, childId);
   if (!ok) return { error: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
   return { userId: session.user.id };

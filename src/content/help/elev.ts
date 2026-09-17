@@ -21,7 +21,7 @@ export const ELEV: HelpContent = {
       paragraphs: [
         "Alegi materia, răspunzi la grile și aplicația reține ce știi și unde te împiedici. De aici încolo " +
           "îți dă mai des exact ce ai greșit, nu la întâmplare.",
-        "Nu trebuie să ții tu socoteala: mementourile vin la orele pe care ți le pui în program, iar " +
+        "Nu trebuie să ții tu socoteala: reminderele vin la orele pe care ți le pui în program, iar " +
           "progresul se vede singur în Progresul meu.",
       ],
       links: [
@@ -75,7 +75,7 @@ export const ELEV: HelpContent = {
           `dacă răspunzi în sub 5 secunde.`,
         `${XP_REWARDS.SESSION_COMPLETE} de puncte la fiecare sesiune terminată, +${XP_REWARDS.PERFECT_SCORE} ` +
           `dacă e fără greșeală.`,
-        `+${ON_TIME_BONUS} dacă termini în ${ON_TIME_WINDOW_MIN} de minute de la memento.`,
+        `+${ON_TIME_BONUS} dacă termini în ${ON_TIME_WINDOW_MIN} de minute de la reminder.`,
         `Provocarea zilei valorează dublu (×${XP_REWARDS.DAILY_CHALLENGE_MULTIPLIER}).`,
         `Niveluri implicite: ${LADDER_RO} puncte. Materia ta poate avea alte praguri — le vezi în Realizări.`,
         "Serie — zilele CU PROGRAM în care ai terminat o sesiune. Weekendul sau vacanța fără program nu " +
@@ -98,7 +98,7 @@ export const ELEV: HelpContent = {
         "Ei văd cum stai: sesiunile, scorurile și zonele unde greșești. Nu văd răspunsurile tale unul câte " +
           "unul și nu pot răspunde în locul tău.",
         "Un părinte îți poate administra canalele de notificare (dacă ai bifat asta) și îți poate trimite " +
-          "un memento. Programul de studiu rămâne al tău dacă nu ai delegat.",
+          "un reminder. Programul de studiu rămâne al tău dacă nu ai delegat.",
       ],
       links: [{ label: "Familia mea", href: "/dashboard/family" }],
     },

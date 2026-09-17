@@ -10,8 +10,9 @@
  */
 
 import type { LadderConfig, LadderStep } from "@aledan/notify-ladder";
-import type { EscalationChannel } from "@prisma/client";
+import type { EscalationChannel, Prisma } from "@prisma/client";
 import { ESCALATION_LEVELS, CASCADE_GRACE_MINUTES } from "./config";
+import { resolveFamilyPlanFromRecord, type SubscriptionPlanSeatFields } from "@/lib/family";
 
 /**
  * A subscriber gets the paid channels (incl. WhatsApp). "trialing" counts as
@@ -53,8 +54,11 @@ export function meteredChannelsCovered(u: {
    */
   enrollments?: { id: string }[] | null;
   /** Legăturile de copil către un PĂRINTE (vezi `coveredByPayingParent`). */
-  guardianLinks?: { parent: { subscriptionStatus: string | null; subscriptionEndsAt: Date | null } | null }[] | null;
+  guardianLinks?: { parent: PayingParent | null }[] | null;
+  /** „Gratuit permanent", bifat de administrator: ca un abonament plătit. */
+  freeForever?: boolean | null;
 }): boolean {
+  if (u.freeForever === true) return true;
   if (u.organization?.meteredIncluded === true) return true;
   if (u.enrollments && u.enrollments.length > 0) return true;
   if (coveredByPayingParent(u)) return true;
@@ -71,13 +75,33 @@ export function meteredChannelsCovered(u: {
  * era refuzat exact copilului pentru care s-a plătit (găsit la review-ul din 16.09.2026).
  *
  * Doar legăturile PARENT active numără: un meditator (TUTOR) nu plătește pachetul copilului.
- * O legătură PARENT se creează numai prin locurile unui pachet de familie (vezi checkSeat).
+ * Și doar un pachet de familie: din 17.09 un părinte își poate lega copilul și în proba fără card,
+ * deci legătura nu mai garantează un pachet de familie — un abonament Elev (pentru un singur cont)
+ * nu acoperă copilul.
  */
-export function coveredByPayingParent(u: {
-  guardianLinks?: { parent: { subscriptionStatus: string | null; subscriptionEndsAt: Date | null } | null }[] | null;
-}): boolean {
-  return Boolean(u.guardianLinks?.some((g) => g.parent && isPaidSubscriber(g.parent)));
+export function coveredByPayingParent(u: { guardianLinks?: { parent: PayingParent | null }[] | null }): boolean {
+  return Boolean(
+    u.guardianLinks?.some(
+      (g) => g.parent && (g.parent.freeForever === true || (isPaidSubscriber(g.parent) && !soloPlan(g.parent.subscriptionPlan))),
+    ),
+  );
 }
+
+/** Elev: a plan for one learner (no parent or child seats). */
+function soloPlan(plan: SubscriptionPlanSeatFields | null | undefined): boolean {
+  const resolved = resolveFamilyPlanFromRecord(plan);
+  return resolved !== null && resolved.maxChildren === 0 && resolved.maxParents === 0;
+}
+
+/** What a parent row needs to say whether it pays for its child. */
+export type PayingParent = {
+  subscriptionStatus: string | null;
+  subscriptionEndsAt: Date | null;
+  /** A parent marked „Gratuit permanent" covers the child like a paid plan. */
+  freeForever?: boolean | null;
+  /** The plan paid for; an individual (Elev) plan doesn't cover a child. */
+  subscriptionPlan?: SubscriptionPlanSeatFields | null;
+};
 
 export type RungUnreachable = "no_email" | "no_phone" | "not_covered";
 
@@ -124,8 +148,21 @@ export const SELECT_ACOPERIRE_CANALE_RELATII = {
   // Copilul unei familii care plătește (vezi `coveredByPayingParent`). Filtrul pe status e doar
   // o scurtătură; decizia finală o ia predicatul, care verifică și data de expirare.
   guardianLinks: {
-    where: { status: "active", relation: "PARENT", parent: { subscriptionStatus: { in: ["active", "trialing"] as string[] } } },
-    select: { parent: { select: { subscriptionStatus: true, subscriptionEndsAt: true } } },
+    where: {
+      status: "active",
+      relation: "PARENT",
+      parent: { OR: [{ subscriptionStatus: { in: ["active", "trialing"] } }, { freeForever: true }] as Prisma.UserWhereInput[] },
+    },
+    select: {
+      parent: {
+        select: {
+          subscriptionStatus: true,
+          subscriptionEndsAt: true,
+          freeForever: true,
+          subscriptionPlan: { select: { name: true, familyPlanKey: true, maxParents: true, maxChildren: true } },
+        },
+      },
+    },
     take: 5,
   },
 } as const;
@@ -134,6 +171,7 @@ export const SELECT_ACOPERIRE_CANALE_RELATII = {
 export const SELECT_ACOPERIRE_CANALE = {
   subscriptionStatus: true,
   subscriptionEndsAt: true,
+  freeForever: true,
   ...SELECT_ACOPERIRE_CANALE_RELATII,
 } as const;
 

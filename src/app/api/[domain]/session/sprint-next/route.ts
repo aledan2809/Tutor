@@ -9,6 +9,7 @@ import {
   getOrCreateNextSprintQuestion,
 } from "@/lib/sprint-session";
 import { liveSignalMessage } from "@/lib/sprint-live";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 /**
  * The next question of a running sprint, chosen from how the previous answers
@@ -27,6 +28,9 @@ async function _POST(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
 
   const { domain: domainSlug } = await params;
   if (domainSlug !== SPRINT_DOMAIN_SLUG) {

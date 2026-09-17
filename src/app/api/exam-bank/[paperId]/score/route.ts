@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { scoreExamPaper, type ExamItemForScoring, type AnswerInput } from "@/lib/exam-bank/score";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 // POST /api/exam-bank/[paperId]/score
 // Body: { answers: { [label]: AnswerInput } }  (objective answers from the take screen)
@@ -15,6 +16,9 @@ export async function POST(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
   const { paperId } = await params;
 
   let body: { answers?: Record<string, AnswerInput>; finalAnswers?: Record<string, string> };

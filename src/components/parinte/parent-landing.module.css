@@ -29,7 +29,9 @@
   color: #f3f4f6;
   line-height: 1.5;
 }
-.root a { color: inherit; text-decoration: none; }
+/* No link reset here: Tailwind's base already makes links inherit colour and decoration, and an
+   unlayered rule in this module would beat Tailwind's utilities — it turned the header's white
+   „Autentificare" dark on blue. */
 
 .wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; }
 .narrow { max-width: 880px; }
@@ -51,6 +53,7 @@
 .btnGhostOnDark { color: #f5efe6 !important; border-color: rgba(245, 239, 230, 0.35); background: rgba(255, 255, 255, 0.06); }
 
 /* ── 1. Hero: the flyer's world ── */
+.heroShell { position: relative; }
 .hero { position: relative; background: var(--cream); color: var(--ink); overflow: hidden; }
 .heroHeader { position: absolute; top: 0; left: 0; right: 0; z-index: 5; }
 .heroPhoto { position: relative; height: 470px; }

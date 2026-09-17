@@ -108,12 +108,14 @@ export function ParentLanding({
 
   return (
     <div className={s.root}>
-      {/* 1. Hero — continues the flyer: the same photo in the background, the same price */}
-      {/* A section, not a header: SiteHeader inside is the page's header. */}
+      {/* 1. Hero — continues the flyer: the same photo in the background, the same price.
+          The site header sits over the photo but outside the section: inside a section it would no
+          longer be the page's header (banner) for screen readers. */}
+      <div className={s.heroShell}>
+      <div className={s.heroHeader}>
+        <SiteHeader locale={locale} tone="light" />
+      </div>
       <section className={s.hero} id={HERO_ID}>
-        <div className={s.heroHeader}>
-          <SiteHeader locale={locale} tone="light" />
-        </div>
         <div className={s.heroPhoto} aria-hidden="true">
           <Image
             src="/images/parinte/mama-cafea.jpg"
@@ -190,6 +192,7 @@ export function ParentLanding({
           </a>
         </div>
       </section>
+      </div>
       <div className={s.fadeToApp} aria-hidden="true" />
 
       {/* 2. The parent's worries */}
@@ -325,7 +328,7 @@ export function ParentLanding({
           <h2 className={`${s.sTitle} ${s.sTitleSm}`}>{c.quiz.title}</h2>
           <p className={s.sLead}>{c.quiz.sub}</p>
           <div className={s.quizBox}>
-            <SubjectQuizDemo locale={locale} />
+            <SubjectQuizDemo locale={locale} cta={{ href: freeHref, label: c.quiz.cta ?? undefined }} />
           </div>
         </div>
       </section>

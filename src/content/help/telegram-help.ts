@@ -8,7 +8,7 @@
 export function telegramHelpReply(): string {
   return [
     "Botul eTutor îți trimite:",
-    "• mementourile de studiu, la orele din programul tău",
+    "• reminderele de studiu, la orele din programul tău",
     "• alertele despre copil (dacă ești părinte sau meditator)",
     "• raportul de progres",
     "",

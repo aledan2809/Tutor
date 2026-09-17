@@ -11,6 +11,7 @@ import {
   type ReportPeriod,
 } from "@/lib/report-trend";
 import { getLinkedChildIds } from "@/lib/guardian";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 /** Today plus the last five. */
 const WINDOW_COUNT = 6;
@@ -25,6 +26,9 @@ const WINDOW_COUNT = 6;
 async function _GET(req: NextRequest) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Proba gratuită s-a încheiat fără plată: contul e în pauză (access.ts).
+  const paused = await refuseIfPaused(session.user.id);
+  if (paused) return paused;
 
   const url = new URL(req.url);
   const period: ReportPeriod = url.searchParams.get("period") === "weekly" ? "weekly" : "daily";

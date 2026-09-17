@@ -1,10 +1,12 @@
 export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { accrueCommissionForPayment } from "@/lib/referral";
 import { logger } from "@/lib/logger";
+import { eventIsForCurrentSubscription } from "@/lib/card-subscription";
 
 /**
  * Stripe Checkout Broker → Tutor callback.
@@ -20,6 +22,14 @@ import { logger } from "@/lib/logger";
 
 const SECRET = process.env.STRIPE_BROKER_CALLBACK_SECRET;
 const MAX_AGE_SECONDS = 300; // anti-replay window (broker payload carries `t`)
+/** How long a declined renewal keeps the family's access: Stripe's default retry period. */
+const PAST_DUE_GRACE_MS = 14 * 24 * 60 * 60 * 1000;
+/**
+ * The account's subscription hasn't ended. A cancellation is final — Stripe neither retries nor
+ * renews a deleted subscription — so a failure or a charge arriving after it is late and mustn't
+ * undo it. (A new subscription comes back through subscription.activated.)
+ */
+const NOT_ENDED = { OR: [{ subscriptionStatus: null }, { subscriptionStatus: { not: "canceled" } }] } satisfies Prisma.UserWhereInput;
 
 interface BrokerCallback {
   v?: number;
@@ -162,6 +172,23 @@ async function recordVoucherRedemption(voucherId: string | undefined, userId: st
   }
 }
 
+/**
+ * Whether this subscription event belongs to the subscription the account has now
+ * (eventIsForCurrentSubscription). One that doesn't is logged: an old subscription still running
+ * means the family pays twice, and only the billing account can stop it.
+ */
+async function currentSubscription(userId: string, p: BrokerCallback, what: string): Promise<boolean> {
+  const account = await prisma.user.findUnique({ where: { id: userId }, select: { stripeSubscriptionId: true } });
+  if (eventIsForCurrentSubscription(account?.stripeSubscriptionId, p.stripeSubscriptionId)) return true;
+  logger.warn("Subscription event for a subscription the account no longer has — left unchanged", {
+    userId,
+    event: what,
+    subscriptionId: p.stripeSubscriptionId ?? "",
+    currentSubscriptionId: account?.stripeSubscriptionId ?? "",
+  });
+  return false;
+}
+
 async function _POST(req: NextRequest) {
   const raw = await req.text();
   const sig = req.headers.get("x-broker-signature") || "";
@@ -237,6 +264,10 @@ async function _POST(req: NextRequest) {
           data: {
             subscriptionPlanId: planId,
             subscriptionStatus: p.subscriptionStatus === "trialing" ? "trialing" : "active",
+            // A cancel stamps an end date; a free year from a 100% code sets one too. A Stripe
+            // subscription has none until it's cancelled — a past date left here would count the
+            // family as unpaid (isPaidSubscriber) and lock the child while the parent pays.
+            subscriptionEndsAt: null,
             // Persist the subscription id so /api/stripe/portal can open the portal.
             ...(p.stripeSubscriptionId ? { stripeSubscriptionId: p.stripeSubscriptionId } : {}),
             // The code kept since signup has done its job (used or not): the plan is paid for.
@@ -266,9 +297,28 @@ async function _POST(req: NextRequest) {
         currency,
       });
       // An add-on renewal is a real charge (Payment + commission) but must NOT
-      // reactivate the main plan's status.
+      // reactivate the main plan's status. Neither may a charge on a subscription the account left
+      // behind: it is recorded, and flagged, since the family is paying twice.
+      if (!isChildAddon && !(await currentSubscription(userId, p, "renewed"))) {
+        if (isNew) await accrueReferral(payment);
+        break;
+      }
       if (!isChildAddon) {
-        await prisma.user.update({ where: { id: userId }, data: { subscriptionStatus: "active" } });
+        // Same reason as on activation: a paying renewal must never keep an old end date. Not on an
+        // account whose subscription already ended, though: an ended subscription doesn't renew, so
+        // this is a late charge (an open invoice paid after the cancellation) — recorded, but it
+        // doesn't turn into access with no end.
+        const renewed = await prisma.user.updateMany({
+          where: { id: userId, ...NOT_ENDED },
+          data: { subscriptionStatus: "active", subscriptionEndsAt: null },
+        });
+        if (renewed.count === 0) {
+          logger.warn("Charge on an account whose subscription already ended — recorded, access unchanged", {
+            userId,
+            subscriptionId: p.stripeSubscriptionId ?? "",
+            eventId: p.eventId ?? "",
+          });
+        }
         await recordVoucherRedemption(p.metadata?.voucherId, userId, p.sessionId);
       }
       if (isNew) await accrueReferral(payment);
@@ -276,9 +326,21 @@ async function _POST(req: NextRequest) {
     }
 
     case "subscription.payment_failed": {
-      // An add-on payment failure doesn't put the whole account past_due.
-      if (!isChildAddon) {
-        await prisma.user.update({ where: { id: userId }, data: { subscriptionStatus: "past_due" } });
+      // An add-on payment failure doesn't put the whole account past_due, nor does one on a
+      // subscription the account left behind.
+      if (!isChildAddon && (await currentSubscription(userId, p, "payment_failed"))) {
+        // Stripe sends the last failure and the cancellation together, in either order: a failure
+        // applied after the cancellation would leave the family „retrying" a subscription that no
+        // longer exists, with every package locked. Both writes are conditional, so a cancellation
+        // landing between them wins.
+        await prisma.user.updateMany({ where: { id: userId, ...NOT_ENDED }, data: { subscriptionStatus: "past_due" } });
+        // Access stays while Stripe retries (access.ts), but not forever: the first failure sets an
+        // end to it, as long as Stripe's retries (two weeks by default). Later failures of the same
+        // renewal don't move it; a renewal that goes through clears it (subscription.renewed).
+        await prisma.user.updateMany({
+          where: { id: userId, subscriptionEndsAt: null, ...NOT_ENDED },
+          data: { subscriptionEndsAt: new Date(Date.now() + PAST_DUE_GRACE_MS) },
+        });
       }
       break;
     }
@@ -293,9 +355,16 @@ async function _POST(req: NextRequest) {
         });
         break;
       }
+      // The end of a subscription the account left behind doesn't end the one it pays now.
+      if (!(await currentSubscription(userId, p, "canceled"))) break;
       await prisma.user.update({
         where: { id: userId },
-        data: { subscriptionStatus: "canceled", subscriptionEndsAt: new Date() },
+        data: {
+          subscriptionStatus: "canceled",
+          subscriptionEndsAt: new Date(),
+          // Nothing is charged any more: a later year from a code isn't taken for a card subscription.
+          ...(p.stripeSubscriptionId ? { stripeSubscriptionId: null } : {}),
+        },
       });
       break;
     }

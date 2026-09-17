@@ -8,6 +8,7 @@ import {
   ESCALATION_LEVELS,
   ESCALATION_PRESETS,
   NUDGE_MAX_AGE_HOURS,
+  NUDGE_MAX_FIRES,
   ON_TIME_WINDOW_MIN,
   PARENT_RENOTIFY_MIN,
   QUIET_HOURS_DEFAULT,
@@ -36,10 +37,10 @@ export const HOW_IT_WORKS: Record<HowItWorksKey, Record<Locale, HowItWorksBlock>
     ro: {
       more: "monitorizare",
       steps: [
-        "Fiecare copil are un capitol: Sesiuni (ce a lucrat și cu ce scor), Remindere (ce a primit și dacă a reacționat), Program (zilele și orele) și Vacanță (zile fără mementouri).",
+        "Fiecare copil are un capitol: Sesiuni (ce a lucrat și cu ce scor), Remindere (ce a primit și dacă a reacționat), Program (zilele și orele) și Vacanță (zile fără remindere).",
         "Datele sunt la zi la fiecare deschidere a paginii — nu aștepți raportul ca să vezi cum a fost azi.",
         "Ești anunțat doar când copilul ignoră tot lanțul într-o zi cu program. Raportul vine separat, în ziua și la ora alese mai jos.",
-        `Poți trimite un memento chiar acum, pe canalele gratuite; se repetă până reacționează și se oprește singur după ${NUDGE_MAX_AGE_HOURS} de ore.`,
+        `Poți trimite un reminder chiar acum, pe canalele gratuite; se repetă până reacționează, de cel mult ${NUDGE_MAX_FIRES} ori și cel mult ${NUDGE_MAX_AGE_HOURS} de ore.`,
       ],
     },
     en: {
@@ -48,7 +49,7 @@ export const HOW_IT_WORKS: Record<HowItWorksKey, Record<Locale, HowItWorksBlock>
         "Each child has a chapter: Sessions, Reminders (what arrived and whether they reacted), Schedule and Holidays.",
         "The data is current every time you open the page — no need to wait for the report.",
         "You are alerted only when the whole chain is ignored on a scheduled day. The report is separate, on the day and hour set below.",
-        `You can send a reminder right now on the free channels; it repeats until they react and stops after ${NUDGE_MAX_AGE_HOURS} hours.`,
+        `You can send a reminder right now on the free channels; it repeats until they react, at most ${NUDGE_MAX_FIRES} times and for at most ${NUDGE_MAX_AGE_HOURS} hours.`,
       ],
     },
   },
@@ -57,7 +58,7 @@ export const HOW_IT_WORKS: Record<HowItWorksKey, Record<Locale, HowItWorksBlock>
     ro: {
       more: "raport",
       steps: [
-        `„La timp” = sesiunea a început în cel mult ${ON_TIME_WINDOW_MIN} de minute de la memento. „Întârziate” = mai târziu, în aceeași zi. „Ignorate” = nici apăsare pe memento, nici sesiune în ziua aceea.`,
+        `„La timp” = sesiunea a început în cel mult ${ON_TIME_WINDOW_MIN} de minute de la reminder. „Întârziate” = mai târziu, în aceeași zi. „Ignorate” = nici apăsare pe reminder, nici sesiune în ziua aceea.`,
         "Perioada în curs apare aici înainte să fie trimisă — verifici oricând, nu doar când ajunge mesajul.",
         "„Zilnic” = ultimele 24 de ore, „Săptămânal” = ultimele 7 zile; fiecare e comparată cu ultimele cinci de același fel.",
         "Elevul vede aceeași pagină, despre el.",
@@ -80,7 +81,7 @@ export const HOW_IT_WORKS: Record<HowItWorksKey, Record<Locale, HowItWorksBlock>
       steps: [
         `Copilul primește în ordinea: aplicație (imediat) → Telegram (după ${TG} min) → email (după încă ${EM}) → WhatsApp (după încă ${WA}, doar în pachetele plătite).`,
         `Lanțul se oprește când apasă pe notificarea din aplicație sau pe butonul din Telegram, ori termină o sesiune. Între ${QUIET_HOURS_DEFAULT.start} și ${QUIET_HOURS_DEFAULT.end} pleacă doar notificarea din aplicație.`,
-        `Ritmuri: Blând = aplicație → email după ${BLAND} min · Standard = cel de mai sus · Insistent = câte ${INSISTENT} min între canale. La mementourile programate: ~${CASCADE_GRACE_MINUTES.morning} min dimineața, ~${CASCADE_GRACE_MINUTES.evening} seara.`,
+        `Ritmuri: Blând = aplicație → email după ${BLAND} min · Standard = cel de mai sus · Insistent = câte ${INSISTENT} min între canale. La reminderele programate: ~${CASCADE_GRACE_MINUTES.morning} min dimineața, ~${CASCADE_GRACE_MINUTES.evening} seara.`,
         `Tu ești anunțat doar dacă a ignorat tot lanțul, într-o zi cu program — apoi re-anunțat la ${PARENT_RENOTIFY_MIN} de minute, sau cum alegi mai jos.`,
       ],
     },
@@ -99,7 +100,7 @@ export const HOW_IT_WORKS: Record<HowItWorksKey, Record<Locale, HowItWorksBlock>
     ro: {
       more: "puncte",
       steps: [
-        `${XP_REWARDS.CORRECT_ANSWER} puncte pentru fiecare răspuns corect (+${XP_REWARDS.FAST_ANSWER_BONUS} sub 5 secunde), ${XP_REWARDS.SESSION_COMPLETE} la fiecare sesiune terminată (+${XP_REWARDS.PERFECT_SCORE} fără greșeală), +${ON_TIME_BONUS} dacă termini în ${ON_TIME_WINDOW_MIN} de minute de la memento.`,
+        `${XP_REWARDS.CORRECT_ANSWER} puncte pentru fiecare răspuns corect (+${XP_REWARDS.FAST_ANSWER_BONUS} sub 5 secunde), ${XP_REWARDS.SESSION_COMPLETE} la fiecare sesiune terminată (+${XP_REWARDS.PERFECT_SCORE} fără greșeală), +${ON_TIME_BONUS} dacă termini în ${ON_TIME_WINDOW_MIN} de minute de la reminder.`,
         `Niveluri implicite: ${LADDER} puncte. Materia ta poate avea alte praguri — le vezi în Realizări.`,
         `Serie = zilele CU PROGRAM în care ai terminat o sesiune. Weekendul fără program n-o rupe. Dacă s-a rupt, o recuperezi în ${STREAK_RECOVERY.maxMissedDays} zile: ${STREAK_RECOVERY.questions} întrebări în ${RECOVERY_MIN} minute, minimum ${STREAK_RECOVERY.requiredCorrect} corecte.`,
         `Clasament = punctele săptămânii, în grupa ta; se resetează lunea, primii ${LEADERBOARD_TOP} apar în Realizări.`,
@@ -122,7 +123,7 @@ export const HOW_IT_WORKS: Record<HowItWorksKey, Record<Locale, HowItWorksBlock>
       steps: [
         `Ordinea implicită: aplicație → Telegram → email → WhatsApp. Dacă nu reacționezi pe primul canal, trecem la următorul; ordinea o schimbi mai jos.`,
         "Telegram e gratuit și instant, iar butonul din mesaj oprește restul lanțului dintr-o apăsare.",
-        `Programul de studiu decide când pleacă primul memento; între ${QUIET_HOURS_DEFAULT.start} și ${QUIET_HOURS_DEFAULT.end} restul lanțului așteaptă dimineața.`,
+        `Programul de studiu decide când pleacă primul reminder; între ${QUIET_HOURS_DEFAULT.start} și ${QUIET_HOURS_DEFAULT.end} restul lanțului așteaptă dimineața.`,
         "Apeși pe notificarea din aplicație sau pe butonul din Telegram, ori termini o sesiune — lanțul se oprește acolo.",
       ],
     },

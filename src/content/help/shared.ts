@@ -33,9 +33,9 @@ export function cascadeSection(locale: Locale, audience: "self" | "child"): Help
   return locale === "ro"
     ? {
         id: "mementouri",
-        title: audience === "self" ? "Cum ajung mementourile la tine" : "Cum ajung mementourile la copil",
+        title: audience === "self" ? "Cum ajung reminderele la tine" : "Cum ajung reminderele la copil",
         paragraphs: [
-          `La ora din program pleacă primul memento, apoi urcăm pe rând, doar dacă ${who} nu reacționează: ` +
+          `La ora din program pleacă primul reminder, apoi urcăm pe rând, doar dacă ${who} nu reacționează: ` +
             `notificarea din aplicație (imediat) → Telegram (după ${TELEGRAM_AFTER} minute) → ` +
             `email (după încă ${EMAIL_AFTER}) → WhatsApp (după încă ${WHATSAPP_AFTER}, doar în pachetele plătite).`,
           `Lanțul se oprește când apeși pe notificarea din aplicație sau pe butonul din mesajul de pe ` +
@@ -47,7 +47,7 @@ export function cascadeSection(locale: Locale, audience: "self" | "child"): Help
           `Blând — aplicație, apoi email după ${BLAND_EMAIL_AFTER} de minute. Fără Telegram, fără WhatsApp.`,
           `Standard — lanțul complet de mai sus.`,
           `Insistent — aplicație, apoi câte ${INSISTENT_STEP} minute între canale.`,
-          `La mementourile programate ritmul ține de fereastră: ~${CASCADE_GRACE_MINUTES.morning} minute ` +
+          `La reminderele programate ritmul ține de fereastră: ~${CASCADE_GRACE_MINUTES.morning} minute ` +
             `între canale dimineața (când timpul e scurt), ~${CASCADE_GRACE_MINUTES.evening} seara.`,
         ],
       }
@@ -118,9 +118,9 @@ export function reportSection(locale: Locale, audience: "self" | "child"): HelpS
             "cu ultimele cinci de același fel, ca să se vadă direcția, nu doar cifra.",
         ],
         bullets: [
-          `La timp — sesiunea a început în cel mult ${ON_TIME_WINDOW_MIN} de minute de la memento.`,
+          `La timp — sesiunea a început în cel mult ${ON_TIME_WINDOW_MIN} de minute de la reminder.`,
           "Întârziate — a început mai târziu, dar în aceeași zi.",
-          "Ignorate — nici nu s-a apăsat pe memento, nici nu s-a făcut vreo sesiune în ziua aceea.",
+          "Ignorate — nici nu s-a apăsat pe reminder, nici nu s-a făcut vreo sesiune în ziua aceea.",
         ],
         links: [{ label: "Vezi raportul", href: "/dashboard/rapoarte" }],
       }
