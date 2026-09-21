@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { ReminderManager } from "@/components/reminder-manager";
@@ -9,6 +9,7 @@ import { PhoneCapture } from "@/components/phone-capture";
 import { ParentAlertActions } from "@/components/watcher/parent-alert-actions";
 import { ParentNudgeManager } from "@/components/watcher/parent-nudge-manager";
 import { SubjectManager } from "@/components/watcher/subject-manager";
+import { takePaidSubjectFromUrl } from "@/components/plan/subject-addon-offer";
 
 const KNOWN_SESSION_TYPES = ["micro", "quick", "deep", "repair", "recovery", "intensive"];
 
@@ -139,6 +140,18 @@ export function ChildChapter({ child }: { child: ChildLite }) {
     setOpen(next);
     if (next && !detail) await loadDetail();
   };
+
+  // Back from paying for one more subject for this child (subject-addon-checkout): open on the subjects.
+  const [paid, setPaid] = useState<{ domainId: string | null } | null>(null);
+  useEffect(() => {
+    const back = takePaidSubjectFromUrl((q) => q.get("child") === child.id);
+    if (!back) return;
+    setPaid(back);
+    setOpen(true);
+    setTab("program");
+    void loadDetail();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [child.id]);
 
   const initials = (child.name ?? "?")[0]?.toUpperCase();
   const streak = child.gamification?.currentStreak ?? 0;
@@ -272,7 +285,12 @@ export function ChildChapter({ child }: { child: ChildLite }) {
                 {detail.canManageSubjects && (
                   <div>
                     <h3 className="mb-2 text-sm font-medium text-gray-400">{tw("subjectManager.heading")}</h3>
-                    <SubjectManager childId={child.id} onChange={() => void loadDetail()} />
+                    <SubjectManager
+                      childId={child.id}
+                      onChange={() => void loadDetail()}
+                      paid={paid}
+                      onPaymentSettled={() => setPaid(null)}
+                    />
                   </div>
                 )}
                 <div>

@@ -62,11 +62,16 @@ export type AccessInput = {
   coParents?: AccessPerson[];
   /** The parents of the children this account tutors: a plan with a tutor's seat covers the tutor. */
   tutorFamilies?: AccessPerson[];
+  /** Every parent link the account has had (active or removed): who may still lend a free week (trialLenders). */
+  parentLinkHistory?: ParentLink[];
   /** Enrolled in a subject a company pays for. */
   orgCovered: boolean;
   /** Tutor, instructor or company administrator: they don't buy a package. */
   staff: boolean;
 };
+
+/** A parent link, active or removed, with when it was made and when the parent's account was created. */
+export type ParentLink = { parentId: string; linkedAt: Date; parentCreatedAt: Date };
 
 /** One child of this account: when this account was linked to it, and the child's other parents. */
 export type CoParentGroup = { linkedAt: Date; others: { person: AccessPerson; linkedAt: Date }[] };
@@ -207,6 +212,28 @@ function familyReason(payers: AccessPerson[]): FullReason {
   return payers.some((p) => (payingForAccess(p) && !individualPlan(p.subscriptionPlan)) || p.isSuperAdmin) ? "family_paid" : "free_forever";
 }
 
+/**
+ * The parents whose free week the account may share. A parent whose own week began while the account's
+ * was still running shares it (a child joins mid-week, as before). A parent who came after the
+ * account's own week ended lends one more week — the first such parent only, counting removed links
+ * too (Alex 17.09.2026): a new parent account every week can't keep a paused child going. Without the
+ * link history (callers that don't load it), every parent lends, as before.
+ */
+export function trialLenders<P extends AccessPerson>(
+  self: AccessPerson,
+  parents: P[],
+  history: ParentLink[] | undefined,
+  pauseStartsAt: Date | null
+): P[] {
+  if (!history) return parents;
+  const ownEnd = trialEndOf(self.createdAt, pauseStartsAt).getTime();
+  const late = (createdAt: Date) => trialStartOf(createdAt, pauseStartsAt).getTime() >= ownEnd;
+  const firstLate = history
+    .filter((h) => late(h.parentCreatedAt))
+    .sort((a, b) => a.linkedAt.getTime() - b.linkedAt.getTime())[0]?.parentId;
+  return parents.filter((p) => !late(p.createdAt) || (p.id !== undefined && p.id === firstLate));
+}
+
 export function resolveAccess(input: AccessInput): Access {
   const { now, pauseStartsAt, self, parents } = input;
   const groups: CoParentGroup[] =
@@ -231,7 +258,7 @@ export function resolveAccess(input: AccessInput): Access {
   // The account's own week, or its parent's: the later one counts (a child can join mid-week).
   const candidates: { endsAt: Date; daysLeft: number; via: "own" | "family" }[] = [
     { endsAt: trialEndOf(self.createdAt, pauseStartsAt), daysLeft: trialDaysLeft(self.createdAt, pauseStartsAt, now), via: "own" },
-    ...parents.map((p) => ({
+    ...trialLenders(self, parents, input.parentLinkHistory, pauseStartsAt).map((p) => ({
       endsAt: trialEndOf(p.createdAt, pauseStartsAt),
       daysLeft: trialDaysLeft(p.createdAt, pauseStartsAt, now),
       via: "family" as const,

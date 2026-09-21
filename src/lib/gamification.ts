@@ -58,11 +58,21 @@ interface XpEventResult {
 // ─── Helper: Get or create user gamification record ───
 
 async function getOrCreateGamification(userId: string, domainId: string) {
-  return prisma.userGamification.upsert({
-    where: { userId_domainId: { userId, domainId } },
-    update: {},
-    create: { userId, domainId },
-  });
+  const upsert = () =>
+    prisma.userGamification.upsert({
+      where: { userId_domainId: { userId, domainId } },
+      update: {},
+      create: { userId, domainId },
+    });
+  try {
+    return await upsert();
+  } catch (e) {
+    // A new learner's first page load asks twice at once, and an upsert isn't atomic: both try to create
+    // the row and one fails on the unique key (seen on a child's first dashboard: „Something went wrong").
+    // The row exists now, so the second try finds it.
+    if ((e as { code?: string }).code !== "P2002") throw e;
+    return upsert();
+  }
 }
 
 // ─── Helper: Get level thresholds for a domain ───

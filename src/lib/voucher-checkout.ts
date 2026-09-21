@@ -126,6 +126,20 @@ export type VoucherPreviewResult =
   | { ok: false; code: VoucherPreviewErrorCode; message: string };
 
 /**
+ * Checkout and the pending-code API answer a refused code with a stable `code`; the pages show it in
+ * the user's language (keys in the `packages` messages) instead of the API's English.
+ */
+export const VOUCHER_ERROR_KEYS = {
+  VOUCHER_INVALID: "voucherInvalid",
+  VOUCHER_EXPIRED: "voucherExpired",
+  VOUCHER_LIMIT_REACHED: "voucherLimitReached",
+  VOUCHER_WRONG_PLAN: "voucherWrongPlan",
+  VOUCHER_ALREADY_USED: "voucherAlreadyUsed",
+  VOUCHER_FREE_ACCESS: "voucherFreeAccess",
+  VOUCHER_TOO_MANY: "voucherTooMany",
+} as const;
+
+/**
  * May this code be shown as a discount on a price, before any plan is chosen? Same order as
  * checkout, minus the plan check (the page applies the discount only to the plan it names).
  */

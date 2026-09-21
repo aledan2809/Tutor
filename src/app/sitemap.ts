@@ -17,6 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/en/grile`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
     // High-intent conversion + funnel pages (RO primary — RO market).
     { url: `${baseUrl}/ro/preturi`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/ro/anual`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${baseUrl}/ro/parinte`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/ro/elev`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${baseUrl}/ro/creatori`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },

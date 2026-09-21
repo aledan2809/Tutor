@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { SubjectAddonOffer, watchPaidSubject, type SubjectAddon } from "@/components/plan/subject-addon-offer";
 
 type SubjectRow = {
   domainId: string;
@@ -18,9 +19,26 @@ type Available = { id: string; name: string; slug: string; icon: string | null }
  * The child's subjects on the parent's page: the parent adds or removes them, and what they decide
  * stays that way (the child can't add back a subject the parent removed). See
  * /api/dashboard/watcher/[id]/subjects.
+ *
+ * Past the subjects the card subscription pays for, the paying parent gets the price of one more and
+ * pays it on its own subscription; the subject is turned on when the payment is confirmed
+ * (subject-addon-checkout). `paid`: back from that payment, and for which subject; `onPaymentSettled`
+ * runs once the list has stopped looking for it, so the owner can forget the payment (this list is
+ * mounted again after each change, and must not announce it again).
  */
-export function SubjectManager({ childId, onChange }: { childId: string; onChange?: () => void }) {
+export function SubjectManager({
+  childId,
+  onChange,
+  paid = null,
+  onPaymentSettled,
+}: {
+  childId: string;
+  onChange?: () => void;
+  paid?: { domainId: string | null } | null;
+  onPaymentSettled?: () => void;
+}) {
   const t = useTranslations("watcher.subjectManager");
+  const ta = useTranslations("subjectAddon");
   const [subjects, setSubjects] = useState<SubjectRow[]>([]);
   const [removed, setRemoved] = useState<SubjectRow[]>([]);
   const [available, setAvailable] = useState<Available[]>([]);
@@ -28,9 +46,12 @@ export function SubjectManager({ childId, onChange }: { childId: string; onChang
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [addon, setAddon] = useState<SubjectAddon | null>(null);
+  const [payment, setPayment] = useState<"waiting" | "done" | "late" | null>(paid ? "waiting" : null);
   const api = `/api/dashboard/watcher/${childId}/subjects`;
 
-  const load = useCallback(async () => {
+  /** The lists again; answers the active subjects (null when they couldn't be read). */
+  const load = useCallback(async (): Promise<SubjectRow[] | null> => {
     try {
       const res = await fetch(api);
       if (!res.ok) throw new Error();
@@ -38,8 +59,10 @@ export function SubjectManager({ childId, onChange }: { childId: string; onChang
       setSubjects(d.subjects ?? []);
       setRemoved(d.removed ?? []);
       setAvailable(d.available ?? []);
+      return d.subjects ?? [];
     } catch {
       setError(t("loadError"));
+      return null;
     } finally {
       setLoading(false);
     }
@@ -49,14 +72,35 @@ export function SubjectManager({ childId, onChange }: { childId: string; onChang
     void load();
   }, [load]);
 
-  const act = async (init: RequestInit, url = api) => {
+  // The payment service confirms a few seconds after the payment page returns: look again meanwhile,
+  // until the subject bought is in the list.
+  const paidDomainId = paid?.domainId ?? null;
+  useEffect(() => {
+    if (!paid) return;
+    setPayment("waiting");
+    return watchPaidSubject(
+      async () => {
+        const active = await load();
+        return !!paidDomainId && !!active?.some((s) => s.domainId === paidDomainId);
+      },
+      (found) => {
+        setPayment(found || !paidDomainId ? "done" : "late");
+        onPaymentSettled?.();
+      },
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [!!paid, paidDomainId, load]);
+
+  const act = async (init: RequestInit, url = api, subject?: { domainId: string; name: string }) => {
     setBusy(true);
     setError(null);
+    setAddon(null);
     try {
       const res = await fetch(url, init);
       if (!res.ok) {
         const d = await res.json().catch(() => ({}));
-        setError(d?.error ?? t("saveError"));
+        if (res.status === 402 && d?.code === "SUBJECT_ADDON" && d.quote && subject) setAddon({ ...subject, quote: d.quote });
+        else setError(d?.error ?? t("saveError"));
       } else {
         onChange?.();
       }
@@ -66,8 +110,11 @@ export function SubjectManager({ childId, onChange }: { childId: string; onChang
     }
   };
 
-  const add = (domainId: string) =>
-    act({ method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ domainId }) });
+  const add = (domainId: string) => {
+    const name = available.find((d) => d.id === domainId)?.name ?? removed.find((r) => r.domainId === domainId)?.name ?? "";
+    return act({ method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ domainId }) }, api, { domainId, name });
+  };
+
   const remove = (s: SubjectRow) => {
     if (!window.confirm(t("confirmRemove", { name: s.name }))) return;
     void act({ method: "DELETE" }, `${api}?domainId=${encodeURIComponent(s.domainId)}`);
@@ -85,7 +132,10 @@ export function SubjectManager({ childId, onChange }: { childId: string; onChang
   return (
     <div className="space-y-3">
       <p className="text-xs text-gray-400">{t("intro")}</p>
+      {payment === "waiting" && <p className="text-sm text-emerald-400">{ta("paidList")}</p>}
+      {payment === "late" && <p className="text-sm text-amber-400">{ta("paidLate")}</p>}
       {error && <p className="text-sm text-amber-400">{error}</p>}
+      {addon && <SubjectAddonOffer addon={addon} childId={childId} onClose={() => setAddon(null)} onError={setError} />}
 
       {subjects.length === 0 ? (
         <p className="text-sm text-gray-500">{t("empty")}</p>

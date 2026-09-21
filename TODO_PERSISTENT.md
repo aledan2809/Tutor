@@ -53,8 +53,71 @@ crontab `/root/backups/crontab.bak-2026-09-17-pre-tutor-fast`) · nginx: `/api/c
 (2) pornește comutatorul „Pornește proba și pauza" din aceeași pagină; (3) verificările din Stripe (decizia 8 de mai jos) și
 deciziile 6–7; (4) opțional, privește pagina Stripe cu un cont de test.
 
-**Livrarea 2 — după 21.09:** −30% la plata în probă (cu cronometru) · −10% Telegram · a 2-a/a 3-a materie · anual ·
-texte aliniate (/preturi, /elev, ajutor, Abonament).
+**Review r6 (17.09) peste livrarea 1 + proba fără card — ✅ LIVE** (`a02111c` + `a1f8e2d`, backup DB
+`/root/backups/tutor-pre-r6-2026-09-17.dump`): 15 constatări grave raportate, 13 reparate, 2 lăsate cu motiv (proba
+„împrumutată" de la un cont nou de părinte → decizie Alex, se face în livrarea 2; părintele acoperit altfel al unui copil în
+pauză nu primește mesaj → trebuie text separat). Verificat: tsc, 1151 de teste, integrare lanțuri + mesaje ALL PASS,
+E2E 172/172 pe build local, live pe etutor.ro. TWG (`loop_trwg_mu57x2s8_jonov1`) oprit la iterația 5: din modificările
+automate s-a păstrat doar limita la zero a zilelor fără sesiune; restul (pagina principală, banner cookie-uri, formulare,
+autentificare cu chei de traducere inexistente) anulate. Rămase ca idei, nefăcute: dublă apăsare la autentificare, limita
+de mărime a CV-ului pe client, contrastul linkului „Ești părinte?".
+
+**Livrarea 2 — decizii Alex 17.09** (macheta: `Reports/livrarea2-reduceri-2026-09-17/macheta-livrarea2-reduceri.html`):
+- **−30% dacă plătește în probă**, pe viață (cât rămâne abonat). Numărătoarea inversă: în bannerul de probă al părintelui,
+  pe Abonament și în mesajul din ultima zi. Copilul nu o vede niciodată.
+- **−10% cu Telegram conectat la plată**, rămâne și după deconectare; contează Telegram-ul **oricui din familie** (cel care
+  plătește sau unul dintre copiii lui).
+- Combinare: cea mai mare dintre cod (−25%) și probă (−30%), apoi −10% Telegram peste.
+- **Materiile în plus** (a 2-a −15%, de la a 3-a −25%, din prețul normal): se plătesc **la plată, după materiile alese**,
+  ca linii pe același abonament; o materie adăugată după plată = abonament mic separat (ca la copilul în plus).
+  **Reducerile (probă/cod/Telegram) se aplică tuturor materiilor.** Scoaterea unei materii plătite **lasă locul plătit**
+  pentru altă materie; ca să nu mai plătească, părintele oprește abonamentul materiei din „Gestionează abonamentul"
+  (serviciul de plăți nu poate opri singur un abonament și nu se modifică).
+- **Copilul în plus** primește și el reducerea pe viață, peste −20% / −30%.
+- **Anual = 10 luni din prețul cu reducere** (schimbare față de 16.09: primește și reducerile), cu zilele rămase din
+  probă. Pe lunarul cu reducere de probă apare oferta „Avem o ofertă și mai mare pentru tine. Dacă faci plata pe tot anul,
+  vei economisi și mai mult. Hai să vezi cât." → pagină cu prețurile comparative, **în două variante**: publică
+  (eTutor.ro/ro/anual, exemple, pentru reclame) și în cont (cifrele lui, plată anuală directă).
+- **Proba „împrumutată"**: un copil ajuns în pauză primește încă 7 zile de la **primul** părinte care îl leagă după
+  probă; un al doilea cont nou nu mai dă nimic.
+- Texte aliniate: /preturi, /elev, Ajutor, Abonament.
+
+**Livrarea 2 — construită și verificată (21.09; comisă, vezi mai jos):**
+- [x] Motorul de reducere (pur, testat): linii pe materii, reducerea pe viață, Telegram, anual
+- [x] Planuri anuale în DB (script cu verificare + backup) și reducerea salvată pe cont la activare
+- [x] Checkout lunar/anual cu materiile alese; abonament separat pentru o materie adăugată după plată; loc plătit refolosibil
+- [x] Numărătoarea inversă (banner părinte, Abonament, mesajul din ultima zi) + oferta anuală pe lunar
+- [x] Pagina anuală publică (/ro/anual) + pagina din cont
+- [x] Proba „împrumutată" o singură dată
+- [x] Texte /preturi, /elev, Ajutor, Abonament · review max + TWG · E2E
+
+**Cum a fost verificată livrarea 2:** `/code-review` max (15 constatări, toate reparate) + **4 revizori independenți**
+pe corecturi (9 + 7 + 4 + 0 constatări). Runda 3 a găsit 3 greșeli reale de numărare a locurilor plătite, toate reparate
+la rădăcină: (a) numărul „păstrat" la cumpărarea unei materii nu se mai învechește când familia cumpără pachetul din nou;
+(b) fiecare abonament separat ține minte dacă intră în numărătoare (nu se mai deduce la sfârșit, deci un copil dezlegat
+între timp nu mai încurcă socoteala); (c) materia cumpărată se pornește în aceeași tranzacție care îi numără locul.
+Runda 4: **zero defecte în corecturi**; din 4 situații vecine, 2 reparate (comisionul de recomandare la o confirmare
+reluată; „Gestionează" al pachetului nu mai deschide portalul unui abonament separat), 1 fără obiect (zero locuri de copil
+plătite în producție) și 2 lăsate cu motiv (mai jos). Verificări: tsc, eslint, **1177 teste**, integrare pe baza de test
+**53 + 23 verificări** cu **12 mutații prinse** (fiecare verificare nouă chiar prinde defectul pe care-l păzește),
+**E2E în browser 52/52** pe build de producție local. TWG `loop_trwg_mu5l1tm3_fgf1u5`: din iterația 3 toți furnizorii AI
+erau epuizați (limita săptămânală a uneltei) — utilă a fost doar iterația 1: **păstrată** protecția numărătorii contra
+unei date invalide; **anulate** 7 fișiere atinse în afara livrării (roșu mai închis pe fundal închis = contrast mai slab,
+spațiu gol permanent sub bannerul de cookie-uri).
+
+**Rămase din livrarea 2 (cazuri rare, cu motiv — nu blochează):**
+- [ ] Un abonament separat oprit **în timp ce pagina de plată a unui pachet nou e deschisă** (deschisă înainte de oprire,
+  plătită după): prețul noului pachet scăzuse materia aceea, deci copilul rămâne cu o materie neplătită. Reparație
+  propusă: checkout-ul trece în metadata sesiunile abonamentelor scăzute + materiile lor; la activare, pentru cele
+  încheiate între timp se aplică regula de la sfârșitul unui abonament separat.
+- [ ] Pachet plătit **fără niciun copil legat**, cu un abonament separat activ pentru un copil dezlegat între timp și
+  legat din nou după plată: abonamentul nu mai intră în număr (familia plătește 2 locuri, contul numără 1).
+- [ ] La **reînnoire** comisionul de recomandare se înregistrează tot doar la prima livrare (`isNew`) — tipar mai vechi,
+  lăsat neschimbat; pașii dinaintea lui sunt o singură scriere.
+- [ ] Cosmetic: în timpul probei, părintele lăsat în afara pachetului altuia vede nota „X are pachetul…" de două ori
+  (bannerul probei + nota din Abonament).
+- [ ] Veche, nu din livrarea 2: `tests/unit/reclassify-rule.test.ts` are un `@ts-expect-error` nefolosit (tsc îl
+  raportează, build-ul Next nu).
 
 **Stare 17.09, 00:40:** livrarea 1 e **comisă local** în `0f25dbe` (nedeployată): tsc, eslint, 1051 de teste și 50/50
 verificări E2E pe build-ul de producție local. *(Depășit: deployat 17.09, 01:30 UTC — vezi mai sus.)*
@@ -509,6 +572,10 @@ acces = admin înscrie + cod la nevoie · coloană vertebrală Curs → Modul �
 - [ ] **Tehnic**: `tests/unit/reclassify-rule.test.ts` are un `@ts-expect-error` nefolosit (tsc local; build-ul de prod trece).
 
 ## [~] 📲 Telegram ca implicit, cu reducere de 10% legată de costul real (decis 2026-08-26)
+
+> **Înlocuit pe partea de bani de deciziile din 16–17.09 (livrarea 2, sus):** −10% se dă dacă Telegram e conectat
+> **la plată** (al oricui din familie) și **rămâne și după deconectare** — fără cerere/aprobare pentru WhatsApp și fără
+> debitare pro-rata. Conectarea descrisă mai jos rămâne valabilă.
 
 > **Stare 2026-09-01** — **conectarea e LIVRATĂ ȘI FUNCȚIONEAZĂ; partea de bani NU e construită.**
 > Livrat 31 aug: card de onboarding cu **link ȘI cod QR** (QR generat server-side, ca tokenul de

@@ -3,12 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
-import { checkVoucherForCheckout, normalizeVoucherCode, type BrokerCoupon } from "@/lib/voucher-checkout";
+import { checkVoucherForCheckout, normalizeVoucherCode } from "@/lib/voucher-checkout";
 import { resolveFamilyPlanFromRecord } from "@/lib/family";
-import { checkoutTrialDays } from "@/lib/free-trial";
+import { checkoutTrialDays, remainingFreeTrialDays } from "@/lib/free-trial";
 import { trialStartOf } from "@/lib/access";
 import { loadPauseStartsAt } from "@/lib/access-server";
 import { paysByCard } from "@/lib/card-subscription";
+import { checkoutDiscount, subjectLines, type BillingInterval } from "@/lib/checkout-price";
+import { familyHasTelegram, monthlyPlanPriceMinor, planLearner, subjectsToBill } from "@/lib/checkout-facts";
 
 /**
  * Checkout via the central Stripe Checkout Broker (stripe.knowbest.ro).
@@ -64,10 +66,9 @@ async function _POST(req: NextRequest) {
     );
   }
 
-  // Validate voucher locally (the broker creates the matching Stripe coupon). The rules
-  // live in voucher-checkout.ts; `code` lets the page show a translated message.
-  let coupon: BrokerCoupon | undefined;
-  let voucherId: string | undefined;
+  // Validate voucher locally. The rules live in voucher-checkout.ts; `code` lets the page show a
+  // translated message. Whether the code is what gets applied is decided below (checkoutDiscount).
+  let codeOffer: { percent: number; renews: boolean; voucherId: string } | null = null;
   const code = normalizeVoucherCode(voucherCode);
   if (code) {
     const voucher = await prisma.voucher.findUnique({ where: { code } });
@@ -83,8 +84,19 @@ async function _POST(req: NextRequest) {
     if (!check.ok) {
       return NextResponse.json({ error: check.message, code: check.code, planKey: check.planKey }, { status: 400 });
     }
-    coupon = check.coupon;
-    voucherId = check.coupon.metadata.voucherId;
+    // A 100% code opens access without a card (/api/activate); here it would be dropped silently and
+    // the family charged the full price.
+    if (check.coupon.percentOff >= 100) {
+      return NextResponse.json(
+        { error: "Codul acesta deschide accesul fără plată: folosește-l din „Activare acces”.", code: "VOUCHER_FREE_ACCESS" },
+        { status: 400 },
+      );
+    }
+    codeOffer = {
+      percent: check.coupon.percentOff,
+      renews: check.coupon.duration === "forever",
+      voucherId: check.coupon.metadata.voucherId,
+    };
   }
 
   const isSubscription = plan.interval !== "ONE_TIME";
@@ -96,13 +108,38 @@ async function _POST(req: NextRequest) {
   // „7 zile gratuite" is counted once per account (decizie Alex 16.09.2026): paying on day 3 of a
   // free account gets the 4 days still owed, not a fresh week on top. The week starts where the
   // no-card trial's does (access.ts): an account older than the pause switch got it from the switch.
-  const [account, pauseStartsAt] = await Promise.all([
+  const [account, pauseStartsAt, telegram, learnerId] = await Promise.all([
     prisma.user.findUnique({ where: { id: session.user.id }, select: { createdAt: true } }),
     loadPauseStartsAt(),
+    familyHasTelegram(session.user.id),
+    planLearner(session.user.id, plan),
   ]);
-  const trialDays = isSubscription
-    ? checkoutTrialDays(plan.trialDays, trialStartOf(account?.createdAt ?? new Date(), pauseStartsAt))
-    : 0;
+  const trialStart = trialStartOf(account?.createdAt ?? new Date(), pauseStartsAt);
+  const trialDays = isSubscription ? checkoutTrialDays(plan.trialDays, trialStart) : 0;
+
+  // What is charged (checkout-price.ts, Alex 16–17.09): one line per subject the learner has chosen,
+  // each with the lifetime discount built into the price — the trial offer while the account's own 7
+  // days run (checked on its own, a plan without trial days included), or a renewing code, then
+  // Telegram connected by anyone in the family. Annual = ten months of it.
+  const discount = checkoutDiscount({
+    trialActive: remainingFreeTrialDays(trialStart) > 0,
+    code: codeOffer ? { percent: codeOffer.percent, renews: codeOffer.renews } : null,
+    telegram,
+  });
+  const billing: BillingInterval = plan.interval === "YEAR" ? "YEAR" : "MONTH";
+  // The learner's subjects, less the ones still paid by their own subscriptions (bought next to an
+  // earlier plan): those aren't billed twice. An annual package is priced from today's monthly price.
+  const [subjects, monthlyMinor] = await Promise.all([
+    isSubscription ? subjectsToBill(session.user.id, learnerId) : Promise.resolve(1),
+    isSubscription ? monthlyPlanPriceMinor(plan) : Promise.resolve(plan.price),
+  ]);
+  const lines = subjectLines({
+    planMonthlyMinor: monthlyMinor,
+    subjects,
+    lifetimePercent: discount.pricesPercent,
+    interval: billing,
+  });
+  const voucherId = discount.codeUsed ? codeOffer?.voucherId : undefined;
 
   const successUrl = `${process.env.STRIPE_SUCCESS_URL || process.env.AUTH_URL + "/dashboard"}?session_id={CHECKOUT_SESSION_ID}`;
   const cancelUrl = process.env.STRIPE_CANCEL_URL || process.env.AUTH_URL + "/dashboard";
@@ -112,21 +149,33 @@ async function _POST(req: NextRequest) {
     projectSlug: "tutor",
     mode: isSubscription ? "subscription" : "payment",
     currency: CURRENCY,
-    lineItems: [
-      {
-        name: plan.name,
-        // Broker expects MAJOR units; plan.price is stored in minor units (cents).
-        amount: plan.price / 100,
-        ...(isSubscription ? { interval, intervalCount: 1 } : {}),
-      },
-    ],
+    lineItems: lines.map((line) => ({
+      name: line.index === 1 ? plan.name : `${plan.name} · materia a ${line.index}-a (−${line.subjectPercent}%)`,
+      // Broker expects MAJOR units; amounts are computed in minor units (bani).
+      amount: line.minor / 100,
+      ...(isSubscription ? { interval, intervalCount: 1 } : {}),
+    })),
     ...(trialDays > 0 ? { trialDays } : {}),
-    ...(coupon ? { coupon } : {}),
+    // A code that doesn't renew beat the trial offer: it is taken off the first payment only.
+    ...(discount.onceCouponPercent && voucherId
+      ? { coupon: { percentOff: discount.onceCouponPercent, duration: "once", metadata: { voucherId } } }
+      : {}),
     successUrl,
     cancelUrl,
     callbackUrl,
     customerEmail: session.user.email || undefined,
-    metadata: { userId: session.user.id, planId: plan.id, ...(voucherId ? { voucherId } : {}) },
+    // Echoed back on the callbacks: activation locks the discount and the paid subjects on the account.
+    metadata: {
+      userId: session.user.id,
+      planId: plan.id,
+      ...(voucherId ? { voucherId } : {}),
+      learnerId: learnerId ?? null,
+      subjects,
+      discountPercent: discount.pricesPercent,
+      discountBase: discount.base,
+      telegram: discount.telegram,
+      interval: billing,
+    },
   };
 
   const res = await fetch(`${brokerUrl}/api/checkout`, {

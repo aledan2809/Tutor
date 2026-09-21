@@ -167,6 +167,8 @@ export default async function DashboardLayout({
               audience={bannerAudience}
               pauseOn={(await loadPauseStartsAt()) !== null}
               holder={trialHolder}
+              // Paying in the account's own free week gives −30% for life; a paying account has no offer.
+              offer={access.via === "own" && !trialHolder ? { endsAt: access.endsAt.toISOString(), serverNow: new Date().toISOString() } : null}
             />
           )}
           <RefreshAt at={access?.kind === "trial" ? access.endsAt.toISOString() : null} now={new Date().toISOString()} />

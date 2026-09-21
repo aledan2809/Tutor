@@ -66,7 +66,18 @@ describe("ce mesaj din probă e scadent", () => {
 });
 
 describe("textul mesajelor", () => {
-  const offer = { planKey: "FAMILY" as const, normal: 33.2, price: 24.9, code: "V126S" };
+  const offer = {
+    planKey: "FAMILY" as const,
+    subjects: 1,
+    normal: 33.2,
+    price: 24.9,
+    first: 24.9,
+    code: "V126S",
+    trialOfferEndsAt: null,
+    telegram: false,
+  };
+  // Paying during the free week: −30% for as long as the subscription lasts (checkout-price.ts).
+  const trialOffer = { ...offer, price: 23.24, first: 23.24, code: null, trialOfferEndsAt: "2026-09-26T06:30:00.000Z" };
   const andrei = { name: "Andrei", stats: { exercises: 31, practicedDays: 4, streak: 3, level: null, weakTopics: 2 } };
 
   it("cu 3 zile înainte: ce a lucrat copilul, prețul cu codul, fără presiune falsă", () => {
@@ -85,6 +96,40 @@ describe("textul mesajelor", () => {
     expect(c.message).toContain("Mâine la 09:30, fără abonament, contul intră în pauză: Andrei nu mai poate exersa");
     expect(c.message).toContain("rămâne salvat");
     expect(c.button).toBe("Păstrez accesul");
+  });
+
+  it("ultima zi: oferta −30% până la ora la care se încheie proba, cu prețul de la plată", () => {
+    const endsAt = new Date("2026-09-26T06:30:00Z");
+    const c = lifecycleCopy({ stage: "last_day", daysLeft: 1, kids: [andrei], offer: trialOffer, endsAt, now });
+    expect(c.message).toContain(
+      "Dacă plătești până atunci, ai −30% cât timp rămâi abonat: Family 23,24 lei/lună, în loc de 33,20 lei. Anulezi oricând.",
+    );
+    expect(c.message).not.toContain("pentru plata în probă");
+    const telegram = lifecycleCopy({ stage: "last_day", daysLeft: 1, kids: [andrei], offer: { ...trialOffer, price: 20.92, first: 20.92, telegram: true }, endsAt, now });
+    expect(telegram.message).toContain("Family 20,92 lei/lună cu încă −10% pentru Telegram, în loc de 33,20 lei.");
+    // A code that beats the trial offer: no −30% promised.
+    const coded = lifecycleCopy({ stage: "last_day", daysLeft: 1, kids: [andrei], offer, endsAt, now });
+    expect(coded.message).not.toContain("−30%");
+    expect(coded.message).toContain("Family: 24,90 lei/lună cu codul V126S, în loc de 33,20 lei. Anulezi oricând.");
+  });
+
+  it("ziua 4 și lansarea: prețul cu −30%, dar fără termen (numărătoarea e doar în ultima zi)", () => {
+    const c = lifecycleCopy({ stage: "three_days", daysLeft: 3, kids: [andrei], offer: trialOffer });
+    expect(c.message).toContain("23,24 lei/lună cu −30% pentru plata în probă, în loc de 33,20 lei. Anulezi oricând.");
+    expect(c.message).not.toContain("Dacă plătești până");
+    const launch = lifecycleCopy({ stage: "launch", daysLeft: 7, kids: [], offer: trialOffer, endsAt: new Date("2026-09-28T19:00:00Z"), now });
+    expect(launch.message).toContain("Family: 23,24 lei/lună cu −30% pentru plata în probă, în loc de 33,20 lei.");
+  });
+
+  it("prețul spune materiile, prima lună cu un cod care nu se reînnoiește, și Telegram după probă", () => {
+    const twoSubjects = { ...offer, subjects: 2, normal: 61.42, price: 61.42, first: 30.71, code: "BINE50" };
+    expect(lifecycleCopy({ stage: "paused", daysLeft: 0, kids: [andrei], offer: twoSubjects }).message).toContain(
+      "Family: 30,71 lei prima lună, apoi 61,42 lei/lună pentru 2 materii cu codul BINE50. Anulezi oricând.",
+    );
+    const paused = { ...offer, price: 29.88, first: 29.88, code: null, telegram: true };
+    expect(lifecycleCopy({ stage: "paused", daysLeft: 0, kids: [andrei], offer: paused }).message).toContain(
+      "Family: 29,88 lei/lună cu −10% pentru Telegram, în loc de 33,20 lei. Anulezi oricând.",
+    );
   });
 
   it("ultima zi, când săptămâna s-a pornit seara: pauza vine azi, nu „mâine”", () => {

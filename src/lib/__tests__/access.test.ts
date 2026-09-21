@@ -215,6 +215,26 @@ describe("proba de 7 zile", () => {
     const later = new Date(created.getTime() + 10 * DAY);
     expect(resolveAccess(input({ self: child, parents: [parent], now: later }))).toMatchObject({ kind: "paused", payer: "parent" });
   });
+
+  it("după probă, doar primul părinte venit mai târziu îi mai dă copilului 7 zile (decizia 17.09)", () => {
+    const pause = at("2026-08-02T00:00:00Z");
+    const child = person({ id: "c", createdAt: at("2026-08-01T00:00:00Z") }); // own week: 2–9 Aug
+    const first = person({ id: "p1", createdAt: at("2026-08-20T10:00:00Z") });
+    const second = person({ id: "p2", createdAt: at("2026-08-26T10:00:00Z") });
+    const history = [
+      { parentId: "p1", linkedAt: at("2026-08-20T10:05:00Z"), parentCreatedAt: first.createdAt },
+      { parentId: "p2", linkedAt: at("2026-08-26T10:05:00Z"), parentCreatedAt: second.createdAt },
+    ];
+    // The first late parent lends a week.
+    expect(resolveAccess(input({ self: child, parents: [first], parentLinkHistory: history.slice(0, 1), now: at("2026-08-22T00:00:00Z"), pauseStartsAt: pause })).kind).toBe("trial");
+    // A second new parent account lends nothing — also after the first one was unlinked (kept in the history).
+    expect(resolveAccess(input({ self: child, parents: [second], parentLinkHistory: history, now: at("2026-08-27T00:00:00Z"), pauseStartsAt: pause }))).toMatchObject({ kind: "paused", payer: "parent" });
+    // A parent whose own week began while the child's was running shares it, as before.
+    const early = person({ id: "p0", createdAt: at("2026-08-05T00:00:00Z") });
+    expect(
+      resolveAccess(input({ self: child, parents: [early], parentLinkHistory: [{ parentId: "p0", linkedAt: early.createdAt, parentCreatedAt: early.createdAt }], now: at("2026-08-11T00:00:00Z"), pauseStartsAt: pause })).kind,
+    ).toBe("trial");
+  });
 });
 
 describe("funcțiile plătite", () => {

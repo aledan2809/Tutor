@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { SiteHeader } from "@/components/SiteHeader";
 import { isPromoActive, normalFromPromo, fmtPrice } from "@/lib/pricing";
+import { MONTHS_PAID_PER_YEAR, TELEGRAM_PERCENT, TRIAL_PAYMENT_PERCENT } from "@/lib/checkout-price";
+import { childDiscountPercent, subjectDiscountPercent } from "@/lib/family";
 
 export const metadata: Metadata = {
   title: "Prețuri — gratuit la start, plătești când vrei | eTutor.ro",
   description:
-    "Începe gratuit 7 zile, fără card. Apoi alegi planul: Elev/Student, Părinte + copil, Părinți + copil sau cu meditator. Reduceri pentru mai mulți copii.",
+    `Începe gratuit 7 zile, fără card. Apoi alegi planul: Elev/Student, Părinte + copil, Părinți + copil sau cu meditator. −${TRIAL_PAYMENT_PERCENT}% dacă plătești în primele 7 zile, −${TELEGRAM_PERCENT}% cu Telegram, anual plătești ${MONTHS_PAID_PER_YEAR} luni.`,
 };
 
 // Displayed amounts are the −25% promo price; normal = amount / 0.75. See @/lib/pricing.
@@ -38,6 +40,7 @@ type Copy = {
   paidTitle: string;
   plans: Plan[];
   discountsTitle: string;
+  annualLink: string;
   discountsList: string[];
   note: string;
   promo: string;
@@ -122,10 +125,17 @@ const RO: Copy = {
       cta: "Alege Family Trio",
     },
   ],
-  discountsTitle: "Discounturi:",
+  discountsTitle: "Reduceri:",
+  // Delivery 2 (Alex 16–17.09.2026); the figures are the ones checkout charges by (checkout-price.ts).
   discountsList: [
-    "Pentru copii: al 2-lea copil −20%, începând cu al 3-lea copil −30%.",
+    `Plătești în primele 7 zile: −${TRIAL_PAYMENT_PERCENT}% cât timp rămâi abonat.`,
+    `Telegram conectat la plată, de oricine din familie: încă −${TELEGRAM_PERCENT}%, rămâne și după.`,
+    `A doua materie −${subjectDiscountPercent(2)}%, de la a treia −${subjectDiscountPercent(3)}%; reducerile de mai sus se aplică tuturor materiilor.`,
+    `Pentru copii: al 2-lea copil −${childDiscountPercent(2)}%, începând cu al 3-lea copil −${childDiscountPercent(3)}%.`,
+    `Anual: plătești ${MONTHS_PAID_PER_YEAR} luni și primești 12, cu aceleași reduceri.`,
+    "Reducerile nu se adună: se aplică cea mai mare dintre plata în probă și un cod de reducere, plus Telegram.",
   ],
+  annualLink: "Vezi cât economisești plătind anual →",
   note: "O singură factură pe familie.",
   promo:
     "🎁 Prețuri promoționale până la 31.08.2026 — toate pachetele au o reducere suplimentară de 25%. De la 1 septembrie 2026, prețurile revin la normal.",
@@ -212,8 +222,14 @@ const EN: Copy = {
   ],
   discountsTitle: "Discounts:",
   discountsList: [
-    "Per child: 2nd child −20%, from the 3rd child −30%.",
+    `Pay in your first 7 days: −${TRIAL_PAYMENT_PERCENT}% for as long as you stay subscribed.`,
+    `Telegram connected at payment, by anyone in the family: another −${TELEGRAM_PERCENT}%, kept afterwards.`,
+    `2nd subject −${subjectDiscountPercent(2)}%, from the 3rd −${subjectDiscountPercent(3)}%; the discounts above apply to every subject.`,
+    `Per child: 2nd child −${childDiscountPercent(2)}%, from the 3rd child −${childDiscountPercent(3)}%.`,
+    `Yearly: pay ${MONTHS_PAID_PER_YEAR} months, get 12, with the same discounts.`,
+    "Discounts don't add up: the larger of paying in the trial and a discount code applies, plus Telegram.",
   ],
+  annualLink: "See how much you save paying yearly →",
   note: "One bill per family.",
   promo:
     "🎁 Promotional prices until 31.08.2026 — all packages get an extra 25% off. From 1 September 2026, prices return to normal.",
@@ -326,6 +342,9 @@ export default async function PreturiPage({ params }: { params: Promise<{ locale
               </li>
             ))}
           </ul>
+          <Link href="/anual" className="mt-2 inline-block text-emerald-400 hover:text-emerald-300">
+            {c.annualLink}
+          </Link>
         </div>
         <p className="mx-auto mt-3 max-w-xl text-center text-xs text-gray-600">{c.note}</p>
 

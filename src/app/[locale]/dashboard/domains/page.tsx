@@ -3,6 +3,12 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import {
+  SubjectAddonOffer,
+  takePaidSubjectFromUrl,
+  watchPaidSubject,
+  type SubjectAddon,
+} from "@/components/plan/subject-addon-offer";
 
 interface EnrolledDomain {
   id: string;
@@ -37,20 +43,39 @@ export default function DomainsPage() {
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState<string | null>(null);
 
-  const fetchDomains = () => {
+  /** The lists again; answers the subjects the learner has (empty when they couldn't be read). */
+  const fetchDomains = (): Promise<EnrolledDomain[]> =>
     fetch("/api/student/domains")
       .then((r) => r.json())
       .then((d) => {
         setEnrolled(d.enrolled || []);
         setAvailable(d.available || []);
+        return (d.enrolled || []) as EnrolledDomain[];
       })
-      .catch(() => {})
+      .catch(() => [] as EnrolledDomain[])
       .finally(() => setLoading(false));
-  };
 
-  useEffect(() => { fetchDomains(); }, []);
+  useEffect(() => { void fetchDomains(); }, []);
 
   const [enrollError, setEnrollError] = useState("");
+  // Past the subjects a card subscription pays for, a learner who pays for themselves gets the price of
+  // one more and pays it on its own subscription; the subject is turned on when the payment is confirmed.
+  const [addon, setAddon] = useState<SubjectAddon | null>(null);
+  const [paidBack, setPaidBack] = useState<{ domainId: string | null } | null>(null);
+  const [payment, setPayment] = useState<"waiting" | "late" | null>(null);
+  useEffect(() => {
+    const back = takePaidSubjectFromUrl();
+    if (back) setPaidBack(back);
+  }, []);
+  useEffect(() => {
+    if (!paidBack) return;
+    setPayment("waiting");
+    // Look again while the payment is confirmed, until the subject bought is among the learner's.
+    return watchPaidSubject(
+      async () => !!paidBack.domainId && (await fetchDomains()).some((d) => d.id === paidBack.domainId),
+      (found) => setPayment(found || !paidBack.domainId ? null : "late"),
+    );
+  }, [paidBack]);
 
   // Access code → a private subject that is not (and must not be) in the catalog.
   const [joinCode, setJoinCode] = useState("");
@@ -91,13 +116,18 @@ export default function DomainsPage() {
   const handleEnroll = async (domainId: string) => {
     setEnrolling(domainId);
     setEnrollError("");
+    setAddon(null);
     try {
       const res = await fetch(`/api/student/domains/${domainId}`, { method: "POST" });
       if (res.ok) {
         fetchDomains();
       } else {
         const data = await res.json().catch(() => ({}));
-        setEnrollError(data.error || t("domains.enrollFailed"));
+        if (res.status === 402 && data.code === "SUBJECT_ADDON" && data.quote) {
+          setAddon({ domainId, name: available.find((d) => d.id === domainId)?.name ?? "", quote: data.quote });
+        } else {
+          setEnrollError(data.error || t("domains.enrollFailed"));
+        }
       }
     } catch {
       setEnrollError(t("domains.networkError"));
@@ -113,8 +143,17 @@ export default function DomainsPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       <h1 className="text-2xl font-bold text-white">{t("domains.title")}</h1>
+      {payment === "waiting" && (
+        <div className="rounded-lg border border-emerald-800 bg-emerald-900/20 p-3 text-sm text-emerald-300">{t("subjectAddon.paidDomains")}</div>
+      )}
+      {payment === "late" && (
+        <div className="rounded-lg border border-amber-800 bg-amber-900/20 p-3 text-sm text-amber-300">{t("subjectAddon.paidLate")}</div>
+      )}
       {enrollError && (
         <div className="rounded-lg border border-red-800 bg-red-900/20 p-3 text-sm text-red-400">{enrollError}</div>
+      )}
+      {addon && (
+        <SubjectAddonOffer addon={addon} onClose={() => setAddon(null)} onError={(message) => setEnrollError(message ?? "")} />
       )}
 
       {/* Enrolled */}

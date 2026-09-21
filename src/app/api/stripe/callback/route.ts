@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { accrueCommissionForPayment } from "@/lib/referral";
 import { logger } from "@/lib/logger";
+import { boughtSubjectTarget, endAddon, grantAddon, recordCheckoutTerms } from "@/lib/checkout-facts";
+import { enableLearnerSubject } from "@/lib/family-invite";
 import {
   endedSubscriptionIds,
   eventIsForCurrentSubscription,
@@ -48,9 +50,18 @@ interface BrokerCallback {
     userId?: string;
     planId?: string;
     voucherId?: string;
-    /** "child_addon" for a per-child add-on subscription (not the main plan). */
+    /** "child_addon" / "subject_addon" for an add-on subscription (not the main plan). */
     type?: string;
     childIndex?: string;
+    /** Checkout terms (checkout route): locked on the account at activation. */
+    learnerId?: string | null;
+    /** A subject add-on: the subject it was bought for, turned on at activation. */
+    domainId?: string | null;
+    subjects?: number;
+    discountPercent?: number;
+    discountBase?: string | null;
+    telegram?: boolean;
+    interval?: string;
   };
   paymentStatus?: string;
   amountTotal?: number | null;
@@ -255,7 +266,10 @@ async function _POST(req: NextRequest) {
 
   const userId = p.metadata?.userId;
   const planId = p.metadata?.planId;
-  const isChildAddon = p.metadata?.type === "child_addon";
+  // An add-on is its own recurring line next to the main subscription: an extra child's seat, or a
+  // subject added after payment. Its events never change the main plan or status.
+  const addonType = p.metadata?.type === "child_addon" || p.metadata?.type === "subject_addon" ? p.metadata.type : null;
+  const isAddon = addonType !== null;
   const amount = typeof p.amountTotal === "number" ? p.amountTotal : 0;
   const currency = p.currency || "ron";
   if (!userId) {
@@ -281,21 +295,25 @@ async function _POST(req: NextRequest) {
     case "subscription.activated": {
       const { payment, isNew } = await createPaymentForSession({
         userId,
-        planId: isChildAddon ? undefined : planId,
+        planId: isAddon ? undefined : planId,
         sessionId: p.sessionId,
         amount,
         currency,
         type: "subscription",
       });
-      if (isChildAddon) {
-        // A per-child add-on is its own recurring line — grant a seat, but NEVER
-        // touch the main plan/status. isNew guards a broker retry from double-granting.
-        if (isNew) {
-          await prisma.user.update({
-            where: { id: userId },
-            data: { paidExtraChildSeats: { increment: 1 } },
-          });
-        }
+      if (addonType) {
+        // Its place — a child's seat or a subject — is counted together with its entry in the payer's
+        // list of subscriptions bought next to the plan and the subject it was bought for turned on, in
+        // one transaction, once per checkout session: a delivery repeated after a failure counts nothing
+        // twice; one that arrives after the subscription's end counts nothing. NEVER the main plan or status.
+        const learnerId = typeof p.metadata?.learnerId === "string" ? p.metadata.learnerId : null;
+        const domainId = addonType === "subject_addon" && typeof p.metadata?.domainId === "string" ? p.metadata.domainId : null;
+        const target = domainId ? await boughtSubjectTarget(userId, learnerId, domainId) : null;
+        await grantAddon(
+          userId,
+          { type: addonType, sessionId: p.sessionId, learnerId, domainId, at: new Date().toISOString() },
+          target ? (db) => enableLearnerSubject(target.learnerId, target.domainId, target.setById, db) : undefined,
+        );
       } else if (await staleActivation(userId, p, isNew)) {
         // Recorded as a payment above; the account keeps the subscription it has now.
       } else {
@@ -310,16 +328,21 @@ async function _POST(req: NextRequest) {
             subscriptionEndsAt: null,
             // Persist the subscription id so /api/stripe/portal can open the portal.
             ...(p.stripeSubscriptionId ? { stripeSubscriptionId: p.stripeSubscriptionId } : {}),
-            // The code kept since signup has done its job (used or not): the plan is paid for.
-            pendingVoucherCode: null,
+            // The code kept since signup has done its job once the plan is paid with it. When the trial
+            // offer beat it, it wasn't used and stays on the account for later (checkout-price.ts).
+            ...(typeof p.metadata?.discountPercent === "number" && !p.metadata?.voucherId ? {} : { pendingVoucherCode: null }),
           },
         });
         // Counts as used from activation, a free trial included.
         await recordVoucherRedemption(p.metadata?.voucherId, userId, p.sessionId);
+        // The discount and the subjects this subscription was priced with, for add-ons bought later.
+        await recordCheckoutTerms(userId, p.metadata as Record<string, unknown> | undefined, p.sessionId);
       }
       // Accrue only on a real charge (a $0 trial activation carries no money);
-      // recurring charges come back as subscription.renewed. isNew guards retries.
-      if (isNew && amount > 0) await accrueReferral(payment);
+      // recurring charges come back as subscription.renewed. On every delivery, not only the first: a
+      // first one that failed before this point (the add-on or terms transaction above) still accrues on
+      // its retry, and a repeated one finds the commission already recorded (unique on the payment).
+      if (amount > 0) await accrueReferral(payment);
       break;
     }
 
@@ -331,7 +354,7 @@ async function _POST(req: NextRequest) {
       // duplicate. isNew guards the commission so a retry can't double-accrue.
       const { payment, isNew } = await createRenewalPayment({
         userId,
-        planId: isChildAddon ? undefined : planId,
+        planId: isAddon ? undefined : planId,
         eventId: p.eventId,
         amount,
         currency,
@@ -339,11 +362,11 @@ async function _POST(req: NextRequest) {
       // An add-on renewal is a real charge (Payment + commission) but must NOT
       // reactivate the main plan's status. Neither may a charge on a subscription the account left
       // behind: it is recorded, and flagged, since the family is paying twice.
-      if (!isChildAddon && !(await currentSubscription(userId, p, "renewed"))) {
+      if (!isAddon && !(await currentSubscription(userId, p, "renewed"))) {
         if (isNew) await accrueReferral(payment);
         break;
       }
-      if (!isChildAddon) {
+      if (!isAddon) {
         // Same reason as on activation: a paying renewal must never keep an old end date. Not on an
         // account whose subscription already ended, though: an ended subscription doesn't renew, so
         // this is a late charge (an open invoice paid after the cancellation) — recorded, but it
@@ -368,7 +391,7 @@ async function _POST(req: NextRequest) {
     case "subscription.payment_failed": {
       // An add-on payment failure doesn't put the whole account past_due, nor does one on a
       // subscription the account left behind.
-      if (!isChildAddon && (await currentSubscription(userId, p, "payment_failed"))) {
+      if (!isAddon && (await currentSubscription(userId, p, "payment_failed"))) {
         // Stripe sends the last failure and the cancellation together, in either order: a failure
         // applied after the cancellation would leave the family „retrying" a subscription that no
         // longer exists, with every package locked. Both writes are conditional, so a cancellation
@@ -386,13 +409,11 @@ async function _POST(req: NextRequest) {
     }
 
     case "subscription.canceled": {
-      if (isChildAddon) {
-        // Free one add-on seat; leave the main subscription untouched. updateMany
-        // with a gt:0 guard clamps at zero if the broker re-delivers the cancel.
-        await prisma.user.updateMany({
-          where: { id: userId, paidExtraChildSeats: { gt: 0 } },
-          data: { paidExtraChildSeats: { decrement: 1 } },
-        });
+      if (addonType) {
+        // Its place goes with its entry, and for a subject at most one subject is switched off, its own
+        // first — in one transaction, so a repeated delivery finds nothing left to do. The main
+        // subscription stays untouched.
+        await endAddon(userId, p.sessionId);
         break;
       }
       // The end of a subscription the account left behind doesn't end the one it pays now.

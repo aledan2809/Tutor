@@ -6,7 +6,8 @@ import { withErrorHandler } from "@/lib/api-handler";
 import { isParentOf } from "@/lib/guardian";
 import { refuseIfPaused } from "@/lib/access-gate";
 import { activeSetters, setByLabel } from "@/lib/guardian-lock";
-import { ensureWatcherEnrollments } from "@/lib/family-invite";
+import { enableLearnerSubject } from "@/lib/family-invite";
+import { subjectAddonQuote, subjectNeedsPayment } from "@/lib/checkout-facts";
 
 /**
  * The child's subjects, from the parent's page (Alex, 16.09.2026: the parent has the last word on the
@@ -84,29 +85,25 @@ async function _POST(req: NextRequest, { params }: { params: Promise<{ id: strin
     return NextResponse.json({ error: "Materia nu există." }, { status: 404 });
   }
 
-  const existing = await prisma.enrollment.findUnique({
-    where: { userId_domainId: { userId: childId, domainId: domain.id } },
-    select: { id: true, roles: true },
-  });
-  if (existing) {
-    await prisma.enrollment.update({
-      where: { id: existing.id },
-      data: {
-        isActive: true,
-        setById: guard.userId,
-        ...(existing.roles.includes("STUDENT") ? {} : { roles: { set: [...existing.roles, "STUDENT"] } }),
+  // Past the subjects the card subscription pays for: the parent who pays gets the price of the next
+  // subject and pays it on its own subscription; another parent is told who does (checkout-facts.ts).
+  const payer = await subjectNeedsPayment(childId, domain.id);
+  if (payer) {
+    const quote = payer.payerId === guard.userId ? await subjectAddonQuote(payer.payerId) : null;
+    return NextResponse.json(
+      {
+        // With a quote the page shows the offer, with the price in the parent's language.
+        error: quote ? "O materie în plus se plătește separat." : "Materiile în plus le adaugă părintele care plătește abonamentul.",
+        code: "SUBJECT_ADDON",
+        quote,
       },
-    });
-  } else {
-    await prisma.enrollment.create({
-      data: { userId: childId, domainId: domain.id, roles: ["STUDENT"], setById: guard.userId },
-    });
+      { status: 402 }
+    );
   }
 
   // Every adult of the family follows the child in the new subject (the watcher lists only the
   // child's subjects the adult has a WATCHER enrollment in).
-  const guardians = await prisma.guardian.findMany({ where: { childId, status: "active" }, select: { parentId: true } });
-  for (const g of guardians) await ensureWatcherEnrollments(g.parentId, [domain.id]);
+  await enableLearnerSubject(childId, domain.id, guard.userId);
 
   return NextResponse.json({ success: true }, { status: 201 });
 }

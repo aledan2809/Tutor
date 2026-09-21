@@ -37,7 +37,7 @@ export default async function WatcherSettingsPage() {
         <PhoneCapture apiBase="/api/student/phone" label={t("phoneLabel")} hint={t("phoneHint")} />
       </div>
 
-      <TelegramConnectCard />
+      <TelegramConnectCard payerDiscount />
 
       <NotificationPreferences showSelfAlert />
 

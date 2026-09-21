@@ -17,11 +17,17 @@ export default async function NotificationSettingsPage() {
   const session = await getSession();
   const tn = await getTranslations("familyNotif");
   let managedByParent = false;
+  // A child whose parent is in the account hears nothing about prices (UCPD Annex I point 28).
+  let payerDiscount = false;
   if (session?.user) {
-    const setting = await prisma.setting.findUnique({
-      where: { userId_key: { userId: session.user.id, key: "notifDelegation" } },
-    });
+    const [setting, parents] = await Promise.all([
+      prisma.setting.findUnique({
+        where: { userId_key: { userId: session.user.id, key: "notifDelegation" } },
+      }),
+      prisma.guardian.count({ where: { childId: session.user.id, status: "active", relation: "PARENT" } }),
+    ]);
     managedByParent = (setting?.value as { managedByParent?: boolean } | undefined)?.managedByParent === true;
+    payerDiscount = parents === 0;
   }
   return (
     <div className="mx-auto max-w-2xl">
@@ -65,7 +71,7 @@ export default async function NotificationSettingsPage() {
         <span className="text-gray-500">&rarr;</span>
       </Link>
 
-      <TelegramConnectCard />
+      <TelegramConnectCard payerDiscount={payerDiscount} />
 
       {managedByParent ? (
         <div className="rounded-lg border border-amber-700/50 bg-amber-950/30 px-4 py-4">

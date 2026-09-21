@@ -475,6 +475,32 @@ export async function ensureWatcherEnrollments(
   }
 }
 
+/**
+ * Turn a subject on for a learner, as a learner (STUDENT), set by `setById` — the parent who added it,
+ * which the child can't undo (guardian-lock.ts) — and have every adult of the family follow them in it.
+ * Used by the parent's subject list and by a subject bought on its own subscription.
+ */
+export async function enableLearnerSubject(learnerId: string, domainId: string, setById: string | null, db: Db = prisma): Promise<void> {
+  const existing = await db.enrollment.findUnique({
+    where: { userId_domainId: { userId: learnerId, domainId } },
+    select: { id: true, roles: true },
+  });
+  if (existing) {
+    await db.enrollment.update({
+      where: { id: existing.id },
+      data: {
+        isActive: true,
+        setById,
+        ...(existing.roles.includes("STUDENT") ? {} : { roles: { set: [...existing.roles, "STUDENT"] } }),
+      },
+    });
+  } else {
+    await db.enrollment.create({ data: { userId: learnerId, domainId, roles: ["STUDENT"], setById } });
+  }
+  const guardians = await db.guardian.findMany({ where: { childId: learnerId, status: "active" }, select: { parentId: true } });
+  for (const g of guardians) await ensureWatcherEnrollments(g.parentId, [domainId], db);
+}
+
 /** Idempotently link a guardian (parent/tutor) to a child + grant WATCHER scope. */
 async function linkGuardianToChild(
   guardianId: string,

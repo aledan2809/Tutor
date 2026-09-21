@@ -1,11 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { FAMILY_PLANS, resolveFamilyPlanFromRecord, type FamilyPlan } from "@/lib/family";
+import {
+  childDiscountPercent,
+  FAMILY_PLANS,
+  resolveFamilyPlanFromRecord,
+  subjectDiscountPercent,
+  type FamilyPlan,
+} from "@/lib/family";
 import { Link } from "@/i18n/navigation";
 import { fmtPrice } from "@/lib/pricing";
-import { discountedMinorUnits, previewAppliesToPlan, type VoucherPreview } from "@/lib/voucher-checkout";
+import { previewAppliesToPlan, VOUCHER_ERROR_KEYS, type VoucherPreview } from "@/lib/voucher-checkout";
+import { packagePrice } from "@/lib/package-price";
+import {
+  checkoutDiscount,
+  MONTHS_PAID_PER_YEAR,
+  TELEGRAM_PERCENT,
+  TRIAL_PAYMENT_PERCENT,
+} from "@/lib/checkout-price";
+import { FREE_TRIAL_DAYS } from "@/lib/free-trial";
+import type { SeatHolderNote } from "@/lib/access-server";
+import { TrialCountdown } from "@/components/access/trial-countdown";
+import { holderWords } from "@/components/access/holder-words";
 
 interface Plan {
   id: string;
@@ -36,21 +53,23 @@ interface PlansResponse {
     /** A declined renewal Stripe is still retrying (within the grace). */
     retrying?: boolean;
     freeTrialDaysLeft?: number;
+    /** The payer's own free week: paying in it gives −30% for life (checkout-price.ts). Null for a child. */
+    trialOffer?: { active: boolean; endsAt: string } | null;
+    /** Telegram connected by anyone in the family: −10% more at payment. */
+    telegram?: boolean;
+    /** A child whose parent is in the account: no offer to pay now, no saving to chase (UCPD). */
+    child?: boolean;
+    /** Subjects each kind of plan bills: the payer's own (Elev) or the first linked child's. */
+    subjects?: { self: number; child: { count: number } | null };
+    subjectsPaid?: { count: number; self: boolean; name: string | null } | null;
+    /** Another parent's plan covers the children without a seat for this one: who has it (no offer). */
+    seatHolder?: SeatHolderNote | null;
+    /** The subscriptions bought next to the plan, each stopped from its own portal. */
+    addons?: { sessionId: string; type: "subject_addon" | "child_addon"; learnerName: string | null; subjectName: string | null; since: string }[];
+    serverNow?: string;
     pendingVoucher?: { ok: true; preview: PreviewJson } | { ok: false; code: string; voucherCode: string | null } | null;
   };
 }
-
-// Checkout and the pending-code API answer a refused voucher with a stable `code` (see
-// lib/voucher-checkout.ts); the page shows it in the user's language instead of the API's English.
-const VOUCHER_ERROR_KEYS = {
-  VOUCHER_INVALID: "voucherInvalid",
-  VOUCHER_EXPIRED: "voucherExpired",
-  VOUCHER_LIMIT_REACHED: "voucherLimitReached",
-  VOUCHER_WRONG_PLAN: "voucherWrongPlan",
-  VOUCHER_ALREADY_USED: "voucherAlreadyUsed",
-  VOUCHER_FREE_ACCESS: "voucherFreeAccess",
-  VOUCHER_TOO_MANY: "voucherTooMany",
-} as const;
 
 function planFeatures(features: unknown): string[] {
   return Array.isArray(features) ? features.filter((f): f is string => typeof f === "string") : [];
@@ -73,11 +92,26 @@ export default function PackagesPage() {
   const preview = savedPreview && voucher.trim().toUpperCase() === savedPreview.code ? savedPreview : null;
   const [voucherBusy, setVoucherBusy] = useState(false);
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
-  const [portalBusy, setPortalBusy] = useState(false);
+  // The portal being opened: the plan's („plan”) or a separate subscription's (its checkout session).
+  const [portalBusy, setPortalBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   // Plan the visitor picked on /preturi (?plan=<FamilyPlanKey>) — pre-highlight
   // + scroll to it so the pricing→signup→packages hand-off keeps continuity.
   const [preselect, setPreselect] = useState<string | null>(null);
+  // Monthly or annual packages (annual = ten months of the monthly price, discounts included).
+  const [billing, setBilling] = useState<"MONTH" | "YEAR">("MONTH");
+
+  /** The prices again, e.g. when the trial offer ends while the page is open. */
+  const reloadPlans = useCallback(() => {
+    fetch("/api/plans")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: PlansResponse | null) => {
+        if (!data) return;
+        setPlans(data.plans || []);
+        setCurrent(data.current || { subscriptionStatus: null, subscriptionPlanId: null });
+      })
+      .catch(() => {});
+  }, []);
 
   const voucherErrorText = (code: string | undefined, fallback?: string): string => {
     const key = VOUCHER_ERROR_KEYS[code as keyof typeof VOUCHER_ERROR_KEYS];
@@ -148,6 +182,7 @@ export default function PackagesPage() {
     const params = new URLSearchParams(window.location.search);
     const p = params.get("plan");
     if (p) setPreselect(p);
+    if (params.get("interval") === "YEAR") setBilling("YEAR");
     // From a campaign link (flyer QR, signup hand-off): same "?voucher=" a visitor would
     // otherwise have to retype — checked and kept on the account straight away.
     const fromLink = params.get("voucher");
@@ -230,12 +265,17 @@ export default function PackagesPage() {
     }
   };
 
-  const openPortal = async () => {
-    setPortalBusy(true);
+  /** The plan's portal, or — with its checkout session — a separate subscription's (its own customer). */
+  const openPortal = async (addonSessionId?: string) => {
+    setPortalBusy(addonSessionId ?? "plan");
     setError(null);
     try {
-      const res = await fetch("/api/stripe/portal", { method: "POST" });
-      const data = await res.json();
+      const res = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(addonSessionId ? { addonSessionId } : {}),
+      });
+      const data = await res.json().catch(() => ({}));
       if (res.ok && data.url) {
         window.location.href = data.url;
         return;
@@ -244,7 +284,7 @@ export default function PackagesPage() {
     } catch {
       setError(t("portalError"));
     } finally {
-      setPortalBusy(false);
+      setPortalBusy(null);
     }
   };
 
@@ -268,20 +308,47 @@ export default function PackagesPage() {
     return parts.join(" • ");
   };
 
-  // Prices come in major units (33.2); integer minor units keep 33,20 − 25% at exactly 24,90.
-  const minor = (lei: number) => Math.round(lei * 100);
+  // Prices come in major units (33.2); the amounts are computed in minor units (package-price.ts).
   const lei = (amount: number) => fmtPrice(amount, locale);
-  const discountFor = (plan: Plan): number | null => {
-    if (!preview) return null;
-    const key = resolveFamilyPlanFromRecord(plan)?.key ?? null;
-    if (!previewAppliesToPlan(preview, key)) return null;
-    return discountedMinorUnits(minor(plan.price), preview.discountPercent) / 100;
-  };
+  const bani = (minorUnits: number) => fmtPrice(minorUnits / 100, locale);
+  // The −30% offer runs while the payer's own free week does (a paying account has no offer, a child
+  // is never made one).
+  const isChild = current.child === true;
+  const trialActive = current.trialOffer?.active === true && !isPaid && !isRetrying && !isChild;
+  /** What a package costs this family, by the same rules as checkout (package-price.ts). Minor units. */
+  const priceFor = (plan: Plan, opts: { telegram?: boolean } = {}) =>
+    packagePrice(plan, { trialActive, telegram: current.telegram === true, subjects: current.subjects }, preview, opts);
   const trialFor = (plan: Plan): number =>
     plan.interval === "ONE_TIME" ? 0 : Math.min(plan.trialDays ?? 0, current.freeTrialDaysLeft ?? 0);
 
-  const bannerPlan = preview?.planKey ? plans.find((p) => resolveFamilyPlanFromRecord(p)?.key === preview.planKey) : null;
-  const bannerPrice = bannerPlan ? discountFor(bannerPlan) : null;
+  const hasAnnual = plans.some((p) => p.interval === "YEAR");
+  const shownPlans = hasAnnual ? plans.filter((p) => p.interval === billing) : plans;
+  const bannerPlan = preview?.planKey
+    ? shownPlans.find((p) => resolveFamilyPlanFromRecord(p)?.key === preview.planKey) ??
+      plans.find((p) => resolveFamilyPlanFromRecord(p)?.key === preview.planKey)
+    : null;
+  const bannerPriced = bannerPlan ? priceFor(bannerPlan) : null;
+  // How the kept code is used at payment: on the plan it names, or — a code for any plan — by the same
+  // rule on every plan (the trial offer may be larger; a code that doesn't renew comes off once).
+  const bannerDiscount = bannerPriced
+    ? bannerPriced.discount
+    : preview
+      ? checkoutDiscount({ trialActive, code: { percent: preview.discountPercent, renews: preview.recurring }, telegram: current.telegram === true })
+      : null;
+  const addons = current.addons ?? [];
+  const holder = !isChild && current.seatHolder ? holderWords(current.seatHolder, locale !== "en") : null;
+  // No packages to choose from: a child, or a parent another parent's plan leaves out.
+  const offersHidden = isChild || holder !== null;
+  const trialEndText = current.trialOffer
+    ? new Date(current.trialOffer.endsAt).toLocaleString(locale === "en" ? "en-GB" : "ro-RO", {
+        timeZone: "Europe/Bucharest",
+        weekday: "long",
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "";
 
   if (loading) {
     return <div className="py-12 text-center text-gray-500">{t("loading")}</div>;
@@ -291,8 +358,15 @@ export default function PackagesPage() {
     <div className="mx-auto max-w-4xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white">{t("title")}</h1>
-        <p className="mt-1 text-sm text-gray-400">{t("subtitle")}</p>
+        {!offersHidden && <p className="mt-1 text-sm text-gray-400">{t("subtitle")}</p>}
       </div>
+
+      {holder && current.seatHolder && (
+        <div className="rounded-xl border border-blue-900/60 bg-blue-950/30 px-4 py-3 text-sm text-blue-100">
+          {holder.plan}{" "}
+          {current.seatHolder.upgrade ? t("holderUpgrade", { who: holder.who, upgrade: current.seatHolder.upgrade }) : holder.noLargerPlan}
+        </div>
+      )}
 
       {isPaid && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-green-900/50 bg-green-900/10 px-4 py-3 text-sm text-green-400">
@@ -301,13 +375,20 @@ export default function PackagesPage() {
               {current.subscriptionStatus === "trialing" ? t("currentTrial") : t("currentActive")}
             </span>
             {cardSubscription && <p className="mt-1 text-xs text-green-300/80">{t("switchPlanByCard")}</p>}
+            {cardSubscription && current.subjectsPaid && (
+              <p className="mt-1 text-xs text-green-300/80">
+                {current.subjectsPaid.self
+                  ? t("subjectsPaidSelf", { count: current.subjectsPaid.count })
+                  : t("subjectsPaidChild", { count: current.subjectsPaid.count, name: current.subjectsPaid.name?.trim() || t("subjectsPaidChildNoName") })}
+              </p>
+            )}
           </div>
           <button
-            onClick={openPortal}
-            disabled={portalBusy}
+            onClick={() => void openPortal()}
+            disabled={portalBusy !== null}
             className="min-h-[40px] rounded-lg border border-green-800/60 bg-green-900/20 px-4 py-2 text-sm font-medium text-green-200 transition-colors hover:bg-green-900/40 disabled:opacity-50"
           >
-            {portalBusy ? t("portalOpening") : t("manageSubscription")}
+            {portalBusy === "plan" ? t("portalOpening") : t("manageSubscription")}
           </button>
         </div>
       )}
@@ -316,29 +397,103 @@ export default function PackagesPage() {
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-800/60 bg-amber-900/15 px-4 py-3 text-sm text-amber-200">
           <span>{t("currentPastDue")}</span>
           <button
-            onClick={openPortal}
-            disabled={portalBusy}
+            onClick={() => void openPortal()}
+            disabled={portalBusy !== null}
             className="min-h-[40px] rounded-lg border border-amber-700/60 bg-amber-900/30 px-4 py-2 text-sm font-medium text-amber-100 transition-colors hover:bg-amber-900/50 disabled:opacity-50"
           >
-            {portalBusy ? t("portalOpening") : t("manageSubscription")}
+            {portalBusy === "plan" ? t("portalOpening") : t("manageSubscription")}
           </button>
         </div>
       )}
 
-      {!isPaid && !isRetrying && preview && (
+      {/* A subject or a child's seat bought after the payment is its own Stripe subscription, under its
+          own customer: the plan's portal doesn't show it, so each has its „Gestionează” here — also once
+          the plan has ended, when they would otherwise keep being charged unseen. */}
+      {addons.length > 0 && (
+        <div className="rounded-xl border border-gray-800 bg-gray-900 px-4 py-3 text-sm">
+          <p className="font-semibold text-white">{t("addonsTitle")}</p>
+          <p className="mt-0.5 text-xs text-gray-400">{isPaid || isRetrying ? t("addonsIntro") : t("addonsWithoutPlan")}</p>
+          <ul className="mt-2 divide-y divide-gray-800">
+            {addons.map((a) => (
+              <li key={a.sessionId} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                <span className="text-gray-200">
+                  {a.type === "child_addon"
+                    ? t("addonChild")
+                    : a.learnerName?.trim()
+                      ? t("addonSubject", { subject: a.subjectName ?? t("addonSubjectUnknown"), name: a.learnerName.trim() })
+                      : t("addonSubjectNoName", { subject: a.subjectName ?? t("addonSubjectUnknown") })}
+                  <span className="ml-1 text-xs text-gray-500">
+                    · {t("addonSince", { date: new Date(a.since).toLocaleDateString(locale === "en" ? "en-GB" : "ro-RO", { timeZone: "Europe/Bucharest", day: "numeric", month: "short", year: "numeric" }) })}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => void openPortal(a.sessionId)}
+                  disabled={portalBusy !== null}
+                  className="min-h-[36px] rounded-lg border border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-200 hover:bg-gray-800 disabled:opacity-50"
+                >
+                  {portalBusy === a.sessionId ? t("portalOpening") : t("addonManage")}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {!isPaid && !isRetrying && !offersHidden && preview && bannerDiscount && (
         <div className="rounded-xl border border-emerald-800/60 bg-emerald-900/15 px-4 py-3 text-sm text-emerald-200">
           <p className="font-semibold">
-            {bannerPlan && bannerPrice !== null
-              ? t("voucherBanner", {
-                  code: preview.code,
-                  plan: bannerPlan.name,
-                  price: lei(bannerPrice),
-                  normal: lei(bannerPlan.price),
-                  interval: intervalLabel(bannerPlan.interval),
-                })
-              : t("voucherBannerAnyPlan", { code: preview.code, percent: preview.discountPercent })}
+            {!bannerDiscount.codeUsed
+              ? // The trial offer is larger: the code isn't used now and stays for later.
+                t("voucherKeptTrialWins", { code: preview.code, percent: TRIAL_PAYMENT_PERCENT })
+              : bannerPlan && bannerPriced
+                ? t("voucherBanner", {
+                    code: preview.code,
+                    plan: bannerPlan.name,
+                    price: bani(bannerPriced.first),
+                    normal: bani(bannerPriced.normal),
+                    interval: intervalLabel(bannerPlan.interval),
+                  })
+                : t("voucherBannerAnyPlan", { code: preview.code, percent: preview.discountPercent })}
           </p>
-          {preview.recurring && <p className="mt-0.5 text-xs text-emerald-300/80">{t("voucherEveryPayment")}</p>}
+          {bannerDiscount.codeUsed && (
+            <p className="mt-0.5 text-xs text-emerald-300/80">
+              {bannerDiscount.onceCouponPercent ? t("voucherFirstPaymentOnly") : t("voucherEveryPayment")}
+            </p>
+          )}
+        </div>
+      )}
+
+      {trialActive && current.trialOffer && current.serverNow && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-700/60 bg-gradient-to-r from-blue-900/40 to-emerald-900/25 px-4 py-3">
+          <div>
+            <p className="text-sm font-semibold text-white">{t("trialOfferTitle", { percent: TRIAL_PAYMENT_PERCENT })}</p>
+            <p className="text-xs text-blue-100/80">{t("trialOfferEnds", { end: trialEndText })}</p>
+          </div>
+          <TrialCountdown
+            endsAt={current.trialOffer.endsAt}
+            serverNow={current.serverNow}
+            locale={locale}
+            className="text-lg font-bold text-blue-100"
+            onEnd={reloadPlans}
+          />
+        </div>
+      )}
+
+      {hasAnnual && !offersHidden && (
+        <div className="flex rounded-xl border border-gray-800 bg-gray-900 p-1" role="tablist" aria-label={t("billingLabel")}>
+          {(["MONTH", "YEAR"] as const).map((b) => (
+            <button
+              key={b}
+              type="button"
+              role="tab"
+              aria-selected={billing === b}
+              onClick={() => setBilling(b)}
+              className={`min-h-[40px] flex-1 rounded-lg px-3 text-sm ${billing === b ? "bg-gray-800 font-semibold text-white" : "text-gray-400 hover:text-gray-200"}`}
+            >
+              {b === "MONTH" ? t("billingMonthly") : t("billingYearly", { months: MONTHS_PAID_PER_YEAR })}
+            </button>
+          ))}
         </div>
       )}
 
@@ -348,19 +503,33 @@ export default function PackagesPage() {
         </div>
       )}
 
-      {plans.length === 0 ? (
+      {offersHidden ? (
+        // A child whose parent is in the account is never shown prices or asked to buy (UCPD Annex I
+        // point 28): who decides, and the access code a school may have given them. A parent another
+        // parent's plan leaves out has the note above instead — never a second package for the same
+        // children. Banners above still manage a subscription the account pays itself.
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-6 text-sm text-gray-300">
+          {isChild && !isPaid && !isRetrying && <p className="mb-2">{t("childManaged")}</p>}
+          <Link href="/dashboard/activare" className="block text-xs text-blue-400 hover:text-blue-300">
+            {t("activateLink")}
+          </Link>
+        </div>
+      ) : plans.length === 0 ? (
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-8 text-center text-gray-500">
           {t("noPlans")}
         </div>
       ) : (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {plans.map((plan) => {
+            {shownPlans.map((plan) => {
               const fam = resolveFamilyPlanFromRecord(plan);
               const isCurrent = current.subscriptionPlanId === plan.id;
               const isPreselected = !!preselect && !isCurrent && fam?.key === preselect;
               const features = planFeatures(plan.features);
-              const discounted = isCurrent ? null : discountFor(plan);
+              const priced = isCurrent ? null : priceFor(plan);
+              const discounted = priced && priced.first < priced.normal ? priced : null;
+              // What connecting Telegram before paying would bring (a family without it yet).
+              const withTelegram = priced && !current.telegram && !isPaid && !isRetrying ? priceFor(plan, { telegram: true }) : null;
               const trial = trialFor(plan);
               return (
                 <div
@@ -381,23 +550,49 @@ export default function PackagesPage() {
                         {t("currentPlan")}
                       </span>
                     ) : (
-                      discounted !== null &&
-                      preview && (
-                        <span className="rounded-md border border-dashed border-amber-400/60 px-2 py-0.5 text-xs font-semibold text-amber-300">
-                          {t("voucherBadge", { code: preview.code, percent: preview.discountPercent })}
+                      priced && (
+                        <span className="flex flex-wrap justify-end gap-1">
+                          {priced.discount.base === "trial" && (
+                            <span className="rounded-md bg-emerald-900/40 px-2 py-0.5 text-xs font-semibold text-emerald-300">
+                              {t("tagTrial", { percent: TRIAL_PAYMENT_PERCENT })}
+                            </span>
+                          )}
+                          {priced.discount.codeUsed && preview && (
+                            <span className="rounded-md border border-dashed border-amber-400/60 px-2 py-0.5 text-xs font-semibold text-amber-300">
+                              {t("voucherBadge", { code: preview.code, percent: preview.discountPercent })}
+                            </span>
+                          )}
+                          {priced.discount.telegram && (
+                            <span className="rounded-md bg-sky-900/40 px-2 py-0.5 text-xs font-semibold text-sky-300">
+                              {t("tagTelegram", { percent: TELEGRAM_PERCENT })}
+                            </span>
+                          )}
                         </span>
                       )
                     )}
                   </div>
 
                   <p className="mb-1">
-                    {discounted !== null && (
-                      <span className="mr-2 text-base text-gray-500 line-through">{lei(plan.price)} lei</span>
-                    )}
-                    <span className="text-2xl font-bold text-white">{lei(discounted ?? plan.price)} lei</span>
+                    {discounted && <span className="mr-2 text-base text-gray-500 line-through">{bani(discounted.normal)} lei</span>}
+                    <span className="text-2xl font-bold text-white">{priced ? bani(priced.first) : lei(plan.price)} lei</span>
                     <span className="text-sm text-gray-400"> {intervalLabel(plan.interval)}</span>
                   </p>
-                  <p className="mb-1 text-xs text-gray-500">{t("perSubject")}</p>
+                  {priced?.discount.onceCouponPercent && (
+                    <p className="mb-1 text-xs text-amber-300/90">{t("firstPaymentThen", { price: bani(priced.total) })}</p>
+                  )}
+                  {plan.interval === "YEAR" && priced && (
+                    <p className="mb-1 text-xs text-gray-400">{t("yearAsMonth", { price: bani(Math.round(priced.first / 12)) })}</p>
+                  )}
+                  <p className="mb-1 text-xs text-gray-500">
+                    {priced && priced.subjects > 1
+                      ? t("subjectsIncluded", { n: priced.subjects, second: subjectDiscountPercent(2), third: subjectDiscountPercent(3) })
+                      : t("perSubject")}
+                  </p>
+                  {withTelegram && withTelegram.first < (priced?.first ?? 0) && (
+                    <Link href="/dashboard/settings/notifications" className="mb-2 block text-xs text-sky-300 hover:text-sky-200">
+                      {t("telegramHint", { price: bani(withTelegram.first), percent: TELEGRAM_PERCENT })}
+                    </Link>
+                  )}
                   {trial > 0 ? (
                     <p className="mb-3 text-xs text-blue-400">{t("trial", { n: trial })}</p>
                   ) : (
@@ -423,6 +618,17 @@ export default function PackagesPage() {
                     </ul>
                   )}
 
+                  {/* Alex 17.09: on the monthly price with the trial offer, the bigger saving of paying a year. */}
+                  {billing === "MONTH" && hasAnnual && priced?.discount.base === "trial" && fam && (
+                    <div className="mb-3 rounded-lg border border-dashed border-amber-500/50 bg-amber-900/10 px-3 py-2 text-xs text-amber-100">
+                      <p className="font-semibold">{t("annualOfferTitle")}</p>
+                      <p className="text-amber-100/80">{t("annualOfferBody")}</p>
+                      <Link href={`/dashboard/packages/anual?plan=${fam.key}`} className="mt-1 inline-block font-semibold text-amber-300 hover:text-amber-200">
+                        {t("annualOfferCta")}
+                      </Link>
+                    </div>
+                  )}
+
                   <button
                     onClick={() => subscribe(plan)}
                     // Never a second subscription next to one the card pays or retries (banner above).
@@ -441,7 +647,16 @@ export default function PackagesPage() {
           </div>
 
           <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 text-xs text-gray-400">
-            {t("discounts")}
+            {t("discounts", {
+              trial: TRIAL_PAYMENT_PERCENT,
+              days: FREE_TRIAL_DAYS,
+              telegram: TELEGRAM_PERCENT,
+              subject2: subjectDiscountPercent(2),
+              subject3: subjectDiscountPercent(3),
+              child2: childDiscountPercent(2),
+              child3: childDiscountPercent(3),
+              months: MONTHS_PAID_PER_YEAR,
+            })}
           </div>
 
           <form

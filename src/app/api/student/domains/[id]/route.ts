@@ -6,11 +6,35 @@ import { refuseIfPaused } from "@/lib/access-gate";
 import { canSeePrivateDomains } from "@/lib/domain-access";
 import { activeSetters, lockedText } from "@/lib/guardian-lock";
 import { ensureWatcherEnrollments } from "@/lib/family-invite";
+import { subjectAddonQuote, subjectNeedsPayment } from "@/lib/checkout-facts";
 import { z } from "zod";
 
 const paramsSchema = z.object({
   id: z.string().min(1, "Domain ID required"),
 });
+
+/**
+ * A subject past the ones a card subscription pays for (checkout-facts.ts). The learner who pays for
+ * themselves — the card subscription is theirs — is told what it takes, with the price: the offer goes to
+ * whoever pays, and nobody else can buy their subjects. A child whose parent pays is only told who adds
+ * subjects — never a price, never a push to buy (UCPD Annex I point 28).
+ */
+async function unpaidSubject(learnerId: string, domainId: string): Promise<NextResponse | null> {
+  const payer = await subjectNeedsPayment(learnerId, domainId);
+  if (!payer) return null;
+  const self = payer.payerId === learnerId;
+  return NextResponse.json(
+    {
+      error: self
+        ? "Abonamentul tău plătește materiile pe care le ai acum. O materie în plus se plătește separat."
+        : "Materiile noi le adaugă părintele tău.",
+      code: "SUBJECT_ADDON",
+      // The price of one more subject, to whoever pays for themselves (subject-addon-checkout).
+      quote: self ? await subjectAddonQuote(payer.payerId) : null,
+    },
+    { status: 402 }
+  );
+}
 
 /** The family's adults follow the child into a new subject, as they do into the first ones. */
 async function familyFollows(childId: string, domainId: string) {
@@ -90,6 +114,10 @@ async function _POST(
         return NextResponse.json({ error: lockedText(owner, "subject"), locked: true }, { status: 403 });
       }
     }
+    if (existing.roles.includes("STUDENT")) {
+      const unpaid = await unpaidSubject(session.user.id, domainId);
+      if (unpaid) return unpaid;
+    }
     // Re-activate enrollment — the child's own choice again.
     const updated = await prisma.enrollment.update({
       where: { id: existing.id },
@@ -109,6 +137,10 @@ async function _POST(
 
   // Same guard as /api/activate: joining a domain must not turn a parent account
   // into a learner one.
+  if (session.user.accountRole !== "PARENT") {
+    const unpaid = await unpaidSubject(session.user.id, domainId);
+    if (unpaid) return unpaid;
+  }
   const enrollment = await prisma.enrollment.create({
     data: {
       userId: session.user.id,

@@ -4,7 +4,9 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { getFamilyOverview } from "@/lib/family-invite";
-import { childDiscountPercent } from "@/lib/family";
+import { childSeatMonthlyMinor, forInterval } from "@/lib/checkout-price";
+import { lockedDiscount, monthlyPlanPriceMinor } from "@/lib/checkout-facts";
+import { paysByCard } from "@/lib/card-subscription";
 import { isPaidSubscriber } from "@/lib/escalation/segmentation";
 import { individualPlan } from "@/lib/access";
 
@@ -39,8 +41,10 @@ async function _POST() {
   const u = await prisma.user.findUnique({
     where: { id: userId },
     select: {
+      id: true,
       subscriptionStatus: true,
       subscriptionEndsAt: true,
+      stripeSubscriptionId: true,
       subscriptionPlan: {
         select: { name: true, price: true, interval: true, isActive: true, familyPlanKey: true, maxParents: true, maxChildren: true },
       },
@@ -75,10 +79,13 @@ async function _POST() {
   // seats.children.max = plan base + already-paid add-on seats. This add-on pays for
   // the NEXT seat (1-based), which sets the loyalty discount tier.
   const childIndex = overview.seats.children.max + 1;
-  const discount = childDiscountPercent(childIndex);
-  // plan.price is minor units (cents); the broker wants MAJOR units.
-  const base = plan.price / 100;
-  const amount = Math.round(base * (1 - discount / 100) * 100) / 100;
+  // The family's lifetime discount (trial offer or code, then Telegram) applies to the extra child's
+  // seat too, on top of the child's own discount (Alex 17.09.2026) — while the card subscription that
+  // locked it runs, not next to a later year from a code. Annual = ten months of today's monthly price.
+  const [locked, byCard, planMonthly] = await Promise.all([lockedDiscount(userId), paysByCard(u), monthlyPlanPriceMinor(plan)]);
+  const monthly = childSeatMonthlyMinor(planMonthly, childIndex, byCard ? (locked?.percent ?? 0) : 0);
+  // Minor units (bani); the broker wants MAJOR units.
+  const amount = forInterval(monthly, plan.interval === "YEAR" ? "YEAR" : "MONTH") / 100;
 
   const successUrl = `${process.env.AUTH_URL}/dashboard/family?addon=ok`;
   const cancelUrl = `${process.env.AUTH_URL}/dashboard/family`;

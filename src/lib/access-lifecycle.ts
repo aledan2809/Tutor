@@ -17,6 +17,7 @@ import { trialStartOf } from "@/lib/access";
 import { loadAccess, loadPauseStartsAt, loadSeatHolder } from "@/lib/access-server";
 import { teaserOffer, teaserStats, type TeaserOffer, type TeaserStats } from "@/lib/access-teaser";
 import { fmtPrice } from "@/lib/pricing";
+import { TELEGRAM_PERCENT, TRIAL_PAYMENT_PERCENT } from "@/lib/checkout-price";
 import { countRo } from "@/lib/ro-count";
 import { withCronLease } from "@/lib/cron-lease";
 import { deliverParentAlert, userInQuietHours } from "@/lib/escalation/parent-monitor";
@@ -109,11 +110,24 @@ export function whenWords(at: Date, now: Date): string {
 
 const capitalized = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-/** „24,90 lei/lună cu codul V126S", or null when the plan isn't found. */
-function priceWords(offer: TeaserOffer | null): string | null {
+/**
+ * „23,24 lei/lună cu −30% pentru plata în probă, în loc de 33,20 lei": what checkout would charge now
+ * (teaserOffer) and why it is lower. `trialStated`: the message has already offered the −30% on its
+ * own (the last day), so it isn't repeated. Null when the plan isn't found.
+ */
+function priceWords(offer: TeaserOffer | null, trialStated = false): string | null {
   if (!offer) return null;
-  const price = `${fmtPrice(offer.price, "ro")} lei/lună`;
-  return offer.code ? `${price} cu codul ${offer.code}` : price;
+  const lei = (n: number) => `${fmtPrice(n, "ro")} lei`;
+  const amount = offer.first < offer.price ? `${lei(offer.first)} prima lună, apoi ${lei(offer.price)}/lună` : `${lei(offer.price)}/lună`;
+  const subjects = offer.subjects > 1 ? ` pentru ${plural(offer.subjects, "o materie", "materii")}` : "";
+  const reasons = [
+    offer.trialOfferEndsAt && !trialStated ? `−${TRIAL_PAYMENT_PERCENT}% pentru plata în probă` : null,
+    offer.code ? `codul ${offer.code}` : null,
+    offer.telegram ? `${trialStated ? "încă " : ""}−${TELEGRAM_PERCENT}% pentru Telegram` : null,
+  ].filter((r): r is string => r !== null);
+  const why = reasons.length > 0 ? ` cu ${reasons.join(" și ")}` : "";
+  const instead = offer.price < offer.normal ? `, în loc de ${lei(offer.normal)}` : "";
+  return `${amount}${subjects}${why}${instead}`;
 }
 
 function priceLine(offer: TeaserOffer | null): string {
@@ -176,12 +190,19 @@ function stageCopy(input: {
           : stopping.length === 1
             ? `${stopping[0].name?.trim() || "copilul"} nu mai poate exersa, `
             : "copiii nu mai pot exersa, ";
+      // Paying before the week ends keeps −30% for as long as the subscription lasts (Alex 17.09): the
+      // offer and the moment it ends, which is the moment the week ends.
+      const offerEnd = offer?.trialOfferEndsAt ? new Date(offer.trialOfferEndsAt) : null;
+      const until = offerEnd && offerEnd.getTime() !== input.endsAt?.getTime() ? whenWords(offerEnd, now) : "atunci";
+      const trialPrice = offerEnd ? priceWords(offer, true) : null;
       return {
         title: when ? `Proba gratuită se încheie ${when}` : "Proba gratuită se încheie în curând",
         message:
           `${kidsText} ${when ? capitalized(when) : "Atunci"}, fără abonament, contul intră în pauză: ${kidsStop}` +
           "tu nu mai vezi progresul și nu mai primești alerte. Tot ce s-a lucrat rămâne salvat și revine imediat ce activezi. " +
-          priceLine(offer),
+          (trialPrice
+            ? `Dacă plătești până ${until}, ai −${TRIAL_PAYMENT_PERCENT}% cât timp rămâi abonat: Family ${trialPrice}. Anulezi oricând.`
+            : priceLine(offer)),
         button: "Păstrez accesul",
       };
     }
@@ -291,11 +312,11 @@ export async function runAccessLifecycle(now: Date = new Date()): Promise<{ ran:
             return {
               name: l.child.name,
               stats: await teaserStats(l.child.id, statsWindow),
-              // A child who joined later has a later week of their own, and a covered one never pauses.
-              pausesWithParent: !(
-                childAccess?.kind === "full" ||
-                (childAccess?.kind === "trial" && endsAt !== null && childAccess.endsAt.getTime() > endsAt.getTime())
-              ),
+              // Only a child whose week ends with this parent's: one who joined later has a later week of
+              // their own, a covered one never pauses, and one already paused (a second parent who arrived
+              // late lends no week — access.ts trialLenders) doesn't stop now.
+              pausesWithParent:
+                childAccess?.kind === "trial" && endsAt !== null && childAccess.endsAt.getTime() <= endsAt.getTime(),
             };
           }),
         );
@@ -303,7 +324,7 @@ export async function runAccessLifecycle(now: Date = new Date()): Promise<{ ran:
           stage,
           daysLeft: access.kind === "trial" ? access.daysLeft : 0,
           kids,
-          offer: await teaserOffer(parent.id, "FAMILY"),
+          offer: await teaserOffer(parent.id, "FAMILY", now),
           endsAt,
           now,
         });

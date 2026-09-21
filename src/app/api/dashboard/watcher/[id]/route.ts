@@ -38,10 +38,13 @@ async function _GET(
     )
     .map((e) => e.domainId);
 
+  // A guardian sees the whole child, read now — not only the subjects the session carried at sign-in: a
+  // subject added or bought since would be missing, and removing the older ones left the page empty.
+  // A child without subjects is still theirs, to give one; a domain-scoped instructor needs a shared one.
   const studentEnrollments = await prisma.enrollment.findMany({
     where: {
       userId: studentId,
-      domainId: { in: watcherDomainIds },
+      ...(isGuardian ? {} : { domainId: { in: watcherDomainIds } }),
       roles: { hasSome: ["STUDENT"] },
       isActive: true,
     },
@@ -50,7 +53,7 @@ async function _GET(
     },
   });
 
-  if (studentEnrollments.length === 0) {
+  if (studentEnrollments.length === 0 && !isGuardian) {
     return NextResponse.json({ error: "Student not found" }, { status: 404 });
   }
 

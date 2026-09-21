@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
 import { isPromoActive, normalFromPromo, fmtPrice } from "@/lib/pricing";
+import { TELEGRAM_PERCENT, TRIAL_PAYMENT_PERCENT } from "@/lib/checkout-price";
 
 // The Elev/Student promo amount, as on /preturi; `{price}` in the copy shows the price in force.
 const ELEV_PROMO_AMOUNT = 19.9;
@@ -49,7 +50,7 @@ const RO: Copy = {
   planPoints: [
     "Cont propriu — îți urmărești singur progresul",
     "De la {price} lei / materie / lună",
-    "Oferte sezoniere pe parcurs",
+    `Reducere de ${TRIAL_PAYMENT_PERCENT}% pentru plata în primele 7 zile, cât rămâi abonat; încă ${TELEGRAM_PERCENT}% cu Telegram conectat`,
     "Remindere și notificări configurate de tine",
   ],
   parentTitle: "Te susține un părinte sau un meditator?",
@@ -84,7 +85,7 @@ const EN: Copy = {
   planPoints: [
     "Your own account — you track your own progress",
     "From {price} lei / subject / month",
-    "Seasonal offers along the way",
+    `${TRIAL_PAYMENT_PERCENT}% off for paying in your first 7 days, for as long as you stay subscribed; another ${TELEGRAM_PERCENT}% with Telegram connected`,
     "Reminders and notifications configured by you",
   ],
   parentTitle: "Backed by a parent or a tutor?",

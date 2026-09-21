@@ -3,6 +3,7 @@
 > Sursa de adevăr pentru build-ul Părinte/Elev/Meditator. Co-design 2026-06; build fazat.
 >
 > **Changelog**
+> - 2026-09-17 (seara): §3 + §4 cu **livrarea 2** construită (deciziile lui Alex din 16–17.09): −30% pe viață la plata în cele 7 zile ale contului, −10% cu Telegram în familie, materiile pe linii la plată, materia adăugată după plată pe abonament separat, anual = 10 luni din prețul cu reducere, paginile anuale, proba „împrumutată" o singură dată.
 > - 2026-09-17: §4 actualizat cu starea LIVE din 16–17.09 (deciziile lui Alex): proba de **7 zile fără card** pe tot pachetul (fără WhatsApp/SMS), **pauza din ziua 8** pentru părinte ȘI copil (cu „teasing" — cifre reale + zone blurate, fără preț arătat copilului), conturile existente primesc 7 zile de la pornirea comutatorului (nu „Gratuit permanent"), **ultimul cuvânt al părintelui** peste programul și materiile copilului (blocate pentru copil, fără flux de cerere), locurile din pachet (plătitorul ține mereu un loc; Family Duo = 2 părinți). Comutatorul pauzei e încă OPRIT. Fluturașul V126S (Family 24,90 lunar, o dată pe cont, până la 30.11) e LIVE.
 > - 2026-06-03: actualizat §2 + §3 cu pachetele LIVE (5 planuri: Elev de la 19,90 / Family 24,90 / Family Duo 29,90 / Trio 39,90 / Family Trio 49,90) + reducerile reale (copil #2 −20% / #3+ −30%; materie a 2-a −15% / a 3-a+ −25%; anual = 2 luni gratuite) + promo −25% până 31.08.2026. Aliniat cu `/preturi` (sursa canonică) + `/parinte` (corectat în aceeași sesiune). Prețurile sunt acum afișate hardcodat pe cele 2 pagini (config-driven la checkout = build viitor).
 
@@ -34,8 +35,8 @@ Pagina Părinte TREBUIE să explice clar opțiunea **Trio** + faptul că **pări
 ## 3. Axe de preț (best-practice „family" tip Spotify — atractiv, decizie ușoară)
 - **Unitate de bază**: materie/lună (de la 19,90 RON — vezi tabelul de planuri §2). Prețuri sezoniere deja în STRATEGY (sezon examene Feb–Iul, vacanță vară).
 - **Discount sibling** (o factură, mai mulți copii, mai ieftin/cap): copil #1 întreg · **#2 −20%** · **#3+ −30%**.
-- **Multi-materie / copil**: 1 întreg · **a 2-a −15%** · **a 3-a+ −25%**.
-- **Anual**: **2 luni gratuite** (plătești 10 luni) + loialitate 15→30% ani consecutivi (STRATEGY).
+- **Multi-materie / copil**: 1 întreg · **a 2-a −15%** · **a 3-a+ −25%** (din prețul normal). La plată: linii pe același abonament, după materiile alese. Adăugată după plată: abonament separat (vezi §4, livrarea 2).
+- **Anual**: **10 × prețul lunar cu reducere** (reducerile de probă/cod/Telegram rămân), cu zilele rămase din probă. Loialitatea 15→30% pe ani consecutivi (STRATEGY) nu e construită.
 - **Promo de lansare**: până la **31.08.2026**, toate pachetele au **−25% suplimentar**; de la 1 septembrie 2026 prețurile cresc în consecință.
 - **Psihologie**: evidențiat Family/Trio ca „Cel mai ales", preț/copil care scade vizibil, o singură factură, toggle Lunar/Anual cu economia afișată, charm pricing, free trial fără card.
 
@@ -48,7 +49,17 @@ Pagina Părinte TREBUIE să explice clar opțiunea **Trio** + faptul că **pări
 > - **Conturile existente** primesc 7 zile de la pornirea comutatorului `accessTrial.startsAt` (încă oprit).
 > - **Locuri**: plătitorul ține mereu un loc; ceilalți adulți ai copilului iau locurile rămase în ordinea legării (Family = 1 părinte, Family Duo = 2). Elev nu acoperă niciun copil și nu vinde loc de copil suplimentar.
 > - **Ultimul cuvânt al părintelui**: ce stabilește sau schimbă un părinte (program, materii) e blocat pentru copil; ce a pus copilul rămâne al lui până îl schimbă părintele. Meditatorul poate ajuta, dar nu blochează.
-> - **Rămas pentru livrarea 2**: −30% dacă plătește în timpul probei (cu numărătoare inversă), −10% cu Telegram conectat, materia a 2-a −15% / a 3-a+ −25%, abonament anual = 10 luni.
+>
+> **Livrarea 2 (reducerile, 17.09).** Cod: `src/lib/checkout-price.ts` (calculul, pur), `src/lib/checkout-facts.ts` (ce știe contul: proba, Telegram, materiile, abonamentele separate), `src/lib/package-price.ts` (prețul arătat pe pagini).
+> - **−30% pe viață** dacă plătește în cele 7 zile ale contului lui. Numărătoarea: în bannerul de probă al părintelui, pe Abonament și în mesajul din ultima zi — niciodată copilului.
+> - **−10% cu Telegram** conectat de oricine din familie în momentul plății; rămâne și după deconectare.
+> - **Combinare**: cea mai mare dintre cod și probă, apoi Telegram peste. Reducerea se păstrează pe cont la activare (`lockedDiscount`) și se aplică și la ce se cumpără mai târziu.
+> - **Materiile**: la plată, linii pe același abonament (a 2-a −15%, de la a 3-a −25%). Abonamentul ține minte câte materii plătește și pentru cine (`paidSubjects`); o materie scoasă lasă locul plătit pentru alta.
+> - **Materia adăugată după plată** = abonament separat, plătit de cine plătește cardul (părintele, sau elevul care plătește singur). Pe Abonament apare în lista „Abonamente separate", fiecare cu „Gestionează". Când se oprește, pleacă locul lui și se oprește cel mult o materie — a lui întâi — doar dacă elevul are mai multe decât locurile rămase plus cele pe care le avea deja în plus la cumpărare.
+> - **Copilul în plus** primește și el reducerea pe viață, peste −20% / −30%.
+> - **Anual** = 10 × prețul lunar cu reducere, cu zilele rămase din probă. Pagina publică `/ro/anual` (exemple) și pagina din cont (cifrele familiei; cine plătește deja cu cardul își păstrează reducerea și schimbă din „Gestionează").
+> - **Proba „împrumutată"**: copilul ajuns în pauză primește încă 7 zile doar de la **primul** părinte care îl leagă după probă.
+> - Copilului legat de un părinte nu i se arată niciun preț; nici părintelui rămas în afara pachetului altuia (vede cine are pachetul, fără grilă de oferte).
 - **Free** (cont gratuit): max **2 materii/zi**, câte **5 întrebări/materie/zi** (deci 10 întrebări/zi pe 2 materii alese). Întrebările **contorizează + intră în gamification** (XP, streak).
 - **Alegerea celor 2 materii necesită cont gratuit** (fără cont = doar demo-ul public; ca să-ți alegi materiile, îți faci cont).
 - Scop: să-l facă **dornic să vadă mai mult ȘI să plătească**.
@@ -77,6 +88,6 @@ Pagina Părinte TREBUIE să explice clar opțiunea **Trio** + faptul că **pări
 - **A. Repoziționare homepage** — ✅ FĂCUT (c0e1ae9)
 - **B.** Pagina Părinte (Trio + Duo explicate) + Pagina Elev — marketing + cum funcționează + CTA
 - **C.** Backend: model Părinte↔Copil↔Meditator + 4 planuri + reguli Free/trial (2 materii/zi × 5q + gamification)
-- **D.** Cronometru −30% + cupoane Stripe + vederea meditatorului pe greșelile copilului
+- **D.** Cronometru −30% + cupoane Stripe + vederea meditatorului pe greșelile copilului — cronometrul și reducerile ✅ (livrarea 2, 17.09); cupoanele ✅ (V126S/ONV126S)
 - **E.** WhatsApp: creds în Tutor + demo WOW + remindere 24h/2h trial-expiry (cron)
 - **(MA, separat)** campanii promo sezoniere care referențiază codurile promo Tutor

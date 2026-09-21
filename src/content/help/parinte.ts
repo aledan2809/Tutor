@@ -1,5 +1,5 @@
 import { NUDGE_MAX_AGE_HOURS, NUDGE_MAX_FIRES, PARENT_RENOTIFY_MIN } from "@/lib/escalation/config";
-import { cascadeSection, reportSection, setupSection, telegramSection } from "./shared";
+import { cascadeSection, pricesSection, reportSection, setupSection, telegramSection } from "./shared";
 import type { HelpContent } from "./types";
 
 export const PARINTE: HelpContent = {
@@ -73,7 +73,8 @@ export const PARINTE: HelpContent = {
       ],
       links: [{ label: "Alerte", href: "/dashboard/watcher/notifications" }],
     },
-    telegramSection("ro", "/dashboard/watcher/setari#telegram"),
+    telegramSection("ro", "/dashboard/watcher/setari#telegram", true),
+    pricesSection("ro", true),
     reportSection("ro", "child"),
     setupSection("ro", true),
   ],
@@ -147,7 +148,8 @@ export const PARINTE: HelpContent = {
       ],
       links: [{ label: "Alerts", href: "/dashboard/watcher/notifications" }],
     },
-    telegramSection("en", "/dashboard/watcher/setari#telegram"),
+    telegramSection("en", "/dashboard/watcher/setari#telegram", true),
+    pricesSection("en", true),
     reportSection("en", "child"),
     setupSection("en", true),
   ],

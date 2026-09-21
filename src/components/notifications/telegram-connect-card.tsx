@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { TELEGRAM_PERCENT } from "@/lib/checkout-price";
 
 interface LinkStatus {
   configured: boolean;
@@ -12,8 +13,11 @@ interface LinkStatus {
  * Telegram connect card — opt-in deep-link flow. Mints a t.me/<bot>?start link,
  * opens it, then polls link status so the UI flips to "connected" once the user
  * taps /start in Telegram. Renders nothing if the bot isn't configured.
+ *
+ * `payerDiscount`: the viewer may pay a subscription (not a child whose parent pays — no price talk to
+ * children, UCPD Annex I point 28), so the card says Telegram connected at payment takes −10% off.
  */
-export function TelegramConnectCard() {
+export function TelegramConnectCard({ payerDiscount = false }: { payerDiscount?: boolean }) {
   const [status, setStatus] = useState<LinkStatus | null>(null);
   const [busy, setBusy] = useState(false);
   const [waiting, setWaiting] = useState(false);
@@ -115,6 +119,11 @@ export function TelegramConnectCard() {
         E gratuit și ajunge instant, iar butonul din mesaj oprește restul reminderelor
         dintr-o apăsare.
       </p>
+      {payerDiscount && (
+        <p className="mt-1 text-xs text-emerald-300">
+          Conectat înainte să plătești abonamentul: încă −{TELEGRAM_PERCENT}% la preț, care rămâne și după.
+        </p>
+      )}
 
       {!invite ? (
         <>

@@ -9,9 +9,11 @@
 import Link from "next/link";
 import { fmtPrice } from "@/lib/pricing";
 import { countRo } from "@/lib/ro-count";
+import { TELEGRAM_PERCENT, TRIAL_PAYMENT_PERCENT } from "@/lib/checkout-price";
 import type { TeaserOffer, TeaserStats } from "@/lib/access-teaser";
 import type { SeatHolderNote } from "@/lib/access-server";
 import { firstName, holderWords } from "@/components/access/holder-words";
+import { TrialCountdown } from "@/components/access/trial-countdown";
 
 type Locale = "ro" | "en";
 
@@ -70,17 +72,30 @@ function Veiled({ label, kind }: { label: string; kind: "rows" | "chart" | "chip
 function OfferCard({ offer, locale, planName, cta }: { offer: TeaserOffer; locale: Locale; planName: string; cta: string }) {
   const ro = locale === "ro";
   const lei = (n: number) => fmtPrice(n, locale);
+  // What the figure includes, as checkout counts it (access-teaser.ts).
+  const notes = [
+    offer.subjects > 1 ? (ro ? countRo(offer.subjects, "o materie", "materii") : `${offer.subjects} subjects`) : null,
+    offer.trialOfferEndsAt ? (ro ? `−${TRIAL_PAYMENT_PERCENT}% pentru plata în probă` : `−${TRIAL_PAYMENT_PERCENT}% for paying during the trial`) : null,
+    offer.telegram ? (ro ? `−${TELEGRAM_PERCENT}% cu Telegram` : `−${TELEGRAM_PERCENT}% with Telegram`) : null,
+    offer.first < offer.price ? (ro ? `prima lună ${lei(offer.first)} lei` : `first month ${lei(offer.first)} lei`) : null,
+  ].filter((n): n is string => n !== null);
   return (
     <div className="mt-3">
       <p className="text-2xl font-bold text-white">
-        {offer.code && <s className="mr-2 text-base font-medium text-gray-500">{lei(offer.normal)} lei</s>}
+        {offer.price < offer.normal && <s className="mr-2 text-base font-medium text-gray-500">{lei(offer.normal)} lei</s>}
         {lei(offer.price)} lei <span className="text-sm font-normal text-gray-400">{ro ? "/ lună" : "/ month"}</span>
       </p>
-      {offer.code && (
+      {(offer.code || notes.length > 0) && (
         <p className="mt-0.5 text-xs text-gray-400">
-          {ro ? "cu codul" : "with code"}{" "}
-          <span className="rounded border border-dashed border-amber-400/70 px-1.5 font-semibold text-amber-300">{offer.code}</span>
-          {ro ? " · anulezi oricând" : " · cancel any time"}
+          {offer.code && (
+            <>
+              {ro ? "cu codul" : "with code"}{" "}
+              <span className="rounded border border-dashed border-amber-400/70 px-1.5 font-semibold text-amber-300">{offer.code}</span>
+              {" · "}
+            </>
+          )}
+          {notes.map((n) => `${n} · `).join("")}
+          {ro ? "anulezi oricând" : "cancel any time"}
         </p>
       )}
       <Link
@@ -101,6 +116,7 @@ export function TrialBanner({
   audience,
   pauseOn,
   holder = null,
+  offer = null,
 }: {
   locale: Locale;
   daysLeft: number;
@@ -109,6 +125,8 @@ export function TrialBanner({
   pauseOn: boolean;
   /** Another parent's plan already covers the children but leaves this parent out: no Family offer. */
   holder?: SeatHolderNote | null;
+  /** The −30% offer for paying in the account's own free week, with its end (checkout-price.ts). */
+  offer?: { endsAt: string; serverNow: string } | null;
 }) {
   const ro = locale === "ro";
   const days = ro ? (daysLeft === 1 ? "mai ai o zi" : `mai ai ${daysLeft} zile`) : daysLeft === 1 ? "one day left" : `${daysLeft} days left`;
@@ -134,15 +152,34 @@ export function TrialBanner({
   const href = `/${locale}/dashboard/packages?plan=${audience === "parent" ? "FAMILY" : "ELEV"}`;
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-900/60 bg-blue-950/30 px-4 py-3 text-sm">
-      <p className="text-blue-100">
-        <span className="mr-2 rounded-full border border-blue-700/60 bg-blue-900/40 px-2 py-0.5 text-xs font-semibold text-blue-200">
-          {ro ? "Proba gratuită" : "Free trial"} · {days}
-        </span>
-        <span className="text-blue-200/80">{text}</span>
-      </p>
+      <div className="text-blue-100">
+        <p>
+          <span className="mr-2 rounded-full border border-blue-700/60 bg-blue-900/40 px-2 py-0.5 text-xs font-semibold text-blue-200">
+            {ro ? "Proba gratuită" : "Free trial"} · {days}
+          </span>
+          <span className="text-blue-200/80">{text}</span>
+        </p>
+        {/* The payer's offer (Alex 17.09): its real end, never a timer that restarts. */}
+        {!left && offer && (
+          <p className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-emerald-200">
+            <span className="font-semibold">
+              {ro
+                ? `−${TRIAL_PAYMENT_PERCENT}% dacă plătești acum, cât rămâi abonat · se încheie în`
+                : `−${TRIAL_PAYMENT_PERCENT}% if you pay now, for as long as you stay subscribed · ends in`}
+            </span>
+            <TrialCountdown endsAt={offer.endsAt} serverNow={offer.serverNow} locale={locale} className="font-bold text-emerald-100" />
+          </p>
+        )}
+      </div>
       {!left && (
         <Link href={href} className="shrink-0 rounded-lg border border-blue-700/60 px-3 py-1.5 text-xs font-semibold text-blue-100 hover:bg-blue-900/40">
-          {audience === "parent" ? (ro ? "Continuă cu Family" : "Continue with Family") : ro ? "Vezi pachetele" : "See the plans"}
+          {audience === "parent"
+            ? ro
+              ? `Continuă cu Family${offer ? ` · −${TRIAL_PAYMENT_PERCENT}%` : ""}`
+              : `Continue with Family${offer ? ` · −${TRIAL_PAYMENT_PERCENT}%` : ""}`
+            : ro
+              ? `Vezi pachetele${offer ? ` · −${TRIAL_PAYMENT_PERCENT}%` : ""}`
+              : `See the plans${offer ? ` · −${TRIAL_PAYMENT_PERCENT}%` : ""}`}
         </Link>
       )}
     </div>

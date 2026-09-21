@@ -107,11 +107,15 @@ export async function loadAccess(userId: string, now: Date = new Date()): Promis
         ...PERSON_SELECT,
         isOrgAdmin: true,
         accountRole: true,
+        // Removed links too: they count for who may lend a free week (access.ts trialLenders).
         guardianLinks: {
-          where: { status: "active", relation: "PARENT" },
+          where: { status: { in: ["active", "removed"] }, relation: "PARENT" },
           select: {
+            status: true,
+            createdAt: true,
             parent: {
               select: {
+                id: true,
                 ...PERSON_SELECT,
                 // Which of the parent's children the plan seats (family.ts seatsChild).
                 paidExtraChildSeats: true,
@@ -161,7 +165,10 @@ export async function loadAccess(userId: string, now: Date = new Date()): Promis
     now,
     pauseStartsAt,
     self: user,
-    parents: user.guardianLinks.map((g) => ({ ...g.parent, childIds: g.parent.childrenLinks.map((l) => l.childId) })),
+    parents: user.guardianLinks
+      .filter((g) => g.status === "active")
+      .map((g) => ({ ...g.parent, childIds: g.parent.childrenLinks.map((l) => l.childId) })),
+    parentLinkHistory: user.guardianLinks.map((g) => ({ parentId: g.parent.id, linkedAt: g.createdAt, parentCreatedAt: g.parent.createdAt })),
     coParentGroups: user.childrenLinks
       .filter((l) => l.relation === "PARENT")
       .map((l) => ({ linkedAt: l.createdAt, others: l.child.guardianLinks.map((g) => ({ person: g.parent, linkedAt: g.createdAt })) })),

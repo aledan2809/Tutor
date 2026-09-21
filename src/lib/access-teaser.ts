@@ -7,7 +7,9 @@
  */
 import { prisma } from "@/lib/prisma";
 import { loadVoucherPreview } from "@/lib/voucher-preview-server";
-import { discountedMinorUnits, previewAppliesToPlan } from "@/lib/voucher-checkout";
+import { previewAppliesToPlan } from "@/lib/voucher-checkout";
+import { familyHasTelegram, payerTrial, planLearner, subjectsToBill } from "@/lib/checkout-facts";
+import { packagePrice } from "@/lib/package-price";
 
 export type TeaserStats = {
   /** Questions answered (voided ones left out). */
@@ -52,31 +54,60 @@ export async function teaserStats(userId: string, window?: { since: Date; until:
 
 export type TeaserOffer = {
   planKey: "FAMILY" | "ELEV";
+  /** Subjects the plan would bill: the learner's chosen ones, at least one. */
+  subjects: number;
+  /** A month before any discount (the subject discounts included). */
   normal: number;
+  /** A month as it renews, with the discounts that stay. */
   price: number;
+  /** The first payment: lower than `price` when a code that doesn't renew comes off it. */
+  first: number;
+  /** The code checkout would apply (kept on the account), or null. */
   code: string | null;
+  /** When paying now still gets the −30% of the free week: the moment that ends (ISO). */
+  trialOfferEndsAt: string | null;
+  /** −10% for Telegram connected by someone in the family. */
+  telegram: boolean;
 };
 
 /**
- * The price the pause screen shows the payer: the plan's monthly price, with the code kept on the
- * account when checkout would accept it for that plan. Major units (lei).
+ * What the payer would be charged now for the plan, by the rules checkout charges by (checkout-price.ts,
+ * delivery 2): the subjects the learner has chosen, the −30% while the payer's own free week runs, the
+ * code kept on the account, and Telegram. Shown on the pause screen and in the trial messages, so
+ * neither can promise a figure the payment page wouldn't charge. Major units (lei).
  */
-export async function teaserOffer(payerId: string, planKey: "FAMILY" | "ELEV"): Promise<TeaserOffer | null> {
-  const [plan, payer] = await Promise.all([
+export async function teaserOffer(payerId: string, planKey: "FAMILY" | "ELEV", now: Date = new Date()): Promise<TeaserOffer | null> {
+  const [plan, payer, telegram] = await Promise.all([
     prisma.subscriptionPlan.findFirst({
       where: { isActive: true, interval: "MONTH", familyPlanKey: planKey },
-      select: { price: true },
+      select: { price: true, familyPlanKey: true, maxParents: true, maxChildren: true, maxTutors: true },
       orderBy: { price: "asc" },
     }),
-    prisma.user.findUnique({ where: { id: payerId }, select: { pendingVoucherCode: true } }),
+    prisma.user.findUnique({ where: { id: payerId }, select: { pendingVoucherCode: true, createdAt: true } }),
+    familyHasTelegram(payerId),
   ]);
-  if (!plan) return null;
-  const pending = payer?.pendingVoucherCode ? await loadVoucherPreview(payer.pendingVoucherCode, payerId) : null;
-  const applies = pending?.ok && previewAppliesToPlan(pending.preview, planKey) ? pending.preview : null;
+  if (!plan || !payer) return null;
+  // As checkout bills them: the learner's subjects, less the ones still paid by their own subscriptions.
+  const [trial, subjects, pending] = await Promise.all([
+    payerTrial(payerId, now, payer.createdAt),
+    planLearner(payerId, plan).then((learnerId) => subjectsToBill(payerId, learnerId)),
+    payer.pendingVoucherCode ? loadVoucherPreview(payer.pendingVoucherCode, payerId) : Promise.resolve(null),
+  ]);
+  const preview = pending?.ok && previewAppliesToPlan(pending.preview, planKey) ? pending.preview : null;
+  const trialActive = trial?.active === true;
+  const priced = packagePrice(
+    { ...plan, price: plan.price / 100, interval: "MONTH" },
+    { trialActive, telegram, subjects: { self: subjects, child: { count: subjects } } },
+    preview,
+  );
   return {
     planKey,
-    normal: plan.price / 100,
-    price: applies ? discountedMinorUnits(plan.price, applies.discountPercent) / 100 : plan.price / 100,
-    code: applies?.code ?? null,
+    subjects: priced.subjects,
+    normal: priced.normal / 100,
+    price: priced.total / 100,
+    first: priced.first / 100,
+    code: priced.discount.codeUsed && preview ? preview.code : null,
+    trialOfferEndsAt: priced.discount.base === "trial" && trial ? trial.endsAt.toISOString() : null,
+    telegram: priced.discount.telegram,
   };
 }
