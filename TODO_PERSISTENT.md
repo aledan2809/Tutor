@@ -88,9 +88,9 @@ data) în aceeași tranzacție cu activarea; în lista de utilizatori scrie „C
 „Gratuit permanent" scrie dacă acel cont are deja acces dintr-un cod; căutarea merge și după cod; în pagina Vouchere,
 „vezi cine" arată conturile care au folosit codul. Verificat în browser pe baza de test, 11/11 — scriptul e păstrat în
 `Reports/trasabilitate-coduri-2026-09-22/verificare-trasabilitate.mjs`.
-- [ ] Cele 5 conturi cu an gratuit de dinainte rămân cu „cod necunoscut". Codurile spun 4 folosiri (TESTER2026 ×2,
-  AVIATION2026, EVALUARE100), deci unul a primit anul pe altă cale. S-ar putea ghici după materii și date, dar ar
-  însemna să scriem dovezi pe care nu le avem — de decis cu Alex dacă merită.
+- [x] **Decis de Alex (22.09): rămân „cod necunoscut".** Cele 5 conturi cu an gratuit de dinainte nu se completează
+  retroactiv. Codurile spun 4 folosiri (TESTER2026 ×2, AVIATION2026, EVALUARE100), deci unul a primit anul pe altă cale;
+  s-ar fi putut ghici după materii și date, dar ar fi însemnat dovezi scrise fără temei. Urma există de la 22.09 încolo.
 
 **Livrarea 2 — construită și verificată (21.09; comisă, vezi mai jos):**
 - [x] Motorul de reducere (pur, testat): linii pe materii, reducerea pe viață, Telegram, anual
