@@ -119,6 +119,9 @@ model User {
   // Child seats bought as a discounted add-on beyond the plan's base seat. The
   // family-seat check honours base + this. 0 for everyone until they buy one.
   paidExtraChildSeats    Int                     @default(0)
+  // Parent seats paid next to the plan: the family pays the difference to the package with one more
+  // parent (Family → Family Duo), because the payment service cannot change a plan.
+  paidExtraParentSeats   Int                     @default(0)
   isBanned               Boolean                 @default(false)
   bannedReason           String?
   organization           Organization?           @relation(fields: [organizationId], references: [id], onDelete: SetNull)

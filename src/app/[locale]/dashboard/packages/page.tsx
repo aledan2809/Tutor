@@ -64,8 +64,21 @@ interface PlansResponse {
     subjectsPaid?: { count: number; self: boolean; name: string | null } | null;
     /** Another parent's plan covers the children without a seat for this one: who has it (no offer). */
     seatHolder?: SeatHolderNote | null;
+    /** For the payer: an adult of the family is left out, and what the package that includes them costs. */
+    parentUpgrade?: {
+      planLabel: string;
+      price: number;
+      total: number;
+      interval: "MONTH" | "YEAR";
+      leftOut: { id: string; name: string | null }[];
+      seats: number;
+    } | null;
+    /** The difference is still being paid next to a package that already includes the seat. */
+    parentUpgradeRedundant?: boolean;
+    /** With the difference paid, the package the family actually has (Family + diferența = Family Duo). */
+    upgradedPlanName?: string | null;
     /** The subscriptions bought next to the plan, each stopped from its own portal. */
-    addons?: { sessionId: string; type: "subject_addon" | "child_addon"; learnerName: string | null; subjectName: string | null; since: string }[];
+    addons?: { sessionId: string; type: "subject_addon" | "child_addon" | "parent_addon"; learnerName: string | null; subjectName: string | null; since: string }[];
     serverNow?: string;
     pendingVoucher?: { ok: true; preview: PreviewJson } | { ok: false; code: string; voucherCode: string | null } | null;
   };
@@ -94,6 +107,7 @@ export default function PackagesPage() {
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
   // The portal being opened: the plan's („plan”) or a separate subscription's (its checkout session).
   const [portalBusy, setPortalBusy] = useState<string | null>(null);
+  const [upgradeBusy, setUpgradeBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Plan the visitor picked on /preturi (?plan=<FamilyPlanKey>) — pre-highlight
   // + scroll to it so the pricing→signup→packages hand-off keeps continuity.
@@ -309,6 +323,32 @@ export default function PackagesPage() {
   };
 
   // Prices come in major units (33.2); the amounts are computed in minor units (package-price.ts).
+  /** „Treci pe Family Duo": the difference, as its own subscription (addon-checkout `type: "parent"`). */
+  const buyParentUpgrade = async () => {
+    setUpgradeBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/dashboard/family/addon-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "parent" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data?.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setError(data?.error ?? t("checkoutError"));
+    } catch {
+      setError(t("checkoutError"));
+    } finally {
+      setUpgradeBusy(false);
+    }
+  };
+
+  /** The family reads a name, not an id; an account without one is „un adult al familiei". */
+  const upgradeName = (p: { name: string | null }) => p.name?.trim() || t("parentUpgradeSomeone");
+
   const lei = (amount: number) => fmtPrice(amount, locale);
   const bani = (minorUnits: number) => fmtPrice(minorUnits / 100, locale);
   // The −30% offer runs while the payer's own free week does (a paying account has no offer, a child
@@ -375,6 +415,12 @@ export default function PackagesPage() {
               {current.subscriptionStatus === "trialing" ? t("currentTrial") : t("currentActive")}
             </span>
             {cardSubscription && <p className="mt-1 text-xs text-green-300/80">{t("switchPlanByCard")}</p>}
+            {current.parentUpgradeRedundant && current.upgradedPlanName && (
+              <p className="mt-1 text-xs text-amber-300/90">{t("parentUpgradeRedundant", { plan: current.upgradedPlanName })}</p>
+            )}
+            {current.upgradedPlanName && (
+              <p className="mt-1 text-xs text-green-300/80">{t("currentUpgraded", { plan: current.upgradedPlanName })}</p>
+            )}
             {cardSubscription && current.subjectsPaid && (
               <p className="mt-1 text-xs text-green-300/80">
                 {current.subjectsPaid.self
@@ -406,6 +452,54 @@ export default function PackagesPage() {
         </div>
       )}
 
+      {/* An adult of the family left out of the package: the payer is told here too, where they pay —
+          the adult themselves only ever sees who holds the package, never a price (access.ts seatHolder). */}
+      {current.parentUpgrade && (
+        <div className="rounded-xl border border-blue-900/60 bg-blue-950/30 px-4 py-3 text-sm">
+          <p className="font-semibold text-white">
+            {current.parentUpgrade.leftOut.length === 0
+              ? t("parentUpgradeTitleNone", { plan: current.parentUpgrade.planLabel })
+              : current.parentUpgrade.leftOut.length === 1
+                ? t("parentUpgradeTitleOne", { name: upgradeName(current.parentUpgrade.leftOut[0]) })
+                : t("parentUpgradeTitleMany", { count: current.parentUpgrade.leftOut.length })}
+          </p>
+          <p className="mt-1 text-gray-300">
+            {current.parentUpgrade.leftOut.length === 0
+              ? t("parentUpgradeBodyNone", { plan: current.parentUpgrade.planLabel, price: lei(current.parentUpgrade.price), interval: current.parentUpgrade.interval })
+              : current.parentUpgrade.leftOut.length === 1
+                ? t("parentUpgradeBodyOne", {
+                    name: upgradeName(current.parentUpgrade.leftOut[0]),
+                    plan: current.parentUpgrade.planLabel,
+                    price: lei(current.parentUpgrade.price),
+                    interval: current.parentUpgrade.interval,
+                  })
+                : t("parentUpgradeBodyMany", {
+                    plan: current.parentUpgrade.planLabel,
+                    first: upgradeName(current.parentUpgrade.leftOut[0]),
+                    price: lei(current.parentUpgrade.price),
+                    interval: current.parentUpgrade.interval,
+                  })}
+          </p>
+          <button
+            type="button"
+            onClick={() => void buyParentUpgrade()}
+            disabled={upgradeBusy}
+            className="mt-3 min-h-[40px] rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
+          >
+            {upgradeBusy
+              ? t("preparing")
+              : t("parentUpgradeCta", { plan: current.parentUpgrade.planLabel, price: lei(current.parentUpgrade.price) })}
+          </button>
+          <p className="mt-2 text-xs text-gray-500">
+            {t("parentUpgradeTotal", {
+              total: lei(current.parentUpgrade.total),
+              plan: current.parentUpgrade.planLabel,
+              interval: current.parentUpgrade.interval,
+            })}
+          </p>
+        </div>
+      )}
+
       {/* A subject or a child's seat bought after the payment is its own Stripe subscription, under its
           own customer: the plan's portal doesn't show it, so each has its „Gestionează” here — also once
           the plan has ended, when they would otherwise keep being charged unseen. */}
@@ -417,11 +511,13 @@ export default function PackagesPage() {
             {addons.map((a) => (
               <li key={a.sessionId} className="flex flex-wrap items-center justify-between gap-2 py-2">
                 <span className="text-gray-200">
-                  {a.type === "child_addon"
-                    ? t("addonChild")
-                    : a.learnerName?.trim()
-                      ? t("addonSubject", { subject: a.subjectName ?? t("addonSubjectUnknown"), name: a.learnerName.trim() })
-                      : t("addonSubjectNoName", { subject: a.subjectName ?? t("addonSubjectUnknown") })}
+                  {a.type === "parent_addon"
+                    ? t("addonParent", { plan: current.upgradedPlanName ?? "" })
+                    : a.type === "child_addon"
+                      ? t("addonChild")
+                      : a.learnerName?.trim()
+                        ? t("addonSubject", { subject: a.subjectName ?? t("addonSubjectUnknown"), name: a.learnerName.trim() })
+                        : t("addonSubjectNoName", { subject: a.subjectName ?? t("addonSubjectUnknown") })}
                   <span className="ml-1 text-xs text-gray-500">
                     · {t("addonSince", { date: new Date(a.since).toLocaleDateString(locale === "en" ? "en-GB" : "ro-RO", { timeZone: "Europe/Bucharest", day: "numeric", month: "short", year: "numeric" }) })}
                   </span>

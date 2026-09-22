@@ -217,6 +217,29 @@ export function resolveFamilyPlanFromRecord(
 }
 
 /**
+ * The package the family effectively has: with the difference to the next one paid (Family Duo's
+ * second parent), the family pays that package's price and gets its seats, so that is its name.
+ */
+export function effectiveFamilyPlan(plan: FamilyPlan | null, paidExtraParentSeats = 0): FamilyPlan | null {
+  if (!plan || paidExtraParentSeats <= 0) return plan;
+  const next = PARENT_UPGRADE[plan.key];
+  return next ? FAMILY_PLANS[next] : plan;
+}
+
+/** The parent seats a package holds with the difference paid: never more than the bigger package's. */
+export function parentSeatsOf(plan: FamilyPlan | null, paidExtraParentSeats = 0): number {
+  if (!plan) return 0;
+  return (effectiveFamilyPlan(plan, paidExtraParentSeats) ?? plan).maxParents;
+}
+
+/** The package that adds a parent seat to this one, or null when none does. */
+export function parentUpgradeOf(plan: FamilyPlan | null): FamilyPlan | null {
+  if (!plan) return null;
+  const next = PARENT_UPGRADE[plan.key];
+  return next ? FAMILY_PLANS[next] : null;
+}
+
+/**
  * How many children a payer's plan seats: the plan's own plus the add-on seats paid for. No limit for
  * „Gratuit permanent", the administrator, or a row without a family plan (accounts marked paid by hand).
  */
@@ -311,18 +334,23 @@ const NO_PLAN: SeatCheck = {
  */
 export function canAddParent(
   plan: FamilyPlan | null,
-  currentParents: number
+  currentParents: number,
+  /** Parent seats paid next to the plan (the difference to the package with one more parent). */
+  paidExtraParentSeats = 0
 ): SeatCheck {
   if (!plan) return NO_PLAN;
-  if (currentParents < plan.maxParents) return { allowed: true };
-  const upgradeTo = PARENT_UPGRADE[plan.key];
+  if (currentParents < parentSeatsOf(plan, paidExtraParentSeats)) return { allowed: true };
+  // With the difference already paid, the family holds the bigger package: it is told THAT one is full,
+  // not to move to a package it is already on.
+  const held = effectiveFamilyPlan(plan, paidExtraParentSeats) ?? plan;
+  const upgradeTo = PARENT_UPGRADE[held.key];
   return {
     allowed: false,
     reason: "parent_limit",
     upgradeTo,
     message: upgradeTo
-      ? `Pachetul „${plan.label}" include un singur părinte. Treci la „${FAMILY_PLANS[upgradeTo].label}" ca să adaugi al doilea părinte.`
-      : `Pachetul „${plan.label}" a atins numărul maxim de părinți.`,
+      ? `Pachetul „${held.label}" include un singur părinte. Treci la „${FAMILY_PLANS[upgradeTo].label}" ca să adaugi al doilea părinte.`
+      : `Pachetul „${held.label}" a atins numărul maxim de părinți.`,
   };
 }
 

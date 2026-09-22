@@ -1110,7 +1110,19 @@
     "addonSince": "since {date}",
     "addonManage": "Manage",
     "childManaged": "Your parent chooses the family's subscription.",
-    "holderUpgrade": "To join the plan too, {who} can move to {upgrade}."
+    "holderUpgrade": "To join the plan too, {who} can move to {upgrade}.",
+    "addonParent": "Move to {plan} (the difference)",
+    "currentUpgraded": "The family has {plan}: the base package plus the difference, paid separately.",
+    "parentUpgradeTitleNone": "{plan} includes two parents",
+    "parentUpgradeTitleOne": "{name} has no seat in the package",
+    "parentUpgradeTitleMany": "{count} adults of the family have no seat in the package",
+    "parentUpgradeBodyNone": "The current package includes one parent. {plan} includes two: you pay only the difference, {price} lei {interval, select, YEAR {a year} other {a month}}.",
+    "parentUpgradeBodyOne": "The child practises as usual, but {name} sees no progress and gets no alerts. {plan} includes them: you pay only the difference, {price} lei {interval, select, YEAR {a year} other {a month}}.",
+    "parentUpgradeBodyMany": "{plan} includes one more parent: {first} comes in, the others stay out. You pay only the difference, {price} lei {interval, select, YEAR {a year} other {a month}}.",
+    "parentUpgradeTotal": "Total {total} lei {interval, select, YEAR {a year} other {a month}}, the price of {plan}. The difference is paid separately and can be stopped at any time — the family then returns to its current package.",
+    "parentUpgradeRedundant": "You are still paying the difference for {plan}, but your package already includes it — you can stop it in the list below.",
+    "parentUpgradeCta": "Move to {plan} · +{price} lei",
+    "parentUpgradeSomeone": "an adult of the family"
   },
   "cookieBanner": {
     "aria": "Cookie consent",

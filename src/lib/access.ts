@@ -20,6 +20,8 @@ import { isPaidSubscriber } from "@/lib/escalation/segmentation";
 import { FREE_TRIAL_DAYS, remainingFreeTrialDays } from "@/lib/free-trial";
 import {
   canAddParent,
+  effectiveFamilyPlan,
+  parentUpgradeOf,
   getFamilyPlan,
   individualPlan,
   resolveFamilyPlanFromRecord,
@@ -42,6 +44,8 @@ export type AccessPerson = {
   subscriptionPlan?: SubscriptionPlanSeatFields | null;
   /** As a parent: add-on seats paid for next to the plan, and their children in link order (seatsChild). */
   paidExtraChildSeats?: number | null;
+  /** Parent seats paid next to the plan (Family + the difference = Family Duo). */
+  paidExtraParentSeats?: number | null;
   childIds?: string[];
 };
 
@@ -146,14 +150,19 @@ export function secondParentSeat(plan: SubscriptionPlanSeatFields | null | undef
  * second adult linked to a Family child would get Family Duo for free.
  */
 export function paysForSecondParent(p: AccessPerson): boolean {
-  return p.isSuperAdmin || p.freeForever || (payingForAccess(p) && !individualPlan(p.subscriptionPlan) && secondParentSeat(p.subscriptionPlan));
+  // A Family that paid the difference to Family Duo seats the second parent exactly like Family Duo.
+  return p.isSuperAdmin || p.freeForever || (payingForAccess(p) && !individualPlan(p.subscriptionPlan) && parentSeats(p) >= 2);
 }
 
 /** How many parents the payer's plan takes: no limit for „Gratuit permanent", the administrator, or a row without a family plan. */
-function parentSeats(p: Pick<AccessPerson, "isSuperAdmin" | "freeForever" | "subscriptionPlan">): number {
+function parentSeats(p: Pick<AccessPerson, "isSuperAdmin" | "freeForever" | "subscriptionPlan" | "paidExtraParentSeats">): number {
   if (p.isSuperAdmin || p.freeForever) return Infinity;
   const resolved = resolveFamilyPlanFromRecord(p.subscriptionPlan);
-  return resolved === null ? Infinity : resolved.maxParents;
+  if (resolved === null) return Infinity;
+  // At most the package with one more parent: a difference still being paid next to a package that
+  // already includes the seat (the family moved to it) opens no third seat — it only needs stopping.
+  const paid = parentUpgradeOf(resolved) ? Math.min(1, p.paidExtraParentSeats ?? 0) : 0;
+  return resolved.maxParents + paid;
 }
 
 /**
@@ -199,8 +208,11 @@ export function seatHolder<P extends AccessPerson>(children: P[][]): { holder: P
   if (children.length === 0 || !children.every((others) => others.some(paysForFamily))) return null;
   for (const holder of children.flat()) {
     if (holder.isSuperAdmin || holder.freeForever || !paysForFamily(holder)) continue;
-    const plan = resolveFamilyPlanFromRecord(holder.subscriptionPlan);
-    if (!plan) continue;
+    const own = resolveFamilyPlanFromRecord(holder.subscriptionPlan);
+    if (!own) continue;
+    // What the family actually has: with the difference already paid, Family is Family Duo — and then
+    // there is no further package with more parents to point a third adult to.
+    const plan = effectiveFamilyPlan(own, holder.paidExtraParentSeats ?? 0) ?? own;
     const next = canAddParent(plan, plan.maxParents).upgradeTo;
     const upgrade = next && getFamilyPlan(next).maxParents > plan.maxParents ? getFamilyPlan(next) : null;
     return { holder, plan, upgrade };

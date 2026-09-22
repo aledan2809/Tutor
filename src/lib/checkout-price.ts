@@ -118,6 +118,14 @@ export function childSeatMonthlyMinor(planMonthlyMinor: number, childIndex: numb
   return percentOff(percentOff(planMonthlyMinor, childDiscountPercent(childIndex)), lifetimePercent);
 }
 
+/**
+ * „Treci pe Family Duo": the difference between the package with one more parent and the current one,
+ * with the family's lifetime discount — the family ends up paying exactly the bigger package's price.
+ */
+export function parentUpgradeMonthlyMinor(planMonthlyMinor: number, upgradeMonthlyMinor: number, lifetimePercent: number): number {
+  return percentOff(Math.max(0, upgradeMonthlyMinor - planMonthlyMinor), lifetimePercent);
+}
+
 export type BillingInterval = "MONTH" | "YEAR";
 
 /** A monthly amount billed for the interval: annual = ten months of it. */

@@ -43,7 +43,10 @@ export type PaidSubjects = {
   sessionId?: string;
 };
 
-export type AddonType = "subject_addon" | "child_addon";
+/** Every kind of subscription bought next to the plan; the list on the payer is read against it. */
+export const ADDON_TYPES = ["subject_addon", "child_addon", "parent_addon"] as const;
+
+export type AddonType = (typeof ADDON_TYPES)[number];
 
 export type AddonEntry = {
   type: AddonType;
@@ -182,7 +185,7 @@ function addonList(value: unknown): AddonEntry[] {
       !!v &&
       typeof v === "object" &&
       typeof (v as AddonEntry).sessionId === "string" &&
-      ((v as AddonEntry).type === "subject_addon" || (v as AddonEntry).type === "child_addon"),
+      ADDON_TYPES.includes((v as AddonEntry).type),
   );
 }
 
@@ -271,6 +274,13 @@ export async function grantAddon(
     let saved = entry;
     if (entry.type === "child_addon") {
       await tx.user.update({ where: { id: payerId }, data: { paidExtraChildSeats: { increment: 1 } } });
+    } else if (entry.type === "parent_addon") {
+      // The difference to the package with one more parent: the second parent is seated from now on.
+      // Paid twice (two checkouts opened from the two pages), the second one seats nobody — it is kept
+      // in the list, marked as not counted, so the family sees it and can stop it.
+      const already = list.some((a) => a.type === "parent_addon" && a.counted !== false);
+      saved = { ...entry, counted: !already };
+      if (!already) await tx.user.update({ where: { id: payerId }, data: { paidExtraParentSeats: { increment: 1 } } });
     } else {
       const payer = await lockedPayer(tx, payerId);
       const counted = await countedPaidSubjects(tx, payerId, payer?.subscriptionPlan ?? null, entry.learnerId);
@@ -319,6 +329,14 @@ export async function endAddon(payerId: string, sessionId: string): Promise<{ en
     if (found.type === "child_addon") {
       // The gt:0 guard clamps at zero.
       await tx.user.updateMany({ where: { id: payerId, paidExtraChildSeats: { gt: 0 } }, data: { paidExtraChildSeats: { decrement: 1 } } });
+      return { entry: found, switchedOff: 0 };
+    }
+    if (found.type === "parent_addon") {
+      // The family goes back to its own package; the second parent is paused again (access.ts). One
+      // that never seated anyone (a second payment for the same move) takes no seat away when it ends.
+      if (found.counted !== false) {
+        await tx.user.updateMany({ where: { id: payerId, paidExtraParentSeats: { gt: 0 } }, data: { paidExtraParentSeats: { decrement: 1 } } });
+      }
       return { entry: found, switchedOff: 0 };
     }
     // A place is given back when it was counted, even if the plan counts another learner since (a family

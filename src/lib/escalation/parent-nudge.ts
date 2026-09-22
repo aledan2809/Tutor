@@ -74,6 +74,8 @@ const PAYER_SELECT = {
   subscriptionEndsAt: true,
   freeForever: true,
   isSuperAdmin: true,
+  // „Treci pe Family Duo" paid: the second parent holds a seat, so the paid channels reach them too.
+  paidExtraParentSeats: true,
   subscriptionPlan: { select: { name: true, familyPlanKey: true, maxParents: true, maxChildren: true, maxTutors: true } },
 } as const;
 

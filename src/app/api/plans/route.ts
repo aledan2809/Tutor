@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { payingForAccess } from "@/lib/access";
 import { loadAccess, loadSeatHolder } from "@/lib/access-server";
+import { getFamilyOverview } from "@/lib/family-invite";
+import { parentUpgradeQuote } from "@/lib/parent-upgrade";
+import { effectiveFamilyPlan, parentUpgradeOf, resolveFamilyPlanFromRecord } from "@/lib/family";
 import { loadVoucherPreview, serializePreview } from "@/lib/voucher-preview-server";
 import { paysByCard } from "@/lib/card-subscription";
 import { isPaidSubscriber } from "@/lib/escalation/segmentation";
@@ -65,6 +68,7 @@ async function _GET() {
         stripeSubscriptionId: true,
         createdAt: true,
         pendingVoucherCode: true,
+        paidExtraParentSeats: true,
         subscriptionPlan: { select: { name: true, familyPlanKey: true, maxParents: true, maxChildren: true, maxTutors: true } },
       },
     }),
@@ -143,6 +147,17 @@ async function _GET() {
     return (monthly !== undefined ? forInterval(monthly, "YEAR") : p.price) / 100;
   };
 
+  // The payer is told that an adult of the family is left out, and what the package that includes them
+  // costs (the same offer as on „Familia mea"); with the difference already paid, the family's package
+  // is the bigger one — that is what it pays for and what it holds.
+  const overview = paid ? await getFamilyOverview(userId) : null;
+  const parentUpgrade = overview ? await parentUpgradeQuote(userId, overview) : null;
+  const ownPlan = resolveFamilyPlanFromRecord(me.subscriptionPlan);
+  const upgradedPlanName = me.paidExtraParentSeats > 0 ? (effectiveFamilyPlan(ownPlan, me.paidExtraParentSeats)?.label ?? null) : null;
+  // Paid next to a package that already includes the second parent (the family moved to it since):
+  // the difference buys nothing any more and is only worth stopping.
+  const parentUpgradeRedundant = me.paidExtraParentSeats > 0 && parentUpgradeOf(ownPlan) === null;
+
   return NextResponse.json({
     plans: plans.map((p) => ({ ...p, price: shownPrice(p) })),
     current: {
@@ -156,6 +171,9 @@ async function _GET() {
       byCard,
       child,
       subjectsPaid,
+      parentUpgrade,
+      upgradedPlanName,
+      parentUpgradeRedundant,
       // The discount the card subscription keeps (for a family comparing a year with what it pays now).
       locked: locked ? { percent: locked.percent, base: locked.base, telegram: locked.telegram, interval: locked.interval } : null,
       // Stripe is still retrying a declined renewal (inside the grace). Past it, nothing is being

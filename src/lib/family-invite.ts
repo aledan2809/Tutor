@@ -30,6 +30,8 @@ import {
   INVITE_CHANNEL,
   resolveFamilyPlanFromRecord,
   canAddParent,
+  effectiveFamilyPlan,
+  parentSeatsOf,
   canAddChild,
   canAddTutor,
   trialChildCheck,
@@ -99,6 +101,7 @@ export interface OwnerPlan {
   unlimited: boolean;
   /** Child seats bought as an add-on beyond the plan base (see canAddChild). */
   paidExtraChildSeats: number;
+  paidExtraParentSeats: number;
   /** The seats come from the 7-day trial without a card, not from a payment. */
   trial: boolean;
 }
@@ -128,6 +131,7 @@ export async function resolveOwnerPlan(
       subscriptionStatus: true,
       subscriptionEndsAt: true,
       paidExtraChildSeats: true,
+      paidExtraParentSeats: true,
       subscriptionPlan: {
         select: {
           name: true,
@@ -166,6 +170,7 @@ export async function resolveOwnerPlan(
     freeForever: u?.freeForever ?? false,
     unlimited: Boolean(u?.isSuperAdmin || u?.freeForever),
     paidExtraChildSeats: u?.paidExtraChildSeats ?? 0,
+    paidExtraParentSeats: u?.paidExtraParentSeats ?? 0,
     trial,
   };
 }
@@ -279,6 +284,8 @@ export interface FamilyOverview {
   unlimited: boolean;
   /** Child seats bought as a paid add-on beyond the plan base. */
   paidExtraChildSeats: number;
+  /** Parent seats paid as the difference to the package with one more parent (Family → Family Duo). */
+  paidExtraParentSeats: number;
   /** The seats come from the 7-day trial without a card. */
   trial: boolean;
   children: FamilyMember[];
@@ -304,10 +311,8 @@ export async function getFamilyOverview(
   ownerId: string,
   db: Db = prisma
 ): Promise<FamilyOverview> {
-  const { key, plan, isSuperAdmin, freeForever, unlimited, paidExtraChildSeats, trial } = await resolveOwnerPlan(
-    ownerId,
-    db
-  );
+  const { key, plan, isSuperAdmin, freeForever, unlimited, paidExtraChildSeats, paidExtraParentSeats, trial } =
+    await resolveOwnerPlan(ownerId, db);
 
   // Children directly held by the owner.
   const childLinks = await db.guardian.findMany({
@@ -374,7 +379,9 @@ export async function getFamilyOverview(
     orderBy: { createdAt: "desc" },
   });
 
-  const maxParents = unlimited ? UNLIMITED : plan?.maxParents ?? 0;
+  // The difference paid to the package with one more parent counts exactly like that package's seat.
+  const maxParents = unlimited ? UNLIMITED : parentSeatsOf(plan, plan ? paidExtraParentSeats : 0);
+  const effectivePlan = effectiveFamilyPlan(plan, plan ? paidExtraParentSeats : 0);
   // Paid add-on child seats extend the base entitlement (only meaningful with a plan).
   const maxChildren = unlimited
     ? UNLIMITED
@@ -384,11 +391,13 @@ export async function getFamilyOverview(
   return {
     ownerId,
     planKey: key,
-    planLabel: plan?.label ?? null,
+    // What the family pays for and holds now (Family + the difference = Family Duo).
+    planLabel: effectivePlan?.label ?? null,
     isSuperAdmin,
     freeForever,
     unlimited,
     paidExtraChildSeats: plan ? paidExtraChildSeats : 0,
+    paidExtraParentSeats: plan ? paidExtraParentSeats : 0,
     trial,
     children,
     coParents,
@@ -430,7 +439,7 @@ export async function checkSeat(
   }
   if (target === INVITE_TARGET_ROLE.TUTOR)
     return canAddTutor(plan, overview.tutors.length);
-  return canAddParent(plan, overview.seats.parents.used);
+  return canAddParent(plan, overview.seats.parents.used, overview.paidExtraParentSeats);
 }
 
 // ─────────────────────── link plumbing ───────────────────────

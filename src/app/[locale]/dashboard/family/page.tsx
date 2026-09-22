@@ -43,6 +43,8 @@ interface Overview {
     payer?: "self" | "parent";
   } | null;
   paidExtraChildSeats: number;
+  /** Parent seats paid as the difference to the package with one more parent (family-invite.ts). */
+  paidExtraParentSeats?: number;
   children: Member[];
   coParents: Member[];
   tutors: Member[];
@@ -67,6 +69,15 @@ interface Overview {
   offersFamily?: boolean;
   /** The other parent whose plan covers the children but has no seat for this one (access-server.ts). */
   seatHolder?: SeatHolderNote | null;
+  /** For the payer: an adult of the family is left out, and this is what the package that includes them costs. */
+  parentUpgrade?: {
+    planLabel: string;
+    price: number;
+    total: number;
+    interval: "MONTH" | "YEAR";
+    leftOut: { id: string; name: string | null }[];
+    seats: number;
+  } | null;
 }
 
 const ROLE_RO: Record<string, string> = {
@@ -82,11 +93,18 @@ export default function FamilyPage() {
   const [addonBusy, setAddonBusy] = useState(false);
   const [addonError, setAddonError] = useState<string | null>(null);
 
-  const buyChildAddon = useCallback(async () => {
+  /** The family reads a name, not an id. */
+  const upgradeName = (p: { name: string | null }) => p.name?.trim() || "un adult al familiei";
+
+  const buyAddon = useCallback(async (type: "child" | "parent") => {
     setAddonBusy(true);
     setAddonError(null);
     try {
-      const r = await fetch("/api/dashboard/family/addon-checkout", { method: "POST" });
+      const r = await fetch("/api/dashboard/family/addon-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type }),
+      });
       const d = await r.json();
       if (r.ok && d.url) {
         window.location.href = d.url;
@@ -154,7 +172,8 @@ export default function FamilyPage() {
       : childSeat);
   const parentCheck: SeatCheck = admin
     ? { allowed: true }
-    : byHolder ?? canAddParent(plan, data.seats.parents.used);
+    // The difference paid to the package with one more parent counts like that package's seat.
+    : byHolder ?? canAddParent(plan, data.seats.parents.used, data.paidExtraParentSeats ?? 0);
   const tutorCheck: SeatCheck = admin
     ? { allowed: true }
     : byHolder ?? canAddTutor(plan, data.tutors.length);
@@ -180,6 +199,47 @@ export default function FamilyPage() {
           <Seat label="Copii" used={data.seats.children.used} max={data.seats.children.max} admin={admin} />
           <Seat label="Meditatori" used={data.seats.tutors.used} max={data.seats.tutors.max} admin={admin} />
         </div>
+        {/* The payer is told that an adult of the family is left out, and what the package that
+            includes them costs — the other parent only ever sees who holds the package, never a price. */}
+        {data.parentUpgrade && (
+          <div className="mt-3 rounded-lg border border-blue-900/60 bg-blue-950/30 p-3 text-sm">
+            <p className="font-semibold text-white">
+              {data.parentUpgrade.leftOut.length === 0
+                ? `${data.parentUpgrade.planLabel} include doi părinți`
+                : data.parentUpgrade.leftOut.length === 1
+                  ? `${upgradeName(data.parentUpgrade.leftOut[0])} nu are loc în pachet`
+                  : `${data.parentUpgrade.leftOut.length} adulți ai familiei nu au loc în pachet`}
+            </p>
+            <p className="mt-1 text-gray-300">
+              {data.parentUpgrade.leftOut.length === 0
+                ? "Pachetul de acum include un singur părinte. "
+                : data.parentUpgrade.leftOut.length === 1
+                  ? `Copilul exersează normal, dar ${upgradeName(data.parentUpgrade.leftOut[0])} nu vede progresul și nu primește alerte. `
+                  : `${data.parentUpgrade.planLabel} include încă un părinte: ${upgradeName(data.parentUpgrade.leftOut[0])} intră în pachet, ceilalți rămân în afară. `}
+              <strong className="text-white">{data.parentUpgrade.planLabel}</strong>{" "}
+              {data.parentUpgrade.leftOut.length === 1 ? "îl include: plătești" : "— plătești"} doar diferența,{" "}
+              <strong className="text-white">
+                {data.parentUpgrade.price.toFixed(2).replace(".", ",")} lei{" "}
+                {data.parentUpgrade.interval === "YEAR" ? "pe an" : "pe lună"}
+              </strong>
+              .
+            </p>
+            <button
+              onClick={() => void buyAddon("parent")}
+              disabled={addonBusy}
+              className="mt-3 min-h-[40px] rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
+            >
+              {addonBusy
+                ? "Se pregătește plata…"
+                : `Treci pe ${data.parentUpgrade.planLabel} · +${data.parentUpgrade.price.toFixed(2).replace(".", ",")} lei`}
+            </button>
+            <p className="mt-2 text-xs text-gray-500">
+              Total {data.parentUpgrade.total.toFixed(2).replace(".", ",")} lei{" "}
+              {data.parentUpgrade.interval === "YEAR" ? "pe an" : "pe lună"}, prețul pachetului {data.parentUpgrade.planLabel}. Diferența se
+              plătește separat și se poate opri oricând — atunci familia revine la pachetul de acum.
+            </p>
+          </div>
+        )}
         {/* The days left and the payment button are in the trial banner above the page. */}
         {data.trial && (
           <p className="mt-3 text-sm text-blue-300">În proba gratuită îți poți lega copilul acum, fără card.</p>
@@ -217,13 +277,22 @@ export default function FamilyPage() {
           label="Adaugă copil"
           check={childCheck}
           onClick={() => setAdding(INVITE_TARGET_ROLE.CHILD)}
-          onAddon={buyChildAddon}
+          onAddon={() => void buyAddon("child")}
           addonBusy={addonBusy}
         />
         <AddButton
           label="Adaugă al 2-lea părinte"
           check={parentCheck}
           onClick={() => setAdding(INVITE_TARGET_ROLE.PARENT)}
+          // The package has no seat left, but one can be had for the difference: that is the move, not
+          // „stop the subscription and buy another package" (the payment service can't change a plan).
+          onAddon={data.parentUpgrade ? () => void buyAddon("parent") : undefined}
+          addonBusy={addonBusy}
+          addonLabel={
+            data.parentUpgrade
+              ? `Treci pe ${data.parentUpgrade.planLabel} · +${data.parentUpgrade.price.toFixed(2).replace(".", ",")} lei`
+              : undefined
+          }
         />
         <AddButton
           label="Adaugă meditator"
@@ -328,6 +397,7 @@ function AddButton({
   onClick,
   onAddon,
   addonBusy = false,
+  addonLabel,
 }: {
   label: string;
   check: SeatCheck;
@@ -335,11 +405,13 @@ function AddButton({
   /** Extra-child add-on path: buy a seat first, then link the child. */
   onAddon?: () => void;
   addonBusy?: boolean;
+  /** What the payment button says when it isn't the plain label („Treci pe Family Duo · +6,67 lei"). */
+  addonLabel?: string;
 }) {
-  // Over the base seat, an extra child is a paid add-on (checkout, not the free
-  // invite modal); an extra parent/tutor is a plan upgrade (link to packages).
-  const isAddon = !check.allowed && !!check.addon && !!onAddon;
-  const upgradeTo = !check.allowed && !check.addon ? check.upgradeTo : undefined;
+  // Over the base seat, an extra child is a paid add-on (checkout, not the free invite modal); a
+  // second parent is the move to the package that includes them, paid as the difference.
+  const isAddon = !check.allowed && !!onAddon && (!!check.addon || !!addonLabel);
+  const upgradeTo = !check.allowed && !isAddon ? check.upgradeTo : undefined;
   const blocked = !check.allowed && !isAddon && !upgradeTo;
 
   const btnClass =
@@ -349,7 +421,7 @@ function AddButton({
     <div className="flex flex-col">
       {isAddon ? (
         <button onClick={onAddon} disabled={addonBusy} className={`${btnClass} disabled:opacity-60`}>
-          {addonBusy ? "Se pregătește plata…" : label}
+          {addonBusy ? "Se pregătește plata…" : (addonLabel ?? label)}
         </button>
       ) : upgradeTo ? (
         <Link href={`/dashboard/packages?plan=${upgradeTo}`} className={`${btnClass} inline-block`}>
@@ -368,7 +440,9 @@ function AddButton({
           {label}
         </button>
       )}
-      {!check.allowed && check.message && (
+      {/* When the button itself is the move („Treci pe Family Duo · +6,67 lei"), the seat note under it
+          would only repeat it in other words. */}
+      {!check.allowed && check.message && !(isAddon && addonLabel) && (
         <span className="mt-1 max-w-xs text-xs text-amber-400">{check.message}</span>
       )}
     </div>

@@ -50,7 +50,7 @@ interface BrokerCallback {
     userId?: string;
     planId?: string;
     voucherId?: string;
-    /** "child_addon" / "subject_addon" for an add-on subscription (not the main plan). */
+    /** "child_addon" / "subject_addon" / "parent_addon" for a subscription bought next to the plan. */
     type?: string;
     childIndex?: string;
     /** Checkout terms (checkout route): locked on the account at activation. */
@@ -266,9 +266,13 @@ async function _POST(req: NextRequest) {
 
   const userId = p.metadata?.userId;
   const planId = p.metadata?.planId;
-  // An add-on is its own recurring line next to the main subscription: an extra child's seat, or a
-  // subject added after payment. Its events never change the main plan or status.
-  const addonType = p.metadata?.type === "child_addon" || p.metadata?.type === "subject_addon" ? p.metadata.type : null;
+  // An add-on is its own recurring line next to the main subscription: an extra child's seat, a subject
+  // added after payment, or the difference to the package with one more parent („Treci pe Family Duo").
+  // Its events never change the main plan or status.
+  const addonType =
+    p.metadata?.type === "child_addon" || p.metadata?.type === "subject_addon" || p.metadata?.type === "parent_addon"
+      ? p.metadata.type
+      : null;
   const isAddon = addonType !== null;
   const amount = typeof p.amountTotal === "number" ? p.amountTotal : 0;
   const currency = p.currency || "ron";

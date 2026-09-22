@@ -4,11 +4,12 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { getFamilyOverview } from "@/lib/family-invite";
-import { childSeatMonthlyMinor, forInterval } from "@/lib/checkout-price";
+import { childSeatMonthlyMinor, forInterval, parentUpgradeMonthlyMinor } from "@/lib/checkout-price";
 import { lockedDiscount, monthlyPlanPriceMinor } from "@/lib/checkout-facts";
 import { paysByCard } from "@/lib/card-subscription";
 import { isPaidSubscriber } from "@/lib/escalation/segmentation";
 import { individualPlan } from "@/lib/access";
+import { parentUpgradeOf, resolveFamilyPlanFromRecord } from "@/lib/family";
 
 /**
  * Per-child add-on checkout via the Stripe Checkout Broker.
@@ -20,12 +21,18 @@ import { individualPlan } from "@/lib/access";
  * activation it calls /api/stripe/callback with metadata.type="child_addon" →
  * paidExtraChildSeats++. NO broker code is touched — a custom `amount` line item
  * is a first-class broker feature.
+ *
+ * The same route sells the family's move to the package with one more parent (`{ type: "parent" }`:
+ * Family → Family Duo). The broker cannot change a plan, so the family pays the DIFFERENCE as its own
+ * small recurring line; together with the plan it pays exactly the bigger package's price and gets its
+ * seats (metadata.type="parent_addon" → paidExtraParentSeats++). Stopping it puts the family back on
+ * its own package.
  */
 
 const INTERVAL_MAP: Record<string, "month" | "year"> = { MONTH: "month", YEAR: "year" };
 const CURRENCY = process.env.TUTOR_CURRENCY || "ron";
 
-async function _POST() {
+async function _POST(req: Request) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -75,7 +82,13 @@ async function _POST() {
     );
   }
 
+  const input = (await req.json().catch(() => null)) as { type?: unknown } | null;
+  const wants = input?.type === "parent" ? "parent" : "child";
   const overview = await getFamilyOverview(userId);
+
+  if (wants === "parent") {
+    return parentUpgradeCheckout({ userId, email: session.user.email, plan, u, overview, brokerUrl, projectKey, interval });
+  }
   // seats.children.max = plan base + already-paid add-on seats. This add-on pays for
   // the NEXT seat (1-based), which sets the loyalty discount tier.
   const childIndex = overview.seats.children.max + 1;
@@ -123,6 +136,72 @@ async function _POST() {
     );
   }
 
+  return NextResponse.json({ url: data.url });
+}
+
+/**
+ * „Treci pe Family Duo": the difference to the package with one more parent, as its own recurring line.
+ * Only next to a family package that has such a package, only once, and only when a second adult is
+ * really left out — nobody pays for a seat nobody uses.
+ */
+async function parentUpgradeCheckout(input: {
+  userId: string;
+  email: string | null | undefined;
+  plan: { name: string; price: number; interval: string; familyPlanKey: string | null; maxParents: number | null; maxChildren: number | null };
+  u: { id: string; subscriptionStatus: string | null; subscriptionEndsAt: Date | null; stripeSubscriptionId: string | null };
+  overview: Awaited<ReturnType<typeof getFamilyOverview>>;
+  brokerUrl: string;
+  projectKey: string;
+  interval: "month" | "year";
+}) {
+  const { userId, plan, u, overview, brokerUrl, projectKey, interval } = input;
+  const own = resolveFamilyPlanFromRecord(plan);
+  const upgrade = parentUpgradeOf(own);
+  if (!upgrade) {
+    return NextResponse.json({ error: "Nu există un pachet cu mai mulți părinți." }, { status: 400 });
+  }
+  if (overview.paidExtraParentSeats > 0) {
+    return NextResponse.json({ error: `Familia are deja pachetul „${upgrade.label}".` }, { status: 409 });
+  }
+  // Only next to a package paid by card: the difference is billed next to it.
+  if (!(await paysByCard(u))) {
+    return NextResponse.json({ error: "Trecerea se plătește lângă un abonament plătit cu cardul." }, { status: 400 });
+  }
+  // The bigger package's monthly price, from the row a price change edits (never the annual row).
+  const target = await prisma.subscriptionPlan.findFirst({
+    where: { isActive: true, interval: "MONTH", familyPlanKey: upgrade.key },
+    orderBy: { price: "asc" },
+    select: { price: true },
+  });
+  if (!target) {
+    return NextResponse.json({ error: "Nu există un pachet cu mai mulți părinți." }, { status: 400 });
+  }
+  const [locked, byCard, planMonthly] = await Promise.all([lockedDiscount(userId), paysByCard(u), monthlyPlanPriceMinor(plan)]);
+  const monthly = parentUpgradeMonthlyMinor(planMonthly, target.price, byCard ? (locked?.percent ?? 0) : 0);
+  if (monthly <= 0) {
+    return NextResponse.json({ error: "Nu am putut calcula diferența de preț." }, { status: 400 });
+  }
+  const amount = forInterval(monthly, plan.interval === "YEAR" ? "YEAR" : "MONTH") / 100;
+
+  const res = await fetch(`${brokerUrl}/api/checkout`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Project-Key": projectKey },
+    body: JSON.stringify({
+      projectSlug: "tutor",
+      mode: "subscription",
+      currency: CURRENCY,
+      lineItems: [{ name: `Trecerea pe ${upgrade.label} (diferența)`, amount, interval, intervalCount: 1 }],
+      successUrl: `${process.env.AUTH_URL}/dashboard/family?addon=ok`,
+      cancelUrl: `${process.env.AUTH_URL}/dashboard/family`,
+      callbackUrl: `${process.env.AUTH_URL}/api/stripe/callback`,
+      customerEmail: input.email || undefined,
+      metadata: { userId, type: "parent_addon", upgradeTo: upgrade.key },
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data?.url) {
+    return NextResponse.json({ error: data?.error || "Nu am putut porni plata." }, { status: res.status === 200 ? 502 : res.status });
+  }
   return NextResponse.json({ url: data.url });
 }
 

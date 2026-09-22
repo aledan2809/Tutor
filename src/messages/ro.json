@@ -1110,7 +1110,19 @@
     "addonSince": "din {date}",
     "addonManage": "Gestionează",
     "childManaged": "Abonamentul familiei îl alege părintele tău.",
-    "holderUpgrade": "Ca să intri și tu în pachet, {who} poate trece pe {upgrade}."
+    "holderUpgrade": "Ca să intri și tu în pachet, {who} poate trece pe {upgrade}.",
+    "addonParent": "Trecerea pe {plan} (diferența)",
+    "currentUpgraded": "Familia are {plan}: pachetul de bază plus diferența, plătită separat.",
+    "parentUpgradeTitleNone": "{plan} include doi părinți",
+    "parentUpgradeTitleOne": "{name} nu are loc în pachet",
+    "parentUpgradeTitleMany": "{count} adulți ai familiei nu au loc în pachet",
+    "parentUpgradeBodyNone": "Pachetul de acum include un singur părinte. {plan} include doi: plătești doar diferența, {price} lei {interval, select, YEAR {pe an} other {pe lună}}.",
+    "parentUpgradeBodyOne": "Copilul exersează normal, dar {name} nu vede progresul și nu primește alerte. {plan} îl include: plătești doar diferența, {price} lei {interval, select, YEAR {pe an} other {pe lună}}.",
+    "parentUpgradeBodyMany": "{plan} include încă un părinte: {first} intră în pachet, ceilalți rămân în afară. Plătești doar diferența, {price} lei {interval, select, YEAR {pe an} other {pe lună}}.",
+    "parentUpgradeTotal": "Total {total} lei {interval, select, YEAR {pe an} other {pe lună}}, prețul pachetului {plan}. Diferența se plătește separat și se poate opri oricând — atunci familia revine la pachetul de acum.",
+    "parentUpgradeRedundant": "Plătești în continuare diferența pentru {plan}, dar pachetul tău o include deja — o poți opri din lista de mai jos.",
+    "parentUpgradeCta": "Treci pe {plan} · +{price} lei",
+    "parentUpgradeSomeone": "un adult al familiei"
   },
   "cookieBanner": {
     "aria": "Consimțământ cookie-uri",

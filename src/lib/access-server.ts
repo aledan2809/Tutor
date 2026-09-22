@@ -4,7 +4,7 @@
  */
 import { prisma } from "@/lib/prisma";
 import { hasAnyOrgProvidedAccess } from "@/lib/org-entitlement";
-import { resolveAccess, seatHolder, type Access } from "@/lib/access";
+import { payingForAccess, resolveAccess, seatHolder, seatingPayers, type Access } from "@/lib/access";
 
 export const ACCESS_TRIAL_SETTING = "accessTrial";
 
@@ -14,6 +14,8 @@ const PERSON_SELECT = {
   subscriptionEndsAt: true,
   freeForever: true,
   isSuperAdmin: true,
+  // The difference paid to the package with one more parent (access.ts parentSeats).
+  paidExtraParentSeats: true,
   subscriptionPlan: { select: { name: true, familyPlanKey: true, maxParents: true, maxChildren: true, maxTutors: true } },
 } as const;
 
@@ -95,6 +97,44 @@ export async function loadSeatHolder(userId: string): Promise<SeatHolderNote | n
   const found = seatHolder(links.map((l) => l.child.guardianLinks.map((g) => g.parent)));
   if (!found) return null;
   return { name: found.holder.name, plan: found.plan.label, parents: found.plan.maxParents, upgrade: found.upgrade?.label ?? null };
+}
+
+/**
+ * The adults of this payer's family who have no seat and no access of their own — whom the move to
+ * the package with one more parent would actually bring in, in the order they were linked (the same
+ * order the seats go: access.ts seatingPayers). Someone marked „Gratuit permanent", the platform
+ * administrator, or an adult who pays a package themselves is not left out: offering to seat them
+ * would sell a seat that grants nothing.
+ */
+export async function unseatedAdults(payerId: string): Promise<{ id: string; name: string | null }[]> {
+  const links = await prisma.guardian.findMany({
+    where: { parentId: payerId, status: "active", relation: "PARENT" },
+    select: {
+      child: {
+        select: {
+          guardianLinks: {
+            where: { status: "active", relation: "PARENT" },
+            orderBy: { createdAt: "asc" },
+            select: { createdAt: true, parent: { select: { id: true, name: true, ...PERSON_SELECT } } },
+          },
+        },
+      },
+    },
+  });
+  const out = new Map<string, { id: string; name: string | null; linkedAt: number }>();
+  for (const link of links) {
+    const all = link.child.guardianLinks.map((g) => ({ person: g.parent, linkedAt: g.createdAt }));
+    for (const one of all) {
+      const p = one.person;
+      if (p.id === payerId || out.has(p.id)) continue;
+      // Their own package, „Gratuit permanent" or the administrator: nothing to buy for them.
+      if (p.isSuperAdmin || p.freeForever || payingForAccess(p)) continue;
+      // Already seated by someone's package (this payer's or another parent's).
+      if (seatingPayers(one.linkedAt, all.filter((o) => o.person.id !== p.id)).length > 0) continue;
+      out.set(p.id, { id: p.id, name: p.name, linkedAt: one.linkedAt.getTime() });
+    }
+  }
+  return [...out.values()].sort((a, b) => a.linkedAt - b.linkedAt).map(({ id, name }) => ({ id, name }));
 }
 
 /** This account's access right now, or null when the account doesn't exist. */
