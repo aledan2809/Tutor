@@ -82,6 +82,15 @@ de mărime a CV-ului pe client, contrastul linkului „Ești părinte?".
   probă; un al doilea cont nou nu mai dă nimic.
 - Texte aliniate: /preturi, /elev, Ajutor, Abonament.
 
+**Decizia 6 — „Treci pe Family Duo" (22.09, `1503ee9`):** al doilea părinte intră în pachet acum, plătind doar diferența
+(6,67 lei/lună), ca abonament mic separat — serviciul de plăți nu știe să schimbe planul. Familia plătește exact prețul
+Family Duo și pachetul se numește așa peste tot; oprirea diferenței o readuce la pachetul ei. **Decizia 7:** pe „Familia
+mea" și pe „Abonament", plătitorul vede cine n-are loc și ce îl include; celui lăsat în afară nu i se arată preț.
+Butonul „Adaugă al 2-lea părinte" duce acum la trecere (înainte trimitea în fundătura cu „oprește abonamentul").
+Verificat în browser pe baza de test, 20/20: `Reports/loc-parinte-2026-09-22/verificare-loc-parinte.mjs`.
+- [ ] Rămâne deschis: schimbarea reală de pachet în serviciul central de plăți (ar face diferența inutilă) — sesiune
+  dedicată pe zonă sensibilă, dacă se decide vreodată.
+
 **Trasabilitatea codurilor (22.09, `56f85ba`):** folosirea unui cod de 100% scrie acum rândul de evidență (cod + cont +
 data) în aceeași tranzacție cu activarea; în lista de utilizatori scrie „Cod gratuit · până la <data>" (cu zilele rămase)
 în loc de „Plătit", plus codul folosit / codul de la plată / codul păstrat nefolosit, cu datele purtând anul; lângă bifa
