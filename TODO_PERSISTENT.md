@@ -82,6 +82,16 @@ de mărime a CV-ului pe client, contrastul linkului „Ești părinte?".
   probă; un al doilea cont nou nu mai dă nimic.
 - Texte aliniate: /preturi, /elev, Ajutor, Abonament.
 
+**Trasabilitatea codurilor (22.09, `56f85ba`):** folosirea unui cod de 100% scrie acum rândul de evidență (cod + cont +
+data) în aceeași tranzacție cu activarea; în lista de utilizatori scrie „Cod gratuit · până la <data>" (cu zilele rămase)
+în loc de „Plătit", plus codul folosit / codul de la plată / codul păstrat nefolosit, cu datele purtând anul; lângă bifa
+„Gratuit permanent" scrie dacă acel cont are deja acces dintr-un cod; căutarea merge și după cod; în pagina Vouchere,
+„vezi cine" arată conturile care au folosit codul. Verificat în browser pe baza de test, 11/11 — scriptul e păstrat în
+`Reports/trasabilitate-coduri-2026-09-22/verificare-trasabilitate.mjs`.
+- [ ] Cele 5 conturi cu an gratuit de dinainte rămân cu „cod necunoscut". Codurile spun 4 folosiri (TESTER2026 ×2,
+  AVIATION2026, EVALUARE100), deci unul a primit anul pe altă cale. S-ar putea ghici după materii și date, dar ar
+  însemna să scriem dovezi pe care nu le avem — de decis cu Alex dacă merită.
+
 **Livrarea 2 — construită și verificată (21.09; comisă, vezi mai jos):**
 - [x] Motorul de reducere (pur, testat): linii pe materii, reducerea pe viață, Telegram, anual
 - [x] Planuri anuale în DB (script cu verificare + backup) și reducerea salvată pe cont la activare
