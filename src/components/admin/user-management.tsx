@@ -26,6 +26,13 @@ interface UserRow {
   createdAt: string;
   enrollments: { roles: string[]; domain: { id: string; name: string; slug: string } }[];
   subscriptionPlan: { name: string } | null;
+  subscriptionEndsAt: string | null;
+  /** A card pays the subscription (otherwise an „active" one comes from a 100% code). */
+  paysByCard: boolean;
+  /** The code this account used: the free year, or the discount kept at the card payment. */
+  voucherUsed: { code: string; percent: number; at: string } | null;
+  /** A code kept on the account since signup and not used yet. */
+  voucherKept: { code: string; percent: number | null; expiresAt: string | null; gone: boolean } | null;
 }
 
 interface DomainOption {
@@ -94,11 +101,24 @@ export function UserManagement() {
     }
   };
 
+  // With the year: a free year from a code ends in the next one, and „22 sept." alone read as this year.
   const fmtDate = (iso: string) =>
-    new Date(iso).toLocaleDateString(locale === "en" ? "en-GB" : "ro-RO", { timeZone: "Europe/Bucharest", day: "numeric", month: "short" });
+    new Date(iso).toLocaleDateString(locale === "en" ? "en-GB" : "ro-RO", {
+      timeZone: "Europe/Bucharest",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
 
-  const accessBadge = (access: AccessView) => {
+  /** Whole days left until a date, never negative (what the admin reads as „still has"). */
+  const daysUntil = (iso: string) => Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000));
+
+  const accessBadge = (user: UserRow) => {
+    const access = user.access;
     if (!access) return null;
+    // An account whose „active" subscription no card pays got a free year from a code: the badge says
+    // so, and until when — „Plătit" alone read as „gave money" on accounts that never paid anything.
+    const codeYear = access.kind === "full" && access.reason === "paid" && !user.paysByCard && user.subscriptionEndsAt;
     const [label, tone] =
       access.kind === "full"
         ? access.reason === "free_forever"
@@ -109,13 +129,53 @@ export function UserManagement() {
               ? [t("accessOrg"), "bg-green-600/20 text-green-300"]
               : access.reason === "staff"
                 ? [t("accessStaff"), "bg-gray-600/30 text-gray-300"]
-                : [t("accessPaid"), "bg-green-600/20 text-green-300"]
+                : codeYear && user.subscriptionEndsAt
+                  ? [t("accessCodeYear", { date: fmtDate(user.subscriptionEndsAt) }), "bg-emerald-600/20 text-emerald-300"]
+                  : [t("accessPaidCard"), "bg-green-600/20 text-green-300"]
         : access.kind === "trial"
           ? [t("accessTrial", { days: access.daysLeft }), "bg-blue-600/20 text-blue-300"]
           : access.kind === "paused"
             ? [t("accessPaused", { date: fmtDate(access.since) }), "bg-amber-600/20 text-amber-300"]
             : [t("accessFree"), "bg-gray-600/30 text-gray-300"];
-    return <span className={`mt-1 inline-block rounded px-1.5 py-0.5 text-xs ${tone}`}>{label}</span>;
+    return (
+      <>
+        <span className={`mt-1 inline-block rounded px-1.5 py-0.5 text-xs ${tone}`}>{label}</span>
+        {codeYear && user.subscriptionEndsAt && (
+          <div className="text-[11px] text-gray-500">{t("accessLeft", { days: daysUntil(user.subscriptionEndsAt) })}</div>
+        )}
+      </>
+    );
+  };
+
+  /** Which code is behind this account, and until when — under the package name, in the list. */
+  const codeLines = (user: UserRow) => {
+    const codeYear = user.access?.kind === "full" && user.access.reason === "paid" && !user.paysByCard;
+    return (
+      <>
+        {user.voucherUsed ? (
+          <div className="text-[11px] text-gray-500">
+            {user.paysByCard
+              ? t("codeAtPayment", { code: user.voucherUsed.code, percent: user.voucherUsed.percent })
+              : t("codeUsed", { code: user.voucherUsed.code, date: fmtDate(user.voucherUsed.at) })}
+          </div>
+        ) : (
+          // A free year from before the code was recorded: say it plainly instead of leaving a gap.
+          codeYear && <div className="text-[11px] text-gray-600">{t("codeUnknown")}</div>
+        )}
+        {user.voucherKept && (
+          <div className="text-[11px] text-gray-500">
+            {t("codeKept", { code: user.voucherKept.code })}{" "}
+            <span className={user.voucherKept.gone ? "text-amber-500" : ""}>
+              {user.voucherKept.gone
+                ? t("codeKeptGone")
+                : user.voucherKept.expiresAt
+                  ? t("codeKeptUntil", { date: fmtDate(user.voucherKept.expiresAt) })
+                  : t("codeKeptNoEnd")}
+            </span>
+          </div>
+        )}
+      </>
+    );
   };
 
   const fetchDomains = async () => {
@@ -302,7 +362,7 @@ export function UserManagement() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder={t("searchUsers")}
+          placeholder={t("searchUsersHint")}
           className="flex-1 rounded-lg border border-gray-700 bg-gray-900 px-4 py-2 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none"
         />
         <button
@@ -377,7 +437,7 @@ export function UserManagement() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-gray-300">
-                    {user.subscriptionPlan?.name || t("free")}
+                    {user.subscriptionPlan?.name || t("noPlan")}
                     {user.subscriptionStatus && (
                       <span className={`ml-1 text-xs ${
                         user.subscriptionStatus === "active" ? "text-green-400" :
@@ -387,7 +447,8 @@ export function UserManagement() {
                         ({user.subscriptionStatus})
                       </span>
                     )}
-                    <div>{accessBadge(user.access)}</div>
+                    {codeLines(user)}
+                    <div>{accessBadge(user)}</div>
                   </td>
                   <td className="px-4 py-3">
                     {user.isBanned ? (
@@ -412,6 +473,11 @@ export function UserManagement() {
                         />
                         {t("freeForever")}
                       </label>
+                    )}
+                    {!user.paysByCard && !user.freeForever && user.access?.kind === "full" && user.access.reason === "paid" && user.subscriptionEndsAt && (
+                      <p className="mb-2 text-[11px] text-emerald-400/80">
+                        {t("freeForeverHasCode", { date: fmtDate(user.subscriptionEndsAt) })}
+                      </p>
                     )}
                     <div className="flex flex-wrap gap-1">
                       <button

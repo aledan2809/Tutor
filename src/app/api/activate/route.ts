@@ -68,6 +68,12 @@ async function _POST(req: NextRequest) {
     if (voucher.expiresAt && voucher.expiresAt < new Date()) return { error: "Voucher expirat", status: 400 };
     if (voucher.maxUses !== null && voucher.usedCount >= voucher.maxUses)
       return { error: "Voucher epuizat (limită de utilizări atinsă)", status: 400 };
+    // One use per account, when the code says so — the same rule checkout applies (voucher-checkout.ts),
+    // read from the same evidence: the row written below.
+    if (voucher.oncePerUser) {
+      const used = await tx.voucherRedemption.findUnique({ where: { voucherId_userId: { voucherId: voucher.id, userId } } });
+      if (used) return { error: "Codul a fost deja folosit pe acest cont.", status: 400 };
+    }
 
     // < 100% → needs the Stripe card flow (not handled here)
     if (voucher.discountPercent < 100) {
@@ -112,6 +118,16 @@ async function _POST(req: NextRequest) {
         ...(voucher.maxUses !== null ? { usedCount: { lt: voucher.maxUses } } : {}),
       },
       data: { usedCount: { increment: 1 } },
+    });
+
+    // Whose use it was, and when: until now only a counter grew, so a free year on an account could
+    // never be traced back to the code that gave it (the admin list and the voucher page read this).
+    // The pair is unique and the same account may activate the same code again on other subjects, so
+    // the first use is the one kept.
+    await tx.voucherRedemption.upsert({
+      where: { voucherId_userId: { voucherId: voucher.id, userId } },
+      create: { voucherId: voucher.id, userId },
+      update: {},
     });
 
     // Enroll in chosen subjects (idempotent via composite unique).

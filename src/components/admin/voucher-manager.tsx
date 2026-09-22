@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { Fragment, useState, useEffect } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { VOUCHER_PLAN_KEYS } from "@/lib/voucher-admin";
 import { FAMILY_PLANS } from "@/lib/family";
 
@@ -10,6 +10,15 @@ import { FAMILY_PLANS } from "@/lib/family";
 function toLocalInput(iso: string): string {
   const d = new Date(iso);
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+}
+
+/** One account that used the code (api/admin/vouchers/[id]/redemptions). */
+interface Redemption {
+  at: string;
+  name: string | null;
+  email: string | null;
+  accessEndsAt: string | null;
+  paysByCard: boolean;
 }
 
 interface VoucherRow {
@@ -30,6 +39,10 @@ interface VoucherRow {
 
 export function VoucherManager() {
   const t = useTranslations("admin");
+  const locale = useLocale();
+  // The reader's own format: the table showed 11/30/2026 next to Romanian text.
+  const fmtDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(locale === "en" ? "en-GB" : "ro-RO", { day: "numeric", month: "short", year: "numeric" });
   const [vouchers, setVouchers] = useState<VoucherRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -37,6 +50,27 @@ export function VoucherManager() {
   const [formError, setFormError] = useState("");
   const emptyForm = { code: "", discountPercent: 10, maxUses: "", expiresAt: "", recurring: false, oncePerUser: false, planKey: "" };
   const [form, setForm] = useState(emptyForm);
+  // Who used a code: opened on demand, one code at a time (the list is short; the page stays light).
+  const [openWho, setOpenWho] = useState<string | null>(null);
+  const [who, setWho] = useState<Record<string, Redemption[]>>({});
+  const [whoLoading, setWhoLoading] = useState<string | null>(null);
+
+  const toggleWho = async (id: string) => {
+    if (openWho === id) {
+      setOpenWho(null);
+      return;
+    }
+    setOpenWho(id);
+    if (who[id]) return;
+    setWhoLoading(id);
+    try {
+      const res = await fetch(`/api/admin/vouchers/${id}/redemptions`);
+      const data = res.ok ? await res.json() : { redemptions: [] };
+      setWho((w) => ({ ...w, [id]: data.redemptions ?? [] }));
+    } finally {
+      setWhoLoading(null);
+    }
+  };
 
   const fetchVouchers = async () => {
     setLoading(true);
@@ -250,7 +284,8 @@ export function VoucherManager() {
             </thead>
             <tbody className="divide-y divide-gray-800">
               {vouchers.map((v) => (
-                <tr key={v.id} className="hover:bg-gray-900/50">
+                <Fragment key={v.id}>
+                <tr className="hover:bg-gray-900/50">
                   <td className="px-4 py-3 font-mono text-white">{v.code}</td>
                   <td className="px-4 py-3 text-green-400">
                     {v.discountPercent}%
@@ -273,9 +308,18 @@ export function VoucherManager() {
                         {t("voucherActivations", { n: v._count?.redemptions ?? 0 })}
                       </span>
                     )}
+                    {(v._count?.redemptions ?? 0) > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => void toggleWho(v.id)}
+                        className="mt-1 block rounded border border-gray-700 px-2 py-0.5 text-xs text-gray-300 hover:bg-gray-800"
+                      >
+                        {openWho === v.id ? t("voucherWhoHide") : t("voucherWhoShow")}
+                      </button>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-gray-300">
-                    {v.expiresAt ? new Date(v.expiresAt).toLocaleDateString() : "Never"}
+                    {v.expiresAt ? fmtDate(v.expiresAt) : t("voucherNoExpiry")}
                   </td>
                   <td className="px-4 py-3">
                     <span className={`rounded px-2 py-0.5 text-xs ${
@@ -307,6 +351,45 @@ export function VoucherManager() {
                     </div>
                   </td>
                 </tr>
+                {openWho === v.id && (
+                  <tr className="bg-gray-900/40">
+                    <td colSpan={6} className="px-4 py-3">
+                      {whoLoading === v.id ? (
+                        <p className="text-xs text-gray-500">{t("loading")}</p>
+                      ) : (who[v.id] ?? []).length === 0 ? (
+                        <p className="text-xs text-gray-500">{t("voucherWhoEmpty")}</p>
+                      ) : (
+                        <table className="w-full text-xs">
+                          <thead className="text-gray-500">
+                            <tr>
+                              <th className="px-2 py-1 text-left font-normal">{t("voucherWhoAccount")}</th>
+                              <th className="px-2 py-1 text-left font-normal">{t("voucherWhoUsed")}</th>
+                              <th className="px-2 py-1 text-left font-normal">{t("voucherWhoAccess")}</th>
+                            </tr>
+                          </thead>
+                          <tbody className="text-gray-300">
+                            {(who[v.id] ?? []).map((r, i) => (
+                              <tr key={i} className="border-t border-gray-800">
+                                <td className="px-2 py-1">
+                                  {r.name || "—"} <span className="text-gray-500">{r.email}</span>
+                                </td>
+                                <td className="px-2 py-1 text-gray-400">{fmtDate(r.at)}</td>
+                                <td className="px-2 py-1 text-gray-400">
+                                  {r.paysByCard
+                                    ? t("voucherWhoCard")
+                                    : r.accessEndsAt
+                                      ? fmtDate(r.accessEndsAt)
+                                      : "—"}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
+                    </td>
+                  </tr>
+                )}
+                </Fragment>
               ))}
               {vouchers.length === 0 && (
                 <tr>

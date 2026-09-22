@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trasabilitatea codurilor — machetă</title>
+<style>
+ :root{color-scheme:dark}
+ body{margin:0;background:#0b0f17;color:#e5e7eb;font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+ .wrap{max-width:980px;margin:0 auto;padding:24px 16px 56px}
+ h1{font-size:22px;margin:0 0 4px} h2{font-size:16px;margin:32px 0 10px;color:#93c5fd}
+ p.lead{color:#9ca3af;margin:0 0 8px}
+ .card{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:14px 16px;margin:10px 0}
+ .row{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #1f2937}
+ .row:last-child{border-bottom:0}
+ .who{flex:1 1 42%;min-width:0} .sub{flex:1 1 34%} .st{flex:0 0 auto;text-align:right}
+ .nm{color:#fff;font-weight:600} .em{color:#6b7280;font-size:13px;word-break:break-all}
+ .tag{display:inline-block;border-radius:6px;padding:2px 7px;font-size:12px;white-space:nowrap}
+ .green{background:rgba(22,163,74,.18);color:#86efac} .emer{background:rgba(5,150,105,.18);color:#6ee7b7}
+ .blue{background:rgba(37,99,235,.18);color:#93c5fd} .amber{background:rgba(217,119,6,.18);color:#fcd34d}
+ .gray{background:rgba(75,85,99,.3);color:#d1d5db}
+ .mut{color:#9ca3af;font-size:13px} .tiny{color:#6b7280;font-size:12px}
+ .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+ .bad{border-left:3px solid #7f1d1d;padding-left:10px}
+ .good{border-left:3px solid #14532d;padding-left:10px}
+ .lbl{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;margin-bottom:6px}
+ .search{display:flex;gap:8px;align-items:center;background:#0f172a;border:1px solid #1f2937;border-radius:10px;padding:8px 10px;max-width:420px}
+ .search input{background:transparent;border:0;color:#e5e7eb;font:inherit;outline:none;width:100%}
+ .btn{background:#1f2937;border:1px solid #374151;color:#d1d5db;border-radius:8px;padding:4px 10px;font-size:13px}
+ table{width:100%;border-collapse:collapse;font-size:14px} th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #1f2937}
+ th{color:#9ca3af;font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+</style></head><body><div class="wrap">
+
+<h1>Trasabilitatea codurilor — machetă</h1>
+<p class="lead">Trei locuri: eticheta din lista de utilizatori, căutarea după cod și pagina Vouchere.</p>
+
+<h2>1. Lista Utilizatori — eticheta</h2>
+
+<div class="card bad">
+  <div class="lbl">Azi (înșelător)</div>
+  <div class="row">
+    <div class="who"><div class="nm">Andreea</div><div class="em">deeatudor12@gmail.com</div></div>
+    <div class="sub"><div>Gratuit <span class="mut">(active)</span></div></div>
+    <div class="st"><span class="tag green">Plătit</span></div>
+  </div>
+</div>
+
+<div class="card good">
+  <div class="lbl">Propus</div>
+  <div class="row">
+    <div class="who"><div class="nm">Andreea</div><div class="em">deeatudor12@gmail.com</div></div>
+    <div class="sub">
+      <div>Fără pachet <span class="mut">· acces dintr-un cod</span></div>
+      <div class="tiny">Cod: <span class="mono">necunoscut</span> — activare dinaintea urmăririi</div>
+    </div>
+    <div class="st"><span class="tag emer">Cod gratuit · până la 13.06.2027</span><div class="tiny">mai are 8 luni</div></div>
+  </div>
+  <div class="row">
+    <div class="who"><div class="nm">Rareș (activare nouă)</div><div class="em">rares@exemplu.ro</div></div>
+    <div class="sub">
+      <div>Family <span class="mut">· acces dintr-un cod</span></div>
+      <div class="tiny">Cod: <span class="mono">TESTER2026</span> · folosit pe 22.09.2026</div>
+    </div>
+    <div class="st"><span class="tag emer">Cod gratuit · până la 22.09.2027</span><div class="tiny">mai are 12 luni</div></div>
+  </div>
+  <div class="row">
+    <div class="who"><div class="nm">Mara (plătește)</div><div class="em">mara@exemplu.ro</div></div>
+    <div class="sub"><div>Family <span class="mut">(active)</span></div><div class="tiny">Cod la plată: <span class="mono">V126S</span> · −25% pe viață</div></div>
+    <div class="st"><span class="tag green">Plătit cu cardul</span></div>
+  </div>
+  <div class="row">
+    <div class="who"><div class="nm">Ion (prieten)</div><div class="em">ion@exemplu.ro</div></div>
+    <div class="sub"><div>Fără pachet</div></div>
+    <div class="st"><span class="tag emer">Gratuit permanent</span></div>
+  </div>
+  <div class="row">
+    <div class="who"><div class="nm">Copil în probă</div><div class="em">copil@exemplu.ro</div></div>
+    <div class="sub"><div>Fără pachet</div><div class="tiny">Cod păstrat, nefolosit: <span class="mono">ONV126S</span> · valabil până la 30.11.2026</div></div>
+    <div class="st"><span class="tag blue">Probă · mai are 3 zile</span></div>
+  </div>
+</div>
+
+<h2>2. Căutare după cod</h2>
+<div class="card">
+  <div class="search"><span class="mut">🔎</span><input value="TESTER2026" readonly></div>
+  <p class="mut" style="margin:10px 0 0">Scrii codul în aceeași casetă de căutare și vezi doar conturile care l-au folosit — azi caută doar după nume și email.</p>
+</div>
+
+<h2>3. Pagina Vouchere — cine l-a folosit</h2>
+<div class="card">
+  <table>
+    <tr><th>Cod</th><th>Reducere</th><th>Folosiri</th><th>Expiră</th><th>Stare</th></tr>
+    <tr><td class="mono" style="color:#fff">TESTER2026</td><td style="color:#86efac">100%</td>
+        <td>2 / 50 <button class="btn">vezi cine ▾</button></td><td class="mut">—</td><td><span class="tag green">activ</span></td></tr>
+  </table>
+  <div style="margin:10px 0 0;padding:10px 12px;background:#0f172a;border:1px solid #1f2937;border-radius:10px">
+    <table>
+      <tr><th>Cont</th><th>Folosit</th><th>Acces până la</th></tr>
+      <tr><td>Rareș · <span class="em">rares@exemplu.ro</span></td><td class="mut">22.09.2026</td><td class="mut">22.09.2027</td></tr>
+      <tr><td>Andrei · <span class="em">andrei@exemplu.ro</span></td><td class="mut">20.09.2026</td><td class="mut">20.09.2027</td></tr>
+    </table>
+  </div>
+</div>
+
+<h2>Ce se schimbă pe dedesubt</h2>
+<div class="card">
+  <p class="mut" style="margin:0 0 8px">La folosirea unui cod de 100% se scrie de acum un rând de evidență (cod + cont + data), în aceeași operațiune cu activarea. Azi se mărește doar un contor, deci nu se știe niciodată cine ce cod a folosit.</p>
+  <p class="mut" style="margin:0">Pentru cele 5 conturi vechi nu putem inventa codul: rămâne „necunoscut". Pe platformă sunt 4 folosiri (TESTER2026 ×2, AVIATION2026, EVALUARE100) și 5 conturi cu an gratuit — deci unul a primit anul pe altă cale.</p>
+</div>
+
+</div></body></html>

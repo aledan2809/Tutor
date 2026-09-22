@@ -25,6 +25,9 @@ async function _GET(req: NextRequest) {
           OR: [
             { name: { contains: search, mode: "insensitive" as const } },
             { email: { contains: search, mode: "insensitive" as const } },
+            // Also by code: typing V126S answers „who used this code" without leaving the list.
+            { voucherRedemptions: { some: { voucher: { code: { contains: search, mode: "insensitive" as const } } } } },
+            { pendingVoucherCode: { contains: search, mode: "insensitive" as const } },
           ],
         }
       : {}),
@@ -47,8 +50,20 @@ async function _GET(req: NextRequest) {
         bannedReason: true,
         subscriptionStatus: true,
         subscriptionPlanId: true,
+        subscriptionEndsAt: true,
+        // Only whether a card pays it: the subscription's id has no business leaving the server.
+        stripeSubscriptionId: true,
+        // A code kept on the account since signup, not used yet.
+        pendingVoucherCode: true,
         freeForever: true,
         createdAt: true,
+        // The code this account used (the free year, or the discount at the card payment): what it was
+        // and when. The first use is the one kept (api/activate, api/stripe/callback).
+        voucherRedemptions: {
+          orderBy: { createdAt: "asc" },
+          take: 1,
+          select: { createdAt: true, voucher: { select: { code: true, discountPercent: true } } },
+        },
         enrollments: {
           select: {
             roles: true,
@@ -61,8 +76,36 @@ async function _GET(req: NextRequest) {
     prisma.user.count({ where }),
   ]);
 
+  // How long a kept code is still good for — one read for the whole page.
+  const keptCodes = [...new Set(users.flatMap((u) => (u.pendingVoucherCode ? [u.pendingVoucherCode] : [])))];
+  const keptVouchers = keptCodes.length
+    ? await prisma.voucher.findMany({
+        where: { code: { in: keptCodes } },
+        select: { code: true, discountPercent: true, expiresAt: true, isActive: true },
+      })
+    : [];
+  const keptByCode = new Map(keptVouchers.map((v) => [v.code, v]));
+
   // What each listed account gets right now (trial day, pause, paid…): one page, so a handful of reads.
-  const withAccess = await Promise.all(users.map(async (u) => ({ ...u, access: await loadAccess(u.id) })));
+  const withAccess = await Promise.all(
+    users.map(async ({ stripeSubscriptionId, voucherRedemptions, pendingVoucherCode, ...u }) => ({
+      ...u,
+      access: await loadAccess(u.id),
+      paysByCard: stripeSubscriptionId !== null,
+      // The code behind this account's access — „who got what, from which code, until when".
+      voucherUsed: voucherRedemptions[0]
+        ? { code: voucherRedemptions[0].voucher.code, percent: voucherRedemptions[0].voucher.discountPercent, at: voucherRedemptions[0].createdAt }
+        : null,
+      voucherKept: pendingVoucherCode
+        ? {
+            code: pendingVoucherCode,
+            percent: keptByCode.get(pendingVoucherCode)?.discountPercent ?? null,
+            expiresAt: keptByCode.get(pendingVoucherCode)?.expiresAt ?? null,
+            gone: !keptByCode.get(pendingVoucherCode)?.isActive,
+          }
+        : null,
+    })),
+  );
 
   return NextResponse.json({ users: withAccess, total, page, totalPages: Math.ceil(total / limit) });
 }
