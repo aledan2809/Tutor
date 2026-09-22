@@ -333,7 +333,7 @@ lei pentru Family din cod, dar NU am verificat independent că asta chiar iese l
 până nu confirmi ce preț/plan vrei pe flyer** — dacă răspunsul e „19,90 e corect, e planul de pornire", flyer-ul
 rămâne cum e; dacă vrei Family, se schimbă cifra + comparația „pe zi" înainte de export final.
 
-## [ ] 🚀 Deploy punctual `dc358c7` pe etutor.ro (adresa Fabulosos după ONRC) — cerut de altă sesiune, 2026-09-15
+## [x] 🚀 Deploy punctual `dc358c7` (adresa Fabulosos după ONRC) — **LIVE din 21.09**, purtat de publicarea livrării 2 (`fbc616f`)
 
 Instrucțiunile primite, de urmat exact: pe VPS2 `cd /var/www/tutor && git fetch origin && git log --oneline origin/master -3`
 — confirmă că `dc358c7` e acolo. Dacă HEAD-ul de pe VPS e în urmă cu ALTE commit-uri nedeployate, OPREȘTE-TE și raportează
@@ -346,7 +346,7 @@ vezi itemul de mai jos). Deci „alte commit-uri" există, dar sunt **doar docum
 tot într-un singur build. ⚠️ pe VPS `package-lock.json` se murdărește la fiecare `npm install`: `git checkout -- package-lock.json`
 înainte de pull, altfel pull-ul eșuează tăcut. Build-ul durează 60–85 min cât rulează orfanul `real` (PID 4066681).
 
-## [x] ✅ Verificat live: ruta `/api/posta/pdf` — găsit + reparat un bug real, `090aeb5` (2026-09-15, nedeployat încă)
+## [x] ✅ Verificat live: ruta `/api/posta/pdf` — bug real reparat în `090aeb5`; **publicat din 21.09** odată cu livrarea 2
 
 Verificarea a găsit exact riscul pe care `b2e3730` voia să-l acopere, dar rămas neacoperit: la 12:44 UTC (39 min după
 deploy, probabil chiar în timpul probei întrerupte din sesiunea trecută) o generare a tipărit `about:blank` — Chromium
