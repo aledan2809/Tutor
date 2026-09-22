@@ -152,8 +152,11 @@ export default async function LandingPage() {
 
       <main className="flex-1">
         {/* Hero — interactive demo above the fold */}
-        <section className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-12 lg:grid-cols-2 lg:py-20">
-          <div className="text-center lg:text-left">
+        {/* On a phone the visitor meets the quiz BEFORE being asked for an account: the words first (so
+            they know where they are), then the demo, then the buttons. On a wide screen nothing moves —
+            the words and the buttons stay on the left, the demo on the right (explicit rows below). */}
+        <section className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-6 px-4 py-12 lg:grid-cols-2 lg:grid-rows-[auto_auto] lg:gap-x-10 lg:gap-y-6 lg:py-20">
+          <div className="order-1 text-center lg:order-none lg:col-start-1 lg:row-start-1 lg:text-left">
             <span className="inline-block rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-300">
               {L.badge}
             </span>
@@ -163,7 +166,10 @@ export default async function LandingPage() {
             <p className="mt-4 max-w-xl text-lg text-gray-300 lg:mx-0 mx-auto">
               {L.sub}
             </p>
-            <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start justify-center">
+          </div>
+
+          <div className="order-3 text-center lg:order-none lg:col-start-1 lg:row-start-2 lg:text-left">
+            <div className="flex flex-col items-center gap-3 sm:flex-row lg:justify-start justify-center">
               <Link
                 href="/auth/register"
                 className="rounded-lg bg-blue-600 px-8 py-3 text-lg font-medium text-white hover:bg-blue-700 transition-colors"
@@ -203,8 +209,8 @@ export default async function LandingPage() {
             )}
           </div>
 
-          {/* Live demo card */}
-          <div className="rounded-2xl border border-gray-800 bg-gray-900/60 p-5 shadow-2xl shadow-blue-950/30 sm:p-6">
+          {/* Live demo card — second on a phone (right after the words), on the right on a wide screen */}
+          <div className="order-2 rounded-2xl border border-gray-800 bg-gray-900/60 p-5 shadow-2xl shadow-blue-950/30 sm:p-6 lg:order-none lg:col-start-2 lg:row-span-2 lg:row-start-1">
             <p className="mb-4 text-center text-sm font-semibold text-blue-300">
               {L.demoHeading}
             </p>
