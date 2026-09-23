@@ -5,6 +5,28 @@ Last Updated: 2026-09-09 (demo Poșta: invitație cu identitate, tablou manager,
 <!-- anterior: 2026-09-01 (treapta Telegram din cascadă -->
 <!--  — sărită tăcut pentru TOȚI utilizatorii; reparată, deployată, verificată pe date de producție) -->
 
+## Current State (Sesiunea 2026-09-23 — prezența conturilor în Administrare)
+
+**Livrat pe etutor.ro** (`950485a`, migrarea 0069): tabelul SuperAdmin → Utilizatori are trei coloane noi
+— **ultima conectare** (cu materia pe care a lucrat atunci), **vizite** și **timp petrecut** — cu filtru
+Azi / 7 zile / 30 de zile.
+
+- Măsurarea: un semnal discret din pagină, o dată pe minut cât e în față; pauză de 30 de minute = vizită
+  nouă (regula Umami). Pentru zilele dinaintea pornirii, cifrele se refac din activitatea deja salvată și
+  sunt marcate „≈".
+- Ultima conectare se scrie din evenimentul `signIn` (prinde orice furnizor), dar capul coloanei arată cea
+  mai proaspătă dovadă că omul a fost pe site — sesiunea ține 30 de zile, deci ștampila singură minte.
+- Curățenie: `GET /api/cron/presence-retention` (Bearer CRON_SECRET, 400 de zile) — **de programat pe
+  VPS2**, vezi TODO_PERSISTENT.
+- Verificat: 18 teste de calcul · 14 pe bază reală · 14 în browser. Scripturi: `Reports/prezenta-conturi-2026-09-23/`.
+- Tot azi: cardul de examene de pe prima pagină → „Evaluare Națională · BAC · Facultate" (`571a852`, `b87b286`).
+
+## Lessons Learned (sesiunea 2026-09-23)
+- **L594** — o unicitate pe `(userId, key)` nu deduplică dacă `userId` e NULL; „scrie o singură dată" se
+  pune pe cheia primară și se dovedește rulând de două ori pe o bază reală.
+- **L595** — „ultima conectare" ≠ „ultima dată pe site" când sesiunea ține 30 de zile: măsoară prezența,
+  nu o deduce din autentificare; iar unde n-ai măsurat, spune-o pe față („nicio conectare din…", „fără urme").
+
 ## Current State (Sesiunea 2026-09-09 — demo Poșta: de la pagină la flux complet)
 
 26 de commit-uri, toate livrate și verificate pe producție. Punctul de plecare a
