@@ -62,7 +62,7 @@ export default async function LandingPage() {
         proofLead:
           "Progresul nu rămâne ascuns: elevul îl vede, părintele îl vede — iar la pachetul cu meditator, îl vede și acesta. Aceleași scoruri, aceeași evoluție, aceleași greșeli de corectat. Crește pas cu pas și ține elevul „în priză”.",
         proofBank: "grile",
-        proofExams: "Evaluare Națională · BAC · Facultăți",
+        proofExams: "Evaluare Națională · BAC · Facultate",
         proofExamsLabel: "examene acoperite",
         proofSpeed: "~10 secunde",
         proofSpeedLabel: "de la text la test",
