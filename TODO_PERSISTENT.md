@@ -8,7 +8,7 @@ Verificat: 18 teste de calcul + 14 verificări pe bază reală + 14 în browser
 - [x] **2026-09-23 — programat pe VPS2** (cron `27 3 * * *`, log `/var/log/tutor-presence-retention.log`, testat: 401 fără cheie, 404 din internet, `ok` cu cheie; backup crontab `/root/backups/crontab.bak-2026-09-23-pre-presence-retention`). Păstrare coborâtă la **365 de zile** prin `.env` (decizie Alex, ca să se potrivească cu politica). Rămas mic: default-ul din cod e tot 400 — de pus 365 la următorul deploy, ca să nu depindă de `.env`. Era: curățenia prezenței — `GET /api/cron/presence-retention`
   cu Bearer `CRON_SECRET` (o dată pe zi; șterge șederile mai vechi de 400 de zile, reglabil din
   `PRESENCE_RETENTION_DAYS`). Fără el, tabelul `UserVisit` crește la nesfârșit.
-- [x] **2026-09-23 — Legal: PRIVACY vE1.1 LIVE** (ro; ledger Legal `f641ea9`, text + script în `Reports/prezenta-conturi-2026-09-23/`). Rămas: **versiunea EN** a politicii e tot vE1.0, fără paragraful despre prezență — de tradus și publicat (NO-TOUCH, cu acord). Era: prezența e dată de comportament despre persoane, unele minore. De adăugat în nota de
+- [x] **2026-09-23 — Legal: PRIVACY vE1.1 LIVE** (ro; ledger Legal `f641ea9`, text + script în `Reports/prezenta-conturi-2026-09-23/`). Și **EN vE1.1 LIVE** 2026-09-23 (acord Alex; `etutor.ro/en/privacy` verificat). Era: prezența e dată de comportament despre persoane, unele minore. De adăugat în nota de
   informare (hub-ul Legal, slug `tutor`): ce se reține (momentele în care contul a fost pe site), cât
   (400 de zile) și de ce (administrarea platformei).
 - [ ] Deschis, cu motiv: contul pus în pauză (ziua 8) continuă să trimită semnal cât se uită la ecranul
