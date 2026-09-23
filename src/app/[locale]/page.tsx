@@ -62,7 +62,7 @@ export default async function LandingPage() {
         proofLead:
           "Progresul nu rămâne ascuns: elevul îl vede, părintele îl vede — iar la pachetul cu meditator, îl vede și acesta. Aceleași scoruri, aceeași evoluție, aceleași greșeli de corectat. Crește pas cu pas și ține elevul „în priză”.",
         proofBank: "grile",
-        proofExams: "BAC · Evaluare Națională · INM/Barou",
+        proofExams: "Evaluare Națională · BAC · Facultăți",
         proofExamsLabel: "examene acoperite",
         proofSpeed: "~10 secunde",
         proofSpeedLabel: "de la text la test",
@@ -111,7 +111,7 @@ export default async function LandingPage() {
         proofLead:
           "Progress doesn't stay hidden: the student sees it, the parent sees it — and on the plan with a tutor, the tutor sees it too. Same scores, same trajectory, same mistakes to work on. It grows step by step and keeps you hooked.",
         proofBank: "real, verified questions",
-        proofExams: "Romanian Bac · National Exam · Law",
+        proofExams: "National Exam · Romanian Bac · University",
         proofExamsLabel: "exams covered",
         proofSpeed: "~10 seconds",
         proofSpeedLabel: "from text to quiz",
