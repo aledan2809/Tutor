@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { AccessTrialPanel } from "@/components/admin/access-trial-panel";
 
@@ -33,6 +33,16 @@ interface UserRow {
   voucherUsed: { code: string; percent: number; at: string } | null;
   /** A code kept on the account since signup and not used yet. */
   voucherKept: { code: string; percent: number | null; expiresAt: string | null; gone: boolean } | null;
+  /** The last successful sign-in; null on accounts that have not signed in since recording began. */
+  lastLoginAt: string | null;
+  /** Presence over the chosen period, plus the freshest evidence of being here and on what. */
+  presence: {
+    visits: number;
+    ms: number;
+    lastSeenAt: string | null;
+    lastTraceAt: string | null;
+    lastDomain: string | null;
+  };
 }
 
 interface DomainOption {
@@ -53,6 +63,14 @@ export function UserManagement() {
   const [loading, setLoading] = useState(false);
   const [onlyFreeForever, setOnlyFreeForever] = useState(false);
   const [savingFreeForever, setSavingFreeForever] = useState<string | null>(null);
+  // Presence period — the columns Vizite/Timp read it; „Ultima conectare" is always absolute.
+  const [days, setDays] = useState<1 | 7 | 30>(7);
+  // True while part of the period predates real recording, so the two columns are partly rebuilt.
+  const [estimated, setEstimated] = useState(false);
+  // When measuring began: „niciodată" is only true for accounts created after it.
+  const [trackingStartedAt, setTrackingStartedAt] = useState<string | null>(null);
+  // Clicking 1 → 7 → 30 quickly starts three reads; only the last one may paint the table.
+  const requestSeq = useRef(0);
   // Bumped after a mark/unmark, so the trial panel re-counts.
   const [panelKey, setPanelKey] = useState(0);
   const [banModal, setBanModal] = useState<{ id: string; name: string | null } | null>(null);
@@ -69,12 +87,16 @@ export function UserManagement() {
   const [enrollError, setEnrollError] = useState("");
   const [enrollLoading, setEnrollLoading] = useState(false);
 
-  const fetchUsers = async (p = page, s = search, ff = onlyFreeForever) => {
+  const fetchUsers = async (p = page, s = search, ff = onlyFreeForever, d = days) => {
+    const seq = ++requestSeq.current;
     setLoading(true);
-    const res = await fetch(`/api/admin/users?page=${p}&search=${encodeURIComponent(s)}${ff ? "&freeForever=1" : ""}`);
+    const res = await fetch(`/api/admin/users?page=${p}&search=${encodeURIComponent(s)}${ff ? "&freeForever=1" : ""}&days=${d}`);
     const data = await res.json();
+    if (seq !== requestSeq.current) return; // a newer period was clicked meanwhile
     setUsers(data.users);
     setTotalPages(data.totalPages);
+    setEstimated(Boolean(data.presence?.estimated));
+    setTrackingStartedAt(data.presence?.trackingStartedAt ?? null);
     setLoading(false);
   };
 
@@ -102,6 +124,36 @@ export function UserManagement() {
   };
 
   // With the year: a free year from a code ends in the next one, and „22 sept." alone read as this year.
+  const fmtDateTime = (iso: string) =>
+    new Date(iso).toLocaleString(locale === "en" ? "en-GB" : "ro-RO", {
+      timeZone: "Europe/Bucharest",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  /** „acum 2 zile" — the unit follows the distance, so a fresh sign-in doesn't read „acum 0 zile". */
+  const fmtAgo = (iso: string) => {
+    const rtf = new Intl.RelativeTimeFormat(locale === "en" ? "en" : "ro", { numeric: "auto" });
+    const diff = Date.now() - new Date(iso).getTime();
+    const min = Math.round(diff / 60_000);
+    if (min < 60) return rtf.format(-Math.max(1, min), "minute");
+    const hours = Math.round(min / 60);
+    if (hours < 24) return rtf.format(-hours, "hour");
+    return rtf.format(-Math.round(hours / 24), "day");
+  };
+
+  /** „4 h 12 min" / „38 min" / „< 1 min" — never a bare number of milliseconds. */
+  const fmtDuration = (ms: number) => {
+    if (ms <= 0) return "—";
+    const min = Math.round(ms / 60_000);
+    if (min < 1) return locale === "en" ? "< 1 min" : "< 1 min";
+    if (min < 60) return `${min} min`;
+    return `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, "0")} min`;
+  };
+
   const fmtDate = (iso: string) =>
     new Date(iso).toLocaleDateString(locale === "en" ? "en-GB" : "ro-RO", {
       timeZone: "Europe/Bucharest",
@@ -386,6 +438,29 @@ export function UserManagement() {
         {t("onlyFreeForever")}
       </label>
 
+      {/* The period the two presence columns read. The sign-in column ignores it — „when did this
+          person last come" is not a question about a window. */}
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <span className="text-gray-400">{t("presencePeriod")}</span>
+        <div className="inline-flex overflow-hidden rounded-lg border border-gray-700">
+          {([1, 7, 30] as const).map((d) => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => {
+                setDays(d);
+                setPage(1);
+                void fetchUsers(1, search, onlyFreeForever, d);
+              }}
+              className={`px-3 py-1.5 ${days === d ? "bg-blue-600 text-white" : "text-gray-400 hover:text-gray-200"}`}
+            >
+              {d === 1 ? t("presenceToday") : d === 7 ? t("presenceDays7") : t("presenceDays30")}
+            </button>
+          ))}
+        </div>
+        {estimated && <span className="text-xs text-amber-400">{t("presenceEstimatedNote")}</span>}
+      </div>
+
       {loading ? (
         <p className="text-gray-400">{t("loading")}</p>
       ) : (
@@ -397,6 +472,9 @@ export function UserManagement() {
                 <th className="px-4 py-3">{t("userEmail")}</th>
                 <th className="px-4 py-3">{t("domainsRoles")}</th>
                 <th className="px-4 py-3">{t("userSubscription")}</th>
+                <th className="px-4 py-3">{t("presenceLastLogin")}</th>
+                <th className="px-4 py-3">{t("presenceVisits")}</th>
+                <th className="px-4 py-3">{t("presenceTime")}</th>
                 <th className="px-4 py-3">{t("userStatus")}</th>
                 <th className="px-4 py-3">{t("userActions")}</th>
               </tr>
@@ -450,6 +528,102 @@ export function UserManagement() {
                     {codeLines(user)}
                     <div>{accessBadge(user)}</div>
                   </td>
+
+                  {/* When the account last came, and on what. The headline is the freshest hard
+                      evidence — a stay on the site, a sign-in, a trace of work — because a signed-in
+                      session lasts 30 days without signing in again, so the sign-in stamp alone can
+                      read „acum 30 de zile" for someone who was studying an hour ago. The subject
+                      carries its own age, so yesterday's visit is never paired with old work as if
+                      they were one fact. */}
+                  <td className="px-4 py-3">
+                    {(() => {
+                      const at = (iso: string | null) => (iso ? new Date(iso).getTime() : null);
+                      const login = at(user.lastLoginAt);
+                      const seen = at(user.presence.lastSeenAt);
+                      const trace = at(user.presence.lastTraceAt);
+                      const best = Math.max(login ?? 0, seen ?? 0, trace ?? 0);
+
+                      if (!best) {
+                        // „niciodată" is only true for an account created after we started measuring;
+                        // for an older one all we honestly know is that it has not come back since.
+                        const bornAfter =
+                          trackingStartedAt && new Date(user.createdAt) >= new Date(trackingStartedAt);
+                        return (
+                          <>
+                            <div className="text-gray-400">
+                              {bornAfter || !trackingStartedAt
+                                ? t("presenceNever")
+                                : t("presenceNoRecord", { date: fmtDate(trackingStartedAt) })}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {t("presenceCreated", { date: fmtDate(user.createdAt) })}
+                            </div>
+                            <div className="text-xs text-gray-500">{t("presenceNoDomain")}</div>
+                          </>
+                        );
+                      }
+
+                      const kind =
+                        best === seen
+                          ? t("presenceKindOnSite")
+                          : best === login
+                            ? t("presenceKindSignIn")
+                            : t("presenceKindActivity");
+                      const bestIso = new Date(best).toISOString();
+                      const traceIsOlder = trace !== null && best - trace > 60 * 60_000;
+                      return (
+                        <>
+                          <div className="text-white">{fmtAgo(bestIso)}</div>
+                          <div className="text-xs text-gray-500">
+                            {kind} · {fmtDateTime(bestIso)}
+                          </div>
+                          {login !== null && best !== login && (
+                            <div className="text-xs text-gray-500">
+                              {t("presenceSignedInAt", { date: fmtDateTime(user.lastLoginAt as string) })}
+                            </div>
+                          )}
+                          <div className="text-xs text-gray-400">
+                            {user.presence.lastDomain
+                              ? t("presenceOnDomain", { domain: user.presence.lastDomain }) +
+                                (traceIsOlder ? ` · ${fmtAgo(user.presence.lastTraceAt as string)}` : "")
+                              : t("presenceNoDomain")}
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </td>
+
+                  <td className="px-4 py-3">
+                    {/* A zero over a rebuilt stretch is not „nobody came" — a parent account leaves no
+                        answers or lessons behind, so there is nothing to rebuild it from. It says so. */}
+                    <div className="text-white">
+                      {user.presence.visits === 0
+                        ? estimated
+                          ? "—"
+                          : "0"
+                        : `${estimated ? "≈ " : ""}${user.presence.visits}`}
+                    </div>
+                    {user.presence.visits === 0 && (
+                      <div className="text-xs text-gray-500">
+                        {estimated ? t("presenceNoTrace") : t("presenceNoVisits")}
+                      </div>
+                    )}
+                  </td>
+
+                  <td className="px-4 py-3">
+                    <div className="text-white">
+                      {estimated && user.presence.ms > 0 ? "≈ " : ""}
+                      {fmtDuration(user.presence.ms)}
+                    </div>
+                    {user.presence.visits > 1 && (
+                      <div className="text-xs text-gray-500">
+                        {t("presencePerVisit", {
+                          time: fmtDuration(Math.round(user.presence.ms / user.presence.visits)),
+                        })}
+                      </div>
+                    )}
+                  </td>
+
                   <td className="px-4 py-3">
                     {user.isBanned ? (
                       <span className="rounded bg-red-600/20 px-2 py-0.5 text-xs text-red-400">

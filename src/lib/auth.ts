@@ -347,4 +347,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
+  events: {
+    /**
+     * The last sign-in, written here rather than in each `authorize`: this fires for every route into
+     * the account (password, Google, magic link), so a provider added later cannot be forgotten.
+     * A failure here must never cost someone their sign-in, hence the catch.
+     */
+    async signIn({ user }) {
+      if (!user?.id) return;
+      try {
+        await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
+      } catch (error) {
+        console.error("[auth] could not record the sign-in time:", error);
+      }
+    },
+  },
 });

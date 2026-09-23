@@ -72,6 +72,11 @@ model User {
   schoolYear     Int?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  /// The last successful sign-in, by any route (password, Google, magic link). Written by the
+  /// NextAuth `signIn` event, so no provider can be forgotten. Null = has never signed in since
+  /// 23.09.2026, when this started being recorded — NOT "never signed in".
+  lastLoginAt    DateTime?
+  visits         UserVisit[]
 
   accounts               Account[]
   enrollments            Enrollment[]
@@ -669,6 +674,7 @@ model Attempt {
 
   @@index([sessionId])
   @@index([userId, questionId])
+  @@index([userId, createdAt])
 }
 
 model Progress {
@@ -1441,6 +1447,7 @@ model LessonProgress {
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lessonId])
+  @@index([userId, updatedAt])
 }
 
 enum AssessmentLevel {
@@ -1856,4 +1863,22 @@ model AppSetting {
   value       Json
   updatedById String?
   updatedAt   DateTime @updatedAt
+}
+
+/// One stay on the site. The page sends a quiet signal every minute while it is in front; a signal
+/// more than VISIT_GAP_MS after the last one opens a new row instead of extending this one, so the
+/// rows ARE the visits — no clustering needed at read time. `lastSeenAt` is the last signal, not the
+/// moment the person left, which is why the reading adds a short tail (see src/lib/presence.ts).
+model UserVisit {
+  id         String   @id @default(cuid())
+  userId     String
+  startedAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  /// How many signals this visit collected — a visit of 1 is someone who opened a page and left.
+  pings      Int      @default(1)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, lastSeenAt])
+  @@index([lastSeenAt])
 }

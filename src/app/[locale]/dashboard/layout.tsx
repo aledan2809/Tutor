@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PresencePinger } from "@/components/presence-pinger";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
@@ -172,6 +173,7 @@ export default async function DashboardLayout({
             />
           )}
           <RefreshAt at={access?.kind === "trial" ? access.endsAt.toISOString() : null} now={new Date().toISOString()} />
+          <PresencePinger />
           <PauseGate screen={pausedScreen}>{children}</PauseGate>
         </main>
       </div>

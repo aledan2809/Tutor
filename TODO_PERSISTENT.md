@@ -1,3 +1,19 @@
+**Prezența conturilor în Administrare (23.09, cerere Alex):** tabelul SuperAdmin → Utilizatori arată
+**ultima conectare** (cu materia pe care a lucrat atunci), **vizitele** și **timpul petrecut** într-o
+perioadă aleasă (Azi / 7 zile / 30 de zile). De azi se măsoară real — pagina trimite un semnal discret
+cât e deschisă în față, iar o pauză de peste 30 de minute înseamnă vizită nouă (regula Umami). Pentru
+zilele dinaintea pornirii, cifrele se refac din activitatea deja salvată și sunt marcate cu „≈".
+Verificat: 18 teste de calcul + 14 verificări pe bază reală + 14 în browser
+(`Reports/prezenta-conturi-2026-09-23/`).
+- [ ] **De programat pe VPS2 după deploy**: curățenia prezenței — `GET /api/cron/presence-retention`
+  cu Bearer `CRON_SECRET` (o dată pe zi; șterge șederile mai vechi de 400 de zile, reglabil din
+  `PRESENCE_RETENTION_DAYS`). Fără el, tabelul `UserVisit` crește la nesfârșit.
+- [ ] **Legal**: prezența e dată de comportament despre persoane, unele minore. De adăugat în nota de
+  informare (hub-ul Legal, slug `tutor`): ce se reține (momentele în care contul a fost pe site), cât
+  (400 de zile) și de ce (administrarea platformei).
+- [ ] Deschis, cu motiv: contul pus în pauză (ziua 8) continuă să trimită semnal cât se uită la ecranul
+  de plată — deliberat, ca să se vadă că a revenit; dacă supără, semnalul se mută sub `PauseGate`.
+
 # TODO Persistent — Tutor
 
 > Citit la FIECARE sesiune. Items rămân până marcate `[x]` cu dată + commit.

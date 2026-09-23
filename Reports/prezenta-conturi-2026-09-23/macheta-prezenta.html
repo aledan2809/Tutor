@@ -1,0 +1,90 @@
+<!doctype html><html lang="ro"><head><meta charset="utf-8"><title>Prezență conturi — machetă</title>
+<style>
+:root{--bg:#030712;--panel:#111827;--line:#1f2937;--txt:#e5e7eb;--dim:#9ca3af;--blue:#3b82f6;--green:#10b981;--amber:#f59e0b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:24px}
+h1{font-size:22px;margin:0 0 4px}p.sub{color:var(--dim);margin:0 0 20px;font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:18px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{background:transparent;color:var(--dim);border:0;padding:7px 14px;font:inherit;cursor:pointer}
+.seg button.on{background:var(--blue);color:#fff}
+.note{color:var(--dim);font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{ text-align:left;color:var(--dim);font-weight:500;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:12px;border-bottom:1px solid #111a2b;vertical-align:top}
+.name{font-weight:600}
+.mail{color:var(--dim);font-size:13px}
+.big{font-weight:600}
+.dim{color:var(--dim);font-size:13px}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;border:1px solid}
+.ok{color:var(--green);border-color:#064e3b;background:#052e2340}
+.warn{color:var(--amber);border-color:#78350f;background:#451a0340}
+.cold{color:var(--dim);border-color:var(--line)}
+.spark{display:inline-flex;gap:2px;align-items:flex-end;height:18px;margin-left:6px}
+.spark i{display:block;width:4px;background:#1d4ed8;border-radius:1px}
+.foot{color:var(--dim);font-size:13px;margin-top:10px}
+code{background:#0b1220;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:12px}
+</style></head><body>
+<h1>Utilizatori — prezență</h1>
+<p class="sub">Machetă. Trei coloane noi în tabelul din Panou SuperAdmin → Utilizatori, cu un filtru de perioadă deasupra.</p>
+
+<div class="card">
+  <div class="bar">
+    <span class="note">Perioada:</span>
+    <span class="seg"><button>Azi</button><button class="on">7 zile</button><button>30 de zile</button></span>
+    <span class="note">· se aplică doar coloanelor <b>Vizite</b> și <b>Timp petrecut</b>; „Ultima conectare" e mereu absolută.</span>
+  </div>
+
+  <table>
+    <thead><tr>
+      <th>Nume</th><th>Domenii și roluri</th><th>Abonament</th>
+      <th>Ultima conectare</th><th>Vizite (7 zile)</th><th>Timp petrecut (7 zile)</th><th>Status</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td><div class="name">Rareș D.</div><div class="mail">raresdanciulescu9@…</div></td>
+        <td class="dim">Aviație — cunoștințe, aptitudini, licență</td>
+        <td class="dim">Fără pachet<br><span class="pill cold">Gratuit permanent</span></td>
+        <td><div class="big">acum 2 zile</div><div class="dim">21 sept. 2026, 19:40</div><div class="dim">pe <b>Aviație — cunoștințe</b></div></td>
+        <td><div class="big">9</div><div class="dim">în 5 zile din 7
+          <span class="spark"><i style="height:6px"></i><i style="height:14px"></i><i style="height:18px"></i><i style="height:3px"></i><i style="height:11px"></i><i style="height:0"></i><i style="height:0"></i></span></div></td>
+        <td><div class="big">4 h 12 min</div><div class="dim">~28 min pe vizită</div></td>
+        <td><span class="pill ok">Activ</span></td>
+      </tr>
+      <tr>
+        <td><div class="name">Catalin Ciucanu</div><div class="mail">catalin@…</div></td>
+        <td class="dim">Poșta — Șef de oficiu</td>
+        <td class="dim">Fără pachet<br><span class="pill cold">Plătit de firmă</span></td>
+        <td><div class="big">acum 12 zile</div><div class="dim">11 sept. 2026, 10:05</div><div class="dim">pe <b>Poșta — Șef de oficiu</b></div></td>
+        <td><div class="big">0</div><div class="dim">nicio vizită în perioadă</div></td>
+        <td><div class="big">—</div></td>
+        <td><span class="pill warn">Inactiv</span></td>
+      </tr>
+      <tr>
+        <td><div class="name">Greg</div><div class="mail">grigore.soare@…</div></td>
+        <td class="dim">Nicio înscriere</td>
+        <td class="dim">Fără pachet<br><span class="pill cold">Gratuit permanent</span></td>
+        <td><div class="big">niciodată</div><div class="dim">cont creat 8 sept. 2026</div><div class="dim">fără materie</div></td>
+        <td><div class="big">0</div></td>
+        <td><div class="big">—</div></td>
+        <td><span class="pill warn">Neintrat</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="foot">
+    Sortare: click pe „Ultima conectare" / „Vizite" / „Timp petrecut" → vezi cine a dispărut sau cine stă cel mai mult.
+    Sub tabel: „<b>Din 42 de conturi, 6 au intrat în ultimele 7 zile</b>".
+  </div>
+</div>
+
+<div class="card">
+  <b>Ce înseamnă cifrele</b>
+  <ul class="note" style="margin:8px 0 0;padding-left:18px">
+    <li><b>Ultima conectare</b> — momentul ultimei autentificări reușite (orice cale: parolă, Google, link) <b>și materia pe care a lucrat atunci</b> (ultima urmă de activitate din acea vizită; dacă a intrat fără să deschidă nimic, scrie „fără materie").</li>
+    <li><b>Vizite</b> — o vizită = o ședere pe site; după <code>30 de minute</code> fără nicio urmă de activitate, următoarea intrare se numără ca vizită nouă (regula folosită și de Umami).</li>
+    <li><b>Timp petrecut</b> — suma duratelor vizitelor din perioadă (de la prima până la ultima urmă a fiecărei vizite, plus un rest scurt la final).</li>
+    <li>Conturile de firmă și copiii se numără la fel; „—" înseamnă zero, nu „nu știm".</li>
+  </ul>
+</div>
+</body></html>
