@@ -1,23 +1,22 @@
 import { describe, it, expect } from "vitest";
-import { watcherSeesAllStudents } from "@/lib/guardian";
+import { watcherScope, requestedWatcherDomains } from "@/lib/guardian";
 
-describe("guardian scoping — watcherSeesAllStudents", () => {
-  it("instructor or admin sees all students (teaching)", () => {
-    expect(watcherSeesAllStudents({ enrollments: [{ roles: ["INSTRUCTOR"] }] })).toBe(true);
-    expect(watcherSeesAllStudents({ enrollments: [{ roles: ["ADMIN"] }] })).toBe(true);
-    expect(
-      watcherSeesAllStudents({ enrollments: [{ roles: ["STUDENT"] }, { roles: ["INSTRUCTOR"] }] })
-    ).toBe(true);
+describe("watcherScope — pe materie, nu pe cont", () => {
+  const antonia = [
+    { domainId: "aviatie", roles: ["ADMIN"] },
+    { domainId: "mate", roles: ["WATCHER"] },
+    { domainId: "fizica", roles: ["WATCHER", "INSTRUCTOR"] },
+  ];
+  it("predă → toată materia; doar părinte → doar copiii ei", () => {
+    expect(watcherScope(antonia)).toEqual({ teaching: ["aviatie", "fizica"], watchOnly: ["mate"] });
   });
-
-  it("a pure parent watcher does NOT see all (scoped to linked children)", () => {
-    expect(watcherSeesAllStudents({ enrollments: [{ roles: ["WATCHER"] }] })).toBe(false);
-    expect(watcherSeesAllStudents({ enrollments: [{ roles: ["WATCHER", "STUDENT"] }] })).toBe(false);
+  it("un simplu elev nu vede pe nimeni", () => {
+    expect(watcherScope([{ domainId: "mate", roles: ["STUDENT"] }])).toEqual({ teaching: [], watchOnly: [] });
   });
-
-  it("null / empty is false", () => {
-    expect(watcherSeesAllStudents(null)).toBe(false);
-    expect(watcherSeesAllStudents(undefined)).toBe(false);
-    expect(watcherSeesAllStudents({ enrollments: [] })).toBe(false);
+  it("materia din adresă contează doar dacă omul are rol pe ea", () => {
+    const s = watcherScope(antonia);
+    expect(requestedWatcherDomains(s, "alta-materie")).toEqual({ teaching: [], watchOnly: [] });
+    expect(requestedWatcherDomains(s, "mate")).toEqual({ teaching: [], watchOnly: ["mate"] });
+    expect(requestedWatcherDomains(s, null)).toEqual(s);
   });
 });

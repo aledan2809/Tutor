@@ -3,7 +3,7 @@ import { requireWatcherOrInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { getStudentProgressSummary } from "@/lib/predictive-analytics";
 import { withErrorHandler } from "@/lib/api-handler";
-import { isGuardianOf, isParentOf, watcherSeesAllStudents } from "@/lib/guardian";
+import { isGuardianOf, isParentOf, watcherScope } from "@/lib/guardian";
 import { refuseIfPaused } from "@/lib/access-gate";
 
 async function _GET(
@@ -22,21 +22,14 @@ async function _GET(
   // `isGuardian` is also reused below to decide the breadth of the new logs:
   // a guardian legitimately sees the whole child; a domain-scoped instructor
   // must NOT see the child's activity outside their own domains.
-  const seesAll = watcherSeesAllStudents(session!.user);
+  // Someone who is not the child's guardian sees them only through a subject they TEACH — and only
+  // that subject's activity. A subject where they are merely a parent (of another child) grants nothing.
+  const teachingDomainIds = watcherScope(session!.user.enrollments).teaching;
   const isGuardian = await isGuardianOf(session!.user.id, studentId);
-  if (!seesAll && !isGuardian) {
+  if (teachingDomainIds.length === 0 && !isGuardian) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-
-  // Verify watcher has access to this student's domains
-  const watcherDomainIds = session!.user.enrollments
-    .filter(
-      (e) =>
-        e.roles.includes("WATCHER" as never) ||
-        e.roles.includes("INSTRUCTOR" as never) ||
-        e.roles.includes("ADMIN" as never)
-    )
-    .map((e) => e.domainId);
+  const watcherDomainIds = teachingDomainIds;
 
   // A guardian sees the whole child, read now — not only the subjects the session carried at sign-in: a
   // subject added or bought since would be missing, and removing the older ones left the page empty.

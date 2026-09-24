@@ -699,7 +699,7 @@ exerciții dictate — nu se pot judeca din text, rămân la om). Cron zilnic `0
 `/api/cron/feedback-digest` (backup crontab `/root/backups/crontab.bak-2026-09-24-pre-feedback-digest`); prima
 trimitere verificată: 8 în așteptare, 5 mesaje pe Telegram + încheiere. **Rămâne la Alex**: cele 8 decizii
 (butonul „Decide acum" din fiecare mesaj). Observație: 4 dintre ele sunt de fapt reclamații de PLATFORMĂ
-(„robotul vorbește prea repede") clasate greșit ca respingeri — viteza vocii e deja reglabilă din Setări.
+(„robotul vorbește prea repede") clasate greșit ca respingeri — viteza vocii se reglează deja din sesiune (calibrarea vocii).
 
 ### (istoric) Verdictul pe feedback-ul elevului nu mai are voie să fie final fără om (creat 2026-08-26)
 

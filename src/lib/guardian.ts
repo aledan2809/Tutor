@@ -3,29 +3,52 @@
  *
  * A WATCHER who is a parent must see ONLY their linked children — not every
  * student in a domain (the family-plan minor-data leak). Instructors/admins keep
- * the domain-wide view (teaching). `watcherSeesAllStudents` is pure; the link
+ * the domain-wide view (teaching), per subject (`watcherScope`); the link
  * lookups hit the DB.
  */
 
 import { prisma } from "@/lib/prisma";
 
-export interface GuardianScopeUser {
-  enrollments?: { roles: readonly string[] }[];
+export interface ScopeEnrollment {
+  domainId: string;
+  roles: readonly string[];
 }
 
 /**
- * Whether this user legitimately sees all students in their domains. True for
- * instructors/admins (teaching); false for a pure parent watcher, who is scoped
- * to their linked children.
+ * Which students a watcher may see, PER SUBJECT — not per account.
+ *
+ * The previous check (`watcherSeesAllStudents`, removed 2026-09-24) answered once for the whole account: a teaching role on ANY subject turned
+ * on the domain-wide view on EVERY subject, including those where the person is only a parent. Found
+ * 2026-08-25 putting Antonia (admin on aviation) in as Rareș's mother: on the subjects where she is
+ * only his parent, the parent scoping stopped applying. A teaching role on one subject must not relax
+ * a child's privacy on another.
+ *
+ * - `teaching`: subjects where they are INSTRUCTOR/ADMIN → every student of that subject.
+ * - `watchOnly`: subjects where they are only WATCHER → their own linked children, nobody else.
  */
-export function watcherSeesAllStudents(
-  user: GuardianScopeUser | null | undefined
-): boolean {
-  return (
-    user?.enrollments?.some(
-      (e) => e.roles.includes("INSTRUCTOR") || e.roles.includes("ADMIN")
-    ) ?? false
-  );
+export function watcherScope(enrollments: readonly ScopeEnrollment[] | null | undefined): {
+  teaching: string[];
+  watchOnly: string[];
+} {
+  const teaching = new Set<string>();
+  const watching = new Set<string>();
+  for (const e of enrollments ?? []) {
+    if (e.roles.includes("INSTRUCTOR") || e.roles.includes("ADMIN")) teaching.add(e.domainId);
+    else if (e.roles.includes("WATCHER")) watching.add(e.domainId);
+  }
+  return { teaching: [...teaching], watchOnly: [...watching].filter((d) => !teaching.has(d)) };
+}
+
+/**
+ * The subjects a watcher list may be asked for. A `domainId` from the URL is honoured only when the
+ * person has a role on it — before, any subject id passed in the query was read as if it were theirs.
+ */
+export function requestedWatcherDomains(
+  scope: { teaching: string[]; watchOnly: string[] },
+  requested: string | null,
+): { teaching: string[]; watchOnly: string[] } {
+  const pick = (ids: string[]) => (requested ? ids.filter((d) => d === requested) : ids);
+  return { teaching: pick(scope.teaching), watchOnly: pick(scope.watchOnly) };
 }
 
 /** Active child user ids linked to this parent. */

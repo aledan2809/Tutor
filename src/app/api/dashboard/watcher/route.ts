@@ -3,7 +3,7 @@ import { requireWatcherOrInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { getStudentProgressSummary } from "@/lib/predictive-analytics";
 import { withErrorHandler } from "@/lib/api-handler";
-import { getLinkedChildIds, watcherSeesAllStudents } from "@/lib/guardian";
+import { getLinkedChildIds, requestedWatcherDomains, watcherScope } from "@/lib/guardian";
 import { refuseIfPaused } from "@/lib/access-gate";
 
 async function _GET(req: NextRequest) {
@@ -17,31 +17,24 @@ async function _GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const domainId = searchParams.get("domainId");
 
-  // Find students the watcher/instructor monitors
-  // Watchers: see students in same domain enrollments where watcher has WATCHER role
-  const watcherEnrollments = session!.user.enrollments.filter(
-    (e) =>
-      e.roles.includes("WATCHER" as never) ||
-      e.roles.includes("INSTRUCTOR" as never) ||
-      e.roles.includes("ADMIN" as never)
-  );
-
-  const domainIds = domainId
-    ? [domainId]
-    : watcherEnrollments.map((e) => e.domainId);
-
-  // Parent scoping: instructors/admins see all students in their domains
-  // (teaching); a pure parent watcher sees ONLY their linked children.
-  const seesAll = watcherSeesAllStudents(session!.user);
-  const linkedChildIds = seesAll ? null : await getLinkedChildIds(userId);
+  // Scoping PER SUBJECT (guardian.ts `watcherScope`): where they teach, every student of that
+  // subject; where they are only a parent, their own children and nobody else. A subject id in the
+  // URL counts only if they have a role on it.
+  const scope = requestedWatcherDomains(watcherScope(session!.user.enrollments), domainId);
+  const linkedChildIds = scope.watchOnly.length ? await getLinkedChildIds(userId) : [];
+  const visible = [
+    ...(scope.teaching.length ? [{ domainId: { in: scope.teaching }, userId: { not: userId } }] : []),
+    ...(scope.watchOnly.length && linkedChildIds.length
+      ? [{ domainId: { in: scope.watchOnly }, userId: { in: linkedChildIds } }]
+      : []),
+  ];
 
   // Get students in these domains, scoped to the watcher's allowed set.
-  const studentEnrollments = await prisma.enrollment.findMany({
+  const studentEnrollments = visible.length === 0 ? [] : await prisma.enrollment.findMany({
     where: {
-      domainId: { in: domainIds },
       roles: { hasSome: ["STUDENT"] },
       isActive: true,
-      userId: seesAll ? { not: userId } : { in: linkedChildIds ?? [] },
+      OR: visible,
     },
     include: {
       user: { select: { id: true, name: true, email: true, image: true } },
@@ -93,7 +86,7 @@ async function _GET(req: NextRequest) {
   return NextResponse.json({
     students,
     totalStudents: students.length,
-    domains: domainIds,
+    domains: [...scope.teaching, ...scope.watchOnly],
   });
 }
 
