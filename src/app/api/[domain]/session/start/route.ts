@@ -13,6 +13,7 @@ import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import { bandForDomainSlug } from "@/lib/curriculum";
 import { visibleTopicsFor } from "@/lib/curriculum-service";
 import { courseTopicsFor } from "@/lib/course-topics";
+import { coursePathFor } from "@/lib/course-path";
 import { LICENTA_DOMAIN_SLUG } from "@/lib/licenta-constants";
 import {
   SPRINT_DOMAIN_SLUG,
@@ -176,7 +177,10 @@ async function _POST(
     // `null` = materia n-are curs publicat → nicio schimbare față de înainte.
     const courseTopics = await courseTopicsFor(session.user.id, domain.id);
     if (courseTopics !== null) {
-      topicIn = courseTopics;
+      // „Testul modulului" din panou cere un singur subiect; se ia doar dacă e deja
+      // deschis de poartă — altfel rămâne tot ce e deschis, ca înainte.
+      const askedTopic = typeof body.topic === "string" ? body.topic : null;
+      topicIn = askedTopic && courseTopics.includes(askedTopic) ? [askedTopic] : courseTopics;
       gateKind = "course";
     }
   }
@@ -196,12 +200,15 @@ async function _POST(
     // Cu poartă activă, sesiunea goală înseamnă "nimic bifat încă" — mesajul
     // trimite la checklist, nu pretinde că banca e goală.
     if (gateKind === "course") {
-      // Nu e o bancă goală, e un curs necitit: mesajul trimite la lecții.
+      // Nu e o bancă goală, e un curs necitit: mesajul trimite la lecții — la lecția
+      // anume de citit, ca omul să nu caute singur prin meniu.
+      const path = await coursePathFor(session.user.id, domain.id);
       return NextResponse.json(
         {
           error: "No questions in completed modules",
           emptyBecauseCourse: true,
           hint: "Termină o lecție ca să se deschidă testul modulului ei.",
+          lessonId: path?.current?.lessonId ?? null,
         },
         { status: 409 }
       );

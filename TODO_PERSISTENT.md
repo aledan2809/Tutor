@@ -6,6 +6,15 @@
   de admin. Conturile unite în „greg” (decizie Alex): contul cu parola dată de admin șters (0 activitate), emailul
   mutat pe „greg”. Backup `/root/backups/tutor-pre-greg-merge-2026-09-24.dump`, SQL în `Reports/greg-login-2026-09-24/`.
   **De spus lui Greg**: intră cu „greg” sau cu emailul, cu parola aleasă la invitație (nu cea primită de la Alex).
+- [x] **Cursurile de firmă: întâi lecția, apoi testul ei** (cerere Alex 24.09: „B2B să se comporte ca Poșta"). Panoul
+  „Astăzi" pe o materie cu curs: „Lecția N din M" → „Testul modulului N" (grile DOAR din subiectul modulului) →
+  lecția următoare; când tot cursul e parcurs, revine la grilele obișnuite. Pe Grile, refuzul porții are buton
+  „Deschide lecția". Materiile cu programă școlară nu sunt atinse. Reparat pe drum: comutarea materiei pe panou
+  dădea 400 (id-urile sunt cuid, validarea cerea uuid). Verificat 17/17 în browser
+  (`Reports/curs-lectii-intai-2026-09-24/`), revizie independentă: 4 constatări, toate reparate (buclă pe subiect comun,
+  testul modulului amesteca subiecte, materii școlare, interogare grea).
+- [x] **Setări „Something went wrong" la Greg (24.09)**: nu era o eroare de cod — a deschis Setările exact în minutul în
+  care serverul reconstruia site-ul (fișierele paginii au dat 400). La reîncărcare merge.
 - [x] **Al doilea curs dintr-o materie** — poarta de test lua doar primul curs publicat, deci testele unui al doilea
   curs nu se deschideau niciodată; la fel pagina „Cursanți” (munca de la al doilea curs invizibilă). Acum toate
   cursurile, iar un subiect de test comun la două cursuri se deschide doar când ambele module sunt citite. Pe prod

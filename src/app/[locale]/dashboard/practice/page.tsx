@@ -52,6 +52,8 @@ export default function PracticePage() {
    * ca aplicație stricată. Mesajul vine de la server, care știe DE CE a refuzat.
    */
   const [startNotice, setStartNotice] = useState<string | null>(null);
+  // Lecția de citit când poarta cursului refuză testul — butonul duce direct la ea.
+  const [gateLessonId, setGateLessonId] = useState<string | null>(null);
   const [domains, setDomains] = useState<DomainOpt[]>([]);
   // A1: when the student has no practiceable subject, offer the catalog inline so
   // they pick + start on the spot instead of being sent "to your account".
@@ -64,6 +66,8 @@ export default function PracticePage() {
   // Deep-link from a reminder: ?start=<sessionType>&domain=<slug> auto-starts.
   const [autoStartType, setAutoStartType] = useState<string | null>(null);
   const [autoStartDomain, setAutoStartDomain] = useState<string | null>(null);
+  // „Testul modulului" din panou: grilele doar din subiectul acelui modul.
+  const [autoStartTopic, setAutoStartTopic] = useState<string | null>(null);
   const [autoStarted, setAutoStarted] = useState(false);
 
   useEffect(() => {
@@ -72,6 +76,7 @@ export default function PracticePage() {
     if (s) {
       setAutoStartType(s);
       setAutoStartDomain(p.get("domain"));
+      setAutoStartTopic(p.get("topic"));
     }
   }, []);
 
@@ -142,14 +147,14 @@ export default function PracticePage() {
       .finally(() => setLoading(false));
   }, [selectedDomain]);
 
-  const handleSelect = async (type: string) => {
+  const handleSelect = async (type: string, topic?: string | null) => {
     setStarting(true);
     try {
       setStartNotice(null);
       const res = await fetch(`/api/${selectedDomain}/session/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type }),
+        body: JSON.stringify(topic ? { type, topic } : { type }),
       });
       const session = await res.json();
       // The sprint route refuses to start a new run while the previous one's
@@ -171,6 +176,7 @@ export default function PracticePage() {
       }
       if (res.status === 409 && session.emptyBecauseCourse) {
         setStartNotice(session.hint || t("practice.courseGate"));
+        setGateLessonId(typeof session.lessonId === "string" ? session.lessonId : null);
         setStarting(false);
         return;
       }
@@ -235,7 +241,7 @@ export default function PracticePage() {
     if (!data || data.stats.totalQuestions === 0 || !selectedDomain) return;
     if (autoStartDomain && selectedDomain !== autoStartDomain) return;
     setAutoStarted(true);
-    handleSelect(autoStartType);
+    handleSelect(autoStartType, autoStartTopic);
   }, [autoStarted, autoStartType, autoStartDomain, data, selectedDomain, starting]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
@@ -322,6 +328,15 @@ export default function PracticePage() {
               className="mb-3 rounded-lg border border-amber-800 bg-amber-950/20 px-3 py-2 text-sm text-amber-200"
             >
               {startNotice}
+              {gateLessonId && (
+                <button
+                  type="button"
+                  onClick={() => router.push(`/dashboard/lessons/${gateLessonId}`)}
+                  className="mt-2 block min-h-[44px] rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                >
+                  {t("practice.courseGateOpenLesson")} →
+                </button>
+              )}
             </div>
           )}
 

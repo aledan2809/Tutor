@@ -6,9 +6,12 @@ import { getXpInfo, getStreakInfo } from "@/lib/gamification";
 import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 import { refuseIfPaused } from "@/lib/access-gate";
+import { coursePathFor } from "@/lib/course-path";
+import { bandForDomainSlug } from "@/lib/curriculum";
 
 const dashboardQuerySchema = z.object({
-  domainId: z.string().uuid().optional(),
+  // Materiile au id-uri cuid, nu uuid: `.uuid()` respingea orice comutare de materie cu 400.
+  domainId: z.string().min(1).max(64).optional(),
 });
 
 async function _GET(req: NextRequest) {
@@ -52,7 +55,10 @@ async function _GET(req: NextRequest) {
     });
   }
 
-  const activeDomainId = domainId || enrollments[0]?.domainId;
+  // Doar o materie în care omul chiar e înscris; altfel prima lui.
+  const activeDomainId =
+    (domainId && enrollments.some((e) => e.domainId === domainId) ? domainId : undefined) ??
+    enrollments[0]?.domainId;
 
   // Use gamification system for XP and streak
   const [xpInfo, streakInfo] = await Promise.all([
@@ -131,8 +137,16 @@ async function _GET(req: NextRequest) {
 
   // Recommendation for active domain
   let recommendation = null;
+  let course = null;
   if (activeDomainId) {
-    recommendation = await recommendSessionType(userId, activeDomainId);
+    // Pe o materie cu curs, panoul arată întâi lecția, apoi testul ei (cerință Alex, 24.09).
+    // O materie cu programă școlară urmează poarta programei la grile (session/start), nu pe a
+    // cursului — deci nici panoul nu-i arată drumul cursului.
+    const activeSlug = enrollments.find((e) => e.domainId === activeDomainId)?.domain.slug;
+    [recommendation, course] = await Promise.all([
+      recommendSessionType(userId, activeDomainId),
+      bandForDomainSlug(activeSlug) ? Promise.resolve(null) : coursePathFor(userId, activeDomainId),
+    ]);
   }
 
   return NextResponse.json({
@@ -171,6 +185,7 @@ async function _GET(req: NextRequest) {
       suggestion: w.suggestion,
     })),
     recommendation,
+    course,
   });
 }
 

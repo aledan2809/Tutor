@@ -341,6 +341,16 @@
     "todayStep2Generic": "Repară o zonă slabă",
     "todayStep3": "Simulare completă",
     "todayStreakDays": "{n} zile la rând",
+    "courseLessonLabel": "Lecția {n} din {total}",
+    "courseReadWhy": "Citește lecția; testul ei se deschide imediat după.",
+    "courseTestLabel": "Testul modulului {n} din {total}",
+    "courseTestWhy": "Ai citit lecția. Grilele sunt doar din ce ai citit.",
+    "courseStartLesson": "Începe lecția",
+    "courseStartTest": "Începe testul",
+    "courseStepRead": "Citește lecția {n}",
+    "courseStepTest": "Testul modulului {n} (grile din ce ai citit)",
+    "courseStepNext": "Lecția {n}: {title}",
+    "courseProgress": "Progres curs: {done} din {total} module",
     "bibliographyTitle": "Bibliografie",
     "progressTitle": "Statistici",
     "gamificationTitle": "Realizări",
@@ -1220,6 +1230,7 @@
     "more": "Detalii în Ajutor"
   },
   "practice": {
+    "courseGateOpenLesson": "Deschide lecția",
     "courseGate": "Termină o lecție ca să se deschidă testul modulului ei."
   },
   "acces": {

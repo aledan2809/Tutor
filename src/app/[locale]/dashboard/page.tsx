@@ -62,6 +62,20 @@ interface DashboardData {
   recentSessions: RecentSession[];
   weakAreas: WeakArea[];
   recommendation: { type: string; reason: string; label: string } | null;
+  /** Drumul pe curs al materiei active (`course-path.ts`); null = materia n-are curs. */
+  course?: {
+    total: number;
+    done: number;
+    current: {
+      n: number;
+      moduleTitle: string;
+      step: "read" | "test";
+      lessonId: string;
+      lessonTitle: string;
+      questionTopic: string | null;
+    } | null;
+    next: { n: number; moduleTitle: string; lessonTitle: string } | null;
+  } | null;
 }
 
 export default function DashboardPage() {
@@ -202,6 +216,15 @@ export default function DashboardPage() {
           userName={session?.user?.name ?? null}
           onContinue={continueSession}
           onSimulate={() => router.push("/dashboard/exam-bank")}
+          onOpenLesson={(id) => router.push(`/dashboard/lessons/${id}`)}
+          onCourseTest={() => {
+            const topic = data.course?.current?.questionTopic;
+            router.push(
+              `/dashboard/practice?start=quick${activeDomain ? `&domain=${encodeURIComponent(activeDomain.domainSlug)}` : ""}${
+                topic ? `&topic=${encodeURIComponent(topic)}` : ""
+              }`
+            );
+          }}
           t={t}
         />
       )}
@@ -440,6 +463,8 @@ function TodayView({
   userName,
   onContinue,
   onSimulate,
+  onOpenLesson,
+  onCourseTest,
   t,
 }: {
   data: DashboardData;
@@ -447,6 +472,8 @@ function TodayView({
   userName: string | null;
   onContinue: () => void;
   onSimulate: () => void;
+  onOpenLesson: (lessonId: string) => void;
+  onCourseTest: () => void;
   t: ReturnType<typeof useTranslations>;
 }) {
   const weak = data.weakAreas[0] ?? null;
@@ -459,6 +486,69 @@ function TodayView({
     streak > 0
       ? t("dashboard.todayGreeting", { name: nameSlot })
       : t("dashboard.todayGreetingNoStreak", { name: nameSlot });
+
+  // Pe o materie cu curs (firmă: Agent imobiliar, Poșta), drumul e al cursului: lecția, apoi testul
+  // ei. Până e parcurs tot, panoul nu propune grile generale — poarta le-ar refuza oricum.
+  const course = data.course?.current ? data.course : null;
+  if (course && course.current) {
+    const cur = course.current;
+    const isTest = cur.step === "test";
+    return (
+      <div className="space-y-4">
+        <p className="text-sm text-gray-300">{greeting}</p>
+        <div className="relative overflow-hidden rounded-2xl border border-blue-700/60 bg-gradient-to-br from-blue-950 to-gray-950 p-5">
+          <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-blue-500/20 blur-2xl" />
+          <p className="text-[11px] font-bold uppercase tracking-widest text-blue-300">
+            {t("dashboard.todayAction")}
+          </p>
+          <p className="mt-1.5 text-xs font-semibold text-blue-200/80">
+            {isTest
+              ? t("dashboard.courseTestLabel", { n: cur.n, total: course.total })
+              : t("dashboard.courseLessonLabel", { n: cur.n, total: course.total })}
+          </p>
+          <h2 className="mt-1 text-lg font-extrabold text-white">{isTest ? cur.moduleTitle : cur.lessonTitle}</h2>
+          <p className="mt-1 text-sm text-blue-200/80">
+            {isTest ? t("dashboard.courseTestWhy") : t("dashboard.courseReadWhy")}
+          </p>
+          <button
+            onClick={isTest ? onCourseTest : () => onOpenLesson(cur.lessonId)}
+            className="mt-4 inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white hover:bg-blue-700 sm:w-auto sm:px-8"
+          >
+            {isTest ? t("dashboard.courseStartTest") : t("dashboard.courseStartLesson")} ▶
+          </button>
+        </div>
+
+        <section>
+          <h3 className="mb-2 text-sm font-semibold text-gray-400">{t("dashboard.todayPathTitle")}</h3>
+          <div className="space-y-2">
+            <PathStep
+              state={isTest ? "done" : "now"}
+              n={1}
+              label={t("dashboard.courseStepRead", { n: cur.n })}
+              onClick={isTest ? undefined : () => onOpenLesson(cur.lessonId)}
+            />
+            <PathStep
+              state={isTest ? "now" : "next"}
+              n={2}
+              label={t("dashboard.courseStepTest", { n: cur.n })}
+              onClick={isTest ? onCourseTest : undefined}
+            />
+            {course.next && (
+              <PathStep
+                state="next"
+                n={3}
+                label={t("dashboard.courseStepNext", { n: course.next.n, title: course.next.moduleTitle })}
+              />
+            )}
+          </div>
+        </section>
+
+        <p className="text-sm text-gray-400">
+          {t("dashboard.courseProgress", { done: course.done, total: course.total })}
+        </p>
+      </div>
+    );
+  }
 
   // Hero action: weakest area first (specific + motivating), else the API's
   // generic recommendation, else a plain short session.

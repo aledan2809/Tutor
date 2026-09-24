@@ -340,6 +340,16 @@
     "todayStep2": "Fix weak area: {topic}",
     "todayStep2Generic": "Fix a weak area",
     "todayStep3": "Full simulation",
+    "courseLessonLabel": "Lesson {n} of {total}",
+    "courseReadWhy": "Read the lesson; its test opens right after.",
+    "courseTestLabel": "Module {n} of {total} test",
+    "courseTestWhy": "You've read the lesson. The questions come only from what you've read.",
+    "courseStartLesson": "Start the lesson",
+    "courseStartTest": "Start the test",
+    "courseStepRead": "Read lesson {n}",
+    "courseStepTest": "Module {n} test (questions from what you've read)",
+    "courseStepNext": "Lesson {n}: {title}",
+    "courseProgress": "Course progress: {done} of {total} modules",
     "todayStreakDays": "{n} days in a row",
     "bibliographyTitle": "Bibliography",
     "progressTitle": "Statistics",
@@ -1220,6 +1230,7 @@
     "more": "Details in Help"
   },
   "practice": {
+    "courseGateOpenLesson": "Open the lesson",
     "courseGate": "Finish a lesson to unlock the test for its module."
   },
   "acces": {
