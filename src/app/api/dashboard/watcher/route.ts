@@ -18,15 +18,15 @@ async function _GET(req: NextRequest) {
   const domainId = searchParams.get("domainId");
 
   // Scoping PER SUBJECT (guardian.ts `watcherScope`): where they teach, every student of that
-  // subject; where they are only a parent, their own children and nobody else. A subject id in the
-  // URL counts only if they have a role on it.
+  // subject. Their own children, on EVERY subject the child studies — also one the parent has no
+  // enrollment on: a subject added to the child later used to leave the child missing from this
+  // list (the parent was only WATCHER on the old subjects), while the child's page already showed
+  // everything. Nobody else's child, anywhere. A subject id in the URL narrows; it never widens.
   const scope = requestedWatcherDomains(watcherScope(session!.user.enrollments), domainId);
-  const linkedChildIds = scope.watchOnly.length ? await getLinkedChildIds(userId) : [];
+  const linkedChildIds = await getLinkedChildIds(userId);
   const visible = [
     ...(scope.teaching.length ? [{ domainId: { in: scope.teaching }, userId: { not: userId } }] : []),
-    ...(scope.watchOnly.length && linkedChildIds.length
-      ? [{ domainId: { in: scope.watchOnly }, userId: { in: linkedChildIds } }]
-      : []),
+    ...(linkedChildIds.length ? [{ userId: { in: linkedChildIds }, ...(domainId ? { domainId } : {}) }] : []),
   ];
 
   // Get students in these domains, scoped to the watcher's allowed set.

@@ -39,6 +39,8 @@ try {
     enr(antonia, A, ["ADMIN"]), enr(antonia, B, ["WATCHER"]),
     enr(rares, A, ["STUDENT"]), enr(rares, B, ["STUDENT"]),
     enr(x, B, ["STUDENT"]), enr(y, A, ["STUDENT"]), enr(z, C, ["STUDENT"]),
+    // Rareș primește și materia C, unde Antonia nu are niciun rol (o materie adăugată copilului mai târziu).
+    enr(rares, C, ["STUDENT"]),
   ]);
   await prisma.guardian.create({ data: { parentId: antonia.id, childId: rares.id, relation: "PARENT", status: "active" } });
 
@@ -60,7 +62,10 @@ try {
   check("NU vede elevul Z de la o materie pe care n-are niciun rol (C)", !ids.has(z.id));
 
   const listC = await (await ctx.get(`/api/dashboard/watcher?domainId=${C.id}`)).json();
-  check("cerând explicit materia C în adresă → niciun elev", (listC.students ?? []).length === 0, `${(listC.students ?? []).length} elevi`);
+  const idsC = new Set((listC.students ?? []).map((st) => st.id));
+  check("materia C (fără rol, dar copilul ei o are) → doar copilul ei, nu Z", idsC.has(rares.id) && !idsC.has(z.id), `${idsC.size} elevi`);
+  const rInList = (list.students ?? []).find((st) => st.id === rares.id);
+  check("în lista generală, copilul apare cu toate cele 3 materii (și C)", (rInList?.domains ?? []).length === 3, `${(rInList?.domains ?? []).length} materii`);
   const listB = await (await ctx.get(`/api/dashboard/watcher?domainId=${B.id}`)).json();
   const idsB = new Set((listB.students ?? []).map((st) => st.id));
   check("pe materia B, doar copilul ei", idsB.has(rares.id) && !idsB.has(x.id), `${idsB.size} elevi`);

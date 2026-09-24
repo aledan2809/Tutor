@@ -925,7 +925,7 @@ Sesiune nouă în domeniul privat **Aptitudini Aviație** (Rareș + admini), cer
 - [x] ✅ **Billing → roluri** — DONE 2026-06-29 (commit la push, LIVE): achiziția unui plan de familie deblochează acum „Familia mea" în nav. Layout-ul dashboard interoghează `subscriptionStatus` + `subscriptionPlan` și calculează `hasFamilyPlan` (`isPaidStatus` + `resolveFamilyPlanFromRecord` cu seat-uri >0); Sidebar gate-uiește secțiunea familie pe `isWatcher || hasFamilyPlan` (+ `isParentView`). Pagina/API `/dashboard/family` rulau deja pe plan (fără cerință de rol WATCHER server-side), deci nav-ul se aliniază acum cu capacitatea reală — fără risc 403. Închide gap-ul „plătit dar meniul blocat".
 - [ ] **WhatsApp invitație rece**: template Meta aprobat `WHATSAPP_INVITE_TEMPLATE` (acțiune user; până atunci email/Telegram cad pe „copiază linkul").
 - [ ] **Email branded** invitații: depinde de itemul Resend DNS `etutor.ro` de mai jos.
-- [ ] **Sync enrollment**: la înscriere ulterioară a copilului la un domeniu nou, guardianul nu e auto-înrolat WATCHER acolo (hook pe `enrollment.create`).
+- [x] **REZOLVAT 2026-09-24 altfel**: lista părintelui arată copilul pe TOATE materiile lui (nu doar unde părintele e WATCHER), deci nu mai trebuie înscris automat. Era: **Sync enrollment**: la înscriere ulterioară a copilului la un domeniu nou, guardianul nu e auto-înrolat WATCHER acolo (hook pe `enrollment.create`).
 - [ ] **Ancoră explicită**: marker de ancoră pe Guardian (acum: familie legacy fără invitație cu ≥2 părinți → nici ancora nu poate cascada scoaterea copilului; fail-safe, under-removes).
 
 ---
