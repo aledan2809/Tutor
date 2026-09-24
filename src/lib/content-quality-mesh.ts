@@ -19,6 +19,7 @@
  */
 
 import { spawn } from "child_process";
+import { geminiGenerateUrl } from "@/lib/gemini-model";
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -90,7 +91,7 @@ async function callGroqJSON(systemPrompt: string, userPrompt: string): Promise<s
   if (geminiKey) {
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+        geminiGenerateUrl(geminiKey),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -524,7 +525,11 @@ function callClaudeCli(prompt: string, timeoutMs = 60_000): Promise<string | nul
     let settled = false;
     const done = (v: string | null) => { if (!settled) { settled = true; resolve(v); } };
     try {
-      const child = spawn("claude", ["-p", prompt, "--output-format", "json", "--model", "sonnet"], { env });
+      // stdin ignorat: CLI-ul așteaptă la un stdin deschis pe care nu-l scrie nimeni (vezi claude-cli.ts).
+      const child = spawn("claude", ["-p", prompt, "--output-format", "json", "--model", "sonnet"], {
+        env,
+        stdio: ["ignore", "pipe", "pipe"],
+      });
       const timer = setTimeout(() => { try { child.kill("SIGKILL"); } catch { /* */ } done(null); }, timeoutMs);
       child.stdout.on("data", (d) => { out += d.toString(); });
       child.on("error", () => { clearTimeout(timer); done(null); });
@@ -569,4 +574,60 @@ export async function finalJudge(
   if (!a.pass) return a;
   if (!b.pass) return b;
   return { pass: true, reason: "", defect: null };
+}
+
+// ── Second opinion on a student's complaint ─────────────────────────────────
+// Judge A's method (solve it yourself, then compare with the marked answer), but for a question
+// that has no stored Source text: the questions students complain about were published long ago
+// and the passage is not kept, so the Source-only Judge A would fail every one on "grounding".
+const JUDGE_A_NO_SOURCE_SYSTEM = `You are a STRICT ANSWER-VERIFIER for a Romanian quiz question. There is no source text: SOLVE the question yourself, from your own knowledge, BEFORE looking at the marked answer. Then compare.
+
+FAIL if ANY holds:
+- The marked correct option is not the right answer → defect "wrong-answer".
+- Two or more options are correct — check each of the four independently → defect "multiple-correct".
+- None of the options is fully correct → defect "no-correct-option".
+- The question depends on a variable, figure, table or exercise that is not given in it → defect "missing-context".
+- The wording is ambiguous enough that a careful student could defend another option → defect "ambiguous".
+
+PASS only if you are confident the marked answer is the unique correct one.
+
+Return JSON: {"verdict":"PASS"|"FAIL","reason":"short, in Romanian","defect":"wrong-answer"|"multiple-correct"|"no-correct-option"|"missing-context"|"ambiguous"|null}`;
+
+export interface SecondOpinion {
+  /** agrees = the marked answer holds up; disagrees = a defect was found; unavailable = no judgment. */
+  verdict: "agrees" | "disagrees" | "unavailable";
+  defect: string | null;
+  reason: string;
+}
+
+/**
+ * An independent re-solve of a question a student complained about.
+ *
+ * Independent on purpose: it is given the question and its marked answer only — never the
+ * student's comment, never the first reviewer's verdict. A second opinion that reads the first
+ * one ends up agreeing with it, which is how a wrong dismissal gets confirmed twice.
+ *
+ * Tries the strong Claude judge first (subscription, $0), then the Groq cascade with Judge A's
+ * method. An error or an unparsable answer is "unavailable" — never a verdict: a judge that could
+ * not run must not be counted as agreeing, nor as finding a defect.
+ */
+export async function secondOpinion(question: QuestionForMesh): Promise<SecondOpinion> {
+  if (process.env.MESH_CLAUDE_JUDGE !== "0") {
+    const claude = await runClaudeJudge(question);
+    if (claude) {
+      return claude.pass
+        ? { verdict: "agrees", defect: null, reason: "" }
+        : { verdict: "disagrees", defect: claude.defect, reason: claude.reason };
+    }
+  }
+  try {
+    const raw = await callGroqJSON(JUDGE_A_NO_SOURCE_SYSTEM, formatQuestionForLens(question));
+    const parsed = safeParseJSON(raw) as { verdict?: string; reason?: string; defect?: string } | null;
+    const v = String(parsed?.verdict ?? "").toUpperCase();
+    if (v === "PASS") return { verdict: "agrees", defect: null, reason: parsed?.reason || "" };
+    if (v === "FAIL") return { verdict: "disagrees", defect: parsed?.defect || null, reason: parsed?.reason || "" };
+    return { verdict: "unavailable", defect: null, reason: "răspuns neinterpretabil" };
+  } catch (err) {
+    return { verdict: "unavailable", defect: null, reason: (err as Error).message.slice(0, 200) };
+  }
 }

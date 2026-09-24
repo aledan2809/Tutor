@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { withErrorHandler } from "@/lib/api-handler";
 import { ingestPDF, ingestFromURL, type IngestPassage } from "@/lib/pdf-ingest";
 import { screenBatchWithFix, finalJudge, hasMissingContextRef, type QuestionForMesh } from "@/lib/content-quality-mesh";
+import { geminiGenerateUrl } from "@/lib/gemini-model";
 
 // Concurrency-limited async map (keeps Groq calls bounded during stage-2 judging).
 async function mapLimit<T, R>(items: T[], limit: number, fn: (t: T, i: number) => Promise<R>): Promise<R[]> {
@@ -63,7 +64,7 @@ async function callTextAI(prompt: string): Promise<string> {
   if (geminiKey) {
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+        geminiGenerateUrl(geminiKey),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

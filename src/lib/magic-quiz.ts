@@ -9,6 +9,7 @@
 
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
+import { geminiGenerateUrl } from "@/lib/gemini-model";
 
 export interface MagicQuestion {
   content: string;
@@ -188,7 +189,7 @@ async function callTextAI(prompt: string): Promise<{ raw: string; provider: stri
   if (geminiKey) {
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+        geminiGenerateUrl(geminiKey),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

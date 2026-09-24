@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { withErrorHandler } from "@/lib/api-handler";
 import { screenBatch, type QuestionForMesh } from "@/lib/content-quality-mesh";
+import { geminiGenerateUrl } from "@/lib/gemini-model";
 
 const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".jfif", ".webp", ".bmp", ".tiff", ".tif"];
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -45,7 +46,7 @@ async function callVisionAI(base64: string, prompt: string): Promise<string> {
   // 1. Gemini
   if (geminiKey) {
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
+      const res = await fetch(geminiGenerateUrl(geminiKey), {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }],

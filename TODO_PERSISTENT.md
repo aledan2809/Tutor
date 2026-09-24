@@ -714,13 +714,22 @@ recreditate, 15 anulate, 6 rânduri de progres recalculate. Copie de siguranță
 1. [x] **LIVRAT 2026-08-31** — **`dismissed` și `flagged` nu mai închid firul.** Stare nouă de așteptare; `resolved`
    doar după confirmare umană. `dismissed` e cel periculos — îi spune unui copil că se
    înșeală — deci **nu ajunge la elev înainte de confirmare**.
-2. [ ] **NEÎNCEPUT** — **A doua judecată = re-rezolvare independentă**, nu recitire a primului verdict (altfel
+2. [x] **LIVRAT 2026-09-24** — a doua opinie (`secondOpinion` în `content-quality-mesh.ts`): judecătorul Claude, apoi
+   metoda lui JUDGE_A fără text-sursă (întrebările nu-și păstrează pasajul, deci JUDGE_A pe sursă ar fi picat pe toate).
+   Nu vede comentariul elevului, nici primul verdict. O respingere contrazisă devine „flagged" (tot la om). Rulările
+   care se suprapun își rezervă reclamațiile (`new → reviewing`). Script pentru cele 8 vechi: `scripts/backfill-second-opinion.ts`.
+   Pe drum: modelul Gemini retras (`gemini-2.0-flash`, 404) înlocuit în 6 locuri cu `GEMINI_TEXT_MODEL` (implicit
+   `gemini-flash-latest`) + Mistral ca a treia rezervă în `callTextAI` — pe 24.09 Groq atinsese limita zilnică
+   comună, deci verificarea reclamațiilor și generarea de grile nu aveau niciun furnizor.
+   *Istoric:* **A doua judecată = re-rezolvare independentă**, nu recitire a primului verdict (altfel
    doar îl confirmă). Refolosește `JUDGE_A` din `src/lib/content-quality-mesh.ts`, care deja
    rezolvă singur întrebarea și compară cu răspunsul marcat. NU construi verificator nou.
 3. [x] **LIVRAT 2026-08-31** (+ alertă Telegram cu link direct la firul respectiv, verdict în
    doi pași și răspuns scris către elev) — **Coadă vizibilă pentru SuperAdmin + părinte**, cu: ce a scris elevul, verdictul automat
    + motivarea lui, întrebarea, acțiunea propusă, și de câte zile așteaptă.
-4. [ ] **NEÎNCEPUT** — **Reminder zilnic pe Telegram către SuperAdmin până la zero.** ⚠️ Mesajul trebuie să
+4. [x] **LIVRAT 2026-09-24** — `/api/cron/feedback-digest`: câte un mesaj pe reclamație (max 5, cele mai vechi
+   primele) cu ce a scris elevul, întrebarea, ambele verdicte, recomandarea și butonul „Decide acum". Nimic când coada e goală.
+   *Istoric:* **Reminder zilnic pe Telegram către SuperAdmin până la zero.** ⚠️ Mesajul trebuie să
    conțină **decizia**, nu numărul: „ai 7 în așteptare" repetat zilnic devine zgomot și e
    ignorat — exact mecanismul care a produs incidentul. Confirmare/respingere dintr-o apăsare.
 5. **Bază de pornire**: 39 de feedback-uri istorice. NU le deschide pe toate deodată (zid

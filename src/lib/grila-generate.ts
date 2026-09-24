@@ -8,6 +8,7 @@
  */
 import mammoth from "mammoth";
 import { ingestPDF, cleanText, segmentPassages, type IngestPassage } from "@/lib/pdf-ingest";
+import { geminiGenerateUrl } from "@/lib/gemini-model";
 
 export type DocFileType = "pdf" | "docx" | "txt";
 
@@ -74,7 +75,7 @@ export async function callTextAI(prompt: string): Promise<string> {
   if (geminiKey) {
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+        geminiGenerateUrl(geminiKey),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -87,6 +88,32 @@ export async function callTextAI(prompt: string): Promise<string> {
       if (res.ok) {
         const data = await res.json();
         return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      }
+    } catch {
+      /* fall through */
+    }
+  }
+
+  // Mistral fallback — the same third provider `content-quality-mesh.ts` already uses. Without it,
+  // a day when Groq's shared daily limit is spent and Gemini refuses leaves callers (the review of
+  // student complaints, grilă generation) with no provider at all.
+  const mistralKey = process.env.MISTRAL_API_KEY;
+  if (mistralKey) {
+    try {
+      const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${mistralKey}` },
+        body: JSON.stringify({
+          model: "mistral-small-latest",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.3,
+          response_format: { type: "json_object" },
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.choices?.[0]?.message?.content || "";
+        if (text) return text;
       }
     } catch {
       /* fall through */

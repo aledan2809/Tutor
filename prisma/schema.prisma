@@ -1782,6 +1782,12 @@ model QuestionFeedback {
   overriddenById  String?
   overrideNote    String?   @db.Text
   overriddenAt    DateTime?
+  /// A doua opinie: o re-rezolvare independentă a întrebării, care NU vede primul verdict și nici
+  /// comentariul elevului. "agrees" (răspunsul marcat pare corect) | "disagrees" (a găsit o problemă)
+  /// | "unavailable" (n-a putut judeca). Null = nu s-a cerut (doar verdictele care așteaptă un om).
+  secondOpinion     String?
+  secondOpinionNote String?   @db.Text
+  secondOpinionAt   DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 

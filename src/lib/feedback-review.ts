@@ -12,9 +12,12 @@ import { prisma } from "@/lib/prisma";
 import { callTextAI } from "@/lib/grila-generate";
 import { telegramAlertToUser } from "@/lib/notifications/service";
 import { sendAppEmail } from "@/lib/email";
+import { secondOpinion, type SecondOpinion } from "@/lib/content-quality-mesh";
 
 const APP_URL = (process.env.AUTH_URL ?? "https://etutor.ro").replace(/\/$/, "");
 const MAX_PER_RUN = 20;
+/** A claim older than this belonged to a run that died; the item goes back to the queue. */
+const STALE_CLAIM_MS = 30 * 60_000;
 
 export interface Judgment {
   valid: boolean;
@@ -183,6 +186,39 @@ export function tellsStudentNow(action: ReviewAction): boolean {
   return action !== "dismissed";
 }
 
+/**
+ * What a second, independent opinion changes.
+ *
+ * Only one thing: a dismissal the second judge disagrees with stops being a dismissal. It becomes
+ * "flagged" — still waiting for a person, but no longer telling anyone the child was wrong, and the
+ * decision text says plainly that the two judges disagree. An agreeing or unavailable second opinion
+ * changes nothing: the verdict still waits for a human, it just arrives with more to go on.
+ */
+export function applySecondOpinion(
+  action: ReviewAction,
+  decision: string,
+  op: SecondOpinion | null,
+): { action: ReviewAction; decision: string } {
+  if (action === "dismissed" && op?.verdict === "disagrees") {
+    const what = [op.defect, op.reason].filter(Boolean).join(": ");
+    return {
+      action: "flagged",
+      decision: `Verificatorii nu sunt de acord: primul a respins reclamația, al doilea, independent, a găsit o problemă${what ? ` (${what})` : ""}. Probabil elevul are dreptate — de confirmat de un om.`,
+    };
+  }
+  return { action, decision };
+}
+
+/** One line for the admin: what the second opinion said, in plain words. */
+export function describeSecondOpinion(op: SecondOpinion): string {
+  if (op.verdict === "agrees") return "A doua verificare, independentă, confirmă răspunsul marcat.";
+  if (op.verdict === "disagrees") {
+    const what = [op.defect, op.reason].filter(Boolean).join(": ");
+    return `A doua verificare, independentă, a găsit o problemă${what ? `: ${what}` : ""}.`;
+  }
+  return `A doua verificare n-a putut judeca (${op.reason || "indisponibilă"}).`;
+}
+
 export function decideReviewAction(
   j: Judgment,
   isPrivate: boolean,
@@ -223,6 +259,15 @@ export async function runFeedbackReview(): Promise<{
 }> {
   const stats = { reviewed: 0, corrected: 0, hidden: 0, flagged: 0, dismissed: 0, productFlagged: 0 };
 
+  // Runs can overlap: the cron fires every 15 min, and a run that waits on second opinions can take
+  // longer than that. Each item is CLAIMED (new → reviewing) before it is judged, so two runs never
+  // judge the same complaint — two different verdicts, and a student told twice. A claim left by a
+  // run that died is released after STALE_CLAIM_MS.
+  await prisma.questionFeedback.updateMany({
+    where: { status: "reviewing", updatedAt: { lt: new Date(Date.now() - STALE_CLAIM_MS) } },
+    data: { status: "new" },
+  });
+
   const items = await prisma.questionFeedback.findMany({
     where: { status: "new", rating: "down" },
     orderBy: { createdAt: "asc" },
@@ -237,6 +282,15 @@ export async function runFeedbackReview(): Promise<{
   const adminIds = admins.map((a) => a.id);
 
   for (const fb of items) {
+    const claim = await prisma.questionFeedback.updateMany({
+      where: { id: fb.id, status: "new" },
+      data: { status: "reviewing" },
+    });
+    if (claim.count === 0) continue; // another run has it
+    const release = () =>
+      prisma.questionFeedback
+        .updateMany({ where: { id: fb.id, status: "reviewing" }, data: { status: "new" } })
+        .catch(() => {});
     try {
       const q = await prisma.question.findUnique({
         where: { id: fb.questionId },
@@ -258,10 +312,18 @@ export async function runFeedbackReview(): Promise<{
         comment: fb.comment,
       });
       stats.reviewed++;
-      if (!j) continue; // AI unavailable — leave it "new" for the next run
+      if (!j) {
+        await release(); // AI unavailable — back to "new" for the next run
+        continue;
+      }
 
-      // Pure decision, then apply the side-effect for that action.
-      const { action, decision } = decideReviewAction(j, isPrivate, options, fb.comment);
+      // Pure decision, then — for the verdicts that wait for a person — an independent second
+      // opinion, then the side-effect for the resulting action.
+      const first = decideReviewAction(j, isPrivate, options, fb.comment);
+      const op = needsHumanConfirmation(first.action)
+        ? await secondOpinion({ content: q.content, options, correctAnswer: q.correctAnswer, explanation: q.explanation ?? undefined })
+        : null;
+      const { action, decision } = applySecondOpinion(first.action, first.decision, op);
       if (action === "corrected") {
         await prisma.question.update({ where: { id: q.id }, data: { correctAnswer: j.correctedAnswer! } });
         stats.corrected++;
@@ -286,10 +348,15 @@ export async function runFeedbackReview(): Promise<{
           reviewIssue:
             action === "product_flagged"
               ? j.issue || fb.comment || ""
-              : j.valid
-                ? j.issue
-                : j.reason,
+              : action !== first.action && op
+                ? op.reason || op.defect || "" // a flipped dismissal: the problem is what the 2nd judge found
+                : j.valid
+                  ? j.issue
+                  : j.reason,
           correctedAnswer: action === "corrected" ? j.correctedAnswer : null,
+          ...(op
+            ? { secondOpinion: op.verdict, secondOpinionNote: describeSecondOpinion(op), secondOpinionAt: new Date() }
+            : {}),
         },
       });
 
@@ -321,7 +388,9 @@ export async function runFeedbackReview(): Promise<{
         await deliverToStudent(fb.userId, userTitle, studentMsg, url, meta, true);
       }
       // Admins (skip the complaining user) — in-app + Telegram where linked.
-      const adminTitle = needsHumanConfirmation(action)
+      const adminTitle = action !== first.action
+        ? `⚠️ DE CONFIRMAT — verificatorii nu sunt de acord, probabil elevul are dreptate (${domain?.name ?? "?"})`
+        : needsHumanConfirmation(action)
         ? `⏳ DE CONFIRMAT — ${action === "dismissed" ? "urmează să-i spunem elevului că nu are dreptate" : "reviewerul nu a putut decide"} (${domain?.name ?? "?"})`
         : action === "product_flagged"
           ? `🛠️ Problemă de produs/UX semnalată (${domain?.name ?? "?"})`
@@ -329,12 +398,13 @@ export async function runFeedbackReview(): Promise<{
       await notifyAdmins(
         adminIds.filter((id) => id !== fb.userId),
         adminTitle,
-        `${action.toUpperCase()} — ${decision}${fb.comment ? ` · comentariu: „${fb.comment}"` : ""}`,
+        `${action.toUpperCase()} — ${decision}${fb.comment ? ` · comentariu: „${fb.comment}"` : ""}${op && action === first.action ? `\n${describeSecondOpinion(op)}` : ""}`,
         url,
         meta
       );
     } catch (err) {
       console.error(`[feedback-review] ${fb.id} failed:`, (err as Error).message);
+      await release();
     }
   }
 

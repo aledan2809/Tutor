@@ -23,6 +23,8 @@ interface Detail {
   reviewAction: string | null;
   reviewIssue: string | null;
   correctedAnswer: string | null;
+  secondOpinion?: string | null;
+  secondOpinionNote?: string | null;
   overrideNote: string | null;
   overriddenAt: string | null;
   needsAdmin: boolean;
@@ -323,6 +325,13 @@ function FeedbackDetailModal({
               </p>
               {d.reviewIssue && <p className="text-gray-300">Problemă identificată: {d.reviewIssue}</p>}
               {d.resolution && <p className="mt-1 text-gray-400">{d.resolution}</p>}
+              {d.secondOpinionNote && (
+                <p
+                  className={`mt-1 ${d.secondOpinion === "disagrees" ? "text-amber-300" : d.secondOpinion === "agrees" ? "text-green-300" : "text-gray-400"}`}
+                >
+                  {d.secondOpinionNote}
+                </p>
+              )}
               {d.overrideNote && (
                 <p className="mt-1 text-blue-300">Notă admin: {d.overrideNote}</p>
               )}

@@ -5,6 +5,7 @@ import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 import { screenBatch, type QuestionForMesh } from "@/lib/content-quality-mesh";
 import { cleanText as cleanText_pdf } from "@/lib/pdf-ingest";
+import { geminiGenerateUrl } from "@/lib/gemini-model";
 
 const schema = z.object({
   domainId: z.string().min(1),
@@ -43,7 +44,7 @@ async function callTextAI(prompt: string): Promise<string> {
   if (geminiKey) {
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+        geminiGenerateUrl(geminiKey),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

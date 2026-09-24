@@ -30,6 +30,9 @@ export interface FeedbackDetail {
   reviewAction: string | null;
   reviewIssue: string | null;
   correctedAnswer: string | null;
+  /** The independent re-solve (agrees | disagrees | unavailable) + its plain-words line. */
+  secondOpinion: string | null;
+  secondOpinionNote: string | null;
   overriddenById: string | null;
   overrideNote: string | null;
   overriddenAt: Date | null;
@@ -116,12 +119,16 @@ export async function buildFeedbackDetail(
     reviewAction: fb.reviewAction,
     reviewIssue: fb.reviewIssue,
     correctedAnswer: fb.correctedAnswer,
+    secondOpinion: fb.secondOpinion,
+    secondOpinionNote: fb.secondOpinionNote,
     overriddenById: fb.overriddenById,
     overrideNote: fb.overrideNote,
     overriddenAt: fb.overriddenAt,
     createdAt: fb.createdAt,
-    needsAdmin: fb.reviewAction === "flagged",
-    isAuto: ["corrected", "hidden", "dismissed"].includes(fb.reviewAction ?? ""),
+    // A dismissal waiting for a person is NOT "resolved automatically" — it is exactly the verdict
+    // that must not stand without one.
+    needsAdmin: fb.status === "pending_review" || fb.reviewAction === "flagged",
+    isAuto: fb.status === "resolved" && ["corrected", "hidden", "dismissed"].includes(fb.reviewAction ?? ""),
     student: { name: student?.name ?? null, email: student?.email ?? null },
     question: {
       id: q?.id ?? fb.questionId,
