@@ -1,3 +1,17 @@
+**Intrarea cu nume de utilizator + cursul care nu se vedea (24.09, caz Greg / Agent imobiliar):**
+- [x] Pagina de intrare avea câmp de tip email → telefonul refuza „greg” înainte de server (serverul accepta deja
+  numele). Acum „Email sau nume de utilizator”, căutare cu litere mici, în Administrare „utilizator: …” la conturile
+  fără email + căutare după nume. LIVE `cc9465f`, verificat 11/11 în browser (`Reports/greg-login-2026-09-24/`).
+- [x] „Nu vede cursul”: înscrierea din Administrare ajunsese pe contul „greg”, nu pe al doilea cont (cu email) creat
+  de admin. Conturile unite în „greg” (decizie Alex): contul cu parola dată de admin șters (0 activitate), emailul
+  mutat pe „greg”. Backup `/root/backups/tutor-pre-greg-merge-2026-09-24.dump`, SQL în `Reports/greg-login-2026-09-24/`.
+  **De spus lui Greg**: intră cu „greg” sau cu emailul, cu parola aleasă la invitație (nu cea primită de la Alex).
+- [x] **Al doilea curs dintr-o materie** — poarta de test lua doar primul curs publicat, deci testele unui al doilea
+  curs nu se deschideau niciodată; la fel pagina „Cursanți” (munca de la al doilea curs invizibilă). Acum toate
+  cursurile, iar un subiect de test comun la două cursuri se deschide doar când ambele module sunt citite. Pe prod
+  azi nicio materie n-are două cursuri (eroare latentă). Verificat 7/7 pe bază + 3/3 în browser, contraprobă pe codul
+  vechi 4/6 (`Reports/al-doilea-curs-2026-09-24/`).
+
 **Prezența conturilor în Administrare (23.09, cerere Alex):** tabelul SuperAdmin → Utilizatori arată
 **ultima conectare** (cu materia pe care a lucrat atunci), **vizitele** și **timpul petrecut** într-o
 perioadă aleasă (Azi / 7 zile / 30 de zile). De azi se măsoară real — pagina trimite un semnal discret
@@ -434,7 +448,13 @@ Context complet: `Reports/VERIFICARE-ADEVAR-posta-2026-09-10.md`.
 
 ---
 
-## [ ] ⚠️ Legal Hub: `terms` lipsește pentru tutor (găsit 2026-09-10)
+## [x] ✅ Legal Hub: Termenii Tutor EXISTĂ — alarmă falsă, închisă 2026-09-24
+
+Verificat 24.09: documentul e tipul `tos` (nu `terms`), vE1.0 din 05.09, PER_APP; `legal.knowbest.ro/ro/terms/tutor`
+200, iar `etutor.ro/ro/terms` îl randează din hub. Proba din 10.09 întrebase API-ul cu tipul greșit (`/tutor/terms` →
+404). Nimic de scris în Legal.
+
+### (istoric) Legal Hub: `terms` lipsește pentru tutor (găsit 2026-09-10)
 
 Pagina `/posta` spune clientului „politicile sunt publice și versionate". Verificat:
 `privacy` **200** (vE1.0, cu amprentă) · `cookies` **200** · **`terms` 404**.

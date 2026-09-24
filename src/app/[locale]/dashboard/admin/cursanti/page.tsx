@@ -82,19 +82,25 @@ export default async function CursantiPage({
 
   const active = domains.find((d) => d.id === materie) ?? domains[0];
 
-  // ── modulele materiei, în ordinea cursului ────────────────────────────────
-  const course = await prisma.course.findFirst({
+  // ── modulele materiei, în ordinea cursurilor ──────────────────────────────
+  // TOATE cursurile publicate, în aceeași ordine ca poarta de test (`courseTopicsFor`):
+  // cu doar primul curs, munca de la al doilea n-ar apărea deloc în tablou.
+  const courses = await prisma.course.findMany({
     where: { domainId: active.id, isPublished: true },
-    orderBy: { createdAt: "asc" },
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
     select: {
       id: true,
+      title: true,
       modules: {
         orderBy: { order: "asc" },
         select: { id: true, order: true, title: true, questionTopic: true },
       },
     },
   });
-  const modules = course?.modules ?? [];
+  // Cu mai multe cursuri, titlul coloanei spune și cursul — „Introducere" poate fi în două.
+  const modules = courses.flatMap((c) =>
+    c.modules.map((m) => (courses.length > 1 ? { ...m, title: `${c.title} · ${m.title}` } : m))
+  );
 
   const lessons = await prisma.lesson.findMany({
     where: { domainId: active.id, isPublished: true },

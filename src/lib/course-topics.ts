@@ -40,11 +40,18 @@ export function unlockedCourseTopics(
   modules: readonly CourseModuleProgress[],
   completedLessonIds: ReadonlySet<string>,
 ): string[] {
+  // Un subiect de test purtat de mai multe module (două cursuri pot avea fiecare o
+  // „Introducere") se deschide doar când TOATE modulele care îl poartă sunt citite:
+  // întrebările se leagă de subiect, nu de curs, deci altfel lectura unui curs ar
+  // deschide testul celuilalt.
+  const unread = new Set<string>();
+  for (const m of modules) {
+    if (m.questionTopic && !m.lessonIds.every((id) => completedLessonIds.has(id))) unread.add(m.questionTopic);
+  }
   const out: string[] = [];
   for (const m of modules) {
-    if (!m.questionTopic) continue;
-    const allRead = m.lessonIds.every((id) => completedLessonIds.has(id));
-    if (allRead) out.push(m.questionTopic);
+    if (!m.questionTopic || unread.has(m.questionTopic) || out.includes(m.questionTopic)) continue;
+    out.push(m.questionTopic);
   }
   return out;
 }
@@ -65,9 +72,13 @@ export function courseReadingProgress(
  * `null` înseamnă „materia nu are curs publicat" — apelantul se poartă exact ca
  * înainte. Un array gol înseamnă „are curs, dar n-a terminat nicio lecție", ceea
  * ce e un mesaj util, nu o bancă goală.
+ *
+ * Se uită la TOATE cursurile publicate ale materiei, nu doar la primul. Înainte lua
+ * doar primul curs: modulele unui al doilea curs nu intrau niciodată în listă, deci
+ * testul lor rămânea închis oricâte lecții ar fi terminat omul.
  */
 export async function courseTopicsFor(userId: string, domainId: string): Promise<string[] | null> {
-  const course = await prisma.course.findFirst({
+  const courses = await prisma.course.findMany({
     where: { domainId, isPublished: true },
     orderBy: [{ order: "asc" }, { createdAt: "asc" }],
     select: {
@@ -81,9 +92,10 @@ export async function courseTopicsFor(userId: string, domainId: string): Promise
       },
     },
   });
-  if (!course || course.modules.length === 0) return null;
+  const courseModules = courses.flatMap((c) => c.modules);
+  if (courseModules.length === 0) return null;
 
-  const modules: CourseModuleProgress[] = course.modules.map((m) => ({
+  const modules: CourseModuleProgress[] = courseModules.map((m) => ({
     order: m.order,
     questionTopic: m.questionTopic,
     lessonIds: m.lessons.map((l) => l.id),
