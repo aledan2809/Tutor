@@ -181,9 +181,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         //
         // Emailul se caută PRIMUL, deci pentru conturile de azi nimic nu se
         // schimbă; numele de utilizator e o a doua încercare, nu o înlocuire.
+        // Numele de utilizator se salvează cu litere mici (vezi /api/acces/activare),
+        // iar telefoanele scriu prima literă mare: „Greg" trebuie să găsească „greg".
         const user =
           (await prisma.user.findUnique({ where: { email: identifier } })) ??
-          (await prisma.user.findUnique({ where: { username: identifier } }));
+          (await prisma.user.findUnique({ where: { username: identifier.toLowerCase() } }));
         if (!user?.password) return null;
         const valid = await bcrypt.compare(
           credentials.password as string,

@@ -30,6 +30,8 @@ async function _GET(req: NextRequest) {
           OR: [
             { name: { contains: search, mode: "insensitive" as const } },
             { email: { contains: search, mode: "insensitive" as const } },
+            // Invited field staff have no email, only a username — findable by it too.
+            { username: { contains: search, mode: "insensitive" as const } },
             // Also by code: typing V126S answers „who used this code" without leaving the list.
             { voucherRedemptions: { some: { voucher: { code: { contains: search, mode: "insensitive" as const } } } } },
             { pendingVoucherCode: { contains: search, mode: "insensitive" as const } },
@@ -49,6 +51,7 @@ async function _GET(req: NextRequest) {
         id: true,
         name: true,
         email: true,
+        username: true,
         image: true,
         isSuperAdmin: true,
         isBanned: true,

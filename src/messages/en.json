@@ -19,6 +19,7 @@
     "signInTitle": "Sign in to Tutor",
     "signInDescription": "Access your adaptive learning platform",
     "emailLabel": "Email address",
+    "identifierLabel": "Email or username",
     "emailPlaceholder": "you@example.com",
     "continueWithGoogle": "Continue with Google",
     "continueWithEmail": "Continue with Email",
@@ -34,7 +35,7 @@
     "forgotPassword": "Forgot password?",
     "useMagicLink": "Use magic link instead",
     "usePassword": "Use password instead",
-    "invalidCredentials": "Invalid email or password",
+    "invalidCredentials": "Invalid email/username or password",
     "networkError": "We could not send the request. Check your connection and try again.",
     "phoneRecovery": "No email? Recover by phone"
   },

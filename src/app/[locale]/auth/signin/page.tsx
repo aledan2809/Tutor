@@ -125,15 +125,23 @@ export default function SignInPage() {
                 htmlFor="email"
                 className="mb-1.5 block text-sm font-medium text-gray-300"
               >
-                {t("emailLabel")}
+                {t("identifierLabel")}
               </label>
+              {/* type="text", nu "email": conturile create prin invitație (oameni de teren)
+                  au doar nume de utilizator, iar un câmp de email îl refuza în browser
+                  înainte să ajungă la server. */}
               <input
                 id="email"
-                type="email"
+                type="text"
+                inputMode="email"
+                autoComplete="username"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                title="Enter your email address"
+                placeholder={locale === "ro" ? "email sau nume de utilizator" : "email or username"}
+                title={locale === "ro" ? "Adresa de email sau numele de utilizator" : "Your email address or username"}
                 required
                 className="min-h-[44px] mb-3 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />

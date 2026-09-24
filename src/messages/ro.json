@@ -19,6 +19,7 @@
     "signInTitle": "Autentifică-te în Tutor",
     "signInDescription": "Accesează platforma ta de învățare adaptivă",
     "emailLabel": "Adresă de email",
+    "identifierLabel": "Email sau nume de utilizator",
     "emailPlaceholder": "tu@exemplu.com",
     "continueWithGoogle": "Continuă cu Google",
     "continueWithEmail": "Continuă cu Email",
@@ -34,7 +35,7 @@
     "forgotPassword": "Ai uitat parola?",
     "useMagicLink": "Folosește magic link",
     "usePassword": "Folosește parola",
-    "invalidCredentials": "Email sau parolă incorectă",
+    "invalidCredentials": "Email/nume de utilizator sau parolă incorectă",
     "networkError": "Nu am putut trimite cererea. Verifică conexiunea și încearcă din nou.",
     "phoneRecovery": "Nu ai email? Recuperează pe telefon"
   },

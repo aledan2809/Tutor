@@ -16,6 +16,7 @@ interface UserRow {
   id: string;
   name: string | null;
   email: string | null;
+  username?: string | null;
   image: string | null;
   isSuperAdmin: boolean;
   isBanned: boolean;
@@ -490,7 +491,17 @@ export function UserManagement() {
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-300">{user.email}</td>
+                  <td className="px-4 py-3 text-gray-300">
+                    {user.email || (user.username ? (
+                      // Account made from an invitation: no email, signs in with this name.
+                      <span title="Cont creat prin invitație — intră cu numele de utilizator">
+                        <span className="text-gray-500">utilizator:</span> {user.username}
+                      </span>
+                    ) : "—")}
+                    {user.email && user.username && (
+                      <span className="block text-xs text-gray-500">utilizator: {user.username}</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     {user.enrollments.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
