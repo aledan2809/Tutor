@@ -7,6 +7,7 @@ import { isOrgProvidedAccess } from "@/lib/org-entitlement";
 import { resolveDomainByIdOrForbid } from "@/lib/domain-gate";
 import { z } from "zod";
 import { refuseIfPaused } from "@/lib/access-gate";
+import { teachesDomain } from "@/lib/teaching-scope";
 
 const paramsSchema = z.object({
   id: z.string().min(1, "Lesson ID is required"),
@@ -59,6 +60,12 @@ async function _GET(
     // Poarta comună (înscriere + ocolire pentru superadmin + 404 în loc de 403).
     const gate = await resolveDomainByIdOrForbid(lessonModel.domainId, session.user);
     if (!gate.ok) return gate.response;
+
+    // O ciornă nu e a elevului: lista i-o ascunde deja, dar id-ul o deschidea direct. Doar cine
+    // predă materia (sau superadminul) o vede înainte de publicare — la fel de nevăzută ca inexistentă.
+    if (!lessonModel.isPublished && !teachesDomain(session.user, lessonModel.domainId)) {
+      return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
+    }
 
     // Get lesson progress
     const lessonProgress = await prisma.lessonProgress.findUnique({

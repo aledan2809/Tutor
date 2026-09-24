@@ -629,8 +629,7 @@ acces = admin înscrie + cod la nevoie · coloană vertebrală Curs → Modul �
   cumpărătorul de 8 luni, investitorul cu cap rate…), scor 1-10 pe descoperire/ascultare/obiecție/avansare + o
   recomandare. Model nou `TrainingSession`/`TrainingTurn`, cost per mesaj → plafon per user/zi. Se leagă de progres.
 - [ ] **Follow-ups din review-ul rutelor** (neatinse, semnalate): ~~`calendar/schedule` nu validează `studentIds`~~ ✅ 2026-09-24 (doar elevii materiei); `vouchers/redeem` nu are niciun apelant în `src`; `ExamPaper` nelegat de materie (subiectele
-  oficiale sunt publice — nu scurge azi, dar un curs privat cu simulări proprii ar scurge); `Lesson.isPublished`
-  decorativ (nicio cale de citire student nu-l verifică); `Domain.instructorEnabled` mort; geografie/chimie/biologie/
+  oficiale sunt publice — nu scurge azi, dar un curs privat cu simulări proprii ar scurge); ~~`Lesson.isPublished` decorativ~~ ✅ 2026-09-24 (lista filtra deja; deschiderea după id refuză acum ciorna elevului, 3/3 + contraprobă); `Domain.instructorEnabled` mort; geografie/chimie/biologie/
   matematica-ix-xii au 0 întrebări publicate (un elev înscris n-are ce exersa).
 - [ ] **Tehnic**: `tests/unit/reclassify-rule.test.ts` are un `@ts-expect-error` nefolosit (tsc local; build-ul de prod trece).
 
