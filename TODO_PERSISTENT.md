@@ -692,7 +692,16 @@ Blocajul e frecarea, nu motivația.
 
 ---
 
-## [ ] 🔴 Verdictul pe feedback-ul elevului nu mai are voie să fie final fără om (creat 2026-08-26)
+## [x] ✅ Verdictul pe feedback-ul elevului nu mai e final fără om — COMPLET 2026-09-24 (`9bbcace`+`e467f11`)
+
+**Stare 24.09**: toți cei 4 pași livrați. Cele 8 reclamații vechi au a doua opinie (4 confirmă răspunsul, 4 sunt
+exerciții dictate — nu se pot judeca din text, rămân la om). Cron zilnic `0 6 * * *` UTC (09:00 RO) spre
+`/api/cron/feedback-digest` (backup crontab `/root/backups/crontab.bak-2026-09-24-pre-feedback-digest`); prima
+trimitere verificată: 8 în așteptare, 5 mesaje pe Telegram + încheiere. **Rămâne la Alex**: cele 8 decizii
+(butonul „Decide acum" din fiecare mesaj). Observație: 4 dintre ele sunt de fapt reclamații de PLATFORMĂ
+(„robotul vorbește prea repede") clasate greșit ca respingeri — viteza vocii e deja reglabilă din Setări.
+
+### (istoric) Verdictul pe feedback-ul elevului nu mai are voie să fie final fără om (creat 2026-08-26)
 
 **De ce**: Rareș a raportat răspunsuri greșite din **29 iunie**. Verificate manual pe
 2026-08-26: avea dreptate în **7 din 9** reclamații pe conținut. Una i-a fost **respinsă**
