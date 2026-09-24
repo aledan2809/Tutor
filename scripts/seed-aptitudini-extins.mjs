@@ -12,7 +12,7 @@
  * (on the VPS: cd /var/www/tutor && node --env-file=.env scripts/seed-aptitudini-extins.mjs --apply)
  */
 import { PrismaClient } from "@prisma/client";
-import { MARK, genNumerical, genSeries, rng, validateItem } from "./lib/aptitudini-extins-gen.mjs";
+import { genNumerical, genSeries, rng, validateItem } from "./lib/aptitudini-extins-gen.mjs";
 
 const prisma = new PrismaClient();
 const SLUG = "aptitudini-aviatie-extins";
