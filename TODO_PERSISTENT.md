@@ -1,3 +1,11 @@
+**Aptitudini Aviație — Set extins (24.09, cerere Alex după linkul lui Rareș):** materie PRIVATĂ `aptitudini-aviatie-extins`
+(Rareș elev, Alex + Anto observatori), 500 de exerciții ORIGINALE generate (250 serii de numere, 250 raționament
+numeric pe date de zbor), marcate `aptitudini-ext-gen:*` în `sourceReference`. Airmappr NU a fost copiat — condițiile lui
+interzic scraping-ul și folosirea comercială. Mai multe: `node --env-file=.env scripts/seed-aptitudini-extins.mjs --apply`
+(doar adaugă, nu șterge). Backup: `/root/backups/tutor-pre-aptitudini-extins-2026-09-24.dump`.
+- [ ] Etapa 2: busola (direcția de pe indicatorul de cap) și orizontul artificial (înclinare/tangaj) — cer desene în
+  aplicație (marcaje noi în pasaj, ca [CLOCK]).
+
 **Intrarea cu nume de utilizator + cursul care nu se vedea (24.09, caz Greg / Agent imobiliar):**
 - [x] Pagina de intrare avea câmp de tip email → telefonul refuza „greg” înainte de server (serverul accepta deja
   numele). Acum „Email sau nume de utilizator”, căutare cu litere mici, în Administrare „utilizator: …” la conturile
