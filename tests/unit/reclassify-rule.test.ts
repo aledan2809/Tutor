@@ -1,5 +1,4 @@
 import { describe, it, expect } from "vitest";
-// @ts-expect-error — plain .mjs helper, shared with the script that runs on the VPS
 import { classifyAccount, STUDY_SIGNALS } from "../../scripts/lib/reclassify-rule.mjs";
 
 const base = {
