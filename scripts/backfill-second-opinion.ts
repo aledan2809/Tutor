@@ -14,7 +14,11 @@ import { applySecondOpinion, describeSecondOpinion, secondOpinionFor, type Revie
 async function main() {
   const apply = process.argv.includes("--apply");
   const items = await prisma.questionFeedback.findMany({
-    where: { status: "pending_review", secondOpinion: null },
+    // Also the ones judged before the suggested answer was recorded (24.09): they need it to be decided.
+    where: {
+      status: "pending_review",
+      OR: [{ secondOpinion: null }, { secondOpinion: { in: ["agrees", "disagrees"] }, secondOpinionAnswer: null }],
+    },
     orderBy: { createdAt: "asc" },
   });
   console.log(`${items.length} în așteptare fără a doua opinie. ${apply ? "SCRIU." : "Probă — nu scriu nimic."}\n`);
@@ -30,7 +34,7 @@ async function main() {
     console.log(`- ${fb.createdAt.toISOString().slice(0, 10)} ${fb.reviewAction} → ${next.action} · ${op.verdict}`);
     console.log(`  elev: „${(fb.comment ?? "").slice(0, 100)}”`);
     console.log(`  întrebare: ${q.content.replace(/\s+/g, " ").slice(0, 110)} | marcat: ${q.correctAnswer.slice(0, 60)}`);
-    console.log(`  ${describeSecondOpinion(op)}\n`);
+    console.log(`  ${describeSecondOpinion(op)} Sugerat: ${op.answer ?? "—"}\n`);
     if (apply) {
       await prisma.questionFeedback.update({
         where: { id: fb.id },
@@ -38,6 +42,7 @@ async function main() {
           secondOpinion: op.verdict,
           secondOpinionNote: describeSecondOpinion(op),
           secondOpinionAt: new Date(),
+          secondOpinionAnswer: op.answer,
           ...(next.action !== fb.reviewAction ? { reviewAction: next.action, resolution: next.decision } : {}),
         },
       });

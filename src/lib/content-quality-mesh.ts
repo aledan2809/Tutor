@@ -591,14 +591,49 @@ FAIL if ANY holds:
 
 PASS only if you are confident the marked answer is the unique correct one.
 
-Return JSON: {"verdict":"PASS"|"FAIL","reason":"short, in Romanian","defect":"wrong-answer"|"multiple-correct"|"no-correct-option"|"missing-context"|"ambiguous"|null}`;
+Return JSON: {"verdict":"PASS"|"FAIL","answer":"the letter of the option YOU find correct, or NONE","reason":"short, in Romanian","defect":"wrong-answer"|"multiple-correct"|"no-correct-option"|"missing-context"|"ambiguous"|null}`;
 
 export interface SecondOpinion {
   /** agrees = the marked answer holds up; disagrees = a defect was found; unavailable = no judgment. */
   verdict: "agrees" | "disagrees" | "unavailable";
   defect: string | null;
   reason: string;
+  /**
+   * The option this judge itself found correct — the exact option text, or null (no option is
+   * correct, or it could not tell). What the person deciding needs next to the marked answer.
+   */
+  answer: string | null;
 }
+
+/** Map what a judge wrote back ("b", "b) 9 J", "9 J") to the exact option text, or null. */
+export function matchOption(raw: string | null | undefined, options: readonly string[]): string | null {
+  const t = (raw ?? "").trim();
+  if (!t || /^(none|niciuna|null|-)$/i.test(t)) return null;
+  const exact = options.find((o) => o.trim() === t);
+  if (exact) return exact;
+  const norm = (x: string) => x.toLowerCase().replace(/\s+/g, " ").trim();
+  const byText = options.find((o) => norm(o) === norm(t.replace(/^[a-e][).:]\s*/i, "")));
+  if (byText) return byText;
+  const letter = t.match(/^([a-e])(?:[).:\s]|$)/i);
+  if (letter) return options[letter[1].toLowerCase().charCodeAt(0) - 97] ?? null;
+  return null;
+}
+
+const SECOND_OPINION_CLAUDE_PROMPT = (q: QuestionForMesh) =>
+  `You are a rigorous Romanian school-content examiner. SOLVE this multiple-choice question yourself first, then compare your answer with the marked one.
+
+Question: ${q.content}
+Options:
+${(q.options || []).map((o, i) => `${String.fromCharCode(97 + i)}) ${o}`).join("\n")}
+Marked correct: ${q.correctAnswer}
+
+Check: is the marked answer correct AND the only correct option? Is the question self-contained and unambiguous?
+
+Think briefly, then end with EXACTLY these two final lines:
+ANSWER: <the letter of the option YOU find correct, or NONE if none is correct>
+RESULT: KEEP
+— or —
+RESULT: DROP | <defect> | <short reason in Romanian>`;
 
 /**
  * An independent re-solve of a question a student complained about.
@@ -607,27 +642,39 @@ export interface SecondOpinion {
  * student's comment, never the first reviewer's verdict. A second opinion that reads the first
  * one ends up agreeing with it, which is how a wrong dismissal gets confirmed twice.
  *
- * Tries the strong Claude judge first (subscription, $0), then the Groq cascade with Judge A's
- * method. An error or an unparsable answer is "unavailable" — never a verdict: a judge that could
- * not run must not be counted as agreeing, nor as finding a defect.
+ * It also says WHICH option it found correct: a person deciding needs the marked answer and the
+ * suggested one side by side, not only "agrees / disagrees" (Alex, 2026-09-24).
+ *
+ * Tries Claude first (subscription, $0), then the Groq cascade with Judge A's method. An error or
+ * an unparsable answer is "unavailable" — never a verdict: a judge that could not run must not be
+ * counted as agreeing, nor as finding a defect.
  */
 export async function secondOpinion(question: QuestionForMesh): Promise<SecondOpinion> {
+  const options = question.options ?? [];
   if (process.env.MESH_CLAUDE_JUDGE !== "0") {
-    const claude = await runClaudeJudge(question);
-    if (claude) {
-      return claude.pass
-        ? { verdict: "agrees", defect: null, reason: "" }
-        : { verdict: "disagrees", defect: claude.defect, reason: claude.reason };
+    const raw = await callClaudeCli(SECOND_OPINION_CLAUDE_PROMPT(question));
+    const m = raw ? String(raw).match(/RESULT:\s*(KEEP|DROP)\b([^\n]*)/i) : null;
+    if (m) {
+      const answer = matchOption(String(raw).match(/ANSWER:\s*([^\n]*)/i)?.[1], options);
+      if (m[1].toUpperCase() === "KEEP") return { verdict: "agrees", defect: null, reason: "", answer: answer ?? question.correctAnswer };
+      const parts = (m[2] || "").split("|").map((x) => x.trim()).filter(Boolean);
+      return {
+        verdict: "disagrees",
+        defect: (parts[0] || "unspecified").toLowerCase().slice(0, 40),
+        reason: (parts[1] || "").slice(0, 200),
+        answer,
+      };
     }
   }
   try {
     const raw = await callGroqJSON(JUDGE_A_NO_SOURCE_SYSTEM, formatQuestionForLens(question));
-    const parsed = safeParseJSON(raw) as { verdict?: string; reason?: string; defect?: string } | null;
+    const parsed = safeParseJSON(raw) as { verdict?: string; reason?: string; defect?: string; answer?: string } | null;
     const v = String(parsed?.verdict ?? "").toUpperCase();
-    if (v === "PASS") return { verdict: "agrees", defect: null, reason: parsed?.reason || "" };
-    if (v === "FAIL") return { verdict: "disagrees", defect: parsed?.defect || null, reason: parsed?.reason || "" };
-    return { verdict: "unavailable", defect: null, reason: "răspuns neinterpretabil" };
+    const answer = matchOption(parsed?.answer, options);
+    if (v === "PASS") return { verdict: "agrees", defect: null, reason: parsed?.reason || "", answer: answer ?? question.correctAnswer };
+    if (v === "FAIL") return { verdict: "disagrees", defect: parsed?.defect || null, reason: parsed?.reason || "", answer };
+    return { verdict: "unavailable", defect: null, reason: "răspuns neinterpretabil", answer: null };
   } catch (err) {
-    return { verdict: "unavailable", defect: null, reason: (err as Error).message.slice(0, 200) };
+    return { verdict: "unavailable", defect: null, reason: (err as Error).message.slice(0, 200), answer: null };
   }
 }

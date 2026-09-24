@@ -233,6 +233,7 @@ export async function secondOpinionFor(q: {
       verdict: "unavailable",
       defect: null,
       reason: "exercițiu interactiv (dictat, desenat sau afișat câteva secunde) — nu se poate verifica din text",
+      answer: null,
     };
   }
   return secondOpinion({ content: q.content, options: q.options, correctAnswer: q.correctAnswer, explanation: q.explanation ?? undefined });
@@ -384,7 +385,12 @@ export async function runFeedbackReview(): Promise<{
                   : j.reason,
           correctedAnswer: action === "corrected" ? j.correctedAnswer : null,
           ...(op
-            ? { secondOpinion: op.verdict, secondOpinionNote: describeSecondOpinion(op), secondOpinionAt: new Date() }
+            ? {
+                secondOpinion: op.verdict,
+                secondOpinionNote: describeSecondOpinion(op),
+                secondOpinionAt: new Date(),
+                secondOpinionAnswer: op.answer,
+              }
             : {}),
         },
       });

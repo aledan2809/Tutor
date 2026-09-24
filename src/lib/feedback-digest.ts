@@ -31,14 +31,73 @@ export function recommendFor(item: PendingItem): string {
   return "Verificările nu sunt concludente: citește întrebarea și decide tu.";
 }
 
+/** Telegram's limit is 4096 characters; the question and the options always fit, the rest is trimmed. */
+const TELEGRAM_MAX = 3900;
+
+/**
+ * One complaint, laid out so a person can decide it WITHOUT opening anything (Alex, 24.09): the
+ * whole question, every option — the marked one ✅ and the one the second check found 💡 — then
+ * what the student wrote, the two verdicts and our recommendation.
+ */
+export function composeDigestItem(i: {
+  header: string;
+  student: string;
+  comment: string | null;
+  question: string;
+  passage: string | null;
+  options: string[];
+  marked: string;
+  suggested: string | null;
+  explanation: string | null;
+  firstVerdict: string | null;
+  secondVerdict: string | null;
+  recommendation: string;
+}): string {
+  const clip = (t: string | null | undefined, max: number) => {
+    const x = (t ?? "").trim();
+    return x.length > max ? `${x.slice(0, max - 1)}…` : x;
+  };
+  const letters = "abcdefgh";
+  const optionLines = i.options.map((o, k) => {
+    const marks = [o === i.marked ? "✅ marcat corect" : "", i.suggested && o === i.suggested && o !== i.marked ? "💡 sugerat" : ""]
+      .filter(Boolean)
+      .join(" · ");
+    return `${letters[k] ?? "-"}) ${clip(o, 300)}${marks ? `   ← ${marks}` : ""}`;
+  });
+  const agreeLine =
+    i.suggested == null
+      ? "A doua verificare nu a indicat o variantă."
+      : i.suggested === i.marked
+        ? "A doua verificare alege aceeași variantă ca cea marcată."
+        : `A doua verificare alege altă variantă: „${clip(i.suggested, 200)}”.`;
+  const interactive = /^\[(MEMORIE|AUDIODICT|CUBEVOICE|CLOCK)\b/.test(i.passage ?? "");
+  const parts = [
+    i.header,
+    ``,
+    `ÎNTREBAREA:`,
+    clip(i.question, 1200),
+    ...(interactive ? [``, `Date dictate/afișate elevului (ascunse în text): ${clip(i.passage, 300)}`] : []),
+    ``,
+    `VARIANTE:`,
+    ...optionLines,
+    ...(i.options.length === 0 ? [`Răspuns marcat: ${clip(i.marked, 300)}`] : []),
+    agreeLine,
+    ``,
+    `${i.student} a scris: „${clip(i.comment, 400) || "(fără comentariu)"}”`,
+    ``,
+    `Prima verificare: ${clip(i.firstVerdict, 350)}`,
+    `A doua: ${clip(i.secondVerdict, 350) || "încă nerulată."}`,
+    ...(i.explanation ? [``, `Explicația din întrebare: ${clip(i.explanation, 400)}`] : []),
+    ``,
+    `➡️ ${i.recommendation}`,
+  ];
+  const text = parts.join("\n");
+  return text.length > TELEGRAM_MAX ? `${text.slice(0, TELEGRAM_MAX - 1)}…` : text;
+}
+
 export function daysWaiting(createdAt: Date, now = new Date()): number {
   return Math.max(0, Math.floor((now.getTime() - createdAt.getTime()) / 86_400_000));
 }
-
-const oneLine = (s: string | null | undefined, max: number) => {
-  const t = (s ?? "").replace(/\s+/g, " ").trim();
-  return t.length > max ? `${t.slice(0, max - 1)}…` : t;
-};
 
 export async function sendPendingFeedbackDigest(now = new Date()): Promise<{ pending: number; sent: number }> {
   const pending = await prisma.questionFeedback.findMany({
@@ -46,7 +105,7 @@ export async function sendPendingFeedbackDigest(now = new Date()): Promise<{ pen
     orderBy: { createdAt: "asc" },
     select: {
       id: true, userId: true, comment: true, createdAt: true, reviewAction: true, resolution: true,
-      secondOpinion: true, secondOpinionNote: true, questionId: true,
+      secondOpinion: true, secondOpinionNote: true, secondOpinionAnswer: true, questionId: true,
     },
   });
   if (pending.length === 0) return { pending: 0, sent: 0 };
@@ -58,7 +117,10 @@ export async function sendPendingFeedbackDigest(now = new Date()): Promise<{ pen
   const [questions, students] = await Promise.all([
     prisma.question.findMany({
       where: { id: { in: shown.map((p) => p.questionId) } },
-      select: { id: true, content: true, correctAnswer: true, domain: { select: { name: true } } },
+      select: {
+        id: true, content: true, options: true, correctAnswer: true, explanation: true, passage: true,
+        domain: { select: { name: true } },
+      },
     }),
     prisma.user.findMany({ where: { id: { in: shown.map((p) => p.userId) } }, select: { id: true, name: true } }),
   ]);
@@ -69,18 +131,21 @@ export async function sendPendingFeedbackDigest(now = new Date()): Promise<{ pen
   for (const [i, fb] of shown.entries()) {
     const q = qById.get(fb.questionId);
     const d = daysWaiting(fb.createdAt, now);
-    const text = [
-      `⏳ De decis ${i + 1}/${pending.length} — așteaptă de ${d === 0 ? "azi" : d === 1 ? "o zi" : `${d} zile`}${q?.domain?.name ? ` · ${q.domain.name}` : ""}`,
-      ``,
-      `${nameById.get(fb.userId) ?? "Elevul"}: „${oneLine(fb.comment, 300) || "(fără comentariu)"}”`,
-      `Întrebarea: ${oneLine(q?.content, 220)}`,
-      `Răspuns marcat: ${oneLine(q?.correctAnswer, 120)}`,
-      ``,
-      `Prima verificare: ${oneLine(fb.resolution, 260)}`,
-      fb.secondOpinionNote ? `A doua: ${oneLine(fb.secondOpinionNote, 260)}` : `A doua: încă nerulată.`,
-      ``,
-      `➡️ ${recommendFor(fb)}`,
-    ].join("\n");
+    const options = Array.isArray(q?.options) ? (q!.options as string[]) : [];
+    const text = composeDigestItem({
+      header: `⏳ De decis ${i + 1}/${pending.length} — așteaptă de ${d === 0 ? "azi" : d === 1 ? "o zi" : `${d} zile`}${q?.domain?.name ? ` · ${q.domain.name}` : ""}`,
+      student: nameById.get(fb.userId) ?? "Elevul",
+      comment: fb.comment,
+      question: q?.content ?? "(întrebarea nu mai există)",
+      passage: q?.passage ?? null,
+      options,
+      marked: q?.correctAnswer ?? "",
+      suggested: fb.secondOpinionAnswer,
+      explanation: q?.explanation ?? null,
+      firstVerdict: fb.resolution,
+      secondVerdict: fb.secondOpinionNote,
+      recommendation: recommendFor(fb),
+    });
     for (const a of admins) {
       const ok = await telegramAlertToUser(a.id, { text, url: feedbackDeepLink(fb.id), buttonLabel: "Decide acum" }).catch(() => false);
       if (ok) sent++;

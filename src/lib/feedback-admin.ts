@@ -33,6 +33,8 @@ export interface FeedbackDetail {
   /** The independent re-solve (agrees | disagrees | unavailable) + its plain-words line. */
   secondOpinion: string | null;
   secondOpinionNote: string | null;
+  /** The option the second check found correct (exact text), or null. */
+  secondOpinionAnswer: string | null;
   overriddenById: string | null;
   overrideNote: string | null;
   overriddenAt: Date | null;
@@ -121,6 +123,7 @@ export async function buildFeedbackDetail(
     correctedAnswer: fb.correctedAnswer,
     secondOpinion: fb.secondOpinion,
     secondOpinionNote: fb.secondOpinionNote,
+    secondOpinionAnswer: fb.secondOpinionAnswer,
     overriddenById: fb.overriddenById,
     overrideNote: fb.overrideNote,
     overriddenAt: fb.overriddenAt,

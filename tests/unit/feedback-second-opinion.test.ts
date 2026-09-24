@@ -2,9 +2,9 @@ import { describe, it, expect } from "vitest";
 import { applySecondOpinion, describeSecondOpinion, statusForAction, isInteractiveExercise } from "@/lib/feedback-review";
 import { recommendFor, daysWaiting } from "@/lib/feedback-digest";
 
-const agrees = { verdict: "agrees" as const, defect: null, reason: "" };
-const disagrees = { verdict: "disagrees" as const, defect: "wrong-answer", reason: "rezultatul corect e 45 J, nu 45 kJ" };
-const unavailable = { verdict: "unavailable" as const, defect: null, reason: "timeout" };
+const agrees = { verdict: "agrees" as const, defect: null, reason: "", answer: "9 J" };
+const disagrees = { verdict: "disagrees" as const, defect: "wrong-answer", reason: "rezultatul corect e 45 J, nu 45 kJ", answer: "45 J" };
+const unavailable = { verdict: "unavailable" as const, defect: null, reason: "timeout", answer: null };
 
 describe("a doua opinie — ce schimbă și ce nu", () => {
   it("o respingere contrazisă nu mai spune nimănui că elevul greșește", () => {
@@ -67,5 +67,62 @@ describe("exercițiile interactive nu primesc a doua opinie din text", () => {
     expect(isInteractiveExercise("Citește textul: ...")).toBe(false);
     expect(isInteractiveExercise(null)).toBe(false);
     expect(isInteractiveExercise("Text care pomenește [CLOCK] la mijloc")).toBe(false);
+  });
+});
+
+import { matchOption } from "@/lib/content-quality-mesh";
+
+describe("matchOption — ce a scris judecătorul → textul exact al variantei", () => {
+  const opts = ["9 J", "9 kJ", "6 J", "18 J"];
+  it("literă, literă cu paranteză, text", () => {
+    expect(matchOption("a", opts)).toBe("9 J");
+    expect(matchOption("b) 9 kJ", opts)).toBe("9 kJ");
+    expect(matchOption("18 J", opts)).toBe("18 J");
+  });
+  it("niciuna / gol / literă inexistentă → null", () => {
+    expect(matchOption("NONE", opts)).toBeNull();
+    expect(matchOption("", opts)).toBeNull();
+    expect(matchOption("e", opts)).toBeNull();
+  });
+});
+
+import { composeDigestItem } from "@/lib/feedback-digest";
+
+describe("mesajul pentru decizie — tot ce trebuie, fără să deschizi ceva", () => {
+  const base = {
+    header: "⏳ De decis 1/1",
+    student: "Rareș",
+    comment: "e 9 J",
+    question: "Un corp cu masa de 2 kg se mișcă cu 3 m/s. Energia cinetică?",
+    passage: null,
+    options: ["9 J", "9 kJ", "6 J", "18 J"],
+    marked: "9 kJ",
+    suggested: "9 J",
+    explanation: "Ec = mv²/2",
+    firstVerdict: "Reclamație respinsă",
+    secondVerdict: "A doua verificare a găsit o problemă.",
+    recommendation: "Probabil elevul are dreptate.",
+  };
+  it("arată întrebarea întreagă și toate variantele, cu marcata și sugerata", () => {
+    const t = composeDigestItem(base);
+    expect(t).toContain(base.question);
+    expect(t).toMatch(/a\) 9 J {3}← 💡 sugerat/);
+    expect(t).toMatch(/b\) 9 kJ {3}← ✅ marcat corect/);
+    expect(t).toContain("c) 6 J");
+    expect(t).toContain("d) 18 J");
+    expect(t).toMatch(/altă variantă: „9 J”/);
+  });
+  it("când a doua verificare alege tot varianta marcată, o spune", () => {
+    const t = composeDigestItem({ ...base, marked: "9 J", suggested: "9 J" });
+    expect(t).toMatch(/aceeași variantă ca cea marcată/);
+    expect(t).not.toContain("💡");
+  });
+  it("exercițiile dictate își arată datele ascunse", () => {
+    const t = composeDigestItem({ ...base, passage: "[CUBEVOICE] start=Față; moves=up,left" });
+    expect(t).toMatch(/Date dictate\/afișate elevului.*CUBEVOICE/);
+  });
+  it("încape în limita Telegram", () => {
+    const t = composeDigestItem({ ...base, question: "x".repeat(5000), comment: "y".repeat(5000) });
+    expect(t.length).toBeLessThanOrEqual(3900);
   });
 });

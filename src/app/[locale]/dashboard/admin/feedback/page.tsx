@@ -25,6 +25,7 @@ interface Detail {
   correctedAnswer: string | null;
   secondOpinion?: string | null;
   secondOpinionNote?: string | null;
+  secondOpinionAnswer?: string | null;
   overrideNote: string | null;
   overriddenAt: string | null;
   needsAdmin: boolean;
@@ -290,11 +291,19 @@ function FeedbackDetailModal({
                     className={`rounded px-2 py-1 ${
                       o === d.question.correctAnswer
                         ? "bg-green-500/15 text-green-300"
-                        : "bg-gray-800 text-gray-300"
+                        : o === d.secondOpinionAnswer
+                          ? "bg-amber-500/15 text-amber-200"
+                          : "bg-gray-800 text-gray-300"
                     }`}
                   >
                     {o === d.question.correctAnswer ? "✓ " : ""}
                     {o}
+                    {o === d.question.correctAnswer && <span className="ml-2 text-xs text-green-400">marcat corect</span>}
+                    {d.secondOpinionAnswer && o === d.secondOpinionAnswer && (
+                      <span className="ml-2 text-xs text-amber-300">
+                        💡 {o === d.question.correctAnswer ? "confirmat de a doua verificare" : "sugerat de a doua verificare"}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>

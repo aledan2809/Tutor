@@ -1788,6 +1788,8 @@ model QuestionFeedback {
   secondOpinion     String?
   secondOpinionNote String?   @db.Text
   secondOpinionAt   DateTime?
+  /// Varianta pe care a doua verificare a găsit-o corectă (textul exact al opțiunii); null = niciuna / n-a putut spune.
+  secondOpinionAnswer String?   @db.Text
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
