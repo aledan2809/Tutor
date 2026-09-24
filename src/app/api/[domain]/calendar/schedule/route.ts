@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import { requireFeature } from "@/lib/plan-gate";
+import { studentsWithin } from "@/lib/teaching-scope";
 
 /**
  * POST /api/[domain]/calendar/schedule
@@ -63,6 +64,13 @@ async function _POST(
         { error: "Only instructors can schedule for students" },
         { status: 403 }
       );
+    }
+    // Only this subject's own students: each one's e-mail becomes a calendar invitee, so an unchecked
+    // id would hand a stranger's address to Google and put them in someone's calendar (teaching-scope.ts).
+    const ok = await studentsWithin(studentIds, [domain.id]);
+    const outside = studentIds.filter((id) => !ok.has(id));
+    if (outside.length) {
+      return NextResponse.json({ error: "Students not enrolled in this subject", outside }, { status: 400 });
     }
     targetUserIds = [...studentIds];
     // Include instructor too

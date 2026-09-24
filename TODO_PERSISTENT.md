@@ -628,8 +628,7 @@ acces = admin înscrie + cod la nevoie · coloană vertebrală Curs → Modul �
 - [ ] **Faza 2 — antrenor conversațional** peste același conținut: chat cu personaje (proprietarul +20%, „de ce 2%?",
   cumpărătorul de 8 luni, investitorul cu cap rate…), scor 1-10 pe descoperire/ascultare/obiecție/avansare + o
   recomandare. Model nou `TrainingSession`/`TrainingTurn`, cost per mesaj → plafon per user/zi. Se leagă de progres.
-- [ ] **Follow-ups din review-ul rutelor** (neatinse, semnalate): `calendar/schedule` nu validează `studentIds` ca înscriși în
-  domeniu (workstream D); `vouchers/redeem` nu are niciun apelant în `src`; `ExamPaper` nelegat de materie (subiectele
+- [ ] **Follow-ups din review-ul rutelor** (neatinse, semnalate): ~~`calendar/schedule` nu validează `studentIds`~~ ✅ 2026-09-24 (doar elevii materiei); `vouchers/redeem` nu are niciun apelant în `src`; `ExamPaper` nelegat de materie (subiectele
   oficiale sunt publice — nu scurge azi, dar un curs privat cu simulări proprii ar scurge); `Lesson.isPublished`
   decorativ (nicio cale de citire student nu-l verifică); `Domain.instructorEnabled` mort; geografie/chimie/biologie/
   matematica-ix-xii au 0 întrebări publicate (un elev înscris n-are ce exersa).

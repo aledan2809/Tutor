@@ -82,6 +82,13 @@ try {
   const tA = await ctx.post("/api/dashboard/instructor/thresholds", { data: { studentId: sa.id, domainId: A.id, metric: "score", value: 50 } });
   check("prag pe elevul A → creat", tA.status() === 201, `HTTP ${tA.status()}`);
 
+  // 4b. Programare în calendar pe materia A: doar elevii materiei (emailul lor devine invitat).
+  const when = { title: "Ora QA", startTime: new Date(Date.now() + 86400000).toISOString(), endTime: new Date(Date.now() + 90000000).toISOString() };
+  const cB = await ctx.post(`/api/${A.slug}/calendar/schedule`, { data: { ...when, studentIds: [sb.id] } });
+  check("programare pe A cu elevul B → refuzată", cB.status() === 400, `HTTP ${cB.status()}`);
+  const cA = await ctx.post(`/api/${A.slug}/calendar/schedule`, { data: { ...when, studentIds: [sa.id] } });
+  check("programare pe A cu elevul A → trece de verificarea elevilor", cA.status() !== 400 && cA.status() !== 403, `HTTP ${cA.status()}`);
+
   // 5. Mesaje.
   const mB = await ctx.post("/api/dashboard/instructor/messages", { data: { recipientIds: [sb.id], content: "salut" } });
   check("mesaj către elevul B → refuzat", mB.status() === 403, `HTTP ${mB.status()}`);
