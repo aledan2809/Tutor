@@ -3,6 +3,7 @@ import { requireInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { predictFailureRisk } from "@/lib/predictive-analytics";
 import { withErrorHandler } from "@/lib/api-handler";
+import { scopedTeachingDomains } from "@/lib/teaching-scope";
 
 async function _GET(req: NextRequest) {
   const { error, session } = await requireInstructor();
@@ -11,13 +12,8 @@ async function _GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const domainId = searchParams.get("domainId");
 
-  const instructorDomainIds = session!.user.enrollments
-    .filter((e) =>
-      e.roles.includes("INSTRUCTOR" as never) || e.roles.includes("ADMIN" as never)
-    )
-    .map((e) => e.domainId);
-
-  const targetDomainIds = domainId ? [domainId] : instructorDomainIds;
+  // Only subjects they teach — a subject id from the URL is not a key (teaching-scope.ts).
+  const targetDomainIds = scopedTeachingDomains(session!.user, domainId);
 
   const studentEnrollments = await prisma.enrollment.findMany({
     where: {

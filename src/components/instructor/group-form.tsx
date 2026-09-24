@@ -63,7 +63,15 @@ export function GroupForm({ domains, students, initialData }: GroupFormProps) {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error?.message ?? "Failed to save group");
+        // The route answers a plain string for a refusal (e.g. a student not in this subject) and a
+        // zod object for a malformed form.
+        throw new Error(
+          typeof data.error === "string"
+            ? data.error === "Students not enrolled in this subject"
+              ? "Unii elevi aleși nu sunt înscriși la materia grupului."
+              : data.error
+            : data.error?.message ?? "Failed to save group"
+        );
       }
 
       router.push("/dashboard/instructor/groups");

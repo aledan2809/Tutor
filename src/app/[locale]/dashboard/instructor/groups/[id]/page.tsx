@@ -31,13 +31,10 @@ export default async function EditGroupPage({
     .filter((e) => e.roles.includes("INSTRUCTOR") || e.roles.includes("ADMIN"))
     .map((e) => e.domainId);
 
-  // Ownership guard — a group is editable only by its creator, a teacher/admin
-  // of its domain, or a superadmin. Without this, any instructor could open
-  // (and via GroupForm, mutate) any group by pasting its id (cross-tenant IDOR).
-  const canManage =
-    session.user.isSuperAdmin ||
-    group.createdById === session.user.id ||
-    instructorDomainIds.includes(group.domainId);
+  // Access guard — a group is open only to a teacher/admin of its subject, or a superadmin. Not to
+  // its creator as such: a group shows its members, and someone who stopped teaching the subject
+  // must not keep reading them. Without a guard, any instructor could open any group by its id.
+  const canManage = session.user.isSuperAdmin || instructorDomainIds.includes(group.domainId);
   if (!canManage) redirect("/dashboard/instructor/groups");
 
   const [domains, students] = await Promise.all([

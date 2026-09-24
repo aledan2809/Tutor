@@ -3,6 +3,7 @@ import { requireInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { withErrorHandler } from "@/lib/api-handler";
+import { studentsWithin, teachesDomain } from "@/lib/teaching-scope";
 
 const thresholdSchema = z.object({
   studentId: z.string().min(1),
@@ -44,6 +45,15 @@ async function _POST(req: NextRequest) {
   const parsed = thresholdSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  }
+
+  // An alert watches a student's scores and reports them to the teacher — only on a subject they
+  // teach, about a student enrolled in it.
+  if (
+    !teachesDomain(session!.user, parsed.data.domainId) ||
+    !(await studentsWithin([parsed.data.studentId], [parsed.data.domainId])).has(parsed.data.studentId)
+  ) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const threshold = await prisma.escalationThreshold.create({

@@ -77,7 +77,8 @@ async function _GET(
 
   // Get group memberships
   const groupMemberships = await prisma.groupMember.findMany({
-    where: { userId: studentId },
+    // Only the groups of subjects they teach — not the names of groups elsewhere.
+    where: { userId: studentId, group: { domainId: { in: instructorDomainIds } } },
     include: {
       group: { select: { id: true, name: true, domainId: true } },
     },

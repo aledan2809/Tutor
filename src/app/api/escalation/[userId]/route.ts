@@ -3,6 +3,8 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { cancelEscalation } from "@/lib/escalation/engine";
 import { withErrorHandler } from "@/lib/api-handler";
+import { teachesStudent } from "@/lib/teaching-scope";
+import { isGuardianOf } from "@/lib/guardian";
 
 /**
  * GET /api/escalation/[userId] — Get escalation history for a user
@@ -19,15 +21,15 @@ async function _GET(
 
   const { userId } = await params;
 
-  // Only allow self, admin, or instructor
+  // Self, the superadmin, a teacher who teaches this student, or the child's guardian. A teaching
+  // role on some OTHER subject is not a pass to a child's reminder history (teaching-scope.ts).
   const isSelf = session.user.id === userId;
-  const isPrivileged =
-    session.user.isSuperAdmin ||
-    session.user.enrollments.some((e) =>
-      e.roles.includes("ADMIN") || e.roles.includes("INSTRUCTOR")
-    );
+  const allowed =
+    isSelf ||
+    (await teachesStudent(session.user, userId)) ||
+    (await isGuardianOf(session.user.id, userId));
 
-  if (!isSelf && !isPrivileged) {
+  if (!allowed) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -58,13 +60,8 @@ async function _DELETE(
 
   const { userId } = await params;
 
-  const isPrivileged =
-    session.user.isSuperAdmin ||
-    session.user.enrollments.some((e) =>
-      e.roles.includes("ADMIN") || e.roles.includes("INSTRUCTOR")
-    );
-
-  if (!isPrivileged) {
+  // Cancelling someone's reminders: the superadmin, or a teacher who teaches this student.
+  if (!(await teachesStudent(session.user, userId))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

@@ -3,6 +3,7 @@ import { requireInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { withErrorHandler } from "@/lib/api-handler";
+import { scopedTeachingDomains, studentsWithin, teachesDomain } from "@/lib/teaching-scope";
 
 const createGroupSchema = z.object({
   name: z.string().min(1).max(100),
@@ -18,15 +19,9 @@ async function _GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const domainId = searchParams.get("domainId");
 
-  const instructorDomainIds = session!.user.enrollments
-    .filter((e) =>
-      e.roles.includes("INSTRUCTOR" as never) || e.roles.includes("ADMIN" as never)
-    )
-    .map((e) => e.domainId);
-
   const groups = await prisma.group.findMany({
     where: {
-      domainId: domainId ? domainId : { in: instructorDomainIds },
+      domainId: { in: scopedTeachingDomains(session!.user, domainId) },
       isActive: true,
     },
     include: {
@@ -61,6 +56,19 @@ async function _POST(req: NextRequest) {
   }
 
   const { name, description, domainId, studentIds } = parsed.data;
+
+  // A group is a window onto its members (names, e-mails, progress through the group pages), so it
+  // may only be opened on a subject they teach, around that subject's own students.
+  if (!teachesDomain(session!.user, domainId)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  if (studentIds?.length) {
+    const ok = await studentsWithin(studentIds, [domainId]);
+    const outside = studentIds.filter((id) => !ok.has(id));
+    if (outside.length) {
+      return NextResponse.json({ error: "Students not enrolled in this subject", outside }, { status: 400 });
+    }
+  }
 
   const group = await prisma.group.create({
     data: {

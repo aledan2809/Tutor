@@ -3,6 +3,7 @@ import { requireInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { withErrorHandler } from "@/lib/api-handler";
+import { studentsWithin } from "@/lib/teaching-scope";
 
 const updateGroupSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -24,10 +25,9 @@ async function loadOwnedGroup(id: string, session: GroupSession) {
   const domainIds = (session.user.enrollments ?? [])
     .filter((e) => e.roles.includes("INSTRUCTOR") || e.roles.includes("ADMIN"))
     .map((e) => e.domainId);
-  const allowed =
-    session.user.isSuperAdmin ||
-    group.createdById === session.user.id ||
-    domainIds.includes(group.domainId);
+  // The subject decides, not authorship: a group shows its members' names and e-mails, so someone
+  // who no longer teaches the subject loses the group with it (teaching-scope.ts).
+  const allowed = session.user.isSuperAdmin || domainIds.includes(group.domainId);
   return { group, forbidden: !allowed };
 }
 
@@ -92,6 +92,15 @@ async function _PATCH(
   }
 
   const { name, description, addStudentIds, removeStudentIds } = parsed.data;
+
+  // Only the group's own subject's students may join it (see teaching-scope.ts).
+  if (addStudentIds?.length) {
+    const ok = await studentsWithin(addStudentIds, [access.group.domainId]);
+    const outside = addStudentIds.filter((sid) => !ok.has(sid));
+    if (outside.length) {
+      return NextResponse.json({ error: "Students not enrolled in this subject", outside }, { status: 400 });
+    }
+  }
 
   // Update group name/description
   const group = await prisma.group.update({

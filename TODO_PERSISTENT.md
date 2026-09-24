@@ -1188,7 +1188,17 @@ Probleme de reformulat în secțiunea de proof + restul homepage-ului (RO+EN, `s
 
 `/try` (URL-ul canonic „fără cont", referit din ~10 locuri) e acum **subject-picker pe grile reale** (`SubjectQuizDemo`), nu generatorul „text→test". Componenta `MagicQuizDemo` + API `/api/magic-quiz` **rămân** dar n-au pagină. De decis: (a) repurpose ca feature logat „Creează-ți propriul test din material"; (b) pagină separată `/genereaza`; (c) drop. Homepage nu mai promite generatorul (copy ajustat).
 
-## [ ] 🔎 Scoping: `watcherSeesAllStudents` e GLOBAL, nu per domeniu (găsit 2026-08-25)
+## [x] ✅ Vizibilitatea pe materie, nu pe cont — REPARAT 2026-09-24 (`c048b22` părinte/profesor + rutele de profesor)
+
+- **Părinte/profesor** (`watcherScope`, LIVE `c048b22`): pe materia unde predă → toți elevii ei; unde e doar părinte
+  → doar copiii lui; o materie din adresă fără rol → nimic; fișa unui elev → doar prin materiile unde îi predă.
+  Contraprobă: codul vechi arăta copilul altui părinte (listă + fișă) și elevii unei materii străine (7/11).
+- **Rutele de profesor** (`src/lib/teaching-scope.ts`): listă elevi, analize de risc, grupuri (creare + adăugare
+  membri), istoric/anulare remindere, praguri, mesaje, grupurile din fișă. Contraprobă: 10 goluri pe codul vechi
+  (15/15 pe cel nou). Pe producție: nicio urmă de folosire (0 grupuri/praguri/mesaje în afara materiei).
+  Verificări păstrate: `Reports/vizibilitate-pe-materie-2026-09-24/`.
+
+### (istoric) Scoping: `watcherSeesAllStudents` e GLOBAL, nu per domeniu (găsit 2026-08-25)
 
 Un user cu rol ADMIN/INSTRUCTOR **pe orice domeniu** primește `seesAll=true` în
 `src/app/api/dashboard/watcher/route.ts` → vede TOȚI elevii din TOATE domeniile lui vizibile,

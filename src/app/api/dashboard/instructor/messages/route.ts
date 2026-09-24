@@ -3,6 +3,7 @@ import { requireInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { withErrorHandler } from "@/lib/api-handler";
+import { scopedTeachingDomains, studentsWithin } from "@/lib/teaching-scope";
 
 const sendMessageSchema = z.object({
   recipientIds: z.array(z.string()).min(1),
@@ -56,6 +57,17 @@ async function _POST(req: NextRequest) {
   }
 
   const { recipientIds, domainId, channel, subject, content } = parsed.data;
+
+  // A teacher writes to their own students — of the named subject, or of any subject they teach.
+  // The superadmin keeps writing to anyone (scopedTeachingDomains gives them only what they ask).
+  if (!session!.user.isSuperAdmin) {
+    const domains = scopedTeachingDomains(session!.user, domainId ?? null);
+    const ok = await studentsWithin(recipientIds, domains);
+    const outside = recipientIds.filter((id) => !ok.has(id));
+    if (outside.length) {
+      return NextResponse.json({ error: "Recipients are not your students", outside }, { status: 403 });
+    }
+  }
 
   // Create messages for all recipients
   const messages = await Promise.all(
