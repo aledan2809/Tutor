@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { applySecondOpinion, describeSecondOpinion, statusForAction } from "@/lib/feedback-review";
+import { applySecondOpinion, describeSecondOpinion, statusForAction, isInteractiveExercise } from "@/lib/feedback-review";
 import { recommendFor, daysWaiting } from "@/lib/feedback-digest";
 
 const agrees = { verdict: "agrees" as const, defect: null, reason: "" };
@@ -53,5 +53,19 @@ describe("mesajul zilnic — recomandarea, nu numărul", () => {
     const now = new Date("2026-09-24T10:00:00Z");
     expect(daysWaiting(new Date("2026-09-24T01:00:00Z"), now)).toBe(0);
     expect(daysWaiting(new Date("2026-09-21T10:00:00Z"), now)).toBe(3);
+  });
+});
+
+describe("exercițiile interactive nu primesc a doua opinie din text", () => {
+  it("recunoaște marcajele ascunse", () => {
+    expect(isInteractiveExercise("[CUBEVOICE] start=Față; moves=up,left")).toBe(true);
+    expect(isInteractiveExercise("[AUDIODICT:ro] 4 7 2")).toBe(true);
+    expect(isInteractiveExercise("[MEMORIE:8] ABC")).toBe(true);
+    expect(isInteractiveExercise("[CLOCK] 3:15")).toBe(true);
+  });
+  it("un pasaj obișnuit sau lipsă nu e exercițiu interactiv", () => {
+    expect(isInteractiveExercise("Citește textul: ...")).toBe(false);
+    expect(isInteractiveExercise(null)).toBe(false);
+    expect(isInteractiveExercise("Text care pomenește [CLOCK] la mijloc")).toBe(false);
   });
 });

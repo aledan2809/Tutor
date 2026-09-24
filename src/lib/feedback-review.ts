@@ -209,6 +209,35 @@ export function applySecondOpinion(
   return { action, decision };
 }
 
+/**
+ * Interactive exercises carry a HIDDEN payload in `passage` — what is dictated aloud, drawn, or shown
+ * for a few seconds ([AUDIODICT], [CUBEVOICE], [MEMORIE], [CLOCK]; see question-renderer.tsx). A judge
+ * that reads text sees a question with nothing to answer from, and "finds" a defect every time.
+ * Measured 2026-09-24 on the four dictated-cube complaints: all four came back "disagrees — depends on
+ * external audio", while the students were complaining that the voice was too fast.
+ */
+export function isInteractiveExercise(passage: string | null | undefined): boolean {
+  return /^\[(MEMORIE|AUDIODICT|CUBEVOICE|CLOCK)\b/.test(passage ?? "");
+}
+
+/** The second opinion for a question — never asked of an exercise a text judge cannot see. */
+export async function secondOpinionFor(q: {
+  content: string;
+  options: string[];
+  correctAnswer: string;
+  explanation: string | null;
+  passage: string | null;
+}): Promise<SecondOpinion> {
+  if (isInteractiveExercise(q.passage)) {
+    return {
+      verdict: "unavailable",
+      defect: null,
+      reason: "exercițiu interactiv (dictat, desenat sau afișat câteva secunde) — nu se poate verifica din text",
+    };
+  }
+  return secondOpinion({ content: q.content, options: q.options, correctAnswer: q.correctAnswer, explanation: q.explanation ?? undefined });
+}
+
 /** One line for the admin: what the second opinion said, in plain words. */
 export function describeSecondOpinion(op: SecondOpinion): string {
   if (op.verdict === "agrees") return "A doua verificare, independentă, confirmă răspunsul marcat.";
@@ -294,7 +323,7 @@ export async function runFeedbackReview(): Promise<{
     try {
       const q = await prisma.question.findUnique({
         where: { id: fb.questionId },
-        select: { id: true, content: true, options: true, correctAnswer: true, explanation: true, domainId: true },
+        select: { id: true, content: true, options: true, correctAnswer: true, explanation: true, passage: true, domainId: true },
       });
       if (!q) {
         await prisma.questionFeedback.update({ where: { id: fb.id }, data: { status: "resolved", resolution: "Întrebarea nu mai există." } });
@@ -321,7 +350,7 @@ export async function runFeedbackReview(): Promise<{
       // opinion, then the side-effect for the resulting action.
       const first = decideReviewAction(j, isPrivate, options, fb.comment);
       const op = needsHumanConfirmation(first.action)
-        ? await secondOpinion({ content: q.content, options, correctAnswer: q.correctAnswer, explanation: q.explanation ?? undefined })
+        ? await secondOpinionFor({ ...q, options })
         : null;
       const { action, decision } = applySecondOpinion(first.action, first.decision, op);
       if (action === "corrected") {

@@ -9,8 +9,7 @@
  *   npx tsx scripts/backfill-second-opinion.ts --apply    # scrie
  */
 import { prisma } from "@/lib/prisma";
-import { secondOpinion } from "@/lib/content-quality-mesh";
-import { applySecondOpinion, describeSecondOpinion, type ReviewAction } from "@/lib/feedback-review";
+import { applySecondOpinion, describeSecondOpinion, secondOpinionFor, type ReviewAction } from "@/lib/feedback-review";
 
 async function main() {
   const apply = process.argv.includes("--apply");
@@ -22,11 +21,11 @@ async function main() {
   for (const fb of items) {
     const q = await prisma.question.findUnique({
       where: { id: fb.questionId },
-      select: { content: true, options: true, correctAnswer: true, explanation: true },
+      select: { content: true, options: true, correctAnswer: true, explanation: true, passage: true },
     });
     if (!q) { console.log(`- ${fb.id}: întrebarea nu mai există, sar peste`); continue; }
     const options = Array.isArray(q.options) ? (q.options as string[]) : [];
-    const op = await secondOpinion({ content: q.content, options, correctAnswer: q.correctAnswer, explanation: q.explanation ?? undefined });
+    const op = await secondOpinionFor({ ...q, options });
     const next = applySecondOpinion(fb.reviewAction as ReviewAction, fb.resolution ?? "", op);
     console.log(`- ${fb.createdAt.toISOString().slice(0, 10)} ${fb.reviewAction} → ${next.action} · ${op.verdict}`);
     console.log(`  elev: „${(fb.comment ?? "").slice(0, 100)}”`);
