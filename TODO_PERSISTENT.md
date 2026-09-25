@@ -3,8 +3,11 @@
 numeric pe date de zbor), marcate `aptitudini-ext-gen:*` în `sourceReference`. Airmappr NU a fost copiat — condițiile lui
 interzic scraping-ul și folosirea comercială. Mai multe: `node --env-file=.env scripts/seed-aptitudini-extins.mjs --apply`
 (doar adaugă, nu șterge). Backup: `/root/backups/tutor-pre-aptitudini-extins-2026-09-24.dump`.
-- [ ] Etapa 2: busola (direcția de pe indicatorul de cap) și orizontul artificial (înclinare/tangaj) — cer desene în
-  aplicație (marcaje noi în pasaj, ca [CLOCK]).
+- [x] Etapa 2 LIVE 2026-09-25 (`3dddcd0`): busola (72) și orizontul artificial (55), desenate în aplicație (marcaje
+  [HEADING]/[ATTITUDE] în pasaj). Materia are acum 923 de exerciții. Verificat 11/11 în browser pe telefon.
+- [ ] Conturile din invitație (doar nume de utilizator) n-au mai intrat după prima zi: Ionuț Capota, Elisa Palasca,
+  Cătălin Ciucanu (au lucrat în ziua activării), Ioana Marinescu (0 activitate). Probabil același blocaj ca Greg
+  (câmp de email la intrare, reparat 24.09) — de anunțat că pot intra acum cu numele de utilizator (Poșta = în așteptare).
 
 **Intrarea cu nume de utilizator + cursul care nu se vedea (24.09, caz Greg / Agent imobiliar):**
 - [x] Pagina de intrare avea câmp de tip email → telefonul refuza „greg” înainte de server (serverul accepta deja
