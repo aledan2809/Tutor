@@ -284,3 +284,71 @@ export function validateItem(q) {
   if (q.options.some((o) => /NaN|Infinity|undefined/.test(o))) return "variantă invalidă";
   return null;
 }
+
+// ── Stage 2: drawn instruments (see src/components/session/flight-instruments.tsx) ──────────────
+const fmtHeading = (h) => `${String(((h % 360) + 360) % 360).padStart(3, "0")}°`;
+
+/** Heading indicator: read the heading under the lubber line. */
+export function genHeading(rand) {
+  const t = tools(rand);
+  const h = t.int(0, 71) * 5;
+  const answer = fmtHeading(h);
+  // Typical mistakes: the reciprocal (reading the tail), the mirror (card read the wrong way round),
+  // one or two marks off.
+  const wrong = [h + 180, 360 - h, h + 10, h - 10, h + 5, h - 5, h + 20].map(fmtHeading);
+  const opts = [answer];
+  for (const w of wrong) if (opts.length < 5 && !opts.includes(w)) opts.push(w);
+  return {
+    subject: "Orientare spațială",
+    topic: "Busolă (indicator de direcție)",
+    difficulty: 2,
+    content: "Ce direcție (cap) arată indicatorul? Citește valoarea de sub reperul portocaliu de sus.",
+    passage: `[HEADING] ${h}`,
+    options: t.shuffle(opts),
+    correctAnswer: answer,
+    explanation: `Sub reper e ${answer}. (Greșeli tipice: direcția opusă ${fmtHeading(h + 180)} sau citirea în oglindă ${fmtHeading(360 - h)}.)`,
+    ref: `${MARK}:instrumente:busola`,
+  };
+}
+
+const describeAttitude = (bank, pitch) => {
+  const b = bank === 0 ? "aripi orizontale" : `înclinat ${Math.abs(bank)}° la ${bank > 0 ? "dreapta" : "stânga"}`;
+  const p = pitch === 0 ? "bot pe orizont" : `bot ${Math.abs(pitch)}° ${pitch > 0 ? "sus" : "jos"}`;
+  return `${b}, ${p}`;
+};
+
+/** Attitude indicator: what is the aircraft doing? */
+export function genAttitude(rand) {
+  const t = tools(rand);
+  const bank = t.pick([0, 10, 15, 20, 30, 45]) * t.pick([1, -1]);
+  const pitch = t.pick([-10, -5, 0, 5, 10]);
+  const answer = describeAttitude(bank, pitch);
+  // Typical mistakes: the bank read the wrong way (the horizon tilts opposite to the wings), the
+  // pitch read the wrong way, both, and a wrong bank amount.
+  const other = t.pick([10, 20, 30, 45].filter((x) => x !== Math.abs(bank)));
+  const cands = [
+    [-bank, pitch], [bank, -pitch], [-bank, -pitch],
+    [bank === 0 ? other : Math.sign(bank) * other, pitch],
+    [bank, pitch === 0 ? 5 : 0], [bank === 0 ? -other : -Math.sign(bank) * other, -pitch],
+  ].map(([b, p]) => describeAttitude(b, p));
+  const opts = [answer];
+  for (const c of cands) if (opts.length < 5 && !opts.includes(c)) opts.push(c);
+  // Level flight (0°, 0°) collapses the mirrored mistakes into itself: top up from nearby attitudes.
+  for (const [b, p] of [[10, 0], [-10, 0], [0, 5], [0, -5], [20, 5], [-20, -5]]) {
+    const c = describeAttitude(b, p);
+    if (opts.length < 5 && !opts.includes(c)) opts.push(c);
+  }
+  return {
+    subject: "Orientare spațială",
+    topic: "Orizont artificial",
+    difficulty: 3,
+    content: "Ce face avionul, după orizontul artificial?",
+    passage: `[ATTITUDE] bank=${bank};pitch=${pitch}`,
+    options: t.shuffle(opts),
+    correctAnswer: answer,
+    explanation:
+      `Avionul: ${answer}. Simbolul avionului stă pe loc; orizontul se mișcă invers — la o înclinare spre dreapta ` +
+      `linia orizontului urcă în dreapta, iar când botul e sus, orizontul coboară (se vede mai mult cer).`,
+    ref: `${MARK}:instrumente:orizont`,
+  };
+}

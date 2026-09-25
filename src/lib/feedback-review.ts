@@ -217,7 +217,7 @@ export function applySecondOpinion(
  * external audio", while the students were complaining that the voice was too fast.
  */
 export function isInteractiveExercise(passage: string | null | undefined): boolean {
-  return /^\[(MEMORIE|AUDIODICT|CUBEVOICE|CLOCK)\b/.test(passage ?? "");
+  return /^\[(MEMORIE|AUDIODICT|CUBEVOICE|CLOCK|HEADING|ATTITUDE)\b/.test(passage ?? "");
 }
 
 /** The second opinion for a question — never asked of an exercise a text judge cannot see. */

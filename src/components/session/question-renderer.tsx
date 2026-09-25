@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { speak, speakItems, cancelSpeech, readTtsRate, useTtsRate, TtsSpeedControl } from "./tts";
+import { FlightInstrument, parseInstrument } from "./flight-instruments";
 
 interface QuestionOption {
   label: string;
@@ -70,7 +71,9 @@ export function QuestionRenderer({
   const isClock = !!clockMatch;
   const clockHour = clockMatch ? Number(clockMatch[1]) : 12;
   const clockMin = clockMatch ? Number(clockMatch[2]) : 0;
-  const isSpecial = isMemory || isAudioDict || isCubeVoice || isClock;
+  // Heading indicator / attitude indicator — drawn above the ordinary option buttons.
+  const instrument = parseInstrument(question.passage);
+  const isSpecial = isMemory || isAudioDict || isCubeVoice || isClock || !!instrument;
 
   const [memLeft, setMemLeft] = useState(memSeconds);
   const memActive = isMemory && memLeft > 0;
@@ -294,6 +297,8 @@ export function QuestionRenderer({
         <p className="flex-1 whitespace-pre-line text-lg text-white">{question.content}</p>
         <SpeakButton text={question.content} />
       </div>
+
+      {instrument && <FlightInstrument instrument={instrument} />}
 
       {/* #3 Cube — replay the dictated start + 6 moves (English); answer = final face below. */}
       {isCubeVoice && dictating && (

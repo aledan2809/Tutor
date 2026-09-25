@@ -70,7 +70,7 @@ export function composeDigestItem(i: {
       : i.suggested === i.marked
         ? "A doua verificare alege aceeași variantă ca cea marcată."
         : `A doua verificare alege altă variantă: „${clip(i.suggested, 200)}”.`;
-  const interactive = /^\[(MEMORIE|AUDIODICT|CUBEVOICE|CLOCK)\b/.test(i.passage ?? "");
+  const interactive = /^\[(MEMORIE|AUDIODICT|CUBEVOICE|CLOCK|HEADING|ATTITUDE)\b/.test(i.passage ?? "");
   const parts = [
     i.header,
     ``,
