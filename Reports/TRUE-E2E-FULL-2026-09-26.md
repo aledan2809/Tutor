@@ -60,7 +60,10 @@ Scor audit de cod: **95/100** (0 critice, 0 high). Tester-Gateway: **PASSED**, 0
 | 8b | Persona-walk | **N/A(not requested)** — fără `--persona` | — |
 | 9 | Paritate + stress | **DONE parțial** — stress PASS; paritate demo/prod **N/A(nu există mediu demo)** | mai jos |
 
-**Completare literală**: 9 faze DONE (una parțial) · 2 N/A cu motiv · 0 FAILED · 0 BLOCKED.
+**Completare literală**: 11 rânduri în matrice → 8 DONE complet, 1 DONE parțial (9: nu există mediu
+demo), 2 N/A cu motiv (5, 8b), 0 FAILED, 0 BLOCKED — adică **9 din 9 faze aplicabile executate**.
+Scenariile de flux din `TODO_PERSISTENT.md` (E1–E23): **20 din 23 rulate (87%)** — 18 PASS, 2 PARTIAL
+(E7, E17), 0 FAIL după reparații; E4, E9, E13 nerulate azi (fără schimbări în zonă de la 2026-09-05).
 
 ---
 
@@ -236,4 +239,19 @@ câmpul e acum de tip text (acceptă și nume de utilizator) → `#email` în `.
 
 ## Publicare
 
-_(completat după publicare)_
+LIVE pe `https://etutor.ro`, 2026-09-28 07:54 UTC (10:54 ora României).
+
+- **Commit** Tutor `1cf2466` (+ Tester-Gateway `1c4a4c6`, doar `apps/tutor.json`), urcate pe GitHub.
+- **Copie de siguranță** înainte: `VPS2:/root/backups/tutor-pre-true-e2e-2026-09-28.dump` (77 de tabele).
+- **Migrări**: `0072_session_version` (coloana `sessionVersion`) și `0073_lowercase_emails` — cele 4
+  emailuri cu majuscule (1 real + 3 de test) sunt acum cu litere mici, 0 conflicte.
+- **Build + repornire**: 3,5 minute (`/root/tutor-deploy-true-e2e-2026-09-28.log`, `DEPLOY_DONE`).
+- **Verificat live**: `/ro`, `/ro/auth/signin`, `/ro/auth/forgot-password`, `/ro/auth/register`,
+  `/ro/parinte`, `/api/health` → 200; `<html lang="ro">` pe `/ro` și `"en"` pe `/en`; curățitorul
+  analizei de trafic legat de Umami; „Enter your password” dispărut; o cale `/api` cu codificare greșită
+  → 400; parola uitată pe un email inexistent → același răspuns „trimis”; ruta de voucher ștearsă → 404.
+  În browser real (telefon): elevul de test intră cu emailul scris cu MAJUSCULE, ajunge la exersare;
+  părintele de test intră și vede „Familia mea”; `?error=AccessDenied` explică în română; 0 erori în
+  pagină.
+- **Curățenie**: cele 6 conturi `e2e-0926-*` și grupa `e2e-0926-group` șterse (tranzacție cu verificarea
+  numărului de rânduri); rămas 0.

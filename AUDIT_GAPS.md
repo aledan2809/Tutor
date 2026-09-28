@@ -6,7 +6,7 @@
 
 ## Open Gaps
 
-### G-TUT-AUDIT-2026-09-26 — Crearea contului și drumul până la conținut (True E2E [10]) — **Eliminated 2026-09-26 (`COMMIT_TBD`)**
+### G-TUT-AUDIT-2026-09-26 — Crearea contului și drumul până la conținut (True E2E [10]) — **Eliminated 2026-09-28 (`1cf2466`, LIVE + verificat)**
 Raport: `Reports/TRUE-E2E-FULL-2026-09-26.md`. Verificare: `Reports/true-e2e-2026-09-26/verificare-reparatii.mjs` (58/58 pe stiva QA, 28.09).
 - **Ghidul de pornire se oprea în „Curriculum setup required”** (engleză, fără pas următor) pe materiile școlare — elev singur și copil creat de părinte. Acum duce la lista de lecții de bifat, iar testul pornește singur după salvare.
 - **Limita de încercări la intrare / recuperare se ocolea** cu un `X-Forwarded-For` falsificat (se lua primul hop) sau cu un cookie de sesiune inventat la fiecare cerere. Acum adresa vine din `X-Real-IP` (pus de nginx) și bugetul pe sesiune se dă doar unei sesiuni semnate (verificată cu cheia serverului).
