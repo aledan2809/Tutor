@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { reserveVoucherLookup } from "@/lib/voucher-guard";
+import { normalizeVoucherCode, plausibleVoucherCode } from "@/lib/voucher-checkout";
+import { emailTaken } from "@/lib/email-lookup";
 import { withErrorHandler } from "@/lib/api-handler";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
@@ -15,7 +18,8 @@ import { loadVoucherPreview, planForCodeYear } from "@/lib/voucher-preview-serve
 
 const schema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email"),
+  // Lowercase: phones capitalise the first letter, and sign-in looks the email up in lowercase.
+  email: z.string().trim().toLowerCase().email("Invalid email"),
   password: z.string().min(8, "Password must be at least 8 characters").max(72, "Password must be at most 72 characters"),
   domainSlug: z.string().optional(), // legacy single-select
   domainSlugs: z.array(z.string()).optional(), // multi-select
@@ -42,9 +46,8 @@ async function _POST(req: NextRequest) {
 
   const { name, email, password, domainSlug, domainSlugs, voucherCode, role } = parsed.data;
 
-  // Check if user already exists
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
+  // Check if user already exists (whatever the capitals of an older row)
+  if (await emailTaken(email)) {
     return NextResponse.json(
       { error: "An account with this email already exists" },
       { status: 409 }
@@ -59,7 +62,9 @@ async function _POST(req: NextRequest) {
       email,
       password: hashedPassword,
       accountRole: accountRoleForSignup(role),
-      emailVerified: new Date(), // Auto-verify for credentials signup
+      // Not proven: nobody has shown they own this address yet. It stays null until a reset link
+      // or a sign-in link reaches the inbox — until then Google / the email link can't enter it.
+      emailVerified: null,
     },
   });
 
@@ -106,9 +111,17 @@ async function _POST(req: NextRequest) {
   // code in the campaign cookie /cafea set — keep that one too. Only kept, never redeemed: the 100%
   // path below still needs the code on the form.
   const keptCode = voucherCode ?? parseAttribution(req.cookies.get(CAMPAIGN_COOKIE)?.value)?.voucher;
-  if (keptCode) {
+  // Codes are looked up only while this address isn't guessing (voucher-guard.ts). While it is, the
+  // account is still made; the code goes back to the page (`voucherDeferred`), which takes the parent
+  // to the packages page with it in the box, where it is checked through the same guard. Nothing
+  // unchecked is kept on the account: the pages that read the kept code would tell whether it exists.
+  const lookup = keptCode ? reserveVoucherLookup(req.headers) : null;
+  const guessing = !!keptCode && !lookup;
+  const deferredCode = guessing ? normalizeVoucherCode(keptCode) : "";
+  const voucherDeferred = plausibleVoucherCode(deferredCode) ? deferredCode : null;
+  if (keptCode && lookup) {
     try {
-      const preview = await loadVoucherPreview(keptCode, user.id);
+      const preview = await loadVoucherPreview(keptCode, user.id, lookup);
       if (preview?.ok) {
         voucherDiscount = preview.preview.discountPercent;
         await prisma.user.update({
@@ -121,7 +134,7 @@ async function _POST(req: NextRequest) {
     }
   }
 
-  if (voucherCode && enrolledCount > 0) {
+  if (voucherCode && !guessing && enrolledCount > 0) {
     try {
       const code = voucherCode.toUpperCase();
       await prisma.$transaction(async (tx) => {
@@ -205,13 +218,14 @@ async function _POST(req: NextRequest) {
     message: "Account created. You can now sign in.",
     voucherApplied,
     voucherDiscount,
+    voucherDeferred,
   }, { status: 201 });
 
   // Consume the one-shot cookies regardless of outcome.
   if (refCode) {
     res.cookies.set(REFERRAL_COOKIE, "", { path: "/", maxAge: 0 });
   }
-  if (campaignCookieRaw) {
+  if (campaignCookieRaw && !voucherDeferred) {
     res.cookies.set(CAMPAIGN_COOKIE, "", { path: "/", maxAge: 0 });
   }
   if (demoQuizId) {

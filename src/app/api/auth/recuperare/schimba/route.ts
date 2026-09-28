@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { logAudit } from "@/lib/audit";
-import { codePotrivit, gasestePentruRecuperare } from "@/lib/recuperare";
+import { consumaCodul, gasestePentruRecuperare } from "@/lib/recuperare";
 
 /**
  * POST /api/auth/recuperare/schimba { identificator, cod, parolaNoua }
@@ -38,22 +37,20 @@ async function _POST(req: NextRequest) {
   );
   if (!identificator.trim() || cod.length !== 6) return gresit;
 
+  // Hașul se face mereu, înainte de căutare: dacă s-ar face doar pentru un cont găsit, răspunsul
+  // ar dura vizibil mai mult când contul există. Și așa lacătul pe cont nu stă cât calculează bcrypt.
+  const hash = await bcrypt.hash(parolaNoua, 10);
   const gasit = await gasestePentruRecuperare(identificator);
   if (!gasit) return gresit;
 
-  const salvat = await prisma.verificationToken.findFirst({
-    where: { identifier: `otp:${gasit.userId}` },
-    orderBy: { expires: "desc" },
+  const ok = await consumaCodul(gasit.userId, cod, async (tx) => {
+    // Versiunea nouă închide sesiunile deschise cu parola veche.
+    await tx.user.update({
+      where: { id: gasit.userId },
+      data: { password: hash, sessionVersion: { increment: 1 } },
+    });
   });
-  if (!salvat || salvat.expires < new Date() || !codePotrivit(cod, salvat.token)) {
-    return gresit;
-  }
-
-  const hash = await bcrypt.hash(parolaNoua, 10);
-  await prisma.$transaction([
-    prisma.user.update({ where: { id: gasit.userId }, data: { password: hash } }),
-    prisma.verificationToken.deleteMany({ where: { identifier: `otp:${gasit.userId}` } }),
-  ]);
+  if (!ok) return gresit;
 
   await logAudit({
     action: "PASSWORD_RESET_OTP",

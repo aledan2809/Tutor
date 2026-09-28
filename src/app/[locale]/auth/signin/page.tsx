@@ -2,7 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { useTranslations, useLocale } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useRouter } from "next/navigation";
 
@@ -16,6 +16,44 @@ export default function SignInPage() {
   const [error, setError] = useState("");
   const [emailSent, setEmailSent] = useState(false);
   const [mode, setMode] = useState<"credentials" | "magic">("credentials");
+
+  // Auth.js sends failures back in the address (?error=…): an expired sign-in link, an email
+  // already taken by another way of signing in. The page used to show nothing.
+  // Carried to „create an account", so someone who came from an invitation returns to it.
+  const [registerHref, setRegisterHref] = useState("/auth/register");
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const cb = params.get("callbackUrl");
+    const role = params.get("role");
+    const roleParam = role === "PARENT" || role === "STUDENT" ? `&role=${role}` : "";
+    if (cb && cb.startsWith("/") && !cb.startsWith("//") && !cb.startsWith("/\\")) {
+      setRegisterHref(`/auth/register?callbackUrl=${encodeURIComponent(cb)}${roleParam}`);
+    }
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("error");
+    if (!code) return;
+    // Shown once: taken out of the address, so nothing started from this page carries it along.
+    params.delete("error");
+    const rest = params.toString();
+    // Next's own entry is kept (state), or Back to this page would show the page left from here.
+    window.history.replaceState(window.history.state, "", `${window.location.pathname}${rest ? `?${rest}` : ""}`);
+    setError(
+      code === "OAuthAccountNotLinked"
+        ? t("errorAccountNotLinked")
+        : code === "AccessDenied"
+          ? t("errorUsePassword")
+        : code === "OneTap"
+          ? t("errorOneTap")
+        : code === "Verification"
+          ? t("errorLinkExpired")
+          : code === "CredentialsSignin"
+            ? t("invalidCredentials")
+            : t("errorGeneric")
+    );
+  }, [t]);
 
   // Honors ?callbackUrl= (set by middleware and campaign flows). Only same-site
   // relative paths are accepted — anything else falls back to the dashboard.
@@ -52,9 +90,13 @@ export default function SignInPage() {
     setError("");
     // Nu anunta „verifica-ti emailul" decat daca trimiterea chiar a reusit.
     try {
-      const res = await signIn("resend", { email, redirect: false });
+      // The link brings them where the other ways of signing in do — not back to this page (whose
+      // address may still carry the ?error= of an older, expired link).
+      const res = await signIn("resend", { email, redirect: false, callbackUrl: postLoginUrl() });
       if (res?.error) {
-        setError(t("networkError"));
+        // AccessDenied = an account made with a password whose email was never proven: the link
+        // isn't sent (see the signIn callback) — the way in is the password or its reset.
+        setError(res.error === "AccessDenied" ? t("errorUsePassword") : t("networkError"));
         return;
       }
     } catch {
@@ -158,7 +200,6 @@ export default function SignInPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  title="Enter your password"
                   required
                   className="min-h-[44px] w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 pr-10 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
@@ -237,11 +278,15 @@ export default function SignInPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                title="Enter your email address"
+                placeholder={t("emailPlaceholder")}
+                autoCapitalize="none"
                 required
                 className="min-h-[44px] mb-4 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
+              {/* Shown here too: in this mode a refused or failed send used to say nothing at all. */}
+              {error && (
+                <p className="mb-3 text-sm text-red-400">{error}</p>
+              )}
               <button
                 type="submit"
                 className="min-h-[44px] w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
@@ -259,9 +304,9 @@ export default function SignInPage() {
         )}
 
         <p className="mt-4 text-center text-sm text-gray-400">
-          Don&apos;t have an account?{" "}
-          <Link href="/auth/register" className="inline-block py-1 text-blue-400 hover:text-blue-300">
-            Create one
+          {t("noAccount")}{" "}
+          <Link href={registerHref} className="inline-block py-1 text-blue-400 hover:text-blue-300">
+            {t("createAccount")}
           </Link>
         </p>
 

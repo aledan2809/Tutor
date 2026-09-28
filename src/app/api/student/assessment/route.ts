@@ -48,8 +48,11 @@ async function _POST(req: NextRequest) {
 
   // Get questions and check answers
   const questionIds = answers.map((a) => a.questionId);
+  // Only this subject's published questions: the response carries the correct answer, so an
+  // id from another subject (a private course, a draft) must count as "not found", not be
+  // answered (True E2E 2026-09-26 — same rule session/answer already applies).
   const questions = await prisma.question.findMany({
-    where: { id: { in: questionIds } },
+    where: { id: { in: questionIds }, domainId, status: "PUBLISHED" },
   });
 
   const questionMap = new Map(questions.map((q) => [q.id, q]));

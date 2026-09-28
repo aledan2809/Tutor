@@ -18,6 +18,7 @@
 
 import { randomBytes } from "crypto";
 import { prisma } from "@/lib/prisma";
+import { emailTaken } from "@/lib/email-lookup";
 import { logger } from "@/lib/logger";
 import {
   type FamilyPlan,
@@ -853,11 +854,7 @@ export async function createChildDirectly(params: {
     const seat = await checkSeat(params.ownerId, INVITE_TARGET_ROLE.CHILD, tx as unknown as Db);
     if (!seat.allowed) throw new FamilySeatError(seat);
 
-    const existing = await tx.user.findUnique({
-      where: { email: params.email },
-      select: { id: true },
-    });
-    if (existing) {
+    if (await emailTaken(params.email, tx)) {
       const e = new Error("EMAIL_TAKEN");
       e.name = "EmailTakenError";
       throw e;
@@ -868,7 +865,8 @@ export async function createChildDirectly(params: {
         name: params.name,
         email: params.email,
         password: params.passwordHash,
-        emailVerified: new Date(),
+        // The parent typed this address; it proves nothing about who owns it.
+        emailVerified: null,
         // A child's account: without a role it was taken for a possible parent (the free week's
         // family seats, the offers) until it picked a subject.
         accountRole: "STUDENT",

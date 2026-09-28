@@ -1,11 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import {
   DURATA_COD_MS,
+  cheieCod,
   codNou,
   gasestePentruRecuperare,
   hashCod,
+  potTrimiteCod,
 } from "@/lib/recuperare";
 
 /**
@@ -47,40 +49,49 @@ async function _POST(req: NextRequest) {
     return raspuns;
   }
 
+  // Limită pe cont, nu doar pe adresă: altfel, din multe adrese, cineva ar cere
+  // coduri noi la nesfârșit pentru contul altuia și ar tot ghici.
+  if (!(await potTrimiteCod(gasit.userId))) return raspuns;
+
   const cod = codNou();
   // Un cod nou îl anulează pe cel dinainte: două coduri vii în același timp ar
   // însemna două ferestre de ghicit, nu una.
   await prisma.verificationToken.deleteMany({
-    where: { identifier: `otp:${gasit.userId}` },
+    where: { identifier: cheieCod(gasit.userId) },
   });
   await prisma.verificationToken.create({
     data: {
-      identifier: `otp:${gasit.userId}`,
-      token: hashCod(cod),
+      identifier: cheieCod(gasit.userId),
+      token: hashCod(gasit.userId, cod),
       expires: new Date(Date.now() + DURATA_COD_MS),
     },
   });
 
-  try {
-    const { WhatsAppClient } = await import("@aledan/whatsapp");
-    const client = new WhatsAppClient({ phoneNumberId, accessToken });
-    // Șablon de autentificare: Meta îi scrie singur textul, iar codul merge și în
-    // corp, și în butonul de copiere — de-aia apare de două ori în componente.
-    const result = await client.sendTemplate(gasit.telefon, TEMPLATE, "ro", [
-      { type: "body" as const, parameters: [{ type: "text" as const, text: cod }] },
-      {
-        type: "button" as const,
-        sub_type: "url" as const,
-        index: 0,
-        parameters: [{ type: "text" as const, text: cod }],
-      },
-    ]);
-    if (!result.success) {
-      console.error("[recuperare] Meta a refuzat codul:", result.error);
+  // Trimis după răspuns: așteptarea lui Meta ar face ca un cont existent să răspundă vizibil
+  // mai încet decât unul inexistent, deci ecranul ar spune totuși care mărci sunt reale.
+  const telefon = gasit.telefon;
+  after(async () => {
+    try {
+      const { WhatsAppClient } = await import("@aledan/whatsapp");
+      const client = new WhatsAppClient({ phoneNumberId, accessToken });
+      // Șablon de autentificare: Meta îi scrie singur textul, iar codul merge și în
+      // corp, și în butonul de copiere — de-aia apare de două ori în componente.
+      const result = await client.sendTemplate(telefon, TEMPLATE, "ro", [
+        { type: "body" as const, parameters: [{ type: "text" as const, text: cod }] },
+        {
+          type: "button" as const,
+          sub_type: "url" as const,
+          index: 0,
+          parameters: [{ type: "text" as const, text: cod }],
+        },
+      ]);
+      if (!result.success) {
+        console.error("[recuperare] Meta a refuzat codul:", result.error);
+      }
+    } catch (e) {
+      console.error("[recuperare] trimitere eșuată:", e);
     }
-  } catch (e) {
-    console.error("[recuperare] trimitere eșuată:", e);
-  }
+  });
 
   return raspuns;
 }

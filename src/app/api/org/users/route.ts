@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { emailTaken } from "@/lib/email-lookup";
 import { withErrorHandler } from "@/lib/api-handler";
 import { logAudit } from "@/lib/audit";
 import { requireContentAdmin, ownsDomain } from "@/lib/merchant-auth";
@@ -23,7 +24,7 @@ const GRANTABLE_ROLES = ["STUDENT", "WATCHER", "INSTRUCTOR"] as const;
 
 const createSchema = z.object({
   name: z.string().min(2).max(120),
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   password: z.string().min(8).max(72),
   domainId: z.string().min(1),
   roles: z.array(z.enum(GRANTABLE_ROLES)).min(1).default(["STUDENT"]),
@@ -86,8 +87,7 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: "Domain not found" }, { status: 404 });
   }
 
-  const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
-  if (existing) {
+  if (await emailTaken(email)) {
     return NextResponse.json({ error: "Există deja un cont cu acest e-mail" }, { status: 409 });
   }
 
@@ -103,7 +103,10 @@ async function _POST(req: NextRequest) {
         name,
         email,
         password: await bcrypt.hash(password, 10),
-        emailVerified: new Date(),
+        // Not proven: the merchant typed this address, the person never confirmed it. Left
+        // unproven, a Google or email-link sign-in can't slip into an account whose password
+        // someone else chose — the owner proves the address with „Ai uitat parola?”.
+        emailVerified: null,
         organizationId,
         accountRole: roles.includes("STUDENT") ? "STUDENT" : null,
       },

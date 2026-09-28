@@ -3,7 +3,7 @@
   "baseUrl": "https://etutor.ro",
   "login": {
     "path": "/en/auth/signin",
-    "emailSelector": "input[type=email]",
+    "emailSelector": "#email",
     "passwordSelector": "input[type=password]",
     "submitSelector": "button[type=submit]",
     "successUrlPattern": "/(dashboard|en/dashboard|ro/dashboard|$)"

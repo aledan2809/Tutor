@@ -1,0 +1,26 @@
+{
+ "deleted group GET [id]": "200 isActive=false members=1 memberHasEmailField=true",
+ "deleted group in list": "200 present=false",
+ "deleted group report": "200 rows=1",
+ "students?groupId=<deleted group>": "200 n=1",
+ "DELETE again (already deleted)": "200 {success}",
+ "PATCH remove member from deleted group": "200 {id,name,description,domainId,createdById,isActive,createdAt,updatedAt}",
+ "deleted group after strip": "200 isActive=false members=0 name=e2e-0926-group",
+ "INSTRUCTOR reports?type=student&id=<student>": "200 rows=1",
+ "INSTRUCTOR reports?type=domain&id=<avi>": "200 rows=10",
+ "INSTRUCTOR reports?type=student&id=<student>&format=csv": "200 rows=1",
+ "INSTRUCTOR2 reports?type=domain&id=<mate>": "403 rows=0 Forbidden",
+ "INSTRUCTOR2 reports?type=student&id=<math-only>": "200 rows=0",
+ "INSTRUCTOR2 reports?type=group&id=<group>": "200 rows=0",
+ "GET /ro": "200 lang=en title=\"Tutor - Mii de grile reale pe materia ta | etutor.ro | Tutor\" hreflang=[]",
+ "GET /en": "200 lang=en title=\"Tutor - Mii de grile reale pe materia ta | etutor.ro | Tutor\" hreflang=[]",
+ "stress 20× GET /ro": {
+  "wallMs": 2526,
+  "counts": {
+   "200": 20
+  },
+  "p50": 1039,
+  "max": 2513
+ },
+ "STUDENT progress on public not-enrolled subject": "200 overall={\"totalAttempts\":0,\"accuracy\":0,\"topicsStudied\":0,\"sessionsCompleted\":0} topics=0"
+}

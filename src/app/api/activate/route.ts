@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { reserveVoucherLookup } from "@/lib/voucher-guard";
 import { withErrorHandler } from "@/lib/api-handler";
 import { z } from "zod";
 import { markCampaignActivated } from "@/lib/campaign-attribution";
@@ -43,6 +44,11 @@ async function _POST(req: NextRequest) {
   }
   const code = parsed.data.voucherCode.toUpperCase();
   const userId = session.user.id;
+  // Unknown codes are counted per address (voucher-guard.ts): this is where a 100% code opens access.
+  const lookup = reserveVoucherLookup(req.headers);
+  if (!lookup) {
+    return NextResponse.json({ error: "Prea multe coduri greșite de pe această rețea. Mai încearcă peste câteva minute." }, { status: 429 });
+  }
 
   // Resolve chosen subjects to real, active, PUBLIC domains. A voucher opens a
   // paid tier, not a private subject — that stays admin-granted.
@@ -64,6 +70,7 @@ async function _POST(req: NextRequest) {
 
   const result = await prisma.$transaction(async (tx) => {
     const voucher = await tx.voucher.findUnique({ where: { code } });
+    if (voucher) lookup.found();
     if (!voucher || !voucher.isActive) return { error: "Voucher inexistent sau inactiv", status: 404 };
     if (voucher.expiresAt && voucher.expiresAt < new Date()) return { error: "Voucher expirat", status: 400 };
     if (voucher.maxUses !== null && voucher.usedCount >= voucher.maxUses)

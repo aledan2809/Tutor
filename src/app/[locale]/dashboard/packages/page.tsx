@@ -162,6 +162,12 @@ export default function PackagesPage() {
         setError(null);
         return data.preview as PreviewJson;
       }
+      if (res.status === 429) {
+        // Not a verdict on the code (too many wrong codes from this network, or too many requests):
+        // it stays in the box and is checked again at the next click; a discount already shown stays.
+        setError(t("voucherTooMany"));
+        return null;
+      }
       if (opts?.fromLink) {
         // Nobody typed this code: leaving it in the box would re-check and refuse it on every
         // click on a package, and the parent couldn't pay at all. A refusal doesn't touch the code
@@ -263,7 +269,10 @@ export default function PackagesPage() {
         return;
       }
       const voucherKey = VOUCHER_ERROR_KEYS[data.code as keyof typeof VOUCHER_ERROR_KEYS];
-      if (voucherKey) {
+      if (res.status === 429 || data.code === "VOUCHER_TOO_MANY") {
+        // Not a verdict on the code: it stays, and the next click pays with it.
+        setError(t("voucherTooMany"));
+      } else if (voucherKey) {
         // The code stopped working after it was checked (used in another tab, just expired). Drop it,
         // so the next click pays the price the card then shows instead of hitting the same refusal.
         setSavedPreview(null);

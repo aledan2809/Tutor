@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { checkVoucherForCheckout, normalizeVoucherCode } from "@/lib/voucher-checkout";
+import { reserveVoucherLookup } from "@/lib/voucher-guard";
 import { resolveFamilyPlanFromRecord } from "@/lib/family";
 import { checkoutTrialDays, remainingFreeTrialDays } from "@/lib/free-trial";
 import { trialStartOf } from "@/lib/access";
@@ -71,7 +72,13 @@ async function _POST(req: NextRequest) {
   let codeOffer: { percent: number; renews: boolean; voucherId: string } | null = null;
   const code = normalizeVoucherCode(voucherCode);
   if (code) {
+    // Each answer below says whether the code exists: unknown codes are counted per address.
+    const lookup = reserveVoucherLookup(req.headers);
+    if (!lookup) {
+      return NextResponse.json({ error: "Prea multe încercări de cod. Mai încearcă peste câteva minute.", code: "VOUCHER_TOO_MANY" }, { status: 429 });
+    }
     const voucher = await prisma.voucher.findUnique({ where: { code } });
+    if (voucher) lookup.found();
     const alreadyUsedByUser = voucher?.oncePerUser
       ? !!(await prisma.voucherRedemption.findUnique({
           where: { voucherId_userId: { voucherId: voucher.id, userId: session.user.id } },

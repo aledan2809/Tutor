@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { CurriculumChecklist } from "@/components/session/curriculum-checklist";
 import { useSession } from "next-auth/react";
@@ -69,6 +69,8 @@ export default function PracticePage() {
   // „Testul modulului" din panou: grilele doar din subiectul acelui modul.
   const [autoStartTopic, setAutoStartTopic] = useState<string | null>(null);
   const [autoStarted, setAutoStarted] = useState(false);
+  // A start refused by the curriculum gate, retried once the checklist is saved.
+  const startAfterSetup = useRef<{ type: string; topic: string | null } | null>(null);
 
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
@@ -139,6 +141,7 @@ export default function PracticePage() {
     // Semnalul de "deschide checklistul" e al domeniului care a dat 409 — nu-l
     // purtăm peste alt domeniu din dropdown (finding review).
     setCurriculumSetupNeeded(false);
+    startAfterSetup.current = null;
     setLoading(true);
     fetch(`/api/${selectedDomain}/session/next`)
       .then((r) => r.json())
@@ -169,6 +172,8 @@ export default function PracticePage() {
         // Say WHY. The checklist used to just appear: the session did not start and
         // nothing explained that it could not, which reads as the app being broken.
         setGateReason(session.needsCurriculumSetup ? "setup" : "empty");
+        // Remember what was asked for, so saving the checklist starts it (no second tap).
+        startAfterSetup.current = { type, topic: topic ?? null };
         setCurriculumSetupNeeded(true);
         setStarting(false);
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -357,6 +362,9 @@ export default function PracticePage() {
               onSaved={() => {
                 setCurriculumSetupNeeded(false);
                 setGateReason(null);
+                const pending = startAfterSetup.current;
+                startAfterSetup.current = null;
+                if (pending) handleSelect(pending.type, pending.topic);
               }}
             />
           )}

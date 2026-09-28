@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { clientIp } from "@/lib/client-ip";
 
 // POST /api/v1/consent/record  { type?, choice, locale? }
 // Records the visitor's cookie consent in the Legal Hub (anonymous path: x-app-slug
@@ -32,7 +33,9 @@ function allow(ip: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
-  const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "local";
+  // The real address (client-ip.ts): it is recorded as consent evidence, and the first
+  // X-Forwarded-For entry is whatever the client chose to send.
+  const ip = clientIp(request.headers);
   if (!allow(ip)) {
     return NextResponse.json({ recorded: false, reason: "rate-limited" }, { status: 429 });
   }

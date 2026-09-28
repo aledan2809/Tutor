@@ -125,6 +125,14 @@ export default function FamilyPage() {
       .then((d) => setData(d))
       .finally(() => setLoading(false));
   }, []);
+  // Quiet refresh: the page stays on screen, so a card being read (a new child's password) doesn't
+  // vanish under the loading line.
+  const refresh = useCallback(() => {
+    fetch("/api/dashboard/family")
+      .then((r) => r.json())
+      .then((d) => setData(d))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     load();
@@ -312,6 +320,7 @@ export default function FamilyPage() {
             setAdding(null);
             load();
           }}
+          onCreated={refresh}
         />
       )}
 
@@ -518,10 +527,13 @@ function AddMember({
   target,
   onClose,
   onDone,
+  onCreated,
 }: {
   target: InviteTargetRole;
   onClose: () => void;
   onDone: () => void;
+  /** A child account now exists: the list must show it even if the panel is closed with „Închide”. */
+  onCreated: () => void;
 }) {
   const canDirect = target === INVITE_TARGET_ROLE.CHILD;
   const [method, setMethod] = useState<"invite" | "direct">("invite");
@@ -560,7 +572,7 @@ function AddMember({
       {method === "invite" ? (
         <InviteForm target={target} onDone={onDone} />
       ) : (
-        <DirectChildForm onDone={onDone} />
+        <DirectChildForm onDone={onDone} onCreated={onCreated} />
       )}
     </div>
   );
@@ -685,26 +697,92 @@ function InviteForm({
   );
 }
 
-function DirectChildForm({ onDone }: { onDone: () => void }) {
+function DirectChildForm({ onDone, onCreated }: { onDone: () => void; onCreated: () => void }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  // After creation the parent needs the sign-in details in front of them: the child
+  // can't use the account without them, and the form used to just close.
+  const [created, setCreated] = useState<{ email: string; password: string } | null>(null);
 
   const submit = async () => {
+    // Checked here too: the server's own refusal of a short password is a generic message.
+    if (password.length < 8) {
+      setError("Parola trebuie să aibă cel puțin 8 caractere.");
+      return;
+    }
     setBusy(true);
     setError(null);
-    const r = await fetch("/api/dashboard/family/direct", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
-    const d = await r.json();
-    setBusy(false);
-    if (r.ok) onDone();
-    else setError(d.seat?.message ?? d.error ?? "Eroare");
+    try {
+      const r = await fetch("/api/dashboard/family/direct", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (r.ok) {
+        setCreated({ email: email.trim().toLowerCase(), password });
+        onCreated();
+      }
+      else {
+        // The field messages are Romanian; the top-level `error` of a refused form is not.
+        const fieldMsg = Object.values(
+          (d.details?.fieldErrors ?? {}) as Record<string, string[] | undefined>
+        ).flat()[0];
+        // Only the 409 carries a sentence written for the parent; every other `error` is a code.
+        setError(
+          d.seat?.message ??
+            fieldMsg ??
+            (r.status === 409 && typeof d.error === "string" && d.error !== "seat_unavailable"
+              ? d.error
+              : r.status === 401
+                ? "Sesiunea a expirat. Intră din nou în cont și încearcă iar."
+                : r.status === 429
+                  ? "Prea multe încercări. Așteaptă un minut și încearcă din nou."
+                  : "Nu s-a putut crea contul. Încearcă din nou.")
+        );
+      }
+    } catch {
+      setError("Nu ne-am putut conecta. Verifică internetul și încearcă din nou.");
+    } finally {
+      setBusy(false);
+    }
   };
+
+  if (created) {
+    return (
+      <div className="space-y-3 rounded-lg border border-green-800 bg-green-950/20 p-4 text-sm">
+        <p className="font-semibold text-green-300">Contul copilului e gata.</p>
+        <p className="text-gray-300">
+          Dă-i copilului datele de mai jos. Intră pe <strong className="text-white">eTutor.ro</strong>, apasă
+          „Intră în cont” și le scrie exact așa:
+        </p>
+        <dl className="space-y-1 rounded-lg bg-gray-900 p-3">
+          <div className="flex flex-wrap gap-2">
+            <dt className="text-gray-400">Email:</dt>
+            <dd className="break-all font-mono text-white">{created.email}</dd>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <dt className="text-gray-400">Parola:</dt>
+            <dd className="break-all font-mono text-white">{created.password}</dd>
+          </div>
+        </dl>
+        <p className="text-xs text-gray-400">
+          Parola n-o mai arătăm după ce închizi. Dacă o uitați, pe pagina de intrare e „Ai uitat parola?” —
+          linkul vine pe emailul de mai sus.
+        </p>
+        <button
+          onClick={onDone}
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500"
+        >
+          Gata, am notat
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -723,15 +801,39 @@ function DirectChildForm({ onDone }: { onDone: () => void }) {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="email@exemplu.ro"
+        autoCapitalize="none"
+        autoComplete="off"
         className="w-full max-w-md rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white placeholder-gray-500"
       />
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Parolă (min. 8 caractere)"
-        className="w-full max-w-md rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white placeholder-gray-500"
-      />
+      <div className="relative w-full max-w-md">
+        <input
+          type={showPassword ? "text" : "password"}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Parolă (min. 8 caractere)"
+          autoComplete="new-password"
+          className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 pr-11 text-white placeholder-gray-500"
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword((v) => !v)}
+          aria-label={showPassword ? "Ascunde parola" : "Arată parola"}
+          title={showPassword ? "Ascunde parola" : "Arată parola"}
+          className="absolute inset-y-0 right-0 flex min-w-[44px] items-center justify-center text-gray-400 hover:text-gray-200"
+        >
+          {showPassword ? (
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" strokeLinecap="round" strokeLinejoin="round" />
+              <line x1="1" y1="1" x2="23" y2="23" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          ) : (
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          )}
+        </button>
+      </div>
       <button
         onClick={submit}
         disabled={busy}

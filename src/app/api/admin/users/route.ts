@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { emailTaken } from "@/lib/email-lookup";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
@@ -164,7 +165,7 @@ async function _GET(req: NextRequest) {
 
 const createUserSchema = z.object({
   name: z.string().min(1).max(100),
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   password: z.string().min(6).max(72),
   // Note: platform "admin" is granted per-domain via the Enroll flow (ADMIN
   // enrollment role), NOT here — the create-user dialog has no domain picker, so
@@ -183,8 +184,7 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const existing = await prisma.user.findUnique({ where: { email: parsed.data.email } });
-  if (existing) {
+  if (await emailTaken(parsed.data.email)) {
     return NextResponse.json({ error: "Email already exists" }, { status: 409 });
   }
 

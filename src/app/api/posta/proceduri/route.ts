@@ -21,6 +21,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
+import { clientIp } from "@/lib/client-ip";
 
 const DIR = process.env.PROCEDURI_UPLOAD_DIR || "/var/www/tutor-uploads/proceduri";
 const MAX_BYTES = 15 * 1024 * 1024;
@@ -57,7 +58,7 @@ const schema = z.object({
 });
 
 async function _POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "necunoscut";
+  const ip = clientIp(req.headers);
   if (preaMulte(ip)) {
     return NextResponse.json(
       { error: "Ați trimis deja de câteva ori în ultima oră. Scrieți-ne pe e-mail dacă e urgent." },

@@ -2,23 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { withErrorHandler } from "@/lib/api-handler";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { sanitizeQuizForSave, persistMagicQuiz } from "@/lib/magic-quiz";
+import { clientIp } from "@/lib/client-ip";
 
 // Public: persist a demo quiz so a friend can take the SAME quiz (duel) and so
 // the creator can claim it on signup (lazy-save). DB write only, no AI cost,
 // but rate-limited because it's public.
 export const dynamic = "force-dynamic";
 
-function clientIp(req: NextRequest): string {
-  const fwd = req.headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
-  return req.headers.get("x-real-ip") || "unknown";
+function clientIpOf(req: NextRequest): string {
+  return clientIp(req.headers);
 }
 
 const DEMO_QUIZ_COOKIE = "tutor_demo_quiz";
 const DEMO_QUIZ_COOKIE_MAX_AGE = 90 * 24 * 60 * 60; // 90 days
 
 async function _POST(req: NextRequest) {
-  const ip = clientIp(req);
+  const ip = clientIpOf(req);
   const rl = checkRateLimit(`magic-quiz-save:${ip}`, { maxRequests: 20, windowMs: 60 * 60_000 });
   if (!rl.allowed) {
     return NextResponse.json(

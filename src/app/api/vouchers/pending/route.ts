@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { loadVoucherPreview, serializePreview } from "@/lib/voucher-preview-server";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { reserveVoucherLookup } from "@/lib/voucher-guard";
 
 /**
  * The discount code kept on the account until payment (User.pendingVoucherCode).
@@ -41,7 +42,11 @@ async function _POST(req: NextRequest) {
   const parsed = bodySchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Invalid input" }, { status: 400 });
 
-  const result = await loadVoucherPreview(parsed.data.code, session.user.id);
+  const lookup = reserveVoucherLookup(req.headers);
+  if (!lookup) {
+    return NextResponse.json({ error: "Too many attempts", code: "VOUCHER_TOO_MANY" }, { status: 429 });
+  }
+  const result = await loadVoucherPreview(parsed.data.code, session.user.id, lookup);
   if (!result || !result.ok) {
     const code = result && !result.ok ? result.code : "VOUCHER_INVALID";
     return NextResponse.json({ error: result && !result.ok ? result.message : "Invalid voucher code", code }, { status: 400 });

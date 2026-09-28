@@ -1872,7 +1872,17 @@ critice** + 6 rute publice / 9 protejate / 3 admin.
 - [x] **E14 — Watcher monitoring** — 2026-05-11 PASS
 - [x] **E15 — SuperAdmin panel** — 2026-05-11 PASS (all 7 API endpoints)
 - [x] **E16 — Auth flows** — 2026-05-11 PASS
-- [x] **E17 — Locale switch** — 2026-05-11 PASS
+- [x] **E17 — Locale switch** — 2026-05-11 PASS · 2026-09-26 PARTIAL → `<html lang>` reparat (`COMMIT_TBD`); `/en` are încă titlul în română
+- [x] **E18 — Elev își face singur cont (telefon) → prima întrebare** — 2026-09-26 FAIL → PASS după reparație (`COMMIT_TBD`): ghidul se oprea în „Curriculum setup required”; emailul cu majuscule
+- [x] **E19 — Părinte: cont → copil creat direct → copilul intră** — 2026-09-26 PARTIAL → PASS (`COMMIT_TBD`): cartonaș cu datele de intrare + ochi la parolă
+- [x] **E20 — Al doilea părinte prin invitație, fără cont** — 2026-09-26 FAIL → PASS (`COMMIT_TBD`): înapoi la invitație, rol de părinte
+- [x] **E21 — Copil cu cod de familie, fără cont** — 2026-09-26 FAIL → PASS (`COMMIT_TBD`): codul revine după cont
+- [x] **E22 — Parolă uitată pe email** — 2026-09-26 FAIL pe producție → PASS (`COMMIT_TBD`): email prin Resend, RO/EN, fără link în jurnal, sesiunile vechi închise
+- [x] **E23 — Recuperare pe telefon (cod WhatsApp)** — 2026-09-26 FAIL (fără limită) → PASS (`COMMIT_TBD`): 5 încercări/cod, 5 coduri/oră
+
+> **Rulare True E2E [10] 2026-09-26** (accent pe crearea contului și drumul spre conținut): raport `Reports/TRUE-E2E-FULL-2026-09-26.md`,
+> constatări în `AUDIT_GAPS.md` (G-TUT-AUDIT-2026-09-26 + G-TUT-OPEN-2026-09-26). E1–E3, E5–E8, E10–E12, E14–E16: PASS;
+> E7 PARTIAL (grupa ștearsă încă citibilă); E4, E9, E13 neexecutate (fără schimbări în zonă de la 2026-09-05).
 
 ---
 

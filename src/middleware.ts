@@ -1,6 +1,9 @@
 import createMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
 import { NextRequest, NextResponse } from "next/server";
+import { clientIp } from "@/lib/client-ip";
+import { rateLimitBucket, decodedApiPath, type Bucket } from "@/lib/rate-limit-rules";
+import { sessionFromHeaders } from "@/lib/session-cookie";
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -56,65 +59,67 @@ function isPublicPath(pathname: string): boolean {
 // ─── Rate limiting state (in-memory, edge-compatible) ───
 const MAX_STORE_SIZE = 10_000;
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+// Attempts at a secret (password, recovery code, voucher or family code) live apart and are never
+// evicted early: otherwise a flood of other requests would push an address's counter out and reset it.
+const attemptStore = new Map<string, { count: number; resetAt: number }>();
 
 function purgeExpiredEntries() {
   const now = Date.now();
-  for (const [key, entry] of rateLimitStore) {
-    if (now > entry.resetAt) rateLimitStore.delete(key);
+  for (const store of [rateLimitStore, attemptStore]) {
+    for (const [key, entry] of store) {
+      if (now > entry.resetAt) store.delete(key);
+    }
   }
 }
 
-// Read-only auth endpoints. NextAuth's client hits /api/auth/session on every
-// page load, tab refocus and periodic refetch — that is a READ, not an access
-// attempt. Sharing one budget with credential submission meant a normal browsing
-// session exhausted it; the client then reports the user as signed out even
-// though the server session is still valid (measured: 60 session reads across 18
-// pages, first 429 at the 18th). For a school platform a whole classroom sits
-// behind one NAT, so the budget was effectively per-classroom.
-const AUTH_READ_PATHS = new Set([
-  "/api/auth/session",
-  "/api/auth/providers",
-  "/api/auth/csrf",
-  "/api/auth/error",
-  "/api/auth/_log",
-]);
-
-function rateLimitBucket(path: string): { bucket: string; maxRequests: number } {
-  if (path.startsWith("/api/admin/stripe") || path.startsWith("/api/stripe")) {
-    return { bucket: "/api/stripe", maxRequests: 3 };
+/**
+ * Keeps the store bounded without a full scan on every insert once it is full: expired entries go
+ * first; if that frees nothing, the oldest tenth goes (a Map iterates in insertion order), so the
+ * next thousand inserts cost nothing extra.
+ */
+function makeRoom() {
+  if (rateLimitStore.size < MAX_STORE_SIZE) return;
+  purgeExpiredEntries();
+  if (rateLimitStore.size < MAX_STORE_SIZE) return;
+  let drop = Math.ceil(MAX_STORE_SIZE / 10);
+  for (const key of rateLimitStore.keys()) {
+    if (drop-- <= 0) break;
+    rateLimitStore.delete(key);
   }
-  if (path.startsWith("/api/auth")) {
-    return AUTH_READ_PATHS.has(path)
-      ? { bucket: "/api/auth:read", maxRequests: 300 }
-      : { bucket: "/api/auth:write", maxRequests: 20 };
-  }
-  return { bucket: path.split("/").slice(0, 3).join("/"), maxRequests: 60 };
 }
 
-// Per-session bucketing where a session exists, so one shared public IP is not
-// punished collectively. Sign-in attempts carry NO session cookie, so they keep
-// falling back to the IP key — brute-force protection is unchanged.
-function clientKeyFor(request: NextRequest, ip: string): string {
-  for (const c of request.cookies.getAll()) {
-    if (c.name.includes("session-token") && c.value) return `s:${c.value.slice(-24)}`;
-  }
-  return `ip:${ip}`;
+/**
+ * The session behind the request as a rate-limit key — only when its cookie decrypts with our secret
+ * (a made-up cookie per request used to open a fresh budget every time, True E2E 2026-09-26). The
+ * session version is part of the key: a session ended by a password change keeps decrypting for 30
+ * days, and must not spend the budget of the owner's new session.
+ */
+async function sessionKey(request: NextRequest): Promise<string | null> {
+  const s = await sessionFromHeaders(request.headers);
+  return s ? `${s.id}:${s.sv}` : null;
 }
 
-function checkRateLimit(clientKey: string, path: string): { allowed: boolean; remaining: number } {
-  const { bucket, maxRequests } = rateLimitBucket(path);
+// A real session gets its own budget, so a classroom behind one address isn't punished together.
+// Attempts at a secret always count per address: one account holder must not multiply password or
+// code guesses by opening more accounts.
+async function clientKeyFor(request: NextRequest, ip: string, bucket: Bucket): Promise<string> {
+  if (bucket.perAddress) return `ip:${ip}`;
+  const key = await sessionKey(request);
+  return key ? `u:${key}` : `ip:${ip}`;
+}
+
+function checkRateLimit(clientKey: string, rule: Bucket): { allowed: boolean; remaining: number } {
+  const { bucket, maxRequests } = rule;
   const windowMs = 60_000;
 
   const key = `${clientKey}:${bucket}`;
+  const store = rule.strict ? attemptStore : rateLimitStore;
   const now = Date.now();
-  const entry = rateLimitStore.get(key);
+  const entry = store.get(key);
 
   if (!entry || now > entry.resetAt) {
-    // Prevent unbounded growth: purge expired entries when store is too large
-    if (rateLimitStore.size >= MAX_STORE_SIZE) {
-      purgeExpiredEntries();
-    }
-    rateLimitStore.set(key, { count: 1, resetAt: now + windowMs });
+    if (store === rateLimitStore) makeRoom();
+    store.set(key, { count: 1, resetAt: now + windowMs });
     return { allowed: true, remaining: maxRequests - 1 };
   }
 
@@ -132,7 +137,7 @@ if (typeof globalThis !== "undefined") {
   }, 60_000);
 }
 
-export default function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Per-request CSP nonce. crypto.randomUUID is edge-runtime safe.
@@ -157,16 +162,24 @@ export default function middleware(request: NextRequest) {
 
   // Rate limiting for API routes
   if (pathname.startsWith("/api/")) {
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const ip = clientIp(request.headers);
+    const apiPath = decodedApiPath(pathname);
+    if (apiPath === null) {
+      return new NextResponse(JSON.stringify({ error: "Bad request" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", "Content-Security-Policy": csp },
+      });
+    }
     // The broker callback is server-to-server, HMAC-signed and replay-checked in the
     // route. It carries no session cookie, so every payment event for every user fell
     // into ONE key capped at 3/min: a 4th event (or one event's broker retries) got 429
     // and a paid subscription wasn't activated — and anyone could burn that key by
     // spoofing X-Forwarded-For. Its own signature check is the protection here.
+    const rule = rateLimitBucket(apiPath);
     const { allowed, remaining } =
-      pathname === "/api/stripe/callback"
+      apiPath === "/api/stripe/callback"
         ? { allowed: true, remaining: 0 }
-        : checkRateLimit(clientKeyFor(request, ip), pathname);
+        : checkRateLimit(await clientKeyFor(request, ip, rule), rule);
 
     if (!allowed) {
       return new NextResponse(JSON.stringify({ error: "Too many requests" }), {

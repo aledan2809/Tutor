@@ -91,22 +91,25 @@ export default async function AcceptInvitePage({
             </p>
             <div className="flex gap-3">
               <Link
-                href={`/auth/signin?callbackUrl=${encodeURIComponent(
-                  `/family/accept/${token}`
-                )}`}
+                href={`/auth/signin?callbackUrl=${encodeURIComponent(`/family/accept/${token}`)}${
+                  // Carried on, in case they make the account from the sign-in page instead.
+                  invite.targetRole === "PARENT" ? "&role=PARENT" : invite.targetRole === "CHILD" ? "&role=STUDENT" : ""
+                }`}
                 className="rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white hover:bg-blue-500"
               >
                 Intră în cont
               </Link>
               <Link
-                href="/auth/register"
+                href={`/auth/register?callbackUrl=${encodeURIComponent(`/family/accept/${token}`)}${
+                  invite.targetRole === "PARENT" ? "&role=PARENT" : invite.targetRole === "CHILD" ? "&role=STUDENT" : ""
+                }`}
                 className="rounded-lg border border-gray-300 px-5 py-2.5 font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
               >
                 Fă-ți cont
               </Link>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-500">
-              După ce îți faci contul, redeschide acest link ca să accepți.
+              După ce îți faci contul, te aducem înapoi aici ca să accepți.
             </p>
           </div>
         )}

@@ -5,13 +5,19 @@ import {
   type VoucherPreview,
   type VoucherPreviewResult,
 } from "@/lib/voucher-checkout";
+import type { VoucherLookup } from "@/lib/voucher-guard";
 
 /**
  * Loads a code and answers `previewVoucher` for this account (null when no code was given).
  * Shared by signup, the packages page and the pending-code API, so the three can't disagree
  * about whether a discount may be shown.
  */
-export async function loadVoucherPreview(rawCode: unknown, userId: string | null): Promise<VoucherPreviewResult | null> {
+export async function loadVoucherPreview(
+  rawCode: unknown,
+  userId: string | null,
+  /** The guessing guard's reservation (voucher-guard.ts), told when the code exists. */
+  lookup?: VoucherLookup,
+): Promise<VoucherPreviewResult | null> {
   const code = normalizeVoucherCode(rawCode);
   if (!code) return null;
   const voucher = await prisma.voucher.findUnique({
@@ -29,6 +35,7 @@ export async function loadVoucherPreview(rawCode: unknown, userId: string | null
       planKey: true,
     },
   });
+  if (voucher) lookup?.found();
   const alreadyUsedByUser =
     voucher?.oncePerUser && userId
       ? Boolean(

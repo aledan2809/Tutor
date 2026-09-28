@@ -3,7 +3,8 @@ export const dynamic = "force-dynamic";
 import type { Metadata, Viewport } from "next";
 import { PwaRegister } from "@/components/pwa-register";
 import { OfflineIndicator } from "@/components/offline-indicator";
-import { UmamiScript } from "@aledan/analytics/react";
+import { UMAMI_DEFAULT_SRC } from "@aledan/analytics/react";
+import { getLocale } from "next-intl/server";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -59,18 +60,29 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // The page's own language, not a fixed "en": screen readers pick their voice from it, and
+  // search engines read /ro pages as Romanian only when it says so (True E2E 2026-09-26).
+  const locale = await getLocale();
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang={locale} className="dark" suppressHydrationWarning>
       <body className="min-h-screen bg-gray-950 text-gray-100 antialiased">
         <OfflineIndicator />
         {children}
         <PwaRegister />
-        <UmamiScript websiteId="7cc3296f-5e08-49ad-adca-b161dc7400d0" />
+        {/* The scrubber first (deferred scripts run in order): addresses with a reset token, an
+            invitation or an access code must not reach the shared analytics server. */}
+        <script defer src="/umami-scrub.js" />
+        <script
+          defer
+          src={UMAMI_DEFAULT_SRC}
+          data-website-id="7cc3296f-5e08-49ad-adca-b161dc7400d0"
+          data-before-send="etutorUmamiScrub"
+        />
       </body>
     </html>
   );

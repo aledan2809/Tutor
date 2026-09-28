@@ -4,6 +4,9 @@ import Resend from "next-auth/providers/resend";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
+import { findUserIdByEmail } from "@/lib/email-lookup";
+import { sendAppEmail } from "@/lib/email";
+import { signInLinkEmail } from "@/lib/sign-in-link-email";
 import { randomBytes } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { normalizeJoinCode } from "@/lib/join-code";
@@ -40,8 +43,20 @@ declare module "next-auth" {
   }
 }
 
+// The email link and the Google button find an existing account by email. Stored emails are
+// lowercase, but a row kept with capitals must still be found — otherwise a second, empty account
+// is made next to it and takes over its sign-ins.
+const baseAdapter = PrismaAdapter(prisma);
+const adapter: typeof baseAdapter = {
+  ...baseAdapter,
+  async getUserByEmail(email) {
+    const id = await findUserIdByEmail(email);
+    return id ? baseAdapter.getUser!(id) : null;
+  },
+};
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter,
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
@@ -50,6 +65,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Resend({
       apiKey: process.env.AUTH_RESEND_KEY,
       from: process.env.EMAIL_FROM || "noreply@tutor.app",
+      // Our own text: Auth.js's default email is in English and names no one.
+      async sendVerificationRequest({ identifier, url }) {
+        const sent = await sendAppEmail({ to: identifier, ...signInLinkEmail(url) });
+        // Thrown, so the page says the link wasn't sent instead of „check your inbox".
+        if (!sent) throw new Error("Sign-in link email was not accepted by any transport");
+      },
     }),
     // Intrarea pe un link de acces, FĂRĂ cont.
     //
@@ -183,16 +204,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // schimbă; numele de utilizator e o a doua încercare, nu o înlocuire.
         // Numele de utilizator se salvează cu litere mici (vezi /api/acces/activare),
         // iar telefoanele scriu prima literă mare: „Greg" trebuie să găsească „greg".
-        const user =
-          (await prisma.user.findUnique({ where: { email: identifier } })) ??
-          (await prisma.user.findUnique({ where: { username: identifier.toLowerCase() } }));
+        // Emailurile se țin cu litere mici, deci „Ana@Gmail.com" și „ana@gmail.com" sunt
+        // același cont (findUserIdByEmail prinde și un rând rămas cu majuscule).
+        const byEmail = await findUserIdByEmail(identifier);
+        const user = byEmail
+          ? await prisma.user.findUnique({ where: { id: byEmail } })
+          : await prisma.user.findUnique({ where: { username: identifier.toLowerCase() } });
         if (!user?.password) return null;
         const valid = await bcrypt.compare(
           credentials.password as string,
           user.password
         );
         if (!valid) return null;
-        return { id: user.id, name: user.name, email: user.email, image: user.image };
+        return { id: user.id, name: user.name, email: user.email, image: user.image, sessionVersion: user.sessionVersion };
       },
     }),
     // Google One Tap: the GSI prompt returns an ID token (JWT), not an auth
@@ -236,9 +260,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        const email = payload.email;
+        const email = payload.email.trim().toLowerCase();
         const googleId = payload.sub;
-        let user = await prisma.user.findUnique({ where: { email } });
+        // The Google account decides first, as it does for the Google button: once linked, it
+        // signs into the account it was linked to — not into whichever account the email matches.
+        const linked = await prisma.account.findUnique({
+          where: { provider_providerAccountId: { provider: "google", providerAccountId: googleId } },
+          select: { user: true },
+        });
+        if (linked?.user) {
+          const u = linked.user;
+          return { id: u.id, name: u.name, email: u.email, image: u.image, sessionVersion: u.sessionVersion };
+        }
+        const existingId = await findUserIdByEmail(email);
+        let user = existingId ? await prisma.user.findUnique({ where: { id: existingId } }) : null;
+        // An account made with a password whose email was never proven may not be its owner's:
+        // anyone can register someone else's address before they do. Joining it on Google's word
+        // would hand the real owner an account a stranger holds the password to. It is entered
+        // with the password, or taken back through "Ai uitat parola?" (which proves the email and
+        // drops any Google account linked meanwhile).
+        if (user?.password && !user.emailVerified) return null;
         if (!user) {
           user = await prisma.user.create({
             data: {
@@ -261,7 +302,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           },
           update: {},
         });
-        return { id: user.id, name: user.name, email: user.email, image: user.image };
+        return { id: user.id, name: user.name, email: user.email, image: user.image, sessionVersion: user.sessionVersion };
       },
     }),
   ],
@@ -273,11 +314,30 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: "/auth/signin",
     verifyRequest: "/auth/verify",
+    // Every failure (an expired email link included) lands on our page, which explains it in
+    // the reader's language, instead of Auth.js's bare English error page.
+    error: "/auth/signin",
   },
   callbacks: {
+    // The email link signs into whatever account carries the address — same risk as One Tap
+    // above for an account whose email was never proven. Refused before any email is sent.
+    async signIn({ user, account }) {
+      if (account?.provider === "resend" && user?.email) {
+        const id = await findUserIdByEmail(user.email);
+        const existing = id
+          ? await prisma.user.findUnique({ where: { id }, select: { password: true, emailVerified: true } })
+          : null;
+        if (existing?.password && !existing.emailVerified) return false;
+      }
+      return true;
+    },
     async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
+        // Carried from sign-in, so a failed database read below can't leave the token without a
+        // version (it would then be signed out at the next refresh).
+        const v = (user as { sessionVersion?: unknown }).sessionVersion;
+        if (typeof v === "number") token.sv = v;
       }
       // Refresh roles from DB — but NOT on every single request. Re-query only on
       // a fresh login, an explicit session update, or when the cached roles are
@@ -308,6 +368,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             // login outright (this block runs when `user` is set). Without this,
             // a ban was cosmetic — the 30-day JWT kept working after "Ban".
             if (dbUser.isBanned) {
+              return null;
+            }
+            // A password change raises the version; a session from before it ends here. A token
+            // without a version predates the column and counts as 0, like every account did.
+            if (user) {
+              // The version read when the password was checked must still be the current one: a
+              // reset that lands during that check would otherwise hand the old password a session
+              // the reset never ends.
+              const checked = (user as { sessionVersion?: unknown }).sessionVersion;
+              if (typeof checked === "number" && checked !== dbUser.sessionVersion) return null;
+              token.sv = dbUser.sessionVersion;
+            } else if ((typeof token.sv === "number" ? token.sv : 0) !== dbUser.sessionVersion) {
               return null;
             }
             token.isSuperAdmin = dbUser.isSuperAdmin ?? false;

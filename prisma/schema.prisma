@@ -76,6 +76,9 @@ model User {
   /// NextAuth `signIn` event, so no provider can be forgotten. Null = has never signed in since
   /// 23.09.2026, when this started being recorded — NOT "never signed in".
   lastLoginAt    DateTime?
+  /// Raised on every password change: a session signed in before it stops working at its next
+  /// refresh (≤5 min). Without it, whoever had the account kept it for 30 days after a reset.
+  sessionVersion Int       @default(0)
   visits         UserVisit[]
 
   accounts               Account[]

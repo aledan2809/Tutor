@@ -1,0 +1,585 @@
+{
+ "ranAt": "2026-09-26T07:59:26.627Z",
+ "base": "https://etutor.ro",
+ "scenarios": [
+  {
+   "id": "E1",
+   "name": "Student practice (start/answer/complete)",
+   "verdict": "PASS",
+   "evidence": [
+    "POST session/start → 200 {sessionId,type,duration,questions,totalQuestions} (100ms)",
+    "   sessionId=cmui3i0ty014j13f11m6bbaiw questions=15",
+    "POST session/answer q=oh51sw → 200 {attemptId,isCorrect,correctAnswer,explanation,source,sourceQuote,quality,nextReview} (105ms) isCorrect=false",
+    "POST session/answer q=3vsuzo → 200 {attemptId,isCorrect,correctAnswer,explanation,source,sourceQuote,quality,nextReview} (91ms) isCorrect=false",
+    "POST session/answer q=4q52w1 → 200 {attemptId,isCorrect,correctAnswer,explanation,source,sourceQuote,quality,nextReview} (117ms) isCorrect=true",
+    "POST session/answer (same question again) → 200 {attemptId,isCorrect,correctAnswer,explanation,source,sourceQuote,quality,nextReview} (130ms)",
+    "GET session/[id] → 200 {sessionId,type,duration,questions,totalQuestions,domainSlug,domainId,serverTimestamp} (99ms)",
+    "POST session/complete → 200 {sessionId,score,totalQuestions,correctAnswers,sprintFeedbackRequired,timedOut,duration,gamification} (111ms) score=25 answered=4",
+    "POST session/complete (again) → 400 {\"error\":\"Session already completed\"} (105ms)"
+   ],
+   "note": ""
+  },
+  {
+   "id": "E2",
+   "name": "Exam start",
+   "verdict": "PASS",
+   "evidence": [
+    "GET exam/formats → 200 {formats} (84ms)",
+    "   formats=1",
+    "POST exam/start → 403 {\"error\":\"Această funcție face parte dintr-un pachet.\"} (103ms)",
+    "GET exam/history → 200 {history,pagination,trends} (89ms)"
+   ],
+   "note": "403 = plan gate (exam_simulations) on a free account — documented behaviour"
+  },
+  {
+   "id": "E3",
+   "name": "Assessment (GET questions + POST answers)",
+   "verdict": "PASS",
+   "evidence": [
+    "GET student/assessment → 200 {questions,totalQuestions} (121ms)",
+    "POST student/assessment (3 answers) → 200 {sessionId,score,level,correctCount,totalQuestions,results,weakAreas} (92ms) score=67 level=INTERMEDIATE",
+    "POST student/assessment (0 answers, must be 400) → 400 {\"error\":\"Invalid input\"} (79ms)"
+   ],
+   "note": ""
+  },
+  {
+   "id": "E5",
+   "name": "Progress / gamification reads",
+   "verdict": "PASS",
+   "evidence": [
+    "GET /api/aviation/xp → 200 {xp,level,progressToNext,nextLevel,xpToNextLevel} (82ms)",
+    "GET /api/aviation/progress → 200 {overall,subjects,topics,weakAreas,recentSessions} (111ms)",
+    "GET /api/aviation/streak → 200 {streak,longestStreak,lastUpdate,isDecayed,canRecover} (84ms)",
+    "GET /api/aviation/achievements → 200 {achievements,available} (82ms)",
+    "GET /api/aviation/leaderboard → 200 {rank,userXp,top10,week,year} (84ms)",
+    "GET /api/aviation/daily-challenge → 200 {available,attempted,doubleXp,question} (85ms)",
+    "GET /api/student/dashboard?domainId=<avi> → 200 {streak,xp,domains,recentSessions,weakAreas,recommendation,course} (113ms)",
+    "GET /api/student/domains → 200 {enrolled,available} (88ms)",
+    "GET /api/student/entitlements → 200 {subscriptionStatus,features,access} (93ms)"
+   ],
+   "note": ""
+  },
+  {
+   "id": "E6",
+   "name": "Notifications list (read-only)",
+   "verdict": "PASS",
+   "evidence": [
+    "STUDENT GET /api/notifications → 200 {notifications,total,unreadCount,childTotal,limit,offset} (80ms) n=7",
+    "STUDENT GET /api/notifications?unread=true → 200 {notifications,total,unreadCount,childTotal,limit,offset} (95ms) n=6",
+    "STUDENT GET /api/notifications/preferences → 200 {id,userId,push,telegram,whatsapp,sms,email,call} (66ms)",
+    "WATCHER GET /api/notifications → 200 {notifications,total,unreadCount,childTotal,limit,offset} (149ms) n=50",
+    "WATCHER GET /api/notifications?audience=child → 200 {notifications,total,unreadCount,childTotal,limit,offset} (146ms) n=50"
+   ],
+   "note": ""
+  },
+  {
+   "id": "E7",
+   "name": "Instructor groups create/read/delete",
+   "verdict": "PARTIAL",
+   "evidence": [
+    "POST instructor/groups → 201 {id,name,description,domainId,createdById,isActive,createdAt,updatedAt} (94ms)",
+    "GET instructor/groups → 200 {groups} (88ms) containsNew=true",
+    "GET instructor/groups/[id] → 200 {id,name,description,domainId,createdById,isActive,createdAt,updatedAt} (99ms) studentIsMember=true",
+    "GET instructor/students?groupId → 200 {students,pagination} (100ms) total=1",
+    "INSTRUCTOR2 GET same group (other teacher, same subject) → 200 {id,name,description,domainId,createdById,isActive,createdAt,updatedAt} (76ms)",
+    "DELETE instructor/groups/[id] → 200 {success} (99ms)",
+    "GET after delete (expect 404) → 200 {id,name,description,domainId,createdById,isActive,createdAt,updatedAt} (69ms)"
+   ],
+   "note": ""
+  },
+  {
+   "id": "E8",
+   "name": "Instructor student monitoring",
+   "verdict": "PASS",
+   "evidence": [
+    "GET dashboard/instructor → 200 {stats,recentActivity,domains,domainOptions} (82ms)",
+    "GET instructor/students?domainId=<avi> → 200 {students,pagination} (139ms) n=10 total=? includesTestStudent=true",
+    "GET instructor/students/[student] → 200 {student,domainProgress,goals,groups} (107ms) domains=1"
+   ],
+   "note": ""
+  },
+  {
+   "id": "E10",
+   "name": "Reports / analytics reads",
+   "verdict": "PARTIAL",
+   "evidence": [
+    "STUDENT GET /api/reports/trend → 200 {period,childId,children,childName,conclusion,current,deltas,history} (124ms)",
+    "STUDENT GET /api/reports/trend?period=weekly → 200 {period,childId,children,childName,conclusion,current,deltas,history} (114ms)",
+    "WATCHER GET /api/reports/trend?childId=<child> → 200 {period,childId,children,childName,conclusion,current,deltas,history} (97ms)",
+    "WATCHER GET /api/dashboard/watcher/reports → 200 {schedules,children} (97ms)",
+    "INSTRUCTOR GET /api/dashboard/instructor/reports?domainId=<avi> → 400 {\"error\":\"Invalid report type or missing id\"} (83ms)",
+    "INSTRUCTOR GET /api/dashboard/instructor/analytics?domainId=<avi> → 200 {predictions,summary} (112ms)",
+    "INSTRUCTOR GET /api/dashboard/instructor/analytics → 200 {predictions,summary} (179ms)"
+   ],
+   "note": ""
+  },
+  {
+   "id": "E11",
+   "name": "Admin questions GET",
+   "verdict": "PASS",
+   "evidence": [
+    "ADMIN GET admin/questions?domainId=<avi> → 200 {questions,total,page,limit,totalPages} (98ms) n=5 total=24",
+    "ADMIN GET admin/questions/[id] → 200 {id,domainId,subject,topic,difficulty,type,content,passage} (94ms)",
+    "ADMIN GET admin/questions (no filter) → 200 {questions,total,page,limit,totalPages} (181ms) domainsInPage=[\"avi\"]"
+   ],
+   "note": ""
+  },
+  {
+   "id": "E12",
+   "name": "Admin domains GET",
+   "verdict": "PARTIAL",
+   "evidence": [
+    "ADMIN GET /api/admin/domains → 403 {\"error\":\"Forbidden\"} (81ms)",
+    "ADMIN GET /api/admin/domains/<avi> → 403 {\"error\":\"Forbidden\"} (81ms)",
+    "ADMIN GET /api/admin/domains/<avi>/exam-config → 403 {\"error\":\"Forbidden\"} (75ms)",
+    "ADMIN GET /api/admin/domain/aviation/exam-format → 403 {\"error\":\"Forbidden\"} (85ms)",
+    "ADMIN GET /api/admin/domain/aviation/templates → 403 {\"error\":\"Forbidden\"} (74ms)",
+    "SUPERADMIN GET /api/admin/domains → 200 {array[21]} (95ms) n=21"
+   ],
+   "note": ""
+  },
+  {
+   "id": "E14",
+   "name": "Watcher monitoring",
+   "verdict": "PASS",
+   "evidence": [
+    "GET dashboard/watcher → 200 {students,totalStudents,domains} (99ms) students=1 onlyLinkedChild=true ids=[\"<child>\"]",
+    "GET dashboard/watcher/[child] → 200 {student,canManageSchedule,canManageSubjects,domainSummaries,schedule,scheduledSessions,sessionLog,byDomain} (94ms)",
+    "GET watcher/[child]/subjects → 200 {subjects,removed,available} (92ms)",
+    "GET watcher/[child]/reminders → 200 {reminders} (72ms)",
+    "GET watcher/[child]/breaks → 200 {breaks} (85ms)",
+    "GET watcher/[child]/nudge → 200 {nudges} (93ms)",
+    "GET watcher/[child]/nudge-targets → 200 {recent,upcoming,meteredAllowed} (100ms)",
+    "GET watcher/[child]/phone → 200 {phone} (67ms)"
+   ],
+   "note": ""
+  },
+  {
+   "id": "E15",
+   "name": "Superadmin /api/admin/* GET",
+   "verdict": "PARTIAL",
+   "evidence": [
+    "GET admin/users?limit=5 → 200 {users,total,page,totalPages,presence} (122ms)",
+    "GET admin/audit → 200 {logs,total,page,totalPages} (93ms)",
+    "GET admin/revenue → 200 {mrr,totalRevenue,totalTransactions,totalUsers,activeSubscriptions,churnRate,conversionRate,recentPayments} (127ms)",
+    "GET admin/plans → 200 {array[10]} (79ms)",
+    "GET admin/vouchers → 200 {vouchers,total,page,totalPages} (122ms)",
+    "GET admin/organizations → 200 {organizations} (129ms)",
+    "GET admin/campaigns → 200 {byCampaign,byVoucher,totals} (73ms)",
+    "GET admin/ads → 200 {array[0]} (95ms)",
+    "GET admin/access-trial → 200 {enabled,startsAt,counts} (93ms)",
+    "GET admin/creatori → 405  (80ms)",
+    "GET admin/feedback → 200 {feedbacks} (296ms)",
+    "GET admin/tags → 200 {array[0]} (123ms)",
+    "GET admin/templates → 200 {templates} (93ms)",
+    "GET admin/exam-formats → 200 {formats,domains} (87ms)",
+    "GET admin/lessons → 200 {lessons,domains} (599ms)",
+    "GET admin/bibliography → 200 {items,domains} (349ms)",
+    "GET admin/posta-copy → 200 {salvat,actualizatLa,actualizatDe} (91ms)",
+    "GET admin/domains → 200 {array[21]} (386ms)",
+    "GET admin/questions?limit=5 → 200 {questions,total,page,limit,totalPages} (126ms)",
+    "GET admin/domains/<avi> → 200 {id,name,slug,description,icon,isActive,instructorEnabled,visibility} (79ms)",
+    "GET admin/domains/<avi>/exam-config → 200 {id,domainId,questionTypes,timeLimit,questionCount,passingScore,shuffleQuestions,shuffleOptions} (300ms)",
+    "GET admin/domain/aviation/exam-format → 200 {formats} (83ms)",
+    "GET admin/domain/aviation/templates → 200 {templates} (278ms)",
+    "GET admin/plans/[id] → 200 {id,name,stripeId,price,interval,trialDays,features,isActive} (108ms)",
+    "GET admin/vouchers/[id]/redemptions → 200 {redemptions} (101ms)",
+    "GET admin/organizations/[id] → 200 {organization} (183ms)"
+   ],
+   "note": "non-200: creatori:405"
+  },
+  {
+   "id": "E16",
+   "name": "Auth flows (wrong password, unauthenticated 401)",
+   "verdict": "PASS",
+   "evidence": [
+    "POST callback/credentials wrong password → 302 location=/auth/signin?error=CredentialsSignin&code=credentials sessionUser=null",
+    "POST callback/credentials unknown email → 302 sessionUser=null",
+    "anon GET /api/student/dashboard → 401 {\"error\":\"Unauthorized\"} (76ms)",
+    "anon GET /api/dashboard/instructor/students → 401 {\"error\":\"Unauthorized\"} (66ms)",
+    "anon GET /api/dashboard/watcher → 401 {\"error\":\"Unauthorized\"} (88ms)",
+    "anon GET /api/admin/users → 401 {\"error\":\"Unauthorized\"} (80ms)",
+    "anon GET /api/notifications → 401 {\"error\":\"Unauthorized\"} (68ms)",
+    "anon GET /api/aviation/progress → 401 {\"error\":\"Unauthorized\"} (72ms)",
+    "anon POST /api/aviation/session/start → 401 {\"error\":\"Unauthorized\"} (67ms)",
+    "anon POST /api/aviation/session/answer → 401 {\"error\":\"Unauthorized\"} (71ms)",
+    "anon POST /api/dashboard/instructor/groups → 401 {\"error\":\"Unauthorized\"} (71ms)"
+   ],
+   "note": ""
+  },
+  {
+   "id": "E17",
+   "name": "Locale pages /ro + /en",
+   "verdict": "PARTIAL",
+   "evidence": [
+    "GET /ro → 200 html lang=en (199ms)",
+    "GET /en → 200 html lang=en (183ms)",
+    "GET /ro/login → 200 html lang=en (231ms)",
+    "GET /en/login → 200 html lang=en (175ms)",
+    "GET /ro/preturi → 200 html lang=en (139ms)",
+    "GET /en/preturi → 200 html lang=en (116ms)"
+   ],
+   "note": ""
+  }
+ ],
+ "boundary": [
+  {
+   "role": "STUDENT",
+   "label": "GET /api/dashboard/instructor",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/dashboard/instructor/students",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/dashboard/instructor/students/<self>",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/dashboard/instructor/groups",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/dashboard/instructor/analytics",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/dashboard/instructor/reports",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/dashboard/instructor/goals",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/dashboard/instructor/messages",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/admin/users",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/admin/questions",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/admin/domains",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/admin/audit",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/admin/revenue",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/admin/vouchers",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/admin/feedback",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/admin/questions?domainId=<avi>",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "POST /api/aviation/xp (award self XP)",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "POST /api/dashboard/instructor/groups",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/dashboard/watcher/<other student>",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/reports/trend?childId=<other student>",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "POST /api/posta-factor/session/start (not enrolled)",
+   "status": 404,
+   "pass": true,
+   "body": "404 {\"error\":\"Domain not found\"}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/matematica-v-viii/progress (not enrolled)",
+   "status": 200,
+   "pass": false,
+   "body": "200 {overall,subjects,topics,weakAreas,recentSessions}"
+  },
+  {
+   "role": "STUDENT",
+   "label": "GET /api/student/assessment?domainId=<posta-factor>",
+   "status": 404,
+   "pass": true,
+   "body": "404 {\"error\":\"Domain not found\"}"
+  },
+  {
+   "role": "INSTRUCTOR2",
+   "label": "GET instructor/students?domainId=<matematica-v-viii> (expect empty)",
+   "status": 200,
+   "pass": true,
+   "body": "200 {students,pagination}"
+  },
+  {
+   "role": "INSTRUCTOR2",
+   "label": "GET instructor/students?domainId=<posta-factor> (expect empty)",
+   "status": 200,
+   "pass": true,
+   "body": "200 {students,pagination}"
+  },
+  {
+   "role": "INSTRUCTOR",
+   "label": "GET instructor/students?domainId=<posta-factor> (expect empty)",
+   "status": 200,
+   "pass": true,
+   "body": "200 {students,pagination}"
+  },
+  {
+   "role": "INSTRUCTOR2",
+   "label": "GET instructor/students (no filter) excludes math-only student",
+   "status": 200,
+   "pass": true,
+   "body": "200 {students,pagination}"
+  },
+  {
+   "role": "INSTRUCTOR2",
+   "label": "GET instructor/students/<math-only student>",
+   "status": 404,
+   "pass": true,
+   "body": "404 {\"error\":\"Student not found\"}"
+  },
+  {
+   "role": "INSTRUCTOR2",
+   "label": "GET instructor/students/<math-only student>?domainId=<mate>",
+   "status": 404,
+   "pass": true,
+   "body": "404 {\"error\":\"Student not found\"}"
+  },
+  {
+   "role": "INSTRUCTOR",
+   "label": "GET instructor/students/<posta-only student>",
+   "status": 404,
+   "pass": true,
+   "body": "404 {\"error\":\"Student not found\"}"
+  },
+  {
+   "role": "INSTRUCTOR2",
+   "label": "GET admin/questions?domainId=<mate> (expect empty)",
+   "status": 200,
+   "pass": true,
+   "body": "200 {questions,total,page,limit,totalPages}"
+  },
+  {
+   "role": "INSTRUCTOR2",
+   "label": "GET dashboard/watcher/<math-only student>",
+   "status": 404,
+   "pass": true,
+   "body": "404 {\"error\":\"Student not found\"}"
+  },
+  {
+   "role": "INSTRUCTOR2",
+   "label": "POST group aviation with math-only student (expect 400)",
+   "status": 400,
+   "pass": true,
+   "body": "400 {\"error\":\"Students not enrolled in this subject\"}"
+  },
+  {
+   "role": "INSTRUCTOR2",
+   "label": "POST group on matematica-v-viii (not taught, expect 403)",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "INSTRUCTOR2",
+   "label": "GET admin/users",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "INSTRUCTOR2",
+   "label": "GET dashboard/instructor/analytics?domainId=<mate>",
+   "status": 200,
+   "pass": true,
+   "body": "200 {predictions,summary}"
+  },
+  {
+   "role": "WATCHER",
+   "label": "GET dashboard/watcher/<not-linked student>",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "WATCHER",
+   "label": "GET dashboard/watcher/<posta-only student>",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "WATCHER",
+   "label": "GET reports/trend?childId=<not-linked student>",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "WATCHER",
+   "label": "GET dashboard/watcher/<not-linked>/reminders",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "WATCHER",
+   "label": "GET dashboard/watcher?domainId=<mate> (must not widen)",
+   "status": 200,
+   "pass": true,
+   "body": "200 {students,totalStudents,domains}"
+  },
+  {
+   "role": "WATCHER",
+   "label": "GET dashboard/instructor/students",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  },
+  {
+   "role": "WATCHER",
+   "label": "GET admin/users",
+   "status": 403,
+   "pass": true,
+   "body": "403 {\"error\":\"Forbidden\"}"
+  }
+ ],
+ "phase7": {
+  "F1": {
+   "wallMs": 482,
+   "student": "200 {sessionId,type,duration,questions,totalQuestions}",
+   "second": "ADMIN",
+   "secondRes": "200 {sessionId,type,duration,questions,totalQuestions}",
+   "distinct": true
+  },
+  "F2": {
+   "student": "200 {overall,subjects,topics,weakAreas,recentSessions}",
+   "instructor": "200 {student,domainProgress,goals,groups}",
+   "studentView": {
+    "totalAttempts": 6,
+    "accuracy": 50,
+    "topics": 2
+   },
+   "instructorView": {
+    "totalAttempts": 6,
+    "accuracy": 50,
+    "topics": 2
+   },
+   "consistent": true
+  }
+ },
+ "phase9": {
+  "sessionStart": {
+   "wallMs": 479,
+   "counts": {
+    "200": 10
+   },
+   "distinctIds": 10,
+   "p50": 459,
+   "max": 477,
+   "non2xx": []
+  },
+  "home": {
+   "wallMs": 255,
+   "counts": {
+    "307": 20
+   },
+   "p50": 227,
+   "max": 246,
+   "location": "/ro"
+  }
+ },
+ "created": [
+  "Session cmui3i0ty014j13f11m6bbaiw (STUDENT, quick, aviation)",
+  "Session cmui3i1sr015913f1s9af95jm (STUDENT, type=assessment, already ended) + 3 Attempt rows",
+  "InstructorGroup cmui3i2z0015r13f11z8hisck \"e2e-0926-group\" (INSTRUCTOR, aviation, 1 member)",
+  "Session cmui3jsj9015x13f1aacr5bla (STUDENT, F1)",
+  "Session cmui3jsj9015v13f1zs79jhwz (ADMIN, F1)",
+  "10 Session rows (STUDENT, stress)"
+ ],
+ "cleanup": {
+  "closedSessions": 12,
+  "notClosed": []
+ }
+}

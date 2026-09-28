@@ -75,6 +75,10 @@ export default function GoogleOneTap({ clientId }: { clientId?: string }) {
       if (res && !res.error) {
         // Land the freshly signed-in visitor on their dashboard.
         window.location.href = `/${locale}/dashboard`;
+      } else if (res?.error) {
+        // Refused (e.g. an account made with a password whose email isn't proven yet): say so
+        // on the sign-in page instead of doing nothing after the person picked their account.
+        window.location.href = `/${locale}/auth/signin?error=OneTap`;
       }
     }
 

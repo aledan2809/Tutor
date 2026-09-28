@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 const ROLE_RO: Record<string, string> = {
@@ -20,6 +20,12 @@ export default function FamilyJoinPage() {
   const [done, setDone] = useState(false);
 
   const norm = code.trim().toUpperCase();
+
+  // Back from signing in (or making an account): the code comes back in the address.
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get("code");
+    if (fromUrl) setCode(fromUrl);
+  }, []);
 
   const lookup = async () => {
     setBusy(true);
@@ -48,7 +54,11 @@ export default function FamilyJoinPage() {
       body: JSON.stringify({ code: norm }),
     });
     if (r.status === 401) {
-      window.location.href = `/auth/signin?callbackUrl=${encodeURIComponent("/family/join")}`;
+      // Keep the code: without it the person signed in and found an empty box.
+      // …and the role the code is for, so „Fă-ți unul” opens the right account (a second parent
+      // must not end up with a student account).
+      const role = info?.targetRole === "PARENT" ? "&role=PARENT" : info?.targetRole === "CHILD" ? "&role=STUDENT" : "";
+      window.location.href = `/auth/signin?callbackUrl=${encodeURIComponent(`/family/join?code=${norm}`)}${role}`;
       return;
     }
     const d = await r.json().catch(() => ({}));

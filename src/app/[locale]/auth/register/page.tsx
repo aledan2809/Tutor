@@ -22,9 +22,14 @@ function nextPathAfterSignup(opts: {
   voucherCode: string;
   voucherApplied: boolean;
   start: string | null;
+  returnTo?: string | null;
+  /** The code couldn't be checked yet (too many wrong codes from this network): the packages page checks it. */
+  voucherDeferred?: boolean;
 }): string {
+  // Came from a page that needs the account (a family invitation, a family code): back there.
+  if (opts.returnTo) return opts.returnTo;
   if (opts.voucherApplied) return "/dashboard";
-  if (opts.start === "free") return "/dashboard/family";
+  if (opts.start === "free" && !(opts.voucherDeferred && opts.voucherCode)) return "/dashboard/family";
   const q = new URLSearchParams();
   if (opts.plan) q.set("plan", opts.plan);
   if (opts.voucherCode) q.set("voucher", opts.voucherCode);
@@ -92,6 +97,8 @@ export default function RegisterPage() {
   const [plan, setPlan] = useState<string | null>(null);
   // ?start=free — the parents' page "try without a card" button: account now, payment later.
   const [start, setStart] = useState<string | null>(null);
+  // ?callbackUrl= — where the new account goes back to (an invitation it came to accept).
+  const [returnTo, setReturnTo] = useState<string | null>(null);
 
   // Read campaign params (?exam=, ?subjects=, ?voucher=) once on mount.
   // window.location is used instead of useSearchParams() to avoid the
@@ -104,6 +111,15 @@ export default function RegisterPage() {
     // and a parent coming from the flyer got a student account unless they noticed the toggle.
     if (planParam && PARENT_PLAN_KEYS.includes(planParam.toUpperCase())) setRole("PARENT");
     setStart(params.get("start"));
+    // Same-site paths only; the locale prefix is dropped because this router adds it.
+    const cb = params.get("callbackUrl");
+    if (cb && cb.startsWith("/") && !cb.startsWith("//") && !cb.startsWith("/\\")) {
+      setReturnTo(cb.replace(/^\/(en|ro)(?=\/|$)/, "") || "/");
+    }
+    // An invitation says what the person is joining as, so the form doesn't start on „Elev"
+    // for a second parent (who would then get a student's account).
+    const roleParam = params.get("role");
+    if (roleParam === "PARENT" || roleParam === "STUDENT") setRole(roleParam);
     const exam = params.get("exam")?.toLowerCase();
     const preset = exam ? CAMPAIGNS[exam] : undefined;
     if (preset) {
@@ -196,13 +212,37 @@ export default function RegisterPage() {
         if (signedIn) {
           leaving = true; // keep the button busy while the next page loads
           router.push(
-            nextPathAfterSignup({ plan, voucherCode, voucherApplied: Boolean(data.voucherApplied), start }),
+            nextPathAfterSignup({
+              plan,
+              voucherCode: data.voucherDeferred || voucherCode,
+              voucherApplied: Boolean(data.voucherApplied),
+              start,
+              returnTo,
+              voucherDeferred: Boolean(data.voucherDeferred),
+            }),
           );
           return;
         }
         setSuccess(true);
       } else {
-        setError(data.error || (ro ? "Ceva nu a mers. Încearcă din nou." : "Something went wrong"));
+        // The server answers in English for programs; the person reading this gets their language.
+        setError(
+          res.status === 409
+            ? ro
+              ? "Există deja un cont cu acest email. Intră în cont; dacă nu mai știi parola, folosește „Ai uitat parola?”."
+              : "An account with this email already exists. Sign in; if you don't remember the password, use “Forgot password?”."
+            : res.status === 429
+              ? ro
+                ? "Prea multe încercări. Așteaptă un minut și încearcă din nou."
+                : "Too many attempts. Wait a minute and try again."
+              : res.status === 400
+                ? ro
+                  ? "Verifică datele: numele are cel puțin 2 litere, emailul e complet, parola are între 8 și 72 de caractere."
+                  : "Check the details: a name of at least 2 letters, a full email, a password of 8 to 72 characters."
+                : ro
+                  ? "Ceva nu a mers. Încearcă din nou."
+                  : "Something went wrong. Please try again."
+        );
       }
     } catch {
       setError(ro ? "Eroare de rețea. Încearcă din nou." : "Network error. Please try again.");
@@ -247,7 +287,7 @@ export default function RegisterPage() {
             onClick={() => {
               // Fallback only — normally the new account is signed in straight away. Abonamentul
               // (packages) e singurul loc unde un voucher sub 100% chiar duce la plată.
-              const dest = nextPathAfterSignup({ plan, voucherCode, voucherApplied, start });
+              const dest = nextPathAfterSignup({ plan, voucherCode, voucherApplied, start, returnTo });
               router.push(dest === "/dashboard" ? "/auth/signin" : `/auth/signin?callbackUrl=${encodeURIComponent(dest)}`);
             }}
             className="inline-block rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-500"
@@ -489,7 +529,10 @@ export default function RegisterPage() {
 
         <p className="mt-6 text-center text-sm text-gray-500">
           {ro ? "Ai deja cont? " : "Already have an account? "}
-          <Link href="/auth/signin" className="text-blue-400 hover:text-blue-300">
+          <Link
+            href={returnTo ? `/auth/signin?callbackUrl=${encodeURIComponent(returnTo)}&role=${role}` : "/auth/signin"}
+            className="text-blue-400 hover:text-blue-300"
+          >
             {ro ? "Autentifică-te" : "Sign in"}
           </Link>
         </p>

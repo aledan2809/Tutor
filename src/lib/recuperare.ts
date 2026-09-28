@@ -1,4 +1,4 @@
-import { randomInt, createHash, timingSafeEqual } from "node:crypto";
+import { randomInt, randomUUID, createHmac, timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -21,18 +21,108 @@ import { prisma } from "@/lib/prisma";
 export const DURATA_COD_MS = 10 * 60 * 1000;
 /** Câte încercări greșite până când codul moare. */
 export const INCERCARI_MAXIME = 5;
+/** Câte coduri noi se pot cere pentru același cont într-o oră. */
+export const CODURI_PE_ORA = 5;
+
+/**
+ * Cheile din tabela de tokenuri. Codul viu, încercările greșite pe el și codurile
+ * trimise în ultima oră stau separat, ca să poată fi numărate.
+ */
+export const cheieCod = (userId: string) => `otp:${userId}`;
+const cheieGresit = (userId: string) => `otp-fail:${userId}`;
+const cheieTrimis = (userId: string) => `otp-sent:${userId}`;
+
+/**
+ * Încercările pe același cont se fac pe rând. Dacă altă încercare ține deja contul, cererea asta
+ * se refuză pe loc în loc să aștepte: o rafală pe un cont ar ocupa altfel toate conexiunile la
+ * bază cât stă la coadă.
+ */
+async function ocupaContul(
+  tx: { $queryRaw: typeof prisma.$queryRaw },
+  userId: string
+): Promise<boolean> {
+  const rows = await tx.$queryRaw<{ ok: boolean }[]>`SELECT pg_try_advisory_xact_lock(hashtext(${cheieCod(userId)})::bigint) AS ok`;
+  return rows[0]?.ok === true;
+}
+
+/**
+ * Poate pleca un cod nou pentru contul ăsta? Fără limită, cineva care știe marca
+ * altuia ar putea cere coduri la nesfârșit și, cu câte cinci încercări pe fiecare,
+ * ar ghici până la urmă. Dacă da, notează trimiterea și șterge contorul de
+ * greșeli: fiecare cod nou pornește cu cinci încercări.
+ */
+export async function potTrimiteCod(userId: string): Promise<boolean> {
+  return prisma.$transaction(async (tx) => {
+    if (!(await ocupaContul(tx, userId))) return false;
+    const acum = new Date();
+    await tx.verificationToken.deleteMany({ where: { identifier: cheieTrimis(userId), expires: { lt: acum } } });
+    const trimise = await tx.verificationToken.count({ where: { identifier: cheieTrimis(userId) } });
+    if (trimise >= CODURI_PE_ORA) {
+      console.warn(`[recuperare] limita de ${CODURI_PE_ORA} coduri pe oră atinsă pentru contul ${userId}`);
+      return false;
+    }
+    await tx.verificationToken.create({
+      data: { identifier: cheieTrimis(userId), token: `sent:${randomUUID()}`, expires: new Date(acum.getTime() + 60 * 60 * 1000) },
+    });
+    await tx.verificationToken.deleteMany({ where: { identifier: cheieGresit(userId) } });
+    return true;
+  });
+}
+
+/**
+ * Verifică codul și, dacă e bun, rulează `laSucces` în aceeași tranzacție (schimbarea
+ * parolei). Încercările pe același cont se fac pe rând (lacăt pe cont), altfel o
+ * rafală de cereri simultane ar citi toate „0 greșeli" și ar trece de limită. Cea care
+ * găsește contul ocupat e refuzată ca un cod greșit, fără să conteze ca greșeală.
+ * La a cincea greșeală codul se șterge: de acolo, orice încercare e „cere altul".
+ */
+export async function consumaCodul(
+  userId: string,
+  cod: string,
+  laSucces: (tx: Pick<typeof prisma, "user">) => Promise<void>
+): Promise<boolean> {
+  return prisma.$transaction(async (tx) => {
+    if (!(await ocupaContul(tx, userId))) return false;
+    const salvat = await tx.verificationToken.findFirst({
+      where: { identifier: cheieCod(userId) },
+      orderBy: { expires: "desc" },
+    });
+    if (!salvat || salvat.expires < new Date()) return false;
+    const toate = { identifier: { in: [cheieCod(userId), cheieGresit(userId)] } };
+    if (codePotrivit(userId, cod, salvat.token)) {
+      await laSucces(tx);
+      await tx.verificationToken.deleteMany({ where: toate });
+      return true;
+    }
+    const gresite = (await tx.verificationToken.count({ where: { identifier: cheieGresit(userId) } })) + 1;
+    if (gresite >= INCERCARI_MAXIME) {
+      await tx.verificationToken.deleteMany({ where: toate });
+    } else {
+      await tx.verificationToken.create({
+        data: { identifier: cheieGresit(userId), token: `fail:${randomUUID()}`, expires: salvat.expires },
+      });
+    }
+    return false;
+  });
+}
 
 export function codNou(): string {
   return String(randomInt(0, 1_000_000)).padStart(6, "0");
 }
 
-/** Codul se ține hașurat: o citire a bazei nu trebuie să dea acces la conturi. */
-export function hashCod(cod: string): string {
-  return createHash("sha256").update(cod).digest("hex");
+/**
+ * Codul se ține sub o cheie secretă a serverului, legat de cont: o citire a bazei nu trebuie să dea
+ * acces la conturi. Un simplu sha256 nu ajungea — un milion de coduri posibile se încearcă pe loc.
+ * Cu contul în cheie, doi oameni cu același cod nu se mai ciocnesc pe coloana unică.
+ */
+export function hashCod(userId: string, cod: string): string {
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) throw new Error("AUTH_SECRET lipsește — codul de recuperare nu poate fi păstrat în siguranță.");
+  return createHmac("sha256", secret).update(`${userId}:${cod}`).digest("hex");
 }
 
-export function codePotrivit(cod: string, hash: string): boolean {
-  const a = Buffer.from(hashCod(cod), "hex");
+export function codePotrivit(userId: string, cod: string, hash: string): boolean {
+  const a = Buffer.from(hashCod(userId, cod), "hex");
   const b = Buffer.from(hash, "hex");
   // Comparare în timp constant: altfel durata răspunsului spune cât din cod e bun.
   return a.length === b.length && timingSafeEqual(a, b);

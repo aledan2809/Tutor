@@ -6,14 +6,13 @@ import {
   MAGIC_MIN_CHARS,
   MAGIC_MAX_CHARS,
 } from "@/lib/magic-quiz";
+import { clientIp } from "@/lib/client-ip";
 
 // Public, no-auth Magic Quiz demo endpoint (Faza 0 / Tier 0).
 // Strictly rate-limited per IP because it is public and costs AI tokens.
 
-function clientIp(req: NextRequest): string {
-  const fwd = req.headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
-  return req.headers.get("x-real-ip") || "unknown";
+function clientIpOf(req: NextRequest): string {
+  return clientIp(req.headers);
 }
 
 // Global daily cap across ALL IPs — bounds total AI cost if the demo goes viral.
@@ -21,7 +20,7 @@ function clientIp(req: NextRequest): string {
 const DAILY_CAP = Math.max(1, parseInt(process.env.MAGIC_QUIZ_DAILY_CAP || "1000", 10) || 1000);
 
 async function _POST(req: NextRequest) {
-  const ip = clientIp(req);
+  const ip = clientIpOf(req);
 
   // Two-tier throttle: burst (5/min) + sustained (25/hour) per IP.
   const burst = checkRateLimit(`magic-quiz:burst:${ip}`, { maxRequests: 5, windowMs: 60_000 });

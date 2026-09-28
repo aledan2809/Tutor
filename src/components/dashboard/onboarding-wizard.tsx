@@ -76,7 +76,14 @@ export function OnboardingWizard() {
         router.push(`/dashboard/practice/${result.sessionId}`);
         return;
       }
-      setError(result.error || t("startFailed"));
+      // 409 = the subject asks for something first (tick what was taught in class, or read
+      // the first lesson). The practice page explains it and shows that step, then starts
+      // the test by itself — the guide must not end on the server's English error.
+      if (res.status === 409) {
+        router.push(`/dashboard/practice?start=quick&domain=${encodeURIComponent(chosen.slug)}`);
+        return;
+      }
+      setError(t("startFailed"));
     } catch {
       setError(t("startFailed"));
     } finally {
