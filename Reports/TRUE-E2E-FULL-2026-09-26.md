@@ -264,3 +264,12 @@ LIVE pe `https://etutor.ro`, 2026-09-28 07:54 UTC (10:54 ora României).
   pagină.
 - **Curățenie**: cele 6 conturi `e2e-0926-*` și grupa `e2e-0926-group` șterse (tranzacție cu verificarea
   numărului de rânduri); rămas 0.
+
+### A doua publicare — deciziile din 28.09 (`a26e69b`, LIVE 10:14 UTC)
+- Copie de siguranță: `VPS2:/root/backups/tutor-pre-decizii-2026-09-28.dump`; migrarea `0074_child_accounts_and_age` aplicată.
+- Cele 10 conturi de test (din `tutor-test-users.env`) au primit anul 1990, ca verificările automate să nu se
+  oprească la întrebarea nouă. Conturile reale de elev fără an vor fi întrebate la prima intrare.
+- Verificat live: paginile 200; `/ro/auth/register` are anul nașterii, iar pentru 2013 apare emailul
+  părintelui; un link de acord greșit → „Linkul nu mai e valid”; API-urile noi → 401 fără cont, 400 cu link
+  greșit; elevul de test intră fără întrebarea de vârstă și fără prețuri în panou; părintele de test intră;
+  0 erori în pagină; jurnalul de erori al serverului neatins de publicare.

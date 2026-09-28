@@ -1884,7 +1884,11 @@ critice** + 6 rute publice / 9 protejate / 3 admin.
 > constatări în `AUDIT_GAPS.md` (G-TUT-AUDIT-2026-09-26 + G-TUT-OPEN-2026-09-26). E1–E3, E5–E8, E10–E12, E14–E16: PASS;
 > E7 PARTIAL (grupa ștearsă încă citibilă); E4, E9, E13 neexecutate (fără schimbări în zonă de la 2026-09-05).
 > **LIVE 2026-09-28** (`1cf2466`): reparațiile + încă șase runde de revizie independentă; 58/58 probe pe copia locală;
-> migrările 0072 + 0073 aplicate; conturile de test șterse. Decizii rămase la Alex: vezi `G-TUT-OPEN-2026-09-26`.
+> migrările 0072 + 0073 aplicate; conturile de test șterse.
+> **Deciziile din 28.09 LIVE** (`a26e69b`, migrarea 0074): acordul părintelui sub 16 ani (an de naștere la înregistrare, link pe email,
+> 7 zile, apoi oprire; refuzul ține până la „da”), conturi de copil cu nume de utilizator + parolă schimbată de părinte, prețuri doar
+> adulților (banner, Abonament, Telegram, ecranul de pauză). 75/75 probe. **De confirmat cu Alina**: textul acordului (PC-2026-09-28),
+> pragul de 16 ani, ce se face cu datele unui cont refuzat. Rămas P3: „Invită & Câștigă” vizibil elevilor.
 
 ---
 
