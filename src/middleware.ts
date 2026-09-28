@@ -46,7 +46,7 @@ const publicPaths = ["/", "/try", "/scor", "/grile", "/auth/signin", "/auth/veri
 // /acces/<cod> e linkul din invitația pe WhatsApp: trebuie să se deschidă pentru
 // cineva care NU are cont — pagina îl bagă în curs ca invitat. Fără cod valid nu
 // se creează nimic (verificarea e în providerul `guest-access`).
-const publicPrefixes = ["/duel/", "/certificat/", "/grile/", "/family/accept/", "/acces/"];
+const publicPrefixes = ["/duel/", "/certificat/", "/grile/", "/family/accept/", "/acces/", "/acord-parinte/"];
 
 function isPublicPath(pathname: string): boolean {
   const pathWithoutLocale = pathname.replace(/^\/(en|ro)/, "") || "/";

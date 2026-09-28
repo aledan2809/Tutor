@@ -29,7 +29,7 @@ export const AUTH_READ_PATHS = new Set([
 export const API_FOLDERS = new Set([
   "acces", "activate", "admin", "auth", "calendar", "courses", "creatori-waitlist", "cron",
   "dashboard", "domains", "escalation", "exam-bank", "family", "health", "lead-magnet", "licenta",
-  "magic-quiz", "me", "notifications", "og", "org", "parent", "plans", "posta", "presence",
+  "magic-quiz", "me", "notifications", "og", "org", "parent", "parent-consent", "plans", "posta", "presence",
   "public", "questions", "referrals", "reports", "settings", "stripe", "student", "telegram", "v1",
   "vouchers", "webhooks",
 ]);

@@ -267,6 +267,10 @@ export interface FamilyMember {
   email: string | null;
   image: string | null;
   status: string;
+  /** A child's sign-in name. */
+  username?: string | null;
+  /** A child's account a parent made from „Familia mea”: its parents set its password. */
+  managedByParent?: boolean;
 }
 
 export interface FamilySeats {
@@ -320,7 +324,7 @@ export async function getFamilyOverview(
     where: { parentId: ownerId, relation: GUARDIAN_RELATION.PARENT, status: "active" },
     select: {
       status: true,
-      child: { select: { id: true, name: true, email: true, image: true } },
+      child: { select: { id: true, name: true, email: true, image: true, username: true, createdByParentId: true } },
     },
   });
   const childIds = childLinks.map((l) => l.child.id);
@@ -361,6 +365,8 @@ export async function getFamilyOverview(
     email: l.child.email,
     image: l.child.image,
     status: l.status,
+    username: l.child.username,
+    managedByParent: l.child.createdByParentId != null,
   }));
   const coParents = Array.from(coParentMap.values());
   const tutors = Array.from(tutorMap.values());
@@ -843,7 +849,10 @@ export async function acceptInvite(params: {
 export async function createChildDirectly(params: {
   ownerId: string;
   name: string;
-  email: string;
+  /** How the child signs in; lowercase, USERNAME_RE (username.ts). */
+  username: string;
+  /** Optional: most children have no address of their own, and a made-up one proved nothing. */
+  email?: string | null;
   passwordHash: string;
   domainSlugs?: string[];
 }): Promise<{ childId: string }> {
@@ -854,17 +863,26 @@ export async function createChildDirectly(params: {
     const seat = await checkSeat(params.ownerId, INVITE_TARGET_ROLE.CHILD, tx as unknown as Db);
     if (!seat.allowed) throw new FamilySeatError(seat);
 
-    if (await emailTaken(params.email, tx)) {
+    if (params.email && (await emailTaken(params.email, tx))) {
       const e = new Error("EMAIL_TAKEN");
       e.name = "EmailTakenError";
+      throw e;
+    }
+    if (await tx.user.findUnique({ where: { username: params.username }, select: { id: true } })) {
+      const e = new Error("USERNAME_TAKEN");
+      e.name = "UsernameTakenError";
       throw e;
     }
 
     const child = await tx.user.create({
       data: {
         name: params.name,
-        email: params.email,
+        username: params.username,
+        email: params.email || null,
         password: params.passwordHash,
+        // Made by this parent: the family's parents may set its password (the child has no email to
+        // reset it with).
+        createdByParentId: params.ownerId,
         // The parent typed this address; it proves nothing about who owns it.
         emailVerified: null,
         // A child's account: without a role it was taken for a possible parent (the free week's
@@ -903,7 +921,7 @@ export async function createChildDirectly(params: {
         token: genToken(),
         targetRole: INVITE_TARGET_ROLE.CHILD,
         relation: GUARDIAN_RELATION.PARENT,
-        email: params.email,
+        email: params.email || null,
         channel: INVITE_CHANNEL.DIRECT,
         status: "accepted",
         acceptedById: child.id,

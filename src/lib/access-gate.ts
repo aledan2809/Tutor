@@ -5,6 +5,7 @@
 import { NextResponse } from "next/server";
 import type { Access } from "@/lib/access";
 import { loadAccess, loadPauseStartsAt } from "@/lib/access-server";
+import { consentStopped } from "@/lib/parent-consent-server";
 
 type Paused = Extract<Access, { kind: "paused" }>;
 
@@ -49,5 +50,11 @@ const notPausedAt = new Map<string, number>();
 export async function refuseIfPaused(userId: string, opts?: { bypass?: boolean }): Promise<NextResponse | null> {
   if (opts?.bypass) return null;
   const paused = await accountPaused(userId);
-  return paused ? pausedResponse(paused) : null;
+  if (paused) return pausedResponse(paused);
+  // A learner under 16 whose parent refused, or hasn't answered in 7 days (parent-consent.ts): the
+  // pages show the question, and the learning API doesn't take their work either.
+  if (await consentStopped(userId)) {
+    return NextResponse.json({ error: "Contul așteaptă acordul unui părinte.", consentBlocked: true }, { status: 403 });
+  }
+  return null;
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
+import { loadConsentState } from "@/lib/parent-consent-server";
 import { withErrorHandler } from "@/lib/api-handler";
 import { redeemJoinCode } from "@/lib/join-code-redeem";
 
@@ -21,6 +22,21 @@ async function _POST(req: NextRequest) {
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  // A learner whose age or parent's consent is still pending joins nothing: a company's course would
+  // otherwise count as company-covered and replace the answer (parent-consent.ts).
+  const consent = await loadConsentState(session.user.id);
+  if (consent.kind !== "none") {
+    return NextResponse.json(
+      {
+        error:
+          consent.kind === "ask-age"
+            ? "Spune-ne întâi anul nașterii: intră în contul tău, pe prima pagină."
+            : "Contul așteaptă acordul unui părinte.",
+        consentBlocked: true,
+      },
+      { status: 403 },
+    );
   }
 
   let body: { code?: unknown } = {};

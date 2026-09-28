@@ -2,8 +2,9 @@
  * Runs before every Umami send (data-before-send on the tracker). Umami stores the page address and
  * the one before it on a server shared by several sites; some of our addresses carry secrets: the
  * password-reset link (?token=&email=), an invitation (/family/accept/<token>, ?code=), a class
- * access code (/acces/<code>), and sign-in's ?callbackUrl= repeating any of them. They are replaced
- * with "_" before anything leaves the page; campaign parameters (utm_*, voucher) stay.
+ * access code (/acces/<code>), a parent's consent link (/acord-parinte/<token>), and sign-in's
+ * ?callbackUrl= repeating any of them. They are replaced with "_" before anything leaves the page;
+ * campaign parameters (utm_*, voucher) stay.
  */
 (function () {
   var SECRET_PARAMS = ["token", "code", "email", "callbackUrl"];
@@ -16,7 +17,8 @@
       });
       url.pathname = url.pathname
         .replace(/^((?:\/(?:ro|en))?\/acces\/)[^/]+/, "$1_")
-        .replace(/^((?:\/(?:ro|en))?\/family\/accept\/)[^/]+/, "$1_");
+        .replace(/^((?:\/(?:ro|en))?\/family\/accept\/)[^/]+/, "$1_")
+        .replace(/^((?:\/(?:ro|en))?\/acord-parinte\/)[^/]+/, "$1_");
       url.hash = "";
       return /^https?:/i.test(u) ? url.toString() : url.pathname + url.search;
     } catch (e) {

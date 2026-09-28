@@ -109,7 +109,10 @@ function OfferCard({ offer, locale, planName, cta }: { offer: TeaserOffer; local
   );
 }
 
-/** Trial countdown for whoever pays (never shown to a child whose parent pays). */
+/**
+ * Trial countdown. A parent gets the offer and the way to the packages; a learner who made their own
+ * account gets only the countdown — no price, no link (never shown to a child whose parent pays).
+ */
 export function TrialBanner({
   locale,
   daysLeft,
@@ -149,7 +152,7 @@ export function TrialBanner({
       : ro
         ? `Ai tot pachetul, în afară de WhatsApp și SMS. ${after}`
         : `You have the whole package except WhatsApp and SMS. ${after}`;
-  const href = `/${locale}/dashboard/packages?plan=${audience === "parent" ? "FAMILY" : "ELEV"}`;
+  const href = `/${locale}/dashboard/packages?plan=FAMILY`;
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-900/60 bg-blue-950/30 px-4 py-3 text-sm">
       <div className="text-blue-100">
@@ -171,15 +174,11 @@ export function TrialBanner({
           </p>
         )}
       </div>
-      {!left && (
+      {!left && audience === "parent" && (
         <Link href={href} className="shrink-0 rounded-lg border border-blue-700/60 px-3 py-1.5 text-xs font-semibold text-blue-100 hover:bg-blue-900/40">
-          {audience === "parent"
-            ? ro
-              ? `Continuă cu Family${offer ? ` · −${TRIAL_PAYMENT_PERCENT}%` : ""}`
-              : `Continue with Family${offer ? ` · −${TRIAL_PAYMENT_PERCENT}%` : ""}`
-            : ro
-              ? `Vezi pachetele${offer ? ` · −${TRIAL_PAYMENT_PERCENT}%` : ""}`
-              : `See the plans${offer ? ` · −${TRIAL_PAYMENT_PERCENT}%` : ""}`}
+          {ro
+            ? `Continuă cu Family${offer ? ` · −${TRIAL_PAYMENT_PERCENT}%` : ""}`
+            : `Continue with Family${offer ? ` · −${TRIAL_PAYMENT_PERCENT}%` : ""}`}
         </Link>
       )}
     </div>
@@ -194,6 +193,7 @@ export function PausedLearnerScreen({
   payer,
   parentName,
   offer,
+  askParent = false,
 }: {
   locale: Locale;
   name: string | null;
@@ -201,6 +201,11 @@ export function PausedLearnerScreen({
   payer: "self" | "parent";
   parentName: string | null;
   offer: TeaserOffer | null;
+  /**
+   * A learner on their own account who may be a child (price-visibility.ts): no price, no sales page —
+   * only that a parent resumes it, and the family code (Alex, 28.09.2026).
+   */
+  askParent?: boolean;
 }) {
   const ro = locale === "ro";
   return (
@@ -222,7 +227,22 @@ export function PausedLearnerScreen({
         />
       </div>
 
-      {payer === "self" && offer && (
+      {payer === "self" && askParent && (
+        // Informative only: no price, no page that sells, nothing that asks a child to get a parent to
+        // buy (UCPD Annex I point 28). A parent with an account can link the child with a family code.
+        <div className={card}>
+          <p className="text-sm text-gray-300">
+            {ro
+              ? "Accesul se reia când un părinte se ocupă de cont. Dacă un părinte are cont pe eTutor.ro, îți poate da un cod de familie, pe care îl scrii aici:"
+              : "Access resumes when a parent takes care of the account. If a parent has an eTutor.ro account, they can give you a family code to type here:"}
+          </p>
+          <Link href={`/${locale}/family/join`} className="mt-2 inline-block text-sm font-semibold text-blue-400 hover:text-blue-300">
+            {ro ? "Am un cod de familie" : "I have a family code"}
+          </Link>
+        </div>
+      )}
+
+      {payer === "self" && !askParent && offer && (
         <div className={card}>
           <h2 className="font-semibold text-white">{ro ? "Pachetul Elev" : "The Student plan"}</h2>
           <p className="mt-1 text-sm text-gray-400">

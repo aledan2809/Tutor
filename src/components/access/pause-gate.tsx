@@ -12,13 +12,21 @@ import { isPausedPath } from "@/lib/access-paths";
  */
 export function PauseGate({ screen, children }: { screen: ReactNode; children: ReactNode }) {
   const pathname = usePathname() ?? "/";
+  useRefreshOnReturn(Boolean(screen));
+  if (!screen) return <>{children}</>;
+  return <>{isPausedPath(pathname) ? screen : children}</>;
+}
+
+/**
+ * While `active`, coming back to the tab reads the access again: a parent who just paid (or gave
+ * consent) in another tab or on their phone sees the app change without reloading. At most once a
+ * minute, since each refresh renders the dashboard again on the server (focus and visibilitychange
+ * often fire together).
+ */
+function useRefreshOnReturn(active: boolean) {
   const router = useRouter();
-  const paused = Boolean(screen);
-  // While paused, coming back to the tab reads the access again: a parent who just paid in another
-  // tab or on their phone sees the app come back without reloading. At most once a minute, since each
-  // refresh renders the dashboard again on the server (focus and visibilitychange often fire together).
   useEffect(() => {
-    if (!paused) return;
+    if (!active) return;
     let last = 0;
     const onReturn = () => {
       if (document.visibilityState !== "visible" || Date.now() - last < 60_000) return;
@@ -31,9 +39,13 @@ export function PauseGate({ screen, children }: { screen: ReactNode; children: R
       window.removeEventListener("focus", onReturn);
       document.removeEventListener("visibilitychange", onReturn);
     };
-  }, [paused, router]);
-  if (!screen) return <>{children}</>;
-  return <>{isPausedPath(pathname) ? screen : children}</>;
+  }, [active, router]);
+}
+
+/** The same, for an account that isn't stopped but may be any moment (waiting for a parent's answer). */
+export function RefreshOnReturn({ active }: { active: boolean }) {
+  useRefreshOnReturn(active);
+  return null;
 }
 
 /**

@@ -147,23 +147,32 @@ Prima pagină → „Fă-ți cont gratuit” → formular → panou → ghidul �
 
 ---
 
-## Decizii care îți rămân (nu le-am luat eu)
+## Deciziile tale din 28.09 — aplicate
 
-1. **Conturile vechi cu emailul „dovedit” fără dovadă.** Preluarea unui cont făcut dinainte pe adresa
-   altcuiva e acum închisă pentru conturile noi: emailul nu mai e considerat dovedit la înregistrare,
-   One Tap și linkul pe email refuză un astfel de cont, iar resetarea pe email îl dovedește și scoate
-   legăturile Google puse de altcineva. **Rămân 22 de conturi reale mai vechi** pe care codul vechi
-   le-a marcat „dovedite” automat. Nu le-am schimbat: ar fi pierdut intrarea cu Google până la o
-   resetare, fără vreun semn că vreunul ar fi fost luat de altcineva. Dacă vrei varianta sigură, e o
-   singură comandă (cu copie de siguranță) care le marchează nedovedite.
-2. **Elevul care își face singur cont vede întâi banner-ul cu prețuri** („−30% dacă plătești acum”,
-   „Vezi pachetele”), iar ghidul de pornire e sub el; copiilor nu li se arată prețuri în altă parte a
-   aplicației. De decis dacă banner-ul trebuie ascuns și la contul de elev făcut singur.
-3. **Vârsta și acordul părintelui la înregistrare** nu se cer.
-4. **Intrarea unei clase întregi de pe aceeași rețea Wi-Fi, cu parolă**: 20 de încercări pe minut pe
-   adresă (intenționat pe adresă, altfel se ocolea). O clasă de 25 care intră cu parola în același
-   minut: ultimii 5 așteaptă un minut. Intrările cu Google / linkul pe email și ieșirea din cont nu mai
-   intră în limita asta.
+1. **Conturile vechi cu emailul marcat „confirmat”** (22 reale): rămân confirmate — risc acceptat.
+2. **Bannerul cu prețuri la elevul care își face singur cont**: ascuns. Elevul vede doar cât mai ține
+   proba (fără preț, fără −30%, fără link spre pachete). Aceeași regulă și la reducerea Telegram și pe
+   pagina „Abonament”: un elev care poate fi minor vede „Abonamentul familiei îl alege părintele tău”.
+3. **Anul nașterii + acordul părintelui**: la înregistrare elevul își alege anul nașterii; sub 16 ani dă
+   emailul unui părinte, care primește un link („Sunt de acord” / „Nu sunt de acord”, cu confirmare).
+   Contul merge 7 zile cât așteaptă; fără răspuns sau după un refuz, paginile de învățat, API-ul și
+   mesajele automate se opresc (Abonament, Setări, Ajutor rămân deschise). Refuzul ține până la un
+   „da”; părintelui care a refuzat i se poate scrie cel mult o dată pe zi. Elevii care și-au făcut
+   cont înainte (sau cu Google) sunt întrebați anul la prima intrare. Nu sunt întrebați: copiii legați
+   de un părinte, părinții, profesorii, cursanții firmelor (Poșta), invitații. Dovada fiecărui răspuns
+   rămâne în `ParentalConsent` (cine, ce text, când, de unde).
+4. **Conturile copiilor create de părinte**: nume de utilizator (propus din nume), email opțional;
+   părintele care a făcut contul, sau un părinte invitat de el, poate schimba parola copilului din
+   „Familia mea”. Un adult străin legat de copil nu poate.
+5. **Ecranul de pauză**: prețul Elev apare doar elevului sigur major (după anul nașterii); unui minor
+   i se spune doar că accesul se reia când un părinte se ocupă de cont, cu drumul spre codul de familie
+   — fără pagină de vânzare.
+
+**De confirmat cu Alina**: textul acordului (`src/lib/parent-consent.ts`, versiunea `PC-2026-09-28`),
+pragul de 16 ani și ce se întâmplă cu datele unui cont refuzat (păstrare / ștergere).
+
+Verificat: 1.296 de teste unitare, 75 de probe în browser și în bază pe copia locală, trei runde de
+revizie independentă pe codul nou.
 
 ---
 

@@ -1,4 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
+import { validBirthYear, needsParentConsent } from "@/lib/age";
+import { issueConsentRequest, sendConsentEmail } from "@/lib/parent-consent-server";
 import { prisma } from "@/lib/prisma";
 import { reserveVoucherLookup } from "@/lib/voucher-guard";
 import { normalizeVoucherCode, plausibleVoucherCode } from "@/lib/voucher-checkout";
@@ -17,7 +19,7 @@ import { SIGNUP_ROLES, accountRoleForSignup, enrollmentsForSignup } from "@/lib/
 import { loadVoucherPreview, planForCodeYear } from "@/lib/voucher-preview-server";
 
 const schema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  name: z.string().trim().min(2, "Name must be at least 2 characters").max(80, "Name must be at most 80 characters"),
   // Lowercase: phones capitalise the first letter, and sign-in looks the email up in lowercase.
   email: z.string().trim().toLowerCase().email("Invalid email"),
   password: z.string().min(8, "Password must be at least 8 characters").max(72, "Password must be at most 72 characters"),
@@ -26,6 +28,10 @@ const schema = z.object({
   voucherCode: z.string().min(1).max(50).optional(), // campaign links (?voucher=)
   // No TUTOR here on purpose — see SIGNUP_ROLES.
   role: z.enum(SIGNUP_ROLES).default("STUDENT"),
+  // A learner's year of birth, and under 16 a parent's email for consent (Alex, 28.09.2026). Optional
+  // here: an account made without them is asked on its first page (dashboard layout).
+  birthYear: z.number().optional(),
+  parentEmail: z.string().trim().toLowerCase().email().optional(),
 });
 
 async function _POST(req: NextRequest) {
@@ -44,7 +50,11 @@ async function _POST(req: NextRequest) {
     );
   }
 
-  const { name, email, password, domainSlug, domainSlugs, voucherCode, role } = parsed.data;
+  const { name, email, password, domainSlug, domainSlugs, voucherCode, role, parentEmail } = parsed.data;
+  const birthYear = role === "STUDENT" && validBirthYear(parsed.data.birthYear) ? parsed.data.birthYear : null;
+  if (role === "STUDENT" && parsed.data.birthYear !== undefined && birthYear === null) {
+    return NextResponse.json({ error: "Invalid input", details: { fieldErrors: { birthYear: ["Invalid year"] } } }, { status: 400 });
+  }
 
   // Check if user already exists (whatever the capitals of an older row)
   if (await emailTaken(email)) {
@@ -62,6 +72,7 @@ async function _POST(req: NextRequest) {
       email,
       password: hashedPassword,
       accountRole: accountRoleForSignup(role),
+      birthYear,
       // Not proven: nobody has shown they own this address yet. It stays null until a reset link
       // or a sign-in link reaches the inbox — until then Google / the email link can't enter it.
       emailVerified: null,
@@ -210,6 +221,20 @@ async function _POST(req: NextRequest) {
       });
     } catch (err) {
       logger.error("Demo quiz claim failed", err, { userId: user.id });
+    }
+  }
+
+  // Under 16: the parent is asked now, by email, after the response. The learner's own address (or
+  // none) isn't a parent's — then the first page asks again.
+  if (birthYear !== null && needsParentConsent(birthYear) && parentEmail && parentEmail !== email) {
+    try {
+      const issued = await issueConsentRequest(user.id, parentEmail);
+      if (issued.ok) {
+        const locale = req.headers.get("referer")?.includes("/en/") ? "en" : "ro";
+        after(() => sendConsentEmail(user.id, issued.token, locale));
+      }
+    } catch (err) {
+      logger.error("Signup parent consent request failed", err, { userId: user.id });
     }
   }
 

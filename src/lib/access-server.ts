@@ -4,6 +4,7 @@
  */
 import { prisma } from "@/lib/prisma";
 import { hasAnyOrgProvidedAccess } from "@/lib/org-entitlement";
+import { consentStoppedUserIds } from "@/lib/parent-consent-server";
 import { payingForAccess, resolveAccess, seatHolder, seatingPayers, type Access } from "@/lib/access";
 
 export const ACCESS_TRIAL_SETTING = "accessTrial";
@@ -55,11 +56,12 @@ export function forgetPauseSwitch(): void {
  * paused and this costs one cached read.
  */
 export async function pausedUserIds(userIds: Iterable<string>, now: Date = new Date()): Promise<Set<string>> {
-  const paused = new Set<string>();
+  const ids = [...new Set(userIds)];
+  // A minor stopped for a parent's consent gets no reminders or alerts either, pause switch or not.
+  const paused = await consentStoppedUserIds(ids, now);
   if (!(await loadPauseStartsAt())) return paused;
   // A few accounts at a time instead of one after another (each is a handful of reads), without
   // taking the whole connection pool away from the pages (review r6, F1).
-  const ids = [...new Set(userIds)];
   for (let i = 0; i < ids.length; i += PAUSE_READS_AT_ONCE) {
     const batch = ids.slice(i, i + PAUSE_READS_AT_ONCE);
     const kinds = await Promise.all(batch.map(async (id) => (await loadAccess(id, now))?.kind));

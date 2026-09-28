@@ -8,6 +8,8 @@ import { PhoneCapture } from "@/components/phone-capture";
 import { Link } from "@/i18n/navigation";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { loadConsentFacts } from "@/lib/parent-consent-server";
+import { mayShowPrices } from "@/lib/price-visibility";
 import { HowItWorks } from "@/components/ui/how-it-works";
 import { HOW_IT_WORKS } from "@/content/help";
 import { getLocale } from "next-intl/server";
@@ -17,17 +19,18 @@ export default async function NotificationSettingsPage() {
   const session = await getSession();
   const tn = await getTranslations("familyNotif");
   let managedByParent = false;
-  // A child whose parent is in the account hears nothing about prices (UCPD Annex I point 28).
+  // The Telegram saving is a price: shown only to whoever may be shown one (price-visibility.ts) —
+  // never a child whose parent is in the account nor a learner who may be a child.
   let payerDiscount = false;
   if (session?.user) {
-    const [setting, parents] = await Promise.all([
+    const [setting, facts] = await Promise.all([
       prisma.setting.findUnique({
         where: { userId_key: { userId: session.user.id, key: "notifDelegation" } },
       }),
-      prisma.guardian.count({ where: { childId: session.user.id, status: "active", relation: "PARENT" } }),
+      loadConsentFacts(session.user.id),
     ]);
     managedByParent = (setting?.value as { managedByParent?: boolean } | undefined)?.managedByParent === true;
-    payerDiscount = parents === 0;
+    payerDiscount = facts !== null && mayShowPrices(facts);
   }
   return (
     <div className="mx-auto max-w-2xl">

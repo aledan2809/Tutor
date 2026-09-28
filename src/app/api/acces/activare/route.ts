@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { USERNAME_RE } from "@/lib/username";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
@@ -18,8 +19,6 @@ import { logAudit } from "@/lib/audit";
  * fără un token valid, nefolosit, nu se creează nimic.
  */
 
-/** Reguli de nume de utilizator: scurt, tastabil pe telefon, fără ambiguități. */
-const USERNAME_RE = /^[a-z0-9](?:[a-z0-9._-]{2,29})$/;
 
 async function _POST(req: NextRequest) {
   let body: { token?: unknown; username?: unknown; password?: unknown } = {};

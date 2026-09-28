@@ -29,7 +29,9 @@ const codeHash = (userId, code) => createHmac("sha256", QA_SECRET).update(`${use
 let ipSeq = 0;
 // Each group of calls comes from its own address, so the per-address limit (20/min on auth)
 // doesn't mix the checks together. The limit itself is covered by the unit tests.
-const newIp = () => `198.18.${Math.floor(++ipSeq / 250)}.${ipSeq % 250}`;
+// Unique per run: the server keeps some counters per address for minutes (voucher-guard: 10).
+const RUN_NET = Math.floor(Date.now() / 1000) % 250;
+const newIp = () => `10.${RUN_NET}.${Math.floor(++ipSeq / 250)}.${ipSeq % 250}`;
 const api = (path, body, ip) =>
   fetch(`${BASE}${path}`, { method: "POST", headers: { "content-type": "application/json", "x-real-ip": ip }, body: JSON.stringify(body) });
 
@@ -37,11 +39,12 @@ async function wipe() {
   const users = await prisma.user.findMany({ where: { OR: [{ email: { startsWith: TAG, mode: "insensitive" } }, { username: { startsWith: TAG } }] }, select: { id: true, email: true } });
   const ids = users.map((u) => u.id);
   await prisma.verificationToken.deleteMany({
-    where: { OR: [...ids.flatMap((id) => [{ identifier: `otp:${id}` }, { identifier: `otp-fail:${id}` }, { identifier: `otp-sent:${id}` }]), ...users.filter((u) => u.email).flatMap((u) => [{ identifier: `reset:${u.email}` }, { identifier: `reset-sent:${u.email}` }])] },
+    where: { OR: [...ids.flatMap((id) => [{ identifier: `otp:${id}` }, { identifier: `otp-fail:${id}` }, { identifier: `otp-sent:${id}` }, { identifier: `parent-consent:${id}` }, { identifier: `parent-consent-sent:${id}` }]), ...users.filter((u) => u.email).flatMap((u) => [{ identifier: `reset:${u.email}` }, { identifier: `reset-sent:${u.email}` }])] },
   });
   await prisma.recipient.deleteMany({ where: { token: { startsWith: TAG } } });
   await prisma.user.deleteMany({ where: { id: { in: ids } } });
   await prisma.domain.deleteMany({ where: { slug: { startsWith: TAG } } });
+  await prisma.organization.deleteMany({ where: { slug: { startsWith: TAG } } });
 }
 
 async function signIn(page, email, password) {
@@ -132,10 +135,10 @@ try {
   // ── C. Emailul cu majuscule la înregistrare ────────────────────────────────────────
   const mixed = `QA-Fix0926-Elev-${s}@Demo.Tutor.App`;
   ip = newIp();
-  const reg = await api("/api/auth/register", { name: "Elev QA", email: mixed, password: PASS, role: "STUDENT" }, ip);
+  const reg = await api("/api/auth/register", { name: "Elev QA", email: mixed, password: PASS, role: "STUDENT", birthYear: 2000 }, ip);
   const stored = await prisma.user.findFirst({ where: { email: { equals: mixed, mode: "insensitive" } }, select: { email: true } });
   check("C1 înregistrarea salvează emailul cu litere mici", reg.status === 201 || reg.status === 200 ? stored?.email === mixed.toLowerCase() : false, `${reg.status} → ${stored?.email}`);
-  const dup = await api("/api/auth/register", { name: "Elev QA", email: mixed.toLowerCase(), password: PASS, role: "STUDENT" }, ip);
+  const dup = await api("/api/auth/register", { name: "Elev QA", email: mixed.toLowerCase(), password: PASS, role: "STUDENT", birthYear: 2000 }, ip);
   check("C2 același email scris altfel nu face un al doilea cont", dup.status === 409, `${dup.status}`);
 
   // ── D. Ghidul de pornire pe o materie cu programă ────────────────────────────────
@@ -148,6 +151,8 @@ try {
   check("C3 intrarea cu emailul scris cu MAJUSCULE merge", !page.url().includes("/auth/signin"), page.url().replace(BASE, ""));
   await page.goto(`${BASE}/ro/dashboard`, { waitUntil: "networkidle" });
   await page.waitForTimeout(1500);
+  const dashText = await page.locator("body").innerText();
+  check("N1 elevul care și-a făcut singur cont vede doar cât mai ține proba — fără preț, fără link spre pachete", /Proba gratuită/.test(dashText) && !/Vezi pachetele|dacă plătești acum|−30%/.test(dashText));
   const mate = page.locator("main section button").filter({ hasText: /Matematic/ }).first();
   check("D1 ghidul oferă Matematica cl. VIII", (await mate.count()) > 0);
   await mate.click();
@@ -183,29 +188,35 @@ try {
   await pp.locator("button", { hasText: /Creează contul direct/ }).first().click();
   await pp.waitForTimeout(600);
   const childEmail = `${TAG}-Copil-${s}@Demo.Tutor.App`;
+  const childUser = `${TAG}-copil-${s}`;
   await pp.getByPlaceholder("Numele copilului").fill("Copil QA");
-  await pp.getByPlaceholder("email@exemplu.ro").fill(childEmail);
+  const suggested = await pp.getByLabel("Nume de utilizator").inputValue();
+  check("Q1 numele de utilizator e propus din numele copilului", suggested === "copil.qa", `„${suggested}”`);
+  await pp.getByLabel("Nume de utilizator").fill(childUser);
+  await pp.getByLabel("Emailul copilului (opțional)").fill(childEmail);
   await pp.getByPlaceholder("Parolă (min. 8 caractere)").fill(PASS);
   check("E1 parola copilului are buton de afișare", (await pp.getByRole("button", { name: "Arată parola" }).count()) > 0);
   await pp.locator("button", { hasText: /Creează contul copilului/ }).first().click();
   await pp.waitForTimeout(2500);
   await pp.screenshot({ path: `${SHOTS}/e-copil-creat.png` });
   const card = await pp.locator("body").innerText();
-  check("E2 după creare părintele vede emailul (cu litere mici) și parola de dat copilului", card.includes("Contul copilului e gata") && card.includes(childEmail.toLowerCase()) && card.includes(PASS));
+  check("E2 după creare părintele vede numele de utilizator, emailul (litere mici) și parola", card.includes("Contul copilului e gata") && card.includes(childUser) && card.includes(childEmail.toLowerCase()) && card.includes(PASS));
   await pp.locator("button", { hasText: /Gata, am notat/ }).first().click();
   await pp.waitForTimeout(1500);
   check("E3 „Gata, am notat” închide cartonașul (parola nu mai rămâne pe ecran)", !(await pp.locator("body").innerText()).includes(PASS));
   const cctx = await browser.newContext({ ...devices["iPhone 13"], locale: "ro-RO" });
   const cp = await cctx.newPage();
-  await signIn(cp, childEmail, PASS);
-  check("E4 copilul intră cu emailul exact cum l-a scris părintele", !cp.url().includes("/auth/signin"), cp.url().replace(BASE, ""));
+  await signIn(cp, childUser.toUpperCase(), PASS);
+  check("E4 copilul intră cu numele de utilizator (scris și cu majuscule)", !cp.url().includes("/auth/signin"), cp.url().replace(BASE, ""));
+  const childBody = await cp.locator("body").innerText();
+  check("Q2 copilul creat de părinte nu e întrebat de vârstă și nu vede prețuri", !/Încă o întrebare|Vezi pachetele|dacă plătești acum/.test(childBody));
   // A second child, and the panel closed with „Închide” instead of „Gata, am notat”.
   await pp.locator("button", { hasText: /Adaugă copil/ }).first().click();
   await pp.waitForTimeout(800);
   await pp.locator("button", { hasText: /Creează contul direct/ }).first().click();
   await pp.waitForTimeout(600);
   await pp.getByPlaceholder("Numele copilului").fill("Al Doilea QA");
-  await pp.getByPlaceholder("email@exemplu.ro").fill(`${TAG}-copil3-${s}@demo.tutor.app`);
+  await pp.getByLabel("Nume de utilizator").fill(`${TAG}-copil3-${s}`);
   await pp.getByPlaceholder("Parolă (min. 8 caractere)").fill(PASS);
   await pp.locator("button", { hasText: /Creează contul copilului/ }).first().click();
   await pp.waitForTimeout(2500);
@@ -215,25 +226,49 @@ try {
   await pp.screenshot({ path: `${SHOTS}/e-lista-dupa-inchide.png` });
   check("M6 cartonașul rămâne pe ecran, iar după „Închide” copilul e deja în listă (fără reîncărcare)", cardStill && (await pp.locator("body").innerText()).includes("Al Doilea QA"));
 
-  // Same email again: the parent reads a Romanian sentence, never a server code.
+  // Same username again: the parent reads a Romanian sentence, never a server code.
   await pp.locator("button", { hasText: /Adaugă copil/ }).first().click();
   await pp.waitForTimeout(800);
   await pp.locator("button", { hasText: /Creează contul direct/ }).first().click();
   await pp.waitForTimeout(600);
   await pp.getByPlaceholder("Numele copilului").fill("Copil QA");
-  await pp.getByPlaceholder("email@exemplu.ro").fill(childEmail.toLowerCase());
+  await pp.getByLabel("Nume de utilizator").fill(childUser);
   await pp.getByPlaceholder("Parolă (min. 8 caractere)").fill(PASS);
   await pp.locator("button", { hasText: /Creează contul copilului/ }).first().click();
   await pp.waitForTimeout(2500);
   await pp.screenshot({ path: `${SHOTS}/e-copil-dublu.png` });
   const dupText = await pp.locator("body").innerText();
   // What the server answered for the same request, to know which sentence the parent must see.
-  const dupApi = await pp.evaluate(async ([e, pw]) => {
-    const r = await fetch("/api/dashboard/family/direct", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: "Copil QA", email: e, password: pw }) });
+  const dupApi = await pp.evaluate(async ([u, pw]) => {
+    const r = await fetch("/api/dashboard/family/direct", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: "Copil QA", username: u, password: pw }) });
     return { status: r.status, body: await r.json().catch(() => ({})) };
-  }, [childEmail.toLowerCase(), PASS]);
+  }, [childUser, PASS]);
   const expected = dupApi.body.seat?.message ?? dupApi.body.error;
-  check("E5 același email a doua oară → mesajul serverului scris pentru părinte, nu un cod", dupApi.status === 409 && typeof expected === "string" && expected !== "seat_unavailable" && dupText.includes(expected) && !/seat_unavailable|Invalid input|Unauthorized/.test(dupText), `${dupApi.status} · ${expected}`);
+  check("E5 același nume de utilizator a doua oară → mesajul serverului scris pentru părinte, nu un cod", dupApi.status === 409 && typeof expected === "string" && expected !== "seat_unavailable" && dupText.includes(expected) && !/seat_unavailable|Invalid input|Unauthorized/.test(dupText), `${dupApi.status} · ${expected}`);
+
+  // The parent sets a new password for the child made from „Familia mea”.
+  await pp.goto(`${BASE}/ro/dashboard/family`, { waitUntil: "networkidle" });
+  await pp.locator("button", { hasText: /^Schimbă parola$/ }).first().click();
+  await pp.getByPlaceholder("Parola nouă (min. 8 caractere)").fill("parola-noua-copil-4");
+  await pp.locator("button", { hasText: /Salvează parola/ }).first().click();
+  await pp.waitForTimeout(1500);
+  await pp.screenshot({ path: `${SHOTS}/q-parola-copil.png` });
+  const pwText = await pp.locator("body").innerText();
+  const cp2 = await (await browser.newContext({ locale: "ro-RO" })).newPage();
+  await signIn(cp2, childUser, "parola-noua-copil-4");
+  check("Q3 părintele schimbă parola copilului și copilul intră cu cea nouă", /Parola s-a schimbat/.test(pwText) && !cp2.url().includes("/auth/signin"), cp2.url().replace(BASE, ""));
+  const otherKid = await prisma.user.create({ data: { email: `${TAG}-alt-copil-${s}@demo.tutor.app`, name: "Alt QA", password: await bcrypt.hash(PASS, 10), accountRole: "STUDENT" } });
+  const foreign = await pp.evaluate(async (id) => (await fetch("/api/dashboard/family/child-password", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ childId: id, password: "altceva-123456" }) })).status, otherKid.id);
+  check("Q4 parola unui cont care nu e copilul făcut de părinte nu se poate schimba", foreign === 403, `${foreign}`);
+  // A stranger who got linked to the child (a family code typed by the child) can't take the account.
+  const madeChild = await prisma.user.findFirst({ where: { username: childUser }, select: { id: true } });
+  const strangerEmail = `${TAG}-strain-${s}@demo.tutor.app`;
+  const stranger = await prisma.user.create({ data: { email: strangerEmail, name: "Străin QA", password: await bcrypt.hash(PASS, 10), accountRole: "PARENT" } });
+  await prisma.guardian.create({ data: { parentId: stranger.id, childId: madeChild.id, relation: "PARENT", status: "active" } });
+  const sp = await (await browser.newContext({ locale: "ro-RO" })).newPage();
+  await signIn(sp, strangerEmail, PASS);
+  const strangerTry = await sp.evaluate(async (id) => (await fetch("/api/dashboard/family/child-password", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ childId: id, password: "preluare-123456" }) })).status, madeChild.id);
+  check("Q5 un adult străin legat de copil nu-i poate schimba parola", strangerTry === 403, `${strangerTry}`);
 
   // ── I. Invitație pentru al doilea părinte, fără cont ─────────────────────────────
   const invite = (target) =>
@@ -286,6 +321,7 @@ try {
   await kf.nth(1).fill(kEmail);
   await kf.nth(2).fill(PASS);
   await kf.nth(3).fill(PASS);
+  await kp.locator("#birth-year").selectOption("2012");
   const kb = kp.locator("form input[type=checkbox]");
   if (await kb.count()) await kb.first().check();
   await kp.locator("form button[type=submit]").click();
@@ -402,6 +438,7 @@ try {
   await rin.nth(1).fill(capEmail);
   await rin.nth(2).fill(PASS);
   await rin.nth(3).fill(PASS);
+  await rp.locator("#birth-year").selectOption("2000");
   const rbox = rp.locator("form input[type=checkbox]");
   if (await rbox.count()) await rbox.first().check().catch(() => {});
   await rp.locator("form button[type=submit]").click();
@@ -426,7 +463,7 @@ try {
   // Two older rows differing only in capitals (the migration leaves such a pair alone).
   const pairLower = `${TAG}-pair-${s}@demo.tutor.app`;
   await prisma.user.create({ data: { email: `QA-Fix0926-Pair-${s}@Demo.Tutor.App`, name: "Pair A", password: await bcrypt.hash(PASS, 10) } });
-  const twin = await api("/api/auth/register", { name: "Pair B", email: pairLower, password: PASS, role: "STUDENT" }, newIp());
+  const twin = await api("/api/auth/register", { name: "Pair B", email: pairLower, password: PASS, role: "STUDENT", birthYear: 2000 }, newIp());
   check("M3 înregistrarea refuză un email pe care îl are deja un cont vechi scris cu majuscule", twin.status === 409, `${twin.status}`);
 
   const jp = await (await browser.newContext({ locale: "ro-RO" })).newPage();
@@ -486,6 +523,119 @@ try {
   for (let i = 0; i < 25; i++) realRuns.push(await activate(realCode, realIp));
   check("M10 25 de familii cu un cod adevărat, de pe aceeași rețea, nu sunt blocate", realRuns.every((c) => c !== 429), `${[...new Set(realRuns)].join(",")}`);
   check("M9 după 20 de coduri inexistente de pe o adresă, acolo nu se mai caută coduri; alte adrese merg", guesses.every((c) => c === 404) && after20 === 429 && otherIp === 404, `${guesses[0]}×20 → ${after20} · altă adresă ${otherIp}`);
+
+  // The parent's trial banner stays.
+  const trialParent = `${TAG}-parinte-proba-${s}@demo.tutor.app`;
+  await prisma.user.create({ data: { email: trialParent, name: "Părinte Probă", password: await bcrypt.hash(PASS, 10), accountRole: "PARENT" } });
+  const tp = await (await browser.newContext({ ...devices["iPhone 13"], locale: "ro-RO" })).newPage();
+  await signIn(tp, trialParent, PASS);
+  await tp.goto(`${BASE}/ro/dashboard`, { waitUntil: "networkidle" });
+  await tp.waitForTimeout(800);
+  const tpText = await tp.locator("body").innerText();
+  check("N2 părintele în proba gratuită vede în continuare bannerul („Continuă cu Family”)", /Proba gratuită/.test(tpText) && /Continuă cu Family/.test(tpText));
+
+  // ── P. Anul nașterii și acordul părintelui ─────────────────────────────────────────
+  const minorEmail = `${TAG}-minor-${s}@demo.tutor.app`;
+  const parentOfMinor = `${TAG}-mama-${s}@demo.tutor.app`;
+  const mctx2 = await browser.newContext({ ...devices["iPhone 13"], locale: "ro-RO" });
+  const mp2 = await mctx2.newPage();
+  await mp2.goto(`${BASE}/ro/auth/register`, { waitUntil: "networkidle" });
+  await mp2.locator("button", { hasText: /^Accept$/ }).first().click({ timeout: 3000 }).catch(() => {});
+  const mf = mp2.locator("form input:not([type=checkbox]):not([type=hidden])");
+  await mf.nth(0).fill("Minor QA");
+  await mf.nth(1).fill(minorEmail);
+  await mp2.locator("#birth-year").selectOption("2012");
+  await mp2.locator("#parent-email").fill(parentOfMinor);
+  await mp2.locator("form input[type=password]").nth(0).fill(PASS);
+  await mp2.locator("form input[type=password]").nth(1).fill(PASS);
+  const mbox = mp2.locator("form input[type=checkbox]");
+  if (await mbox.count()) await mbox.first().check().catch(() => {});
+  await mp2.locator("form button[type=submit]").click();
+  await mp2.waitForURL((u) => !u.pathname.includes("/auth/register"), { timeout: 30000 }).catch(() => {});
+  await mp2.goto(`${BASE}/ro/dashboard`, { waitUntil: "networkidle" });
+  await mp2.waitForTimeout(1000);
+  await mp2.screenshot({ path: `${SHOTS}/p-minor-asteapta.png` });
+  const minorRow = await prisma.user.findFirst({ where: { email: minorEmail }, select: { id: true, birthYear: true, parentConsentEmail: true, parentConsentRequestedAt: true } });
+  const minorToken = minorRow ? await prisma.verificationToken.findFirst({ where: { identifier: `parent-consent:${minorRow.id}` } }) : null;
+  const waitText = await mp2.locator("body").innerText();
+  check("P1 elevul sub 16 ani: anul și emailul părintelui salvate, linkul emis, contul merge cu anunțul de așteptare", minorRow?.birthYear === 2012 && minorRow?.parentConsentEmail === parentOfMinor && !!minorToken && /ca părintele tău să-și dea acordul/.test(waitText) && /q\*\*\*@demo\.tutor\.app/.test(waitText) && !waitText.includes(parentOfMinor), `${minorRow?.birthYear} · ${minorRow?.parentConsentEmail} · link ${!!minorToken}`);
+
+  const pc = await (await browser.newContext({ locale: "ro-RO" })).newPage();
+  await pc.goto(`${BASE}/ro/acord-parinte/${minorToken?.token ?? "x"}`, { waitUntil: "networkidle" });
+  const pcText = await pc.locator("body").innerText();
+  await pc.screenshot({ path: `${SHOTS}/p-pagina-parinte.png` });
+  await pc.locator("button", { hasText: /^Sunt de acord$/ }).click();
+  await pc.waitForTimeout(1500);
+  const afterConsent = await prisma.user.findUnique({ where: { id: minorRow?.id ?? "x" }, select: { parentConsentAt: true } });
+  const evidence = await prisma.parentalConsent.findMany({ where: { userId: minorRow?.id ?? "x" } });
+  await pc.goto(`${BASE}/ro/acord-parinte/${minorToken?.token ?? "x"}`, { waitUntil: "networkidle" });
+  const usedText = await pc.locator("body").innerText();
+  check("P2 părintele vede cine și ce, își dă acordul; rămâne dovada, iar linkul nu mai merge a doua oară", /Minor QA/.test(pcText) && /nu-i arătăm prețuri/.test(pcText) && !!afterConsent?.parentConsentAt && evidence.length === 1 && evidence[0].decision === "GIVEN" && evidence[0].textVersion === "PC-2026-09-28" && /Linkul nu mai e valid/.test(usedText), `dovezi ${evidence.length}`);
+  await mp2.goto(`${BASE}/ro/dashboard`, { waitUntil: "networkidle" });
+  check("P3 după acord, anunțul de așteptare dispare", !/ca părintele tău să-și dea acordul/.test(await mp2.locator("body").innerText()));
+
+  // 8 days without an answer: the account waits for the parent.
+  const lateMinor = await prisma.user.create({ data: { email: `${TAG}-tarziu-${s}@demo.tutor.app`, name: "Tarziu QA", password: await bcrypt.hash(PASS, 10), accountRole: "STUDENT", birthYear: 2012, parentConsentEmail: `${TAG}-tata-${s}@demo.tutor.app`, parentConsentRequestedAt: new Date(Date.now() - 8 * 86_400_000) } });
+  const lp2 = await (await browser.newContext({ ...devices["iPhone 13"], locale: "ro-RO" })).newPage();
+  await signIn(lp2, lateMinor.email, PASS);
+  await lp2.goto(`${BASE}/ro/dashboard/practice`, { waitUntil: "networkidle" });
+  await lp2.screenshot({ path: `${SHOTS}/p-blocat.png` });
+  const lateText = await lp2.locator("body").innerText();
+  check("P4 după 7 zile fără răspuns, contul așteaptă părintele (nici exersarea nu se deschide)", /Contul așteaptă un părinte/.test(lateText) && !/Întrebări disponibile/.test(lateText));
+
+  // A learner who made the account without saying their age (Google, before this): asked first.
+  const noAge = await prisma.user.create({ data: { email: `${TAG}-fara-varsta-${s}@demo.tutor.app`, name: "Fara Varsta QA", password: await bcrypt.hash(PASS, 10), accountRole: "STUDENT" } });
+  const ap2 = await (await browser.newContext({ ...devices["iPhone 13"], locale: "ro-RO" })).newPage();
+  await signIn(ap2, noAge.email, PASS);
+  await ap2.goto(`${BASE}/ro/dashboard`, { waitUntil: "networkidle" });
+  const askText = await ap2.locator("body").innerText();
+  await ap2.locator("#birth-year").selectOption("2000");
+  await ap2.locator("button", { hasText: /^Continuă$/ }).click();
+  await ap2.waitForTimeout(2500);
+  const afterAge = await ap2.locator("body").innerText();
+  check("P5 elevul fără an: e întrebat întâi; cu 2000, intră în cont", /Încă o întrebare/.test(askText) && !/Încă o întrebare/.test(afterAge) && (await prisma.user.findUnique({ where: { id: noAge.id }, select: { birthYear: true } }))?.birthYear === 2000);
+
+  // A refusal.
+  const refMinor = await prisma.user.create({ data: { email: `${TAG}-refuz-${s}@demo.tutor.app`, name: "Refuz QA", password: await bcrypt.hash(PASS, 10), accountRole: "STUDENT", birthYear: 2013, parentConsentEmail: `${TAG}-bunic-${s}@demo.tutor.app`, parentConsentRequestedAt: new Date() } });
+  await prisma.verificationToken.create({ data: { identifier: `parent-consent:${refMinor.id}`, token: "a".repeat(40) + s.padStart(24, "0"), expires: new Date(Date.now() + 86_400_000) } });
+  const refRes = await api("/api/parent-consent", { token: "a".repeat(40) + s.padStart(24, "0"), decision: "REFUSED" }, newIp());
+  const rp2 = await (await browser.newContext({ locale: "ro-RO" })).newPage();
+  await signIn(rp2, refMinor.email, PASS);
+  await rp2.goto(`${BASE}/ro/dashboard`, { waitUntil: "networkidle" });
+  check("P6 părintele nu e de acord → contul se oprește și elevul află de ce", refRes.status === 200 && /n-a fost de acord/.test(await rp2.locator("body").innerText()));
+  const sameAgain = await rp2.evaluate(async (e) => (await fetch("/api/me/parent-consent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ parentEmail: e }) })).status, `${TAG}-bunic-${s}@demo.tutor.app`);
+  const sameAgain2 = await rp2.evaluate(async (e) => (await fetch("/api/me/parent-consent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ parentEmail: e }) })).status, `${TAG}-bunic-${s}@demo.tutor.app`);
+  const otherParent = await rp2.evaluate(async (e) => (await fetch("/api/me/parent-consent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ parentEmail: e }) })).status, `${TAG}-bunica-${s}@demo.tutor.app`);
+  await rp2.goto(`${BASE}/ro/dashboard`, { waitUntil: "networkidle" });
+  const stillText = await rp2.locator("body").innerText();
+  const practiceApi = await rp2.evaluate(async () => (await fetch("/api/student/sessions/quick", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" })).status);
+  check("P7 după refuz: părintele care a refuzat poate fi rugat o dată pe zi, alt părinte oricând — dar contul rămâne oprit până la un „da”, iar API-ul de exersare refuză", sameAgain === 200 && sameAgain2 === 429 && otherParent === 200 && /n-a fost de acord/.test(stillText) && practiceApi === 403, `${sameAgain} · ${sameAgain2} · ${otherParent} · API ${practiceApi}`);
+  // The parent who refused changes their mind from the new link: the account opens.
+  const reToken = await prisma.verificationToken.findFirst({ where: { identifier: `parent-consent:${refMinor.id}` } });
+  const reRes = await api("/api/parent-consent", { token: reToken?.token ?? "x", decision: "GIVEN" }, newIp());
+  await rp2.goto(`${BASE}/ro/dashboard`, { waitUntil: "networkidle" });
+  check("P9 după un „da” venit mai târziu, contul se deschide", reRes.status === 200 && !/Contul așteaptă un părinte/.test(await rp2.locator("body").innerText()));
+  // „Nu sunt de acord” asks once more before it stops the account.
+  const confMinor = await prisma.user.create({ data: { email: `${TAG}-confirm-${s}@demo.tutor.app`, name: "Confirm QA", password: await bcrypt.hash(PASS, 10), accountRole: "STUDENT", birthYear: 2013, parentConsentEmail: `${TAG}-matusa-${s}@demo.tutor.app`, parentConsentRequestedAt: new Date() } });
+  const confTok = "b".repeat(40) + s.padStart(24, "0");
+  await prisma.verificationToken.create({ data: { identifier: `parent-consent:${confMinor.id}`, token: confTok, expires: new Date(Date.now() + 86_400_000) } });
+  const cfp = await (await browser.newContext({ locale: "ro-RO" })).newPage();
+  await cfp.goto(`${BASE}/ro/acord-parinte/${confTok}`, { waitUntil: "networkidle" });
+  await cfp.locator("button", { hasText: /^Nu sunt de acord$/ }).click();
+  await cfp.waitForTimeout(500);
+  const confText = await cfp.locator("body").innerText();
+  const notYet = await prisma.user.findUnique({ where: { id: confMinor.id }, select: { parentConsentRefusedAt: true } });
+  check("P10 „Nu sunt de acord” cere confirmare; până atunci nimic nu se înregistrează", /Sigur\? Contul copilului se oprește/.test(confText) && notYet?.parentConsentRefusedAt === null);
+
+  // A company's learner (a course invitation, like Poșta's): an adult at work, never asked.
+  const org = await prisma.organization.create({ data: { name: "Firma QA", slug: `${TAG}-firma-${s}` } });
+  const orgDomain = await prisma.domain.create({ data: { name: `Curs QA ${s}`, slug: `${TAG}-curs-${s}`, isActive: true, visibility: "PRIVATE", organizationId: org.id } });
+  const worker = await prisma.user.create({ data: { username: `${TAG}angajat${s}`, name: "Angajat QA", password: await bcrypt.hash(PASS, 10), accountRole: "STUDENT" } });
+  await prisma.enrollment.create({ data: { userId: worker.id, domainId: orgDomain.id, roles: ["STUDENT"], isActive: true } });
+  const wp = await (await browser.newContext({ locale: "ro-RO" })).newPage();
+  await signIn(wp, `${TAG}angajat${s}`, PASS);
+  await wp.goto(`${BASE}/ro/dashboard`, { waitUntil: "networkidle" });
+  check("P8 cursantul unei firme nu e întrebat de vârstă", !/Încă o întrebare|Contul așteaptă un părinte/.test(await wp.locator("body").innerText()));
 
   // ── F. Paginile de parolă uitată, în limba paginii ────────────────────────────────
   await page.goto(`${BASE}/ro/auth/forgot-password`, { waitUntil: "networkidle" });

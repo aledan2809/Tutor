@@ -11,6 +11,8 @@ import { loadVoucherPreview, serializePreview } from "@/lib/voucher-preview-serv
 import { paysByCard } from "@/lib/card-subscription";
 import { isPaidSubscriber } from "@/lib/escalation/segmentation";
 import { forInterval } from "@/lib/checkout-price";
+import { loadConsentFacts } from "@/lib/parent-consent-server";
+import { mayShowPrices } from "@/lib/price-visibility";
 import {
   familyHasTelegram,
   firstLinkedChild,
@@ -105,7 +107,10 @@ async function _GET() {
   // 28): no countdown, no −30% in the trial, no Telegram saving — the rule of the trial banner and of
   // the Telegram card. A learner whose card pays their own subscription is its payer, not such a child:
   // the offer goes to whoever pays (their own subjects' prices included, student domains route).
-  const child = parentLinks > 0 && me.accountRole !== "PARENT" && firstChild === null && !byCard;
+  // A learner on their own account who may be a child (no year of birth saying 18+) is treated the
+  // same: no prices, no countdown (price-visibility.ts; Alex, 28.09.2026).
+  const facts = await loadConsentFacts(userId);
+  const child = !byCard && ((parentLinks > 0 && me.accountRole !== "PARENT" && firstChild === null) || (facts !== null && !mayShowPrices(facts)));
 
   const paid = isPaidSubscriber(me);
   const [selfSubjects, childSubjects, locked, countedLearner, names, seatHolder] = await Promise.all([

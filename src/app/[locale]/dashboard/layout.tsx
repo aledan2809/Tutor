@@ -1,3 +1,7 @@
+import { CONSENT_GRACE_DAYS, consentState, maskEmail } from "@/lib/parent-consent";
+import { loadConsentFacts } from "@/lib/parent-consent-server";
+import { mayShowPrices } from "@/lib/price-visibility";
+import { AgeConsent, type AgeConsentView } from "@/components/consent/age-consent";
 import type { Metadata } from "next";
 import { PresencePinger } from "@/components/presence-pinger";
 import { auth } from "@/lib/auth";
@@ -6,7 +10,7 @@ import { getLocale } from "next-intl/server";
 import { loadAccess, loadPauseStartsAt, loadSeatHolder } from "@/lib/access-server";
 import { teaserOffer, teaserStats } from "@/lib/access-teaser";
 import { PausedLearnerScreen, PausedParentScreen, TrialBanner } from "@/components/access/access-screens";
-import { PauseGate, RefreshAt } from "@/components/access/pause-gate";
+import { PauseGate, RefreshAt, RefreshOnReturn } from "@/components/access/pause-gate";
 import { prisma } from "@/lib/prisma";
 import { payingForAccess } from "@/lib/access";
 import { resolveFamilyPlanFromRecord } from "@/lib/family";
@@ -96,11 +100,35 @@ export default async function DashboardLayout({
   // The 7-day trial and the pause (access.ts, decisions of 16.09.2026) — read above.
   // A parent in the free week gets the family menu like a paying one.
   const familyNav = hasFamilyPlan || (isParentAccount && access?.kind === "trial");
+  // A learner who made their own account sees the trial's countdown but no price, no −30% and no link
+  // to the packages (Alex, 28.09.2026): it may be a child (UCPD Annex I point 28). The packages page
+  // stays in the menu for whoever looks; the offer belongs to the parent's banner.
   const bannerAudience: "parent" | "self" | null =
     access?.kind !== "trial" ? null : isWatcherOnly || isParentAccount ? "parent" : parentLinks.length === 0 ? "self" : null;
   // A parent whose children another parent's plan already covers, without a seat for them (Family is
   // for one parent): told who has the plan and which plan takes them too — never sold a second Family.
   const trialHolder = bannerAudience === "parent" ? await loadSeatHolder(session.user.id) : null;
+
+  // Age and a parent's consent (Alex, 28.09.2026): a learner on their own account says their year of
+  // birth; under 16 a parent is asked. Until then (or after 7 days without an answer) the page is the
+  // question itself.
+  const consentFacts = await loadConsentFacts(session.user.id);
+  const consent = consentFacts ? consentState(consentFacts) : ({ kind: "none" } as const);
+  const consentView: AgeConsentView | null =
+    consent.kind === "none"
+      ? null
+      : consent.kind === "waiting"
+        ? { ...consent, parentEmail: maskEmail(consent.parentEmail) }
+        : consent.kind === "blocked"
+          ? { ...consent, parentEmail: consent.parentEmail ? maskEmail(consent.parentEmail) : null }
+          : consent;
+  const consentBlocks = consentView !== null && consentView.kind !== "waiting";
+  const consentDeadline =
+    consent.kind === "waiting" && consentFacts?.parentConsentRequestedAt
+      ? new Date(consentFacts.parentConsentRequestedAt.getTime() + CONSENT_GRACE_DAYS * 24 * 60 * 60 * 1000).toISOString()
+      : null;
+  // A price only to whoever may be shown one (price-visibility.ts).
+  const showPrices = consentFacts !== null && mayShowPrices(consentFacts);
 
   // Which pause screen this account gets is decided by who it is, not by the page: a child only
   // ever sees the learner screen, without an offer (UCPD Annex I point 28); a parent sees the family
@@ -136,7 +164,7 @@ export default async function DashboardLayout({
     } else {
       const [stats, offer] = await Promise.all([
         teaserStats(session.user.id),
-        access.payer === "self" ? teaserOffer(session.user.id, "ELEV") : Promise.resolve(null),
+        access.payer === "self" && showPrices ? teaserOffer(session.user.id, "ELEV") : Promise.resolve(null),
       ]);
       pausedScreen = (
         <PausedLearnerScreen
@@ -146,6 +174,7 @@ export default async function DashboardLayout({
           payer={access.payer}
           parentName={parentLinks[0]?.parent.name ?? null}
           offer={offer}
+          askParent={access.payer === "self" && !showPrices}
         />
       );
     }
@@ -161,7 +190,15 @@ export default async function DashboardLayout({
         </header>
         <main className={`flex-1 p-4 pt-14 sm:p-6 lg:pt-6 ${isStudent ? "pb-20 lg:pb-6" : ""}`}>
           <AppBanner isWatcherOnly={isWatcherOnly} />
-          {access?.kind === "trial" && bannerAudience && (
+          {consentView?.kind === "waiting" && (
+            <>
+              <AgeConsent view={consentView} locale={locale} />
+              {/* The account stops the moment the 7 days end, or when a parent answers elsewhere. */}
+              <RefreshAt at={consentDeadline} now={new Date().toISOString()} />
+              <RefreshOnReturn active />
+            </>
+          )}
+          {!consentBlocks && access?.kind === "trial" && bannerAudience && (
             <TrialBanner
               locale={locale}
               daysLeft={access.daysLeft}
@@ -169,12 +206,16 @@ export default async function DashboardLayout({
               pauseOn={(await loadPauseStartsAt()) !== null}
               holder={trialHolder}
               // Paying in the account's own free week gives −30% for life; a paying account has no offer.
-              offer={access.via === "own" && !trialHolder ? { endsAt: access.endsAt.toISOString(), serverNow: new Date().toISOString() } : null}
+              offer={bannerAudience === "parent" && access.via === "own" && !trialHolder ? { endsAt: access.endsAt.toISOString(), serverNow: new Date().toISOString() } : null}
             />
           )}
           <RefreshAt at={access?.kind === "trial" ? access.endsAt.toISOString() : null} now={new Date().toISOString()} />
           <PresencePinger />
-          <PauseGate screen={pausedScreen}>{children}</PauseGate>
+          {/* The consent screen takes the pause's place: the same pages stay open (Abonament, settings,
+              help), and coming back to the tab reads the state again. */}
+          <PauseGate screen={consentBlocks && consentView ? <AgeConsent view={consentView} locale={locale} /> : pausedScreen}>
+            {children}
+          </PauseGate>
         </main>
       </div>
       {isStudent && <MobileBottomNav />}

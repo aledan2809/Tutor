@@ -10,6 +10,7 @@ import { PAID_FEATURES, type PlanFeature } from "./plan-features";
 import { accessOpensPaidFeatures } from "./access";
 import { loadAccess } from "./access-server";
 import { pausedResponse } from "./access-gate";
+import { consentStopped } from "./parent-consent-server";
 
 /**
  * Returns a 403 response when the user's access doesn't include `feature`, or
@@ -29,6 +30,10 @@ export async function requireFeature(
 
   const access = await loadAccess(userId);
   if (access?.kind === "paused") return pausedResponse(access, { locked: true, feature });
+  // A learner under 16 stopped for a parent's consent (parent-consent.ts): same as the pause.
+  if (await consentStopped(userId)) {
+    return NextResponse.json({ error: "Contul așteaptă acordul unui părinte.", consentBlocked: true, locked: true, feature }, { status: 403 });
+  }
   // A function no package gates (plan-features.ts) is open to every account that isn't paused.
   if (!PAID_FEATURES.includes(feature)) return null;
   if (access && accessOpensPaidFeatures(access)) return null;

@@ -20,6 +20,7 @@ import {
 } from "@/lib/family";
 import { ChildToneControl } from "@/components/gamification/child-tone-control";
 import { ChildNotifControl } from "@/components/gamification/child-notif-control";
+import { USERNAME_RE, USERNAME_RULE_RO, normalizeUsername, suggestUsername } from "@/lib/username";
 
 interface Member {
   userId: string;
@@ -27,6 +28,10 @@ interface Member {
   email: string | null;
   image: string | null;
   status: string;
+  /** A child's sign-in name. */
+  username?: string | null;
+  /** A child's account a parent made: the parents set its password. */
+  managedByParent?: boolean;
 }
 interface Overview {
   planKey: FamilyPlanKey | null;
@@ -482,10 +487,12 @@ function MemberSection({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white">{m.name ?? "(fără nume)"}</p>
+                {m.username && <p className="text-xs text-gray-400">Utilizator: {m.username}</p>}
                 {m.email && <p className="text-xs text-gray-400">{m.email}</p>}
               </div>
               <RemoveButton memberId={m.userId} onDone={onRemove} />
             </div>
+            {m.managedByParent && <ChildPasswordControl childId={m.userId} username={m.username ?? null} />}
             {showToneControl && <ChildToneControl childId={m.userId} />}
             {showToneControl && <ChildNotifControl childId={m.userId} />}
           </div>
@@ -697,19 +704,98 @@ function InviteForm({
   );
 }
 
+/** A password field with the show/hide eye (every password field has one). */
+function PasswordInput({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative w-full max-w-md">
+      <input
+        type={show ? "text" : "password"}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        autoComplete="new-password"
+        className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 pr-11 text-white placeholder-gray-500"
+      />
+      <button
+        type="button"
+        onClick={() => setShow((v) => !v)}
+        aria-label={show ? "Ascunde parola" : "Arată parola"}
+        title={show ? "Ascunde parola" : "Arată parola"}
+        className="absolute inset-y-0 right-0 flex min-w-[44px] items-center justify-center text-gray-400 hover:text-gray-200"
+      >
+        {show ? (
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" strokeLinecap="round" strokeLinejoin="round" />
+            <line x1="1" y1="1" x2="23" y2="23" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        ) : (
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        )}
+      </button>
+    </div>
+  );
+}
+
+/** What the parent passes on to the child: how to sign in. Shown once, after creating or changing it. */
+function SignInDetails({ username, email, password }: { username: string | null; email?: string | null; password: string }) {
+  return (
+    <dl className="space-y-1 rounded-lg bg-gray-900 p-3">
+      {username && (
+        <div className="flex flex-wrap gap-2">
+          <dt className="text-gray-400">Nume de utilizator:</dt>
+          <dd className="break-all font-mono text-white">{username}</dd>
+        </div>
+      )}
+      {email && (
+        <div className="flex flex-wrap gap-2">
+          <dt className="text-gray-400">sau emailul:</dt>
+          <dd className="break-all font-mono text-white">{email}</dd>
+        </div>
+      )}
+      <div className="flex flex-wrap gap-2">
+        <dt className="text-gray-400">Parola:</dt>
+        <dd className="break-all font-mono text-white">{password}</dd>
+      </div>
+    </dl>
+  );
+}
+
 function DirectChildForm({ onDone, onCreated }: { onDone: () => void; onCreated: () => void }) {
   const [name, setName] = useState("");
+  // Proposed from the name until the parent types their own.
+  const [username, setUsername] = useState("");
+  const [usernameTouched, setUsernameTouched] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
   // After creation the parent needs the sign-in details in front of them: the child
   // can't use the account without them, and the form used to just close.
-  const [created, setCreated] = useState<{ email: string; password: string } | null>(null);
+  const [created, setCreated] = useState<{ username: string; email: string | null; password: string } | null>(null);
 
   const submit = async () => {
-    // Checked here too: the server's own refusal of a short password is a generic message.
+    const user = normalizeUsername(username);
+    // Checked here too: the server's own refusals would come back as one generic line.
+    if (name.trim().length < 2) {
+      setError("Scrie numele copilului.");
+      return;
+    }
+    if (!USERNAME_RE.test(user)) {
+      setError(USERNAME_RULE_RO);
+      return;
+    }
     if (password.length < 8) {
       setError("Parola trebuie să aibă cel puțin 8 caractere.");
       return;
@@ -720,11 +806,11 @@ function DirectChildForm({ onDone, onCreated }: { onDone: () => void; onCreated:
       const r = await fetch("/api/dashboard/family/direct", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, username: user, email, password }),
       });
       const d = await r.json().catch(() => ({}));
       if (r.ok) {
-        setCreated({ email: email.trim().toLowerCase(), password });
+        setCreated({ username: user, email: email.trim().toLowerCase() || null, password });
         onCreated();
       }
       else {
@@ -760,19 +846,10 @@ function DirectChildForm({ onDone, onCreated }: { onDone: () => void; onCreated:
           Dă-i copilului datele de mai jos. Intră pe <strong className="text-white">eTutor.ro</strong>, apasă
           „Intră în cont” și le scrie exact așa:
         </p>
-        <dl className="space-y-1 rounded-lg bg-gray-900 p-3">
-          <div className="flex flex-wrap gap-2">
-            <dt className="text-gray-400">Email:</dt>
-            <dd className="break-all font-mono text-white">{created.email}</dd>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <dt className="text-gray-400">Parola:</dt>
-            <dd className="break-all font-mono text-white">{created.password}</dd>
-          </div>
-        </dl>
+        <SignInDetails username={created.username} email={created.email} password={created.password} />
         <p className="text-xs text-gray-400">
-          Parola n-o mai arătăm după ce închizi. Dacă o uitați, pe pagina de intrare e „Ai uitat parola?” —
-          linkul vine pe emailul de mai sus.
+          Parola n-o mai arătăm după ce închizi. Dacă o uitați, o schimbi tu din „Familia mea”, cu
+          „Schimbă parola” lângă numele copilului.
         </p>
         <button
           onClick={onDone}
@@ -787,53 +864,46 @@ function DirectChildForm({ onDone, onCreated }: { onDone: () => void; onCreated:
   return (
     <div className="space-y-3">
       <p className="text-xs text-gray-400">
-        Creezi tu contul copilului. Îi dai apoi emailul și parola ca să se poată
-        loga.
+        Creezi tu contul copilului: îi alegi un nume de utilizator și o parolă, cu care intră. Emailul nu e
+        necesar.
       </p>
       <input
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e) => {
+          setName(e.target.value);
+          if (!usernameTouched) setUsername(suggestUsername(e.target.value));
+        }}
         placeholder="Numele copilului"
         className="w-full max-w-md rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white placeholder-gray-500"
       />
+      <div className="w-full max-w-md">
+        <input
+          value={username}
+          onChange={(e) => {
+            setUsernameTouched(true);
+            setUsername(e.target.value);
+          }}
+          placeholder="Nume de utilizator (ex. ana.pop)"
+          aria-label="Nume de utilizator"
+          autoCapitalize="none"
+          autoCorrect="off"
+          autoComplete="off"
+          spellCheck={false}
+          className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white placeholder-gray-500"
+        />
+        <p className="mt-1 text-xs text-gray-500">Cu el intră copilul. Litere mici, cifre, punct sau minus.</p>
+      </div>
       <input
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="email@exemplu.ro"
+        placeholder="Emailul copilului (opțional)"
+        aria-label="Emailul copilului (opțional)"
         autoCapitalize="none"
         autoComplete="off"
         className="w-full max-w-md rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white placeholder-gray-500"
       />
-      <div className="relative w-full max-w-md">
-        <input
-          type={showPassword ? "text" : "password"}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Parolă (min. 8 caractere)"
-          autoComplete="new-password"
-          className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 pr-11 text-white placeholder-gray-500"
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword((v) => !v)}
-          aria-label={showPassword ? "Ascunde parola" : "Arată parola"}
-          title={showPassword ? "Ascunde parola" : "Arată parola"}
-          className="absolute inset-y-0 right-0 flex min-w-[44px] items-center justify-center text-gray-400 hover:text-gray-200"
-        >
-          {showPassword ? (
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" strokeLinecap="round" strokeLinejoin="round" />
-              <line x1="1" y1="1" x2="23" y2="23" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          ) : (
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          )}
-        </button>
-      </div>
+      <PasswordInput value={password} onChange={setPassword} placeholder="Parolă (min. 8 caractere)" />
       <button
         onClick={submit}
         disabled={busy}
@@ -842,6 +912,85 @@ function DirectChildForm({ onDone, onCreated }: { onDone: () => void; onCreated:
         {busy ? "Se creează…" : "Creează contul copilului"}
       </button>
       {error && <p className="text-sm text-amber-400">{error}</p>}
+    </div>
+  );
+}
+
+/** „Schimbă parola” for a child's account a parent made: the child has no email to reset it with. */
+function ChildPasswordControl({ childId, username }: { childId: string; username: string | null }) {
+  const [open, setOpen] = useState(false);
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState<string | null>(null);
+
+  const save = async () => {
+    if (password.length < 8) {
+      setError("Parola trebuie să aibă cel puțin 8 caractere.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const r = await fetch("/api/dashboard/family/child-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ childId, password }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (r.ok) {
+        setDone(password);
+        setPassword("");
+      } else {
+        setError(
+          r.status === 400 || r.status === 403
+            ? (typeof d.error === "string" ? d.error : "Nu s-a putut schimba parola.")
+            : r.status === 429
+              ? "Prea multe încercări. Așteaptă un minut și încearcă din nou."
+              : "Nu s-a putut schimba parola. Încearcă din nou.",
+        );
+      }
+    } catch {
+      setError("Nu ne-am putut conecta. Verifică internetul și încearcă din nou.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (done) {
+    return (
+      <div className="mt-3 space-y-2 text-sm">
+        <p className="text-green-300">Parola s-a schimbat. Dă-i copilului datele noi:</p>
+        <SignInDetails username={username} password={done} />
+        <button onClick={() => { setDone(null); setOpen(false); }} className="text-xs text-blue-400 hover:text-blue-300">
+          Gata, am notat
+        </button>
+      </div>
+    );
+  }
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)} className="mt-2 text-xs text-blue-400 hover:text-blue-300">
+        Schimbă parola
+      </button>
+    );
+  }
+  return (
+    <div className="mt-3 space-y-2">
+      <PasswordInput value={password} onChange={setPassword} placeholder="Parola nouă (min. 8 caractere)" />
+      <div className="flex gap-3">
+        <button
+          onClick={save}
+          disabled={busy}
+          className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-500 disabled:opacity-50"
+        >
+          {busy ? "Se salvează…" : "Salvează parola"}
+        </button>
+        <button onClick={() => { setOpen(false); setError(null); }} className="text-xs text-gray-400 hover:text-white">
+          Renunță
+        </button>
+      </div>
+      {error && <p className="text-xs text-amber-400">{error}</p>}
     </div>
   );
 }

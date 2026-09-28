@@ -24,6 +24,7 @@ describe("umami-scrub", () => {
   it("hides invitation tokens and access codes in the path", () => {
     expect(scrub("event", { url: "/ro/family/accept/4cdd31c6" }).url).toBe("/ro/family/accept/_");
     expect(scrub("event", { url: "/acces/POSTA-7K2" }).url).toBe("/acces/_");
+    expect(scrub("event", { url: "/ro/acord-parinte/abc123" }).url).toBe("/ro/acord-parinte/_");
   });
   it("hides a code carried inside callbackUrl, keeps campaign parameters", () => {
     const p = scrub("event", { url: "/ro/auth/signin?callbackUrl=%2Ffamily%2Fjoin%3Fcode%3DU92Y&utm_source=flyer&voucher=V126S" });

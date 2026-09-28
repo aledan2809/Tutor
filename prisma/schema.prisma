@@ -79,6 +79,19 @@ model User {
   /// Raised on every password change: a session signed in before it stops working at its next
   /// refresh (≤5 min). Without it, whoever had the account kept it for 30 days after a reset.
   sessionVersion Int       @default(0)
+  /// The parent who made this account from „Familia mea” (a child's account). Only such an account can
+  /// have its password set by its parents: an older child who joined with their own email keeps theirs.
+  createdByParentId String?
+  /// Year of birth, asked of a learner who makes their own account (Alex, 28.09.2026). Under 16 the
+  /// law asks a parent's consent; under 18 no price is shown. Null = not asked yet.
+  birthYear      Int?
+  /// A minor's parent, asked for consent by email (the address the learner gave).
+  parentConsentEmail       String?
+  /// When the consent was first asked: the account keeps working for 7 days from here without it.
+  parentConsentRequestedAt DateTime?
+  parentConsentAt          DateTime?
+  parentConsentRefusedAt   DateTime?
+  parentalConsents         ParentalConsent[]
   visits         UserVisit[]
 
   accounts               Account[]
@@ -1892,4 +1905,23 @@ model UserVisit {
 
   @@index([userId, lastSeenAt])
   @@index([lastSeenAt])
+}
+
+/// Evidence of a parent's answer to the consent email for a minor's account: kept as given (who, what
+/// text, when, from where). One row per answer; the account's own columns hold the current state.
+model ParentalConsent {
+  id          String   @id @default(cuid())
+  userId      String
+  parentEmail String
+  /// GIVEN | REFUSED
+  decision    String
+  /// Which consent text the parent saw (src/lib/parent-consent.ts PARENT_CONSENT_VERSION).
+  textVersion String
+  ip          String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
