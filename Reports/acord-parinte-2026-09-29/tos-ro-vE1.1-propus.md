@@ -114,7 +114,7 @@ Conținutul generat de IA poate conține inexactități și are caracter informa
 
 Conform GDPR, în calitate de persoană vizată ai următoarele drepturi: **dreptul de acces** (Art. 15), **dreptul la rectificare** (Art. 16), **dreptul la ștergere** („dreptul de a fi uitat", Art. 17), **dreptul la restricționarea prelucrării** (Art. 18), **dreptul la portabilitatea datelor** (Art. 20) și **dreptul la opoziție** (Art. 21).
 
-Îți poți exercita aceste drepturi direct din aplicație (de regulă din Setări → Contul meu) sau prin transmiterea unei cereri privind datele cu caracter personal (DSR) la **{entity_dpo_email}**.
+Îți poți exercita aceste drepturi din formularul de cereri de pe pagina Politicii de confidențialitate sau prin transmiterea unei cereri privind datele cu caracter personal (DSR) la **{entity_dpo_email}**.
 
 **Retragerea consimțământului (Art. 7(3)).** Atunci când o prelucrare se bazează pe consimțământul tău, îl poți retrage oricând, la fel de ușor cum a fost acordat, fără a afecta legalitatea prelucrării efectuate înainte de retragere.
 
@@ -128,11 +128,11 @@ Pentru detalii complete privind drepturile tale, temeiurile juridice, perioadele
 
 Ne rezervăm dreptul de a modifica, suspenda sau întrerupe orice parte a Serviciului, cu sau fără notificare prealabilă.
 
-Modificările semnificative ale acestor Termeni vor fi comunicate cu minimum **14 zile** înainte de intrarea în vigoare prin: banner în aplicație, e-mail la adresa înregistrată sau notificare push. Continuarea utilizării Serviciului după data intrării în vigoare constituie acceptarea modificărilor. Dacă nu ești de acord, poți șterge contul înainte de data intrării în vigoare.
+Modificările semnificative ale acestor Termeni vor fi comunicate cu minimum **14 zile** înainte de intrarea în vigoare prin: banner în aplicație, e-mail la adresa înregistrată sau notificare push. Continuarea utilizării Serviciului după data intrării în vigoare constituie acceptarea modificărilor. Dacă nu ești de acord, poți cere ștergerea contului înainte de data intrării în vigoare.
 
 ## 15. Reziliere
 
-**15.1 Din partea ta.** Poți șterge contul oricând din Setări → Contul meu sau contactând **{entity_dpo_email}**. Datele tale vor fi șterse conform Politicii de Confidențialitate.
+**15.1 Din partea ta.** Poți cere oricând ștergerea contului, din formularul de pe pagina Politicii de confidențialitate sau scriindu-ne la **{entity_dpo_email}**. Datele tale vor fi șterse conform Politicii de Confidențialitate.
 
 **15.2 Din partea noastră.** Putem suspenda sau șterge contul tău cu notificare prealabilă în cazul încălcării acestor Termeni sau, imediat, în cazul unui comportament ilegal sau prejudiciabil.
 

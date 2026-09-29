@@ -126,7 +126,7 @@ Pentru destinatarii din țări cu **decizie de adecvare** a Comisiei Europene, t
 | Conturi în pauză (proba gratuită încheiată, fără abonament) | 12 luni în care nimeni din familie nu intră în cont → avertismente pe e-mail cu 30, 7 și 1 zi înainte → ștergere, niciodată înainte de ultimul avertisment și cel mai devreme la o zi după el; plățile făcute cândva rămân în evidența contabilă, fără datele persoanei |
 | Contul unui elev sub 16 ani fără acordul unui părinte | La refuzul părintelui: ștergere imediată. Fără răspuns: contul se oprește după 7 zile și se șterge după încă 30 de zile |
 | Dovada răspunsului unui părinte (registrul de consimțăminte) | Pe durata contului și încă 3 ani după ștergerea lui |
-| Alte conturi inactive | 24 luni inactivitate → notificare → 30 de zile → ștergere |
+| Conturi blocate pentru încălcarea Termenilor | Cât timp sunt blocate (ca aceeași persoană să nu-și poată face alt cont); după deblocare, regulile obișnuite |
 
 La expirarea perioadei de retenție, datele sunt șterse definitiv sau anonimizate ireversibil.
 
@@ -146,7 +146,7 @@ Conform GDPR, ai următoarele drepturi, pe care le poți exercita contactând **
 
 **Dreptul la opoziție (Art. 21)**: Poți obiecta oricând la prelucrarea bazată pe interese legitime. Vom înceta prelucrarea dacă nu demonstrăm motive legitime imperative care prevalează. Ai dreptul necondiționat de opoziție la prelucrarea în scopuri de marketing direct.
 
-**Dreptul de a retrage consimțământul (Art. 7(3))**: Consimțământul poate fi retras oricând, la fel de ușor cum a fost acordat, fără a afecta legalitatea prelucrării anterioare. Retragerea se poate face din Setări → Contul meu sau contactând DPO-ul.
+**Dreptul de a retrage consimțământul (Art. 7(3))**: Consimțământul poate fi retras oricând, la fel de ușor cum a fost acordat, fără a afecta legalitatea prelucrării anterioare. Retragerea se poate face scriindu-ne la DPO; mesajele despre proba gratuită și abonament le poți opri și singur, din Setări → Notificări.
 
 **Dreptul de a nu face obiectul unei decizii automate (Art. 22)**: Nu aplicăm decizii automate cu efect juridic semnificativ bazate exclusiv pe prelucrare automatizată fără implicare umană. Recomandările IA sunt **consultative** și nu produc efecte juridice.
 

@@ -126,7 +126,7 @@ For recipients in countries covered by a European Commission **adequacy decision
 | Paused accounts (free trial over, no subscription) | 12 months in which nobody in the family signs in → email warnings 30, 7 and 1 day before → deletion, never before the last warning and at the earliest one day after it; payments made in the past stay in the accounting records, without the person's data |
 | The account of a pupil under 16 without a parent's consent | On the parent's refusal: deleted at once. With no answer: stopped after 7 days, deleted 30 days later |
 | Evidence of a parent's answer (consent register) | For the life of the account and 3 years after its deletion |
-| Other inactive accounts | 24 months of inactivity → notification → 30 days → deletion |
+| Accounts blocked for breaching the Terms | For as long as they are blocked (so the same person can't make another account); once unblocked, the usual rules |
 
 Upon expiry of the retention period, data is permanently deleted or irreversibly anonymised.
 
@@ -146,7 +146,7 @@ Under GDPR, you have the following rights, which you may exercise by contacting 
 
 **Right to object (Art. 21)**: You may object at any time to processing based on legitimate interests. We will cease processing unless we demonstrate compelling legitimate grounds which override your rights. You have an unconditional right to object to processing for direct marketing purposes.
 
-**Right to withdraw consent (Art. 7(3))**: Consent may be withdrawn at any time, as easily as it was given, without affecting the lawfulness of processing carried out beforehand. Withdrawal can be done from Settings → My Account or by contacting the DPO.
+**Right to withdraw consent (Art. 7(3))**: Consent may be withdrawn at any time, as easily as it was given, without affecting the lawfulness of processing carried out beforehand. You can withdraw it by writing to the DPO; the messages about the free trial and the subscription you can also stop yourself, from Settings → Notifications.
 
 **Right not to be subject to an automated decision (Art. 22)**: We do not apply automated decisions producing significant legal effects based solely on automated processing without human involvement. AI recommendations are **advisory** and produce no legal effects.
 

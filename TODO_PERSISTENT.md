@@ -10,11 +10,11 @@ LIVE 2026-09-29 (`1617e4f`; Legal `843e3dd`):** raport complet `Reports/acord-pa
 - [ ] **Alex**: confirmă textele propuse Privacy vE1.2 + Termeni vE1.1 (`Reports/acord-parinte-2026-09-29/*-propus.md`) —
   apoi le public în Legal Hub (propose-confirm, NO-TOUCH).
 - [ ] **Alex**: Termeni §9A.5 (Invită & Câștigă): pragul minim de plată, cât de des se plătește, în ce cont, reținerea de impozit.
-- [ ] **Alex**: politica actuală are rândul „Alte conturi inactive — 24 luni” (conturi plătitoare, „Gratuit permanent”,
-  companii) — nu există în cod. De scos din text sau de construit.
-- [ ] **Alex**: Termenii §15.1 promit ștergerea contului din Setări de către utilizator — nu există încă (se poate face peste
-  `eraseAccount`).
-- [ ] **Alex**: conturile blocate (ban) sunt lăsate deoparte de ștergerea la 12 luni, ca să rămână blocate — de decis cât se păstrează.
+- [x] **Alex 29.09: rândul „Alte conturi inactive — 24 luni” se scoate din politică** — făcut în textul propus vE1.2.
+- [x] **Alex 29.09: promisiunea „ștergi contul din Setări” se scoate din Termeni** — în textul propus vE1.1: ștergerea se cere
+  din formularul de pe pagina Politicii de confidențialitate sau prin e-mail (la fel pentru drepturi și retragerea acordului).
+- [x] **Alex 29.09: conturile blocate se păstrează cât timp sunt blocate** (ștergerea la 12 luni le lasă deoparte) — scris în
+  textul propus al politicii.
 - [ ] Livrare de curățenie, după ce aceasta stă o săptămână: scos coloana `birthYear` și tabelul `ParentalConsent` (pe prod 0 rânduri).
 - [ ] De reținut: conturile vechi cu doar anul nașterii primesc 31 decembrie — un elev care are deja 16 ani ar fi tratat ca
   minor până atunci și nu-și poate corecta data. Pe prod: 0 conturi afectate (doar anul 1990, verificat 29.09).

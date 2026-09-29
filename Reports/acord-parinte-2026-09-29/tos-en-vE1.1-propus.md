@@ -114,7 +114,7 @@ AI-generated content may contain inaccuracies and is informational in nature, as
 
 Under the GDPR, as a data subject you have the following rights: the **right of access** (Art. 15), the **right to rectification** (Art. 16), the **right to erasure** ("the right to be forgotten", Art. 17), the **right to restriction of processing** (Art. 18), the **right to data portability** (Art. 20), and the **right to object** (Art. 21).
 
-You may exercise these rights directly within the application (usually from Settings → My Account) or by submitting a data subject request (DSR) to **{entity_dpo_email}**.
+You may exercise these rights through the request form on the Privacy Policy page or by submitting a data subject request (DSR) to **{entity_dpo_email}**.
 
 **Withdrawal of consent (Art. 7(3)).** Where processing is based on your consent, you may withdraw it at any time, as easily as it was given, without affecting the lawfulness of processing carried out before the withdrawal.
 
@@ -128,11 +128,11 @@ Within the Service, **no decisions are taken based solely on automated processin
 
 We reserve the right to modify, suspend, or discontinue any part of the Service, with or without prior notice.
 
-Significant changes to these Terms will be communicated at least **14 days** before they take effect by: an in-app banner, an email to the registered address, or a push notification. Continued use of the Service after the effective date constitutes acceptance of the changes. If you do not agree, you may delete your account before the effective date.
+Significant changes to these Terms will be communicated at least **14 days** before they take effect by: an in-app banner, an email to the registered address, or a push notification. Continued use of the Service after the effective date constitutes acceptance of the changes. If you do not agree, you may ask for your account to be deleted before the effective date.
 
 ## 15. Termination
 
-**15.1 By you.** You may delete your account at any time from Settings → My Account or by contacting **{entity_dpo_email}**. Your data will be deleted in accordance with the Privacy Policy.
+**15.1 By you.** You may ask for your account to be deleted at any time, through the form on the Privacy Policy page or by writing to **{entity_dpo_email}**. Your data will be deleted in accordance with the Privacy Policy.
 
 **15.2 By us.** We may suspend or delete your account with prior notice in the event of a breach of these Terms or, immediately, in the event of illegal or harmful conduct.
 

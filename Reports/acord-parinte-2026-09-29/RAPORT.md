@@ -52,7 +52,7 @@ verificate de mine. Cele mai importante:
 
 1. Textele propuse pentru Politica de confidențialitate vE1.2 și Termeni vE1.1 (`privacy-*-vE1.2-propus.md`, `tos-*-vE1.1-propus.md`) — de citit și confirmat înainte de publicare.
 2. Pentru Termeni §9A.5 (recomandări): pragul minim de plată, cât de des se plătește, în ce cont și reținerea de impozit.
-3. Rândul „Alte conturi inactive — 24 luni” din politica actuală promite o ștergere care nu există în cod (conturi plătitoare, „Gratuit permanent”, companii). De decis: o scoatem din text sau o construim.
-4. Termenii §15.1 promit ștergerea contului din Setări, de către utilizator — nu există încă.
-5. Conturile blocate (ban) sunt lăsate deoparte de ștergerea la 12 luni, ca să rămână blocate: cât se păstrează?
+3. ~~Rândul „Alte conturi inactive — 24 luni”~~ — **decis 29.09: se scoate** (făcut în textul propus).
+4. ~~Ștergerea contului din Setări~~ — **decis 29.09: se scoate promisiunea din Termeni**; ștergerea se cere din formularul de pe pagina Politicii de confidențialitate sau prin e-mail (textul propus corectat, și la drepturi și la retragerea acordului, unde apărea „Setări → Contul meu”, pagină care nu există).
+5. ~~Conturile blocate~~ — **decis 29.09: se păstrează cât timp sunt blocate** (scris în politică).
 6. Comutatorul probei e oprit pe prod: bara de sus, mesajul de 48 h și ștergerea la 12 luni pornesc doar când e aprins.
