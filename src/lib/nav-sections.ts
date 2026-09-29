@@ -63,14 +63,17 @@ const CONTENT_LEARN: NavItem[] = [
   { href: "/dashboard/calendar", labelKey: "calendar" },
 ];
 
-/** Every role ends with the same account block; only the extras differ. */
-function accountSection(extra: NavItem[] = []): NavSection {
+/**
+ * Every role ends with the same account block; only the extras differ. „Invită & Câștigă” pays a
+ * commission in money: not for a learner who may be a minor (price-visibility.ts; Alex, 28.09.2026).
+ */
+function accountSection(extra: NavItem[] = [], showReferrals = true): NavSection {
   return {
     id: "account",
     labelKey: "sectionAccount",
     items: [
       ...extra,
-      { href: "/dashboard/referrals", labelKey: "referrals" },
+      ...(showReferrals ? [{ href: "/dashboard/referrals", labelKey: "referrals" } as NavItem] : []),
       { href: "/dashboard/notifications", labelKey: "notifications" },
       { href: "/dashboard/settings", labelKey: "settings" },
       { href: "/dashboard/ajutor", labelKey: "help" },
@@ -81,8 +84,9 @@ function accountSection(extra: NavItem[] = []): NavSection {
 export function buildNavSections(
   user: NavUser,
   hasFamilyPlan = false,
-  opts: { isFamilyTutor?: boolean } = {}
+  opts: { isFamilyTutor?: boolean; showReferrals?: boolean } = {}
 ): NavSection[] {
+  const showReferrals = opts.showReferrals ?? true;
   const role = resolveClientRole(user, { hasFamilyPlan, isFamilyTutor: opts.isFamilyTutor });
   const roles = (r: string) => !!user.enrollments?.some((e) => e.roles.includes(r));
 
@@ -122,7 +126,7 @@ export function buildNavSections(
           { href: "/dashboard/family", labelKey: "family" },
         ],
       },
-      accountSection([{ href: "/dashboard/packages", labelKey: "subscription" }]),
+      accountSection([{ href: "/dashboard/packages", labelKey: "subscription" }], showReferrals),
     ];
   } else if (role === "meditator") {
     sections = [
@@ -140,7 +144,7 @@ export function buildNavSections(
           { href: "/dashboard/exam-bank", labelKey: "examBank" },
         ],
       },
-      accountSection(),
+      accountSection([], showReferrals),
     ];
   } else {
     // Student, and every mixed account (student+watcher, admin, superadmin):
@@ -193,7 +197,7 @@ export function buildNavSections(
         ? { href: "/dashboard/family", labelKey: "family" }
         : { href: "/dashboard/family", labelKey: "family", locked: !isInstructor && !user.isSuperAdmin }
     );
-    sections.push(accountSection(account));
+    sections.push(accountSection(account, showReferrals));
 
     if (isAdmin) {
       sections.push({ id: "admin", items: [{ href: "/dashboard/admin", labelKey: "admin" }] });

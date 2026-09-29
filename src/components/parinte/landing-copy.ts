@@ -548,8 +548,8 @@ function faqItems(locale: Locale, ctx: LandingContext, trial: ReturnType<typeof 
   // What happens after the free days without a card depends on whether the pause is switched on.
   const afterTrial = ctx.facts.pauseOn
     ? ro
-      ? " Dacă nu alegi un abonament până atunci, contul intră în pauză, al tău și al copilului. Nimic nu se șterge: tot ce a lucrat revine imediat ce plătești."
-      : " If you don't choose a subscription by then, the account is paused, yours and your child's. Nothing is deleted: everything they did comes back as soon as you pay."
+      ? " Dacă nu alegi un abonament până atunci, contul intră în pauză, al tău și al copilului. Tot ce a lucrat rămâne salvat și revine imediat ce plătești; doar un cont lăsat în pauză în care nu intră nimeni 12 luni se șterge, după ce te anunțăm pe e-mail."
+      : " If you don't choose a subscription by then, the account is paused, yours and your child's. Everything they did stays saved and comes back as soon as you pay; only an account left paused that nobody signs in to for 12 months is deleted, after we tell you by e-mail."
     : ro
       ? " După ele, fără abonament, contul rămâne pe varianta gratuită."
       : " After that, without a subscription, the account keeps the free tier.";

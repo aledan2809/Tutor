@@ -82,8 +82,11 @@ model User {
   /// The parent who made this account from „Familia mea” (a child's account). Only such an account can
   /// have its password set by its parents: an older child who joined with their own email keeps theirs.
   createdByParentId String?
-  /// Year of birth, asked of a learner who makes their own account (Alex, 28.09.2026). Under 16 the
-  /// law asks a parent's consent; under 18 no price is shown. Null = not asked yet.
+  /// Date of birth, asked of a learner who makes their own account (Alex, 28.09.2026: the day, not only
+  /// the year). Under 16 the law asks a parent's consent; under 18 no price is shown. Null = not asked yet.
+  birthDate      DateTime? @db.Date
+  /// Legacy: the year alone (28.09.2026 only), copied into birthDate by migration 0075. Unused; dropped
+  /// in a later deploy, once no running build reads it.
   birthYear      Int?
   /// A minor's parent, asked for consent by email (the address the learner gave).
   parentConsentEmail       String?
@@ -1578,7 +1581,8 @@ model Referral {
 // webhook retries never double-accrue. 30-day hold before a payout is PAYABLE.
 model ReferralEarning {
   id         String   @id @default(cuid())
-  referralId String
+  // Null once the referred account is erased: the commission stays with the promoter (account-erasure.ts).
+  referralId String?
   promoterId String
   paymentId  String? // links to Payment.id (the confirmed payment that generated it)
   level      Int      @default(1)
@@ -1588,8 +1592,8 @@ model ReferralEarning {
   payableAt  DateTime // paymentDate + 30-day anti-fraud hold
   createdAt  DateTime @default(now())
 
-  referral Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
-  promoter User     @relation("EarningPromoter", fields: [promoterId], references: [id], onDelete: Cascade)
+  referral Referral? @relation(fields: [referralId], references: [id], onDelete: SetNull)
+  promoter User      @relation("EarningPromoter", fields: [promoterId], references: [id], onDelete: Cascade)
 
   @@unique([paymentId, level])
   @@index([promoterId, status])
@@ -1907,8 +1911,9 @@ model UserVisit {
   @@index([lastSeenAt])
 }
 
-/// Evidence of a parent's answer to the consent email for a minor's account: kept as given (who, what
-/// text, when, from where). One row per answer; the account's own columns hold the current state.
+/// Legacy (28.09.2026 only): the evidence of a parent's answer now lives in the Legal Hub
+/// (GuardianConsent). Unused, empty on production; dropped in a later deploy, once no running build
+/// writes it.
 model ParentalConsent {
   id          String   @id @default(cuid())
   userId      String

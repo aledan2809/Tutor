@@ -75,7 +75,15 @@ function OfferCard({ offer, locale, planName, cta }: { offer: TeaserOffer; local
   // What the figure includes, as checkout counts it (access-teaser.ts).
   const notes = [
     offer.subjects > 1 ? (ro ? countRo(offer.subjects, "o materie", "materii") : `${offer.subjects} subjects`) : null,
-    offer.trialOfferEndsAt ? (ro ? `−${TRIAL_PAYMENT_PERCENT}% pentru plata în probă` : `−${TRIAL_PAYMENT_PERCENT}% for paying during the trial`) : null,
+    offer.trialOfferEndsAt
+      ? offer.trialOfferKind === "winback"
+        ? ro
+          ? `−${TRIAL_PAYMENT_PERCENT}% dacă reactivezi până pe ${new Date(offer.trialOfferEndsAt).toLocaleDateString("ro-RO", { day: "numeric", month: "long", timeZone: "Europe/Bucharest" })}`
+          : `−${TRIAL_PAYMENT_PERCENT}% if you reactivate by ${new Date(offer.trialOfferEndsAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", timeZone: "Europe/Bucharest" })}`
+        : ro
+          ? `−${TRIAL_PAYMENT_PERCENT}% pentru plata în probă`
+          : `−${TRIAL_PAYMENT_PERCENT}% for paying during the trial`
+      : null,
     offer.telegram ? (ro ? `−${TELEGRAM_PERCENT}% cu Telegram` : `−${TELEGRAM_PERCENT}% with Telegram`) : null,
     offer.first < offer.price ? (ro ? `prima lună ${lei(offer.first)} lei` : `first month ${lei(offer.first)} lei`) : null,
   ].filter((n): n is string => n !== null);

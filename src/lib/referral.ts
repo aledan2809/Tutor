@@ -1,3 +1,5 @@
+import { loadConsentFacts } from "@/lib/parent-consent-server";
+import { isAdult } from "@/lib/age";
 import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 
@@ -118,10 +120,25 @@ export async function resolvePromoterByCode(
 ): Promise<{ id: string } | null> {
   const code = normalizeCode(rawCode);
   if (!code) return null;
-  return prisma.user.findFirst({
+  const promoter = await prisma.user.findFirst({
     where: { referralCode: code, isBanned: false },
     select: { id: true },
   });
+  // A minor doesn't promote (a money commission): a link they got before the page was hidden from
+  // them stops bringing referrals (Alex, 28.09.2026).
+  return promoter && (await promoterMayEarn(promoter.id)) ? promoter : null;
+}
+
+/**
+ * A promoter known to be a minor — a child in a family, or a date of birth under 18 — earns nothing.
+ * One whose age isn't known yet (an account from before the question) keeps earning: it is asked on
+ * its next visit, and turning it away now would lose those referrals for good. The page itself stays
+ * hidden from anyone who may be a child (price-visibility.ts).
+ */
+async function promoterMayEarn(userId: string): Promise<boolean> {
+  const facts = await loadConsentFacts(userId);
+  if (!facts || facts.isChild) return false;
+  return facts.birthDate == null || isAdult(facts.birthDate);
 }
 
 /**
@@ -198,6 +215,8 @@ export async function accrueCommissionForPayment(input: {
     select: { id: true, promoterId: true, commissionPct: true, status: true },
   });
   if (!referral) return { accrued: false, reason: "not_referred" };
+  // A promoter who may be a minor earns nothing (a money commission; Alex, 28.09.2026).
+  if (!(await promoterMayEarn(referral.promoterId))) return { accrued: false, reason: "promoter_may_be_minor" };
 
   const amount = commissionCents(input.amountCents, referral.commissionPct);
   if (amount <= 0) return { accrued: false, reason: "zero_commission" };

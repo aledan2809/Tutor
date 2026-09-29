@@ -1,16 +1,21 @@
 import { CONSENT_GRACE_DAYS, consentState, maskEmail } from "@/lib/parent-consent";
-import { loadConsentFacts } from "@/lib/parent-consent-server";
+import { consentEraseOnFor, loadConsentFacts } from "@/lib/parent-consent-server";
 import { mayShowPrices } from "@/lib/price-visibility";
 import { AgeConsent, type AgeConsentView } from "@/components/consent/age-consent";
+import { AccountGone } from "@/components/consent/account-gone";
 import type { Metadata } from "next";
 import { PresencePinger } from "@/components/presence-pinger";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { sessionFromHeaders } from "@/lib/session-cookie";
 import { getLocale } from "next-intl/server";
 import { loadAccess, loadPauseStartsAt, loadSeatHolder } from "@/lib/access-server";
 import { teaserOffer, teaserStats } from "@/lib/access-teaser";
 import { PausedLearnerScreen, PausedParentScreen, TrialBanner } from "@/components/access/access-screens";
 import { PauseGate, RefreshAt, RefreshOnReturn } from "@/components/access/pause-gate";
+import { TrialTopBar } from "@/components/access/trial-top-bar";
+import { TRIAL_PAYMENT_PERCENT } from "@/lib/checkout-price";
 import { prisma } from "@/lib/prisma";
 import { payingForAccess } from "@/lib/access";
 import { resolveFamilyPlanFromRecord } from "@/lib/family";
@@ -35,6 +40,13 @@ export default async function DashboardLayout({
 }) {
   const session = await auth();
   if (!session?.user) {
+    // A cookie of ours for an account that no longer exists: erased (a parent's „no”, silence, 12
+    // months unused). Say so, whenever the learner comes back, instead of a bare sign-in form.
+    const carried = await sessionFromHeaders(await headers());
+    if (carried && !(await prisma.user.findUnique({ where: { id: carried.id }, select: { id: true } }))) {
+      const lang = (await getLocale()) === "en" ? "en" : "ro";
+      return <AccountGone locale={lang} />;
+    }
     redirect("/auth/signin");
   }
 
@@ -72,6 +84,8 @@ export default async function DashboardLayout({
       take: 2,
     }),
   ]);
+  // The account is gone (erased after a parent's „no”) but the browser still holds its session.
+  if (sub === null) return <AccountGone locale={locale} />;
   const fam = resolveFamilyPlanFromRecord(sub?.subscriptionPlan);
   // A renewal Stripe is still retrying keeps the menu: the parent must reach the family, not lose it.
   // Past its end (an expired year from a code, a retry period that ran out) the plan is gone, and the
@@ -109,7 +123,7 @@ export default async function DashboardLayout({
   // for one parent): told who has the plan and which plan takes them too — never sold a second Family.
   const trialHolder = bannerAudience === "parent" ? await loadSeatHolder(session.user.id) : null;
 
-  // Age and a parent's consent (Alex, 28.09.2026): a learner on their own account says their year of
+  // Age and a parent's consent (Alex, 28.09.2026): a learner on their own account says their date of
   // birth; under 16 a parent is asked. Until then (or after 7 days without an answer) the page is the
   // question itself.
   const consentFacts = await loadConsentFacts(session.user.id);
@@ -120,7 +134,15 @@ export default async function DashboardLayout({
       : consent.kind === "waiting"
         ? { ...consent, parentEmail: maskEmail(consent.parentEmail) }
         : consent.kind === "blocked"
-          ? { ...consent, parentEmail: consent.parentEmail ? maskEmail(consent.parentEmail) : null }
+          ? {
+              ...consent,
+              parentEmail: consent.parentEmail ? maskEmail(consent.parentEmail) : null,
+              // Silence ends in erasure too: the learner is told the day.
+              eraseOn:
+                consent.reason === "no-answer" && consentFacts?.parentConsentRequestedAt
+                  ? (await consentEraseOnFor(session.user.id, consentFacts.parentConsentRequestedAt)).toISOString()
+                  : null,
+            }
           : consent;
   const consentBlocks = consentView !== null && consentView.kind !== "waiting";
   const consentDeadline =
@@ -182,9 +204,19 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar user={session.user} hasFamilyPlan={familyNav} />
-      <div className="flex flex-1 flex-col">
-        <header className="flex h-14 items-center justify-end border-b border-gray-800 px-4 sm:px-6">
+      <Sidebar user={session.user} hasFamilyPlan={familyNav} showReferrals={showPrices} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex h-14 min-w-0 items-center justify-end border-b border-gray-800 px-4 sm:px-6">
+          {/* The free week's time left, always in sight (Alex, 29.09.2026) — same audience as the banner. */}
+          {!consentBlocks && access?.kind === "trial" && bannerAudience && (
+            <TrialTopBar
+              locale={locale}
+              endsAt={access.endsAt.toISOString()}
+              serverNow={new Date().toISOString()}
+              audience={bannerAudience}
+              offerPercent={bannerAudience === "parent" && access.via === "own" && !trialHolder ? TRIAL_PAYMENT_PERCENT : null}
+            />
+          )}
           <SetupChecklist showLinkChild={showLinkChild} />
           <NotificationBell />
         </header>

@@ -32,7 +32,7 @@ type Current = {
   child?: boolean;
   retrying?: boolean;
   freeTrialDaysLeft?: number;
-  trialOffer?: { active: boolean; endsAt: string } | null;
+  trialOffer?: { active: boolean; endsAt: string; kind?: "trial" | "winback" } | null;
   telegram?: boolean;
   subjects?: { self: number; child: { count: number } | null };
   locked?: { percent: number; base: DiscountBase; telegram: boolean; interval: "MONTH" | "YEAR" } | null;
@@ -188,7 +188,9 @@ export default function AnnualPage() {
 
           {fresh.trialActive && current.trialOffer && current.serverNow && (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-700/60 bg-gradient-to-r from-blue-900/40 to-emerald-900/25 px-4 py-3">
-              <p className="text-sm font-semibold text-white">{t("trialOffer", { percent: TRIAL_PAYMENT_PERCENT })}</p>
+              <p className="text-sm font-semibold text-white">
+                {t(current.trialOffer.kind === "winback" ? "winbackOffer" : "trialOffer", { percent: TRIAL_PAYMENT_PERCENT })}
+              </p>
               <TrialCountdown endsAt={current.trialOffer.endsAt} serverNow={current.serverNow} locale={locale} className="text-lg font-bold text-blue-100" onEnd={load} />
             </div>
           )}

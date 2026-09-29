@@ -1,0 +1,164 @@
+# Terms and Conditions of Use
+
+**Operator**: {entity_name} · **Jurisdiction**: {entity_jurisdiction}
+**VAT / Registration No.**: {entity_cui} · **Address**: {entity_address}
+**Version**: {version} · **Effective from**: {effective_date}
+
+---
+
+## 1. Acceptance of Terms
+
+By creating an account, accessing or using the **{app_name}** application (hereinafter "the Service"), you confirm that you have read, understood, and agree to these Terms and Conditions of Use ("the Terms"), including the [Privacy Policy](/en/privacy/{app_slug}) and the [Cookie Policy](/en/cookies/{app_slug}).
+
+If you do not agree with any of these provisions, please do not access or use the Service.
+
+## 2. Who We Are
+
+The **{app_name}** Service is operated by **{entity_name}**, a company registered under the laws of **{entity_jurisdiction}**, with registered address at **{entity_address}** and VAT/registration number **{entity_cui}**.
+
+For any question regarding the protection of personal data, you may contact our Data Protection Officer (DPO) at **{entity_dpo_email}**.
+
+## 3. Description of the Service
+
+**{app_name}** provides a digital platform that may include, as applicable: account and profile management, progress tracking, notifications, appointment and session management, document administration, or other features described within the application.
+
+The Service is provided "as is" and may evolve periodically through the addition or removal of features.
+
+## 4. Eligibility
+
+eTutor is a school learning platform. It is built for pupils in grades 5 to 12, including those preparing for the National Evaluation, an exam sat at the age of 14. A large share of our users are therefore minors, and this is the purpose of the platform, not a tolerated exception. We do not set a minimum age for learning on eTutor. We do set clear rules about who opens the account, who accepts these Terms and who pays for a subscription.
+
+For pupils under the age of 16, the account is created by a parent or other legal guardian, or by the pupil, with the consent of a parent given through the link we email them. The parent accepts these Terms, gives consent to the processing of the child's data and is responsible for how the account is used. If the parent refuses, the child's account is deleted at once, with everything the child did; if there is no answer, the account stops after 7 days and is deleted 30 days later. The child learns on the platform; the account holder in the relationship with us remains the parent. The age of 16 is not our choice: it follows from Article 8 of Regulation (EU) 2016/679 (GDPR), as set for Romania by Law no. 190/2018.
+
+Pupils aged 16 and over may create their own account and give their own consent to the processing of their data. With the pupil's agreement, a parent may be linked to the account as an observer: they can see progress and receive reports, without taking control of the account. Any paid subscription, however, requires a parent or legal guardian to enter into the contract and make the payment; under the Romanian Civil Code a minor cannot validly bind themselves to such a contract on their own.
+
+Adults, whether pupils who have come of age, students, parents, teachers or private tutors, use the Service in their own name. If an account appears to belong to a child under 16 and was opened without a parent's involvement, we may ask for confirmation of legal guardianship and may suspend the account until the matter is clarified. You can write to us at any time at **{entity_dpo_email}**.
+
+## 5. Your Account
+
+**5.1 Registration.** Creating an account requires providing accurate and up-to-date information (name, email address, phone number, as applicable). You are responsible for the accuracy of this information.
+
+**5.2 Security.** You are responsible for keeping your account credentials (password, access code) confidential. You must notify us immediately at **{entity_dpo_email}** if you suspect unauthorised access.
+
+**5.3 One account per person.** You may not create multiple accounts or transfer your account to another person without our written consent.
+
+**5.4 Inactive account.** A paused account (the free trial is over and there is no subscription) in which nobody in the family signs in for 12 months is deleted, with everything done in it. We email you 30, 7 and 1 day before, and simply signing in keeps it. Other accounts inactive for 24 consecutive months may be deactivated; you will be notified in advance at the associated email address.
+
+## 6. Acceptable Use
+
+**You agree NOT to:**
+
+- use the Service for any unlawful purpose or in a manner inconsistent with these Terms;
+- use false account details or impersonate another person;
+- access, test, or exploit vulnerabilities in our systems without authorisation;
+- collect or use other users' data without their consent;
+- distribute content that is illegal, abusive, defamatory, obscene, or that infringes third-party rights;
+- disrupt or overload the Service infrastructure (DoS/DDoS attacks or excessive automated behaviour);
+- use the Service for commercial activities not authorised by us.
+
+Breach of the acceptable use rules may lead to the immediate suspension or deletion of the account.
+
+## 7. Content Generated by Artificial Intelligence
+
+Where the Service uses artificial intelligence (AI) models to generate content or recommendations, you agree that:
+
+- **AI results are indicative**, not guaranteed, and may contain inaccuracies;
+- **You do not rely exclusively** on AI output for decisions with a significant impact;
+- **Your feedback** may be used to improve the models, under the conditions described in the Privacy Policy.
+
+## 8. Intellectual Property
+
+**8.1 Our property.** The Service, the source code, the interface, the logos, the original content, and the algorithms are the exclusive property of **{entity_name}** or its licensors and are protected by copyright, trademark, and other intellectual property laws.
+
+**8.2 Your licence.** We grant you a limited, non-exclusive, non-transferable, revocable licence to access and use the Service for personal, non-commercial purposes, in accordance with these Terms.
+
+**8.3 Your content.** The content you upload (personal notes, documents, etc.) remains your property. You grant us a limited licence to process it for the purpose of providing the Service. We will not sell or share it with third parties without your consent, subject to the exceptions described in the Privacy Policy.
+
+## 9. Payments and Subscriptions
+
+If the Service includes paid premium features, these are governed by the specific terms displayed at the time of purchase, including: the price, the billing frequency, the cancellation policy, and the refund conditions.
+
+Prices may be modified with at least 30 days' prior notice. Access to an existing subscription will not be affected until the end of the paid period.
+
+## 9A. The "Invite & Earn" programme
+
+**9A.1 Who may take part.** Any adult user (aged 18 or over) with an eTutor account. Pupils who may be minors do not take part and earn no commission.
+
+**9A.2 How it works.** You get a personal link. Anyone who makes an eTutor account through the link, within 90 days of opening it, becomes the person you invited. An account has at most one person who invited it, and you cannot invite yourself.
+
+**9A.3 What the invited person gets.** −25% on their first payment.
+
+**9A.4 What you get.** 50% of every payment of the person you invited, for as long as they stay subscribed. Each commission becomes available 30 days after the payment it comes from.
+
+**9A.5 Paying out commissions.** [TO BE CONFIRMED: minimum amount, payout frequency, the account paid into and tax withholding.]
+
+**9A.6 Abuse.** Fake accounts, inviting your own accounts or sending the link as unsolicited messages cancel the resulting commissions and exclude you from the programme.
+
+**9A.7 Changes.** We may change or stop the programme with 30 days' notice. Commissions already earned remain yours.
+
+## 10. Limitation of Liability
+
+**10.1** To the extent permitted by applicable law, **{entity_name}** is not liable for: indirect, incidental, special, or punitive losses; loss of profit, data, or business opportunities; service interruptions caused by force majeure, cyber attacks, or third-party failures.
+
+**10.2** Our total liability towards you, for any type of claim relating to the Service, is limited to the amount you paid for the Service in the 12 months preceding the event giving rise to the claim, or to 100 EUR if the service was free of charge.
+
+**10.3** The above limitations do not apply to damage caused intentionally or by gross negligence, nor to damage that cannot be excluded by law (e.g. liability for defective products under EU legislation).
+
+## 11. Warranties
+
+The Service is provided "**as is**" and "**as available**", without express or implied warranties as to uninterrupted operation, freedom from errors, or fitness for a particular purpose, to the extent permitted by law.
+
+AI-generated content may contain inaccuracies and is informational in nature, as its accuracy depends on the quality of the information you provide and on the inherent limitations of AI models.
+
+## 12. Your Rights Regarding Personal Data
+
+Under the GDPR, as a data subject you have the following rights: the **right of access** (Art. 15), the **right to rectification** (Art. 16), the **right to erasure** ("the right to be forgotten", Art. 17), the **right to restriction of processing** (Art. 18), the **right to data portability** (Art. 20), and the **right to object** (Art. 21).
+
+You may exercise these rights directly within the application (usually from Settings → My Account) or by submitting a data subject request (DSR) to **{entity_dpo_email}**.
+
+**Withdrawal of consent (Art. 7(3)).** Where processing is based on your consent, you may withdraw it at any time, as easily as it was given, without affecting the lawfulness of processing carried out before the withdrawal.
+
+For full details on your rights, the legal bases, the retention periods, and the manner of exercising them, please consult the [Privacy Policy](/en/privacy/{app_slug}).
+
+## 13. Automated Decisions
+
+Within the Service, **no decisions are taken based solely on automated processing** (including profiling) that produce legal effects concerning you or that similarly affect you to a significant extent. Scores, recommendations, and analyses generated by AI are advisory in nature. Should such processing be introduced, you will be informed and will have the right to obtain human intervention, to express your point of view, and to contest the decision, in accordance with Art. 22 GDPR.
+
+## 14. Modifications to the Service and to the Terms
+
+We reserve the right to modify, suspend, or discontinue any part of the Service, with or without prior notice.
+
+Significant changes to these Terms will be communicated at least **14 days** before they take effect by: an in-app banner, an email to the registered address, or a push notification. Continued use of the Service after the effective date constitutes acceptance of the changes. If you do not agree, you may delete your account before the effective date.
+
+## 15. Termination
+
+**15.1 By you.** You may delete your account at any time from Settings → My Account or by contacting **{entity_dpo_email}**. Your data will be deleted in accordance with the Privacy Policy.
+
+**15.2 By us.** We may suspend or delete your account with prior notice in the event of a breach of these Terms or, immediately, in the event of illegal or harmful conduct.
+
+**15.3 Effects of termination.** Upon termination, the licence to use the Service ceases. Obligations that by their nature survive termination (liability, intellectual property, disputes) remain in force.
+
+## 16. Governing Law and Dispute Resolution
+
+These Terms are governed by the law of **{entity_jurisdiction}** and of the European Union, in particular by the GDPR (EU Regulation 2016/679) and the e-Commerce Directive.
+
+Any dispute shall first be subject to an amicable resolution procedure (by contacting **{entity_dpo_email}**). If no solution is reached within 30 days, disputes shall be resolved by the courts competent at our registered seat, with the possibility of addressing the National Supervisory Authority for Personal Data Processing (ANSPDCP) or another competent authority in accordance with EU legislation.
+
+EU consumers also retain the right to have recourse to national alternative dispute resolution (ADR) entities, as well as the right to bring proceedings before the competent courts.
+
+## 17. General Provisions
+
+- **Entire agreement**: These Terms, together with the Privacy Policy and the Cookie Policy, constitute the entire agreement between you and **{entity_name}** regarding the use of the Service.
+- **Severability**: If any provision is declared void or unenforceable, the remaining provisions remain in force.
+- **Waiver**: The fact that we do not exercise a right provided in these Terms does not constitute a waiver of that right.
+- **Assignment**: You may not assign the rights or obligations arising from these Terms without our written consent. We may assign these rights as part of a business transfer, with prior notice to you.
+
+## Contact
+
+**{entity_name}**
+{entity_address}
+DPO / Data Protection: **{entity_dpo_email}**
+
+---
+
+*Version {version} · Effective from {effective_date}*

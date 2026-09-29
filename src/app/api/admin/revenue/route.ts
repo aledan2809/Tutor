@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { ERASED_PAYMENTS_HOLDER_ID } from "@/lib/erased-holder";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import { withErrorHandler } from "@/lib/api-handler";
 
@@ -18,7 +19,8 @@ async function _GET(req: NextRequest) {
     payments,
     recentPayments,
   ] = await Promise.all([
-    prisma.user.count(),
+    // Not a person: it holds the payments of erased accounts.
+    prisma.user.count({ where: { NOT: { id: ERASED_PAYMENTS_HOLDER_ID } } }),
     prisma.user.count({ where: { subscriptionStatus: "active" } }),
     prisma.payment.aggregate({
       where: { status: "succeeded", createdAt: { gte: since } },

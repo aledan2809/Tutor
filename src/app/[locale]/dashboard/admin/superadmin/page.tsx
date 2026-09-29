@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { ERASED_PAYMENTS_HOLDER_ID } from "@/lib/erased-holder";
 import { Link } from "@/i18n/navigation";
 
 export default async function SuperAdminOverview() {
@@ -11,7 +12,8 @@ export default async function SuperAdminOverview() {
     recentAudit,
     referralPayable,
   ] = await Promise.all([
-    prisma.user.count(),
+    // Not a person: it holds the payments of erased accounts.
+    prisma.user.count({ where: { NOT: { id: ERASED_PAYMENTS_HOLDER_ID } } }),
     prisma.user.count({ where: { subscriptionStatus: "active" } }),
     prisma.voucher.count({ where: { isActive: true } }),
     prisma.payment.count({ where: { status: "succeeded" } }),

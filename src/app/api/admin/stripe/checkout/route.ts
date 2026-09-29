@@ -12,6 +12,7 @@ import { loadPauseStartsAt } from "@/lib/access-server";
 import { paysByCard } from "@/lib/card-subscription";
 import { checkoutDiscount, subjectLines, type BillingInterval } from "@/lib/checkout-price";
 import { familyHasTelegram, monthlyPlanPriceMinor, planLearner, subjectsToBill } from "@/lib/checkout-facts";
+import { winbackOffer } from "@/lib/winback";
 
 /**
  * Checkout via the central Stripe Checkout Broker (stripe.knowbest.ro).
@@ -129,7 +130,8 @@ async function _POST(req: NextRequest) {
   // days run (checked on its own, a plan without trial days included), or a renewing code, then
   // Telegram connected by anyone in the family. Annual = ten months of it.
   const discount = checkoutDiscount({
-    trialActive: remainingFreeTrialDays(trialStart) > 0,
+    // The free week, or the last month before an inactive account is erased (winback.ts): the same −30%.
+    trialActive: remainingFreeTrialDays(trialStart) > 0 || (await winbackOffer(session.user.id)) !== null,
     code: codeOffer ? { percent: codeOffer.percent, renews: codeOffer.renews } : null,
     telegram,
   });

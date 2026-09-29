@@ -18,6 +18,7 @@ import { isParentOf } from "@/lib/guardian";
 import { activeSetters } from "@/lib/guardian-lock";
 import type { SubscriptionPlanSeatFields } from "@/lib/family";
 import { forInterval, planMonthlyMinor, subjectMonthlyMinor, type DiscountBase } from "@/lib/checkout-price";
+import { winbackOffer } from "@/lib/winback";
 
 /** Setting key on the payer: the lifetime discount of the family's card subscription. */
 export const LOCKED_DISCOUNT_KEY = "checkoutDiscount";
@@ -106,6 +107,23 @@ export async function payerTrial(
   if (!user) return null;
   const daysLeft = remainingFreeTrialDays(trialStartOf(user.createdAt, pauseStartsAt), now);
   return { active: daysLeft > 0, daysLeft, endsAt: trialEndOf(user.createdAt, pauseStartsAt) };
+}
+
+/**
+ * The −30% for as long as they stay subscribed that the payer can get right now, and until when: the
+ * account's own free week, or — for an account about to be erased for inactivity — the window opened
+ * by the first warning, up to the day it would be erased (winback.ts, Alex 29.09.2026). Null when
+ * neither is open.
+ */
+export async function payerLifetimeOffer(
+  userId: string,
+  now: Date = new Date(),
+  createdAt?: Date,
+): Promise<{ endsAt: Date; kind: "trial" | "winback" } | null> {
+  const trial = await payerTrial(userId, now, createdAt);
+  if (trial?.active) return { endsAt: trial.endsAt, kind: "trial" };
+  const winback = await winbackOffer(userId, now);
+  return winback ? { endsAt: winback.endsAt, kind: "winback" } : null;
 }
 
 /**

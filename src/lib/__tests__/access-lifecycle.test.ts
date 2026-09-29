@@ -41,6 +41,15 @@ describe("ce mesaj din probă e scadent", () => {
     expect(dueLifecycleStage({ ...at, access: trial(1), sent: new Set(["last_day"]) })).toBeNull();
   });
 
+  it("ultimele 48 de ore: un mesaj al lor, între cel de 3 zile și ultima zi", () => {
+    const at = { createdAt: switchOn, pauseStartsAt: switchOn, now };
+    expect(dueLifecycleStage({ ...at, access: trial(2), sent: new Set(["launch", "three_days"]) })).toBe("two_days");
+    expect(dueLifecycleStage({ ...at, access: trial(2), sent: new Set(["three_days", "two_days"]) })).toBeNull();
+    expect(dueLifecycleStage({ ...at, access: trial(1), sent: new Set(["three_days", "two_days"]) })).toBe("last_day");
+    // After the 48-hour message, the 3-day one doesn't come late.
+    expect(dueLifecycleStage({ ...at, access: trial(3), sent: new Set(["two_days"]) })).toBeNull();
+  });
+
   it("o rulare întârziată trimite doar mesajul cel mai potrivit, nu o rafală", () => {
     // Launch never went out and there's one day left: only the last-day message.
     expect(dueLifecycleStage({ access: trial(1), createdAt: switchOn, pauseStartsAt: switchOn, now, sent: none })).toBe("last_day");
@@ -74,10 +83,11 @@ describe("textul mesajelor", () => {
     first: 24.9,
     code: "V126S",
     trialOfferEndsAt: null,
+    trialOfferKind: null,
     telegram: false,
   };
   // Paying during the free week: −30% for as long as the subscription lasts (checkout-price.ts).
-  const trialOffer = { ...offer, price: 23.24, first: 23.24, code: null, trialOfferEndsAt: "2026-09-26T06:30:00.000Z" };
+  const trialOffer = { ...offer, price: 23.24, first: 23.24, code: null, trialOfferEndsAt: "2026-09-26T06:30:00.000Z", trialOfferKind: "trial" as const };
   const andrei = { name: "Andrei", stats: { exercises: 31, practicedDays: 4, streak: 3, level: null, weakTopics: 2 } };
 
   it("cu 3 zile înainte: ce a lucrat copilul, prețul cu codul, fără presiune falsă", () => {
@@ -111,6 +121,20 @@ describe("textul mesajelor", () => {
     const coded = lifecycleCopy({ stage: "last_day", daysLeft: 1, kids: [andrei], offer, endsAt, now });
     expect(coded.message).not.toContain("−30%");
     expect(coded.message).toContain("Family: 24,90 lei/lună cu codul V126S, în loc de 33,20 lei. Anulezi oricând.");
+  });
+
+  it("ultimele 48 de ore: −30% cât timp rămâi abonat, cu ora la care se încheie", () => {
+    const endsAt = new Date("2026-09-27T06:30:00Z");
+    const c = lifecycleCopy({ stage: "two_days", daysLeft: 2, kids: [andrei], offer: { ...trialOffer, trialOfferEndsAt: endsAt.toISOString() }, endsAt, now });
+    expect(c.title).toBe("Ultimele 48 de ore din proba gratuită");
+    expect(c.message).toContain("ai −30% cât timp rămâi abonat: Family 23,24 lei/lună, în loc de 33,20 lei. Anulezi oricând.");
+    expect(c.message).toMatch(/Dacă plătești până (pe 27 septembrie|poimâine|mâine), la 09:30/);
+    expect(c.button).toBe("Păstrez −30%");
+    // A code that beats the trial offer: no −30% promised, no deadline.
+    const coded = lifecycleCopy({ stage: "two_days", daysLeft: 2, kids: [andrei], offer, endsAt, now });
+    expect(coded.message).not.toContain("−30%");
+    expect(coded.message).not.toContain("Dacă plătești până");
+    expect(coded.button).toBe("Continuă cu Family");
   });
 
   it("ziua 4 și lansarea: prețul cu −30%, dar fără termen (numărătoarea e doar în ultima zi)", () => {
@@ -176,14 +200,14 @@ describe("textul mesajelor", () => {
   });
 
   it("fiecare mesaj spune la final cum se oprește (au preț și buton de plată)", () => {
-    for (const stage of ["launch", "three_days", "last_day", "paused"] as const) {
+    for (const stage of ["launch", "three_days", "two_days", "last_day", "paused"] as const) {
       expect(lifecycleCopy({ stage, daysLeft: 3, kids: [andrei], offer, endsAt: new Date("2026-09-26T06:30:00Z"), now }).message.endsWith(STOP_LINE)).toBe(true);
     }
     expect(STOP_LINE).toContain("eTutor.ro/ro/dashboard/settings/notifications");
   });
 
   it("niciun text nu i se adresează copilului și niciunul nu spune „AI”", () => {
-    for (const stage of ["launch", "three_days", "last_day", "paused"] as const) {
+    for (const stage of ["launch", "three_days", "two_days", "last_day", "paused"] as const) {
       const c = lifecycleCopy({ stage, daysLeft: 3, kids: [andrei], offer });
       const text = `${c.title} ${c.message} ${c.button}`;
       // Case-sensitive: Romanian „ai" (you have) is not the acronym.

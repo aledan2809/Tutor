@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { ERASED_PAYMENTS_HOLDER_ID } from "@/lib/erased-holder";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import { logAudit } from "@/lib/audit";
 import { withErrorHandler } from "@/lib/api-handler";
@@ -22,7 +23,7 @@ async function _GET() {
   forgetPauseSwitch();
   const [startsAt, freeForever, withoutOwnPlan] = await Promise.all([
     loadPauseStartsAt(),
-    prisma.user.count({ where: { freeForever: true } }),
+    prisma.user.count({ where: { freeForever: true, NOT: { id: ERASED_PAYMENTS_HOLDER_ID } } }),
     // An upper bound: children of paying families, company learners and tutors are in this count
     // but are never paused (access.ts decides per account).
     prisma.user.count({

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { loadConsentFacts } from "@/lib/parent-consent-server";
+import { mayShowPrices } from "@/lib/price-visibility";
 import { getReferralStats } from "@/lib/referral";
 import { prisma } from "@/lib/prisma";
 import { ReferralsClient } from "./referrals-client";
@@ -20,6 +22,10 @@ export default async function ReferralsPage({
   const { locale } = await params;
   const session = await auth();
   if (!session?.user) redirect("/auth/signin");
+  // A money commission: not for a learner who may be a minor (Alex, 28.09.2026). Checked before the
+  // stats, which would hand out a referral link on the first look.
+  const facts = await loadConsentFacts(session.user.id);
+  if (!facts || !mayShowPrices(facts)) notFound();
 
   const stats = await getReferralStats(session.user.id);
   const welcome = await prisma.setting.findUnique({

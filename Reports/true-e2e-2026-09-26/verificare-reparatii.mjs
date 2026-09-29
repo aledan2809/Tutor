@@ -57,6 +57,18 @@ async function signIn(page, email, password) {
   await page.waitForLoadState("networkidle").catch(() => {});
 }
 
+// Date of birth: three lists (Alex, 28.09.2026 — the day, not only the year).
+async function pickBirth(page, iso) {
+  const [y, m, d] = iso.split("-");
+  await page.locator("#birth-day").selectOption(String(Number(d)));
+  await page.locator("#birth-month").selectOption(String(Number(m)));
+  await page.locator("#birth-year").selectOption(y);
+}
+// The evidence of a parent's answer lives in the Legal Hub (local legal_ga, :3120).
+const { execFileSync } = await import("node:child_process");
+const legalSql = (q) => execFileSync("docker", ["exec", "legal-postgres-dev", "psql", "-U", "legal_dev", "-d", "legal_ga", "-Atc", q], { encoding: "utf8" }).trim();
+const parentalVersion = async () => (await (await fetch("http://localhost:3120/api/v1/public/legal/tutor/parental_consent?locale=ro")).json()).version.id;
+
 async function anonPage(page, path) {
   await page.goto(`${BASE}${path}`, { waitUntil: "networkidle" });
   await page.waitForTimeout(400);
@@ -135,10 +147,10 @@ try {
   // ── C. Emailul cu majuscule la înregistrare ────────────────────────────────────────
   const mixed = `QA-Fix0926-Elev-${s}@Demo.Tutor.App`;
   ip = newIp();
-  const reg = await api("/api/auth/register", { name: "Elev QA", email: mixed, password: PASS, role: "STUDENT", birthYear: 2000 }, ip);
+  const reg = await api("/api/auth/register", { name: "Elev QA", email: mixed, password: PASS, role: "STUDENT", birthDate: "2000-06-15" }, ip);
   const stored = await prisma.user.findFirst({ where: { email: { equals: mixed, mode: "insensitive" } }, select: { email: true } });
   check("C1 înregistrarea salvează emailul cu litere mici", reg.status === 201 || reg.status === 200 ? stored?.email === mixed.toLowerCase() : false, `${reg.status} → ${stored?.email}`);
-  const dup = await api("/api/auth/register", { name: "Elev QA", email: mixed.toLowerCase(), password: PASS, role: "STUDENT", birthYear: 2000 }, ip);
+  const dup = await api("/api/auth/register", { name: "Elev QA", email: mixed.toLowerCase(), password: PASS, role: "STUDENT", birthDate: "2000-06-15" }, ip);
   check("C2 același email scris altfel nu face un al doilea cont", dup.status === 409, `${dup.status}`);
 
   // ── D. Ghidul de pornire pe o materie cu programă ────────────────────────────────
@@ -321,7 +333,7 @@ try {
   await kf.nth(1).fill(kEmail);
   await kf.nth(2).fill(PASS);
   await kf.nth(3).fill(PASS);
-  await kp.locator("#birth-year").selectOption("2012");
+  await pickBirth(kp, "2012-05-10");
   const kb = kp.locator("form input[type=checkbox]");
   if (await kb.count()) await kb.first().check();
   await kp.locator("form button[type=submit]").click();
@@ -438,7 +450,7 @@ try {
   await rin.nth(1).fill(capEmail);
   await rin.nth(2).fill(PASS);
   await rin.nth(3).fill(PASS);
-  await rp.locator("#birth-year").selectOption("2000");
+  await pickBirth(rp, "2000-06-15");
   const rbox = rp.locator("form input[type=checkbox]");
   if (await rbox.count()) await rbox.first().check().catch(() => {});
   await rp.locator("form button[type=submit]").click();
@@ -463,7 +475,7 @@ try {
   // Two older rows differing only in capitals (the migration leaves such a pair alone).
   const pairLower = `${TAG}-pair-${s}@demo.tutor.app`;
   await prisma.user.create({ data: { email: `QA-Fix0926-Pair-${s}@Demo.Tutor.App`, name: "Pair A", password: await bcrypt.hash(PASS, 10) } });
-  const twin = await api("/api/auth/register", { name: "Pair B", email: pairLower, password: PASS, role: "STUDENT", birthYear: 2000 }, newIp());
+  const twin = await api("/api/auth/register", { name: "Pair B", email: pairLower, password: PASS, role: "STUDENT", birthDate: "2000-06-15" }, newIp());
   check("M3 înregistrarea refuză un email pe care îl are deja un cont vechi scris cu majuscule", twin.status === 409, `${twin.status}`);
 
   const jp = await (await browser.newContext({ locale: "ro-RO" })).newPage();
@@ -534,7 +546,7 @@ try {
   const tpText = await tp.locator("body").innerText();
   check("N2 părintele în proba gratuită vede în continuare bannerul („Continuă cu Family”)", /Proba gratuită/.test(tpText) && /Continuă cu Family/.test(tpText));
 
-  // ── P. Anul nașterii și acordul părintelui ─────────────────────────────────────────
+  // ── P. Data nașterii și acordul părintelui (dovada în Legal Hub; refuzul șterge contul) ──
   const minorEmail = `${TAG}-minor-${s}@demo.tutor.app`;
   const parentOfMinor = `${TAG}-mama-${s}@demo.tutor.app`;
   const mctx2 = await browser.newContext({ ...devices["iPhone 13"], locale: "ro-RO" });
@@ -544,7 +556,7 @@ try {
   const mf = mp2.locator("form input:not([type=checkbox]):not([type=hidden])");
   await mf.nth(0).fill("Minor QA");
   await mf.nth(1).fill(minorEmail);
-  await mp2.locator("#birth-year").selectOption("2012");
+  await pickBirth(mp2, "2012-05-10");
   await mp2.locator("#parent-email").fill(parentOfMinor);
   await mp2.locator("form input[type=password]").nth(0).fill(PASS);
   await mp2.locator("form input[type=password]").nth(1).fill(PASS);
@@ -555,10 +567,10 @@ try {
   await mp2.goto(`${BASE}/ro/dashboard`, { waitUntil: "networkidle" });
   await mp2.waitForTimeout(1000);
   await mp2.screenshot({ path: `${SHOTS}/p-minor-asteapta.png` });
-  const minorRow = await prisma.user.findFirst({ where: { email: minorEmail }, select: { id: true, birthYear: true, parentConsentEmail: true, parentConsentRequestedAt: true } });
+  const minorRow = await prisma.user.findFirst({ where: { email: minorEmail }, select: { id: true, birthDate: true, parentConsentEmail: true, parentConsentRequestedAt: true } });
   const minorToken = minorRow ? await prisma.verificationToken.findFirst({ where: { identifier: `parent-consent:${minorRow.id}` } }) : null;
   const waitText = await mp2.locator("body").innerText();
-  check("P1 elevul sub 16 ani: anul și emailul părintelui salvate, linkul emis, contul merge cu anunțul de așteptare", minorRow?.birthYear === 2012 && minorRow?.parentConsentEmail === parentOfMinor && !!minorToken && /ca părintele tău să-și dea acordul/.test(waitText) && /q\*\*\*@demo\.tutor\.app/.test(waitText) && !waitText.includes(parentOfMinor), `${minorRow?.birthYear} · ${minorRow?.parentConsentEmail} · link ${!!minorToken}`);
+  check("P1 elevul sub 16 ani: data nașterii și emailul părintelui salvate, linkul emis, contul merge cu anunțul de așteptare", minorRow?.birthDate?.toISOString().slice(0, 10) === "2012-05-10" && minorRow?.parentConsentEmail === parentOfMinor && !!minorToken && /ca părintele tău să-și dea acordul/.test(waitText) && /q\*\*\*@demo\.tutor\.app/.test(waitText) && !waitText.includes(parentOfMinor), `${minorRow?.birthDate?.toISOString().slice(0, 10)} · ${minorRow?.parentConsentEmail} · link ${!!minorToken}`);
 
   const pc = await (await browser.newContext({ locale: "ro-RO" })).newPage();
   await pc.goto(`${BASE}/ro/acord-parinte/${minorToken?.token ?? "x"}`, { waitUntil: "networkidle" });
@@ -567,15 +579,15 @@ try {
   await pc.locator("button", { hasText: /^Sunt de acord$/ }).click();
   await pc.waitForTimeout(1500);
   const afterConsent = await prisma.user.findUnique({ where: { id: minorRow?.id ?? "x" }, select: { parentConsentAt: true } });
-  const evidence = await prisma.parentalConsent.findMany({ where: { userId: minorRow?.id ?? "x" } });
+  const evidence = legalSql(`select string_agg(event, ',') from "GuardianConsent" where "subjectRef"='${minorRow?.id ?? "x"}'`);
   await pc.goto(`${BASE}/ro/acord-parinte/${minorToken?.token ?? "x"}`, { waitUntil: "networkidle" });
   const usedText = await pc.locator("body").innerText();
-  check("P2 părintele vede cine și ce, își dă acordul; rămâne dovada, iar linkul nu mai merge a doua oară", /Minor QA/.test(pcText) && /nu-i arătăm prețuri/.test(pcText) && !!afterConsent?.parentConsentAt && evidence.length === 1 && evidence[0].decision === "GIVEN" && evidence[0].textVersion === "PC-2026-09-28" && /Linkul nu mai e valid/.test(usedText), `dovezi ${evidence.length}`);
+  check("P2 părintele vede cine și textul din Legal Hub, își dă acordul; dovada e în Legal Hub, iar linkul nu mai merge a doua oară", /Minor QA/.test(pcText) && /nu-i arătăm prețuri/.test(pcText) && /Dacă refuzi/.test(pcText) && !!afterConsent?.parentConsentAt && evidence === "GIVEN" && /Linkul nu mai e valid/.test(usedText), `dovezi în Legal Hub: ${evidence}`);
   await mp2.goto(`${BASE}/ro/dashboard`, { waitUntil: "networkidle" });
   check("P3 după acord, anunțul de așteptare dispare", !/ca părintele tău să-și dea acordul/.test(await mp2.locator("body").innerText()));
 
   // 8 days without an answer: the account waits for the parent.
-  const lateMinor = await prisma.user.create({ data: { email: `${TAG}-tarziu-${s}@demo.tutor.app`, name: "Tarziu QA", password: await bcrypt.hash(PASS, 10), accountRole: "STUDENT", birthYear: 2012, parentConsentEmail: `${TAG}-tata-${s}@demo.tutor.app`, parentConsentRequestedAt: new Date(Date.now() - 8 * 86_400_000) } });
+  const lateMinor = await prisma.user.create({ data: { email: `${TAG}-tarziu-${s}@demo.tutor.app`, name: "Tarziu QA", password: await bcrypt.hash(PASS, 10), accountRole: "STUDENT", birthDate: new Date("2012-05-10"), parentConsentEmail: `${TAG}-tata-${s}@demo.tutor.app`, parentConsentRequestedAt: new Date(Date.now() - 8 * 86_400_000) } });
   const lp2 = await (await browser.newContext({ ...devices["iPhone 13"], locale: "ro-RO" })).newPage();
   await signIn(lp2, lateMinor.email, PASS);
   await lp2.goto(`${BASE}/ro/dashboard/practice`, { waitUntil: "networkidle" });
@@ -589,34 +601,35 @@ try {
   await signIn(ap2, noAge.email, PASS);
   await ap2.goto(`${BASE}/ro/dashboard`, { waitUntil: "networkidle" });
   const askText = await ap2.locator("body").innerText();
-  await ap2.locator("#birth-year").selectOption("2000");
+  await pickBirth(ap2, "2000-06-15");
   await ap2.locator("button", { hasText: /^Continuă$/ }).click();
   await ap2.waitForTimeout(2500);
   const afterAge = await ap2.locator("body").innerText();
-  check("P5 elevul fără an: e întrebat întâi; cu 2000, intră în cont", /Încă o întrebare/.test(askText) && !/Încă o întrebare/.test(afterAge) && (await prisma.user.findUnique({ where: { id: noAge.id }, select: { birthYear: true } }))?.birthYear === 2000);
+  check("P5 elevul fără dată: e întrebat întâi; cu 15.06.2000, intră în cont", /Încă o întrebare/.test(askText) && !/Încă o întrebare/.test(afterAge) && (await prisma.user.findUnique({ where: { id: noAge.id }, select: { birthDate: true } }))?.birthDate?.toISOString().slice(0, 10) === "2000-06-15");
 
-  // A refusal.
-  const refMinor = await prisma.user.create({ data: { email: `${TAG}-refuz-${s}@demo.tutor.app`, name: "Refuz QA", password: await bcrypt.hash(PASS, 10), accountRole: "STUDENT", birthYear: 2013, parentConsentEmail: `${TAG}-bunic-${s}@demo.tutor.app`, parentConsentRequestedAt: new Date() } });
-  await prisma.verificationToken.create({ data: { identifier: `parent-consent:${refMinor.id}`, token: "a".repeat(40) + s.padStart(24, "0"), expires: new Date(Date.now() + 86_400_000) } });
-  const refRes = await api("/api/parent-consent", { token: "a".repeat(40) + s.padStart(24, "0"), decision: "REFUSED" }, newIp());
+  // A refusal: recorded in the Legal Hub, then the child's account is erased.
+  const refMinor = await prisma.user.create({ data: { email: `${TAG}-refuz-${s}@demo.tutor.app`, name: "Refuz QA", password: await bcrypt.hash(PASS, 10), accountRole: "STUDENT", birthDate: new Date("2013-03-03"), parentConsentEmail: `${TAG}-bunic-${s}@demo.tutor.app`, parentConsentRequestedAt: new Date() } });
+  const refTok = "a".repeat(40) + s.padStart(24, "0");
+  await prisma.verificationToken.create({ data: { identifier: `parent-consent:${refMinor.id}`, token: refTok, expires: new Date(Date.now() + 86_400_000) } });
   const rp2 = await (await browser.newContext({ locale: "ro-RO" })).newPage();
   await signIn(rp2, refMinor.email, PASS);
   await rp2.goto(`${BASE}/ro/dashboard`, { waitUntil: "networkidle" });
-  check("P6 părintele nu e de acord → contul se oprește și elevul află de ce", refRes.status === 200 && /n-a fost de acord/.test(await rp2.locator("body").innerText()));
-  const sameAgain = await rp2.evaluate(async (e) => (await fetch("/api/me/parent-consent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ parentEmail: e }) })).status, `${TAG}-bunic-${s}@demo.tutor.app`);
-  const sameAgain2 = await rp2.evaluate(async (e) => (await fetch("/api/me/parent-consent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ parentEmail: e }) })).status, `${TAG}-bunic-${s}@demo.tutor.app`);
-  const otherParent = await rp2.evaluate(async (e) => (await fetch("/api/me/parent-consent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ parentEmail: e }) })).status, `${TAG}-bunica-${s}@demo.tutor.app`);
-  await rp2.goto(`${BASE}/ro/dashboard`, { waitUntil: "networkidle" });
-  const stillText = await rp2.locator("body").innerText();
+  const refRes = await api("/api/parent-consent", { token: refTok, decision: "REFUSED", versionId: await parentalVersion() }, newIp());
+  const refBody = await refRes.json().catch(() => ({}));
+  const refGone = (await prisma.user.findUnique({ where: { id: refMinor.id } })) === null;
+  const refEvidence = legalSql(`select string_agg(event, ',' order by "createdAt") from "GuardianConsent" where "subjectRef"='${refMinor.id}'`);
+  check("P6 părintele nu e de acord → răspunsul intră în Legal Hub și contul copilului se șterge pe loc", refRes.status === 200 && refBody.erased === true && refGone && refEvidence === "REFUSED,SUBJECT_ERASED", `${refRes.status} · șters ${refGone} · Legal Hub: ${refEvidence}`);
+  // The child's session from before: nothing it sends is kept, and the page says the account is gone.
   const practiceApi = await rp2.evaluate(async () => (await fetch("/api/student/sessions/quick", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" })).status);
-  check("P7 după refuz: părintele care a refuzat poate fi rugat o dată pe zi, alt părinte oricând — dar contul rămâne oprit până la un „da”, iar API-ul de exersare refuză", sameAgain === 200 && sameAgain2 === 429 && otherParent === 200 && /n-a fost de acord/.test(stillText) && practiceApi === 403, `${sameAgain} · ${sameAgain2} · ${otherParent} · API ${practiceApi}`);
-  // The parent who refused changes their mind from the new link: the account opens.
-  const reToken = await prisma.verificationToken.findFirst({ where: { identifier: `parent-consent:${refMinor.id}` } });
-  const reRes = await api("/api/parent-consent", { token: reToken?.token ?? "x", decision: "GIVEN" }, newIp());
   await rp2.goto(`${BASE}/ro/dashboard`, { waitUntil: "networkidle" });
-  check("P9 după un „da” venit mai târziu, contul se deschide", reRes.status === 200 && !/Contul așteaptă un părinte/.test(await rp2.locator("body").innerText()));
+  const goneText = await rp2.locator("body").innerText();
+  await rp2.screenshot({ path: `${SHOTS}/p-cont-sters.png` });
+  check("P7 sesiunea deschisă a copilului: API-ul de exersare refuză, pagina spune că contul nu mai există", practiceApi === 403 && /Contul nu mai există/.test(goneText), `API ${practiceApi}`);
+  const oldLink = await (await browser.newContext({ locale: "ro-RO" })).newPage();
+  await oldLink.goto(`${BASE}/ro/acord-parinte/${refTok}`, { waitUntil: "networkidle" });
+  check("P9 linkul vechi, după ștergere, spune că nu mai e valid", /Linkul nu mai e valid/.test(await oldLink.locator("body").innerText()));
   // „Nu sunt de acord” asks once more before it stops the account.
-  const confMinor = await prisma.user.create({ data: { email: `${TAG}-confirm-${s}@demo.tutor.app`, name: "Confirm QA", password: await bcrypt.hash(PASS, 10), accountRole: "STUDENT", birthYear: 2013, parentConsentEmail: `${TAG}-matusa-${s}@demo.tutor.app`, parentConsentRequestedAt: new Date() } });
+  const confMinor = await prisma.user.create({ data: { email: `${TAG}-confirm-${s}@demo.tutor.app`, name: "Confirm QA", password: await bcrypt.hash(PASS, 10), accountRole: "STUDENT", birthDate: new Date("2013-03-03"), parentConsentEmail: `${TAG}-matusa-${s}@demo.tutor.app`, parentConsentRequestedAt: new Date() } });
   const confTok = "b".repeat(40) + s.padStart(24, "0");
   await prisma.verificationToken.create({ data: { identifier: `parent-consent:${confMinor.id}`, token: confTok, expires: new Date(Date.now() + 86_400_000) } });
   const cfp = await (await browser.newContext({ locale: "ro-RO" })).newPage();
@@ -625,7 +638,7 @@ try {
   await cfp.waitForTimeout(500);
   const confText = await cfp.locator("body").innerText();
   const notYet = await prisma.user.findUnique({ where: { id: confMinor.id }, select: { parentConsentRefusedAt: true } });
-  check("P10 „Nu sunt de acord” cere confirmare; până atunci nimic nu se înregistrează", /Sigur\? Contul copilului se oprește/.test(confText) && notYet?.parentConsentRefusedAt === null);
+  check("P10 „Nu sunt de acord” cere confirmare și spune că se șterge tot; până atunci nimic nu se înregistrează", /Sigur\? Contul copilului și tot ce a lucrat pe platformă se șterg imediat/.test(confText) && notYet?.parentConsentRefusedAt === null);
 
   // A company's learner (a course invitation, like Poșta's): an adult at work, never asked.
   const org = await prisma.organization.create({ data: { name: "Firma QA", slug: `${TAG}-firma-${s}` } });

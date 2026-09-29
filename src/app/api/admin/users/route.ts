@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { ERASED_PAYMENTS_HOLDER_ID } from "@/lib/erased-holder";
 import { emailTaken } from "@/lib/email-lookup";
 import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import bcrypt from "bcryptjs";
@@ -26,6 +27,8 @@ async function _GET(req: NextRequest) {
   const skip = (page - 1) * limit;
 
   const where: Prisma.UserWhereInput = {
+    // Not a person: it holds the payments of erased accounts.
+    NOT: { id: ERASED_PAYMENTS_HOLDER_ID },
     ...(search
       ? {
           OR: [

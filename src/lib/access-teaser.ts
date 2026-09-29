@@ -8,7 +8,7 @@
 import { prisma } from "@/lib/prisma";
 import { loadVoucherPreview } from "@/lib/voucher-preview-server";
 import { previewAppliesToPlan } from "@/lib/voucher-checkout";
-import { familyHasTelegram, payerTrial, planLearner, subjectsToBill } from "@/lib/checkout-facts";
+import { familyHasTelegram, payerLifetimeOffer, planLearner, subjectsToBill } from "@/lib/checkout-facts";
 import { packagePrice } from "@/lib/package-price";
 
 export type TeaserStats = {
@@ -66,6 +66,8 @@ export type TeaserOffer = {
   code: string | null;
   /** When paying now still gets the −30% of the free week: the moment that ends (ISO). */
   trialOfferEndsAt: string | null;
+  /** Why the −30% applies: the free week, or the last month before an inactive account is erased. */
+  trialOfferKind: "trial" | "winback" | null;
   /** −10% for Telegram connected by someone in the family. */
   telegram: boolean;
 };
@@ -88,13 +90,14 @@ export async function teaserOffer(payerId: string, planKey: "FAMILY" | "ELEV", n
   ]);
   if (!plan || !payer) return null;
   // As checkout bills them: the learner's subjects, less the ones still paid by their own subscriptions.
+  // The free week's −30%, or the same −30% before an inactive account is erased (winback.ts).
   const [trial, subjects, pending] = await Promise.all([
-    payerTrial(payerId, now, payer.createdAt),
+    payerLifetimeOffer(payerId, now, payer.createdAt),
     planLearner(payerId, plan).then((learnerId) => subjectsToBill(payerId, learnerId)),
     payer.pendingVoucherCode ? loadVoucherPreview(payer.pendingVoucherCode, payerId) : Promise.resolve(null),
   ]);
   const preview = pending?.ok && previewAppliesToPlan(pending.preview, planKey) ? pending.preview : null;
-  const trialActive = trial?.active === true;
+  const trialActive = trial !== null;
   const priced = packagePrice(
     { ...plan, price: plan.price / 100, interval: "MONTH" },
     { trialActive, telegram, subjects: { self: subjects, child: { count: subjects } } },
@@ -108,6 +111,7 @@ export async function teaserOffer(payerId: string, planKey: "FAMILY" | "ELEV", n
     first: priced.first / 100,
     code: priced.discount.codeUsed && preview ? preview.code : null,
     trialOfferEndsAt: priced.discount.base === "trial" && trial ? trial.endsAt.toISOString() : null,
+    trialOfferKind: priced.discount.base === "trial" && trial ? trial.kind : null,
     telegram: priced.discount.telegram,
   };
 }

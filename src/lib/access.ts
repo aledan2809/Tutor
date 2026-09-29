@@ -5,7 +5,8 @@
  *  - Without a card, a family gets the whole package for 7 days (WhatsApp/SMS aside — those are
  *    paid per message, see meteredChannelsCovered).
  *  - On day 8 without payment the account is paused, the child's AND the parent's: no practice, no
- *    reminders, no alerts, no report. Nothing is deleted; paying brings everything back.
+ *    reminders, no alerts, no report. Nothing is deleted then; paying brings everything back (a pause
+ *    nobody signs in to for 12 months is erased, after warnings: inactive-accounts.ts).
  *  - Accounts that already existed get their 7 days from the moment the pause is switched on.
  *  - Accounts marked „Gratuit permanent" by an administrator (friends, testers) are never paused
  *    and get no trial messages. Tutors/instructors are never paused either.

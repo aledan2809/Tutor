@@ -393,7 +393,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }));
             token.rolesAt = Date.now();
           }
-          // dbUser null (e.g. mid-deploy lookup miss) → keep prior token values.
+          // No row: the account was erased (a parent's „no”, a person's decision). The session ends
+          // with it — kept, it would carry a dead id for up to 30 days. A database ERROR (below) still
+          // keeps the token: that is a hiccup, not an answer.
+          if (!dbUser) return null;
         } catch {
           // Transient DB error → do NOT throw (that would drop the session).
           // Keep whatever roles the token already carries.

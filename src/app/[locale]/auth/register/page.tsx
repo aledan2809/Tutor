@@ -1,6 +1,7 @@
 "use client";
 
-import { needsParentConsent } from "@/lib/age";
+import { birthDateProblem, birthDateString, needsParentConsent, parseBirthDate } from "@/lib/age";
+import { BirthDateFields, type BirthDateValue } from "@/components/consent/birth-date-fields";
 import { useState, useEffect } from "react";
 import { useLocale } from "next-intl";
 import { signIn } from "next-auth/react";
@@ -84,8 +85,8 @@ export default function RegisterPage() {
   // Cine isi face contul. Fara asta, inscrierea acorda STUDENT oricui alegea o
   // materie, deci un parinte primea meniul de elev si nu-l vedea niciodata pe al lui.
   const [role, setRole] = useState<"STUDENT" | "PARENT">("STUDENT");
-  // A learner's year of birth; under 16 also a parent's email, asked for consent (Alex, 28.09.2026).
-  const [birthYear, setBirthYear] = useState("");
+  // A learner's date of birth; under 16 also a parent's email, asked for consent (Alex, 28.09.2026).
+  const [birth, setBirth] = useState<BirthDateValue>({ day: "", month: "", year: "" });
   const [parentEmail, setParentEmail] = useState("");
   const [domainSlugs, setDomainSlugs] = useState<string[]>([]);
   const [domains, setDomains] = useState<Domain[]>([]);
@@ -171,8 +172,8 @@ export default function RegisterPage() {
       });
   }, []);
 
-  const minorSignup = role === "STUDENT" && birthYear !== "" && needsParentConsent(Number(birthYear));
-  const lastBirthYear = new Date().getFullYear() - 5;
+  const birthDate = parseBirthDate(birthDateString(birth.day, birth.month, birth.year));
+  const minorSignup = role === "STUDENT" && birthDate !== null && needsParentConsent(birthDate);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,8 +187,15 @@ export default function RegisterPage() {
       setError(ro ? "Parolele nu coincid" : "Passwords do not match");
       return;
     }
-    if (role === "STUDENT" && !birthYear) {
-      setError(ro ? "Alege anul nașterii." : "Choose your year of birth.");
+    if (role === "STUDENT" && !birthDate) {
+      const problem = birthDateProblem(birthDateString(birth.day, birth.month, birth.year));
+      setError(
+        problem === "too-young"
+          ? ro ? "Pentru un copil sub 5 ani, contul îl face un părinte." : "For a child under 5, a parent makes the account."
+          : problem === "invalid"
+            ? ro ? "Data nașterii nu există (verifică ziua și luna)." : "That date doesn't exist (check the day and month)."
+            : ro ? "Alege data nașterii: ziua, luna și anul." : "Choose your date of birth: day, month and year.",
+      );
       return;
     }
     // Coming back to a family's invitation or code, the parent is already there: no email to ask.
@@ -212,7 +220,7 @@ export default function RegisterPage() {
           password,
           role,
           domainSlugs,
-          ...(role === "STUDENT" && birthYear ? { birthYear: Number(birthYear) } : {}),
+          ...(role === "STUDENT" && birthDate ? { birthDate: birthDateString(birth.day, birth.month, birth.year) } : {}),
           ...(minorSignup && parentEmail.trim() ? { parentEmail } : {}),
           ...(voucherCode ? { voucherCode } : {}),
         }),
@@ -261,10 +269,10 @@ export default function RegisterPage() {
                 ? ro
                   ? "Scrie un email valid pentru părinte (ex. nume@gmail.com)."
                   : "Enter a valid email for the parent (e.g. name@gmail.com)."
-              : res.status === 400 && data.details?.fieldErrors?.birthYear
+              : res.status === 400 && data.details?.fieldErrors?.birthDate
                 ? ro
-                  ? "Alege anul nașterii din listă."
-                  : "Choose the year of birth from the list."
+                  ? "Alege data nașterii din liste."
+                  : "Choose the date of birth from the lists."
               : res.status === 400
                 ? ro
                   ? "Verifică datele: numele are cel puțin 2 litere, emailul e complet, parola are între 8 și 72 de caractere."
@@ -437,23 +445,12 @@ export default function RegisterPage() {
           </div>
 
           {role === "STUDENT" && (
-            <div>
-              <label htmlFor="birth-year" className="mb-1 block text-sm text-gray-400">
-                {ro ? "Anul nașterii" : "Year of birth"}
-              </label>
-              <select
-                id="birth-year"
-                value={birthYear}
-                onChange={(e) => setBirthYear(e.target.value)}
-                required
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
-              >
-                <option value="">{ro ? "Alege anul" : "Choose the year"}</option>
-                {Array.from({ length: lastBirthYear - 1919 }, (_, i) => lastBirthYear - i).map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
-            </div>
+            <BirthDateFields
+              locale={ro ? "ro" : "en"}
+              value={birth}
+              onChange={setBirth}
+              selectClassName="w-full rounded-lg border border-gray-700 bg-gray-800 px-2 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+            />
           )}
 
           {minorSignup && !returnTo && (

@@ -18,6 +18,7 @@ import {
   firstLinkedChild,
   lockedDiscount,
   paidSubjects,
+  payerLifetimeOffer,
   payerTrial,
   planLearner,
   runningAddons,
@@ -94,8 +95,10 @@ async function _GET() {
   // offer and its countdown), Telegram in the family (−10%), and the subjects each kind of plan would
   // bill — the payer's own for Elev, the first linked child's for a family plan — less the ones still
   // paid by their own subscriptions, as checkout counts them.
-  const [trial, telegram, counted, parentLinks, firstChild, addons, byCard] = await Promise.all([
+  const [trial, lifetimeOffer, telegram, counted, parentLinks, firstChild, addons, byCard] = await Promise.all([
     payerTrial(userId, new Date(), me.createdAt),
+    // The free week's −30%, or the same −30% before an inactive account is erased (winback.ts).
+    payerLifetimeOffer(userId, new Date(), me.createdAt),
     familyHasTelegram(userId),
     paidSubjects(userId),
     prisma.guardian.count({ where: { childId: userId, status: "active", relation: "PARENT" } }),
@@ -186,7 +189,12 @@ async function _GET() {
       retrying: me.subscriptionStatus === "past_due" && payingForAccess(me),
       // Same start as the no-card week and as checkout (access.ts trialStartOf).
       freeTrialDaysLeft: trial?.daysLeft ?? 0,
-      trialOffer: trial && !child && !paid && !seatHolder ? { active: trial.active, endsAt: trial.endsAt.toISOString() } : null,
+      trialOffer:
+        !child && !paid && !seatHolder && (lifetimeOffer || trial)
+          ? lifetimeOffer
+            ? { active: true, endsAt: lifetimeOffer.endsAt.toISOString(), kind: lifetimeOffer.kind }
+            : { active: false, endsAt: trial!.endsAt.toISOString(), kind: "trial" as const }
+          : null,
       seatHolder,
       telegram,
       subjects: {

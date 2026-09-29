@@ -18,12 +18,15 @@ export function TrialCountdown({
   serverNow,
   locale,
   className,
+  compact,
   onEnd,
 }: {
   endsAt: string;
   serverNow: string;
   locale: string;
   className?: string;
+  /** Without the seconds („3z 14:22"), for a narrow screen. */
+  compact?: boolean;
   onEnd?: () => void;
 }) {
   const offset = useRef(0);
@@ -53,7 +56,7 @@ export function TrialCountdown({
   const total = Math.floor(left / 1000);
   const days = Math.floor(total / 86400);
   const two = (n: number) => String(n).padStart(2, "0");
-  const clock = `${two(Math.floor((total % 86400) / 3600))}:${two(Math.floor((total % 3600) / 60))}:${two(total % 60)}`;
+  const clock = `${two(Math.floor((total % 86400) / 3600))}:${two(Math.floor((total % 3600) / 60))}${compact ? "" : `:${two(total % 60)}`}`;
   const text = days > 0 ? `${days}${locale === "en" ? "d" : "z"} ${clock}` : clock;
   return (
     <span className={className} style={{ fontVariantNumeric: "tabular-nums" }} suppressHydrationWarning>

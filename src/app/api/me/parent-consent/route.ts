@@ -27,15 +27,23 @@ async function _POST(req: NextRequest) {
   if (state.kind !== "ask-parent" && state.kind !== "waiting" && state.kind !== "blocked") {
     return NextResponse.json({ error: "Contul nu așteaptă acordul unui părinte." }, { status: 409 });
   }
+  // A parent's „no” is final: the account is being erased.
+  if (state.kind === "blocked" && state.reason === "refused") {
+    return NextResponse.json({ error: "Un părinte n-a fost de acord, așa că acest cont se închide." }, { status: 409 });
+  }
   const issued = await issueConsentRequest(session.user.id, parsed.data.parentEmail);
   if (!issued.ok) {
     return issued.reason === "too-many"
       ? NextResponse.json({ error: "Am trimis deja de trei ori azi. Mai încearcă mâine." }, { status: 429 })
+      : issued.reason === "address-busy"
+        ? NextResponse.json({ error: "Acestei adrese i-am scris de prea multe ori azi. Scrie adresa celuilalt părinte sau încearcă mâine." }, { status: 429 })
       : issued.reason === "same-as-child"
         ? NextResponse.json({ error: "Scrie adresa unui părinte, nu pe a ta." }, { status: 400 })
-        : issued.reason === "refused-address"
-          ? NextResponse.json({ error: "Părintelui acesta i-am scris azi. Mai poți încerca mâine sau scrie celuilalt părinte." }, { status: 429 })
-          : NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        : issued.reason === "refused"
+          ? NextResponse.json({ error: "Un părinte n-a fost de acord, așa că acest cont se închide." }, { status: 409 })
+          : issued.reason === "not-needed"
+            ? NextResponse.json({ error: "Contul are deja acordul unui părinte." }, { status: 409 })
+            : NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const locale = parsed.data.locale ?? "ro";
   after(() => sendConsentEmail(session.user.id, issued.token, locale));

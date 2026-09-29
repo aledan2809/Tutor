@@ -54,7 +54,7 @@ interface PlansResponse {
     retrying?: boolean;
     freeTrialDaysLeft?: number;
     /** The payer's own free week: paying in it gives −30% for life (checkout-price.ts). Null for a child. */
-    trialOffer?: { active: boolean; endsAt: string } | null;
+    trialOffer?: { active: boolean; endsAt: string; kind?: "trial" | "winback" } | null;
     /** Telegram connected by anyone in the family: −10% more at payment. */
     telegram?: boolean;
     /** A child whose parent is in the account: no offer to pay now, no saving to chase (UCPD). */
@@ -572,8 +572,12 @@ export default function PackagesPage() {
       {trialActive && current.trialOffer && current.serverNow && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-700/60 bg-gradient-to-r from-blue-900/40 to-emerald-900/25 px-4 py-3">
           <div>
-            <p className="text-sm font-semibold text-white">{t("trialOfferTitle", { percent: TRIAL_PAYMENT_PERCENT })}</p>
-            <p className="text-xs text-blue-100/80">{t("trialOfferEnds", { end: trialEndText })}</p>
+            <p className="text-sm font-semibold text-white">
+              {t(current.trialOffer.kind === "winback" ? "winbackOfferTitle" : "trialOfferTitle", { percent: TRIAL_PAYMENT_PERCENT })}
+            </p>
+            <p className="text-xs text-blue-100/80">
+              {t(current.trialOffer.kind === "winback" ? "winbackOfferEnds" : "trialOfferEnds", { end: trialEndText })}
+            </p>
           </div>
           <TrialCountdown
             endsAt={current.trialOffer.endsAt}

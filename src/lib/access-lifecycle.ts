@@ -1,7 +1,8 @@
 /**
  * The messages of the 7-day trial, to the parent only (approved mockup, Alex 16.09.2026):
  *  - at launch, to accounts that already existed: they have 7 days with the whole package;
- *  - 3 days before the end, the last day, and day 8 (the account is paused).
+ *  - 3 days before the end, 48 hours before (Alex, 29.09.2026: the −30% brought forward in the last
+ *    48 hours), the last day, and day 8 (the account is paused).
  * Each says what the child worked on, what happens next and what it costs; one button, to payment.
  *
  * Never to a child or a learner (UCPD Annex I point 28: no direct exhortation to children to buy
@@ -12,6 +13,7 @@
  * dueLifecycleStage and lifecycleCopy are pure; runAccessLifecycle reads, sends and records.
  */
 import { prisma } from "@/lib/prisma";
+import { inMessageWindow } from "@/lib/message-window";
 import type { Access } from "@/lib/access";
 import { trialStartOf } from "@/lib/access";
 import { loadAccess, loadPauseStartsAt, loadSeatHolder } from "@/lib/access-server";
@@ -25,11 +27,12 @@ import { ACCESS_MESSAGES_PAGE, ACCESS_MESSAGES_SETTING, accessMessagesOff } from
 import { resolveIsTest } from "@/lib/notifications/test-account";
 import { isPaidSubscriber } from "@/lib/escalation/segmentation";
 
-export type LifecycleStage = "launch" | "three_days" | "last_day" | "paused";
+export type LifecycleStage = "launch" | "three_days" | "two_days" | "last_day" | "paused";
 
 export const LIFECYCLE_TYPE: Record<LifecycleStage, string> = {
   launch: "access_trial_launch",
   three_days: "access_trial_three_days",
+  two_days: "access_trial_two_days",
   last_day: "access_trial_last_day",
   paused: "access_trial_paused",
 };
@@ -37,9 +40,7 @@ export const LIFECYCLE_TYPE: Record<LifecycleStage, string> = {
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** A pause older than this gets no „your account is paused" message (the run was late or off). */
 const PAUSED_MESSAGE_MAX_AGE_MS = 3 * DAY_MS;
-/** Messages go out between these Bucharest hours, and never in the parent's own quiet hours. */
-const SEND_FROM_HOUR = 9;
-const SEND_UNTIL_HOUR = 20;
+/** Messages go out between 9:00 and 20:00 in Bucharest (message-window.ts), and never in the parent's own quiet hours. */
 
 /**
  * The message this payer should get now, or null. `sent` holds the stages already sent in this
@@ -63,7 +64,8 @@ export function dueLifecycleStage(input: {
   if (access.kind !== "trial" || access.via !== "own") return null;
 
   if (access.daysLeft <= 1) return sent.has("last_day") ? null : "last_day";
-  if (access.daysLeft <= 3) return sent.has("three_days") || sent.has("last_day") ? null : "three_days";
+  if (access.daysLeft <= 2) return sent.has("two_days") || sent.has("last_day") ? null : "two_days";
+  if (access.daysLeft <= 3) return sent.has("three_days") || sent.has("two_days") || sent.has("last_day") ? null : "three_days";
   // An account older than the switch got its week at launch: say so once.
   const startedAtLaunch = trialStartOf(createdAt, pauseStartsAt).getTime() === pauseStartsAt.getTime();
   return startedAtLaunch && sent.size === 0 ? "launch" : null;
@@ -168,7 +170,7 @@ function stageCopy(input: {
         title: "7 zile cu tot pachetul Family",
         message:
           `${input.endsAt ? `Până ${whenWords(input.endsAt, now)}, ai` : "Ai 7 zile cu"} tot pachetul Family: remindere pe canalele gratuite, rapoarte și alerte. ` +
-          "După aceea, fără abonament, contul intră în pauză. Nimic nu se șterge. " +
+          "După aceea, fără abonament, contul intră în pauză. Tot ce s-a lucrat rămâne salvat; doar un cont lăsat în pauză în care nu intră nimeni 12 luni se șterge, după ce te anunțăm pe e-mail. " +
           priceLine(offer),
         button: "Vezi pachetul Family",
       };
@@ -180,6 +182,18 @@ function stageCopy(input: {
           : `${kidsText} Anulezi oricând.`,
         button: "Continuă cu Family",
       };
+    case "two_days": {
+      // The last 48 hours: the −30% for as long as they stay subscribed, and the moment it ends.
+      const offerEnd = offer?.trialOfferEndsAt ? new Date(offer.trialOfferEndsAt) : null;
+      const trialPrice = offerEnd ? priceWords(offer, true) : null;
+      return {
+        title: "Ultimele 48 de ore din proba gratuită",
+        message: trialPrice
+          ? `${kidsText} Dacă plătești până ${whenWords(offerEnd as Date, now)}, ai −${TRIAL_PAYMENT_PERCENT}% cât timp rămâi abonat: Family ${trialPrice}. Anulezi oricând.`
+          : `${kidsText} ${priceLine(offer)}`,
+        button: trialPrice ? `Păstrez −${TRIAL_PAYMENT_PERCENT}%` : "Continuă cu Family",
+      };
+    }
     case "last_day": {
       const when = input.endsAt ? whenWords(input.endsAt, now) : null;
       // Only the children whose access ends with the parent's week; none named when no child is linked.
@@ -217,10 +231,6 @@ function stageCopy(input: {
   }
 }
 
-function bucharestHour(now: Date): number {
-  return Number(now.toLocaleString("en-GB", { timeZone: "Europe/Bucharest", hour: "2-digit", hour12: false }));
-}
-
 const PACKAGES_URL = "/dashboard/packages?plan=FAMILY";
 /** Longer than a launch run over every existing parent; a run that dies frees it after this. */
 const LIFECYCLE_LEASE_MS = 30 * 60_000;
@@ -229,8 +239,7 @@ const LIFECYCLE_LEASE_MS = 30 * 60_000;
 export async function runAccessLifecycle(now: Date = new Date()): Promise<{ ran: boolean; sent: number }> {
   const pauseStartsAt = await loadPauseStartsAt();
   if (!pauseStartsAt) return { ran: false, sent: 0 };
-  const hour = bucharestHour(now);
-  if (hour < SEND_FROM_HOUR || hour >= SEND_UNTIL_HOUR) return { ran: false, sent: 0 };
+  if (!inMessageWindow(now)) return { ran: false, sent: 0 };
 
   // A launch run over many parents can be long; the lease outlasts it, and the record written under
   // a lock (below) keeps two runs at once from sending the same message twice.
@@ -345,7 +354,13 @@ export async function runAccessLifecycle(now: Date = new Date()): Promise<{ ran:
               type: LIFECYCLE_TYPE[stage],
               title: copy.title,
               message: copy.message,
-              metadata: { stage, trialEndsAt: endsAt ? endsAt.toISOString() : null, url: PACKAGES_URL },
+              // The children the message names: erasing one of them removes it (account-erasure.ts).
+              metadata: {
+                stage,
+                trialEndsAt: endsAt ? endsAt.toISOString() : null,
+                url: PACKAGES_URL,
+                aboutUserIds: parent.childrenLinks.map((l) => l.child.id),
+              },
             },
           });
           return true;

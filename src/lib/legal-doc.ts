@@ -8,7 +8,8 @@
 const APP_SLUG = "tutor";
 const APP_NAME = "eTutor";
 
-export type LegalDocType = "privacy" | "tos" | "cookies";
+/** parental_consent: the text a parent reads before answering for a learner under 16 (acord-parinte). */
+export type LegalDocType = "privacy" | "tos" | "cookies" | "parental_consent";
 
 // Controller entity for eTutor (Class RDA Impex SRL). Used only as the offline
 // fallback — the live Hub returns the authoritative entity record.
@@ -22,6 +23,8 @@ const ENTITY_FALLBACK = {
 
 export type LegalDoc = {
   html: string;
+  /** The Hub's id of the exact version shown — what a consent is anchored on. */
+  versionId: string | null;
   version: string | null;
   effectiveFrom: string | null;
   entityName: string | null;
@@ -111,7 +114,7 @@ export async function getLegalDocument(
   type: LegalDocType,
   locale: string = "ro",
 ): Promise<LegalDoc> {
-  const empty: LegalDoc = { html: "", version: null, effectiveFrom: null, entityName: null, ok: false };
+  const empty: LegalDoc = { html: "", versionId: null, version: null, effectiveFrom: null, entityName: null, ok: false };
   const apiUrl = process.env.LEGAL_API_URL;
   if (!apiUrl) return empty;
   const intlLocale = locale === "en" ? "en-GB" : "ro-RO";
@@ -151,6 +154,7 @@ export async function getLegalDocument(
 
     return {
       html: mdToHtml(text),
+      versionId: version.id,
       version: version.version ?? null,
       effectiveFrom: version.effectiveFrom ?? null,
       entityName: vars["{entity_name}"],

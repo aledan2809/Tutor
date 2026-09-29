@@ -4,6 +4,7 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { alertAdminsOfNegativeFeedback } from "@/lib/feedback-admin";
 import { withErrorHandler } from "@/lib/api-handler";
+import { refuseIfPaused } from "@/lib/access-gate";
 
 const feedbackInput = z.object({
   rating: z.enum(["up", "down"]),
@@ -15,6 +16,10 @@ const feedbackInput = z.object({
 async function _POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Like the learning API: a stopped account (and one erased while its session is still open, which
+  // consentStopped counts as stopped) writes nothing.
+  const refused = await refuseIfPaused(session.user.id, { bypass: session.user.isSuperAdmin });
+  if (refused) return refused;
   const { id: questionId } = await params;
 
   const parsed = feedbackInput.safeParse(await req.json().catch(() => null));

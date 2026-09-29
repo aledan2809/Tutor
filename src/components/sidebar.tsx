@@ -20,9 +20,11 @@ interface SidebarProps {
   /** True when the user holds an active family subscription plan (parent/child
    *  seats), so the family section shows even without a WATCHER enrollment. */
   hasFamilyPlan?: boolean;
+  /** „Invită & Câștigă” (a money commission): not for a learner who may be a minor. */
+  showReferrals?: boolean;
 }
 
-export function Sidebar({ user, hasFamilyPlan = false }: SidebarProps) {
+export function Sidebar({ user, hasFamilyPlan = false, showReferrals = true }: SidebarProps) {
   const t = useTranslations("nav");
   const tAuth = useTranslations("auth");
   const pathname = usePathname();
@@ -46,7 +48,7 @@ export function Sidebar({ user, hasFamilyPlan = false }: SidebarProps) {
     return () => document.removeEventListener("keydown", onKey);
   }, [mobileOpen]);
 
-  const sections = buildNavSections(user, hasFamilyPlan);
+  const sections = buildNavSections(user, hasFamilyPlan, { showReferrals });
 
   const sidebarContent = (
     <>
