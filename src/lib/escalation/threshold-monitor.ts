@@ -19,6 +19,7 @@ import { prisma } from "@/lib/prisma";
 import { escapeHtml, resolveUserAlertChannels, userInQuietHours } from "./parent-monitor";
 import { webPushToUser, telegramAlertToUser } from "@/lib/notifications/service";
 import { sendAppEmail } from "@/lib/email";
+import { isUndeliverableAddress } from "@/lib/email-recipients";
 import { pausedUserIds } from "@/lib/access-server";
 
 const METRIC_RO: Record<string, string> = {
@@ -123,7 +124,8 @@ export async function deliverThresholdAlert(
         });
       } else if (channel === "EMAIL") {
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
-        if (user?.email) {
+        // A test or reserved address only bounces (email-recipients.ts).
+        if (user?.email && !isUndeliverableAddress(user.email)) {
           const base = (process.env.AUTH_URL ?? "").replace(/\/$/, "");
           // Propagate provider failure so the cascade can try the next channel.
           ok = await sendAppEmail({
@@ -186,6 +188,14 @@ async function checkThreshold(th: ThresholdRow, now: Date): Promise<boolean> {
   if (value === null) return false; // no signal
   if (!compare(value, th.operator, th.value)) return false;
 
+  // Claimed before sending: two runs at once read the same lastFiredOn, and both used to send the
+  // day's alert (30.09.2026). Only the run that moves the stamp sends; the day is spent either way.
+  const claimed = await prisma.escalationThreshold.updateMany({
+    where: { id: th.id, lastFiredOn: th.lastFiredOn },
+    data: { lastFiredOn: now },
+  });
+  if (claimed.count === 0) return false;
+
   const studentName = th.student.name ?? th.student.email ?? "Elevul";
   const title = `Prag atins: ${studentName}`;
   const message = `${studentName} (${th.domain.name}): ${METRIC_RO[th.metric] ?? th.metric} = ${value}, ${OP_RO[th.operator] ?? th.operator} pragul de ${th.value}.`;
@@ -216,9 +226,5 @@ async function checkThreshold(th: ThresholdRow, now: Date): Promise<boolean> {
       });
     }
   }
-  await prisma.escalationThreshold.update({
-    where: { id: th.id },
-    data: { lastFiredOn: now },
-  });
   return true;
 }

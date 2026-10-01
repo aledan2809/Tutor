@@ -2,13 +2,24 @@
  * Parent monitoring for the family plan.
  *
  * When a child ignores their whole cascade, open a ParentEscalation: notify the
- * parent (in-app), re-notify every 30 min until they react, let them authorize
+ * parent (in-app), re-notify at their cadence until they react, let them authorize
  * an extra full cascade (incl. WhatsApp), and tell them the outcome — the child
  * engaged (positive, with the channel that reached them) or lapsed again
  * (negative). The decision bits are pure; the orchestration hits the DB and runs
  * from the cron.
+ *
+ * Limits (30.09.2026: one parent got ~1,100 e-mails in a week, and the shared sending account hit
+ * its daily cap for every app): a chain is known by its first rung, as the engine knows it, so a lapse
+ * already reported never looks new again; one open episode per child at a time — a new lapse replaces
+ * a waiting one (status `superseded`) instead of being hidden; at most
+ * MAX_PARENT_RENOTIFY re-notifications per episode; an episode nobody acted on closes after
+ * EPISODE_MAX_AGE_H without a word; one „reacted” notice per child, whatever number of episodes it
+ * closes; at most PARENT_ALERTS_PER_DAY delivered alerts per parent per day besides the first alert of
+ * an episode (the in-app list keeps the rest); every resolution claimed atomically, one run at a time,
+ * each run within RUN_BUDGET_MS.
  */
 
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { startEscalation } from "./engine";
 import { userIdsOnBreak } from "./breaks";
@@ -22,6 +33,9 @@ import { sendAppEmail } from "@/lib/email";
 import { coveredAsSecondParent, parentPaysForMetered } from "./parent-nudge";
 import { pausedUserIds } from "@/lib/access-server";
 import { escapeHtml } from "@/lib/sanitize";
+import { withCronLease } from "@/lib/cron-lease";
+import { isUndeliverableAddress } from "@/lib/email-recipients";
+import { bucharestTimeToUtc, bucharestYmd } from "@/lib/bucharest-day";
 
 const PARENT_ALERT_URL = "/dashboard/watcher/notifications";
 
@@ -56,7 +70,7 @@ export async function resolveUserAlertChannels(userId: string): Promise<string[]
         if (user?.telegramChatId) out.push("TELEGRAM");
         break;
       case "EMAIL":
-        if ((prefs?.email ?? true) && user?.email) out.push("EMAIL");
+        if ((prefs?.email ?? true) && user?.email && !isUndeliverableAddress(user.email)) out.push("EMAIL");
         break;
       case "WHATSAPP":
         if (
@@ -107,7 +121,8 @@ async function sendAlertOnChannel(
       });
     case "EMAIL": {
       const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
-      if (!user?.email) return false;
+      // A test or reserved address only bounces (and bounces hurt every app on the sending account).
+      if (!user?.email || isUndeliverableAddress(user.email)) return false;
       // sendAppEmail reports provider failure — propagate it so the cascade can
       // fall through to the next channel instead of silently "succeeding".
       // The message carries names people typed (a child's name): escaped, so it stays text.
@@ -187,6 +202,80 @@ export const RENOTIFY_MIN = PARENT_RENOTIFY_MIN; // re-nag the parent at this in
 export const STALL_MIN = PARENT_ALERT_STALL_MIN; // child chain considered lapsed after last touch
 export const AUTH_EXHAUST_MIN = 60; // authorized cascade considered lapsed after this
 const LOOKBACK_HOURS = 12;
+/** Re-notifications of one episode after its first alert; then it waits quietly for the parent. */
+export const MAX_PARENT_RENOTIFY = 3;
+/** An episode nobody acted on closes after this many hours (a new lapse opens a new one). */
+export const EPISODE_MAX_AGE_H = 24;
+/** An authorized extra cascade nobody resolved closes after this many hours. */
+const AUTHORIZED_MAX_AGE_H = 48;
+/**
+ * Alerts one parent may get on their devices in a Bucharest day, counting only those that went out;
+ * the in-app list keeps the rest. The first alert of an episode always goes (one per lapse).
+ */
+export const PARENT_ALERTS_PER_DAY = 8;
+const UNCAPPED_ALERTS = new Set(["no_reaction"]);
+const OPEN_STATUSES = ["awaiting_parent", "authorized"];
+/**
+ * How far back a chain's first rung is looked for: as long as the engine keeps a chain alive
+ * (CHAIN_MAX_AGE_DAYS in engine.ts) — a rung frozen over a break can lapse days after its first one.
+ */
+const CHAIN_LOOKBACK_DAYS = 14;
+/**
+ * A run stops starting new work after this long (claims make it safe to finish on the next run): a
+ * run that outlives its 30-minute lease would otherwise overlap the next one, which is how the
+ * hours-long runs of 30.09 sent the same notices again.
+ */
+const RUN_BUDGET_MS = 20 * 60_000;
+/** The extra cascade a parent authorized: every rung of it carries this reason. */
+const AUTHORIZED_REASON = "parent_authorized";
+const isAuthorizedCascade = (metadata: Prisma.JsonValue | null) =>
+  (metadata as Record<string, unknown> | null)?.reason === AUTHORIZED_REASON;
+
+/**
+ * The latest chain of each child, known by its first rung (level 1) as the engine knows it
+ * (`chainFacts`): its start, the last time it reached the child, and whether a rung is still waiting.
+ * The extra cascade a parent authorized is left out — it belongs to its episode (step 2).
+ */
+async function latestChains(
+  childIds: string[],
+  now: Date
+): Promise<Map<string, { start: Date; lastTouch: Date; active: boolean }>> {
+  const out = new Map<string, { start: Date; lastTouch: Date; active: boolean }>();
+  if (childIds.length === 0) return out;
+  const from = new Date(now.getTime() - CHAIN_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
+  const starts = await prisma.$queryRaw<{ userId: string; start: Date }[]>`
+    SELECT "userId", MAX("createdAt") AS "start"
+    FROM "EscalationEvent"
+    WHERE "userId" IN (${Prisma.join(childIds)})
+      AND "level" = 1 AND "isTest" = false AND "createdAt" >= ${from}
+      AND ("metadata"->>'reason') IS DISTINCT FROM ${AUTHORIZED_REASON}
+    GROUP BY "userId"`;
+  if (starts.length === 0) return out;
+  const startOf = new Map(starts.map((r) => [r.userId, r.start] as const));
+  const earliest = new Date(Math.min(...starts.map((r) => r.start.getTime())));
+  const events = await prisma.escalationEvent.findMany({
+    where: { userId: { in: [...startOf.keys()] }, createdAt: { gte: earliest }, isTest: false },
+    select: { userId: true, status: true, sentAt: true, createdAt: true, metadata: true },
+  });
+  for (const [userId, start] of startOf) out.set(userId, { start, lastTouch: start, active: false });
+  for (const e of events) {
+    const chain = out.get(e.userId);
+    if (!chain || e.createdAt.getTime() < chain.start.getTime() || isAuthorizedCascade(e.metadata)) continue;
+    // Stall is measured from the last time we actually REACHED the child (a sent
+    // event), so skipped/undeliverable rungs created later don't reset the clock.
+    if (e.sentAt && e.sentAt.getTime() > chain.lastTouch.getTime()) chain.lastTouch = e.sentAt;
+    if (e.status === "PENDING" || e.status === "ESCALATING") chain.active = true;
+  }
+  return out;
+}
+
+/** Thrown inside the episode transaction to undo it: something moved meanwhile, the next run decides. */
+class EpisodeMoved extends Error {}
+
+/** Pure: may this episode be re-notified again? (rung 1 = the first re-notification) */
+export function renotifyAllowed(parentAlertRung: number): boolean {
+  return parentAlertRung <= MAX_PARENT_RENOTIFY;
+}
 
 /** Pure: is it time to re-notify the parent again? */
 export function shouldRenotifyParent(
@@ -250,30 +339,56 @@ export function shouldRenotifyParentMode(
   }
 }
 
-/** One in-app alert row + real-time delivery to ONE guardian (rung = their own cascade step). */
+/** The start of today in Bucharest. */
+function startOfBucharestDay(now: Date): Date {
+  const { y, m, d } = bucharestYmd(now);
+  return bucharestTimeToUtc(y, m, d);
+}
+
+/**
+ * One in-app alert row + real-time delivery to ONE guardian (rung = their own cascade step). Past
+ * PARENT_ALERTS_PER_DAY delivered alerts today, only the in-app row is written — except for the first
+ * alert of an episode. Never throws: one parent's failure must not stop the others' alerts.
+ */
 async function notifyParent(
   parentId: string,
   childId: string,
   childName: string | null,
   alert: { alertType: string; title: string; message: string; channel?: string | null },
-  rung = 0
+  rung = 0,
+  now: Date = new Date()
 ): Promise<void> {
-  await prisma.notification.create({
-    data: {
-      userId: parentId,
-      type: "parent_alert",
-      title: alert.title,
-      message: alert.message,
-      metadata: {
-        childId,
-        childName,
-        alertType: alert.alertType,
-        channel: alert.channel ?? null,
-      },
-    },
-  });
-  // Real-time delivery to the parent's devices (not just the in-app feed).
-  await deliverParentAlert(parentId, alert.title, alert.message, rung);
+  try {
+    const capped = !UNCAPPED_ALERTS.has(alert.alertType);
+    // Only alerts that reached a device count: an in-app-only row, or one held by quiet hours, doesn't.
+    const deliveredToday = capped
+      ? await prisma.notification.count({
+          where: {
+            userId: parentId,
+            type: "parent_alert",
+            createdAt: { gte: startOfBucharestDay(now) },
+            metadata: { path: ["delivered"], equals: true },
+          },
+        })
+      : 0;
+    const metadata = {
+      childId,
+      childName,
+      alertType: alert.alertType,
+      channel: alert.channel ?? null,
+      delivered: false,
+    };
+    const row = await prisma.notification.create({
+      data: { userId: parentId, type: "parent_alert", title: alert.title, message: alert.message, metadata },
+    });
+    // Real-time delivery to the parent's devices (not just the in-app feed), within the daily limit.
+    if (capped && deliveredToday >= PARENT_ALERTS_PER_DAY) return;
+    if (await deliverParentAlert(parentId, alert.title, alert.message, rung)) {
+      await prisma.notification.update({ where: { id: row.id }, data: { metadata: { ...metadata, delivered: true } } });
+    }
+  } catch (e) {
+    console.error("notifyParent error:", e);
+  }
 }
 
 /**
@@ -285,7 +400,8 @@ async function notifyGuardians(
   childId: string,
   childName: string | null,
   alert: { alertType: string; title: string; message: string; channel?: string | null },
-  opts?: { relation?: "PARENT" }
+  opts?: { relation?: "PARENT" },
+  now: Date = new Date()
 ): Promise<number> {
   const links = await prisma.guardian.findMany({
     where: { childId, status: "active", ...(opts?.relation ? { relation: opts.relation } : {}) },
@@ -297,7 +413,7 @@ async function notifyGuardians(
   if (paused.has(childId)) return 0;
   const reached = links.filter((l) => !paused.has(l.parentId));
   for (const l of reached) {
-    await notifyParent(l.parentId, childId, childName, alert);
+    await notifyParent(l.parentId, childId, childName, alert, 0, now);
   }
   return reached.length;
 }
@@ -348,34 +464,72 @@ const chName = (c: string | null) => (c ? CHANNEL_RO[c] ?? c : "aplicație");
  * Drive the whole parent-monitoring lifecycle. Called from the cron.
  * Returns counts for observability.
  */
-export async function runParentMonitoring(now: Date = new Date()): Promise<{
-  opened: number;
-  renotified: number;
-  resolvedPositive: number;
-  resolvedNegative: number;
-}> {
+type MonitoringResult = { opened: number; renotified: number; resolvedPositive: number; resolvedNegative: number; expired: number };
+
+export async function runParentMonitoring(now: Date = new Date()): Promise<MonitoringResult & { ran: boolean }> {
+  // One run at a time: two runs working from their own lists sent the same notices again and again.
+  const run = await withCronLease("parent-monitoring", 30 * 60_000, () => monitorOnce(now));
+  return run.ran
+    ? { ran: true, ...run.result }
+    : { ran: false, opened: 0, renotified: 0, resolvedPositive: 0, resolvedNegative: 0, expired: 0 };
+}
+
+async function monitorOnce(now: Date): Promise<MonitoringResult> {
+  const deadline = Date.now() + RUN_BUDGET_MS;
+  const outOfTime = () => Date.now() > deadline;
   let opened = 0;
   let renotified = 0;
   let resolvedPositive = 0;
   let resolvedNegative = 0;
+  let expired = 0;
+  // Children whose parents were told something this run: one notice per child, whatever number of
+  // episodes it closes.
+  const announced = new Set<string>();
 
   // Vacanță: copiii în vacanță sunt excluși complet — niciun fel de alertă către părinte.
   const onBreak = await userIdsOnBreak(now);
 
+  // 0) Episodes nobody acted on for a day close without a word: a new lapse opens a fresh one. An
+  //    authorized extra cascade left unresolved closes after two (it would block new episodes). Counted
+  //    from when the episode opened (or was authorized), not from its chain's start — a chain can lapse
+  //    long after its first rung.
+  const stale = await prisma.parentEscalation.updateMany({
+    where: {
+      OR: [
+        { status: "awaiting_parent", createdAt: { lt: new Date(now.getTime() - EPISODE_MAX_AGE_H * 60 * 60 * 1000) } },
+        {
+          status: "authorized",
+          OR: [
+            { authorizedAt: { lt: new Date(now.getTime() - AUTHORIZED_MAX_AGE_H * 60 * 60 * 1000) } },
+            { authorizedAt: null, createdAt: { lt: new Date(now.getTime() - AUTHORIZED_MAX_AGE_H * 60 * 60 * 1000) } },
+          ],
+        },
+      ],
+    },
+    data: { status: "expired", resolvedAt: now },
+  });
+  expired = stale.count;
+
   const open = await prisma.parentEscalation.findMany({
-    where: { status: { in: ["awaiting_parent", "authorized"] } },
+    where: { status: { in: OPEN_STATUSES } },
     include: { child: { select: { name: true } } },
   });
 
   // 1) Resolve episodes where the child has since engaged → positive.
   for (const esc of open) {
+    if (outOfTime()) break;
     if (onBreak.has(esc.childId)) continue;
     const { reacted, channel } = await childReactionSince(esc.childId, esc.openedFor);
     if (reacted) {
-      await prisma.parentEscalation.update({
-        where: { id: esc.id },
+      // Claimed: only the run that moves it out of its open state announces it.
+      const claimed = await prisma.parentEscalation.updateMany({
+        where: { id: esc.id, status: esc.status },
         data: { status: "resolved_positive", childChannel: channel, resolvedAt: now },
       });
+      if (claimed.count === 0) continue;
+      resolvedPositive++;
+      if (announced.has(esc.childId)) continue;
+      announced.add(esc.childId);
       // Episode lifecycle stays PARENT-only (the TUTOR never saw its opening).
       await notifyGuardians(
         esc.childId,
@@ -386,23 +540,28 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
           message: `${esc.child.name ?? "Copilul"} a reacționat (via ${chName(channel)}).`,
           channel,
         },
-        { relation: "PARENT" }
+        { relation: "PARENT" },
+        now
       );
-      resolvedPositive++;
     }
   }
 
   // 2) Authorized episodes that lapsed again (no reaction past the window) → negative.
   for (const esc of open) {
+    if (outOfTime()) break;
     if (onBreak.has(esc.childId)) continue;
     if (esc.status !== "authorized" || !esc.authorizedAt) continue;
     if (now.getTime() - esc.authorizedAt.getTime() < AUTH_EXHAUST_MIN * 60_000) continue;
     const { reacted } = await childReactionSince(esc.childId, esc.authorizedAt);
     if (reacted) continue; // handled by step 1 next tick
-    await prisma.parentEscalation.update({
-      where: { id: esc.id },
+    const claimed = await prisma.parentEscalation.updateMany({
+      where: { id: esc.id, status: "authorized" },
       data: { status: "resolved_negative", resolvedAt: now },
     });
+    if (claimed.count === 0) continue;
+    resolvedNegative++;
+    if (announced.has(esc.childId)) continue;
+    announced.add(esc.childId);
     await notifyGuardians(
       esc.childId,
       esc.child.name,
@@ -411,59 +570,128 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
         title: "Nu a reacționat ❌",
         message: `${esc.child.name ?? "Copilul"} nu a reacționat nici după reminderul suplimentar.`,
       },
-      { relation: "PARENT" }
+      { relation: "PARENT" },
+      now
     );
-    resolvedNegative++;
   }
 
-  // 3) Open episodes for children whose cascade lapsed with no reaction.
+  // 3) Open episodes for children whose latest chain lapsed with no reaction. A chain is known by its
+  //    first rung: the earliest event of the 12-hour window slid forward as events aged out and made one
+  //    lapse look new again (4–6 episodes a child a day), and a rung created late in a slow cascade must
+  //    not look like a new lapse either. A chain already has its episode when one was opened for it or
+  //    after it (openedFor ≥ its start).
   const since = new Date(now.getTime() - LOOKBACK_HOURS * 60 * 60 * 1000);
   const recent = await prisma.escalationEvent.findMany({
     where: { createdAt: { gte: since }, isTest: false },
-    orderBy: { createdAt: "asc" },
-    select: { userId: true, status: true, sentAt: true, createdAt: true },
+    select: { userId: true, metadata: true },
   });
-  const byChild = new Map<string, { start: Date; lastTouch: Date; active: boolean }>();
-  for (const e of recent) {
-    const cur = byChild.get(e.userId) ?? { start: e.createdAt, lastTouch: e.createdAt, active: false };
-    if (e.createdAt < cur.start) cur.start = e.createdAt;
-    // Stall is measured from the last time we actually REACHED the child (a sent
-    // event), so skipped/undeliverable rungs created later don't reset the clock.
-    if (e.sentAt && e.sentAt.getTime() > cur.lastTouch.getTime()) cur.lastTouch = e.sentAt;
-    if (e.status === "PENDING" || e.status === "ESCALATING") cur.active = true;
-    byChild.set(e.userId, cur);
-  }
+  const candidates = [...new Set(recent.filter((e) => !isAuthorizedCascade(e.metadata)).map((e) => e.userId))];
+  const chains = await latestChains(candidates, now);
+  const lastOpened =
+    chains.size === 0
+      ? []
+      : await prisma.parentEscalation.groupBy({
+          by: ["childId"],
+          where: { childId: { in: [...chains.keys()] } },
+          _max: { openedFor: true },
+        });
+  const reportedUpTo = new Map(lastOpened.map((r) => [r.childId, r._max.openedFor]));
   // Zile fără program (weekend / nimic programat): nu deschidem alertă nouă către părinte.
-  const scheduledChildren = await scheduledTodayFilter([...byChild.keys()], now);
-  for (const [childId, chain] of byChild) {
+  const scheduledChildren = await scheduledTodayFilter([...chains.keys()], now);
+  for (const [childId, chain] of chains) {
+    if (outOfTime()) break;
+    const reported = reportedUpTo.get(childId);
+    if (reported && reported.getTime() >= chain.start.getTime()) continue; // this chain has its episode
     if (onBreak.has(childId)) continue; // vacanță
     if (!scheduledChildren.has(childId)) continue; // zi fără program: fără alertă nouă
     if (chain.active) continue; // chain still running
-    // Episodes (and the authorize-extra-memento flow) belong to PARENT-relation
-    // guardians only; a TUTOR-relation guardian stays on threshold alerts.
-    const linked = await prisma.guardian.findMany({
-      where: { childId, status: "active", relation: "PARENT" },
-      select: { parentId: true },
-    });
-    // A paused family (access.ts) gets no alerts: neither a paused parent nor about a paused child.
-    const pausedHere = await pausedUserIds([childId, ...linked.map((g) => g.parentId)], now);
-    if (pausedHere.has(childId)) continue;
-    const guardians = linked.filter((g) => !pausedHere.has(g.parentId));
-    if (guardians.length === 0) continue;
-
-    const reaction = await childReactionSince(childId, chain.start);
-    if (reaction.reacted) {
-      // Prompt reaction (no no-reaction episode) → tell the parent which channel
-      // worked, once per episode. Dedup via an existing alert for this child.
-      const alreadyReported = await prisma.notification.findFirst({
-        where: {
-          type: "parent_alert",
-          createdAt: { gte: chain.start },
-          metadata: { path: ["childId"], equals: childId },
-        },
-        select: { id: true },
+    // One child's failure must not stop the others' alerts.
+    try {
+      // Episodes (and the authorize-extra-memento flow) belong to PARENT-relation
+      // guardians only; a TUTOR-relation guardian stays on threshold alerts.
+      const linked = await prisma.guardian.findMany({
+        where: { childId, status: "active", relation: "PARENT" },
+        select: { parentId: true },
       });
-      if (!alreadyReported) {
+      // A paused family (access.ts) gets no alerts: neither a paused parent nor about a paused child.
+      const pausedHere = await pausedUserIds([childId, ...linked.map((g) => g.parentId)], now);
+      if (pausedHere.has(childId)) continue;
+      const guardians = linked.filter((g) => !pausedHere.has(g.parentId));
+      if (guardians.length === 0) continue;
+
+      const reaction = await childReactionSince(childId, chain.start);
+      // No reaction → a no-reaction episode, but only after a stall grace.
+      if (!reaction.reacted && now.getTime() - chain.lastTouch.getTime() < STALL_MIN * 60_000) continue;
+      // Under a lock on the child and checked again inside it, so two runs can never report the same
+      // chain twice, even past their leases. A prompt reaction is recorded as a closed episode, so the
+      // chain counts as reported (a deleted notice used to be sent again).
+      const openedHere = await prisma
+        .$transaction(
+          async (tx) => {
+            await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('parent-episode'), hashtext(${childId}))`;
+            const latest = await tx.parentEscalation.findFirst({
+              where: { childId },
+              orderBy: { openedFor: "desc" },
+              select: { openedFor: true },
+            });
+            if (latest && latest.openedFor.getTime() >= chain.start.getTime()) return false;
+            if (reaction.reacted) {
+              for (const g of guardians) {
+                await tx.parentEscalation.create({
+                  data: {
+                    parentId: g.parentId,
+                    childId,
+                    status: "resolved_positive",
+                    openedFor: chain.start,
+                    childChannel: reaction.channel,
+                    resolvedAt: now,
+                  },
+                });
+              }
+              return true;
+            }
+            const stillOpen = await tx.parentEscalation.findMany({
+              where: { childId, status: { in: OPEN_STATUSES } },
+              select: { id: true, status: true },
+            });
+            // The parent's extra cascade is running: step 2 owns this child until it resolves.
+            if (stillOpen.some((e) => e.status === "authorized")) return false;
+            // One open episode per child: a new lapse replaces the one still waiting, so the parent hears
+            // about this morning's miss and not only yesterday evening's.
+            if (stillOpen.length > 0) {
+              const replaced = await tx.parentEscalation.updateMany({
+                where: { id: { in: stillOpen.map((e) => e.id) }, status: "awaiting_parent" },
+                data: { status: "superseded", resolvedAt: now },
+              });
+              // One moved meanwhile (a parent authorized the extra cascade): undo, the next run decides.
+              if (replaced.count < stillOpen.length) throw new EpisodeMoved();
+            }
+            for (const g of guardians) {
+              await tx.parentEscalation.create({
+                data: {
+                  parentId: g.parentId,
+                  childId,
+                  status: "awaiting_parent",
+                  openedFor: chain.start,
+                  // First alert (below) goes out on rung 0 = the parent's preferred
+                  // channel; the next re-notify starts one rung down.
+                  parentAlertRung: 1,
+                  lastParentNotifiedAt: now,
+                },
+              });
+            }
+            return true;
+          },
+          // A slow database must not roll the opening back again and again (the default is 5 s).
+          { timeout: 15_000, maxWait: 5_000 }
+        )
+        .catch((e) => {
+          if (e instanceof EpisodeMoved) return false;
+          throw e;
+        });
+      if (!openedHere) continue;
+      if (reaction.reacted) {
+        if (announced.has(childId)) continue; // told already this run (step 1)
         const c = await prisma.user.findUnique({ where: { id: childId }, select: { name: true } });
         await notifyGuardians(
           childId,
@@ -474,47 +702,30 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
             message: `${c?.name ?? "Copilul"} a reacționat (via ${chName(reaction.channel)}).`,
             channel: reaction.channel,
           },
-          { relation: "PARENT" }
+          { relation: "PARENT" },
+          now
         );
+        continue;
       }
-      continue;
-    }
-
-    // No reaction → open a no-reaction episode, but only after a stall grace.
-    if (now.getTime() - chain.lastTouch.getTime() < STALL_MIN * 60_000) continue;
-    const existing = await prisma.parentEscalation.findFirst({
-      where: { childId, openedFor: { gte: chain.start } },
-    });
-    if (existing) continue; // already tracked this episode
-    const child = await prisma.user.findUnique({ where: { id: childId }, select: { name: true } });
-    for (const g of guardians) {
-      await prisma.parentEscalation.create({
-        data: {
-          parentId: g.parentId,
-          childId,
-          status: "awaiting_parent",
-          openedFor: chain.start,
-          // First alert (below) goes out on rung 0 = the parent's preferred
-          // channel; the next re-notify starts one rung down.
-          parentAlertRung: 1,
-          lastParentNotifiedAt: now,
+      const child = await prisma.user.findUnique({ where: { id: childId }, select: { name: true } });
+      await notifyGuardians(
+        childId,
+        child?.name ?? null,
+        {
+          alertType: "no_reaction",
+          title: "Nu a reacționat la reminder",
+          message: `${child?.name ?? "Copilul"} nu a reacționat la niciun canal. Poți autoriza un reminder suplimentar.`,
         },
-      });
+        { relation: "PARENT" },
+        now
+      );
+      opened++;
+    } catch (e) {
+      console.error("parent-monitor: child failed", childId, e);
     }
-    await notifyGuardians(
-      childId,
-      child?.name ?? null,
-      {
-        alertType: "no_reaction",
-        title: "Nu a reacționat la reminder",
-        message: `${child?.name ?? "Copilul"} nu a reacționat la niciun canal. Poți autoriza un reminder suplimentar.`,
-      },
-      { relation: "PARENT" }
-    );
-    opened++;
   }
 
-  // 4) Re-notify parents still awaiting, every RENOTIFY_MIN.
+  // 4) Re-notify parents still awaiting, at their cadence — at most MAX_PARENT_RENOTIFY times.
   const awaiting = await prisma.parentEscalation.findMany({
     where: { status: "awaiting_parent" },
     include: { child: { select: { name: true } } },
@@ -524,12 +735,28 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
     now
   );
   const pausedAwaiting = await pausedUserIds(awaiting.flatMap((e) => [e.parentId, e.childId]), now);
+  // A parent no longer linked to the child (removed from the family) gets no more re-notifications.
+  const stillLinked =
+    awaiting.length === 0
+      ? []
+      : await prisma.guardian.findMany({
+          where: {
+            status: "active",
+            relation: "PARENT",
+            OR: awaiting.map((e) => ({ parentId: e.parentId, childId: e.childId })),
+          },
+          select: { parentId: true, childId: true },
+        });
+  const linked = new Set(stillLinked.map((l) => `${l.parentId}:${l.childId}`));
   for (const esc of awaiting) {
+    if (outOfTime()) break;
+    if (!linked.has(`${esc.parentId}:${esc.childId}`)) continue;
     // Părinte în pauză sau copil în pauză: fără re-anunțuri. Checked only on the parent, a paused
     // child's episode re-alerted a parent covered some other way every 30 minutes (review r6, X5).
     if (pausedAwaiting.has(esc.parentId) || pausedAwaiting.has(esc.childId)) continue;
     if (onBreak.has(esc.childId)) continue; // vacanță
     if (!scheduledAwaiting.has(esc.childId)) continue; // zi fără program: nu re-notificăm
+    if (!renotifyAllowed(esc.parentAlertRung)) continue; // enough: it waits quietly for the parent
     // Cadence is the parent's own choice (decizia 03): every 30 min / every N hours /
     // once a day at a fixed local time / a single alert. One prefs fetch covers both
     // the cadence and the quiet-hours check below.
@@ -545,6 +772,12 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
     // so the parent's cascade resumes exactly where it left off in the morning
     // (instead of burning ~18 silent rungs overnight).
     if (isQuietHours(tz, pp?.quietHoursStart ?? "22:00", pp?.quietHoursEnd ?? "07:00", now)) continue;
+    // Claimed before sending: a run that finds the rung moved on (another run sent it) skips it.
+    const claimed = await prisma.parentEscalation.updateMany({
+      where: { id: esc.id, status: "awaiting_parent", parentAlertRung: esc.parentAlertRung },
+      data: { lastParentNotifiedAt: now, parentAlertRung: esc.parentAlertRung + 1 },
+    });
+    if (claimed.count === 0) continue;
     // Re-notify ONLY this episode's parent (not every guardian of the child), one
     // rung further down THEIR own channel cascade each time.
     await notifyParent(
@@ -556,16 +789,13 @@ export async function runParentMonitoring(now: Date = new Date()): Promise<{
         title: "Încă nu a reacționat",
         message: `${esc.child.name ?? "Copilul"} încă nu a reacționat. Autorizează un reminder suplimentar?`,
       },
-      esc.parentAlertRung
+      esc.parentAlertRung,
+      now
     );
-    await prisma.parentEscalation.update({
-      where: { id: esc.id },
-      data: { lastParentNotifiedAt: now, parentAlertRung: esc.parentAlertRung + 1 },
-    });
     renotified++;
   }
 
-  return { opened, renotified, resolvedPositive, resolvedNegative };
+  return { opened, renotified, resolvedPositive, resolvedNegative, expired };
 }
 
 /**
@@ -583,10 +813,12 @@ export async function authorizeExtraMemento(
   });
   if (!esc) return { ok: false };
 
-  await prisma.parentEscalation.update({
-    where: { id: esc.id },
+  // Guarded: an episode replaced or closed meanwhile isn't authorized next to its successor.
+  const authorized = await prisma.parentEscalation.updateMany({
+    where: { id: esc.id, status: "awaiting_parent" },
     data: { status: "authorized", authorizedAt: new Date() },
   });
+  if (authorized.count === 0) return { ok: false };
 
   await startEscalation({
     userId: childId,

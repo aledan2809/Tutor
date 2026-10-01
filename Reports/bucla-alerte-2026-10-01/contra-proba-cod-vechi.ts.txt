@@ -1,0 +1,56 @@
+// Contra-proba (01.10.2026): aceleași situații pe monitorul VECHI și pe cel NOU. Monitorul vechi se pune
+// temporar lângă cel nou și se șterge după rulare:
+//   git show <commit-dinainte>:src/lib/escalation/parent-monitor.ts > src/lib/escalation/parent-monitor-old-qa.ts
+//   mkdir -p .qa-tmp && cp Reports/bucla-alerte-2026-10-01/contra-proba-cod-vechi.ts.txt .qa-tmp/contra.ts
+//   DATABASE_URL=postgresql://tutor:tutorqa@127.0.0.1:55432/tutor_qa npx tsx .qa-tmp/contra.ts
+//   rm -rf .qa-tmp src/lib/escalation/parent-monitor-old-qa.ts
+// Fără AUTH_RESEND_KEY și fără SMTP_HOST în mediu, nu pleacă niciun e-mail: se numără doar rândurile din aplicație.
+// Rezultat 01.10: VECHI 2 episoade · 12 re-anunțuri · 2 „A reacționat” — NOU 1 · 3 · 1.
+// Same situations on the old and the new monitor: what the probe catches must differ.
+import { prisma } from "@/lib/prisma";
+import * as oldM from "@/lib/escalation/parent-monitor-old-qa";
+import * as newM from "@/lib/escalation/parent-monitor";
+
+const MIN = 60_000, HOUR = 60 * MIN;
+async function scenario(label: string, run: (now?: Date) => Promise<unknown>) {
+  const s = Date.now().toString().slice(-6);
+  const mk = (k: string, data: object, d = "qa.etutor.ro") => prisma.user.create({ data: { email: `qa-contra-${k}-${s}@${d}`, name: `QA ${k}`, ...data } });
+  const p = await mk("p", { accountRole: "PARENT" });
+  const c = await mk("c", { accountRole: "STUDENT", birthDate: new Date("2000-01-01") }, "example.invalid");
+  await prisma.guardian.create({ data: { parentId: p.id, childId: c.id } });
+  // A chain run to its last rung: first rung (level 1, how a chain is known) + last rung (5).
+  const ev = (level: number, channel: "PUSH" | "SMS", createdAgo: number, sentAgo: number) =>
+    prisma.escalationEvent.create({ data: { userId: c.id, level, status: "COMPLETED", channel, createdAt: new Date(Date.now() - createdAgo * MIN), sentAt: new Date(Date.now() - sentAgo * MIN) } });
+  const notes = (t: string) => prisma.notification.count({ where: { userId: p.id, type: "parent_alert", metadata: { path: ["alertType"], equals: t } } });
+
+  const first = await ev(1, "PUSH", 70, 70);
+  await ev(5, "SMS", 65, 60);
+  await run();
+  // The same lapse, its first rung now outside the 12-hour window (the loop's mechanism): the old code
+  // took the window's earliest remaining event for a new start and opened another episode.
+  const aged = new Date(Date.now() - 13 * HOUR);
+  await prisma.escalationEvent.update({ where: { id: first.id }, data: { createdAt: aged, sentAt: aged } });
+  await prisma.parentEscalation.updateMany({ where: { childId: c.id }, data: { openedFor: aged } });
+  await run();
+  const episodes = await prisma.parentEscalation.count({ where: { childId: c.id } });
+  // Six due re-notifications.
+  for (let i = 0; i < 6; i++) {
+    await prisma.parentEscalation.updateMany({ where: { childId: c.id, status: "awaiting_parent" }, data: { lastParentNotifiedAt: new Date(Date.now() - 31 * MIN) } });
+    await run();
+  }
+  const reminders = await notes("no_reaction_reminder");
+  // The child reacts.
+  await prisma.session.create({ data: { userId: c.id, startedAt: new Date() } });
+  await run();
+  const reacted = await notes("reacted_positive");
+  console.log(`${label}: episoade deschise=${episodes} · re-anunțuri=${reminders} · „A reacționat”=${reacted}`);
+  await prisma.notification.deleteMany({ where: { userId: p.id } });
+  await prisma.user.deleteMany({ where: { email: { startsWith: "qa-contra-" } } });
+}
+
+async function main() {
+  await scenario("COD VECHI", (now) => oldM.runParentMonitoring(now));
+  await scenario("COD NOU  ", (now) => newM.runParentMonitoring(now));
+  await prisma.$disconnect();
+}
+main();

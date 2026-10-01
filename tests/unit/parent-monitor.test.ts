@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   shouldRenotifyParent,
   shouldRenotifyParentMode,
+  renotifyAllowed,
+  MAX_PARENT_RENOTIFY,
   RENOTIFY_MIN,
 } from "@/lib/escalation/parent-monitor";
 
@@ -78,5 +80,19 @@ describe("shouldRenotifyParentMode", () => {
 
   it("unknown mode falls back to STANDARD_30", () => {
     expect(shouldRenotifyParentMode(cfg({ mode: "WHATEVER" }), null, now)).toBe(true);
+  });
+});
+
+describe("renotifyAllowed (30.09.2026: one episode reached its 84th alert)", () => {
+  it("allows exactly MAX_PARENT_RENOTIFY re-notifications after the first alert", () => {
+    // The first alert leaves the episode on rung 1; each re-notification moves it one rung on.
+    const sent = [1, 2, 3, 4, 5, 6].filter(renotifyAllowed).length;
+    expect(MAX_PARENT_RENOTIFY).toBe(3);
+    expect(sent).toBe(MAX_PARENT_RENOTIFY);
+  });
+
+  it("stays quiet on the rungs past the limit, however old the episode", () => {
+    expect(renotifyAllowed(MAX_PARENT_RENOTIFY + 1)).toBe(false);
+    expect(renotifyAllowed(84)).toBe(false);
   });
 });

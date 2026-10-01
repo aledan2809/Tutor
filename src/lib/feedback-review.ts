@@ -12,6 +12,7 @@ import { prisma } from "@/lib/prisma";
 import { callTextAI } from "@/lib/grila-generate";
 import { telegramAlertToUser } from "@/lib/notifications/service";
 import { sendAppEmail } from "@/lib/email";
+import { isUndeliverableAddress } from "@/lib/email-recipients";
 import { secondOpinion, type SecondOpinion } from "@/lib/content-quality-mesh";
 
 const APP_URL = (process.env.AUTH_URL ?? "https://etutor.ro").replace(/\/$/, "");
@@ -125,7 +126,8 @@ async function deliverToStudent(
   await telegramAlertToUser(userId, { text: `${title}\n\n${decision}`, url, buttonLabel: "Deschide" });
   if (prefs?.email !== false) {
     const u = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, name: true } });
-    if (u?.email) {
+    // A test or reserved address only bounces (email-recipients.ts).
+    if (u?.email && !isUndeliverableAddress(u.email)) {
       await sendAppEmail({
         to: u.email,
         subject: title,

@@ -175,8 +175,9 @@ export async function runParentNudges(now: Date = new Date()): Promise<{ fired: 
       }
       // Child reacted since the nudge started → stop + tell the parent.
       if (await childReactedSince(n.childId, n.createdAt)) {
-        await prisma.parentNudge.update({ where: { id: n.id }, data: { active: false } });
-        await notifyParentReacted(n.parentId, n.childId);
+        // Claimed: only the run that stops the series tells the parent.
+        const stoppedHere = await prisma.parentNudge.updateMany({ where: { id: n.id, active: true }, data: { active: false } });
+        if (stoppedHere.count > 0) await notifyParentReacted(n.parentId, n.childId);
         stopped++;
         continue;
       }
@@ -202,13 +203,15 @@ export async function runParentNudges(now: Date = new Date()): Promise<{ fired: 
         (n.intervalMin != null && now.getTime() - n.lastFiredAt.getTime() >= n.intervalMin * 60_000);
       if (!due) continue;
 
+      // Claimed before sending: a second run working from the same list finds fireCount moved on.
+      const oneShot = n.intervalMin == null;
+      const claimed = await prisma.parentNudge.updateMany({
+        where: { id: n.id, active: true, fireCount: n.fireCount },
+        data: { lastFiredAt: now, fireCount: { increment: 1 }, active: !oneShot },
+      });
+      if (claimed.count === 0) continue;
       await fireNudge(n.childId, n.message, n.channels, n.url ?? "/dashboard/practice", {
         meteredAllowed: await parentPaysForMetered(n.parentId, n.childId),
-      });
-      const oneShot = n.intervalMin == null;
-      await prisma.parentNudge.update({
-        where: { id: n.id },
-        data: { lastFiredAt: now, fireCount: { increment: 1 }, active: !oneShot },
       });
       fired++;
     } catch (err) {

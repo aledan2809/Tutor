@@ -15,6 +15,7 @@ import type { EscalationChannel } from "@prisma/client";
 import { getTelegramClient } from "@/lib/telegram/connect";
 import { buildTelegramButtonUrl } from "@/lib/escalation/tap-link";
 import { sendAppEmail } from "@/lib/email";
+import { isUndeliverableAddress } from "@/lib/email-recipients";
 import { meteredChannelsCovered, SELECT_ACOPERIRE_CANALE } from "@/lib/escalation/segmentation";
 
 interface NotificationPayload {
@@ -535,6 +536,8 @@ async function sendEmailNotification(
     console.warn(`No email for user ${payload.userId}`);
     return false;
   }
+  // A test or reserved address only bounces (email-recipients.ts).
+  if (isUndeliverableAddress(user.email)) return false;
 
   const userName = (payload.metadata.userName as string) ?? user.name ?? "Salut";
   const base = (process.env.AUTH_URL ?? "https://etutor.ro").replace(/\/$/, "");

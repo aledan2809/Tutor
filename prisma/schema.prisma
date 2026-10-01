@@ -201,9 +201,9 @@ model ParentEscalation {
   id                   String    @id @default(cuid())
   parentId             String
   childId              String
-  status               String    @default("awaiting_parent") // awaiting_parent | authorized | resolved_positive | resolved_negative
+  status               String    @default("awaiting_parent") // awaiting_parent | authorized | resolved_positive | resolved_negative | expired | superseded
   childChannel         String? // channel that finally reached the child (attribution)
-  openedFor            DateTime  @default(now()) // reference time the child's chain lapsed
+  openedFor            DateTime  @default(now()) // start (first rung) of the chain this episode reports
   // How many alerts we've already sent the parent for this episode — indexes into
   // the parent's OWN ordered channel cascade (first alert on their preferred
   // channel, each re-notify moves one rung down, stays on the last).

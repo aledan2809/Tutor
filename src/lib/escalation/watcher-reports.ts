@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { getLinkedChildIds } from "@/lib/guardian";
 import { webPushToUser, telegramAlertToUser } from "@/lib/notifications/service";
 import { sendAppEmail } from "@/lib/email";
+import { isUndeliverableAddress } from "@/lib/email-recipients";
 import {
   buildChildReport,
   renderReportHtml,
@@ -121,7 +122,8 @@ export async function deliverReport(
 
   if (channels.includes("EMAIL")) {
     const parent = await prisma.user.findUnique({ where: { id: parentId }, select: { email: true } });
-    if (parent?.email) {
+    // A test or reserved address only bounces (email-recipients.ts).
+    if (parent?.email && !isUndeliverableAddress(parent.email)) {
       result.email = await sendAppEmail({
         to: parent.email,
         subject,
@@ -165,17 +167,29 @@ export async function runWatcherReports(now: Date = new Date()): Promise<number>
     if (paused.has(s.parentId)) continue;
     const { due, today } = isReportDue(s, now);
     if (!due) continue;
+    // Claimed before sending: two runs at once read the same lastSentOn and both sent the report.
+    // Stamped even with 0 children so we don't retry all day.
+    const claimed = await prisma.watcherReportSchedule.updateMany({
+      where: { id: s.id, lastSentOn: s.lastSentOn },
+      data: { lastSentOn: today },
+    });
+    if (claimed.count === 0) continue;
+    let built: Awaited<ReturnType<typeof buildReportsForSchedule>>;
     try {
-      const { reports, sections, periodLabel } = await buildReportsForSchedule(s, now);
-      if (reports.length > 0) {
-        await deliverReport(s.parentId, reports, sections, s.channels, periodLabel);
+      built = await buildReportsForSchedule(s, now);
+    } catch (e) {
+      // Nothing went out: give the day back, so a later run retries it.
+      console.error("runWatcherReports error:", e);
+      await prisma.watcherReportSchedule
+        .updateMany({ where: { id: s.id, lastSentOn: today }, data: { lastSentOn: s.lastSentOn } })
+        .catch(() => undefined);
+      continue;
+    }
+    try {
+      if (built.reports.length > 0) {
+        await deliverReport(s.parentId, built.reports, built.sections, s.channels, built.periodLabel);
         sent++;
       }
-      // Stamp lastSentOn even with 0 children so we don't retry all day.
-      await prisma.watcherReportSchedule.update({
-        where: { id: s.id },
-        data: { lastSentOn: today },
-      });
     } catch (e) {
       console.error("runWatcherReports error:", e);
     }

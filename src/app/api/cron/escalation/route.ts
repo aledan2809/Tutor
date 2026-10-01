@@ -8,6 +8,7 @@ import { runFeedbackReview } from "@/lib/feedback-review";
 import { runWatcherReports } from "@/lib/escalation/watcher-reports";
 import { runAccessLifecycle } from "@/lib/access-lifecycle";
 import { withErrorHandler } from "@/lib/api-handler";
+import { withCronLease } from "@/lib/cron-lease";
 
 /**
  * POST /api/cron/escalation — Cron job endpoint for escalation processing
@@ -29,6 +30,17 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // One run of this route at a time (30.09.2026: runs lasting hours overlapped and each worked from
+  // its own stale list). Cutting the caller's connection doesn't stop a run on the server, so the
+  // guard is here and not in the crontab. The sections below also claim each send on their own.
+  const run = await withCronLease("escalation-route", 30 * 60_000, () => runAll());
+  if (!run.ran) {
+    return NextResponse.json({ success: true, ran: false, timestamp: new Date().toISOString() });
+  }
+  return NextResponse.json(run.result);
+}
+
+async function runAll() {
   // Scheduled reminders run first (they may start fresh chains), then advancement of all pending
   // chains, then detection. When the minute cron holds the lease, it is doing the first two and this
   // run skips them.
@@ -48,8 +60,9 @@ async function _POST(req: NextRequest) {
   // pause switch is off.
   const accessLifecycle = await runAccessLifecycle();
 
-  return NextResponse.json({
+  return {
     success: true,
+    ran: true,
     detectionEnabled: escalationDetectionEnabled(),
     remindersFired: chains.remindersFired,
     missedSessions: missedUserIds.length,
@@ -62,7 +75,7 @@ async function _POST(req: NextRequest) {
     thresholdAlerts,
     accessLifecycle,
     timestamp: new Date().toISOString(),
-  });
+  };
 }
 
 export const POST = withErrorHandler(_POST);

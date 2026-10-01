@@ -32,6 +32,7 @@ import { userIdsOnBreak } from "./breaks";
 import { scheduledTodayFilter } from "./scheduled-days";
 import { pausedUserIds } from "@/lib/access-server";
 import { getUserPhone } from "@/lib/phone-setting";
+import { isUndeliverableAddress } from "@/lib/email-recipients";
 
 interface EscalationContext {
   userId: string;
@@ -221,7 +222,8 @@ export async function processEscalationEvent(eventId: string): Promise<void> {
   if (event.channel === "EMAIL" || event.channel === "WHATSAPP" || event.channel === "SMS") {
     const phone = event.channel !== "EMAIL" ? await getUserPhone(event.userId) : null;
     const unreachable = rungCannotReach(event.channel, {
-      hasEmail: Boolean(event.user.email),
+      // A test or reserved address can only bounce: skip the rung instead of retrying it.
+      hasEmail: Boolean(event.user.email) && !isUndeliverableAddress(event.user.email),
       hasPhone: typeof phone === "string" && phone.trim().length > 0,
       covered: meteredChannelsCovered(event.user),
       isTest: event.isTest,
