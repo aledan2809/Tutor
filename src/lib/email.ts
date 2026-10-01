@@ -58,6 +58,12 @@ export async function sendAppEmail(opts: {
         signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
       });
       if (res.ok) return true;
+      // A 409 on a key: Resend is still handling an earlier request with it, or the key came with a different
+      // message. Each of our keys names one message, so it is the first: no second copy through SMTP.
+      if (res.status === 409 && opts.idempotencyKey) {
+        logger.warn("Resend already had this message (idempotency key); not sent again");
+        return true;
+      }
       logger.error("Resend email rejected", undefined, { status: res.status });
     } catch (err) {
       // Timed out: Resend may have sent it anyway, so no second copy through SMTP.

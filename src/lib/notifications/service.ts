@@ -15,7 +15,7 @@ import type { EscalationChannel } from "@prisma/client";
 import { getTelegramClient } from "@/lib/telegram/connect";
 import { buildTelegramButtonUrl } from "@/lib/escalation/tap-link";
 import { sendAppEmail } from "@/lib/email";
-import { SEND_TIMEOUT_MS, withSendTimeout } from "@/lib/send-timeout";
+import { SEND_TIMEOUT_MS, SendTimeoutError, withSendTimeout } from "@/lib/send-timeout";
 import { isUndeliverableAddress } from "@/lib/email-recipients";
 import { meteredChannelsCovered, SELECT_ACOPERIRE_CANALE } from "@/lib/escalation/segmentation";
 
@@ -152,7 +152,7 @@ export async function webPushToUser(
         delivered++;
       } catch (err) {
         const sc = (err as { statusCode?: number }).statusCode;
-        if (sc === 410 || sc === 404) await prisma.pushSubscription.delete({ where: { id: sub.id } });
+        if (sc === 410 || sc === 404) await prisma.pushSubscription.deleteMany({ where: { id: sub.id } });
       }
     }
   } catch (e) {
@@ -271,7 +271,7 @@ async function sendPushNotification(
           const statusCode = (err as { statusCode?: number }).statusCode;
           if (statusCode === 410 || statusCode === 404) {
             // Subscription expired — clean up
-            await prisma.pushSubscription.delete({ where: { id: sub.id } });
+            await prisma.pushSubscription.deleteMany({ where: { id: sub.id } });
           }
         }
       }
@@ -469,7 +469,7 @@ async function sendWhatsAppNotification(
 
     // Paid WhatsApp reminder (Premium-only — gated in the engine before we get
     // here). Uses the Meta-approved `study_reminder` template.
-    await withSendTimeout(
+    const res = await withSendTimeout(
       client.sendTemplate(
         normalizePhone(phone),
         "study_reminder",
@@ -483,9 +483,15 @@ async function sendWhatsAppNotification(
       ),
       "WhatsApp"
     );
-
-    return true;
+    // A refusal (a paused template, a wrong number) is a failure, not a send.
+    return res.success;
   } catch (error) {
+    // No answer in time: the message may well have gone, and this channel is paid — counted as sent,
+    // so the rung isn't paid for again (the engine retries a failed rung on the same channel).
+    if (error instanceof SendTimeoutError) {
+      console.error("WhatsApp send timed out; counted as sent so it isn't paid twice");
+      return true;
+    }
     console.error("WhatsApp send error:", error);
     return false;
   }
@@ -526,9 +532,15 @@ async function sendSMSNotification(
     // valoare de rezervă. (`metadata.domainName` nu se setează nicăieri — verificat.)
     const message = textReminderSms(user?.name ?? undefined);
 
-    await withSendTimeout(client.send({ to: phone, message }), "SMS");
-    return true;
+    const res = await withSendTimeout(client.send({ to: phone, message }), "SMS");
+    // A refusal is a failure, not a send.
+    return res.success;
   } catch (error) {
+    // No answer in time: maybe sent, and paid — counted as sent so the rung isn't paid for twice.
+    if (error instanceof SendTimeoutError) {
+      console.error("SMS send timed out; counted as sent so it isn't paid twice");
+      return true;
+    }
     console.error("SMS send error:", error);
     return false;
   }

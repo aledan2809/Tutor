@@ -690,6 +690,8 @@
     "selfAlertEveryPost": "hours",
     "selfAlertFixedPre": "Daily at",
     "selfAlertOnce": "A single alert, no re-notification",
+    "selfAlertDigestPre": "Daily summary at",
+    "selfAlertDigestHint": "No alerts during the day: one message with everything that happened, at the time you choose (even inside quiet hours).",
     "channelTelegram": "Telegram",
     "moveUp": "Move up",
     "moveDown": "Move down",

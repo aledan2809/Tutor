@@ -185,10 +185,12 @@ export async function deliverParentAlert(
   message: string,
   rung = 0,
   link: AlertLink = ALERTS_LINK,
-  idempotencyKey?: string
+  idempotencyKey?: string,
+  /** The daily digest goes at the time the parent chose, even inside their quiet hours. */
+  opts?: { ignoreQuietHours?: boolean }
 ): Promise<boolean> {
   try {
-    if (await userInQuietHours(parentId)) return false;
+    if (!opts?.ignoreQuietHours && (await userInQuietHours(parentId))) return false;
 
     const channels = await resolveUserAlertChannels(parentId);
     const start = Math.min(rung, channels.length - 1);
@@ -227,9 +229,9 @@ const OPEN_STATUSES = ["awaiting_parent", "authorized"];
  */
 const CHAIN_LOOKBACK_DAYS = 14;
 /**
- * A run stops starting new work after this long (claims make it safe to finish on the next run): a
- * run that outlives its 30-minute lease would otherwise overlap the next one, which is how the
- * hours-long runs of 30.09 sent the same notices again.
+ * A run stops starting new work after this long (claims make it safe to finish on the next run). The
+ * lease is renewed while the run works; the budget keeps a run from going on for hours anyway, which is
+ * what the runs of 30.09 did.
  */
 const RUN_BUDGET_MS = 20 * 60_000;
 /** The extra cascade a parent authorized: every rung of it carries this reason. */
@@ -323,6 +325,7 @@ export function shouldRenotifyParentMode(
 ): boolean {
   switch (config.mode) {
     case "ONCE":
+    case "DIGEST": // everything goes in the day's digest (parent-digest.ts)
       return false;
     case "EVERY_H": {
       const h = Number.isFinite(config.everyH) && config.everyH > 0 ? config.everyH : 6;
@@ -387,6 +390,9 @@ async function notifyParent(
     const row = await prisma.notification.create({
       data: { userId: parentId, type: "parent_alert", title: alert.title, message: alert.message, metadata },
     });
+    // A parent on the daily digest gets it all once a day (parent-digest.ts), nothing on their devices now.
+    const mode = await prisma.notificationPreference.findUnique({ where: { userId: parentId }, select: { selfAlertMode: true } });
+    if (mode?.selfAlertMode === "DIGEST") return;
     // Real-time delivery to the parent's devices (not just the in-app feed), within the daily limits.
     if (deliveredToday >= PARENT_ALERTS_HARD_CAP) return;
     if (capped && deliveredToday >= PARENT_ALERTS_PER_DAY) return;
@@ -519,14 +525,19 @@ async function monitorOnce(now: Date): Promise<MonitoringResult> {
   });
   expired = stale.count;
 
+  // One child's episodes together, so a run that runs out of time never splits them (the next run would
+  // announce the rest again).
   const open = await prisma.parentEscalation.findMany({
     where: { status: { in: OPEN_STATUSES } },
     include: { child: { select: { name: true } } },
+    orderBy: { childId: "asc" },
   });
 
   // 1) Resolve episodes where the child has since engaged → positive.
+  let lastChild: string | null = null;
   for (const esc of open) {
-    if (outOfTime()) break;
+    if (esc.childId !== lastChild && outOfTime()) break;
+    lastChild = esc.childId;
     if (onBreak.has(esc.childId)) continue;
     const { reacted, channel } = await childReactionSince(esc.childId, esc.openedFor);
     if (reacted) {

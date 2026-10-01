@@ -20,7 +20,16 @@ import { prisma } from "@/lib/prisma";
 
 export type LeaseRun<T> = { ran: true; result: T } | { ran: false };
 
-export async function withCronLease<T>(name: string, ttlMs: number, fn: () => Promise<T>): Promise<LeaseRun<T>> {
+export async function withCronLease<T>(
+  name: string,
+  ttlMs: number,
+  fn: () => Promise<T>,
+  /**
+   * `renewals`: how many lease lengths a run may be kept alive past the first (default
+   * MAX_RENEWED_LEASES); 0 = never renewed, for a wrapper whose parts hold leases of their own.
+   */
+  opts: { renewals?: number } = {}
+): Promise<LeaseRun<T>> {
   const key = `cronLease:${name}`;
   const token = randomUUID();
   // The row exists after the first run; a concurrent first run loses on the primary key.
@@ -38,7 +47,7 @@ export async function withCronLease<T>(name: string, ttlMs: number, fn: () => Pr
       AND COALESCE(("value"->>'untilMs')::bigint, 0) < (EXTRACT(EPOCH FROM NOW()) * 1000)::bigint`;
   if (taken === 0) return { ran: false };
 
-  const renewUntil = Date.now() + MAX_RENEWED_LEASES * ttlMs;
+  const renewUntil = Date.now() + (opts.renewals ?? MAX_RENEWED_LEASES) * ttlMs;
   const renew = setInterval(() => {
     if (Date.now() > renewUntil) {
       clearInterval(renew);
@@ -49,7 +58,7 @@ export async function withCronLease<T>(name: string, ttlMs: number, fn: () => Pr
       SET "value" = jsonb_set("value", '{untilMs}', to_jsonb((EXTRACT(EPOCH FROM NOW()) * 1000)::bigint + ${ttlMs}::bigint)),
           "updatedAt" = NOW()
       WHERE "key" = ${key} AND "value"->>'token' = ${token}`.catch(() => undefined);
-  }, Math.max(10_000, Math.floor(ttlMs / 3)));
+  }, Math.max(1_000, Math.floor(ttlMs / 3)));
   renew.unref?.();
 
   try {

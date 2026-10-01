@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { detectMissedSessions, escalationDetectionEnabled } from "@/lib/escalation/engine";
 import { runReminderChains } from "@/lib/escalation/chains-run";
 import { runParentMonitoring } from "@/lib/escalation/parent-monitor";
+import { runParentDigests } from "@/lib/escalation/parent-digest";
 import { runParentNudges } from "@/lib/escalation/parent-nudge";
 import { runThresholdChecks } from "@/lib/escalation/threshold-monitor";
 import { runFeedbackReview } from "@/lib/feedback-review";
@@ -32,8 +33,9 @@ async function _POST(req: NextRequest) {
 
   // One run of this route at a time (30.09.2026: runs lasting hours overlapped and each worked from
   // its own stale list). Cutting the caller's connection doesn't stop a run on the server, so the
-  // guard is here and not in the crontab. The sections below also claim each send on their own.
-  const run = await withCronLease("escalation-route", 30 * 60_000, () => runAll());
+  // guard is here and not in the crontab. Not renewed: the sections hold leases of their own and claim
+  // each send, so a slow one (an AI review) must not keep the others off past these 30 minutes.
+  const run = await withCronLease("escalation-route", 30 * 60_000, () => runAll(), { renewals: 0 });
   if (!run.ran) {
     return NextResponse.json({ success: true, ran: false, timestamp: new Date().toISOString() });
   }
@@ -48,6 +50,12 @@ async function runAll() {
   const missedUserIds = await detectMissedSessions();
   // Parent monitoring runs after advancement so it sees the latest chain state.
   const parentMonitoring = await runParentMonitoring();
+  // The daily digest for parents who chose it, after monitoring so it sees the latest episodes.
+  // Its own failure stays its own: the sections after it still run.
+  const parentDigests = await runParentDigests().catch((err) => {
+    console.error("parent digests failed", err);
+    return { ran: false, sent: 0, empty: 0 };
+  });
   // Parent on-demand nudges (custom message, repeat every N min until reaction).
   const parentNudges = await runParentNudges();
   // Auto-review of 👎 question feedback (fix/hide on private banks, flag curriculum).
@@ -69,6 +77,7 @@ async function runAll() {
     escalationsAdvanced: chains.escalationsAdvanced,
     chainsRan: chains.ran,
     parentMonitoring,
+    parentDigests,
     parentNudges,
     feedbackReview,
     watcherReports,

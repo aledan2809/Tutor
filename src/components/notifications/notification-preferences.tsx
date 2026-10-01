@@ -217,6 +217,29 @@ export function NotificationPreferences({ showSelfAlert = false }: { showSelfAle
                 />
               </span>
             </label>
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-800 bg-gray-900 px-3 py-2.5">
+              <input
+                type="radio"
+                name="selfAlertMode"
+                checked={prefs.selfAlertMode === "DIGEST"}
+                onChange={() => setPrefs({ ...prefs, selfAlertMode: "DIGEST" })}
+                className="mt-1.5 accent-blue-600"
+              />
+              <span className="text-sm text-gray-200">
+                <span className="flex items-center gap-2">
+                  {t("selfAlertDigestPre")}
+                  <input
+                    type="time"
+                    value={prefs.selfAlertAt ?? "20:00"}
+                    onChange={(e) =>
+                      setPrefs({ ...prefs, selfAlertMode: "DIGEST", selfAlertAt: e.target.value })
+                    }
+                    className="rounded-md border border-gray-700 bg-gray-800 px-2 py-1 text-sm text-white"
+                  />
+                </span>
+                <span className="mt-1 block text-xs text-gray-500">{t("selfAlertDigestHint")}</span>
+              </span>
+            </label>
             <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-800 bg-gray-900 px-3 py-2.5">
               <input
                 type="radio"

@@ -690,6 +690,8 @@
     "selfAlertEveryPost": "ore",
     "selfAlertFixedPre": "Zilnic la ora",
     "selfAlertOnce": "O singură alertă, fără renotificare",
+    "selfAlertDigestPre": "Rezumat zilnic la ora",
+    "selfAlertDigestHint": "Fără alerte în timpul zilei: un singur mesaj cu tot ce s-a întâmplat, la ora aleasă (și dacă e în orele de liniște).",
     "channelTelegram": "Telegram",
     "moveUp": "Mută mai sus",
     "moveDown": "Mută mai jos",

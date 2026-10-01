@@ -168,7 +168,7 @@ export default function WatcherNotificationsPage() {
                       <span className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
                     )}
                   </div>
-                  <p className="text-sm text-gray-400 mt-0.5">{notif.message}</p>
+                  <p className="text-sm text-gray-400 mt-0.5 whitespace-pre-line">{notif.message}</p>
                   <div className="flex items-center gap-3 mt-2">
                     <span className="text-xs text-gray-500">
                       {new Date(notif.createdAt).toLocaleString()}

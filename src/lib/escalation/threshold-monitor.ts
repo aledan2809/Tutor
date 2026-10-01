@@ -21,6 +21,7 @@ import { webPushToUser, telegramAlertToUser } from "@/lib/notifications/service"
 import { sendAppEmail } from "@/lib/email";
 import { isUndeliverableAddress } from "@/lib/email-recipients";
 import { pausedUserIds } from "@/lib/access-server";
+import { prefersDailyDigest } from "./parent-digest";
 
 const METRIC_RO: Record<string, string> = {
   streak: "seria",
@@ -111,6 +112,8 @@ export async function deliverThresholdAlert(
     await prisma.notification.create({
       data: { userId, type, title, message, metadata },
     });
+    // A parent on the daily digest finds it there (parent-digest.ts), nothing on their devices now.
+    if (dest.url.startsWith("/dashboard/watcher") && (await prefersDailyDigest(userId))) return true;
     if (await userInQuietHours(userId)) return true;
     for (const channel of await resolveUserAlertChannels(userId)) {
       let ok = false;

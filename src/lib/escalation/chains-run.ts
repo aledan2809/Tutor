@@ -24,6 +24,7 @@ export async function runReminderChains(): Promise<ChainsRun> {
     const remindersFired = await runDueReminders();
     const escalationsAdvanced = await advancePendingEscalations();
     return { stuckClosed, remindersFired, escalationsAdvanced };
-  });
+    // Renewed at most once: a hung run keeps reminders off for two lease lengths at most.
+  }, { renewals: 1 });
   return run.ran ? { ran: true, ...run.result } : { ran: false, stuckClosed: 0, remindersFired: 0, escalationsAdvanced: 0 };
 }

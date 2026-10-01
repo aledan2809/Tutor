@@ -5,6 +5,7 @@ import { withErrorHandler } from "@/lib/api-handler";
 import { allowedChannels, clampChannelWrite } from "@/lib/plan-channels";
 import { meteredChannelsCovered, SELECT_ACOPERIRE_CANALE } from "@/lib/escalation/segmentation";
 import { sanitizeChannelOrder } from "@/lib/escalation/config";
+import { safeTimeZone } from "@/lib/escalation/parent-digest";
 
 /**
  * GET /api/notifications/preferences — Get user's notification preferences.
@@ -74,11 +75,11 @@ async function _PUT(req: NextRequest) {
   if (cleanOrder) data.channelOrder = cleanOrder;
   if (typeof quietHoursStart === "string") data.quietHoursStart = quietHoursStart;
   if (typeof quietHoursEnd === "string") data.quietHoursEnd = quietHoursEnd;
-  if (typeof timezone === "string") data.timezone = timezone;
+  if (typeof timezone === "string" && safeTimeZone(timezone) === timezone) data.timezone = timezone;
 
   // Parent-only re-alert cadence (a no-op on non-parent rows). Validated defensively.
   const { selfAlertMode, selfAlertEveryH, selfAlertAt } = body;
-  if (["STANDARD_30", "EVERY_H", "FIXED_AT", "ONCE"].includes(selfAlertMode)) {
+  if (["STANDARD_30", "EVERY_H", "FIXED_AT", "ONCE", "DIGEST"].includes(selfAlertMode)) {
     data.selfAlertMode = selfAlertMode;
   }
   if (Number.isInteger(selfAlertEveryH) && selfAlertEveryH >= 1 && selfAlertEveryH <= 24) {

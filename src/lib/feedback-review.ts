@@ -125,14 +125,22 @@ async function deliverToStudent(
   metadata: object,
   actionable: boolean,
 ) {
-  await notify([userId], "feedback_resolved", title, decision, metadata);
-  if (!actionable) return; // a dismissal stays in-app only — no extra channels
-  // Past the day's limit, the answer stays in the app (this row included in the count).
-  const { y, m, d } = bucharestYmd(new Date());
-  const today = await prisma.notification.count({
-    where: { userId, type: "feedback_resolved", createdAt: { gte: bucharestTimeToUtc(y, m, d) } },
-  });
-  if (today > FEEDBACK_MESSAGES_PER_DAY) return;
+  // Past the day's limit the answer stays in the app. Only answers that went out count (`external`).
+  let external = actionable;
+  if (external) {
+    const { y, m, d } = bucharestYmd(new Date());
+    const sentToday = await prisma.notification.count({
+      where: {
+        userId,
+        type: "feedback_resolved",
+        createdAt: { gte: bucharestTimeToUtc(y, m, d) },
+        metadata: { path: ["external"], equals: true },
+      },
+    });
+    external = sentToday < FEEDBACK_MESSAGES_PER_DAY;
+  }
+  await notify([userId], "feedback_resolved", title, decision, { ...metadata, external });
+  if (!external) return; // a dismissal, or past the day's limit: in the app only
   const prefs = await prisma.notificationPreference.findUnique({ where: { userId } });
   // Telegram is opt-in by linking (not a NotificationPreference flag) + free.
   await telegramAlertToUser(userId, { text: `${title}\n\n${decision}`, url, buttonLabel: "Deschide" });

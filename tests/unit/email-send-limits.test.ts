@@ -48,6 +48,15 @@ describe("sendAppEmail limits", () => {
     expect(fetch.mock.calls[1][1].headers["Idempotency-Key"]).toBeUndefined();
   });
 
+  it("a 409 on an idempotency key means the message was already taken: no second copy through SMTP", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 409 }));
+    expect(await sendAppEmail({ to: "a@b.ro", subject: "s", html: "h", idempotencyKey: "etutor:x" })).toBe(true);
+    expect(createTransport).not.toHaveBeenCalled();
+    // Without a key, a 409 is an ordinary refusal and SMTP is tried.
+    expect(await sendAppEmail({ to: "a@b.ro", subject: "s", html: "h" })).toBe(true);
+    expect(createTransport).toHaveBeenCalledTimes(1);
+  });
+
   it("automatic mail stops at a suppressed address; mail the person asked for isn't even checked", async () => {
     const fetch = vi.fn().mockResolvedValue({ ok: true, status: 200 });
     vi.stubGlobal("fetch", fetch);
