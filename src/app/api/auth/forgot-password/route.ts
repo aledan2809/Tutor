@@ -114,7 +114,7 @@ async function _POST(req: NextRequest) {
   // answer measurably slower than a missing one. Never log the link — whoever reads the logs
   // could change the password.
   after(async () => {
-    const sent = await sendAppEmail({ to: email, subject, html });
+    const sent = await sendAppEmail({ to: email, subject, html, requested: true });
     if (!sent) logger.error("Password reset email was not accepted by any transport");
   });
 

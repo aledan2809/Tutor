@@ -1930,3 +1930,23 @@ model ParentalConsent {
 
   @@index([userId])
 }
+
+/// Addresses eTutor's automatic mail no longer goes to (01.10.2026, after the parent-alert loop): a mirror
+/// of Resend's per-account suppression list (a permanent bounce, a spam complaint, an address Resend already
+/// suppresses), so an alert falls through to another channel instead of „succeeding” into nothing. Mail the
+/// person asks for still goes to Resend. Written by /api/webhooks/resend; a later delivery to the address
+/// releases it. Only a keyed hash is kept: most rows are other apps' recipients (the account is shared).
+model EmailSuppression {
+  /// HMAC of the lowercased address with the server secret (src/lib/email-suppression.ts addressHash).
+  emailHash   String   @id
+  /// bounced | complained | suppressed — a bounce is never downgraded.
+  reason      String
+  detail      String?
+  count       Int      @default(1)
+  /// When Resend saw the latest suppressing event; a delivery older than this doesn't release the address.
+  lastEventAt DateTime
+  /// When a later delivery released it; a suppressing event after this stops the address again.
+  releasedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

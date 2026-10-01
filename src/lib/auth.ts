@@ -67,7 +67,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       from: process.env.EMAIL_FROM || "noreply@tutor.app",
       // Our own text: Auth.js's default email is in English and names no one.
       async sendVerificationRequest({ identifier, url }) {
-        const sent = await sendAppEmail({ to: identifier, ...signInLinkEmail(url) });
+        const sent = await sendAppEmail({ to: identifier, ...signInLinkEmail(url), requested: true });
         // Thrown, so the page says the link wasn't sent instead of „check your inbox".
         if (!sent) throw new Error("Sign-in link email was not accepted by any transport");
       },

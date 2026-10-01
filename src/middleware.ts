@@ -175,9 +175,11 @@ export default async function middleware(request: NextRequest) {
     // into ONE key capped at 3/min: a 4th event (or one event's broker retries) got 429
     // and a paid subscription wasn't activated — and anyone could burn that key by
     // spoofing X-Forwarded-For. Its own signature check is the protection here.
+    // Resend's webhook is the same kind of caller: signed (Svix) and checked in the route, and it reports
+    // every delivery on the shared sending account, so a busy minute must not end in 429s.
     const rule = rateLimitBucket(apiPath);
     const { allowed, remaining } =
-      apiPath === "/api/stripe/callback"
+      apiPath === "/api/stripe/callback" || apiPath === "/api/webhooks/resend"
         ? { allowed: true, remaining: 0 }
         : checkRateLimit(await clientKeyFor(request, ip, rule), rule);
 
