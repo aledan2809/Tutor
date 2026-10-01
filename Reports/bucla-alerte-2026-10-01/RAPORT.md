@@ -121,6 +121,25 @@ cere coordonare pe contul comun.
 3. Scoaterea prefixului `#PAUSED-TUTOR-EMAIL-LOOP-2026-10-01` de pe cele două linii. Opțional, pe linia de la
    15 minute: `curl -m 840` și `flock -n`, ca la linia de la minut. Codul nu mai depinde de ele, dar curăță procesele.
 
+## Riscurile rămase după livrare, închise (01.10, după analiza sesiunii MA)
+
+Sesiunea MA a refăcut cele 30 de zile ale lui Rareș pe ambele variante de cod. Pe aceleași evenimente, codul nou i-ar fi
+trimis lui Anto 106 e-mailuri, față de ~2.784 cu codul vechi, cu cel mult 8 pe zi. Anto nu are notificări pe telefon
+sau Telegram, deci toate alertele ei pleacă pe e-mail. A semnalat trei riscuri rămase, acum închise (commit separat):
+
+- **Nicio trimitere nu mai poate ține o rulare pe loc.** Fiecare trimitere are acum o limită de 20 de secunde: notificare
+  pe telefon, Telegram, WhatsApp, SMS și e-mail. Rândul unei rulări se reînnoiește cât timp ea lucrează, deci nu mai
+  expiră la mijlocul ei ca să pornească alta peste. O rulare blocată de-a binelea nu-l poate ține la nesfârșit: după de
+  patru ori durata rândului, reînnoirea se oprește. Fiecare alertă către un părinte are o cheie proprie la Resend
+  (episodul și treapta), deci aceeași alertă pleacă o singură dată chiar dacă e cerută de două ori.
+- **Răspunsurile la feedback-ul elevului:** cel mult 3 pe zi pleacă și pe Telegram și e-mail; restul rămân în aplicație.
+  Rareș primise 16 într-o zi.
+- **Plafon total pe părinte:** prima alertă a unei ratări trece de plafonul de 8, dar nimic nu trece de 12 pe zi. Altfel,
+  un copil cu multe remindere ar fi dus totalul la numărul de ratări plus 8.
+
+Verificare: teste unitare 1.375/1.375; cap-coadă 20/20 (cu plafonul total); rândul reînnoit verificat pe baza de test,
+3/3 (`verificare-rand-reinnoit.ts`).
+
 ## Rămâne deschis
 
 - **Respingerile de la Resend** (webhook bounce/complaint), ca o adresă care respinge să nu mai primească nimic.
@@ -131,9 +150,7 @@ cere coordonare pe contul comun.
 - **Prima alertă vine prea devreme la cascadele lente.** E un comportament mai vechi decât bucla. Când părintele a pus
   pauze de peste 45 de minute între trepte, alerta „nu a reacționat la niciun canal” pleacă după prima treaptă, deși
   urmează altele. Acum pleacă o singură dată pe lanț, dar textul nu e exact.
-- **Timpi-limită la trimiterea e-mailului.** Apelul către Resend nu are nicio limită de timp, iar la SMTP limita
-  implicită e de ordinul minutelor. Un e-mail agățat poate lungi o rulare. Bugetul de 20 de minute și lacătele țin rularea în frâu, dar limita ține de transport, deci se face împreună
-  cu sesiunea MA.
+- ~~Timpi-limită la trimiterea e-mailului~~ — făcut, împreună cu celelalte canale (secțiunea de mai sus).
 - Două trimițătoare de e-mail (reminderele pentru acordul părintelui, avertismentele pentru conturile inactive)
   nu folosesc încă filtrul de adrese. Au rândul lor și își notează trimiterea înainte, deci nu pot intra în buclă.
   Le-am lăsat neatinse fiindcă fac parte din drumul acordului și al ștergerii contului: ce se întâmplă cu un

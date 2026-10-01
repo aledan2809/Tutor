@@ -28,6 +28,11 @@ export async function sendAppEmail(opts: {
   html: string;
   /** The person asked for this message (sign-in link, password reset): the suppression list doesn't stop it. */
   requested?: boolean;
+  /**
+   * One logical message (e.g. one alert to one parent): Resend sends it at most once per key within a day,
+   * however many times it is asked. Only for messages whose text doesn't change between attempts.
+   */
+  idempotencyKey?: string;
 }): Promise<boolean> {
   if (!opts.requested) {
     const suppressed = await suppressionFor(opts.to);
@@ -47,6 +52,7 @@ export async function sendAppEmail(opts: {
         headers: {
           Authorization: `Bearer ${resendKey}`,
           "Content-Type": "application/json",
+          ...(opts.idempotencyKey ? { "Idempotency-Key": opts.idempotencyKey.slice(0, 256) } : {}),
         },
         body: JSON.stringify({ from, to: opts.to, subject: opts.subject, html: opts.html }),
         signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),

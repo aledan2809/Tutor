@@ -39,6 +39,15 @@ describe("sendAppEmail limits", () => {
     expect(createTransport).toHaveBeenCalledWith(expect.objectContaining({ connectionTimeout: 10_000, greetingTimeout: 10_000, socketTimeout: 20_000 }));
   });
 
+  it("sends the idempotency key to Resend when one is given, and none otherwise", async () => {
+    const fetch = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+    vi.stubGlobal("fetch", fetch);
+    await sendAppEmail({ to: "a@b.ro", subject: "s", html: "h", idempotencyKey: "etutor:alert:renotify:ep1:2" });
+    await sendAppEmail({ to: "a@b.ro", subject: "s", html: "h" });
+    expect(fetch.mock.calls[0][1].headers["Idempotency-Key"]).toBe("etutor:alert:renotify:ep1:2");
+    expect(fetch.mock.calls[1][1].headers["Idempotency-Key"]).toBeUndefined();
+  });
+
   it("automatic mail stops at a suppressed address; mail the person asked for isn't even checked", async () => {
     const fetch = vi.fn().mockResolvedValue({ ok: true, status: 200 });
     vi.stubGlobal("fetch", fetch);

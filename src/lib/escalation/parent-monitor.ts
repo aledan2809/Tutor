@@ -15,8 +15,8 @@
  * MAX_PARENT_RENOTIFY re-notifications per episode; an episode nobody acted on closes after
  * EPISODE_MAX_AGE_H without a word; one „reacted” notice per child, whatever number of episodes it
  * closes; at most PARENT_ALERTS_PER_DAY delivered alerts per parent per day besides the first alert of
- * an episode (the in-app list keeps the rest); every resolution claimed atomically, one run at a time,
- * each run within RUN_BUDGET_MS.
+ * an episode, and never more than PARENT_ALERTS_HARD_CAP (the in-app list keeps the rest); every
+ * resolution claimed atomically, each alert sent once per key, one run at a time, within RUN_BUDGET_MS.
  */
 
 import { Prisma } from "@prisma/client";
@@ -34,6 +34,7 @@ import { coveredAsSecondParent, parentPaysForMetered } from "./parent-nudge";
 import { pausedUserIds } from "@/lib/access-server";
 import { escapeHtml } from "@/lib/sanitize";
 import { withCronLease } from "@/lib/cron-lease";
+import { withSendTimeout } from "@/lib/send-timeout";
 import { isUndeliverableAddress } from "@/lib/email-recipients";
 import { bucharestTimeToUtc, bucharestYmd } from "@/lib/bucharest-day";
 
@@ -106,7 +107,8 @@ async function sendAlertOnChannel(
   channel: string,
   title: string,
   message: string,
-  link: AlertLink = ALERTS_LINK
+  link: AlertLink = ALERTS_LINK,
+  idempotencyKey?: string
 ): Promise<boolean> {
   const base = (process.env.AUTH_URL ?? "").replace(/\/$/, "");
   switch (channel) {
@@ -130,6 +132,7 @@ async function sendAlertOnChannel(
         to: user.email,
         subject: title,
         html: `<p>${escapeHtml(message).replace(/\n/g, "<br>")}</p><p><a href="${base}${link.url}">${escapeHtml(link.label)}</a></p>`,
+        idempotencyKey,
       });
     }
     case "WHATSAPP": {
@@ -149,7 +152,7 @@ async function sendAlertOnChannel(
           phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID!,
           accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
         });
-        const res = await client.sendText(normalizePhone(phone), `${title}\n${message}`);
+        const res = await withSendTimeout(client.sendText(normalizePhone(phone), `${title}\n${message}`), "WhatsApp");
         return res.success;
       } catch (e) {
         console.error("parent-alert WhatsApp send error:", e);
@@ -181,7 +184,8 @@ export async function deliverParentAlert(
   title: string,
   message: string,
   rung = 0,
-  link: AlertLink = ALERTS_LINK
+  link: AlertLink = ALERTS_LINK,
+  idempotencyKey?: string
 ): Promise<boolean> {
   try {
     if (await userInQuietHours(parentId)) return false;
@@ -190,7 +194,7 @@ export async function deliverParentAlert(
     const start = Math.min(rung, channels.length - 1);
     for (let k = 0; k < channels.length; k++) {
       const i = (start + k) % channels.length;
-      if (await sendAlertOnChannel(parentId, channels[i], title, message, link)) return true;
+      if (await sendAlertOnChannel(parentId, channels[i], title, message, link, idempotencyKey)) return true;
     }
   } catch (e) {
     console.error("deliverParentAlert error:", e);
@@ -210,9 +214,11 @@ export const EPISODE_MAX_AGE_H = 24;
 const AUTHORIZED_MAX_AGE_H = 48;
 /**
  * Alerts one parent may get on their devices in a Bucharest day, counting only those that went out;
- * the in-app list keeps the rest. The first alert of an episode always goes (one per lapse).
+ * the in-app list keeps the rest. The first alert of an episode goes past it (one per lapse)…
  */
 export const PARENT_ALERTS_PER_DAY = 8;
+/** …but nothing goes past this one: a child with many reminders can't turn it into lapses + 8. */
+export const PARENT_ALERTS_HARD_CAP = 12;
 const UNCAPPED_ALERTS = new Set(["no_reaction"]);
 const OPEN_STATUSES = ["awaiting_parent", "authorized"];
 /**
@@ -348,7 +354,8 @@ function startOfBucharestDay(now: Date): Date {
 /**
  * One in-app alert row + real-time delivery to ONE guardian (rung = their own cascade step). Past
  * PARENT_ALERTS_PER_DAY delivered alerts today, only the in-app row is written — except for the first
- * alert of an episode. Never throws: one parent's failure must not stop the others' alerts.
+ * alert of an episode, up to PARENT_ALERTS_HARD_CAP. `key` names this one alert to this one parent, so
+ * the e-mail provider sends it at most once. Never throws: one parent's failure must not stop the others.
  */
 async function notifyParent(
   parentId: string,
@@ -356,21 +363,20 @@ async function notifyParent(
   childName: string | null,
   alert: { alertType: string; title: string; message: string; channel?: string | null },
   rung = 0,
-  now: Date = new Date()
+  now: Date = new Date(),
+  key?: string
 ): Promise<void> {
   try {
     const capped = !UNCAPPED_ALERTS.has(alert.alertType);
     // Only alerts that reached a device count: an in-app-only row, or one held by quiet hours, doesn't.
-    const deliveredToday = capped
-      ? await prisma.notification.count({
-          where: {
-            userId: parentId,
-            type: "parent_alert",
-            createdAt: { gte: startOfBucharestDay(now) },
-            metadata: { path: ["delivered"], equals: true },
-          },
-        })
-      : 0;
+    const deliveredToday = await prisma.notification.count({
+      where: {
+        userId: parentId,
+        type: "parent_alert",
+        createdAt: { gte: startOfBucharestDay(now) },
+        metadata: { path: ["delivered"], equals: true },
+      },
+    });
     const metadata = {
       childId,
       childName,
@@ -381,9 +387,10 @@ async function notifyParent(
     const row = await prisma.notification.create({
       data: { userId: parentId, type: "parent_alert", title: alert.title, message: alert.message, metadata },
     });
-    // Real-time delivery to the parent's devices (not just the in-app feed), within the daily limit.
+    // Real-time delivery to the parent's devices (not just the in-app feed), within the daily limits.
+    if (deliveredToday >= PARENT_ALERTS_HARD_CAP) return;
     if (capped && deliveredToday >= PARENT_ALERTS_PER_DAY) return;
-    if (await deliverParentAlert(parentId, alert.title, alert.message, rung)) {
+    if (await deliverParentAlert(parentId, alert.title, alert.message, rung, undefined, key)) {
       await prisma.notification.update({ where: { id: row.id }, data: { metadata: { ...metadata, delivered: true } } });
     }
   } catch (e) {
@@ -401,7 +408,9 @@ async function notifyGuardians(
   childName: string | null,
   alert: { alertType: string; title: string; message: string; channel?: string | null },
   opts?: { relation?: "PARENT" },
-  now: Date = new Date()
+  now: Date = new Date(),
+  /** Names this alert about this child; each parent's key adds their id. */
+  keyBase?: string
 ): Promise<number> {
   const links = await prisma.guardian.findMany({
     where: { childId, status: "active", ...(opts?.relation ? { relation: opts.relation } : {}) },
@@ -413,7 +422,7 @@ async function notifyGuardians(
   if (paused.has(childId)) return 0;
   const reached = links.filter((l) => !paused.has(l.parentId));
   for (const l of reached) {
-    await notifyParent(l.parentId, childId, childName, alert, 0, now);
+    await notifyParent(l.parentId, childId, childName, alert, 0, now, keyBase ? `${keyBase}:${l.parentId}` : undefined);
   }
   return reached.length;
 }
@@ -541,7 +550,8 @@ async function monitorOnce(now: Date): Promise<MonitoringResult> {
           channel,
         },
         { relation: "PARENT" },
-        now
+        now,
+        `etutor:alert:reacted:${esc.childId}:${esc.openedFor.getTime()}`
       );
     }
   }
@@ -571,7 +581,8 @@ async function monitorOnce(now: Date): Promise<MonitoringResult> {
         message: `${esc.child.name ?? "Copilul"} nu a reacționat nici după reminderul suplimentar.`,
       },
       { relation: "PARENT" },
-      now
+      now,
+      `etutor:alert:negative:${esc.childId}:${esc.openedFor.getTime()}`
     );
   }
 
@@ -703,7 +714,8 @@ async function monitorOnce(now: Date): Promise<MonitoringResult> {
             channel: reaction.channel,
           },
           { relation: "PARENT" },
-          now
+          now,
+          `etutor:alert:reacted:${childId}:${chain.start.getTime()}`
         );
         continue;
       }
@@ -717,7 +729,8 @@ async function monitorOnce(now: Date): Promise<MonitoringResult> {
           message: `${child?.name ?? "Copilul"} nu a reacționat la niciun canal. Poți autoriza un reminder suplimentar.`,
         },
         { relation: "PARENT" },
-        now
+        now,
+        `etutor:alert:no-reaction:${childId}:${chain.start.getTime()}`
       );
       opened++;
     } catch (e) {
@@ -790,7 +803,8 @@ async function monitorOnce(now: Date): Promise<MonitoringResult> {
         message: `${esc.child.name ?? "Copilul"} încă nu a reacționat. Autorizează un reminder suplimentar?`,
       },
       esc.parentAlertRung,
-      now
+      now,
+      `etutor:alert:renotify:${esc.id}:${esc.parentAlertRung}`
     );
     renotified++;
   }

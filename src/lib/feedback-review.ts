@@ -13,10 +13,16 @@ import { callTextAI } from "@/lib/grila-generate";
 import { telegramAlertToUser } from "@/lib/notifications/service";
 import { sendAppEmail } from "@/lib/email";
 import { isUndeliverableAddress } from "@/lib/email-recipients";
+import { bucharestTimeToUtc, bucharestYmd } from "@/lib/bucharest-day";
 import { secondOpinion, type SecondOpinion } from "@/lib/content-quality-mesh";
 
 const APP_URL = (process.env.AUTH_URL ?? "https://etutor.ro").replace(/\/$/, "");
 const MAX_PER_RUN = 20;
+/**
+ * Answers to one student's 👎 that also go out by Telegram and e-mail in a Bucharest day; the rest stay
+ * in the app (01.10.2026: one student got 16 e-mails in a day, one per reviewed question).
+ */
+export const FEEDBACK_MESSAGES_PER_DAY = 3;
 /** A claim older than this belonged to a run that died; the item goes back to the queue. */
 const STALE_CLAIM_MS = 30 * 60_000;
 
@@ -121,6 +127,12 @@ async function deliverToStudent(
 ) {
   await notify([userId], "feedback_resolved", title, decision, metadata);
   if (!actionable) return; // a dismissal stays in-app only — no extra channels
+  // Past the day's limit, the answer stays in the app (this row included in the count).
+  const { y, m, d } = bucharestYmd(new Date());
+  const today = await prisma.notification.count({
+    where: { userId, type: "feedback_resolved", createdAt: { gte: bucharestTimeToUtc(y, m, d) } },
+  });
+  if (today > FEEDBACK_MESSAGES_PER_DAY) return;
   const prefs = await prisma.notificationPreference.findUnique({ where: { userId } });
   // Telegram is opt-in by linking (not a NotificationPreference flag) + free.
   await telegramAlertToUser(userId, { text: `${title}\n\n${decision}`, url, buttonLabel: "Deschide" });

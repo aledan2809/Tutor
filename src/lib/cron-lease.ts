@@ -8,7 +8,13 @@
  * Postgres advisory locks don't fit: Prisma pools connections, so the unlock can land on another
  * connection than the lock and leave it held. The lease is a plain compare-and-set on one row, timed
  * by the database clock, and expires on its own if a run dies before releasing it.
+ *
+ * While the run works, the lease is renewed every third of its length (01.10.2026: a run that outlived
+ * its lease let the next one start on a stale list, and the same notices went out twice). A run that
+ * dies stops renewing, and the lease still runs out on its own; a run stuck for MAX_RENEWED_LEASES
+ * lengths stops renewing too, so a hung run can't keep the job off forever.
  */
+const MAX_RENEWED_LEASES = 4;
 import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
 
@@ -32,9 +38,24 @@ export async function withCronLease<T>(name: string, ttlMs: number, fn: () => Pr
       AND COALESCE(("value"->>'untilMs')::bigint, 0) < (EXTRACT(EPOCH FROM NOW()) * 1000)::bigint`;
   if (taken === 0) return { ran: false };
 
+  const renewUntil = Date.now() + MAX_RENEWED_LEASES * ttlMs;
+  const renew = setInterval(() => {
+    if (Date.now() > renewUntil) {
+      clearInterval(renew);
+      return;
+    }
+    prisma.$executeRaw`
+      UPDATE "AppSetting"
+      SET "value" = jsonb_set("value", '{untilMs}', to_jsonb((EXTRACT(EPOCH FROM NOW()) * 1000)::bigint + ${ttlMs}::bigint)),
+          "updatedAt" = NOW()
+      WHERE "key" = ${key} AND "value"->>'token' = ${token}`.catch(() => undefined);
+  }, Math.max(10_000, Math.floor(ttlMs / 3)));
+  renew.unref?.();
+
   try {
     return { ran: true, result: await fn() };
   } finally {
+    clearInterval(renew);
     // Release only our own lease: if this run outlived it, another run may hold the row now.
     await prisma.$executeRaw`
       UPDATE "AppSetting"

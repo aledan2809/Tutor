@@ -15,6 +15,7 @@ import type { EscalationChannel } from "@prisma/client";
 import { getTelegramClient } from "@/lib/telegram/connect";
 import { buildTelegramButtonUrl } from "@/lib/escalation/tap-link";
 import { sendAppEmail } from "@/lib/email";
+import { SEND_TIMEOUT_MS, withSendTimeout } from "@/lib/send-timeout";
 import { isUndeliverableAddress } from "@/lib/email-recipients";
 import { meteredChannelsCovered, SELECT_ACOPERIRE_CANALE } from "@/lib/escalation/segmentation";
 
@@ -140,9 +141,13 @@ export async function webPushToUser(
     });
     for (const sub of subs) {
       try {
-        await webpush.sendNotification(
-          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-          pushPayload
+        await withSendTimeout(
+          webpush.sendNotification(
+            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+            pushPayload,
+            { timeout: SEND_TIMEOUT_MS }
+          ),
+          "web push"
         );
         delivered++;
       } catch (err) {
@@ -182,12 +187,13 @@ export async function telegramAlertToUser(
         : null;
   try {
     if (url) {
-      const r = await client.sendInlineKeyboard(user.telegramChatId, esc(opts.text), [
-        [{ text: opts.buttonLabel ?? "Deschide", url }],
-      ]);
+      const r = await withSendTimeout(
+        client.sendInlineKeyboard(user.telegramChatId, esc(opts.text), [[{ text: opts.buttonLabel ?? "Deschide", url }]]),
+        "Telegram"
+      );
       return r.success;
     }
-    const r = await client.sendText(user.telegramChatId, esc(opts.text));
+    const r = await withSendTimeout(client.sendText(user.telegramChatId, esc(opts.text)), "Telegram");
     return r.success;
   } catch (e) {
     console.error("telegramAlertToUser error:", e);
@@ -252,9 +258,13 @@ async function sendPushNotification(
 
       for (const sub of subscriptions) {
         try {
-          await webpush.sendNotification(
-            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-            pushPayload
+          await withSendTimeout(
+            webpush.sendNotification(
+              { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+              pushPayload,
+              { timeout: SEND_TIMEOUT_MS }
+            ),
+            "web push"
           );
           deliveredCount++;
         } catch (err) {
@@ -406,12 +416,13 @@ async function sendTelegramNotification(
 
   try {
     if (buttonUrl) {
-      const res = await client.sendInlineKeyboard(chatId, text, [
-        [{ text: buttonLabelFor(rawUrl), url: buttonUrl }],
-      ]);
+      const res = await withSendTimeout(
+        client.sendInlineKeyboard(chatId, text, [[{ text: buttonLabelFor(rawUrl), url: buttonUrl }]]),
+        "Telegram"
+      );
       return res.success;
     }
-    const res = await client.sendText(chatId, text);
+    const res = await withSendTimeout(client.sendText(chatId, text), "Telegram");
     return res.success;
   } catch (error) {
     console.error("Telegram send error:", error);
@@ -458,16 +469,19 @@ async function sendWhatsAppNotification(
 
     // Paid WhatsApp reminder (Premium-only — gated in the engine before we get
     // here). Uses the Meta-approved `study_reminder` template.
-    await client.sendTemplate(
-      normalizePhone(phone),
-      "study_reminder",
-      "ro",
-      [
-        {
-          type: "body" as const,
-          parameters: [{ type: "text" as const, text: userName }],
-        },
-      ]
+    await withSendTimeout(
+      client.sendTemplate(
+        normalizePhone(phone),
+        "study_reminder",
+        "ro",
+        [
+          {
+            type: "body" as const,
+            parameters: [{ type: "text" as const, text: userName }],
+          },
+        ]
+      ),
+      "WhatsApp"
     );
 
     return true;
@@ -512,7 +526,7 @@ async function sendSMSNotification(
     // valoare de rezervă. (`metadata.domainName` nu se setează nicăieri — verificat.)
     const message = textReminderSms(user?.name ?? undefined);
 
-    await client.send({ to: phone, message });
+    await withSendTimeout(client.send({ to: phone, message }), "SMS");
     return true;
   } catch (error) {
     console.error("SMS send error:", error);

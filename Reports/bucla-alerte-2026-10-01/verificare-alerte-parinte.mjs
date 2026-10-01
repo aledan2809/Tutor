@@ -4,7 +4,8 @@
 //   târzie apare după episod) · reminderul autorizat nu deschide alt episod · ratarea de seară după o reacție
 //   de dimineață se raportează · o ratare nouă înlocuiește episodul care aștepta · cel mult 3
 //   re-anunțări pe episod · episodul de peste o zi se închide fără mesaj · un singur „A reacționat ✅” per copil,
-//   oricâte episoade închide · cel mult 8 alerte livrate pe zi unui părinte, în afară de prima a unei ratări ·
+//   oricâte episoade închide · cel mult 8 alerte livrate pe zi unui părinte, în afară de prima a unei ratări,
+//   și niciodată peste 12 ·
 //   nimic spre adrese de test (test.com) · nimic spre un părinte scos din familie · două rulări simultane nu
 //   dublează nimic.
 //   cd /Users/danciulescu/Projects/REAL && node /Users/danciulescu/Projects/Tutor/Reports/bucla-alerte-2026-10-01/verificare-alerte-parinte.mjs
@@ -196,6 +197,14 @@ try {
   await lapse(c5.id, 60);
   await cron();
   check("12 prima alertă a unei ratări pleacă și peste plafonul zilei", mailsTo(p5.email, /Nu a reacționat/).length === 1);
+  // …but not past the hard ceiling: a child with many reminders can't make it lapses + 8.
+  const p5b = await mk("p5b", { accountRole: "PARENT" });
+  const c5b = await mk("c5b", { accountRole: "STUDENT", birthDate: new Date("2000-01-01") }, "example.invalid");
+  await prisma.guardian.create({ data: { parentId: p5b.id, childId: c5b.id } });
+  for (let i = 0; i < 12; i++) await prisma.notification.create({ data: { userId: p5b.id, type: "parent_alert", title: "qa", message: "x", metadata: { childId: c5b.id, alertType: "qa", delivered: true } } });
+  await lapse(c5b.id, 60);
+  await cron();
+  check("12b peste 12 alerte livrate azi nu mai pleacă nici prima alertă a unei ratări (rămâne în aplicație)", mailsTo(p5b.email).length === 0 && (await notes(p5b.id, "no_reaction")) === 1);
 
   // ── 9. A slow cascade set by the parent: a rung of the same chain created after its episode ──
   const p7 = await mk("p7", { accountRole: "PARENT" });
