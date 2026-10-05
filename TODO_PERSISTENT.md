@@ -1,3 +1,21 @@
+## [ ] 🔴 PÂLNIA — lotul 1 de reparații (pașii 1–5 din `Reports/TRUE-E2E-FULL-2026-10-05.md` §6) — SESIUNE NOUĂ (decizia lui Alex 05.10)
+
+**De ce**: în 30 de zile, 115 vizitatori (80 pe telefon) → pagina de cont văzută **6 ori** → ~2–4 conturi. Cauza nr. 1 dovedită cu capturi
+(`Reports/true-e2e-2026-10-05/funnel/*-mobil.png`): pe iPhone (390×664 px utili) bannerul de cookie-uri ocupă 470–664 px și acoperă
+„Fă-ți cont gratuit” (y 648) + „Începe testul” (551) pe `/ro`, singurul buton de pe `/ro/parinte` (636) și „Creează cont” (562) pe
+`/ro/auth/register`. Demo-ul fără cont `/ro/try` merge (grilă reală în 2 atingeri, 0 erori) dar are 1 vizită/30 zile. 0 evenimente Umami.
+
+**Prompt pentru sesiunea nouă (autonom, regim mesh, FĂRĂ echipe de agenți — maximum 2–3 agenți în total, modele ieftine la execuție):**
+> Proiect Tutor (ACTIVE). Citește întâi `Reports/TRUE-E2E-FULL-2026-10-05.md` §0 și §6 + `AUDIT_GAPS.md` G-TUT-AUDIT-2026-10-05. Livrează lotul 1, în ordine, fiecare pas cu test pe copia locală înainte de a trece mai departe:
+> 1. **Bannerul de cookie-uri** (componenta cu textul „Folosim cookie-uri esențiale”, `fixed bottom-0 z-9999`): pe telefon o singură linie compactă jos (text scurt + „Accept”/„Respinge” mici) care NU acoperă conținutul (padding-bottom pe `body` cât înălțimea lui) sau afișat abia după prima derulare/atingere; butoanele principale ≥44 px (audit [7]: 7/19 sub 44 px pe panou). Verifică cu `Reports/true-e2e-2026-10-05/funnel/sonda-palnie.mjs` (adaptat la QA): pe `/ro`, `/ro/parinte`, `/ro/auth/register`, `/acces/<cod>`, `/family/join` niciun buton principal sub banner, toate vizibile fără scroll la 390×664.
+> 2. **Demo-ul vizibil**: pe `/ro` butonul principal „Încearcă o grilă acum — fără cont” → `/ro/try` deasupra lui „Fă-ți cont gratuit”; același buton mare pe fiecare `/ro/grile/*` (azi link de 20 px „Demo gratuit”) și pe `/ro/parinte`; la finalul demo-ului un singur buton „Salvează progresul — fă-ți cont (gratuit)” → `/ro/auth/register` (verifică ce afișează azi `/ro/try` după ultima întrebare — nu s-a verificat).
+> 3. **Cont nou, nu intrare, pentru anonimi**: `src/middleware.ts` trimite anonimii de pe `/dashboard*` la `signin?callbackUrl=…` (13 vizite/30 zile); pune pe pagina de intrare un buton mare „Cont nou gratuit” (nu textul de 28 px „Fă-ți unul”) și corectează titlurile: `/ro/auth/register` are `<title>` „Sign In - Tutor | Tutor”; șablon unic „… | eTutor.ro” în limba paginii (și pe `/ro/try`: „Tutor - Adaptive Learning Platform”).
+> 4. **Măsurare**: evenimente Umami prin `@aledan/analytics trackEvent` — `cta_register`, `cta_try`, `register_done`, `first_question` (+ `cta_parinte_fara_card`); verifică în Umami (`analytics.knowbest.ro`, site etutor.ro) că apar.
+> 5. **Securitate (P1 confirmate pe QA)**: `src/lib/family-invite.ts:665,675` — `escapeHtml(inviterName)` (există `@/lib/sanitize`) + plafon 10 invitații/zi per invitator și 2 per adresă-țintă (`verif-invite-html/RESULT.txt` arată 5→5 livrate azi); `src/app/api/auth/register/route.ts:229` — plafon per IP (5/oră) + plafon global zilnic pe e-mailurile de acord al părintelui. Teste unitare pentru ambele.
+> Reguli: stiva QA = `.claude/launch.json` → `tutor-qa-prod` (DB `tutor_qa` pe :55432, `docker start tutor-qa-pg`; cutia poștală falsă `Reports/true-e2e-2026-10-05/smtp-sink.mjs` pe :2525); nu `next build` peste serverul pornit; `/review` pe diff la final; livrare pe VPS2 doar cu OK-ul lui Alex (rețeta din DEPLOY_REGISTRY rândul 12, build detașat, poartă pe BUILD_ID); după livrare re-rulează `sonda-palnie.mjs` pe producție și compară cu capturile din 05.10. Nu atinge `.env`, Master git, Legal.
+
+**După lotul 1** (sesiuni următoare, din raport §6): 6 (429 pe Notificările părintelui), 7 (B2B: poarta de vârstă + mesaj fals + „Copiază link”), 8 (intrarea cu cod: reintrare în contul telefonului), 9 (`/ro/parinte` „fără card” primul; `/ro/preturi` buton fix; logat → `packages?plan=`), 10 (formular 4 câmpuri + calibrare fără clasă/bife), 11–15.
+
 **Acordul părintelui în Legal Hub, ștergerea conturilor, bara probei, conturile inactive (decizii Alex 28–29.09) —
 LIVE 2026-09-29 (`1617e4f`; Legal `843e3dd`):** raport complet `Reports/acord-parinte-2026-09-29/RAPORT.md`.
 - [x] Data nașterii întreagă; sub 16 ani acordul părintelui, scris în Legal Hub (GuardianConsent) înainte de a fi aplicat;
