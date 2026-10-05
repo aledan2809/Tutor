@@ -1,0 +1,61 @@
+import {chromium,devices,BASE,mk} from './lib.mjs';
+import fs from 'fs';
+const VP=process.argv[2]||'mobile';
+const ts=Date.now(); const email=`qa-e2e-1005-parinte-${VP}-${ts}@example.com`; const kid=`qa-e2e-1005-copil-${VP}-${ts}`.slice(0,30).replace(/[^a-z0-9.-]/g,'');
+const pw='QaTest#2026x', kpw='QaKid#2026x';
+const opts= VP==='mobile'?{viewport:{width:375,height:812},deviceScaleFactor:2,isMobile:true,hasTouch:true,userAgent:devices['iPhone 13'].userAgent}:{viewport:{width:1440,height:900}};
+const b=await chromium.launch(); const ctx=await b.newContext(opts); const p=await ctx.newPage(); const m=mk(VP+'-p',p);
+const H=opts.viewport.height; const out={vp:VP,email,kid,notes:[]}; let taps=0;
+const tap=()=>taps++;
+// 1 landing
+let t0=Date.now();
+await p.goto(BASE+'/cafea'); await p.waitForLoadState('networkidle'); out.landingSec=(Date.now()-t0)/1000;
+const hit=await p.evaluate(()=>{const a=[...document.querySelectorAll('a')].find(e=>/24,90 lei\/lun/.test(e.innerText));const r=a.getBoundingClientRect();const el=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return {top:Math.round(r.top),bottom:Math.round(r.bottom),covered:!(a===el||a.contains(el)),coveredBy:(el&&el.closest('[class]')?.className||'').toString().slice(0,60)+' | '+(el?.innerText||'').slice(0,40)}});
+out.cta1=hit; await m.snap('landing-first-visit');
+await p.getByRole('button',{name:'Accept'}).click().catch(()=>{}); await p.waitForTimeout(400);
+const hit2=await p.evaluate(()=>{const a=[...document.querySelectorAll('a')].find(e=>/fără card/i.test(e.innerText));const r=a.getBoundingClientRect();return {top:Math.round(r.top),bottom:Math.round(r.bottom)}});
+out.freeBtnAfterAccept=hit2; out.sticky=await p.evaluate(()=>!!document.querySelector('[class*=sticky],[data-sticky]')); await m.snap('landing-after-accept');
+const tStart=Date.now();
+await p.locator('a[href*="start=free"]').first().click(); tap();
+await p.waitForURL(/register/); await p.waitForLoadState('networkidle'); await m.snap('register');
+out.registerTextEN=await p.evaluate(()=>/\b(Sign in|Password|Email address|Create account)\b/.test(document.body.innerText));
+const inp=p.locator('input');
+await inp.nth(0).fill('QA Parinte '+VP); await inp.nth(1).fill(email); await inp.nth(2).fill(pw); await inp.nth(3).fill(pw);
+await m.snap('register-filled');
+const tReg=Date.now(); await p.getByRole('button',{name:'Creează cont'}).click(); tap();
+await p.waitForURL(u=>!/register/.test(u.pathname),{timeout:20000}); 
+await p.waitForSelector('text=Se încarcă',{state:'detached',timeout:15000}).catch(()=>{});
+out.afterRegisterUrl=p.url().replace(BASE,''); out.registerSubmitSec=(Date.now()-tReg)/1000; await m.snap('after-register');
+if(!/family/.test(p.url())){ out.notes.push('landed not on family: '+p.url()); await p.goto(BASE+'/ro/dashboard/family'); }
+await p.getByRole('button',{name:'Adaugă copil'}).first().waitFor();
+out.addBtnTopBeforeOpen=await p.evaluate(()=>{const e=[...document.querySelectorAll('main button')].find(b=>b.innerText.trim()==='Adaugă copil');return Math.round(e.getBoundingClientRect().top)});
+await m.snap('family');
+await p.getByRole('button',{name:'Adaugă copil'}).first().click(); tap(); await p.waitForTimeout(500);
+out.formTopAfterOpen=await p.evaluate(()=>{const e=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Creează contul direct');return Math.round(e.getBoundingClientRect().top)});
+await m.snap('add-child-open');
+await p.getByRole('button',{name:'Creează contul direct'}).click(); tap(); await p.waitForTimeout(300);
+await p.getByPlaceholder('Numele copilului').scrollIntoViewIfNeeded();
+await p.getByPlaceholder('Numele copilului').fill('Ana QA'); 
+out.usernameAutofill=await p.getByPlaceholder(/Nume de utilizator/).inputValue();
+await p.getByPlaceholder(/Nume de utilizator/).fill(kid);
+await p.getByPlaceholder(/Parolă/).fill(kpw);
+await m.snap('direct-form-filled');
+await p.getByRole('button',{name:'Creează contul copilului'}).click(); tap(); await p.waitForTimeout(1500);
+await m.snap('child-created');
+const bodyAfter=await p.innerText('main'); out.childCreatedText=bodyAfter.slice(bodyAfter.indexOf('Contul copilului')).slice(0,600);
+const ok=p.getByRole('button',{name:/Gata, am notat/}); out.noteBtn=await ok.count();
+out.noteBtnTop=out.noteBtn? await ok.first().evaluate(e=>Math.round(e.getBoundingClientRect().top)):null;
+if(out.noteBtn){ await ok.first().click(); tap(); await p.waitForTimeout(800);} 
+await m.snap('after-note');
+out.afterNoteText=(await p.innerText('main')).slice(0,1800);
+out.parentTapsToFirstValue=taps; out.parentSecToFirstValue=((Date.now()-tStart)/1000);
+// monitorizare
+await p.goto(BASE+'/ro/dashboard'); await p.waitForSelector('text=Se încarcă',{state:'detached',timeout:15000}).catch(()=>{}); await p.waitForTimeout(700); await m.snap('monitorizare');
+out.monitorText=(await p.innerText('main')).slice(0,1500); out.monitorUrl=p.url().replace(BASE,'');
+// packages
+let tp=Date.now(); await p.goto(BASE+'/ro/dashboard/packages?plan=FAMILY&voucher=V126S'); await p.waitForLoadState('networkidle'); await p.waitForTimeout(1200); out.packagesSec=(Date.now()-tp)/1000; await m.snap('packages');
+out.packagesText=(await p.innerText('main')).slice(0,3500);
+fs.writeFileSync(`${VP}-parent-out.json`,JSON.stringify(out,null,1)); fs.writeFileSync(`${VP}-parent-log.json`,JSON.stringify(m.log,null,1));
+fs.writeFileSync(`${VP}-state.json`,JSON.stringify(await ctx.storageState()));
+console.log(JSON.stringify(out,null,1));
+await b.close();

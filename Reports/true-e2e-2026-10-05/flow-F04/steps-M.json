@@ -1,0 +1,351 @@
+{
+ "tag": "M",
+ "steps": [
+  {
+   "n": 1,
+   "name": "join-landing",
+   "file": "M-01-join-landing.png",
+   "url": "/ro/family/join",
+   "title": "Tutor - Adaptive Learning Platform",
+   "sec": "0.4",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Verifică codul",
+     "belowFold": false
+    },
+    {
+     "t": "Politica de cookie-uri",
+     "belowFold": false
+    },
+    {
+     "t": "Confidențialitate",
+     "belowFold": false
+    },
+    {
+     "t": "Respinge",
+     "belowFold": false
+    },
+    {
+     "t": "Accept",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "name": "cookie-banner-over-join",
+   "file": "M-02-cookie-banner-over-join.png",
+   "url": "/ro/family/join",
+   "title": "Tutor - Adaptive Learning Platform",
+   "sec": "0.4",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Verifică codul",
+     "belowFold": false
+    },
+    {
+     "t": "Politica de cookie-uri",
+     "belowFold": false
+    },
+    {
+     "t": "Confidențialitate",
+     "belowFold": false
+    },
+    {
+     "t": "Respinge",
+     "belowFold": false
+    },
+    {
+     "t": "Accept",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "name": "verified",
+   "file": "M-03-verified.png",
+   "url": "/ro/family/join",
+   "title": "Tutor - Adaptive Learning Platform",
+   "sec": "1.7",
+   "taps": 2,
+   "prim": [
+    {
+     "t": "Accept",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 4,
+   "name": "signin-redirect",
+   "file": "M-04-signin-redirect.png",
+   "url": "/ro/auth/signin?callbackUrl=%2Ffamily%2Fjoin%3Fcode%3DMQEBS5F4&role=STUDENT",
+   "title": "Sign In - Tutor | Tutor",
+   "sec": "2.9",
+   "taps": 3,
+   "prim": [
+    {
+     "t": "Continuă cu Google",
+     "belowFold": false
+    },
+    {
+     "t": "Arată parola",
+     "belowFold": false
+    },
+    {
+     "t": "Autentificare",
+     "belowFold": false
+    },
+    {
+     "t": "Nu ai email? Recuperează pe telefon",
+     "belowFold": false
+    },
+    {
+     "t": "Ai uitat parola?",
+     "belowFold": false
+    },
+    {
+     "t": "Folosește magic link",
+     "belowFold": false
+    },
+    {
+     "t": "Fă-ți unul",
+     "belowFold": false
+    },
+    {
+     "t": "încearcă fără cont ✨",
+     "belowFold": false
+    },
+    {
+     "t": "Termeni și condiții",
+     "belowFold": false
+    },
+    {
+     "t": "Politica de confidențialitate",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 5,
+   "name": "register",
+   "file": "M-05-register.png",
+   "url": "/ro/auth/register?callbackUrl=%2Ffamily%2Fjoin%3Fcode%3DMQEBS5F4&role=STUDENT",
+   "title": "Sign In - Tutor | Tutor",
+   "sec": "4.2",
+   "taps": 4,
+   "prim": [
+    {
+     "t": "Elev",
+     "belowFold": false
+    },
+    {
+     "t": "Părinte",
+     "belowFold": false
+    },
+    {
+     "t": "Arată parola",
+     "belowFold": false
+    },
+    {
+     "t": "Arată parola",
+     "belowFold": false
+    },
+    {
+     "t": "Creează cont",
+     "belowFold": false
+    },
+    {
+     "t": "Autentifică-te",
+     "belowFold": false
+    },
+    {
+     "t": "Încearcă fără cont ✨",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 6,
+   "name": "register-filled",
+   "file": "M-06-register-filled.png",
+   "url": "/ro/auth/register?callbackUrl=%2Ffamily%2Fjoin%3Fcode%3DMQEBS5F4&role=STUDENT",
+   "title": "Sign In - Tutor | Tutor",
+   "sec": "4.3",
+   "taps": 4,
+   "prim": [
+    {
+     "t": "Elev",
+     "belowFold": false
+    },
+    {
+     "t": "Părinte",
+     "belowFold": false
+    },
+    {
+     "t": "Arată parola",
+     "belowFold": false
+    },
+    {
+     "t": "Arată parola",
+     "belowFold": false
+    },
+    {
+     "t": "Creează cont",
+     "belowFold": false
+    },
+    {
+     "t": "Autentifică-te",
+     "belowFold": false
+    },
+    {
+     "t": "Încearcă fără cont ✨",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 7,
+   "name": "back-on-join",
+   "file": "M-07-back-on-join.png",
+   "url": "/ro/family/join?code=MQEBS5F4",
+   "title": "Tutor - Adaptive Learning Platform",
+   "sec": "6.5",
+   "taps": 5,
+   "prim": [
+    {
+     "t": "Verifică codul",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 8,
+   "name": "re-verify",
+   "file": "M-08-re-verify.png",
+   "url": "/ro/family/join?code=MQEBS5F4",
+   "title": "Tutor - Adaptive Learning Platform",
+   "sec": "7.8",
+   "taps": 6,
+   "prim": [
+    {
+     "t": "Accept",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 9,
+   "name": "accepted",
+   "file": "M-09-accepted.png",
+   "url": "/ro/family/join?code=MQEBS5F4",
+   "title": "Tutor - Adaptive Learning Platform",
+   "sec": "9.9",
+   "taps": 7,
+   "prim": [
+    {
+     "t": "Mergi la panou",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 10,
+   "name": "panou",
+   "file": "M-10-panou.png",
+   "url": "/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "13.4",
+   "taps": 8,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Astăzi",
+     "belowFold": false
+    },
+    {
+     "t": "Panou complet",
+     "belowFold": false
+    },
+    {
+     "t": "📘\nQA DIAG mate 1789647508347\n→",
+     "belowFold": false
+    },
+    {
+     "t": "📘\nQA DIAG romana 1789647508347\n→",
+     "belowFold": false
+    },
+    {
+     "t": "📘\nQA DIAG bio 1789647508347\n→",
+     "belowFold": false
+    },
+    {
+     "t": "📘\nMatematica cl. VIII\n→",
+     "belowFold": false
+    },
+    {
+     "t": "Vezi toate materiile în listă →",
+     "belowFold": false
+    }
+   ]
+  }
+ ],
+ "console": [
+  {
+   "url": "http://localhost:3113/ro/family/join",
+   "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  },
+  {
+   "url": "http://localhost:3113/ro/auth/register?callbackUrl=%2Ffamily%2Fjoin%3Fcode%3DMQEBS5F4&role=STUDENT",
+   "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  }
+ ],
+ "http": [
+  {
+   "url": "/api/family/accept",
+   "status": 401
+  },
+  {
+   "url": "/api/student/domains",
+   "status": 401
+  }
+ ],
+ "roleChecked": "Elev",
+ "selects": 3,
+ "registerInputs": 7,
+ "joinAfterRegister": "Intră în familie cu un cod | Introdu codul de familie primit de la părinte. | Verifică codul | Confidențialitate | · | Termeni | · | Cookie-uri",
+ "codePrefilled": "MQEBS5F4",
+ "panouText": "Tutor | Panou de control | ÎNVAȚĂ | Lecții | Grile | Simulări | Generează test | Domenii | Calendar | PROGRES | Progresul meu | CONT | Abonament | 🔒 | Familia mea | Notificări | Setări | Ajutor | EN | RO | qa-e2e-1005 Copil mobile | qa-e2e-1005-f04-child-mobile@example.com | Deconectare | 🚀 | 3 | Panou de control | Astăzi | Panou complet | Bine ai venit! 👋 | Hai să te cunoaștem în 3 pași rapizi — apoi îți dăm exact ce ai nevoie. | 1 Materia | → | 2 Test scurt | → | 3 Planul tău | Ce pregăteșt",
+ "firstValueSec": "13.4",
+ "firstValueTaps": 8
+}

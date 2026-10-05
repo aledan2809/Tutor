@@ -1,0 +1,22 @@
+import {chromium,devices,BASE,mk,DIR} from './lib.mjs';
+import fs from 'fs';
+const tag=process.argv[2];
+const st=JSON.parse(fs.readFileSync(`${DIR}/${tag}-steps.json`));
+const b=await chromium.launch();
+const ctx=await b.newContext({viewport:{width:375,height:812},deviceScaleFactor:2,isMobile:true,hasTouch:true,userAgent:devices['iPhone 13'].userAgent,storageState:`${DIR}/${tag}-auth.json`});
+const p=await ctx.newPage(); const m=mk(tag+'-e',p);
+const d=JSON.parse(fs.readFileSync(`${DIR}/${tag}-d-steps.json`)); const u=d.steps.at(-1).url;
+await p.goto(BASE+u); await p.waitForTimeout(2500);
+const opt=p.getByText(/^B\.\s*60/).first(); const vis=await opt.isVisible().catch(()=>false);
+const bb=await opt.boundingBox().catch(()=>null); console.log('option visible',vis,'y',bb?.y);
+await opt.scrollIntoViewIfNeeded(); await opt.click(); m.tap(); await p.waitForTimeout(1500); await m.snap('answered');
+console.log((await p.evaluate(()=>document.body.innerText)).replace(/\n+/g,' | ').slice(600,1400));
+if(process.env.SKIP!=='1'){await p.getByRole('button',{name:'Trimite răspunsul'}).click(); m.tap();} await p.waitForTimeout(1500); await m.snap('submitted'); console.log('AFTER SUBMIT',(await p.evaluate(()=>document.body.innerText)).replace(/\n+/g,' | ').slice(560,1200));
+// logout + lowercase login
+await ctx.clearCookies(); await p.goto(BASE+'/ro/auth/signin'); await p.waitForTimeout(1000);
+await p.getByRole('button',{name:'Respinge'}).click().catch(()=>{});
+await p.locator('input[type=text]').fill(st.email.toLowerCase()); await p.getByPlaceholder('••••••••').fill('QaE2e!1005x');
+await p.locator('button[type=submit]').click(); await p.waitForTimeout(3500); await m.snap('login-lowercase');
+console.log('login ->',p.url());
+fs.writeFileSync(`${DIR}/${m.log.tag}-steps.json`,JSON.stringify(m.log,null,1));
+await b.close();

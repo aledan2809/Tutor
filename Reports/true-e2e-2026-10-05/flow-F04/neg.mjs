@@ -1,0 +1,13 @@
+import {chromium,BASE,mk} from './lib.mjs'; import fs from 'fs';
+const b=await chromium.launch(); const ctx=await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true});
+const page=await ctx.newPage(); const m=mk('N',page);
+await page.goto(BASE+'/ro/family/join'); const r=page.getByRole('button',{name:'Respinge'}); if(await r.count()) await r.click();
+const tryc=async(c,n)=>{ await page.locator('main input').first().fill(c); await page.getByRole('button',{name:'Verifică codul'}).click(); await page.waitForTimeout(1200); await m.snap(n); console.log(n,JSON.stringify(c),'->',(await page.innerText('main')).replace(/\n+/g,' | ').slice(0,200)); };
+await tryc('ZZZZ9999','inexistent');
+await tryc('DEYCXFGR','used');
+await tryc('  pc3 rq75x ','spaces-lower');
+await tryc('PC3RQ75X','valid');
+await tryc('abc','too-short').catch(e=>console.log('short: button disabled?',e.message.slice(0,80)));
+console.log('lang attr',await page.evaluate(()=>document.documentElement.lang), 'bg', await page.evaluate(()=>getComputedStyle(document.querySelector('main > div')).backgroundColor+' / body '+getComputedStyle(document.body).backgroundColor));
+await page.goto(BASE+'/family/join'); console.log('no-prefix url ->',page.url());
+fs.writeFileSync('neg.json',JSON.stringify(m.log)); await b.close();

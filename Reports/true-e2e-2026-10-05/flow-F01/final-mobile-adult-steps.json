@@ -1,0 +1,256 @@
+{
+ "tag": "final-mobile-adult",
+ "steps": [
+  {
+   "n": 1,
+   "name": "landing",
+   "file": "final-mobile-adult-01-landing.png",
+   "url": "/ro",
+   "title": "Tutor - Mii de grile reale pe materia ta | etutor.ro | Tutor",
+   "sec": 1.2,
+   "taps": 0,
+   "typed": 0,
+   "cta": {
+    "Fă-ți cont gratuit": {
+     "top": 648,
+     "vh": 844,
+     "aboveFold": true,
+     "coveredBy": "mx-auto max-w-3xl rounded-2xl border border-gray-700 bg-gray 🍪\n\nFolosim cookie-uri esențiale pentru "
+    },
+    "Începe testul": {
+     "top": 551,
+     "vh": 844,
+     "aboveFold": true,
+     "coveredBy": null
+    },
+    "Autentificare": {
+     "top": 10,
+     "vh": 844,
+     "aboveFold": true,
+     "coveredBy": null
+    },
+    "Vezi demo-ul complet": {
+     "top": 712,
+     "vh": 844,
+     "aboveFold": true,
+     "coveredBy": "text-blue-400 underline hover:text-blue-300 Confidențialitate"
+    },
+    "banner": true
+   }
+  },
+  {
+   "n": 2,
+   "name": "register-empty",
+   "file": "final-mobile-adult-02-register-empty.png",
+   "url": "/ro/auth/register",
+   "title": "Sign In - Tutor | Tutor",
+   "sec": 2.2,
+   "taps": 1,
+   "typed": 0
+  },
+  {
+   "n": 3,
+   "name": "register-filled",
+   "file": "final-mobile-adult-03-register-filled.png",
+   "url": "/ro/auth/register",
+   "title": "Sign In - Tutor | Tutor",
+   "sec": 2.2,
+   "taps": 4,
+   "typed": 4,
+   "cookieBanner": true
+  },
+  {
+   "n": 4,
+   "name": "dashboard-wizard1",
+   "file": "final-mobile-adult-04-dashboard-wizard1.png",
+   "url": "/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": 3.9,
+   "taps": 5,
+   "typed": 4
+  },
+  {
+   "n": 5,
+   "name": "blocked-by-cookie-banner-wizard-subject",
+   "file": "final-mobile-adult-05-blocked-by-cookie-banner-wizard-subject.png",
+   "url": "/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": 8,
+   "taps": 5,
+   "typed": 4
+  },
+  {
+   "n": 6,
+   "name": "wizard-step2",
+   "file": "final-mobile-adult-06-wizard-step2.png",
+   "url": "/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": 9.7,
+   "taps": 7,
+   "typed": 4
+  },
+  {
+   "n": 7,
+   "name": "after-start",
+   "file": "final-mobile-adult-07-after-start.png",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "title": "Practice - Tutor",
+   "sec": 12.2,
+   "taps": 8,
+   "typed": 4
+  },
+  {
+   "n": 8,
+   "name": "class-chosen",
+   "file": "final-mobile-adult-08-class-chosen.png",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "title": "Practice - Tutor",
+   "sec": 13.8,
+   "taps": 9,
+   "typed": 4
+  },
+  {
+   "n": 9,
+   "name": "save-button",
+   "file": "final-mobile-adult-09-save-button.png",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "title": "Practice - Tutor",
+   "sec": 13.9,
+   "taps": 9,
+   "typed": 4
+  },
+  {
+   "n": 10,
+   "name": "first-question",
+   "file": "final-mobile-adult-10-first-question.png",
+   "url": "/ro/dashboard/practice/cmuv7j2kd00plsnj39oqb4mcw",
+   "title": "Practice - Tutor",
+   "sec": 14.4,
+   "taps": 10,
+   "typed": 4
+  },
+  {
+   "n": 11,
+   "name": "answered",
+   "file": "final-mobile-adult-11-answered.png",
+   "url": "/ro/dashboard/practice/cmuv7j2kd00plsnj39oqb4mcw",
+   "title": "Practice - Tutor",
+   "sec": 15.7,
+   "taps": 11,
+   "typed": 4
+  },
+  {
+   "n": 12,
+   "name": "login-lowercase",
+   "file": "final-mobile-adult-12-login-lowercase.png",
+   "url": "/ro/auth/signin",
+   "title": "Sign In - Tutor | Tutor",
+   "sec": 50.2,
+   "taps": 11,
+   "typed": 4
+  }
+ ],
+ "console": [
+  {
+   "url": "/ro/auth/register",
+   "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  },
+  {
+   "url": "/ro/dashboard",
+   "text": "Failed to load resource: the server responded with a status of 409 (Conflict)"
+  },
+  {
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "text": "Failed to load resource: the server responded with a status of 409 (Conflict)"
+  }
+ ],
+ "http": [
+  {
+   "url": "/api/student/domains",
+   "status": 401
+  },
+  {
+   "url": "/api/matematica-v-viii/session/start",
+   "status": 409
+  },
+  {
+   "url": "/api/matematica-v-viii/session/start",
+   "status": 409
+  }
+ ],
+ "taps": 11,
+ "typed": 4,
+ "cookieBlocks": [
+  {
+   "where": "wizard subject",
+   "url": "/ro/dashboard"
+  }
+ ],
+ "landingCTA": {
+  "Fă-ți cont gratuit": {
+   "top": 648,
+   "vh": 844,
+   "aboveFold": true,
+   "coveredBy": "mx-auto max-w-3xl rounded-2xl border border-gray-700 bg-gray 🍪\n\nFolosim cookie-uri esențiale pentru "
+  },
+  "Începe testul": {
+   "top": 551,
+   "vh": 844,
+   "aboveFold": true,
+   "coveredBy": null
+  },
+  "Autentificare": {
+   "top": 10,
+   "vh": 844,
+   "aboveFold": true,
+   "coveredBy": null
+  },
+  "Vezi demo-ul complet": {
+   "top": 712,
+   "vh": 844,
+   "aboveFold": true,
+   "coveredBy": "text-blue-400 underline hover:text-blue-300 Confidențialitate"
+  },
+  "banner": true
+ },
+ "lastTap": "answer",
+ "registerTitle": "Sign In - Tutor | Tutor",
+ "registerFields": [
+  "Numele tău",
+  "tu@exemplu.ro",
+  "birth-day",
+  "birth-month",
+  "birth-year",
+  "Minimum 8 caractere",
+  "Repetă parola"
+ ],
+ "subjectCheckboxes": 0,
+ "cookieBannerOnRegister": true,
+ "submitY": 631,
+ "submitToDashboardSec": 1.6,
+ "afterStartUrl": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+ "classOptions": [
+  "Alege clasa",
+  "Clasa a V-a",
+  "Clasa a VI-a",
+  "Clasa a VII-a",
+  "Clasa a VIII-a"
+ ],
+ "curriculum": {
+  "checkboxes": 28,
+  "saveY": 2286,
+  "vh": 844,
+  "scrollsNeeded": 3
+ },
+ "firstValueSec": 14.4,
+ "firstValueUrl": "/ro/dashboard/practice/cmuv7j2kd00plsnj39oqb4mcw",
+ "firstQuestionText": "Tutor | Panou de control | ÎNVAȚĂ | Lecții | Grile | Simulări | Generează test | Domenii | Calendar | PROGRES | Progresul meu | CONT | Abonament | 🔒 | Familia mea | Invită un prieten | Notificări | Setări | Ajutor | EN | RO | Qa Elev | qa-e2e-1005-elev-1791202164793@example.com | Deconectare | ⏳ | Proba gratuită, mai ai | 6z 23:59 | 🚀 | 3 | Proba gratuită · mai ai 7 zileAi tot pachetul, în afară de WhatsApp și SMS. Când se termină proba, rămâi pe varianta gratuită; tot ce ai lucrat rămâne salv",
+ "englishWords": null,
+ "answeredSec": 15.7,
+ "totalSecToFirstQuestion": 14.4,
+ "signinTitle": "Sign In - Tutor | Tutor",
+ "lowercaseLoginUrl": "/ro/auth/signin",
+ "email": "Qa-e2e-1005-elev-1791202164793@example.com",
+ "pe": "qa-e2e-1005-parinte-consent-1791202164793@example.com",
+ "totalSec": 50.2
+}

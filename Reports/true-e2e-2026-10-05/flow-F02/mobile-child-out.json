@@ -1,0 +1,224 @@
+{
+ "steps": [
+  {
+   "name": "home",
+   "url": "/ro",
+   "sec": "1.9",
+   "taps": 0,
+   "txt": "eTUTOR.ro | Autentificare | Mii de grile reale · pe materia ta · gratuit | Mii de grile reale, pe materia ta — gata de exersat | Grile verificate pe BAC, Evaluare Națională și admitere — exersezi pe loc, îți salvezi progresul și primești serii zilnice. | Fă-ți cont gratuit | Vezi demo-ul complet | 👨‍👩‍👧 | Ești părinte? Vezi dacă cel mic chiar învață → | Încearcă chiar acum 👇 | Alege materia și exersează pe grile reale: | Matematica (540 întrebări) | Începe testul ✨ | De ce elevii, părinții și profesorii aleg eTUTOR.ro | Progresul nu rămâne ascuns: elevul îl vede, părintele îl vede — iar la pachetul cu meditator, îl vede și acesta. Aceleași scoruri, aceeași evoluție, aceleași greșeli de c",
+   "btns": [
+    "eTUTOR.ro",
+    "Autentificare",
+    "Fă-ți cont gratuit",
+    "Vezi demo-ul complet",
+    "👨‍👩‍👧\nEști părinte? Vezi dacă cel mic",
+    "Începe testul ✨",
+    "Ești\n\nELEV/STUDENT\n\nÎnveți pe cont propr [BELOW]",
+    "Ești\n\nPĂRINTE\n\nVezi dacă cel mic chiar î [BELOW]",
+    "Ești\n\nPROFESOR\n\nAdaugi materiale pe mate [BELOW]",
+    "Creează cont gratuit [BELOW]",
+    "Vezi planurile și prețurile → [BELOW]",
+    "Demo gratuit [BELOW]",
+    "Grile pe materie [BELOW]",
+    "Pentru profesori [BELOW]",
+    "Confidențialitate [BELOW]",
+    "Termeni [BELOW]"
+   ]
+  },
+  {
+   "name": "signin",
+   "url": "/ro/auth/signin",
+   "sec": "3.8",
+   "taps": 0,
+   "txt": "Autentifică-te în Tutor | Accesează platforma ta de învățare adaptivă | Continuă cu Google | Sau continuă cu | Email sau nume de utilizator | Parola | Autentificare | Nu ai email? Recuperează pe telefon | Ai uitat parola? | Folosește magic link | Nu ai cont? Fă-ți unul | Sau încearcă fără cont ✨ | Prin autentificare, ești de acord cu Termeni și condiții & Politica de confidențialitate | Confidențialitate | · | Termeni | · | Cookie-uri",
+   "btns": [
+    "Continuă cu Google",
+    "Arată parola",
+    "Autentificare",
+    "Nu ai email? Recuperează pe telefon",
+    "Ai uitat parola?",
+    "Folosește magic link",
+    "Fă-ți unul",
+    "încearcă fără cont ✨",
+    "Termeni și condiții",
+    "Politica de confidențialitate",
+    "Confidențialitate [BELOW]",
+    "Termeni [BELOW]",
+    "Cookie-uri [BELOW]"
+   ]
+  },
+  {
+   "name": "after-signin",
+   "url": "/ro/dashboard",
+   "sec": "4.9",
+   "taps": 1,
+   "txt": "Tutor | Panou de control | ÎNVAȚĂ | Lecții | Grile | Simulări | Generează test | Domenii | Calendar | PROGRES | Progresul meu | CONT | Abonament | 🔒 | Familia mea | Notificări | Setări | Ajutor | EN | RO | Ana QA | Deconectare | 🚀 | 3 | Panou de control | Astăzi | Panou complet | Bine ai venit! 👋 | Hai să te cunoaștem în 3 pași rapizi — apoi îți dăm exact ce ai nevoie. | 1 Materia | → | 2 Test scurt | → | 3 Planul tău | Ce pregătești? | 📘 | Matematica cl. VIII | → | 📘 | QA DIAG mate 1789647508347 | → | 📘 | QA DIAG romana 1789647508347 | → | 📘 | QA DIAG bio 1789647508347 | → | Vezi toate materiile în listă → | Grile | Simulări | Progres | Setări | Confidențialitate | · | Termeni | · | ",
+   "btns": [
+    "Tutor",
+    "Close menu",
+    "Panou de control",
+    "Lecții",
+    "Grile",
+    "Simulări",
+    "Generează test",
+    "Domenii",
+    "Calendar",
+    "Progresul meu",
+    "Abonament",
+    "🔒\nFamilia mea",
+    "Notificări",
+    "Setări",
+    "Ajutor",
+    "EN"
+   ]
+  },
+  {
+   "name": "after-subject",
+   "url": "/ro/dashboard",
+   "sec": "7.5",
+   "taps": 2,
+   "txt": "Panou de control | Astăzi | Panou complet | Bine ai venit! 👋 | Hai să te cunoaștem în 3 pași rapizi — apoi îți dăm exact ce ai nevoie. | ✓ Materia | → | 2 Test scurt | → | 3 Planul tău | PASUL 2 DIN 3 | Test de calibrare · Matematica cl. VIII | Câteva grile scurte — îți arată din start la ce ești bun și ce merită reparat. | Începe testul ▶ | 90 de secunde acum îți economisesc ore mai târziu.",
+   "btns": [
+    "Astăzi",
+    "Panou complet",
+    "Începe testul ▶"
+   ]
+  },
+  {
+   "name": "step1",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "sec": "8.5",
+   "taps": 3,
+   "txt": "Grile | Înainte de prima sesiune, bifează ce s-a predat la clasă — grilele se aleg după bifele tale. Durează un minut. | Materia parcursă la școală | Bulina arată ce ar fi trebuit predat până azi, după programă. Bifează în dreptul fiecărei lecții dacă s-a predat efectiv la clasa ta — grilele se potrivesc pe ce ai bifat. | În ce clasă ești? | Alege clasa | Clasa a V-a | Clasa a VI-a | Clasa a VII-a | Clasa a VIII-a | 540 | Întrebări disponibile | ⓘ | 0 | Capitole studiate | ⓘ | 0 | Puncte slabe | ⓘ | RECOMANDAT | 🎯 Sesiune rapidă | ⓘ | Practică obișnuită | 10 min | 15 întrebări | Începe sesiun",
+   "btns": [
+    "ⓘ",
+    "ⓘ",
+    "ⓘ",
+    "ⓘ",
+    "Începe sesiunea",
+    "⚡ Sesiune micro 2 min 5 întrebări [BELOW]",
+    "ⓘ [BELOW]",
+    "📚 Sesiune lungă 20 min 30 întrebări [BELOW]",
+    "ⓘ [BELOW]",
+    "🔧 Sesiune de remediere 15 min 20 întreb [BELOW]",
+    "ⓘ [BELOW]",
+    "🔄 Sesiune de recuperare 10 min 15 între [BELOW]",
+    "ⓘ [BELOW]",
+    "🔥 Sesiune intensivă 20 min 30 întrebări [BELOW]"
+   ]
+  },
+  {
+   "name": "step2",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "sec": "9.5",
+   "taps": 4,
+   "txt": "Grile | Înainte de prima sesiune, bifează ce s-a predat la clasă — grilele se aleg după bifele tale. Durează un minut. | Materia parcursă la școală | Bulina arată ce ar fi trebuit predat până azi, după programă. Bifează în dreptul fiecărei lecții dacă s-a predat efectiv la clasa ta — grilele se potrivesc pe ce ai bifat. | În ce clasă ești? | Alege clasa | Clasa a V-a | Clasa a VI-a | Clasa a VII-a | Clasa a VIII-a | 540 | Întrebări disponibile | ⓘ | 0 | Capitole studiate | ⓘ | 0 | Puncte slabe | ⓘ | RECOMANDAT | 🎯 Sesiune rapidă | ⓘ | Practică obișnuită | 10 min | 15 întrebări | Începe sesiun",
+   "btns": [
+    "ⓘ",
+    "ⓘ",
+    "ⓘ",
+    "ⓘ",
+    "Începe sesiunea",
+    "⚡ Sesiune micro 2 min 5 întrebări [BELOW]",
+    "ⓘ [BELOW]",
+    "📚 Sesiune lungă 20 min 30 întrebări [BELOW]",
+    "ⓘ [BELOW]",
+    "🔧 Sesiune de remediere 15 min 20 întreb [BELOW]",
+    "ⓘ [BELOW]",
+    "🔄 Sesiune de recuperare 10 min 15 între [BELOW]",
+    "ⓘ [BELOW]",
+    "🔥 Sesiune intensivă 20 min 30 întrebări [BELOW]"
+   ]
+  },
+  {
+   "name": "step3",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "sec": "10.6",
+   "taps": 5,
+   "txt": "Grile | Înainte de prima sesiune, bifează ce s-a predat la clasă — grilele se aleg după bifele tale. Durează un minut. | Materia parcursă la școală | Bulina arată ce ar fi trebuit predat până azi, după programă. Bifează în dreptul fiecărei lecții dacă s-a predat efectiv la clasa ta — grilele se potrivesc pe ce ai bifat. | În ce clasă ești? | Alege clasa | Clasa a V-a | Clasa a VI-a | Clasa a VII-a | Clasa a VIII-a | 540 | Întrebări disponibile | ⓘ | 0 | Capitole studiate | ⓘ | 0 | Puncte slabe | ⓘ | RECOMANDAT | 🎯 Sesiune rapidă | ⓘ | Practică obișnuită | 10 min | 15 întrebări | Începe sesiun",
+   "btns": [
+    "ⓘ",
+    "ⓘ",
+    "ⓘ",
+    "ⓘ",
+    "Începe sesiunea",
+    "⚡ Sesiune micro 2 min 5 întrebări [BELOW]",
+    "ⓘ [BELOW]",
+    "📚 Sesiune lungă 20 min 30 întrebări [BELOW]",
+    "ⓘ [BELOW]",
+    "🔧 Sesiune de remediere 15 min 20 întreb [BELOW]",
+    "ⓘ [BELOW]",
+    "🔄 Sesiune de recuperare 10 min 15 între [BELOW]",
+    "ⓘ [BELOW]",
+    "🔥 Sesiune intensivă 20 min 30 întrebări [BELOW]"
+   ]
+  },
+  {
+   "name": "step4",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "sec": "11.6",
+   "taps": 6,
+   "txt": "Grile | Înainte de prima sesiune, bifează ce s-a predat la clasă — grilele se aleg după bifele tale. Durează un minut. | Materia parcursă la școală | Bulina arată ce ar fi trebuit predat până azi, după programă. Bifează în dreptul fiecărei lecții dacă s-a predat efectiv la clasa ta — grilele se potrivesc pe ce ai bifat. | În ce clasă ești? | Alege clasa | Clasa a V-a | Clasa a VI-a | Clasa a VII-a | Clasa a VIII-a | 540 | Întrebări disponibile | ⓘ | 0 | Capitole studiate | ⓘ | 0 | Puncte slabe | ⓘ | RECOMANDAT | 🎯 Sesiune rapidă | ⓘ | Practică obișnuită | 10 min | 15 întrebări | Începe sesiun",
+   "btns": [
+    "ⓘ",
+    "ⓘ",
+    "ⓘ",
+    "ⓘ",
+    "Începe sesiunea",
+    "⚡ Sesiune micro 2 min 5 întrebări [BELOW]",
+    "ⓘ [BELOW]",
+    "📚 Sesiune lungă 20 min 30 întrebări [BELOW]",
+    "ⓘ [BELOW]",
+    "🔧 Sesiune de remediere 15 min 20 întreb [BELOW]",
+    "ⓘ [BELOW]",
+    "🔄 Sesiune de recuperare 10 min 15 între [BELOW]",
+    "ⓘ [BELOW]",
+    "🔥 Sesiune intensivă 20 min 30 întrebări [BELOW]"
+   ]
+  },
+  {
+   "name": "step5",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "sec": "12.7",
+   "taps": 7,
+   "txt": "Grile | Înainte de prima sesiune, bifează ce s-a predat la clasă — grilele se aleg după bifele tale. Durează un minut. | Materia parcursă la școală | Bulina arată ce ar fi trebuit predat până azi, după programă. Bifează în dreptul fiecărei lecții dacă s-a predat efectiv la clasa ta — grilele se potrivesc pe ce ai bifat. | În ce clasă ești? | Alege clasa | Clasa a V-a | Clasa a VI-a | Clasa a VII-a | Clasa a VIII-a | 540 | Întrebări disponibile | ⓘ | 0 | Capitole studiate | ⓘ | 0 | Puncte slabe | ⓘ | RECOMANDAT | 🎯 Sesiune rapidă | ⓘ | Practică obișnuită | 10 min | 15 întrebări | Începe sesiun",
+   "btns": [
+    "ⓘ",
+    "ⓘ",
+    "ⓘ",
+    "ⓘ",
+    "Începe sesiunea",
+    "⚡ Sesiune micro 2 min 5 întrebări [BELOW]",
+    "ⓘ [BELOW]",
+    "📚 Sesiune lungă 20 min 30 întrebări [BELOW]",
+    "ⓘ [BELOW]",
+    "🔧 Sesiune de remediere 15 min 20 întreb [BELOW]",
+    "ⓘ [BELOW]",
+    "🔄 Sesiune de recuperare 10 min 15 între [BELOW]",
+    "ⓘ [BELOW]",
+    "🔥 Sesiune intensivă 20 min 30 întrebări [BELOW]"
+   ]
+  },
+  {
+   "name": "class-chosen",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "sec": "12.9",
+   "taps": 4,
+   "txt": "Grile | Înainte de prima sesiune, bifează ce s-a predat la clasă — grilele se aleg după bifele tale. Durează un minut. | Materia parcursă la școală | Bulina arată ce ar fi trebuit predat până azi, după programă. Bifează în dreptul fiecărei lecții dacă s-a predat efectiv la clasa ta — grilele se potrivesc pe ce ai bifat. | În ce clasă ești? | Alege clasa | Clasa a V-a | Clasa a VI-a | Clasa a VII-a | Clasa a VIII-a | ● în programă până azi | ☑ predat la clasa ta | CLASA A V-A | ● | Numere naturale. Operații, puteri, divizibilitate | ● | Fracții ordinare și zecimale | ● | Elemente de geometrie: punct, dreaptă, unghi, figuri | CLASA A VI-A | ● | Rapoarte și proporții. Procente | ● | Numere întregi. Operații | ● | Numere raționale. Operații | ● | Organizarea datelor. Medii | ● | Drepte, unghiuri, congruență. Triunghiul | CLASA A VII-A | ● | Numere și operații aritmetice. Rădăcina pătrată | ●"
+  },
+  {
+   "name": "after-start-no-ticks",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "sec": "17.0",
+   "taps": 5,
+   "txt": "Tutor | Panou de control | ÎNVAȚĂ | Lecții | Grile | Simulări | Generează test | Domenii | Calendar | PROGRES | Progresul meu | CONT | Abonament | 🔒 | Familia mea | Notificări | Setări | Ajutor | EN | RO | Ana QA | Deconectare | 🚀 | 3 | Grile | Înainte de prima sesiune, bifează ce s-a predat la clasă — grilele se aleg după bifele tale. Durează un minut. | Materia parcursă la școală | Bulina arată ce ar fi trebuit predat până azi, după programă. Bifează în dreptul fiecărei lecții dacă s-a predat efectiv la clasa ta — grilele se potrivesc pe ce ai bifat. | În ce clasă ești? | Alege clasa | Clasa a V-a | Clasa a VI-a | Clasa a VII-a | Clasa a VIII-a | ● în programă până azi | ☑ predat la clas"
+  },
+  {
+   "name": "after-start-ticks",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "sec": "18.3",
+   "taps": 9,
+   "txt": "Tutor | Panou de control | ÎNVAȚĂ | Lecții | Grile | Simulări | Generează test | Domenii | Calendar | PROGRES | Progresul meu | CONT | Abonament | 🔒 | Familia mea | Notificări | Setări | Ajutor | EN | RO | Ana QA | Deconectare | 🚀 | 3 | Grile | Înainte de prima sesiune, bifează ce s-a predat la clasă — grilele se aleg după bifele tale. Durează un minut. | Materia parcursă la școală | Bulina arată ce ar fi trebuit predat până azi, după programă. Bifează în dreptul fiecărei lecții dacă s-a predat efectiv la clasa ta — grilele se potrivesc pe ce ai bifat. | În ce clasă ești? | Alege clasa | Clasa a V-a | Clasa a VI-a | Clasa a VII-a | Clasa a VIII-a | ● în programă până azi | ☑ predat la clas"
+  }
+ ]
+}

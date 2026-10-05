@@ -1,0 +1,218 @@
+{
+ "R": [
+  {
+   "id": "E1",
+   "v": "FAIL",
+   "ev": [
+    "start→401 {\"error\":\"Unauthorized\"} 75ms"
+   ]
+  },
+  {
+   "id": "E2",
+   "v": "PARTIAL",
+   "ev": [
+    "formats→401 {\"error\":\"Unauthorized\"} 76ms"
+   ]
+  },
+  {
+   "id": "E3",
+   "v": "FAIL",
+   "ev": [
+    "assessment GET→401 {\"error\":\"Unauthorized\"} 302ms"
+   ]
+  },
+  {
+   "id": "E4",
+   "v": "FAIL",
+   "ev": [
+    "/api/aviation/bibliography→401",
+    "/api/student/bibliography→401"
+   ]
+  },
+  {
+   "id": "E5",
+   "v": "FAIL",
+   "ev": [
+    "/api/aviation/xp→401",
+    "/api/aviation/progress→401",
+    "/api/aviation/streak→401",
+    "/api/aviation/achievements→401",
+    "/api/student/dashboard?domainId=cmnoldd7100007slwe2ukyv→401"
+   ]
+  },
+  {
+   "id": "E6",
+   "v": "FAIL",
+   "ev": [
+    "/api/notifications→401",
+    "/api/notifications/preferences→401"
+   ]
+  },
+  {
+   "id": "E7",
+   "v": "PASS",
+   "ev": [
+    "/api/dashboard/instructor/groups?domainId=cmnoldd710000→200"
+   ]
+  },
+  {
+   "id": "E8",
+   "v": "FAIL",
+   "ev": [
+    "/api/dashboard/instructor/students?domainId=cmnoldd7100→200",
+    "/api/dashboard/instructor/students/undefined?domainId=c→404"
+   ]
+  },
+  {
+   "id": "E9",
+   "v": "PASS",
+   "ev": [
+    "/api/admin/questions?domainId=cmnoldd7100007slwe2ukyvc4→200"
+   ]
+  },
+  {
+   "id": "E10",
+   "v": "FAIL",
+   "ev": [
+    "/api/dashboard/instructor/reports?domainId=cmnoldd71000→400",
+    "/api/dashboard/instructor/analytics?domainId=cmnoldd710→200"
+   ]
+  },
+  {
+   "id": "E11",
+   "v": "PASS",
+   "ev": [
+    "/api/admin/questions?limit=5→200"
+   ]
+  },
+  {
+   "id": "E12",
+   "v": "PASS",
+   "ev": [
+    "/api/admin/domains→200",
+    "/api/student/domains→200"
+   ]
+  },
+  {
+   "id": "E13",
+   "v": "PASS",
+   "ev": [
+    "/api/admin/lessons→200",
+    "/api/admin/bibliography→200"
+   ]
+  },
+  {
+   "id": "E14",
+   "v": "FAIL",
+   "ev": [
+    "watcher→401 {\"error\":\"Unauthorized\"} 117ms",
+    "children=0"
+   ]
+  },
+  {
+   "id": "E15",
+   "v": "PASS",
+   "ev": [
+    "/api/admin/users→200",
+    "/api/admin/vouchers→200",
+    "/api/admin/audit→200",
+    "/api/admin/revenue→200",
+    "/api/admin/feedback→200"
+   ]
+  },
+  {
+   "id": "E16",
+   "v": "PASS",
+   "ev": [
+    "try1 user=null cb=302 loc=/auth/signin?error=CredentialsSignin&code=credenti",
+    "try2 user=null cb=302 loc=/auth/signin?error=CredentialsSignin&code=credenti",
+    "try3 user=null cb=302 loc=/auth/signin?error=CredentialsSignin&code=credenti",
+    "anon dashboard→401"
+   ]
+  },
+  {
+   "id": "E17",
+   "v": "PASS",
+   "ev": [
+    "/ro→200 lang=ro title=Tutor - Mii de grile reale pe materia ta | etutor.",
+    "/en→200 lang=en title=Tutor - Mii de grile reale pe materia ta | etutor."
+   ]
+  },
+  {
+   "id": "F1",
+   "v": "PARTIAL",
+   "ev": [
+    "STUDENT→401 {\"error\":\"Unauthorized\"} 585ms",
+    "JOURNEY→404 {\"error\":\"Domain not found\"} 1082ms"
+   ]
+  },
+  {
+   "id": "F2",
+   "v": "FAIL",
+   "ev": [
+    "student→401 {\"error\":\"Unauthorized\"} 236ms",
+    "watcher→401 {\"error\":\"Unauthorized\"} 447ms",
+    "studentOverall=undefined",
+    "watcherContainsSameAttempts=undefined"
+   ]
+  }
+ ],
+ "S": [
+  {
+   "name": "/ro",
+   "n": 30,
+   "p50": 2050,
+   "p95": 2209,
+   "max": 2215,
+   "wall": 2220,
+   "codes": {
+    "200": 30
+   }
+  },
+  {
+   "name": "/ro/parinte",
+   "n": 30,
+   "p50": 1669,
+   "p95": 1754,
+   "max": 1764,
+   "wall": 1765,
+   "codes": {
+    "200": 30
+   }
+  },
+  {
+   "name": "/ro/preturi",
+   "n": 30,
+   "p50": 1239,
+   "p95": 1305,
+   "max": 1321,
+   "wall": 1321,
+   "codes": {
+    "200": 30
+   }
+  },
+  {
+   "name": "/ro/auth/signin",
+   "n": 30,
+   "p50": 941,
+   "p95": 993,
+   "max": 999,
+   "wall": 1002,
+   "codes": {
+    "200": 30
+   }
+  },
+  {
+   "name": "/api/aviation/progress (auth)",
+   "n": 10,
+   "p50": 277,
+   "p95": 296,
+   "max": 296,
+   "wall": 305,
+   "codes": {
+    "401": 10
+   }
+  }
+ ],
+ "at": "2026-10-05T12:13:16.811Z"
+}

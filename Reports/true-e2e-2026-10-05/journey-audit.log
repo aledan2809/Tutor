@@ -1,0 +1,125 @@
+=== STUDENT 07:18:43
+[OK            ] Domains                      /en/dashboard/domains — h1="Domains"
+    └─ tables=0 buttons=24 bodyLen=1100
+[OK            ] Calendar                     /en/dashboard/calendar
+    └─ tables=0 buttons=13 bodyLen=516
+[OK            ] Notifications                /en/dashboard/notifications — h1="Notification Center"
+    └─ tables=0 buttons=39 bodyLen=1470
+[OK            ] Gamification                 /en/dashboard/gamification — h1="Achievements"
+    └─ tables=0 buttons=18 bodyLen=1334
+    └─ emptyMarkers=1
+[OK            ] Settings                     /en/dashboard/settings — h1="Settings"
+    └─ tables=0 buttons=21 bodyLen=731
+[OK            ] Instructor Questions         /en/dashboard/instructor/questions — h1="Panou de control"
+    └─ tables=0 buttons=18 bodyLen=741
+[OK            ] Admin Questions              /en/dashboard/admin/questions — h1="Panou de control"
+    └─ tables=0 buttons=18 bodyLen=741
+[OK            ] Family                       /en/dashboard/family — h1="Familia mea"
+    └─ tables=0 buttons=16 bodyLen=779
+[OK            ] Admin Feedback               /en/dashboard/admin/feedback — h1="Panou de control"
+    └─ tables=0 buttons=18 bodyLen=741
+
+═══════════════════════════════════════════════════════════════
+  SUMMARY
+═══════════════════════════════════════════════════════════════
+
+  OK             18 page(s)
+  HAS_ERRORS     1 page(s)
+
+  JSON report: /Users/danciulescu/Projects/Tutor/journey-audit-results/2026-10-05-student/report.json
+  Screenshots: /Users/danciulescu/Projects/Tutor/journey-audit-results/2026-10-05-student/screenshots/
+
+=== INSTRUCTOR 07:19:37
+    └─ tables=0 buttons=28 bodyLen=1118
+[OK            ] Calendar                     /en/dashboard/calendar — h1="Calendar"
+    └─ tables=0 buttons=16 bodyLen=416
+[OK            ] Notifications                /en/dashboard/notifications — h1="Notification Center"
+    └─ tables=0 buttons=16 bodyLen=394
+    └─ emptyMarkers=1
+[OK            ] Gamification                 /en/dashboard/gamification — h1="Achievements"
+    └─ tables=0 buttons=19 bodyLen=1271
+    └─ emptyMarkers=1
+[OK            ] Settings                     /en/dashboard/settings — h1="Settings"
+    └─ tables=0 buttons=23 bodyLen=731
+[OK            ] Instructor Questions         /en/dashboard/instructor/questions
+    └─ tables=0 buttons=59 bodyLen=4997
+[OK            ] Admin Questions              /en/dashboard/admin/questions — h1="Panou de control"
+    └─ tables=0 buttons=19 bodyLen=699
+[OK            ] Family                       /en/dashboard/family — h1="Familia mea"
+    └─ tables=0 buttons=16 bodyLen=891
+[OK            ] Admin Feedback               /en/dashboard/admin/feedback — h1="Panou de control"
+    └─ tables=0 buttons=19 bodyLen=699
+
+═══════════════════════════════════════════════════════════════
+  SUMMARY
+═══════════════════════════════════════════════════════════════
+
+  OK             18 page(s)
+  HAS_ERRORS     1 page(s)
+
+  JSON report: /Users/danciulescu/Projects/Tutor/journey-audit-results/2026-10-05-instructor/report.json
+  Screenshots: /Users/danciulescu/Projects/Tutor/journey-audit-results/2026-10-05-instructor/screenshots/
+
+=== ADMIN 07:20:25
+[OK            ] Domains                      /en/dashboard/domains — h1="Domains"
+    └─ tables=0 buttons=26 bodyLen=1168
+[OK            ] Calendar                     /en/dashboard/calendar — h1="Calendar"
+    └─ tables=0 buttons=14 bodyLen=464
+[OK            ] Notifications                /en/dashboard/notifications — h1="Notification Center"
+    └─ tables=0 buttons=58 bodyLen=6264
+[OK            ] Gamification                 /en/dashboard/gamification — h1="Achievements"
+    └─ tables=0 buttons=18 bodyLen=1377
+    └─ emptyMarkers=1
+[OK            ] Settings                     /en/dashboard/settings — h1="Settings"
+    └─ tables=0 buttons=21 bodyLen=779
+[OK            ] Instructor Questions         /en/dashboard/instructor/questions
+    └─ tables=0 buttons=16 bodyLen=3834
+[OK            ] Admin Questions              /en/dashboard/admin/questions — h1="Panou de control"
+    └─ tables=0 buttons=18 bodyLen=793
+[OK            ] Family                       /en/dashboard/family — h1="Familia mea"
+    └─ tables=0 buttons=16 bodyLen=980
+[OK            ] Admin Feedback               /en/dashboard/admin/feedback — h1="Panou de control"
+    └─ tables=0 buttons=18 bodyLen=793
+
+═══════════════════════════════════════════════════════════════
+  SUMMARY
+═══════════════════════════════════════════════════════════════
+
+  OK             18 page(s)
+  HAS_ERRORS     1 page(s)
+
+  JSON report: /Users/danciulescu/Projects/Tutor/journey-audit-results/2026-10-05-admin/report.json
+  Screenshots: /Users/danciulescu/Projects/Tutor/journey-audit-results/2026-10-05-admin/screenshots/
+
+=== WATCHER 07:21:13
+    └─ tables=0 buttons=27 bodyLen=1212
+[OK            ] Calendar                     /en/dashboard/calendar
+    └─ tables=0 buttons=16 bodyLen=634
+[OK            ] Notifications                /en/dashboard/notifications — h1="Notification Center"
+    └─ tables=0 buttons=21 bodyLen=570
+    └─ emptyMarkers=1
+[OK            ] Gamification                 /en/dashboard/gamification — h1="Achievements"
+    └─ tables=0 buttons=21 bodyLen=1421
+    └─ emptyMarkers=1
+[OK            ] Settings                     /en/dashboard/settings — h1="Settings"
+    └─ tables=0 buttons=24 bodyLen=849
+[OK            ] Instructor Questions         /en/dashboard/instructor/questions — h1="Panou de control"
+    └─ tables=0 buttons=21 bodyLen=874
+[OK            ] Admin Questions              /en/dashboard/admin/questions — h1="Panou de control"
+    └─ tables=0 buttons=21 bodyLen=874
+[OK            ] Family                       /en/dashboard/family — h1="Familia mea"
+    └─ tables=0 buttons=20 bodyLen=1283
+[OK            ] Admin Feedback               /en/dashboard/admin/feedback — h1="Panou de control"
+    └─ tables=0 buttons=21 bodyLen=874
+
+═══════════════════════════════════════════════════════════════
+  SUMMARY
+═══════════════════════════════════════════════════════════════
+
+  OK             18 page(s)
+  HAS_ERRORS     1 page(s)
+
+  JSON report: /Users/danciulescu/Projects/Tutor/journey-audit-results/2026-10-05-watcher/report.json
+  Screenshots: /Users/danciulescu/Projects/Tutor/journey-audit-results/2026-10-05-watcher/screenshots/
+
+JOURNEY_DONE

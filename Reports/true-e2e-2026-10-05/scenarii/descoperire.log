@@ -1,0 +1,30 @@
+SUPERADMIN   OK 302 [{"slug":"matematica-v-viii","id":"cmpx7pink001h47s5mmbfcmbu","roles":["STUDENT"]},{"slug":"romana-cl-viii","id":"cmq0j4ieu000014dev5gll2ew","roles":["STUDENT"]},{"slug":"aviation","id":"cmnoldd7100007slwe2ukyvc4","roles":["ADMIN","STUDENT"]}]
+ADMIN        OK 302 [{"slug":"aviation","id":"cmnoldd7100007slwe2ukyvc4","roles":["ADMIN"]}]
+INSTRUCTOR   OK 302 [{"slug":"aviation","id":"cmnoldd7100007slwe2ukyvc4","roles":["INSTRUCTOR"]},{"slug":"matematica-v-viii","id":"cmpx7pink001h47s5mmbfcmbu","roles":["INSTRUCTOR"]}]
+STUDENT      OK 302 [{"slug":"aviation","id":"cmnoldd7100007slwe2ukyvc4","roles":["STUDENT"]}]
+WATCHER      OK 302 [{"slug":"aviation","id":"cmnoldd7100007slwe2ukyvc4","roles":["WATCHER"]}]
+INSTRUCTOR2  OK 302 [{"slug":"aviation","id":"cmnoldd7100007slwe2ukyvc4","roles":["INSTRUCTOR"]}]
+admin/domains 200 {array[21]}
+   agent-imobiliar cmtonq90s0003a8xfcjg693s5 PRIVATE true
+   aptitudini-aviatie cmqruay160000evq4uxkhya81 PRIVATE true
+   aptitudini-aviatie-extins cmug0813a0000rre2troc45ny PRIVATE true
+   aviation cmnoldd7100007slwe2ukyvc4 PRIVATE true
+   aviatie-cunostinte cmqskyzvn0000jv22ydjr30su PRIVATE true
+   biologie cmpx7pizf001l47s5khtpd19w PRIVATE true
+   chimie cmpxqkq9g001338esa31cdgav PRIVATE true
+   drept-penal-si-procedura-penala cmo0fb20w0014qh0t8iqtqtfx PRIVATE true
+   geografie cmpx7pitt001j47s5jlo3r3pg PRIVATE true
+   istorie cmpx7mbqq000047s5ht7xwvy5 PRIVATE true
+   licenta-rares cmqrwp4kr000011uhglh8uarb PRIVATE true
+   matematica-ix-xii cmpyb6f7z00003jdj7i396jiv PUBLIC true
+   matematica-v-viii cmpx7pink001h47s5mmbfcmbu PUBLIC true
+   matematica-m1-ix-xii cmq750ilp0000hpgtnz0c1hza PUBLIC true
+   matematica-m2-ix-xii cmq750ilu0001hpgtkz7zp7gn PUBLIC true
+   matematica-m3-ix-xii cmq750ilw0002hpgtv7kmqs5p PUBLIC true
+   posta-factor cmtsvd3ny000bty3vb0jhouqh PRIVATE true
+   posta-ghiseu cmtsvd4n6001lty3vtd1f55mo PRIVATE true
+   posta-oficiu cmtsvd47l000yty3v1n3imlxo PRIVATE true
+   romana-ix-xii cmq4ybyby0000s7ee6hn94q5o PUBLIC true
+   romana-cl-viii cmq0j4ieu000014dev5gll2ew PUBLIC true
+POSTA_DEMO 200 {users,total,page,totalPages,presence} id=cmtsvjaov0047ty3vcflduouo enrollments=["posta-factor","posta-oficiu","posta-ghiseu"]
+JOURNEY 200 {users,total,page,totalPages,presence} id=cmtnyaacl0000xzh7amgn0lqb enrollments=["matematica-v-viii"]

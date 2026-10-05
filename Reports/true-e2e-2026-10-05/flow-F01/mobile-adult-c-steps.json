@@ -1,0 +1,59 @@
+{
+ "tag": "mobile-adult-c",
+ "steps": [
+  {
+   "n": 1,
+   "name": "after-pick-subject",
+   "file": "mobile-adult-c-01-after-pick-subject.png",
+   "url": "/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "3.3",
+   "taps": 1,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Astăzi",
+     "belowFold": false
+    },
+    {
+     "t": "Panou complet",
+     "belowFold": false
+    },
+    {
+     "t": "Începe testul ▶",
+     "belowFold": false
+    }
+   ],
+   "sinceWizard": "1.3"
+  }
+ ],
+ "console": [],
+ "http": []
+}

@@ -1,0 +1,34 @@
+{
+ "vp": "desktop",
+ "email": "qa-e2e-1005-parinte-desktop-1791185927042@example.com",
+ "kid": "qa-e2e-1005-copil-desktop-1791",
+ "notes": [],
+ "landingSec": 1.432,
+ "cta1": {
+  "top": 470,
+  "bottom": 524,
+  "covered": false,
+  "coveredBy": "parent-landing_btn__kGdW8 | Începe cu 24,90 lei/lună\n→"
+ },
+ "freeBtnAfterAccept": {
+  "top": 472,
+  "bottom": 522
+ },
+ "sticky": true,
+ "registerTextEN": false,
+ "afterRegisterUrl": "/ro/dashboard/family",
+ "registerSubmitSec": 0.904,
+ "addBtnTopBeforeOpen": 396,
+ "formTopAfterOpen": 553,
+ "usernameAutofill": "ana.qa",
+ "childCreatedText": "Contul copilului e gata.\n\nDă-i copilului datele de mai jos. Intră pe eTutor.ro, apasă „Intră în cont” și le scrie exact așa:\n\nNume de utilizator:\nqa-e2e-1005-copil-desktop-1791\nParola:\nQaKid#2026x\n\nParola n-o mai arătăm după ce închizi. Dacă o uitați, o schimbi tu din „Familia mea”, cu „Schimbă parola” lângă numele copilului.\n\nGata, am notat\nCopii\n\nAna QA\n\nUtilizator: qa-e2e-1005-copil-desktop-1791\n\nScoate\nSchimbă parola\nDoar încurajări calme — Limitează tonul energic pentru acest copil\nEu gestionez notificările pentru acest copil — Când e bifat, tu alegi canalele copilului; el nu le mai schim",
+ "noteBtn": 1,
+ "noteBtnTop": 786,
+ "afterNoteText": "Proba gratuită · mai ai 7 zileAi tot pachetul Family. Reminderele pe WhatsApp și SMS pornesc când pui cardul — nu plătești nimic până se termină proba.\n\n−30% dacă plătești acum, cât rămâi abonat · se încheie în\n6z 23:59:56\n\nContinuă cu Family · −30%\nFamilia mea\n\nAdaugă copilul, al doilea părinte sau meditatorul. Fiecare are cont propriu și vede doar ce i se cuvine.\n\nPachet: Family · probă gratuită\nPărinți: 1/1\nCopii: 1/1\nMeditatori: 0/0\n\nÎn proba gratuită îți poți lega copilul acum, fără card.\n\nAdaugă copil\nMai adaugi un copil, cu 20% reducere, după ce continui cu Family.\nAdaugă al 2-lea părinte\nPachetul „Family\" include un singur părinte. Treci la „Family Duo\" ca să adaugi al doilea părinte.\nAdaugă meditator\nAccesul pentru meditator e disponibil în pachetul „Trio\". Treci la el ca să adaugi un meditator.\nCopii\n\nAna QA\n\nUtilizator: qa-e2e-1005-copil-desktop-1791\n\nScoate\nSchimbă parola\nDoar încurajări calme — Limitează tonul energic pentru acest copil\nEu gestionez notificările pentru acest copil — Când e bifat, tu alegi canalele copilului; el nu le mai schimbă singur.",
+ "parentTapsToFirstValue": 6,
+ "parentSecToFirstValue": 4.567,
+ "monitorText": "Proba gratuită · mai ai 7 zileAi tot pachetul Family. Reminderele pe WhatsApp și SMS pornesc când pui cardul — nu plătești nimic până se termină proba.\n\n−30% dacă plătești acum, cât rămâi abonat · se încheie în\n6z 23:59:55\n\nContinuă cu Family · −30%\nPanou de control\nAstăzi\nPanou complet\nLeagă contul copilului\n\nCa să-i vezi progresul și să primești alerte, adaugă-l din Familia mea.\n\nFamilia mea →",
+ "monitorUrl": "/ro/dashboard",
+ "packagesSec": 1.87,
+ "packagesText": "Proba gratuită · mai ai 7 zileAi tot pachetul Family. Reminderele pe WhatsApp și SMS pornesc când pui cardul — nu plătești nimic până se termină proba.\n\n−30% dacă plătești acum, cât rămâi abonat · se încheie în\n6z 23:59:53\n\nContinuă cu Family · −30%\nPachete\n\nAlege un pachet ca să deblochezi toate funcțiile.\n\nCodul V126S rămâne pe cont: acum ai −30% din proba gratuită, mai mult decât codul.\n\n−30% dacă plătești acum, în proba gratuită — cât rămâi abonat\n\nOferta se încheie luni, 12 oct., 10:38. Zilele gratuite rămase se păstrează: prima plată vine după probă.\n\n6z 23:59:53\nLunar\nAnual · plătești 10 luni\nSelf (elev)\n−30% în probă\n\n26,53 lei18,57 lei /lună\n\npreț pentru prima materie\n\nConectează Telegram înainte să plătești: 16,71 lei (încă −10%, rămâne și după)\n\nPrimele 7 zile gratuite\n\nLocuri\n\n0 părinți • 0 copii\n\nAdaugi membrii din secțiunea Familia mea.\n\nAvem o ofertă și mai mare pentru tine.\n\nDacă faci plata pe tot anul, vei economisi și mai mult.\n\nHai să vezi cât →\nAlege pachetul\nFamily\n−30% în probă\n\n33,20 lei23,24 lei /lună\n\npreț pentru prima materie\n\nConectează Telegram înainte să plătești: 20,92 lei (încă −10%, rămâne și după)\n\nPrimele 7 zile gratuite\n\nLocuri\n\n1 părinte • 1 copil\n\nAdaugi membrii din secțiunea Familia mea.\n\nAvem o ofertă și mai mare pentru tine.\n\nDacă faci plata pe tot anul, vei economisi și mai mult.\n\nHai să vezi cât →\nAlege pachetul\nFamily Duo\n−30% în probă\n\n39,87 lei27,91 lei /lună\n\npreț pentru prima materie\n\nConectează Telegram înainte să plătești: 25,12 lei (încă −10%, rămâne și după)\n\nPrimele 7 zile gratuite\n\nLocuri\n\n2 părinți • 1 copil\n\nAdaugi membrii din secțiunea Familia mea.\n\nAvem o ofertă și mai mare pentru tine.\n\nDacă faci plata pe tot anul, vei economisi și mai mult.\n\nHai să vezi cât →\nAlege pachetul\nTrio\n−30% în probă\n\n53,20 lei37,24 lei /lună\n\npreț pentru prima materie\n\nConectează Telegram înainte să plătești: 33,52 lei (încă −10%, rămâne și după)\n\nPrimele 7 zile gratuite\n\nLocuri\n\n1 părinte • 1 copil • 1 meditator\n\nAdaugi membrii din secțiunea Familia mea.\n\nAvem o ofertă și mai mare pentru tine.\n\nDacă faci plata pe tot anul, vei economisi și mai mult.\n\nHai să vezi cât →\nAlege pachetul\nFamily Trio\n−30% în probă\n\n66,53 lei46,57 lei /lună\n\npreț pentru prima materie\n\nConectează Telegram înainte să plătești: 41,91 lei (încă −10%, rămâne și după)\n\nPrimele 7 zile gratuite\n\nLocuri\n\n2 părinți • 1 copil • 1 meditator\n\nAdaugi membrii din secțiunea Familia mea.\n\nAvem o ofertă și mai mare pentru tine.\n\nDacă faci plata pe tot anul, vei economisi și mai mult.\n\nHai să vezi cât →\nAlege pachetul\nReduceri: −30% dacă plătești în primele 7 zile, cât rămâi abonat · −10% cu Telegram conectat la plată (rămâne și după) · a doua materie −15%, de la a treia −25% · al doilea copil −20%, de la al treilea −30% · anual: plătești 10 luni, primești 12. Reducerile nu se adună: primești cea mai bună dintre cod și probă, plus Telegram.\nCod voucher (opțional)\nAplică\nȘterge codul\nAi un cod de acces 100%? Activează-l aici"
+}

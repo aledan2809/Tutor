@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-05T07:50:03.637Z",
+  "to": [
+    "qa-e2e-1005-target-1-1791186601@example.test"
+  ],
+  "subject": "Invitație etutor.ro",
+  "text": "Bună!\n\nBanca ta [https://rau.example] te invită pe etutor.ro ca elev.\n\nAlegi materia, răspunzi la grile și aplicația reține ce știi și unde te\nîmpiedici. De aici încolo îți dă mai des exact ce ai greșit, nu la întâmplare.\n\nNu trebuie să ții tu socoteala: reminderele vin la orele pe care ți le pui în\nprogram, iar progresul se vede singur în Progresul meu.\n\nAcceptă invitația\n[http://localhost:3113/family/accept/d021d439e974d328778b02fd65b61127e27ab0718c760656]\n\nSau deschide linkul:\nhttp://localhost:3113/family/accept/d021d439e974d328778b02fd65b61127e27ab0718c760656\n\nLinkul expiră în 7 zile.",
+  "html": "\n        <p>Bună!</p>\n        <p><a href=\"https://rau.example\">Banca ta</a> te invită pe etutor.ro ca <strong>elev</strong>.</p>\n        <p>Alegi materia, răspunzi la grile și aplicația reține ce știi și unde te împiedici. De aici încolo îți dă mai des exact ce ai greșit, nu la întâmplare.</p><p>Nu trebuie să ții tu socoteala: reminderele vin la orele pe care ți le pui în program, iar progresul se vede singur în Progresul meu.</p>\n        <p><a href=\"http://localhost:3113/family/accept/d021d439e974d328778b02fd65b61127e27ab0718c760656\">Acceptă invitația</a></p>\n        <p>Sau deschide linkul: http://localhost:3113/family/accept/d021d439e974d328778b02fd65b61127e27ab0718c760656</p>\n        <p style=\"color:#888;font-size:12px\">Linkul expiră în 7 zile.</p>",
+  "links": [
+    "https://rau.example",
+    "http://localhost:3113/family/accept/d021d439e974d328778b02fd65b61127e27ab0718c760656",
+    "https://rau.example]",
+    "http://localhost:3113/family/accept/d021d439e974d328778b02fd65b61127e27ab0718c760656]"
+  ]
+}

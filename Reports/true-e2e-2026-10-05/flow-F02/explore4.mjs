@@ -1,0 +1,14 @@
+import {chromium,devices,BASE,mk} from './lib.mjs';
+import fs from 'fs';
+const b=await chromium.launch();
+const ctx=await b.newContext({storageState:'state.json',viewport:{width:375,height:812},deviceScaleFactor:2,isMobile:true,hasTouch:true,userAgent:devices['iPhone 13'].userAgent});
+const p=await ctx.newPage(); const m=mk('w',p);
+await p.goto(BASE+'/ro/dashboard/family'); await p.getByRole('button',{name:'Adaugă copil'}).waitFor();
+await p.getByRole('button',{name:'Adaugă copil'}).click(); await p.waitForTimeout(600);
+const pos=await p.evaluate(()=>{const e=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Creează contul direct');const r=e.getBoundingClientRect();return {top:r.top,scrollY,innerHeight}});
+console.log('direct tab pos',pos);
+await p.getByRole('button',{name:'Creează contul direct'}).click(); await p.waitForTimeout(500);
+await p.getByRole('button',{name:'Creează contul direct'}).scrollIntoViewIfNeeded(); await m.snap('direct-form');
+console.log(await p.evaluate(()=>[...document.querySelectorAll('main input,main select,main label,main button')].map(e=>[e.tagName,e.type,e.name,e.placeholder,(e.innerText||'').slice(0,60),e.value])));
+console.log((await p.innerText('main')).split('Meditatori')[1].slice(0,1500));
+await b.close();

@@ -1,0 +1,41 @@
+{
+ "lap": [
+  [
+   "signin-page",
+   "0.4",
+   0
+  ],
+  [
+   "dashboard-wizard",
+   "0.9",
+   1
+  ],
+  [
+   "calibration-step2",
+   "1.0",
+   2
+  ],
+  [
+   "class-picker",
+   "1.2",
+   3
+  ],
+  [
+   "picked-class",
+   "1.7",
+   4
+  ],
+  [
+   "first-question",
+   "2.6",
+   5
+  ]
+ ],
+ "saveY": 1908,
+ "opt": [
+  332,
+  390,
+  448,
+  506
+ ]
+}

@@ -1,0 +1,34 @@
+01 p1-register /ro/auth/register?plan=FAMILY&voucher=ONV126S&start=free [1 taps, 4s]  
+    ✓ Codul ONV126S e inclus Îl verificăm și îl aplicăm după ce îți faci contul. Primele 7 zile sunt gratuite. Cont de părinte Intră în eTUTOR.ro și vezi cum progresează copilul tău Sunt Elev Părinte Îți vei lega copilul dup
+02 p1-dupa-register /ro/dashboard/family [2 taps, 6s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-mobile-2258678@example.com Deco
+03 p1-familia-mea-proba /ro/dashboard/family [2 taps, 8s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-mobile-2258678@example.com Deco
+hipoteza: {"err":"TimeoutError: locator.evaluate: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('button').filter({ hasText: /Adaugă al 2-lea părinte/ }).first()\n"}
+04 p1-adauga-parinte-in-vizor /ro/dashboard/family [2 taps, 69s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-mobile-2258678@example.com Deco
+click err locator.click: Timeout 4000ms exceeded.
+Call log:
+  - waiting for locator('button').filter({ hasText
+05 p1-click-adauga-parinte-in-proba /ro/dashboard/family [2 taps, 74s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-mobile-2258678@example.com Deco
+06 p1-copil-creat /ro/dashboard/family [5 taps, 79s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-mobile-2258678@example.com Deco
+07 p1-familia-mea-duo-activ /ro/dashboard/family [5 taps, 81s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-mobile-2258678@example.com Deco
+08 p1-formular-invitatie /ro/dashboard/family [6 taps, 82s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-mobile-2258678@example.com Deco
+09 p1-invitatie-trimisa /ro/dashboard/family [8 taps, 85s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-mobile-2258678@example.com Deco
+mail: Invitație etutor.ro http://localhost:3113/family/accept/3b9155cdde2824dbe6b05035568592d8feccf2153611f09b
+10 p2-accept-vizitator /ro/family/accept/3b9155cdde2824dbe6b05035568592d8feccf2153611f09b [0 taps, 86s] tema/brand 
+    Invitație în familia etutor.ro Părinte QA Unu te invită ca părinte. Intră în cont (sau fă-ți unul) ca să accepți invitația. Intră în cont Fă-ți cont După ce îți faci contul, te aducem înapoi aici ca să accepți. Confidenț
+11 p2-register-preselectat /ro/auth/register?callbackUrl=%2Ffamily%2Faccept%2F3b9155cdde2824dbe6b05035568592d8feccf2153611f09b&role=PARENT [1 taps, 88s]  
+    Cont de părinte Intră în eTUTOR.ro și vezi cum progresează copilul tău Sunt Elev Părinte Îți vei lega copilul după ce intri în cont. Nume Email Parolă Confirmă parola Creează cont Ai deja cont? Autentifică-te Nehotărât? 
+12 p2-dupa-register /ro/family/accept/3b9155cdde2824dbe6b05035568592d8feccf2153611f09b [2 taps, 90s]  
+    Invitație în familia etutor.ro Părinte QA Unu te invită ca părinte. Accept ca părinte Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-u
+13 p2-accept-logat /ro/family/accept/3b9155cdde2824dbe6b05035568592d8feccf2153611f09b [2 taps, 91s]  
+    Invitație în familia etutor.ro Părinte QA Unu te invită ca părinte. Accept ca părinte Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-u
+14 p2-dupa-accept /ro/dashboard [3 taps, 94s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Doi qa-e2e-1005-f03-p2-mobile-2258678@example.com Deco
+ERR page.waitForTimeout: Target page, context or browser has been closed

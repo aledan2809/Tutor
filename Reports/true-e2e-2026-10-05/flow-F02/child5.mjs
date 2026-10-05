@@ -1,0 +1,10 @@
+import {chromium,devices,BASE,mk} from './lib.mjs';
+const opts={viewport:{width:375,height:812},deviceScaleFactor:2,isMobile:true,hasTouch:true,userAgent:devices['iPhone 13'].userAgent};
+const b=await chromium.launch(); const ctx=await b.newContext({...opts,storageState:`mobile-child-state.json`}); const p=await ctx.newPage();
+await p.goto(BASE+'/ro/dashboard/practice?start=quick&domain=matematica-v-viii'); await p.waitForLoadState('networkidle');
+await p.locator('select').first().selectOption({label:'Clasa a VIII-a'}); await p.waitForTimeout(1000);
+console.log(await p.evaluate(()=>[...document.querySelectorAll('main button')].map(b=>{const r=b.getBoundingClientRect();return [b.innerText.trim().replace(/\n/g,' ').slice(0,50),Math.round(r.top+scrollY),b.disabled]})));
+console.log('page height',await p.evaluate(()=>document.documentElement.scrollHeight));
+console.log('checked', await p.locator('input[type=checkbox]:checked').count(), 'of', await p.locator('input[type=checkbox]').count());
+await p.screenshot({path:'fullpage-grile.png',fullPage:true});
+await b.close();

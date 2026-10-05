@@ -1,0 +1,234 @@
+{
+ "tag": "mobile-c4",
+ "steps": [
+  {
+   "n": 1,
+   "name": "start-btn-visible",
+   "file": "mobile-c4-01-start-btn-visible.png",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "title": "Practice - Tutor",
+   "sec": "2.7",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Salvează și continuă",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "Începe sesiunea",
+     "belowFold": false
+    },
+    {
+     "t": "⚡ Sesiune micro\n2 min\n5 întrebări",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "name": "after-start-no-ticks",
+   "file": "mobile-c4-02-after-start-no-ticks.png",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "title": "Practice - Tutor",
+   "sec": "4.1",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Salvează și continuă",
+     "belowFold": true
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": true
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": true
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": true
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": true
+    },
+    {
+     "t": "Începe sesiunea",
+     "belowFold": true
+    },
+    {
+     "t": "⚡ Sesiune micro\n2 min\n5 întrebări",
+     "belowFold": true
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "name": "after-start-ticks",
+   "file": "mobile-c4-03-after-start-ticks.png",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "title": "Practice - Tutor",
+   "sec": "5.4",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Salvează și continuă",
+     "belowFold": true
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": true
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": true
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": true
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": true
+    },
+    {
+     "t": "Începe sesiunea",
+     "belowFold": true
+    },
+    {
+     "t": "⚡ Sesiune micro\n2 min\n5 întrebări",
+     "belowFold": true
+    }
+   ]
+  }
+ ],
+ "console": [
+  {
+   "url": "http://localhost:3113/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "text": "Failed to load resource: the server responded with a status of 409 (Conflict)"
+  },
+  {
+   "url": "http://localhost:3113/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "text": "Failed to load resource: the server responded with a status of 409 (Conflict)"
+  },
+  {
+   "url": "http://localhost:3113/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "text": "Failed to load resource: the server responded with a status of 409 (Conflict)"
+  }
+ ],
+ "http": [
+  {
+   "url": "/api/matematica-v-viii/session/start",
+   "status": 409
+  },
+  {
+   "url": "/api/matematica-v-viii/session/start",
+   "status": 409
+  },
+  {
+   "url": "/api/matematica-v-viii/session/start",
+   "status": 409
+  }
+ ]
+}

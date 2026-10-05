@@ -1,0 +1,1075 @@
+[
+ {
+  "vp": "mobile",
+  "steps": [
+   {
+    "n": 1,
+    "name": "wrong-code-landing",
+    "file": "mobile-01-wrong-code-landing.png",
+    "url": "/ro/acces/XXXXXXXX",
+    "sec": "1.2",
+    "taps": 0,
+    "prim": [
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "07xx xxx xxx",
+      "belowFold": false
+     },
+     {
+      "t": "Intră la curs",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": true
+     },
+     {
+      "t": "Termeni",
+      "belowFold": true
+     },
+     {
+      "t": "Cookie-uri",
+      "belowFold": true
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": false
+     },
+     {
+      "t": "Respinge",
+      "belowFold": false
+     },
+     {
+      "t": "Accept",
+      "belowFold": false
+     }
+    ],
+    "body": "eTUTOR.ro\nSpune-ne cine ești\n\nDoar atât — ca șeful tău să vadă că ai făcut cursul. Nu ai de ales nicio parolă acum.\n\nNume\nPrenume\nTelefon\nIntră la curs\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+    "loadMs": 1152
+   },
+   {
+    "n": 2,
+    "name": "wrong-code-after-submit",
+    "file": "mobile-02-wrong-code-after-submit.png",
+    "url": "/ro/acces/XXXXXXXX",
+    "sec": "3.8",
+    "taps": 1,
+    "prim": [
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "07xx xxx xxx",
+      "belowFold": false
+     },
+     {
+      "t": "Intră la curs",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": true
+     },
+     {
+      "t": "Termeni",
+      "belowFold": true
+     },
+     {
+      "t": "Cookie-uri",
+      "belowFold": true
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": false
+     },
+     {
+      "t": "Respinge",
+      "belowFold": false
+     },
+     {
+      "t": "Accept",
+      "belowFold": false
+     }
+    ],
+    "body": "eTUTOR.ro\nSpune-ne cine ești\n\nDoar atât — ca șeful tău să vadă că ai făcut cursul. Nu ai de ales nicio parolă acum.\n\nNume\nPrenume\nTelefon\nLinkul ăsta nu mai e valabil. Poate a expirat sau a fost folosit de prea multe ori.\nIntră la curs\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept"
+   },
+   {
+    "n": 3,
+    "name": "good-landing",
+    "file": "mobile-03-good-landing.png",
+    "url": "/ro/acces/JRKB4TH4",
+    "sec": "0.7",
+    "taps": 0,
+    "prim": [
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "07xx xxx xxx",
+      "belowFold": false
+     },
+     {
+      "t": "Intră la curs",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": true
+     },
+     {
+      "t": "Termeni",
+      "belowFold": true
+     },
+     {
+      "t": "Cookie-uri",
+      "belowFold": true
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": false
+     },
+     {
+      "t": "Respinge",
+      "belowFold": false
+     },
+     {
+      "t": "Accept",
+      "belowFold": false
+     }
+    ],
+    "body": "eTUTOR.ro\nSpune-ne cine ești\n\nDoar atât — ca șeful tău să vadă că ai făcut cursul. Nu ai de ales nicio parolă acum.\n\nNume\nPrenume\nTelefon\nIntră la curs\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+    "loadMs": 658
+   },
+   {
+    "n": 4,
+    "name": "good-filled",
+    "file": "mobile-04-good-filled.png",
+    "url": "/ro/acces/JRKB4TH4",
+    "sec": "0.8",
+    "taps": 1,
+    "prim": [
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "07xx xxx xxx",
+      "belowFold": false
+     },
+     {
+      "t": "Intră la curs",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": true
+     },
+     {
+      "t": "Termeni",
+      "belowFold": true
+     },
+     {
+      "t": "Cookie-uri",
+      "belowFold": true
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": false
+     },
+     {
+      "t": "Respinge",
+      "belowFold": false
+     },
+     {
+      "t": "Accept",
+      "belowFold": false
+     }
+    ],
+    "body": "eTUTOR.ro\nSpune-ne cine ești\n\nDoar atât — ca șeful tău să vadă că ai făcut cursul. Nu ai de ales nicio parolă acum.\n\nNume\nPrenume\nTelefon\nIntră la curs\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept"
+   },
+   {
+    "n": 5,
+    "name": "after-enter",
+    "file": "mobile-05-after-enter.png",
+    "url": "/ro/dashboard/lessons",
+    "sec": "0.9",
+    "taps": 2,
+    "prim": [
+     {
+      "t": "Tutor",
+      "belowFold": false
+     },
+     {
+      "t": "Close menu",
+      "belowFold": false
+     },
+     {
+      "t": "Panou de control",
+      "belowFold": false
+     },
+     {
+      "t": "Lecții",
+      "belowFold": false
+     },
+     {
+      "t": "Grile",
+      "belowFold": false
+     },
+     {
+      "t": "Simulări",
+      "belowFold": false
+     },
+     {
+      "t": "Generează test",
+      "belowFold": false
+     },
+     {
+      "t": "Domenii",
+      "belowFold": false
+     },
+     {
+      "t": "Calendar",
+      "belowFold": false
+     },
+     {
+      "t": "Progresul meu",
+      "belowFold": false
+     },
+     {
+      "t": "Abonament",
+      "belowFold": false
+     },
+     {
+      "t": "🔒\nFamilia mea",
+      "belowFold": false
+     },
+     {
+      "t": "Notificări",
+      "belowFold": false
+     },
+     {
+      "t": "Setări",
+      "belowFold": false
+     },
+     {
+      "t": "Ajutor",
+      "belowFold": false
+     },
+     {
+      "t": "EN",
+      "belowFold": false
+     }
+    ],
+    "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest qa-e2e-1005-mobile\n\nDeconectare\n⏳\nProba gratuită, mai ai\n6z 23:59\n🚀\n3\n\nProba gratuită · mai ai 7 zileAi tot pachetul, în afară de WhatsApp și SMS. Când se termină proba, rămâi pe varianta gratuită; tot ce ai lucrat rămâne salvat.\n\nLecții\nSe încarcă...\nGrile\nSimulări\nProgres\nSetări\nConfidențialitate\n·\nTermeni\n·\nCookie-u",
+    "firstValueSec": "0.9"
+   },
+   {
+    "n": 6,
+    "name": "after-enter-settled",
+    "file": "mobile-06-after-enter-settled.png",
+    "url": "/ro/dashboard/lessons",
+    "sec": "2.5",
+    "taps": 2,
+    "prim": [
+     {
+      "t": "Tutor",
+      "belowFold": false
+     },
+     {
+      "t": "Close menu",
+      "belowFold": false
+     },
+     {
+      "t": "Panou de control",
+      "belowFold": false
+     },
+     {
+      "t": "Lecții",
+      "belowFold": false
+     },
+     {
+      "t": "Grile",
+      "belowFold": false
+     },
+     {
+      "t": "Simulări",
+      "belowFold": false
+     },
+     {
+      "t": "Generează test",
+      "belowFold": false
+     },
+     {
+      "t": "Domenii",
+      "belowFold": false
+     },
+     {
+      "t": "Calendar",
+      "belowFold": false
+     },
+     {
+      "t": "Progresul meu",
+      "belowFold": false
+     },
+     {
+      "t": "Abonament",
+      "belowFold": false
+     },
+     {
+      "t": "🔒\nFamilia mea",
+      "belowFold": false
+     },
+     {
+      "t": "Notificări",
+      "belowFold": false
+     },
+     {
+      "t": "Setări",
+      "belowFold": false
+     },
+     {
+      "t": "Ajutor",
+      "belowFold": false
+     },
+     {
+      "t": "EN",
+      "belowFold": false
+     }
+    ],
+    "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest qa-e2e-1005-mobile\n\nDeconectare\n⏳\nProba gratuită, mai ai\n6z 23:59\n🚀\n3\n\nProba gratuită · mai ai 7 zileAi tot pachetul, în afară de WhatsApp și SMS. Când se termină proba, rămâi pe varianta gratuită; tot ce ai lucrat rămâne salvat.\n\nLecții\n\nMateria asta nu are lecții — conținutul ei sunt grilele.\n\nMergi la Grile\nGrile\nSi"
+   },
+   {
+    "n": 7,
+    "name": "second-entry",
+    "file": "mobile-07-second-entry.png",
+    "url": "/ro/dashboard/lessons",
+    "sec": "5.0",
+    "taps": 2,
+    "prim": [
+     {
+      "t": "Tutor",
+      "belowFold": false
+     },
+     {
+      "t": "Close menu",
+      "belowFold": false
+     },
+     {
+      "t": "Panou de control",
+      "belowFold": false
+     },
+     {
+      "t": "Lecții",
+      "belowFold": false
+     },
+     {
+      "t": "Grile",
+      "belowFold": false
+     },
+     {
+      "t": "Simulări",
+      "belowFold": false
+     },
+     {
+      "t": "Generează test",
+      "belowFold": false
+     },
+     {
+      "t": "Domenii",
+      "belowFold": false
+     },
+     {
+      "t": "Calendar",
+      "belowFold": false
+     },
+     {
+      "t": "Progresul meu",
+      "belowFold": false
+     },
+     {
+      "t": "Abonament",
+      "belowFold": false
+     },
+     {
+      "t": "🔒\nFamilia mea",
+      "belowFold": false
+     },
+     {
+      "t": "Notificări",
+      "belowFold": false
+     },
+     {
+      "t": "Setări",
+      "belowFold": false
+     },
+     {
+      "t": "Ajutor",
+      "belowFold": false
+     },
+     {
+      "t": "EN",
+      "belowFold": false
+     }
+    ],
+    "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest qa-e2e-1005-mobile\n\nDeconectare\n⏳\nProba gratuită, mai ai\n6z 23:59\n🚀\n3\n\nProba gratuită · mai ai 7 zileAi tot pachetul, în afară de WhatsApp și SMS. Când se termină proba, rămâi pe varianta gratuită; tot ce ai lucrat rămâne salvat.\n\nLecții\n\nMateria asta nu are lecții — conținutul ei sunt grilele.\n\nMergi la Grile\nGrile\nSi"
+   },
+   {
+    "n": 8,
+    "name": "logged-in-auto",
+    "file": "mobile-08-logged-in-auto.png",
+    "url": "/ro/dashboard/lessons",
+    "sec": "1.0",
+    "taps": 2,
+    "prim": [
+     {
+      "t": "Tutor",
+      "belowFold": false
+     },
+     {
+      "t": "Close menu",
+      "belowFold": false
+     },
+     {
+      "t": "Panou de control",
+      "belowFold": false
+     },
+     {
+      "t": "Lecții",
+      "belowFold": false
+     },
+     {
+      "t": "Grile",
+      "belowFold": false
+     },
+     {
+      "t": "Simulări",
+      "belowFold": false
+     },
+     {
+      "t": "Generează test",
+      "belowFold": false
+     },
+     {
+      "t": "Domenii",
+      "belowFold": false
+     },
+     {
+      "t": "Calendar",
+      "belowFold": false
+     },
+     {
+      "t": "Progresul meu",
+      "belowFold": false
+     },
+     {
+      "t": "Abonament",
+      "belowFold": false
+     },
+     {
+      "t": "🔒\nFamilia mea",
+      "belowFold": false
+     },
+     {
+      "t": "Notificări",
+      "belowFold": false
+     },
+     {
+      "t": "Setări",
+      "belowFold": false
+     },
+     {
+      "t": "Ajutor",
+      "belowFold": false
+     },
+     {
+      "t": "EN",
+      "belowFold": false
+     }
+    ],
+    "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest qa-e2e-1005-mobile\n\nDeconectare\n⏳\nProba gratuită, mai ai\n6z 23:59\n🚀\n3\n\nProba gratuită · mai ai 7 zileAi tot pachetul, în afară de WhatsApp și SMS. Când se termină proba, rămâi pe varianta gratuită; tot ce ai lucrat rămâne salvat.\n\nLecții\n\nMateria asta nu are lecții — conținutul ei sunt grilele.\n\nMergi la Grile\nGrile\nSi",
+    "sec2": "1.0"
+   }
+  ],
+  "console": [],
+  "http": [],
+  "db": {
+   "users": [
+    {
+     "id": "cmuuxt7aa003wsnj3ep5725ky",
+     "name": "Test qa-e2e-1005-mobile",
+     "isGuest": true
+    },
+    {
+     "id": "cmuuxtjor005asnj3okpgjrao",
+     "name": "Test qa-e2e-1005-mobile",
+     "isGuest": true
+    }
+   ],
+   "uses": 2,
+   "enr": "PrismaClientValidationError: \nInvalid `prisma.enrollment.findMany()` invocation:\n\n{\n  where: {\n    u",
+   "afterSecond": {
+    "users": 3,
+    "recips": [
+     {
+      "userId": "cmuuxtlon005ksnj3fjsajprd",
+      "phone": "40785866720"
+     }
+    ],
+    "uses": 3
+   }
+  }
+ },
+ {
+  "vp": "desktop",
+  "steps": [
+   {
+    "n": 1,
+    "name": "wrong-code-landing",
+    "file": "desktop-01-wrong-code-landing.png",
+    "url": "/ro/acces/XXXXXXXX",
+    "sec": "1.2",
+    "taps": 0,
+    "prim": [
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "07xx xxx xxx",
+      "belowFold": false
+     },
+     {
+      "t": "Intră la curs",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": true
+     },
+     {
+      "t": "Termeni",
+      "belowFold": true
+     },
+     {
+      "t": "Cookie-uri",
+      "belowFold": true
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": false
+     },
+     {
+      "t": "Respinge",
+      "belowFold": false
+     },
+     {
+      "t": "Accept",
+      "belowFold": false
+     }
+    ],
+    "body": "eTUTOR.ro\nSpune-ne cine ești\n\nDoar atât — ca șeful tău să vadă că ai făcut cursul. Nu ai de ales nicio parolă acum.\n\nNume\nPrenume\nTelefon\nIntră la curs\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+    "loadMs": 1161
+   },
+   {
+    "n": 2,
+    "name": "wrong-code-after-submit",
+    "file": "desktop-02-wrong-code-after-submit.png",
+    "url": "/ro/acces/XXXXXXXX",
+    "sec": "3.8",
+    "taps": 1,
+    "prim": [
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "07xx xxx xxx",
+      "belowFold": false
+     },
+     {
+      "t": "Intră la curs",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": true
+     },
+     {
+      "t": "Termeni",
+      "belowFold": true
+     },
+     {
+      "t": "Cookie-uri",
+      "belowFold": true
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": false
+     },
+     {
+      "t": "Respinge",
+      "belowFold": false
+     },
+     {
+      "t": "Accept",
+      "belowFold": false
+     }
+    ],
+    "body": "eTUTOR.ro\nSpune-ne cine ești\n\nDoar atât — ca șeful tău să vadă că ai făcut cursul. Nu ai de ales nicio parolă acum.\n\nNume\nPrenume\nTelefon\nLinkul ăsta nu mai e valabil. Poate a expirat sau a fost folosit de prea multe ori.\nIntră la curs\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept"
+   },
+   {
+    "n": 3,
+    "name": "good-landing",
+    "file": "desktop-03-good-landing.png",
+    "url": "/ro/acces/JRKB4TH4",
+    "sec": "0.7",
+    "taps": 0,
+    "prim": [
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "07xx xxx xxx",
+      "belowFold": false
+     },
+     {
+      "t": "Intră la curs",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": true
+     },
+     {
+      "t": "Termeni",
+      "belowFold": true
+     },
+     {
+      "t": "Cookie-uri",
+      "belowFold": true
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": false
+     },
+     {
+      "t": "Respinge",
+      "belowFold": false
+     },
+     {
+      "t": "Accept",
+      "belowFold": false
+     }
+    ],
+    "body": "eTUTOR.ro\nSpune-ne cine ești\n\nDoar atât — ca șeful tău să vadă că ai făcut cursul. Nu ai de ales nicio parolă acum.\n\nNume\nPrenume\nTelefon\nIntră la curs\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+    "loadMs": 675
+   },
+   {
+    "n": 4,
+    "name": "good-filled",
+    "file": "desktop-04-good-filled.png",
+    "url": "/ro/acces/JRKB4TH4",
+    "sec": "0.7",
+    "taps": 1,
+    "prim": [
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "07xx xxx xxx",
+      "belowFold": false
+     },
+     {
+      "t": "Intră la curs",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": true
+     },
+     {
+      "t": "Termeni",
+      "belowFold": true
+     },
+     {
+      "t": "Cookie-uri",
+      "belowFold": true
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": false
+     },
+     {
+      "t": "Respinge",
+      "belowFold": false
+     },
+     {
+      "t": "Accept",
+      "belowFold": false
+     }
+    ],
+    "body": "eTUTOR.ro\nSpune-ne cine ești\n\nDoar atât — ca șeful tău să vadă că ai făcut cursul. Nu ai de ales nicio parolă acum.\n\nNume\nPrenume\nTelefon\nIntră la curs\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept"
+   },
+   {
+    "n": 5,
+    "name": "after-enter",
+    "file": "desktop-05-after-enter.png",
+    "url": "/ro/acces/JRKB4TH4",
+    "sec": "20.8",
+    "taps": 2,
+    "prim": [
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "07xx xxx xxx",
+      "belowFold": false
+     },
+     {
+      "t": "Intră la curs",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": true
+     },
+     {
+      "t": "Termeni",
+      "belowFold": true
+     },
+     {
+      "t": "Cookie-uri",
+      "belowFold": true
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": false
+     },
+     {
+      "t": "Respinge",
+      "belowFold": false
+     },
+     {
+      "t": "Accept",
+      "belowFold": false
+     }
+    ],
+    "body": "eTUTOR.ro\nSpune-ne cine ești\n\nDoar atât — ca șeful tău să vadă că ai făcut cursul. Nu ai de ales nicio parolă acum.\n\nNume\nPrenume\nTelefon\nLinkul ăsta nu mai e valabil. Poate a expirat sau a fost folosit de prea multe ori.\nIntră la curs\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+    "firstValueSec": "20.8"
+   },
+   {
+    "n": 6,
+    "name": "after-enter-settled",
+    "file": "desktop-06-after-enter-settled.png",
+    "url": "/ro/acces/JRKB4TH4",
+    "sec": "22.3",
+    "taps": 2,
+    "prim": [
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "",
+      "belowFold": false
+     },
+     {
+      "t": "07xx xxx xxx",
+      "belowFold": false
+     },
+     {
+      "t": "Intră la curs",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": true
+     },
+     {
+      "t": "Termeni",
+      "belowFold": true
+     },
+     {
+      "t": "Cookie-uri",
+      "belowFold": true
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "belowFold": false
+     },
+     {
+      "t": "Confidențialitate",
+      "belowFold": false
+     },
+     {
+      "t": "Respinge",
+      "belowFold": false
+     },
+     {
+      "t": "Accept",
+      "belowFold": false
+     }
+    ],
+    "body": "eTUTOR.ro\nSpune-ne cine ești\n\nDoar atât — ca șeful tău să vadă că ai făcut cursul. Nu ai de ales nicio parolă acum.\n\nNume\nPrenume\nTelefon\nLinkul ăsta nu mai e valabil. Poate a expirat sau a fost folosit de prea multe ori.\nIntră la curs\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept"
+   },
+   {
+    "n": 7,
+    "name": "second-entry",
+    "file": "desktop-07-second-entry.png",
+    "url": "/ro/dashboard/lessons",
+    "sec": "24.7",
+    "taps": 2,
+    "prim": [
+     {
+      "t": "Tutor",
+      "belowFold": false
+     },
+     {
+      "t": "Panou de control",
+      "belowFold": false
+     },
+     {
+      "t": "Lecții",
+      "belowFold": false
+     },
+     {
+      "t": "Grile",
+      "belowFold": false
+     },
+     {
+      "t": "Simulări",
+      "belowFold": false
+     },
+     {
+      "t": "Generează test",
+      "belowFold": false
+     },
+     {
+      "t": "Domenii",
+      "belowFold": false
+     },
+     {
+      "t": "Calendar",
+      "belowFold": false
+     },
+     {
+      "t": "Progresul meu",
+      "belowFold": false
+     },
+     {
+      "t": "Abonament",
+      "belowFold": false
+     },
+     {
+      "t": "🔒\nFamilia mea",
+      "belowFold": false
+     },
+     {
+      "t": "Notificări",
+      "belowFold": false
+     },
+     {
+      "t": "Setări",
+      "belowFold": false
+     },
+     {
+      "t": "Ajutor",
+      "belowFold": false
+     },
+     {
+      "t": "EN",
+      "belowFold": false
+     },
+     {
+      "t": "RO",
+      "belowFold": false
+     }
+    ],
+    "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest qa-e2e-1005-desktop\n\nDeconectare\nProba gratuită: mai ai\n6z 23:59:58\n🚀\nConfigurare\n3\n\nProba gratuită · mai ai 7 zileAi tot pachetul, în afară de WhatsApp și SMS. Când se termină proba, rămâi pe varianta gratuită; tot ce ai lucrat rămâne salvat.\n\nLecții\n\nMateria asta nu are lecții — conținutul ei sunt grilele.\n\nMergi la "
+   },
+   {
+    "n": 8,
+    "name": "logged-in-auto",
+    "file": "desktop-08-logged-in-auto.png",
+    "url": "/ro/dashboard/lessons",
+    "sec": "1.1",
+    "taps": 2,
+    "prim": [
+     {
+      "t": "Tutor",
+      "belowFold": false
+     },
+     {
+      "t": "Panou de control",
+      "belowFold": false
+     },
+     {
+      "t": "Lecții",
+      "belowFold": false
+     },
+     {
+      "t": "Grile",
+      "belowFold": false
+     },
+     {
+      "t": "Simulări",
+      "belowFold": false
+     },
+     {
+      "t": "Generează test",
+      "belowFold": false
+     },
+     {
+      "t": "Domenii",
+      "belowFold": false
+     },
+     {
+      "t": "Calendar",
+      "belowFold": false
+     },
+     {
+      "t": "Progresul meu",
+      "belowFold": false
+     },
+     {
+      "t": "Abonament",
+      "belowFold": false
+     },
+     {
+      "t": "🔒\nFamilia mea",
+      "belowFold": false
+     },
+     {
+      "t": "Notificări",
+      "belowFold": false
+     },
+     {
+      "t": "Setări",
+      "belowFold": false
+     },
+     {
+      "t": "Ajutor",
+      "belowFold": false
+     },
+     {
+      "t": "EN",
+      "belowFold": false
+     },
+     {
+      "t": "RO",
+      "belowFold": false
+     }
+    ],
+    "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest qa-e2e-1005-desktop\n\nDeconectare\nProba gratuită: mai ai\n6z 23:59:57\n🚀\nConfigurare\n3\n\nProba gratuită · mai ai 7 zileAi tot pachetul, în afară de WhatsApp și SMS. Când se termină proba, rămâi pe varianta gratuită; tot ce ai lucrat rămâne salvat.\n\nLecții\n\nMateria asta nu are lecții — conținutul ei sunt grilele.\n\nMergi la ",
+    "sec2": "1.0"
+   }
+  ],
+  "console": [
+   {
+    "url": "/ro/acces/JRKB4TH4",
+    "text": "Failed to load resource: the server responded with a status of 429 (Too Many Requests)"
+   }
+  ],
+  "http": [
+   {
+    "url": "/api/auth/callback/guest-access?",
+    "status": 429
+   }
+  ],
+  "db": {
+   "users": [],
+   "uses": 4,
+   "enr": null,
+   "afterSecond": {
+    "users": 1,
+    "recips": [
+     {
+      "userId": "cmuuxu92n006dsnj3r5w5phz5",
+      "phone": "40785877403"
+     }
+    ],
+    "uses": 5
+   }
+  }
+ }
+]

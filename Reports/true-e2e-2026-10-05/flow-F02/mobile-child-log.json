@@ -1,0 +1,206 @@
+{
+ "tag": "mobile-c",
+ "steps": [
+  {
+   "n": 1,
+   "name": "home",
+   "file": "mobile-c-01-home.png",
+   "url": "/ro",
+   "title": "Tutor - Mii de grile reale pe materia ta | etutor.ro | Tutor",
+   "sec": "1.9",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "eTUTOR.ro",
+     "belowFold": false
+    },
+    {
+     "t": "Fă-ți cont gratuit",
+     "belowFold": false
+    },
+    {
+     "t": "Vezi demo-ul complet",
+     "belowFold": false
+    },
+    {
+     "t": "👨‍👩‍👧\nEști părinte? Vezi dacă cel mic chiar înv",
+     "belowFold": false
+    },
+    {
+     "t": "Începe testul ✨",
+     "belowFold": false
+    },
+    {
+     "t": "Ești\n\nELEV/STUDENT\n\nÎnveți pe cont propriu — îți v",
+     "belowFold": true
+    },
+    {
+     "t": "Ești\n\nPĂRINTE\n\nVezi dacă cel mic chiar învață; dac",
+     "belowFold": true
+    },
+    {
+     "t": "Ești\n\nPROFESOR\n\nAdaugi materiale pe materia ta și ",
+     "belowFold": true
+    },
+    {
+     "t": "Creează cont gratuit",
+     "belowFold": true
+    },
+    {
+     "t": "Vezi planurile și prețurile →",
+     "belowFold": true
+    },
+    {
+     "t": "Demo gratuit",
+     "belowFold": true
+    },
+    {
+     "t": "Grile pe materie",
+     "belowFold": true
+    },
+    {
+     "t": "Pentru profesori",
+     "belowFold": true
+    },
+    {
+     "t": "Confidențialitate",
+     "belowFold": true
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "name": "signin",
+   "file": "mobile-c-02-signin.png",
+   "url": "/ro/auth/signin",
+   "title": "Sign In - Tutor | Tutor",
+   "sec": "3.7",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Continuă cu Google",
+     "belowFold": false
+    },
+    {
+     "t": "Arată parola",
+     "belowFold": false
+    },
+    {
+     "t": "Autentificare",
+     "belowFold": false
+    },
+    {
+     "t": "Nu ai email? Recuperează pe telefon",
+     "belowFold": false
+    },
+    {
+     "t": "Ai uitat parola?",
+     "belowFold": false
+    },
+    {
+     "t": "Folosește magic link",
+     "belowFold": false
+    },
+    {
+     "t": "Fă-ți unul",
+     "belowFold": false
+    },
+    {
+     "t": "încearcă fără cont ✨",
+     "belowFold": false
+    },
+    {
+     "t": "Termeni și condiții",
+     "belowFold": false
+    },
+    {
+     "t": "Politica de confidențialitate",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "name": "after-signin",
+   "file": "mobile-c-03-after-signin.png",
+   "url": "/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "4.9",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Astăzi",
+     "belowFold": false
+    },
+    {
+     "t": "Panou complet",
+     "belowFold": false
+    },
+    {
+     "t": "📘\nMatematica cl. VIII\n→",
+     "belowFold": false
+    },
+    {
+     "t": "📘\nQA DIAG mate 1789647508347\n→",
+     "belowFold": false
+    },
+    {
+     "t": "📘\nQA DIAG romana 1789647508347\n→",
+     "belowFold": false
+    },
+    {
+     "t": "📘\nQA DIAG bio 1789647508347\n→",
+     "belowFold": false
+    },
+    {
+     "t": "Vezi toate materiile în listă →",
+     "belowFold": false
+    }
+   ]
+  }
+ ],
+ "console": [
+  {
+   "url": "http://localhost:3113/ro/auth/signin",
+   "text": "Failed to load resource: the server responded with a status of 403 ()"
+  },
+  {
+   "url": "http://localhost:3113/ro/auth/signin",
+   "text": "[GSI_LOGGER]: The given origin is not allowed for the given client ID."
+  }
+ ],
+ "http": [
+  {
+   "url": "https://accounts.google.com/gsi/status?client_id=594240948902-c06c9qlnhui8f8j9ov4ouv06r2fckr25.apps.googleusercontent.com&cas=8X9YeL9a5Vvfy3c4rWoKBVgtYFgmZStPgqO8%2BMBEj9M&bs=KUkdu5qreFssVj606VcYu2n%2FLSnC6AsS7eVgVgJX2uU&has_opted_out_fedcm=false&is_itp=true",
+   "status": 403
+  }
+ ]
+}

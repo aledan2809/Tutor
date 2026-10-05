@@ -1,0 +1,179 @@
+E1    PASS     Student practice (start/answer/complete)
+      POST session/start → 200 {sessionId,type,duration,questions,totalQuestions} (131ms)
+         sessionId=cmuv7tdlk01casc6hbqb349ie questions=15
+      POST session/answer q=e2fda9 → 200 {attemptId,isCorrect,correctAnswer,explanation,source,sourceQuote,quality,nextReview} (121ms) isCorrect=false
+      POST session/answer q=bzu89u → 200 {attemptId,isCorrect,correctAnswer,explanation,source,sourceQuote,quality,nextReview} (108ms) isCorrect=false
+      POST session/answer q=055hyz → 200 {attemptId,isCorrect,correctAnswer,explanation,source,sourceQuote,quality,nextReview} (108ms) isCorrect=false
+      POST session/answer (same question again) → 200 {attemptId,isCorrect,correctAnswer,explanation,source,sourceQuote,quality,nextReview} (99ms)
+      GET session/[id] → 200 {sessionId,type,duration,questions,totalQuestions,domainSlug,domainId,serverTimestamp} (103ms)
+      POST session/complete → 200 {sessionId,score,totalQuestions,correctAnswers,sprintFeedbackRequired,timedOut,duration,gamification} (148ms) score=0 answered=4
+      POST session/complete (again) → 400 {"error":"Session already completed"} (96ms)
+E2    PASS     Exam start — 403 = plan gate (exam_simulations) on a free account — documented behaviour
+      GET exam/formats → 200 {formats} (92ms)
+         formats=1
+      POST exam/start → 403 {"error":"Această funcție face parte dintr-un pachet."} (128ms)
+      GET exam/history → 200 {history,pagination,trends} (100ms)
+E3    PASS     Assessment (GET questions + POST answers)
+      GET student/assessment → 200 {questions,totalQuestions} (179ms)
+      POST student/assessment (3 answers) → 200 {sessionId,score,level,correctCount,totalQuestions,results,weakAreas} (122ms) score=67 level=INTERMEDIATE
+      POST student/assessment (0 answers, must be 400) → 400 {"error":"Invalid input"} (96ms)
+E5    PASS     Progress / gamification reads
+      GET /api/aviation/xp → 200 {xp,level,progressToNext,nextLevel,xpToNextLevel} (92ms)
+      GET /api/aviation/progress → 200 {overall,subjects,topics,weakAreas,recentSessions} (96ms)
+      GET /api/aviation/streak → 200 {streak,longestStreak,lastUpdate,isDecayed,canRecover} (97ms)
+      GET /api/aviation/achievements → 200 {achievements,available} (125ms)
+      GET /api/aviation/leaderboard → 200 {rank,userXp,top10,week,year} (80ms)
+      GET /api/aviation/daily-challenge → 200 {available,attempted,doubleXp,question} (106ms)
+      GET /api/student/dashboard?domainId=<avi> → 200 {streak,xp,domains,recentSessions,weakAreas,recommendation,course} (96ms)
+      GET /api/student/domains → 200 {enrolled,available} (110ms)
+      GET /api/student/entitlements → 200 {subscriptionStatus,features,access} (86ms)
+E6    PASS     Notifications list (read-only)
+      STUDENT GET /api/notifications → 200 {notifications,total,unreadCount,childTotal,limit,offset} (107ms) n=12
+      STUDENT GET /api/notifications?unread=true → 200 {notifications,total,unreadCount,childTotal,limit,offset} (99ms) n=11
+      STUDENT GET /api/notifications/preferences → 200 {id,userId,push,telegram,whatsapp,sms,email,call} (109ms)
+      WATCHER GET /api/notifications → 200 {notifications,total,unreadCount,childTotal,limit,offset} (181ms) n=50
+      WATCHER GET /api/notifications?audience=child → 200 {notifications,total,unreadCount,childTotal,limit,offset} (156ms) n=50
+E7    PARTIAL  Instructor groups create/read/delete
+      POST instructor/groups → 201 {id,name,description,domainId,createdById,isActive,createdAt,updatedAt} (99ms)
+      GET instructor/groups → 200 {groups} (99ms) containsNew=true
+      GET instructor/groups/[id] → 200 {id,name,description,domainId,createdById,isActive,createdAt,updatedAt} (101ms) studentIsMember=true
+      GET instructor/students?groupId → 200 {students,pagination} (102ms) total=1
+      INSTRUCTOR2 GET same group (other teacher, same subject) → 200 {id,name,description,domainId,createdById,isActive,createdAt,updatedAt} (91ms)
+      DELETE instructor/groups/[id] → 200 {success} (117ms)
+      GET after delete (expect 404) → 200 {id,name,description,domainId,createdById,isActive,createdAt,updatedAt} (91ms)
+E8    PASS     Instructor student monitoring
+      GET dashboard/instructor → 200 {stats,recentActivity,domains,domainOptions} (104ms)
+      GET instructor/students?domainId=<avi> → 200 {students,pagination} (152ms) n=10 total=? includesTestStudent=true
+      GET instructor/students/[student] → 200 {student,domainProgress,goals,groups} (121ms) domains=1
+E10   PARTIAL  Reports / analytics reads
+      STUDENT GET /api/reports/trend → 200 {period,childId,children,childName,conclusion,current,deltas,history} (105ms)
+      STUDENT GET /api/reports/trend?period=weekly → 200 {period,childId,children,childName,conclusion,current,deltas,history} (132ms)
+      WATCHER GET /api/reports/trend?childId=<child> → 200 {period,childId,children,childName,conclusion,current,deltas,history} (130ms)
+      WATCHER GET /api/dashboard/watcher/reports → 200 {schedules,children} (96ms)
+      INSTRUCTOR GET /api/dashboard/instructor/reports?domainId=<avi> → 400 {"error":"Invalid report type or missing id"} (88ms)
+      INSTRUCTOR GET /api/dashboard/instructor/analytics?domainId=<avi> → 200 {predictions,summary} (105ms)
+      INSTRUCTOR GET /api/dashboard/instructor/analytics → 200 {predictions,summary} (123ms)
+E11   PASS     Admin questions GET
+      ADMIN GET admin/questions?domainId=<avi> → 200 {questions,total,page,limit,totalPages} (103ms) n=5 total=24
+      ADMIN GET admin/questions/[id] → 200 {id,domainId,subject,topic,difficulty,type,content,passage} (108ms)
+      ADMIN GET admin/questions (no filter) → 200 {questions,total,page,limit,totalPages} (125ms) domainsInPage=["avi"]
+E12   PARTIAL  Admin domains GET
+      ADMIN GET /api/admin/domains → 403 {"error":"Forbidden"} (110ms)
+      ADMIN GET /api/admin/domains/<avi> → 403 {"error":"Forbidden"} (112ms)
+      ADMIN GET /api/admin/domains/<avi>/exam-config → 403 {"error":"Forbidden"} (93ms)
+      ADMIN GET /api/admin/domain/aviation/exam-format → 403 {"error":"Forbidden"} (97ms)
+      ADMIN GET /api/admin/domain/aviation/templates → 403 {"error":"Forbidden"} (86ms)
+      SUPERADMIN GET /api/admin/domains → 200 {array[21]} (152ms) n=21
+E14   PASS     Watcher monitoring
+      GET dashboard/watcher → 200 {students,totalStudents,domains} (108ms) students=1 onlyLinkedChild=true ids=["<child>"]
+      GET dashboard/watcher/[child] → 200 {student,canManageSchedule,canManageSubjects,domainSummaries,schedule,scheduledSessions,sessionLog,byDomain} (113ms)
+      GET watcher/[child]/subjects → 200 {subjects,removed,available} (92ms)
+      GET watcher/[child]/reminders → 200 {reminders} (100ms)
+      GET watcher/[child]/breaks → 200 {breaks} (191ms)
+      GET watcher/[child]/nudge → 200 {nudges} (201ms)
+      GET watcher/[child]/nudge-targets → 200 {recent,upcoming,meteredAllowed} (95ms)
+      GET watcher/[child]/phone → 200 {phone} (121ms)
+E15   PARTIAL  Superadmin /api/admin/* GET — non-200: creatori:405
+      GET admin/users?limit=5 → 200 {users,total,page,totalPages,presence} (130ms)
+      GET admin/audit → 200 {logs,total,page,totalPages} (168ms)
+      GET admin/revenue → 200 {mrr,totalRevenue,totalTransactions,totalUsers,activeSubscriptions,churnRate,conversionRate,recentPayments} (109ms)
+      GET admin/plans → 200 {array[10]} (211ms)
+      GET admin/vouchers → 200 {vouchers,total,page,totalPages} (127ms)
+      GET admin/organizations → 200 {organizations} (199ms)
+      GET admin/campaigns → 200 {byCampaign,byVoucher,totals} (103ms)
+      GET admin/ads → 200 {array[0]} (98ms)
+      GET admin/access-trial → 200 {enabled,startsAt,counts} (97ms)
+      GET admin/creatori → 405  (83ms)
+      GET admin/feedback → 200 {feedbacks} (183ms)
+      GET admin/tags → 200 {array[0]} (243ms)
+      GET admin/templates → 200 {templates} (91ms)
+      GET admin/exam-formats → 200 {formats,domains} (116ms)
+      GET admin/lessons → 200 {lessons,domains} (359ms)
+      GET admin/bibliography → 200 {items,domains} (103ms)
+      GET admin/posta-copy → 200 {salvat,actualizatLa,actualizatDe} (106ms)
+      GET admin/domains → 200 {array[21]} (113ms)
+      GET admin/questions?limit=5 → 200 {questions,total,page,limit,totalPages} (116ms)
+      GET admin/domains/<avi> → 200 {id,name,slug,description,icon,isActive,instructorEnabled,visibility} (90ms)
+      GET admin/domains/<avi>/exam-config → 200 {id,domainId,questionTypes,timeLimit,questionCount,passingScore,shuffleQuestions,shuffleOptions} (92ms)
+      GET admin/domain/aviation/exam-format → 200 {formats} (113ms)
+      GET admin/domain/aviation/templates → 200 {templates} (137ms)
+      GET admin/plans/[id] → 200 {id,name,stripeId,price,interval,trialDays,features,isActive} (142ms)
+      GET admin/vouchers/[id]/redemptions → 200 {redemptions} (98ms)
+      GET admin/organizations/[id] → 200 {organization} (113ms)
+E16   PASS     Auth flows (wrong password, unauthenticated 401)
+      POST callback/credentials wrong password → 302 location=/auth/signin?error=CredentialsSignin&code=credentials sessionUser=null
+      POST callback/credentials unknown email → 302 sessionUser=null
+      anon GET /api/student/dashboard → 401 {"error":"Unauthorized"} (76ms)
+      anon GET /api/dashboard/instructor/students → 401 {"error":"Unauthorized"} (99ms)
+      anon GET /api/dashboard/watcher → 401 {"error":"Unauthorized"} (78ms)
+      anon GET /api/admin/users → 401 {"error":"Unauthorized"} (93ms)
+      anon GET /api/notifications → 401 {"error":"Unauthorized"} (82ms)
+      anon GET /api/aviation/progress → 401 {"error":"Unauthorized"} (82ms)
+      anon POST /api/aviation/session/start → 401 {"error":"Unauthorized"} (73ms)
+      anon POST /api/aviation/session/answer → 401 {"error":"Unauthorized"} (83ms)
+      anon POST /api/dashboard/instructor/groups → 401 {"error":"Unauthorized"} (90ms)
+E17   PASS     Locale pages /ro + /en
+      GET /ro → 200 html lang=ro (191ms)
+      GET /en → 200 html lang=en (197ms)
+      GET /ro/login → 200 html lang=ro (240ms)
+      GET /en/login → 200 html lang=en (189ms)
+      GET /ro/preturi → 200 html lang=ro (119ms)
+      GET /en/preturi → 200 html lang=en (103ms)
+
+BOUNDARY
+  [OK ] STUDENT     GET /api/dashboard/instructor → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/dashboard/instructor/students → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/dashboard/instructor/students/<self> → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/dashboard/instructor/groups → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/dashboard/instructor/analytics → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/dashboard/instructor/reports → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/dashboard/instructor/goals → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/dashboard/instructor/messages → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/admin/users → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/admin/questions → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/admin/domains → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/admin/audit → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/admin/revenue → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/admin/vouchers → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/admin/feedback → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/admin/questions?domainId=<avi> → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     POST /api/aviation/xp (award self XP) → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     POST /api/dashboard/instructor/groups → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/dashboard/watcher/<other student> → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     GET /api/reports/trend?childId=<other student> → 403 {"error":"Forbidden"}
+  [OK ] STUDENT     POST /api/posta-factor/session/start (not enrolled) → 404 {"error":"Domain not found"}
+  [BAD] STUDENT     GET /api/matematica-v-viii/progress (not enrolled) → 200 {overall,subjects,topics,weakAreas,recentSessions}
+  [OK ] STUDENT     GET /api/student/assessment?domainId=<posta-factor> → 404 {"error":"Domain not found"}
+  [OK ] INSTRUCTOR2 GET instructor/students?domainId=<matematica-v-viii> (expect empty) → 200 {students,pagination}
+  [OK ] INSTRUCTOR2 GET instructor/students?domainId=<posta-factor> (expect empty) → 200 {students,pagination}
+  [OK ] INSTRUCTOR  GET instructor/students?domainId=<posta-factor> (expect empty) → 200 {students,pagination}
+  [OK ] INSTRUCTOR2 GET instructor/students (no filter) excludes math-only student → 200 {students,pagination}
+  [OK ] INSTRUCTOR2 GET instructor/students/<math-only student> → 404 {"error":"Student not found"}
+  [OK ] INSTRUCTOR2 GET instructor/students/<math-only student>?domainId=<mate> → 404 {"error":"Student not found"}
+  [OK ] INSTRUCTOR  GET instructor/students/<posta-only student> → 404 {"error":"Student not found"}
+  [OK ] INSTRUCTOR2 GET admin/questions?domainId=<mate> (expect empty) → 200 {questions,total,page,limit,totalPages}
+  [OK ] INSTRUCTOR2 GET dashboard/watcher/<math-only student> → 404 {"error":"Student not found"}
+  [OK ] INSTRUCTOR2 POST group aviation with math-only student (expect 400) → 400 {"error":"Students not enrolled in this subject"}
+  [OK ] INSTRUCTOR2 POST group on matematica-v-viii (not taught, expect 403) → 403 {"error":"Forbidden"}
+  [OK ] INSTRUCTOR2 GET admin/users → 403 {"error":"Forbidden"}
+  [OK ] INSTRUCTOR2 GET dashboard/instructor/analytics?domainId=<mate> → 200 {predictions,summary}
+  [OK ] WATCHER     GET dashboard/watcher/<not-linked student> → 403 {"error":"Forbidden"}
+  [OK ] WATCHER     GET dashboard/watcher/<posta-only student> → 403 {"error":"Forbidden"}
+  [OK ] WATCHER     GET reports/trend?childId=<not-linked student> → 403 {"error":"Forbidden"}
+  [OK ] WATCHER     GET dashboard/watcher/<not-linked>/reminders → 403 {"error":"Forbidden"}
+  [OK ] WATCHER     GET dashboard/watcher?domainId=<mate> (must not widen) → 200 {students,totalStudents,domains}
+  [OK ] WATCHER     GET dashboard/instructor/students → 403 {"error":"Forbidden"}
+  [OK ] WATCHER     GET admin/users → 403 {"error":"Forbidden"}
+
+…pauză 65s (fereastra de 60 cereri/minut/sesiune pe /api/aviation)
+F1 {"wallMs":351,"student":"200 {sessionId,type,duration,questions,totalQuestions}","second":"ADMIN","secondRes":"200 {sessionId,type,duration,questions,totalQuestions}","distinct":true}
+F2 {"student":"200 {overall,subjects,topics,weakAreas,recentSessions}","instructor":"200 {student,domainProgress,goals,groups}","studentView":{"totalAttempts":10,"accuracy":30,"topics":4},"instructorView":{"totalAttempts":10,"accuracy":30,"topics":4},"consistent":true}
+
+…pauză 65s
+stress session/start {"wallMs":538,"counts":{"200":10},"distinctIds":10,"p50":526,"max":537,"non2xx":[]}
+stress GET / {"wallMs":262,"counts":{"307":20},"p50":218,"max":256,"location":"/ro"}
+
+…pauză 65s înainte de închiderea sesiunilor
+closed 12 notClosed []
+
+SUMAR: E1=PASS E2=PASS E3=PASS E5=PASS E6=PASS E7=PARTIAL E8=PASS E10=PARTIAL E11=PASS E12=PARTIAL E14=PASS E15=PARTIAL E16=PASS E17=PASS | boundary bad: 1 / 43

@@ -6,6 +6,28 @@
 
 ## Open Gaps
 
+### G-TUT-AUDIT-2026-10-05 — Pâlnia vizitatori→conturi + fluxuri incomplete/incorecte (True E2E [10]) — **OPEN**
+
+Raport: `Reports/TRUE-E2E-FULL-2026-10-05.md` (artefacte în `Reports/true-e2e-2026-10-05/`). Nimic aplicat — plan de reparații în raport §6.
+- **G-TUT-1005-01 (P1 pâlnie)** — Bannerul de cookie-uri acoperă CTA-urile pe telefon la prima vizită (`/ro`, `/ro/parinte`, `/ro/auth/register`, `/acces/*`, `/family/join`); 6 vederi ale paginii de cont în 30 de zile la 115 vizitatori. Dovadă: `funnel/*-mobil.png`, `umami-30d.json`.
+- **G-TUT-1005-02 (P1 pâlnie)** — Demo-ul fără cont `/ro/try` merge în 2 atingeri dar e invizibil (buton sub banner, link de 20 px pe `/grile`); 1 vizită/30 zile.
+- **G-TUT-1005-03 (P2 pâlnie)** — Anonimii pe `/dashboard*` ajung la signin cu „Fă-ți unul” de 28 px; titlul paginii de înregistrare e „Sign In - Tutor”; `/ro/preturi` fără CTA pe primul ecran; `/ro/parinte` începe cu prețul, „fără card” sub margine; 0 evenimente Umami.
+- **G-TUT-1005-04 (P1 securitate ✔)** — Invitația pe e-mail: numele invitatorului intră ca HTML neescapat (`src/lib/family-invite.ts:665,675`) și nu există plafon (5 invitații → 5 adrese, livrate, pe QA). Dovadă `verif-invite-html/`.
+- **G-TUT-1005-05 (P1 securitate ✔)** — E-mailul de acord al părintelui se trimite spre orice adresă fără plafon pe IP (`register/route.ts:229`).
+- **G-TUT-1005-06 (P1 ✔ cod)** — Adultul venit pe cod B2B primește fals „Nu am putut trimite emailul către părinte” (`api/me/age/route.ts:68`, `sent: minor`) și e blocat de poarta de vârstă înaintea primei lecții (F11).
+- **G-TUT-1005-07 (P1)** — Notificările părintelui: ~50 cereri `nudge-targets` → 429; 429 afișat ca „Niciun student de monitorizat” (F08).
+- **G-TUT-1005-08 (P1 produs)** — Invitația B2B depinde doar de WhatsApp; la eșec niciun link de copiat (F11).
+- **G-TUT-1005-09 (P2 ✔)** — Intrarea cu cod comun: `upsert` pe `Recipient` fură rândul altui telefon și fiecare intrare creează alt cont (`src/lib/auth.ts:161,171`; F05).
+- **G-TUT-1005-10 (P2)** — Elev neînscris primește 200 la `/api/matematica-v-viii/progress` (`scenarii/faze-6-7-9.log:145`) — gardă de materie lipsă pe o rută.
+- **G-TUT-1005-11 (P2 ✔)** — Panoul părintelui: „Leagă contul copilului” deși e legat (`dashboard/page.tsx:196`); fără pas următor după „Gata, am notat”; codul de familie generat nu e afișat (F02, F04).
+- **G-TUT-1005-12 (P2 ✔)** — Panoul „Astăzi”: zone slabe nefiltrate pe materie, hero „Începe” continuă orice sesiune, wizard pică pe materii cu curs, pasul „Simulări” nefiltrat (`dashboard/page.tsx`, `student/dashboard/route.ts:113`, `onboarding-wizard.tsx:56`, `exam-bank/page.tsx:12`).
+- **G-TUT-1005-13 (P2 ✔)** — Adrese oprite: contul minorului se poate șterge fără ca părintele să fi primit vreun e-mail (`consent-reminders.ts:187`); copilul vede „Am trimis” fără livrare (`age-consent.tsx:241`); rezumatul zilnic nelivrat consumă ziua (`parent-digest.ts:271`); părintele nu e anunțat (`notification-preferences.tsx:212`).
+- **G-TUT-1005-14 (P2 ✔)** — Codul 100% la înscriere nu scrie `VoucherRedemption` (`register/route.ts:167`); e-mailul copilului neconfirmat permite reset (`family-invite.ts:849`); checkout fără refuz server-side pentru copil (`stripe/checkout/route.ts:43`).
+- **G-TUT-1005-15 (P2 UX)** — Logat, „Alege Family” → înregistrare; `?plan=` ignorat (F10); instructorul aterizează pe panoul de elev, „Create Group”/motive de risc în engleză, „Grupuri 0” lângă 2 grupe (F12); formular de cont 7 câmpuri; calibrare clasă + 28 bife; răspunsuri sub margine pe prima grilă (F01/F02/F04).
+- **G-TUT-1005-16 (P3)** — Inventar texte RO/EN neinternaționalizate, date US, „CUI: TBD” pe acordul părintelui, hamburger peste text, orele de liniște nevalidate, `openedAt` la GET, `type` neprelucrat în proxy-ul de consimțământ (detalii în raport §4).
+- Deschise din 26.09, reconfirmate: grupa ștearsă încă citibilă (E7), `/api/aviation/curriculum` 404 pe detaliul copilului.
+
+
 ### G-TUT-AUDIT-2026-09-26 — Crearea contului și drumul până la conținut (True E2E [10]) — **Eliminated 2026-09-28 (`1cf2466`, LIVE + verificat)**
 Raport: `Reports/TRUE-E2E-FULL-2026-09-26.md`. Verificare: `Reports/true-e2e-2026-09-26/verificare-reparatii.mjs` (58/58 pe stiva QA, 28.09).
 - **Ghidul de pornire se oprea în „Curriculum setup required”** (engleză, fără pas următor) pe materiile școlare — elev singur și copil creat de părinte. Acum duce la lista de lecții de bifat, iar testul pornește singur după salvare.

@@ -1,0 +1,336 @@
+{
+ "email": "Qa-e2e-1005-elev-1791186036034@example.com",
+ "pe": "qa-e2e-1005-parinte-consent-1791186036034@example.com",
+ "tag": "mobile-minor",
+ "steps": [
+  {
+   "n": 1,
+   "name": "landing",
+   "file": "mobile-minor-01-landing.png",
+   "url": "/ro",
+   "title": "Tutor - Mii de grile reale pe materia ta | etutor.ro | Tutor",
+   "sec": "0.3",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "eTUTOR.ro",
+     "belowFold": false
+    },
+    {
+     "t": "Fă-ți cont gratuit",
+     "belowFold": false
+    },
+    {
+     "t": "Vezi demo-ul complet",
+     "belowFold": false
+    },
+    {
+     "t": "👨‍👩‍👧\nEști părinte? Vezi dacă cel mic chiar înv",
+     "belowFold": false
+    },
+    {
+     "t": "Începe testul ✨",
+     "belowFold": false
+    },
+    {
+     "t": "Ești\n\nELEV/STUDENT\n\nÎnveți pe cont propriu — îți v",
+     "belowFold": true
+    },
+    {
+     "t": "Ești\n\nPĂRINTE\n\nVezi dacă cel mic chiar învață; dac",
+     "belowFold": true
+    },
+    {
+     "t": "Ești\n\nPROFESOR\n\nAdaugi materiale pe materia ta și ",
+     "belowFold": true
+    },
+    {
+     "t": "Creează cont gratuit",
+     "belowFold": true
+    },
+    {
+     "t": "Vezi planurile și prețurile →",
+     "belowFold": true
+    },
+    {
+     "t": "Demo gratuit",
+     "belowFold": true
+    },
+    {
+     "t": "Grile pe materie",
+     "belowFold": true
+    },
+    {
+     "t": "Pentru profesori",
+     "belowFold": true
+    },
+    {
+     "t": "Confidențialitate",
+     "belowFold": true
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "name": "register-filled",
+   "file": "mobile-minor-02-register-filled.png",
+   "url": "/ro/auth/register",
+   "title": "Sign In - Tutor | Tutor",
+   "sec": "1.7",
+   "taps": 2,
+   "prim": [
+    {
+     "t": "Elev",
+     "belowFold": false
+    },
+    {
+     "t": "Părinte",
+     "belowFold": false
+    },
+    {
+     "t": "Arată parola",
+     "belowFold": false
+    },
+    {
+     "t": "Arată parola",
+     "belowFold": false
+    },
+    {
+     "t": "Creează cont",
+     "belowFold": false
+    },
+    {
+     "t": "Autentifică-te",
+     "belowFold": false
+    },
+    {
+     "t": "Încearcă fără cont ✨",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "name": "after-submit",
+   "file": "mobile-minor-03-after-submit.png",
+   "url": "/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "4.0",
+   "taps": 3,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Retrimite sau scrie altă adresă",
+     "belowFold": false
+    },
+    {
+     "t": "Astăzi",
+     "belowFold": false
+    },
+    {
+     "t": "Panou complet",
+     "belowFold": false
+    },
+    {
+     "t": "📘\nQA DIAG mate 1789647508347\n→",
+     "belowFold": false
+    },
+    {
+     "t": "📘\nQA DIAG romana 1789647508347\n→",
+     "belowFold": false
+    },
+    {
+     "t": "📘\nQA DIAG bio 1789647508347\n→",
+     "belowFold": false
+    },
+    {
+     "t": "📘\nMatematica cl. VIII\n→",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 4,
+   "name": "wizard-step2",
+   "file": "mobile-minor-04-wizard-step2.png",
+   "url": "/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "5.6",
+   "taps": 4,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Retrimite sau scrie altă adresă",
+     "belowFold": false
+    },
+    {
+     "t": "Astăzi",
+     "belowFold": false
+    },
+    {
+     "t": "Panou complet",
+     "belowFold": false
+    },
+    {
+     "t": "Începe testul ▶",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 5,
+   "name": "after-start",
+   "file": "mobile-minor-05-after-start.png",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "title": "Practice - Tutor",
+   "sec": "8.8",
+   "taps": 5,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Retrimite sau scrie altă adresă",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": true
+    },
+    {
+     "t": "Începe sesiunea",
+     "belowFold": true
+    },
+    {
+     "t": "⚡ Sesiune micro\n2 min\n5 întrebări",
+     "belowFold": true
+    }
+   ],
+   "text": "Tutor | Panou de control | ÎNVAȚĂ | Lecții | Grile | Simulări | Generează test | Domenii | Calendar | PROGRES | Progresul meu | CONT | Abonament | 🔒 | Familia mea | Notificări | Setări | Ajutor | EN | RO | Qa Elev | qa-e2e-1005-elev-1791186036034@example.com | Deconectare | ⏳ | Proba gratuită, mai ai | 6z 23:59 | 🚀 | 3 | Am trimis un email la q***@example.com, ca părintele tău să-și dea acordul. Contul merge încă 7 zile fără răspunsul lui. | Retrimite sau scrie altă adresă | Proba gratuită · mai ai 7 zileAi tot pachetul, în afară de WhatsApp și SMS. Când se termină proba, rămâi pe varianta gratuită; tot ce ai lucrat rămâne salvat. | Grile | Înainte de prima sesiune, bifează ce s-a predat l"
+  }
+ ],
+ "console": [
+  {
+   "url": "http://localhost:3113/ro/auth/register",
+   "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  },
+  {
+   "url": "http://localhost:3113/ro/dashboard",
+   "text": "Failed to load resource: the server responded with a status of 409 (Conflict)"
+  },
+  {
+   "url": "http://localhost:3113/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "text": "Failed to load resource: the server responded with a status of 409 (Conflict)"
+  }
+ ],
+ "http": [
+  {
+   "url": "/api/student/domains",
+   "status": 401
+  },
+  {
+   "url": "/api/matematica-v-viii/session/start",
+   "status": 409
+  },
+  {
+   "url": "/api/matematica-v-viii/session/start",
+   "status": 409
+  }
+ ],
+ "sec_to_dashboard": 3.95,
+ "startBtn": {
+  "y": 642.5,
+  "vh": 812
+ }
+}

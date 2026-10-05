@@ -1,0 +1,546 @@
+{
+ "vp": "mobile",
+ "email": "qa-e2e-1005-f06-mobile-1791185862147@example.com",
+ "steps": [
+  {
+   "n": 1,
+   "name": "signin",
+   "file": "mobile-01-signin.png",
+   "url": "/ro/auth/signin",
+   "sec": 1,
+   "taps": 0,
+   "text": "Autentifică-te în Tutor\n\nAccesează platforma ta de învățare adaptivă\n\nContinuă cu Google\nSau continuă cu\nEmail sau nume de utilizator\nParola\nAutentificare\nNu ai email? Recuperează pe telefon\nAi uitat parola?\nFolosește magic link\n\nNu ai cont? Fă-ți unul\n\nSau încearcă fără cont ✨\n\nPrin autentificare, ești de acord cu Termeni și condiții & Politica de confidențialitate\n\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+   "prim": [
+    {
+     "t": "Continuă cu Google",
+     "below": false
+    },
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Autentificare",
+     "below": false
+    },
+    {
+     "t": "Nu ai email? Recuperează pe telefon",
+     "below": false
+    },
+    {
+     "t": "Ai uitat parola?",
+     "below": false
+    },
+    {
+     "t": "Folosește magic link",
+     "below": false
+    },
+    {
+     "t": "Fă-ți unul",
+     "below": false
+    },
+    {
+     "t": "încearcă fără cont ✨",
+     "below": false
+    },
+    {
+     "t": "Termeni și condiții",
+     "below": false
+    },
+    {
+     "t": "Politica de confidențialitate",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": true
+    },
+    {
+     "t": "Termeni",
+     "below": true
+    }
+   ],
+   "sw": false
+  },
+  {
+   "n": 2,
+   "name": "forgot-empty",
+   "file": "mobile-02-forgot-empty.png",
+   "url": "/ro/auth/forgot-password",
+   "sec": 1.6,
+   "taps": 1,
+   "text": "Ai uitat parola?\n\nScrie emailul contului și îți trimitem un link cu care îți alegi o parolă nouă.\n\nEmail\nTrimite linkul\n\nN-ai email pe cont? Recuperează pe telefon\n\nÎnapoi la intrare\n\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+   "prim": [
+    {
+     "t": "Trimite linkul",
+     "below": false
+    },
+    {
+     "t": "N-ai email pe cont? Recuperează pe telefon",
+     "below": false
+    },
+    {
+     "t": "Înapoi la intrare",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": true
+    },
+    {
+     "t": "Termeni",
+     "below": true
+    },
+    {
+     "t": "Cookie-uri",
+     "below": true
+    },
+    {
+     "t": "Politica de cookie-uri",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": false
+    },
+    {
+     "t": "Respinge",
+     "below": false
+    },
+    {
+     "t": "Accept",
+     "below": false
+    }
+   ],
+   "sw": false
+  },
+  {
+   "n": 3,
+   "name": "forgot-sent",
+   "file": "mobile-03-forgot-sent.png",
+   "url": "/ro/auth/forgot-password",
+   "sec": 2.3,
+   "taps": 2,
+   "text": "Uită-te în email\n\nDacă există un cont pentru QA-E2E-1005-F06-MOBILE-1791185862147@EXAMPLE.COM, ți-am trimis un link. E valabil o oră. Dacă nu-l vezi, uită-te și în Spam.\n\nÎnapoi la intrare\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+   "prim": [
+    {
+     "t": "Înapoi la intrare",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": true
+    },
+    {
+     "t": "Termeni",
+     "below": true
+    },
+    {
+     "t": "Cookie-uri",
+     "below": true
+    },
+    {
+     "t": "Politica de cookie-uri",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": false
+    },
+    {
+     "t": "Respinge",
+     "below": false
+    },
+    {
+     "t": "Accept",
+     "below": false
+    }
+   ],
+   "sw": false
+  },
+  {
+   "n": 4,
+   "name": "reset-form",
+   "file": "mobile-04-reset-form.png",
+   "url": "/ro/auth/reset-password?token=59207a3d7fb8ead1e0683c471e779d6ed65e74c4311162fbbcac7a44a386572b&email=qa-e2e-1005-f06-mobile-1791185862147%40example.com",
+   "sec": 3.3,
+   "taps": 2,
+   "text": "Alege o parolă nouă\n\nParola nouă pentru qa-e2e-1005-f06-mobile-1791185862147@example.com\n\nParola nouă\nScrie parola încă o dată\nSalvează parola\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+   "prim": [
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Salvează parola",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": true
+    },
+    {
+     "t": "Termeni",
+     "below": true
+    },
+    {
+     "t": "Cookie-uri",
+     "below": true
+    },
+    {
+     "t": "Politica de cookie-uri",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": false
+    },
+    {
+     "t": "Respinge",
+     "below": false
+    },
+    {
+     "t": "Accept",
+     "below": false
+    }
+   ],
+   "sw": false
+  },
+  {
+   "n": 5,
+   "name": "reset-short",
+   "file": "mobile-05-reset-short.png",
+   "url": "/ro/auth/reset-password?token=59207a3d7fb8ead1e0683c471e779d6ed65e74c4311162fbbcac7a44a386572b&email=qa-e2e-1005-f06-mobile-1791185862147%40example.com",
+   "sec": 3.9,
+   "taps": 3,
+   "text": "Alege o parolă nouă\n\nParola nouă pentru qa-e2e-1005-f06-mobile-1791185862147@example.com\n\nParola nouă\nScrie parola încă o dată\nSalvează parola\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+   "prim": [
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Salvează parola",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": true
+    },
+    {
+     "t": "Termeni",
+     "below": true
+    },
+    {
+     "t": "Cookie-uri",
+     "below": true
+    },
+    {
+     "t": "Politica de cookie-uri",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": false
+    },
+    {
+     "t": "Respinge",
+     "below": false
+    },
+    {
+     "t": "Accept",
+     "below": false
+    }
+   ],
+   "sw": false
+  },
+  {
+   "n": 6,
+   "name": "reset-mismatch",
+   "file": "mobile-06-reset-mismatch.png",
+   "url": "/ro/auth/reset-password?token=59207a3d7fb8ead1e0683c471e779d6ed65e74c4311162fbbcac7a44a386572b&email=qa-e2e-1005-f06-mobile-1791185862147%40example.com",
+   "sec": 4.5,
+   "taps": 4,
+   "text": "Alege o parolă nouă\n\nParola nouă pentru qa-e2e-1005-f06-mobile-1791185862147@example.com\n\nParola nouă\nScrie parola încă o dată\n\nCele două parole nu sunt la fel.\n\nSalvează parola\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+   "prim": [
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Salvează parola",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": true
+    },
+    {
+     "t": "Termeni",
+     "below": true
+    },
+    {
+     "t": "Cookie-uri",
+     "below": true
+    },
+    {
+     "t": "Politica de cookie-uri",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": false
+    },
+    {
+     "t": "Respinge",
+     "below": false
+    },
+    {
+     "t": "Accept",
+     "below": false
+    }
+   ],
+   "sw": false
+  },
+  {
+   "n": 7,
+   "name": "reset-done",
+   "file": "mobile-07-reset-done.png",
+   "url": "/ro/auth/reset-password?token=59207a3d7fb8ead1e0683c471e779d6ed65e74c4311162fbbcac7a44a386572b&email=qa-e2e-1005-f06-mobile-1791185862147%40example.com",
+   "sec": 5.8,
+   "taps": 5,
+   "text": "Gata, parola e schimbată\n\nAcum poți intra cu parola nouă.\n\nIntră în cont\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+   "prim": [
+    {
+     "t": "Intră în cont",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": true
+    },
+    {
+     "t": "Termeni",
+     "below": true
+    },
+    {
+     "t": "Cookie-uri",
+     "below": true
+    },
+    {
+     "t": "Politica de cookie-uri",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": false
+    },
+    {
+     "t": "Respinge",
+     "below": false
+    },
+    {
+     "t": "Accept",
+     "below": false
+    }
+   ],
+   "sw": false
+  },
+  {
+   "n": 8,
+   "name": "signin-after",
+   "file": "mobile-08-signin-after.png",
+   "url": "/ro/auth/signin",
+   "sec": 6.5,
+   "taps": 6,
+   "text": "Autentifică-te în Tutor\n\nAccesează platforma ta de învățare adaptivă\n\nContinuă cu Google\nSau continuă cu\nEmail sau nume de utilizator\nParola\nAutentificare\nNu ai email? Recuperează pe telefon\nAi uitat parola?\nFolosește magic link\n\nNu ai cont? Fă-ți unul\n\nSau încearcă fără cont ✨\n\nPrin autentificare, ești de acord cu Termeni și condiții & Politica de confidențialitate\n\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+   "prim": [
+    {
+     "t": "Continuă cu Google",
+     "below": false
+    },
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Autentificare",
+     "below": false
+    },
+    {
+     "t": "Nu ai email? Recuperează pe telefon",
+     "below": false
+    },
+    {
+     "t": "Ai uitat parola?",
+     "below": false
+    },
+    {
+     "t": "Folosește magic link",
+     "below": false
+    },
+    {
+     "t": "Fă-ți unul",
+     "below": false
+    },
+    {
+     "t": "încearcă fără cont ✨",
+     "below": false
+    },
+    {
+     "t": "Termeni și condiții",
+     "below": false
+    },
+    {
+     "t": "Politica de confidențialitate",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": true
+    },
+    {
+     "t": "Termeni",
+     "below": true
+    }
+   ],
+   "sw": false
+  },
+  {
+   "n": 9,
+   "name": "logged-in",
+   "file": "mobile-09-logged-in.png",
+   "url": "/ro/dashboard",
+   "sec": 8.5,
+   "taps": 7,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nQa F06\n\nqa-e2e-1005-f06-mobile-1791185862147@example.com\n\nDeconectare\n⏳\nProba gratuită, mai ai\n6z 23:59\n🚀\n3\n\nProba gratuită · mai ai 7 zileAi tot pachetul, în afară de WhatsApp și SMS. Când se termină proba, rămâi pe varianta gratuită; tot ce ai lucrat rămâne salvat.\n\nPanou de control\nAstăzi\nPanou complet\nBine ai venit! 👋\n\nHai să te cunoaștem în 3 pași rapizi — apoi îți dăm exact ce ai nevoie.\n\n1 Materi",
+   "prim": [
+    {
+     "t": "Tutor",
+     "below": false
+    },
+    {
+     "t": "Close menu",
+     "below": false
+    },
+    {
+     "t": "Panou de control",
+     "below": false
+    },
+    {
+     "t": "Lecții",
+     "below": false
+    },
+    {
+     "t": "Grile",
+     "below": false
+    },
+    {
+     "t": "Simulări",
+     "below": false
+    },
+    {
+     "t": "Generează test",
+     "below": false
+    },
+    {
+     "t": "Domenii",
+     "below": false
+    },
+    {
+     "t": "Calendar",
+     "below": false
+    },
+    {
+     "t": "Progresul meu",
+     "below": false
+    },
+    {
+     "t": "Abonament",
+     "below": false
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "below": false
+    }
+   ],
+   "sw": false,
+   "ok": true
+  }
+ ],
+ "defects": [],
+ "notes": [
+  "setup: register -> http://localhost:3113/ro/dashboard",
+  "old session before reset: true",
+  "forgot link y=534 vh=844",
+  "save button y=550"
+ ],
+ "http": [
+  {
+   "tag": "A",
+   "url": "/api/student/domains",
+   "status": 401
+  }
+ ],
+ "console": [
+  {
+   "tag": "A",
+   "url": "http://localhost:3113/ro/auth/register",
+   "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  }
+ ],
+ "submitToScreenMs": 632,
+ "enumeration": {
+  "existing": {
+   "s": 200,
+   "b": "{\"success\":true,\"message\":\"If an account with that email exists, a reset link has been sent.\"}"
+  },
+  "missing": {
+   "s": 200,
+   "b": "{\"success\":true,\"message\":\"If an account with that email exists, a reset link has been sent.\"}"
+  },
+  "sameBody": true,
+  "msExisting": 14,
+  "msMissing": 12
+ },
+ "mail": {
+  "subject": "Parola nouă pentru eTutor.ro",
+  "at": "2026-10-05T07:37:48.447Z",
+  "delayAfterSubmitSec": "0.4",
+  "count": 1,
+  "text": "Bună, Qa F06,\n\nCineva a cerut schimbarea parolei contului tău de pe eTutor.ro. Cu linkul de mai\njos îți alegi o parolă nouă. Merge o oră și o singură dată.\n\nAlege parola nouă\n[http://localhost:3113/ro/auth/reset-password?token=59207a3d7fb8ead1e0683c471e779d6ed65e74c4311162fbbcac7a44a386572b&email=qa-e2e-1005-f06-mobile-1791185862147%40example.com]\n\nDacă n-ai cerut tu, ignoră emailul: parola rămâne aceeași.\n\neTutor.ro",
+  "hasEtutorBrand": true,
+  "htmlLinkText": "Alege parola nouă"
+ },
+ "firstValue": {
+  "reached": true,
+  "sec": 8.4,
+  "taps": 7
+ },
+ "reuse": {
+  "file": "mobile-10-reuse.png",
+  "text": "Alege o parolă nouă\n\nParola nouă pentru qa-e2e-1005-f06-mobile-1791185862147@example.com\n\nParola nouă\nScrie parola încă o dată\n\nLinkul de resetare e greșit sau a expirat. Cere unul nou.\n\nSalvează parola\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+  "newLinkCta": 0
+ },
+ "twoInARow": {
+  "before": 1,
+  "after": 2,
+  "newMails": 1
+ },
+ "oldSession": {
+  "sessionApiUserAfter": true,
+  "urlAfterGoto": "/ro/dashboard"
+ }
+}

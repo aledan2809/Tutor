@@ -1,0 +1,10 @@
+import {chromium,devices,BASE,mk} from './lib.mjs';
+import fs from 'fs';
+const b=await chromium.launch();
+const ctx=await b.newContext({storageState:'state.json',viewport:{width:375,height:812},deviceScaleFactor:2,isMobile:true,hasTouch:true,userAgent:devices['iPhone 13'].userAgent});
+const p=await ctx.newPage(); const m=mk('z',p);
+await p.goto(BASE+'/ro/dashboard/family'); await p.getByRole('button',{name:'Adaugă copil'}).waitFor();
+await p.getByRole('button',{name:'Adaugă copil'}).click(); await p.waitForTimeout(600); await m.snap('add-child-open');
+console.log((await p.innerText('main')).split('Adaugă copil')[0].slice(-0)||'');
+console.log(await p.evaluate(()=>[...document.querySelectorAll('main input,main button,main select,main textarea')].map(e=>[e.tagName,e.type,e.name,e.placeholder,(e.innerText||'').slice(0,50),e.disabled])));
+await b.close();

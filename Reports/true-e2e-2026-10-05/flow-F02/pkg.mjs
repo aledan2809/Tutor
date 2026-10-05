@@ -1,0 +1,14 @@
+import {chromium,devices,BASE,mk} from './lib.mjs';
+const opts={viewport:{width:375,height:812},deviceScaleFactor:2,isMobile:true,hasTouch:true,userAgent:devices['iPhone 13'].userAgent};
+const b=await chromium.launch(); const ctx=await b.newContext({...opts,storageState:`mobile-state.json`}); const p=await ctx.newPage(); const m=mk('mobile-pk',p);
+await p.goto(BASE+'/ro/dashboard/packages?plan=FAMILY&voucher=V126S'); await p.waitForLoadState('networkidle'); await p.waitForTimeout(1500);
+await m.snap('packages-top');
+const reqs=[]; p.on('request',r=>{ if(/stripe|checkout|api\/(plans|stripe)/.test(r.url())) reqs.push(r.method()+' '+r.url().replace(BASE,'').slice(0,120));});
+await p.route(/checkout|stripe/,r=>{ if(r.request().url().startsWith(BASE+'/api')) return r.continue(); r.abort()});
+const btn=p.getByRole('button',{name:'Alege pachetul'}).nth(1); await btn.evaluate(e=>e.scrollIntoView({block:'center'})); await m.snap('family-card');
+const [resp]=await Promise.all([p.waitForResponse(r=>/checkout|stripe/.test(r.url()),{timeout:8000}).catch(()=>null), btn.click()]);
+await p.waitForTimeout(2000); await m.snap('after-choose');
+console.log('resp',resp&&resp.status(),resp&&resp.url().replace(BASE,'')); if(resp) console.log((await resp.text().catch(()=>'')).slice(0,300));
+console.log(reqs, p.url());
+console.log((await p.innerText('main')).slice(0,400));
+await b.close();

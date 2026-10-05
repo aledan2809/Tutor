@@ -1,0 +1,59 @@
+{
+  "cookies": [
+    {
+      "name": "NEXT_LOCALE",
+      "value": "ro",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "authjs.csrf-token",
+      "value": "cde3b7ca9cef2026d0dfe59441afb61192fa01a21c62a696f468505555cbb070%7Cd9b6f48770102f47e943e4955cecd9c3a302b3d9d8dfdec4601dd08671ebb96b",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "authjs.callback-url",
+      "value": "http%3A%2F%2Flocalhost%3A3113%2Fro%2Fauth%2Fregister",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "authjs.session-token",
+      "value": "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwia2lkIjoiZVpoM2lrV2k2T1hTWGdpVzhWSnMzb19kQ2szWkM0ZjZtZWdNM3V2aHVVZVluOUlsNFNtQjVscjFJeW5TVEp1U3lXOG1YTHJVWW5QOG9hZDJkNGd5T3cifQ..uFeU-lXhxZdIiE4p-xv69A.XBvYNM2WwUfryPZkQQxy0rL417JPeEPGQlnaHrbZIFYNT_322pn21SiQqN3GIoQnhVsJJH5LSGsrq_AAGFzrCLjLXWVQ6-fc1ki7mYSpYsSD0wQ1mlm-t00N5AE_orBBiAgaSSBcvk134Ty1BYoIknKy4USTvJm-XjC0HPNGuRd5Uia7R4i9Hx8tJhIfQA5GxmfMYaGZA4NTFuHV1Rm6QQy_wiGxnZvD4xNAtfaKh_uQqRRTZ5VCAsKJItPcCt0rZ9Lwt2sxQwGHX_sLJF1jF3fmBWDV-8zSfojs6C3ogdAoUVMLIowSLKymb3RLZfZmWrb1fVymERWcyKNNrIj_oUI0E7Kp007IcEtM-e_tXQfkUutmQ8FMWYgHWmkhxkhnaY5sArOe4adH-klGoozwF3D1Tl1go3nTjlT8VuPqgb38JhjMlcqaL0RdsCSVBDS9EWJNtKVr-XGUmPElcj7xKb0lrQ3AQ-87Jr2_Ct9CYhQ.xZj7PE0B9wygvQ1niSF8d7OukgEXV0JrmSo6h27qb0U",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1793777808.257709,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "http://localhost:3113",
+      "localStorage": [
+        {
+          "name": "session_cmuuxsbal003jsnj3ikef3hae",
+          "value": "{\"sessionId\":\"cmuuxsbal003jsnj3ikef3hae\",\"type\":\"quick\",\"duration\":4320,\"questions\":[{\"id\":\"cmq5t99bc006lp68y1ivh67hd\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Geometrie plană\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"În figura alăturată sunt reprezentate unghiurile opuse la vârf AOC și BOD. Măsura unghiului AOC este egală cu 60°. Măsura unghiului BOD este egală cu:\",\"options\":[\"30°\",\"60°\",\"90°\",\"120°\"],\"imageUrl\":\"/exam-figures/en-viii-2022-mate-examen-2-s2-2.png\",\"passage\":null},{\"id\":\"cmq5t99bc006bp68yvymxd9rd\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Statistică, medii și probleme practice\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"O mașină se deplasează în intervalul orar 12:56 − 14:26 cu o viteză medie de 80 km/h. Mihai afirmă că, în acest interval de timp, mașina a parcurs o distanță egală cu 200 km. Afirmația lui Mihai este:\",\"options\":[\"adevărată\",\"falsă\"],\"imageUrl\":null,\"passage\":null},{\"id\":\"cmq5t99cj00ekp68yfh9dhb9l\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Geometrie plană\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"În figura alăturată, punctele A, B, C, D și E sunt coliniare, în această ordine, astfel încât punctul B este mijlocul segmentului AC, punctul C este mijlocul segmentului AD și punctul D este mijlocul segmentului AE. Raportul BD/AE este egal cu:\",\"options\":[\"1/2\",\"3/7\",\"2/5\",\"3/8\"],\"imageUrl\":\"/exam-figures/en-viii-2022-mate-test-05-s2-1.png\",\"passage\":null},{\"id\":\"cmq5t99az004tp68yrtdwad5f\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Fracții și numere raționale\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Fracția subunitară din mulțimea A = {44/10, 5/4, 4/5, 4} este:\",\"options\":[\"4/5\",\"5/4\",\"4\",\"44/10\"],\"imageUrl\":null,\"passage\":null},{\"id\":\"cmq5t99bd0081p68ywihp1zhn\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Geometrie plană\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"În figura alăturată, punctele distincte A, B, C, D, E, F, G și H sunt reprezentate pe cercul de centru O, astfel încât arcele mici AB, BC, CD, DE, EF, FG, GH și HA sunt congruente. Măsura arcului mic BC este egală cu:\",\"options\":[\"30°\",\"45°\",\"60°\",\"75°\"],\"imageUrl\":\"/exam-figures/en-viii-2023-mate-examen-1-s2-5.png\",\"passage\":null},{\"id\":\"cmq5t99bs00arp68yoovm93as\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Statistică, medii și probleme practice\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Maria măsoară temperatura pe parcursul unei zile, din două în două ore, de la ora 8:00 până la ora 18:00. Temperaturile măsurate sunt:\\n• 8:00 — −4 °C\\n• 10:00 — 0 °C\\n• 12:00 — 2 °C\\n• 14:00 — 6 °C\\n• 16:00 — 5 °C\\n• 18:00 — 1 °C\\nTemperatura înregistrată la ora 14:00 este mai mare decât temperatura înregistrată la ora 8:00 cu:\",\"options\":[\"−9 °C\",\"−6 °C\",\"8 °C\",\"10 °C\"],\"imageUrl\":null,\"passage\":null},{\"id\":\"cmq5t99af0004p68y547rfrox\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Statistică, medii și probleme practice\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Patru elevi, Ioan, Mihai, Gabriela și Maria, au calculat media aritmetică a numerelor a = √12 și b = 10 − 2√3. Rezultatele obținute (tabel): Ioan → 10; Mihai → 5 + 2√3; Gabriela → 5; Maria → 5 − 2√3. Conform informațiilor din tabel, rezultatul corect a fost obținut de:\",\"options\":[\"Ioan\",\"Mihai\",\"Gabriela\",\"Maria\"],\"imageUrl\":null,\"passage\":null},{\"id\":\"cmq5t99bb005mp68ymukvfp58\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Geometrie plană\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"În figura alăturată este reprezentat trapezul isoscel ABCD, cu AB ∥ CD. Diagonala AC este perpendiculară pe latura BC, AB = 18 cm, iar măsura unghiului ADC este egală cu 120°. Lungimea segmentului BC este egală cu:\",\"options\":[\"6 cm\",\"9 cm\",\"6√3 cm\",\"9√3 cm\"],\"imageUrl\":\"/exam-figures/en-viii-2021-mate-sesiune-speciala-4-s2-4.png\",\"passage\":null},{\"id\":\"cmq5t99c500brp68y6oe1fje5\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Statistică, medii și probleme practice\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Mihai a înregistrat temperaturile măsurate la aceeași oră pe parcursul unei săptămâni:\\n• Luni — −4 °C\\n• Marți — −1 °C\\n• Miercuri — −5 °C\\n• Joi — −2 °C\\n• Vineri — 0 °C\\n• Sâmbătă — 1 °C\\n• Duminică — −3 °C\\nMedia aritmetică a temperaturilor măsurate de Mihai, în această săptămână, la aceeași oră, este egală cu:\",\"options\":[\"0 °C\",\"−2 °C\",\"−5 °C\",\"−7 °C\"],\"imageUrl\":null,\"passage\":null},{\"id\":\"cmq5t99az004rp68yf5ih3nnt\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Rapoarte, proporții și procente\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Un obiect costă 100 de lei. După o scumpire cu 10%, noul preț al obiectului este egal cu:\",\"options\":[\"10 lei\",\"90 de lei\",\"100 de lei\",\"110 lei\"],\"imageUrl\":null,\"passage\":null},{\"id\":\"cmq5t99c700dbp68y1v5kehp8\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Geometrie plană\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Punctele A, B, C și D sunt situate pe un cerc de centru O, astfel încât triunghiul ABC este echilateral și BD este diametru. Măsura unghiului ACD este egală cu:\",\"options\":[\"30°\",\"45°\",\"60°\",\"90°\"],\"imageUrl\":\"/exam-figures/en-viii-2022-mate-test-01-s2-5.png\",\"passage\":null},{\"id\":\"cmq5t99ah0022p68yh93ovbna\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Numere întregi și operații\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Rezultatul calculului 25 − 5 · 3 este egal cu:\",\"options\":[\"0\",\"10\",\"60\",\"90\"],\"imageUrl\":null,\"passage\":null},{\"id\":\"cmq5t99ag0020p68y67mwrfpg\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Geometrie plană\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"În figura alăturată este reprezentat paralelogramul ABCD, cu AD = BD = 4√2 cm. Măsura unghiului ADB este egală cu 90°. Lungimea segmentului CD este egală cu:\",\"options\":[\"4 cm\",\"4√2 cm\",\"4√3 cm\",\"8 cm\"],\"imageUrl\":\"/exam-figures/en-viii-2025-mate-rezerva-02-s2-4.png\",\"passage\":null},{\"id\":\"cmq5t99ax0031p68yy1uyn3yz\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Rapoarte, proporții și procente\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Dacă 6/a = b/2, a ≠ 0, atunci raportul (a·b)/(a·b + 1) este egal cu:\",\"options\":[\"12/13\",\"1\",\"12/11\",\"12\"],\"imageUrl\":null,\"passage\":null},{\"id\":\"cmq5t99bc005tp68yogmd9aln\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Statistică, medii și probleme practice\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Patru elevi, Andreea, Mihaela, Radu și Vlad, calculează media geometrică a numerelor reale a = 3 + 2√2 și b = 3 − 2√2 și obțin rezultatele înregistrate în tabelul următor: Andreea → 1; Mihaela → √6; Radu → 3; Vlad → √17. Conform informațiilor din tabel, dintre cei patru elevi, cel care a calculat corect media geometrică este:\",\"options\":[\"Andreea\",\"Mihaela\",\"Radu\",\"Vlad\"],\"imageUrl\":null,\"passage\":null}],\"totalQuestions\":15,\"domainSlug\":\"matematica-v-viii\"}"
+        },
+        {
+          "name": "etutor_cookie_consent_v1",
+          "value": "{\"choice\":\"rejected\",\"at\":\"2026-10-05T07:35:58.791Z\"}"
+        }
+      ]
+    }
+  ]
+}

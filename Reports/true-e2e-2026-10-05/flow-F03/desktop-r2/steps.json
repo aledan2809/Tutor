@@ -1,0 +1,2141 @@
+[
+ {
+  "n": "01",
+  "name": "p1-register",
+  "note": "",
+  "taps": 1,
+  "sec": 5,
+  "url": "/ro/auth/register?plan=FAMILY&voucher=ONV126S&start=free",
+  "title": "Sign In - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Elev",
+    "y": 318
+   },
+   {
+    "t": "Părinte",
+    "y": 318
+   },
+   {
+    "t": "Creează cont",
+    "y": 690
+   },
+   {
+    "t": "Autentifică-te",
+    "y": 751
+   },
+   {
+    "t": "Încearcă fără cont ✨",
+    "y": 783
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 917
+   },
+   {
+    "t": "Termeni",
+    "y": 917
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 917
+   }
+  ],
+  "text": "✓ Codul ONV126S e inclus Îl verificăm și îl aplicăm după ce îți faci contul. Primele 7 zile sunt gratuite. Cont de părinte Intră în eTUTOR.ro și vezi cum progresează copilul tău Sunt Elev Părinte Îți vei lega copilul după ce intri în cont. Nume Email Parolă Confirmă parola Creează cont Ai deja cont? Autentifică-te Nehotărât? Încearcă fără cont ✨ Confidențialitate · Termeni · Cookie-uri",
+  "errs": [
+   "401 /api/student/domains"
+  ]
+ },
+ {
+  "n": "02",
+  "name": "p1-dupa-register",
+  "note": "",
+  "taps": 2,
+  "sec": 8,
+  "url": "/ro/dashboard/family",
+  "title": "Dashboard - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Tutor",
+    "y": 10
+   },
+   {
+    "t": "Panou de control",
+    "y": 80
+   },
+   {
+    "t": "Monitorizare",
+    "y": 165
+   },
+   {
+    "t": "Rapoarte",
+    "y": 213
+   },
+   {
+    "t": "Alerte",
+    "y": 261
+   },
+   {
+    "t": "Cadență alerte",
+    "y": 309
+   },
+   {
+    "t": "Familia mea",
+    "y": 357
+   },
+   {
+    "t": "Abonament",
+    "y": 441
+   },
+   {
+    "t": "Invită un prieten",
+    "y": 489
+   },
+   {
+    "t": "Notificări",
+    "y": 537
+   },
+   {
+    "t": "Setări",
+    "y": 585
+   },
+   {
+    "t": "Ajutor",
+    "y": 633
+   },
+   {
+    "t": "EN",
+    "y": 736
+   },
+   {
+    "t": "RO",
+    "y": 736
+   },
+   {
+    "t": "Deconectare",
+    "y": 840
+   },
+   {
+    "t": "−30% dacă plătești în probă",
+    "y": 15
+   },
+   {
+    "t": "🚀\nConfigurare\n4",
+    "y": 13
+   },
+   {
+    "t": "Continuă cu Family · −30%",
+    "y": 147
+   },
+   {
+    "t": "Adaugă copil",
+    "y": 396
+   },
+   {
+    "t": "Adaugă al 2-lea părinte",
+    "y": 396
+   },
+   {
+    "t": "Adaugă meditator",
+    "y": 396
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 917
+   },
+   {
+    "t": "Termeni",
+    "y": 917
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 917
+   }
+  ],
+  "text": "Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Deconectare Proba gratuită: mai ai 6z 23:59:58 −30% dacă plătești în probă 🚀 Configurare 4 Proba gratuită · mai ai 7 zileAi tot pachetul Family. Reminderele pe WhatsApp și SMS pornesc când pui cardul — nu plătești nimic până se termină proba. −30% dacă plătești acum, cât rămâi abonat · se încheie în 6z 23:59:58 Continuă cu Family · −30% Familia mea Adaugă copilul, al doilea părinte sau meditatorul. Fiecare are cont propriu și vede doar ce i se cuvine. Pachet: Family · probă gratuită Părinți: 1/1 Copii: 0/1 Meditatori: 0/0 În proba gratuită îți poți lega copilul acum, fără card. Adaugă copil Adaugă al 2-lea părinte Pachetul „Family\" include un singur părinte. Treci la „Famil",
+  "errs": []
+ },
+ {
+  "n": "03",
+  "name": "p1-familia-mea-proba",
+  "note": "",
+  "taps": 2,
+  "sec": 10,
+  "url": "/ro/dashboard/family",
+  "title": "Dashboard - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Tutor",
+    "y": 10
+   },
+   {
+    "t": "Panou de control",
+    "y": 80
+   },
+   {
+    "t": "Monitorizare",
+    "y": 165
+   },
+   {
+    "t": "Rapoarte",
+    "y": 213
+   },
+   {
+    "t": "Alerte",
+    "y": 261
+   },
+   {
+    "t": "Cadență alerte",
+    "y": 309
+   },
+   {
+    "t": "Familia mea",
+    "y": 357
+   },
+   {
+    "t": "Abonament",
+    "y": 441
+   },
+   {
+    "t": "Invită un prieten",
+    "y": 489
+   },
+   {
+    "t": "Notificări",
+    "y": 537
+   },
+   {
+    "t": "Setări",
+    "y": 585
+   },
+   {
+    "t": "Ajutor",
+    "y": 633
+   },
+   {
+    "t": "EN",
+    "y": 736
+   },
+   {
+    "t": "RO",
+    "y": 736
+   },
+   {
+    "t": "Deconectare",
+    "y": 840
+   },
+   {
+    "t": "−30% dacă plătești în probă",
+    "y": 15
+   },
+   {
+    "t": "🚀\nConfigurare\n4",
+    "y": 13
+   },
+   {
+    "t": "Continuă cu Family · −30%",
+    "y": 147
+   },
+   {
+    "t": "Adaugă copil",
+    "y": 396
+   },
+   {
+    "t": "Adaugă al 2-lea părinte",
+    "y": 396
+   },
+   {
+    "t": "Adaugă meditator",
+    "y": 396
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 917
+   },
+   {
+    "t": "Termeni",
+    "y": 917
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 917
+   }
+  ],
+  "text": "Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Deconectare Proba gratuită: mai ai 6z 23:59:55 −30% dacă plătești în probă 🚀 Configurare 4 Proba gratuită · mai ai 7 zileAi tot pachetul Family. Reminderele pe WhatsApp și SMS pornesc când pui cardul — nu plătești nimic până se termină proba. −30% dacă plătești acum, cât rămâi abonat · se încheie în 6z 23:59:55 Continuă cu Family · −30% Familia mea Adaugă copilul, al doilea părinte sau meditatorul. Fiecare are cont propriu și vede doar ce i se cuvine. Pachet: Family · probă gratuită Părinți: 1/1 Copii: 0/1 Meditatori: 0/0 În proba gratuită îți poți lega copilul acum, fără card. Adaugă copil Adaugă al 2-lea părinte Pachetul „Family\" include un singur părinte. Treci la „Famil",
+  "errs": []
+ },
+ {
+  "n": "--",
+  "name": "hipoteza-blocat",
+  "info": {
+   "err": "TimeoutError: locator.evaluate: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('button').filter({ hasText: /Adaugă al 2-lea părinte/ }).first()\n"
+  }
+ },
+ {
+  "n": "04",
+  "name": "p1-adauga-parinte-in-vizor",
+  "note": "",
+  "taps": 2,
+  "sec": 70,
+  "url": "/ro/dashboard/family",
+  "title": "Dashboard - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Tutor",
+    "y": 10
+   },
+   {
+    "t": "Panou de control",
+    "y": 80
+   },
+   {
+    "t": "Monitorizare",
+    "y": 165
+   },
+   {
+    "t": "Rapoarte",
+    "y": 213
+   },
+   {
+    "t": "Alerte",
+    "y": 261
+   },
+   {
+    "t": "Cadență alerte",
+    "y": 309
+   },
+   {
+    "t": "Familia mea",
+    "y": 357
+   },
+   {
+    "t": "Abonament",
+    "y": 441
+   },
+   {
+    "t": "Invită un prieten",
+    "y": 489
+   },
+   {
+    "t": "Notificări",
+    "y": 537
+   },
+   {
+    "t": "Setări",
+    "y": 585
+   },
+   {
+    "t": "Ajutor",
+    "y": 633
+   },
+   {
+    "t": "EN",
+    "y": 736
+   },
+   {
+    "t": "RO",
+    "y": 736
+   },
+   {
+    "t": "Deconectare",
+    "y": 840
+   },
+   {
+    "t": "−30% dacă plătești în probă",
+    "y": 15
+   },
+   {
+    "t": "🚀\nConfigurare\n4",
+    "y": 13
+   },
+   {
+    "t": "Continuă cu Family · −30%",
+    "y": 147
+   },
+   {
+    "t": "Adaugă copil",
+    "y": 396
+   },
+   {
+    "t": "Adaugă al 2-lea părinte",
+    "y": 396
+   },
+   {
+    "t": "Adaugă meditator",
+    "y": 396
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 917
+   },
+   {
+    "t": "Termeni",
+    "y": 917
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 917
+   }
+  ],
+  "text": "Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Deconectare Proba gratuită: mai ai 6z 23:58:55 −30% dacă plătești în probă 🚀 Configurare 4 Proba gratuită · mai ai 7 zileAi tot pachetul Family. Reminderele pe WhatsApp și SMS pornesc când pui cardul — nu plătești nimic până se termină proba. −30% dacă plătești acum, cât rămâi abonat · se încheie în 6z 23:58:55 Continuă cu Family · −30% Familia mea Adaugă copilul, al doilea părinte sau meditatorul. Fiecare are cont propriu și vede doar ce i se cuvine. Pachet: Family · probă gratuită Părinți: 1/1 Copii: 0/1 Meditatori: 0/0 În proba gratuită îți poți lega copilul acum, fără card. Adaugă copil Adaugă al 2-lea părinte Pachetul „Family\" include un singur părinte. Treci la „Famil",
+  "errs": []
+ },
+ {
+  "n": "--",
+  "name": "dupa-click-in-proba",
+  "bodyLenDelta": -14,
+  "tail": "Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Deconectare Proba gratuită: mai ai 6z 23:58:50 −30% dacă plătești în probă 🚀 Configurare 4 Proba gratuită · mai ai 7 zileAi tot pachetul Family. Reminderele pe WhatsApp și SMS pornesc când pui cardul — nu plătești nimic până se termină proba. −30% dacă plătești acum, cât rămâi abonat · se încheie în 6z 23:58:50 Continuă cu Family · −30% Familia mea Adaugă copilul, al doilea părinte sau meditatorul. Fiecare are cont propriu și vede doar ce i se cuvine. Pachet: Family · probă gratuită Părinți: 1/1 Copii: 0/1 Meditatori: 0/0 În proba gratuită îți poți lega copilul acum, fără card. Adaugă copil Adaugă al 2-lea părinte Pachetul „Family\" include un singur părinte. Treci la „Family Duo\" ca să adaugi al doilea părinte. Adaugă meditator Accesul pentru meditato"
+ },
+ {
+  "n": "05",
+  "name": "p1-click-adauga-parinte-in-proba",
+  "note": "",
+  "taps": 2,
+  "sec": 76,
+  "url": "/ro/dashboard/family",
+  "title": "Dashboard - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Tutor",
+    "y": 10
+   },
+   {
+    "t": "Panou de control",
+    "y": 80
+   },
+   {
+    "t": "Monitorizare",
+    "y": 165
+   },
+   {
+    "t": "Rapoarte",
+    "y": 213
+   },
+   {
+    "t": "Alerte",
+    "y": 261
+   },
+   {
+    "t": "Cadență alerte",
+    "y": 309
+   },
+   {
+    "t": "Familia mea",
+    "y": 357
+   },
+   {
+    "t": "Abonament",
+    "y": 441
+   },
+   {
+    "t": "Invită un prieten",
+    "y": 489
+   },
+   {
+    "t": "Notificări",
+    "y": 537
+   },
+   {
+    "t": "Setări",
+    "y": 585
+   },
+   {
+    "t": "Ajutor",
+    "y": 633
+   },
+   {
+    "t": "EN",
+    "y": 736
+   },
+   {
+    "t": "RO",
+    "y": 736
+   },
+   {
+    "t": "Deconectare",
+    "y": 840
+   },
+   {
+    "t": "−30% dacă plătești în probă",
+    "y": 15
+   },
+   {
+    "t": "🚀\nConfigurare\n4",
+    "y": 13
+   },
+   {
+    "t": "Continuă cu Family · −30%",
+    "y": 147
+   },
+   {
+    "t": "Adaugă copil",
+    "y": 396
+   },
+   {
+    "t": "Adaugă al 2-lea părinte",
+    "y": 396
+   },
+   {
+    "t": "Adaugă meditator",
+    "y": 396
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 917
+   },
+   {
+    "t": "Termeni",
+    "y": 917
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 917
+   }
+  ],
+  "text": "Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Deconectare Proba gratuită: mai ai 6z 23:58:50 −30% dacă plătești în probă 🚀 Configurare 4 Proba gratuită · mai ai 7 zileAi tot pachetul Family. Reminderele pe WhatsApp și SMS pornesc când pui cardul — nu plătești nimic până se termină proba. −30% dacă plătești acum, cât rămâi abonat · se încheie în 6z 23:58:50 Continuă cu Family · −30% Familia mea Adaugă copilul, al doilea părinte sau meditatorul. Fiecare are cont propriu și vede doar ce i se cuvine. Pachet: Family · probă gratuită Părinți: 1/1 Copii: 0/1 Meditatori: 0/0 În proba gratuită îți poți lega copilul acum, fără card. Adaugă copil Adaugă al 2-lea părinte Pachetul „Family\" include un singur părinte. Treci la „Famil",
+  "errs": []
+ },
+ {
+  "n": "06",
+  "name": "p1-copil-creat",
+  "note": "",
+  "taps": 5,
+  "sec": 80,
+  "url": "/ro/dashboard/family",
+  "title": "Dashboard - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Tutor",
+    "y": 10
+   },
+   {
+    "t": "Panou de control",
+    "y": 80
+   },
+   {
+    "t": "Monitorizare",
+    "y": 165
+   },
+   {
+    "t": "Rapoarte",
+    "y": 213
+   },
+   {
+    "t": "Alerte",
+    "y": 261
+   },
+   {
+    "t": "Cadență alerte",
+    "y": 309
+   },
+   {
+    "t": "Familia mea",
+    "y": 357
+   },
+   {
+    "t": "Abonament",
+    "y": 441
+   },
+   {
+    "t": "Invită un prieten",
+    "y": 489
+   },
+   {
+    "t": "Notificări",
+    "y": 537
+   },
+   {
+    "t": "Setări",
+    "y": 585
+   },
+   {
+    "t": "Ajutor",
+    "y": 633
+   },
+   {
+    "t": "EN",
+    "y": 997
+   },
+   {
+    "t": "RO",
+    "y": 997
+   },
+   {
+    "t": "Deconectare",
+    "y": 1101
+   },
+   {
+    "t": "−30% dacă plătești în probă",
+    "y": 15
+   },
+   {
+    "t": "🚀\nConfigurare\n4",
+    "y": 13
+   },
+   {
+    "t": "Continuă cu Family · −30%",
+    "y": 147
+   },
+   {
+    "t": "Adaugă copil",
+    "y": 396
+   },
+   {
+    "t": "Adaugă al 2-lea părinte",
+    "y": 396
+   },
+   {
+    "t": "Adaugă meditator",
+    "y": 396
+   },
+   {
+    "t": "Închide",
+    "y": 519
+   },
+   {
+    "t": "Invitație",
+    "y": 553
+   },
+   {
+    "t": "Creează contul direct",
+    "y": 553
+   },
+   {
+    "t": "Gata, am notat",
+    "y": 810
+   }
+  ],
+  "text": "Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Deconectare Proba gratuită: mai ai 6z 23:58:45 −30% dacă plătești în probă 🚀 Configurare 4 Proba gratuită · mai ai 7 zileAi tot pachetul Family. Reminderele pe WhatsApp și SMS pornesc când pui cardul — nu plătești nimic până se termină proba. −30% dacă plătești acum, cât rămâi abonat · se încheie în 6z 23:58:45 Continuă cu Family · −30% Familia mea Adaugă copilul, al doilea părinte sau meditatorul. Fiecare are cont propriu și vede doar ce i se cuvine. Pachet: Family · probă gratuită Părinți: 1/1 Copii: 1/1 Meditatori: 0/0 În proba gratuită îți poți lega copilul acum, fără card. Adaugă copil Mai adaugi un copil, cu 20% reducere, după ce continui cu Family. Adaugă al 2-lea pă",
+  "errs": []
+ },
+ {
+  "n": "07",
+  "name": "p1-familia-mea-duo-activ",
+  "note": "",
+  "taps": 5,
+  "sec": 83,
+  "url": "/ro/dashboard/family",
+  "title": "Dashboard - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Tutor",
+    "y": 10
+   },
+   {
+    "t": "Panou de control",
+    "y": 80
+   },
+   {
+    "t": "Monitorizare",
+    "y": 165
+   },
+   {
+    "t": "Rapoarte",
+    "y": 213
+   },
+   {
+    "t": "Alerte",
+    "y": 261
+   },
+   {
+    "t": "Cadență alerte",
+    "y": 309
+   },
+   {
+    "t": "Familia mea",
+    "y": 357
+   },
+   {
+    "t": "Abonament",
+    "y": 441
+   },
+   {
+    "t": "Invită un prieten",
+    "y": 489
+   },
+   {
+    "t": "Notificări",
+    "y": 537
+   },
+   {
+    "t": "Setări",
+    "y": 585
+   },
+   {
+    "t": "Ajutor",
+    "y": 633
+   },
+   {
+    "t": "EN",
+    "y": 736
+   },
+   {
+    "t": "RO",
+    "y": 736
+   },
+   {
+    "t": "Deconectare",
+    "y": 840
+   },
+   {
+    "t": "🚀\nConfigurare\n3",
+    "y": 13
+   },
+   {
+    "t": "Adaugă copil",
+    "y": 238
+   },
+   {
+    "t": "Adaugă al 2-lea părinte",
+    "y": 238
+   },
+   {
+    "t": "Adaugă meditator",
+    "y": 238
+   },
+   {
+    "t": "Scoate",
+    "y": 409
+   },
+   {
+    "t": "Schimbă parola",
+    "y": 455
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 917
+   },
+   {
+    "t": "Termeni",
+    "y": 917
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 917
+   }
+  ],
+  "text": "Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Deconectare 🚀 Configurare 3 Familia mea Adaugă copilul, al doilea părinte sau meditatorul. Fiecare are cont propriu și vede doar ce i se cuvine. Pachet: Family Duo Părinți: 1/2 Copii: 1/1 Meditatori: 0/0 Adaugă copil Adaugă al 2-lea copil cu o reducere de 20% pe pachet. Adaugă al 2-lea părinte Adaugă meditator Accesul pentru meditator e disponibil în pachetul „Family Trio\". Treci la el ca să adaugi un meditator. Copii Copil QA 2097991 Utilizator: copil.qa.2097991 qa-e2e-1005-f03-c-desktop-2097991@example.com Scoate Schimbă parola Doar încurajări calme — Limitează tonul energic pentru acest copil Eu gestionez notificările pentru acest copil — Când e bifat, tu alegi canalele ",
+  "errs": []
+ },
+ {
+  "n": "08",
+  "name": "p1-formular-invitatie",
+  "note": "",
+  "taps": 6,
+  "sec": 83,
+  "url": "/ro/dashboard/family",
+  "title": "Dashboard - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Tutor",
+    "y": 10
+   },
+   {
+    "t": "Panou de control",
+    "y": 80
+   },
+   {
+    "t": "Monitorizare",
+    "y": 165
+   },
+   {
+    "t": "Rapoarte",
+    "y": 213
+   },
+   {
+    "t": "Alerte",
+    "y": 261
+   },
+   {
+    "t": "Cadență alerte",
+    "y": 309
+   },
+   {
+    "t": "Familia mea",
+    "y": 357
+   },
+   {
+    "t": "Abonament",
+    "y": 441
+   },
+   {
+    "t": "Invită un prieten",
+    "y": 489
+   },
+   {
+    "t": "Notificări",
+    "y": 537
+   },
+   {
+    "t": "Setări",
+    "y": 585
+   },
+   {
+    "t": "Ajutor",
+    "y": 633
+   },
+   {
+    "t": "EN",
+    "y": 736
+   },
+   {
+    "t": "RO",
+    "y": 736
+   },
+   {
+    "t": "Deconectare",
+    "y": 840
+   },
+   {
+    "t": "🚀\nConfigurare\n3",
+    "y": 13
+   },
+   {
+    "t": "Adaugă copil",
+    "y": 238
+   },
+   {
+    "t": "Adaugă al 2-lea părinte",
+    "y": 238
+   },
+   {
+    "t": "Adaugă meditator",
+    "y": 238
+   },
+   {
+    "t": "Închide",
+    "y": 361
+   },
+   {
+    "t": "Invitație",
+    "y": 395
+   },
+   {
+    "t": "Email",
+    "y": 439
+   },
+   {
+    "t": "WhatsApp",
+    "y": 439
+   },
+   {
+    "t": "Cod de familie",
+    "y": 439
+   },
+   {
+    "t": "Trimite invitația",
+    "y": 483
+   }
+  ],
+  "text": "Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Deconectare 🚀 Configurare 3 Familia mea Adaugă copilul, al doilea părinte sau meditatorul. Fiecare are cont propriu și vede doar ce i se cuvine. Pachet: Family Duo Părinți: 1/2 Copii: 1/1 Meditatori: 0/0 Adaugă copil Adaugă al 2-lea copil cu o reducere de 20% pe pachet. Adaugă al 2-lea părinte Adaugă meditator Accesul pentru meditator e disponibil în pachetul „Family Trio\". Treci la el ca să adaugi un meditator. Adaugă părinte Închide Invitație Email WhatsApp Cod de familie Trimite invitația Copii Copil QA 2097991 Utilizator: copil.qa.2097991 qa-e2e-1005-f03-c-desktop-2097991@example.com Scoate Schimbă parola Doar încurajări calme — Limitează tonul energic pentru acest copi",
+  "errs": []
+ },
+ {
+  "n": "09",
+  "name": "p1-invitatie-trimisa",
+  "note": "",
+  "taps": 8,
+  "sec": 86,
+  "url": "/ro/dashboard/family",
+  "title": "Dashboard - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Tutor",
+    "y": 10
+   },
+   {
+    "t": "Panou de control",
+    "y": 80
+   },
+   {
+    "t": "Monitorizare",
+    "y": 165
+   },
+   {
+    "t": "Rapoarte",
+    "y": 213
+   },
+   {
+    "t": "Alerte",
+    "y": 261
+   },
+   {
+    "t": "Cadență alerte",
+    "y": 309
+   },
+   {
+    "t": "Familia mea",
+    "y": 357
+   },
+   {
+    "t": "Abonament",
+    "y": 441
+   },
+   {
+    "t": "Invită un prieten",
+    "y": 489
+   },
+   {
+    "t": "Notificări",
+    "y": 537
+   },
+   {
+    "t": "Setări",
+    "y": 585
+   },
+   {
+    "t": "Ajutor",
+    "y": 633
+   },
+   {
+    "t": "EN",
+    "y": 736
+   },
+   {
+    "t": "RO",
+    "y": 736
+   },
+   {
+    "t": "Deconectare",
+    "y": 840
+   },
+   {
+    "t": "🚀\nConfigurare\n3",
+    "y": 13
+   },
+   {
+    "t": "Adaugă copil",
+    "y": 238
+   },
+   {
+    "t": "Adaugă al 2-lea părinte",
+    "y": 238
+   },
+   {
+    "t": "Adaugă meditator",
+    "y": 238
+   },
+   {
+    "t": "Scoate",
+    "y": 409
+   },
+   {
+    "t": "Schimbă parola",
+    "y": 455
+   },
+   {
+    "t": "Anulează",
+    "y": 616
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 917
+   },
+   {
+    "t": "Termeni",
+    "y": 917
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 917
+   }
+  ],
+  "text": "Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Deconectare 🚀 Configurare 3 Familia mea Adaugă copilul, al doilea părinte sau meditatorul. Fiecare are cont propriu și vede doar ce i se cuvine. Pachet: Family Duo Părinți: 1/2 Copii: 1/1 Meditatori: 0/0 Adaugă copil Adaugă al 2-lea copil cu o reducere de 20% pe pachet. Adaugă al 2-lea părinte Adaugă meditator Accesul pentru meditator e disponibil în pachetul „Family Trio\". Treci la el ca să adaugi un meditator. Copii Copil QA 2097991 Utilizator: copil.qa.2097991 qa-e2e-1005-f03-c-desktop-2097991@example.com Scoate Schimbă parola Doar încurajări calme — Limitează tonul energic pentru acest copil Eu gestionez notificările pentru acest copil — Când e bifat, tu alegi canalele ",
+  "errs": []
+ },
+ {
+  "n": "--",
+  "name": "email-invitatie",
+  "subject": "Invitație etutor.ro",
+  "link": "http://localhost:3113/family/accept/9317159a2c40f05269ada375324e986ca9dea7d4936e0943",
+  "text": "Bună!\n\nPărinte QA Unu te invită pe etutor.ro ca părinte.\n\nCopilul își pune orele de studiu în program. La ora aceea îl împingem noi, pe\ncanalele lui, începând cu cele gratuite.\n\nPe tine te anunțăm doar dacă a ignorat TOT lanțul, într-o zi cu program. Ideea e\nsă nu fii tu cel care întreabă zilnic „ai învățat?”, ci să afli doar când chiar\ne cazul.\n\nAcceptă invitația\n[http://localhost:3113/family/accept/9317159a2c40f05269ada375324e986ca9dea7d4936e0943]\n\nSau deschide linkul:\nhttp://localhost:3113/family/accept/9317159a2c40f05269ada375324e986ca9dea7d4936e0943\n\nLinkul expiră în 7 zile."
+ },
+ {
+  "n": "10",
+  "name": "p2-accept-vizitator",
+  "note": "tema/brand",
+  "taps": 0,
+  "sec": 88,
+  "url": "/ro/family/accept/9317159a2c40f05269ada375324e986ca9dea7d4936e0943",
+  "title": "Tutor - Adaptive Learning Platform",
+  "btns": [
+   {
+    "t": "Intră în cont",
+    "y": 291
+   },
+   {
+    "t": "Fă-ți cont",
+    "y": 291
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 557
+   },
+   {
+    "t": "Termeni",
+    "y": 557
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 557
+   },
+   {
+    "t": "Politica de cookie-uri",
+    "y": 838
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 838
+   },
+   {
+    "t": "Respinge",
+    "y": 815
+   },
+   {
+    "t": "Accept",
+    "y": 815
+   }
+  ],
+  "text": "Invitație în familia etutor.ro Părinte QA Unu te invită ca părinte. Intră în cont (sau fă-ți unul) ca să accepți invitația. Intră în cont Fă-ți cont După ce îți faci contul, te aducem înapoi aici ca să accepți. Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate. Respinge Accept",
+  "errs": []
+ },
+ {
+  "n": "11",
+  "name": "p2-register-preselectat",
+  "note": "",
+  "taps": 1,
+  "sec": 89,
+  "url": "/ro/auth/register?callbackUrl=%2Ffamily%2Faccept%2F9317159a2c40f05269ada375324e986ca9dea7d4936e0943&role=PARENT",
+  "title": "Sign In - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Elev",
+    "y": 270
+   },
+   {
+    "t": "Părinte",
+    "y": 270
+   },
+   {
+    "t": "Creează cont",
+    "y": 642
+   },
+   {
+    "t": "Autentifică-te",
+    "y": 703
+   },
+   {
+    "t": "Încearcă fără cont ✨",
+    "y": 735
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 917
+   },
+   {
+    "t": "Termeni",
+    "y": 917
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 917
+   },
+   {
+    "t": "Politica de cookie-uri",
+    "y": 838
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 838
+   },
+   {
+    "t": "Respinge",
+    "y": 815
+   },
+   {
+    "t": "Accept",
+    "y": 815
+   }
+  ],
+  "text": "Cont de părinte Intră în eTUTOR.ro și vezi cum progresează copilul tău Sunt Elev Părinte Îți vei lega copilul după ce intri în cont. Nume Email Parolă Confirmă parola Creează cont Ai deja cont? Autentifică-te Nehotărât? Încearcă fără cont ✨ Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate. Respinge Accept",
+  "errs": [
+   "401 /api/student/domains"
+  ]
+ },
+ {
+  "n": "--",
+  "name": "rol-preselectat",
+  "roleSel": [
+   "Părinte"
+  ]
+ },
+ {
+  "n": "12",
+  "name": "p2-dupa-register",
+  "note": "",
+  "taps": 2,
+  "sec": 92,
+  "url": "/ro/family/accept/9317159a2c40f05269ada375324e986ca9dea7d4936e0943",
+  "title": "Tutor - Adaptive Learning Platform",
+  "btns": [
+   {
+    "t": "Accept ca părinte",
+    "y": 290
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 557
+   },
+   {
+    "t": "Termeni",
+    "y": 557
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 557
+   },
+   {
+    "t": "Politica de cookie-uri",
+    "y": 838
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 838
+   },
+   {
+    "t": "Respinge",
+    "y": 815
+   },
+   {
+    "t": "Accept",
+    "y": 815
+   }
+  ],
+  "text": "Invitație în familia etutor.ro Părinte QA Unu te invită ca părinte. Accept ca părinte Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate. Respinge Accept",
+  "errs": []
+ },
+ {
+  "n": "13",
+  "name": "p2-accept-logat",
+  "note": "",
+  "taps": 2,
+  "sec": 92,
+  "url": "/ro/family/accept/9317159a2c40f05269ada375324e986ca9dea7d4936e0943",
+  "title": "Tutor - Adaptive Learning Platform",
+  "btns": [
+   {
+    "t": "Accept ca părinte",
+    "y": 290
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 557
+   },
+   {
+    "t": "Termeni",
+    "y": 557
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 557
+   },
+   {
+    "t": "Politica de cookie-uri",
+    "y": 838
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 838
+   },
+   {
+    "t": "Respinge",
+    "y": 815
+   },
+   {
+    "t": "Accept",
+    "y": 815
+   }
+  ],
+  "text": "Invitație în familia etutor.ro Părinte QA Unu te invită ca părinte. Accept ca părinte Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate. Respinge Accept",
+  "errs": []
+ },
+ {
+  "n": "14",
+  "name": "p2-dupa-accept",
+  "note": "",
+  "taps": 3,
+  "sec": 95,
+  "url": "/ro/dashboard",
+  "title": "Dashboard - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Tutor",
+    "y": 10
+   },
+   {
+    "t": "Panou de control",
+    "y": 80
+   },
+   {
+    "t": "Monitorizare",
+    "y": 165
+   },
+   {
+    "t": "Rapoarte",
+    "y": 213
+   },
+   {
+    "t": "Alerte",
+    "y": 261
+   },
+   {
+    "t": "Cadență alerte",
+    "y": 309
+   },
+   {
+    "t": "Familia mea",
+    "y": 357
+   },
+   {
+    "t": "Abonament",
+    "y": 441
+   },
+   {
+    "t": "Invită un prieten",
+    "y": 489
+   },
+   {
+    "t": "Notificări",
+    "y": 537
+   },
+   {
+    "t": "Setări",
+    "y": 585
+   },
+   {
+    "t": "Ajutor",
+    "y": 633
+   },
+   {
+    "t": "EN",
+    "y": 736
+   },
+   {
+    "t": "RO",
+    "y": 736
+   },
+   {
+    "t": "Deconectare",
+    "y": 840
+   },
+   {
+    "t": "🚀\nConfigurare\n3",
+    "y": 13
+   },
+   {
+    "t": "Astăzi",
+    "y": 83
+   },
+   {
+    "t": "Panou complet",
+    "y": 83
+   },
+   {
+    "t": "Continuă ▶",
+    "y": 302
+   },
+   {
+    "t": "1\nSesiune scurtă de grile",
+    "y": 411
+   },
+   {
+    "t": "3\nSimulare completă",
+    "y": 527
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 917
+   },
+   {
+    "t": "Termeni",
+    "y": 917
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 917
+   },
+   {
+    "t": "Politica de cookie-uri",
+    "y": 838
+   }
+  ],
+  "text": "Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Doi qa-e2e-1005-f03-p2-desktop-2097991@example.com Deconectare 🚀 Configurare 3 Panou de control Astăzi Panou complet Salut, Părinte — hai să începem o serie nouă! ACȚIUNEA DE AZI O sesiune scurtă de grile Regular practice Continuă ▶ Drumul tău 1 Sesiune scurtă de grile 2 Repară o zonă slabă 3 Simulare completă Acuratețe 0% 0 sesiuni XP total 0 500 până la Co-pilot Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate. Respinge Accept",
+  "errs": []
+ },
+ {
+  "n": "--",
+  "name": "p2-aterizare-dupa-accept",
+  "landed": "http://localhost:3113/ro/dashboard",
+  "navLinks": [
+   "Tutor -> /ro/dashboard",
+   "Panou de control -> /ro/dashboard",
+   "Monitorizare -> /ro/dashboard/watcher",
+   "Rapoarte -> /ro/dashboard/rapoarte",
+   "Alerte -> /ro/dashboard/watcher/notifications",
+   "Cadență alerte -> /ro/dashboard/watcher/setari",
+   "Familia mea -> /ro/dashboard/family",
+   "Abonament -> /ro/dashboard/packages",
+   "Invită un prieten -> /ro/dashboard/referrals",
+   "Notificări -> /ro/dashboard/notifications",
+   "Setări -> /ro/dashboard/settings",
+   "Ajutor -> /ro/dashboard/ajutor",
+   "Confidențialitate -> /ro/privacy",
+   "Termeni -> /ro/terms",
+   "Cookie-uri -> /ro/cookies",
+   "Politica de cookie-uri -> /ro/cookies",
+   "Confidențialitate -> /ro/privacy"
+  ],
+  "body": "Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Doi qa-e2e-1005-f03-p2-desktop-2097991@example.com Deconectare 🚀 Configurare 3 Panou de control Astăzi Panou complet Salut, Părinte — hai să începem o serie nouă! ACȚIUNEA DE AZI O sesiune scurtă de grile Regular practice Continuă ▶ Drumul tău 1 Sesiune scurtă de grile 2 Repară o zonă slabă 3 Simulare completă Acuratețe 0% 0 sesiuni XP total 0 500 până la Co-pilot Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate. Respinge Accept"
+ },
+ {
+  "n": "--",
+  "name": "watcher-final-url",
+  "url": "http://localhost:3113/ro/dashboard",
+  "body": "Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Doi qa-e2e-1005-f03-p2-desktop-2097991@example.com Deconectare 🚀 Configurare 3 Panou de control Astăzi Panou complet Salut, Părinte — hai să începem o serie nouă! ACȚIUNEA DE AZI O sesiune scurtă de grile Regular practice Continuă ▶ Drumul tău 1 Sesiune scurtă de grile 2 Repară o zonă slabă 3 Simulare completă Acuratețe 0% 0 sesiuni XP total 0 500 până la Co-pilot Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate. Respinge Accept"
+ },
+ {
+  "n": "15",
+  "name": "p2-monitorizare-first-value",
+  "note": "secunde de la link: 11, taps 3",
+  "taps": 3,
+  "sec": 97,
+  "url": "/ro/dashboard",
+  "title": "Dashboard - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Tutor",
+    "y": 10
+   },
+   {
+    "t": "Panou de control",
+    "y": 80
+   },
+   {
+    "t": "Monitorizare",
+    "y": 165
+   },
+   {
+    "t": "Rapoarte",
+    "y": 213
+   },
+   {
+    "t": "Alerte",
+    "y": 261
+   },
+   {
+    "t": "Cadență alerte",
+    "y": 309
+   },
+   {
+    "t": "Familia mea",
+    "y": 357
+   },
+   {
+    "t": "Abonament",
+    "y": 441
+   },
+   {
+    "t": "Invită un prieten",
+    "y": 489
+   },
+   {
+    "t": "Notificări",
+    "y": 537
+   },
+   {
+    "t": "Setări",
+    "y": 585
+   },
+   {
+    "t": "Ajutor",
+    "y": 633
+   },
+   {
+    "t": "EN",
+    "y": 736
+   },
+   {
+    "t": "RO",
+    "y": 736
+   },
+   {
+    "t": "Deconectare",
+    "y": 840
+   },
+   {
+    "t": "🚀\nConfigurare\n3",
+    "y": 13
+   },
+   {
+    "t": "Astăzi",
+    "y": 83
+   },
+   {
+    "t": "Panou complet",
+    "y": 83
+   },
+   {
+    "t": "Continuă ▶",
+    "y": 302
+   },
+   {
+    "t": "1\nSesiune scurtă de grile",
+    "y": 411
+   },
+   {
+    "t": "3\nSimulare completă",
+    "y": 527
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 917
+   },
+   {
+    "t": "Termeni",
+    "y": 917
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 917
+   },
+   {
+    "t": "Politica de cookie-uri",
+    "y": 838
+   }
+  ],
+  "text": "Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Doi qa-e2e-1005-f03-p2-desktop-2097991@example.com Deconectare 🚀 Configurare 3 Panou de control Astăzi Panou complet Salut, Părinte — hai să începem o serie nouă! ACȚIUNEA DE AZI O sesiune scurtă de grile Regular practice Continuă ▶ Drumul tău 1 Sesiune scurtă de grile 2 Repară o zonă slabă 3 Simulare completă Acuratețe 0% 0 sesiuni XP total 0 500 până la Co-pilot Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate. Respinge Accept",
+  "errs": []
+ },
+ {
+  "n": "--",
+  "name": "FIRST VALUE",
+  "secFromLink": 11,
+  "taps": 3
+ },
+ {
+  "n": "16",
+  "name": "p2-watcher-imediat-dupa-accept",
+  "note": "sesiune veche, fără re-login",
+  "taps": 3,
+  "sec": 100,
+  "url": "/ro/dashboard",
+  "title": "Dashboard - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Tutor",
+    "y": 10
+   },
+   {
+    "t": "Panou de control",
+    "y": 80
+   },
+   {
+    "t": "Monitorizare",
+    "y": 165
+   },
+   {
+    "t": "Rapoarte",
+    "y": 213
+   },
+   {
+    "t": "Alerte",
+    "y": 261
+   },
+   {
+    "t": "Cadență alerte",
+    "y": 309
+   },
+   {
+    "t": "Familia mea",
+    "y": 357
+   },
+   {
+    "t": "Abonament",
+    "y": 441
+   },
+   {
+    "t": "Invită un prieten",
+    "y": 489
+   },
+   {
+    "t": "Notificări",
+    "y": 537
+   },
+   {
+    "t": "Setări",
+    "y": 585
+   },
+   {
+    "t": "Ajutor",
+    "y": 633
+   },
+   {
+    "t": "EN",
+    "y": 736
+   },
+   {
+    "t": "RO",
+    "y": 736
+   },
+   {
+    "t": "Deconectare",
+    "y": 840
+   },
+   {
+    "t": "🚀\nConfigurare\n3",
+    "y": 13
+   },
+   {
+    "t": "Astăzi",
+    "y": 83
+   },
+   {
+    "t": "Panou complet",
+    "y": 83
+   },
+   {
+    "t": "Continuă ▶",
+    "y": 302
+   },
+   {
+    "t": "1\nSesiune scurtă de grile",
+    "y": 411
+   },
+   {
+    "t": "3\nSimulare completă",
+    "y": 527
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 917
+   },
+   {
+    "t": "Termeni",
+    "y": 917
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 917
+   },
+   {
+    "t": "Politica de cookie-uri",
+    "y": 838
+   }
+  ],
+  "text": "Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Doi qa-e2e-1005-f03-p2-desktop-2097991@example.com Deconectare 🚀 Configurare 3 Panou de control Astăzi Panou complet Salut, Părinte — hai să începem o serie nouă! ACȚIUNEA DE AZI O sesiune scurtă de grile Regular practice Continuă ▶ Drumul tău 1 Sesiune scurtă de grile 2 Repară o zonă slabă 3 Simulare completă Acuratețe 0% 0 sesiuni XP total 0 500 până la Co-pilot Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate. Respinge Accept",
+  "errs": []
+ },
+ {
+  "n": "17",
+  "name": "p2-panou-complet",
+  "note": "",
+  "taps": 3,
+  "sec": 103,
+  "url": "/ro/dashboard",
+  "title": "Dashboard - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Tutor",
+    "y": 10
+   },
+   {
+    "t": "Panou de control",
+    "y": 80
+   },
+   {
+    "t": "Monitorizare",
+    "y": 165
+   },
+   {
+    "t": "Rapoarte",
+    "y": 213
+   },
+   {
+    "t": "Alerte",
+    "y": 261
+   },
+   {
+    "t": "Cadență alerte",
+    "y": 309
+   },
+   {
+    "t": "Familia mea",
+    "y": 357
+   },
+   {
+    "t": "Abonament",
+    "y": 441
+   },
+   {
+    "t": "Invită un prieten",
+    "y": 489
+   },
+   {
+    "t": "Notificări",
+    "y": 537
+   },
+   {
+    "t": "Setări",
+    "y": 585
+   },
+   {
+    "t": "Ajutor",
+    "y": 633
+   },
+   {
+    "t": "EN",
+    "y": 736
+   },
+   {
+    "t": "RO",
+    "y": 736
+   },
+   {
+    "t": "Deconectare",
+    "y": 840
+   },
+   {
+    "t": "🚀\nConfigurare\n3",
+    "y": 13
+   },
+   {
+    "t": "Astăzi",
+    "y": 83
+   },
+   {
+    "t": "Panou complet",
+    "y": 83
+   },
+   {
+    "t": "⚡\n\nSesiune rapidă",
+    "y": 284
+   },
+   {
+    "t": "▶\n\nContinuă\n\nReia de unde ai rămas",
+    "y": 284
+   },
+   {
+    "t": "📈\n\nEvaluare\n\nAflă-ți nivelul",
+    "y": 284
+   },
+   {
+    "t": "Începe acum",
+    "y": 581
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 917
+   },
+   {
+    "t": "Termeni",
+    "y": 917
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 917
+   }
+  ],
+  "text": "Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Doi qa-e2e-1005-f03-p2-desktop-2097991@example.com Deconectare 🚀 Configurare 3 Panou de control Astăzi Panou complet Serie curentă 0 zile Record: 0 XP total 0 500 până la Co-pilot Nivel Cadet Acuratețe 0% 0 sesiuni ⚡ Sesiune rapidă ▶ Continuă Reia de unde ai rămas 📈 Evaluare Află-ți nivelul Zone slabe Nicio zonă slabă detectată încă. Sesiuni recente Nicio sesiune încă. Începe să exersezi! RECOMANDAT ÎN CONTINUARE Regular practice Începe acum Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate. Respinge Accept",
+  "errs": []
+ },
+ {
+  "n": "18",
+  "name": "p2-watcher",
+  "note": "",
+  "taps": 3,
+  "sec": 105,
+  "url": "/ro/dashboard/watcher",
+  "title": "Watcher - Tutor",
+  "btns": [
+   {
+    "t": "Confidențialitate",
+    "y": 557
+   },
+   {
+    "t": "Termeni",
+    "y": 557
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 557
+   },
+   {
+    "t": "Politica de cookie-uri",
+    "y": 838
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 838
+   },
+   {
+    "t": "Respinge",
+    "y": 815
+   },
+   {
+    "t": "Accept",
+    "y": 815
+   }
+  ],
+  "text": "Contul nu mai există Contul a fost închis și datele lui au fost șterse. Te deconectăm acum. Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate. Respinge Accept",
+  "errs": []
+ },
+ {
+  "n": "19",
+  "name": "p2-progress",
+  "note": "",
+  "taps": 3,
+  "sec": 108,
+  "url": "/ro/dashboard/progress",
+  "title": "Progress - Tutor",
+  "btns": [
+   {
+    "t": "Confidențialitate",
+    "y": 557
+   },
+   {
+    "t": "Termeni",
+    "y": 557
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 557
+   },
+   {
+    "t": "Politica de cookie-uri",
+    "y": 838
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 838
+   },
+   {
+    "t": "Respinge",
+    "y": 815
+   },
+   {
+    "t": "Accept",
+    "y": 815
+   }
+  ],
+  "text": "Contul nu mai există Contul a fost închis și datele lui au fost șterse. Te deconectăm acum. Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate. Respinge Accept",
+  "errs": []
+ },
+ {
+  "n": "20",
+  "name": "p2-rapoarte",
+  "note": "",
+  "taps": 3,
+  "sec": 111,
+  "url": "/ro/dashboard/rapoarte",
+  "title": "Dashboard - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Confidențialitate",
+    "y": 557
+   },
+   {
+    "t": "Termeni",
+    "y": 557
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 557
+   },
+   {
+    "t": "Politica de cookie-uri",
+    "y": 838
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 838
+   },
+   {
+    "t": "Respinge",
+    "y": 815
+   },
+   {
+    "t": "Accept",
+    "y": 815
+   }
+  ],
+  "text": "Contul nu mai există Contul a fost închis și datele lui au fost șterse. Te deconectăm acum. Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate. Respinge Accept",
+  "errs": []
+ },
+ {
+  "n": "21",
+  "name": "p2-notifications",
+  "note": "",
+  "taps": 3,
+  "sec": 114,
+  "url": "/ro/dashboard/notifications",
+  "title": "Notifications - Tutor",
+  "btns": [
+   {
+    "t": "Confidențialitate",
+    "y": 557
+   },
+   {
+    "t": "Termeni",
+    "y": 557
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 557
+   },
+   {
+    "t": "Politica de cookie-uri",
+    "y": 838
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 838
+   },
+   {
+    "t": "Respinge",
+    "y": 815
+   },
+   {
+    "t": "Accept",
+    "y": 815
+   }
+  ],
+  "text": "Contul nu mai există Contul a fost închis și datele lui au fost șterse. Te deconectăm acum. Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate. Respinge Accept",
+  "errs": []
+ },
+ {
+  "n": "22",
+  "name": "p2-relogin",
+  "note": "",
+  "taps": 3,
+  "sec": 118,
+  "url": "/ro/auth/signin",
+  "title": "Sign In - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Continuă cu Google",
+    "y": 218
+   },
+   {
+    "t": "Autentificare",
+    "y": 526
+   },
+   {
+    "t": "Nu ai email? Recuperează pe telefon",
+    "y": 576
+   },
+   {
+    "t": "Ai uitat parola?",
+    "y": 574
+   },
+   {
+    "t": "Folosește magic link",
+    "y": 574
+   },
+   {
+    "t": "Fă-ți unul",
+    "y": 634
+   },
+   {
+    "t": "încearcă fără cont ✨",
+    "y": 670
+   },
+   {
+    "t": "Termeni și condiții",
+    "y": 714
+   },
+   {
+    "t": "Politica de confidențialitate",
+    "y": 738
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 917
+   },
+   {
+    "t": "Termeni",
+    "y": 917
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 917
+   }
+  ],
+  "text": "Autentifică-te în Tutor Accesează platforma ta de învățare adaptivă Continuă cu Google Sau continuă cu Email sau nume de utilizator Parola Email/nume de utilizator sau parolă incorectă Autentificare Nu ai email? Recuperează pe telefon Ai uitat parola? Folosește magic link Nu ai cont? Fă-ți unul Sau încearcă fără cont ✨ Prin autentificare, ești de acord cu Termeni și condiții & Politica de confidențialitate Confidențialitate · Termeni · Cookie-uri",
+  "errs": []
+ },
+ {
+  "n": "23",
+  "name": "p2-watcher-dupa-relogin",
+  "note": "",
+  "taps": 3,
+  "sec": 121,
+  "url": "/ro/auth/signin?callbackUrl=%2Fdashboard%2Fwatcher",
+  "title": "Sign In - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Continuă cu Google",
+    "y": 234
+   },
+   {
+    "t": "Autentificare",
+    "y": 510
+   },
+   {
+    "t": "Nu ai email? Recuperează pe telefon",
+    "y": 560
+   },
+   {
+    "t": "Ai uitat parola?",
+    "y": 558
+   },
+   {
+    "t": "Folosește magic link",
+    "y": 558
+   },
+   {
+    "t": "Fă-ți unul",
+    "y": 618
+   },
+   {
+    "t": "încearcă fără cont ✨",
+    "y": 654
+   },
+   {
+    "t": "Termeni și condiții",
+    "y": 698
+   },
+   {
+    "t": "Politica de confidențialitate",
+    "y": 722
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 917
+   },
+   {
+    "t": "Termeni",
+    "y": 917
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 917
+   }
+  ],
+  "text": "Autentifică-te în Tutor Accesează platforma ta de învățare adaptivă Continuă cu Google Sau continuă cu Email sau nume de utilizator Parola Autentificare Nu ai email? Recuperează pe telefon Ai uitat parola? Folosește magic link Nu ai cont? Fă-ți unul Sau încearcă fără cont ✨ Prin autentificare, ești de acord cu Termeni și condiții & Politica de confidențialitate Confidențialitate · Termeni · Cookie-uri",
+  "errs": []
+ },
+ {
+  "n": "24",
+  "name": "p2-familia-mea",
+  "note": "",
+  "taps": 3,
+  "sec": 123,
+  "url": "/ro/auth/signin?callbackUrl=%2Fdashboard%2Ffamily",
+  "title": "Sign In - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Continuă cu Google",
+    "y": 234
+   },
+   {
+    "t": "Autentificare",
+    "y": 510
+   },
+   {
+    "t": "Nu ai email? Recuperează pe telefon",
+    "y": 560
+   },
+   {
+    "t": "Ai uitat parola?",
+    "y": 558
+   },
+   {
+    "t": "Folosește magic link",
+    "y": 558
+   },
+   {
+    "t": "Fă-ți unul",
+    "y": 618
+   },
+   {
+    "t": "încearcă fără cont ✨",
+    "y": 654
+   },
+   {
+    "t": "Termeni și condiții",
+    "y": 698
+   },
+   {
+    "t": "Politica de confidențialitate",
+    "y": 722
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 917
+   },
+   {
+    "t": "Termeni",
+    "y": 917
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 917
+   }
+  ],
+  "text": "Autentifică-te în Tutor Accesează platforma ta de învățare adaptivă Continuă cu Google Sau continuă cu Email sau nume de utilizator Parola Autentificare Nu ai email? Recuperează pe telefon Ai uitat parola? Folosește magic link Nu ai cont? Fă-ți unul Sau încearcă fără cont ✨ Prin autentificare, ești de acord cu Termeni și condiții & Politica de confidențialitate Confidențialitate · Termeni · Cookie-uri",
+  "errs": []
+ },
+ {
+  "n": "25",
+  "name": "p2-abonament-preturi",
+  "note": "",
+  "taps": 3,
+  "sec": 126,
+  "url": "/ro/auth/signin?callbackUrl=%2Fdashboard%2Fpackages",
+  "title": "Sign In - Tutor | Tutor",
+  "btns": [
+   {
+    "t": "Continuă cu Google",
+    "y": 234
+   },
+   {
+    "t": "Autentificare",
+    "y": 510
+   },
+   {
+    "t": "Nu ai email? Recuperează pe telefon",
+    "y": 560
+   },
+   {
+    "t": "Ai uitat parola?",
+    "y": 558
+   },
+   {
+    "t": "Folosește magic link",
+    "y": 558
+   },
+   {
+    "t": "Fă-ți unul",
+    "y": 618
+   },
+   {
+    "t": "încearcă fără cont ✨",
+    "y": 654
+   },
+   {
+    "t": "Termeni și condiții",
+    "y": 698
+   },
+   {
+    "t": "Politica de confidențialitate",
+    "y": 722
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 917
+   },
+   {
+    "t": "Termeni",
+    "y": 917
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 917
+   }
+  ],
+  "text": "Autentifică-te în Tutor Accesează platforma ta de învățare adaptivă Continuă cu Google Sau continuă cu Email sau nume de utilizator Parola Autentificare Nu ai email? Recuperează pe telefon Ai uitat parola? Folosește magic link Nu ai cont? Fă-ți unul Sau încearcă fără cont ✨ Prin autentificare, ești de acord cu Termeni și condiții & Politica de confidențialitate Confidențialitate · Termeni · Cookie-uri",
+  "errs": []
+ },
+ {
+  "n": "26",
+  "name": "p3-link-refolosit-vizitator",
+  "note": "",
+  "taps": 3,
+  "sec": 127,
+  "url": "/ro/family/accept/9317159a2c40f05269ada375324e986ca9dea7d4936e0943",
+  "title": "Tutor - Adaptive Learning Platform",
+  "btns": [
+   {
+    "t": "Confidențialitate",
+    "y": 557
+   },
+   {
+    "t": "Termeni",
+    "y": 557
+   },
+   {
+    "t": "Cookie-uri",
+    "y": 557
+   },
+   {
+    "t": "Politica de cookie-uri",
+    "y": 838
+   },
+   {
+    "t": "Confidențialitate",
+    "y": 838
+   },
+   {
+    "t": "Respinge",
+    "y": 815
+   },
+   {
+    "t": "Accept",
+    "y": 815
+   }
+  ],
+  "text": "Invitație inexistentă Linkul nu este valid. Cere persoanei să retrimită invitația. Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate. Respinge Accept",
+  "errs": []
+ },
+ {
+  "n": "27",
+  "name": "en-accept",
+  "note": "",
+  "taps": 4,
+  "sec": 160,
+  "url": "/en/family/accept/9317159a2c40f05269ada375324e986ca9dea7d4936e0943",
+  "title": "Tutor - Adaptive Learning Platform",
+  "btns": [
+   {
+    "t": "Privacy",
+    "y": 557
+   },
+   {
+    "t": "Terms",
+    "y": 557
+   },
+   {
+    "t": "Cookies",
+    "y": 557
+   },
+   {
+    "t": "Cookie Policy",
+    "y": 818
+   },
+   {
+    "t": "Privacy",
+    "y": 838
+   },
+   {
+    "t": "Reject",
+    "y": 815
+   },
+   {
+    "t": "Accept",
+    "y": 815
+   }
+  ],
+  "text": "Invitație inexistentă Linkul nu este valid. Cere persoanei să retrimită invitația. Privacy · Terms · Cookies 🍪 We use essential cookies to run your account. Details in the Cookie Policy · Privacy. Reject Accept",
+  "errs": []
+ }
+]

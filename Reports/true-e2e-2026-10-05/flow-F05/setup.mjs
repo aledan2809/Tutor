@@ -1,0 +1,13 @@
+import {prisma,chromium,BASE,ADMIN,PW} from './lib.mjs';
+const r=await fetch(BASE+'/api/auth/register',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:'qa-e2e-1005 admin',email:ADMIN,password:PW,role:'STUDENT',birthDate:'1985-01-01'})});
+console.log('register',r.status,(await r.text()).slice(0,200));
+await prisma.user.updateMany({where:{email:ADMIN},data:{isSuperAdmin:true,emailVerified:new Date()}});
+const b=await chromium.launch(); const ctx=await b.newContext(); const p=await ctx.newPage();
+await p.goto(BASE+'/ro/auth/signin'); 
+const csrf=await (await ctx.request.get(BASE+'/api/auth/csrf')).json();
+const l=await ctx.request.post(BASE+'/api/auth/callback/credentials',{form:{csrfToken:csrf.csrfToken,email:ADMIN,password:PW,json:'true'}});
+console.log('login',l.status());
+const dom=await prisma.domain.findFirst({where:{name:'Matematica cl. VIII'}});
+const j=await ctx.request.post(BASE+`/api/admin/domains/${dom.id}/join-code`,{data:{action:'rotate'}});
+console.log('joincode',j.status(),await j.text());
+await b.close(); await prisma.$disconnect();

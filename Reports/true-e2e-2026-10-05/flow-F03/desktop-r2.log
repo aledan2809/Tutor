@@ -1,0 +1,59 @@
+01 p1-register /ro/auth/register?plan=FAMILY&voucher=ONV126S&start=free [1 taps, 5s]  
+    ✓ Codul ONV126S e inclus Îl verificăm și îl aplicăm după ce îți faci contul. Primele 7 zile sunt gratuite. Cont de părinte Intră în eTUTOR.ro și vezi cum progresează copilul tău Sunt Elev Părinte Îți vei lega copilul dup
+02 p1-dupa-register /ro/dashboard/family [2 taps, 8s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Dec
+03 p1-familia-mea-proba /ro/dashboard/family [2 taps, 10s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Dec
+hipoteza: {"err":"TimeoutError: locator.evaluate: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('button').filter({ hasText: /Adaugă al 2-lea părinte/ }).first()\n"}
+04 p1-adauga-parinte-in-vizor /ro/dashboard/family [2 taps, 70s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Dec
+click err locator.click: Timeout 4000ms exceeded.
+Call log:
+  - waiting for locator('button').filter({ hasText
+05 p1-click-adauga-parinte-in-proba /ro/dashboard/family [2 taps, 76s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Dec
+06 p1-copil-creat /ro/dashboard/family [5 taps, 80s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Dec
+07 p1-familia-mea-duo-activ /ro/dashboard/family [5 taps, 83s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Dec
+08 p1-formular-invitatie /ro/dashboard/family [6 taps, 83s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Dec
+09 p1-invitatie-trimisa /ro/dashboard/family [8 taps, 86s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Unu qa-e2e-1005-f03-p1-desktop-2097991@example.com Dec
+mail: Invitație etutor.ro http://localhost:3113/family/accept/9317159a2c40f05269ada375324e986ca9dea7d4936e0943
+10 p2-accept-vizitator /ro/family/accept/9317159a2c40f05269ada375324e986ca9dea7d4936e0943 [0 taps, 88s] tema/brand 
+    Invitație în familia etutor.ro Părinte QA Unu te invită ca părinte. Intră în cont (sau fă-ți unul) ca să accepți invitația. Intră în cont Fă-ți cont După ce îți faci contul, te aducem înapoi aici ca să accepți. Confidenț
+11 p2-register-preselectat /ro/auth/register?callbackUrl=%2Ffamily%2Faccept%2F9317159a2c40f05269ada375324e986ca9dea7d4936e0943&role=PARENT [1 taps, 89s]  
+    Cont de părinte Intră în eTUTOR.ro și vezi cum progresează copilul tău Sunt Elev Părinte Îți vei lega copilul după ce intri în cont. Nume Email Parolă Confirmă parola Creează cont Ai deja cont? Autentifică-te Nehotărât? 
+12 p2-dupa-register /ro/family/accept/9317159a2c40f05269ada375324e986ca9dea7d4936e0943 [2 taps, 92s]  
+    Invitație în familia etutor.ro Părinte QA Unu te invită ca părinte. Accept ca părinte Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-u
+13 p2-accept-logat /ro/family/accept/9317159a2c40f05269ada375324e986ca9dea7d4936e0943 [2 taps, 92s]  
+    Invitație în familia etutor.ro Părinte QA Unu te invită ca părinte. Accept ca părinte Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-u
+14 p2-dupa-accept /ro/dashboard [3 taps, 95s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Doi qa-e2e-1005-f03-p2-desktop-2097991@example.com Dec
+15 p2-monitorizare-first-value /ro/dashboard [3 taps, 97s] secunde de la link: 11, taps 3 
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Doi qa-e2e-1005-f03-p2-desktop-2097991@example.com Dec
+16 p2-watcher-imediat-dupa-accept /ro/dashboard [3 taps, 100s] sesiune veche, fără re-login 
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Doi qa-e2e-1005-f03-p2-desktop-2097991@example.com Dec
+17 p2-panou-complet /ro/dashboard [3 taps, 103s]  
+    Tutor Panou de control COPILUL MEU Monitorizare Rapoarte Alerte Cadență alerte Familia mea CONT Abonament Invită un prieten Notificări Setări Ajutor EN RO Părinte QA Doi qa-e2e-1005-f03-p2-desktop-2097991@example.com Dec
+18 p2-watcher /ro/dashboard/watcher [3 taps, 105s]  
+    Contul nu mai există Contul a fost închis și datele lui au fost șterse. Te deconectăm acum. Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de co
+19 p2-progress /ro/dashboard/progress [3 taps, 108s]  
+    Contul nu mai există Contul a fost închis și datele lui au fost șterse. Te deconectăm acum. Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de co
+20 p2-rapoarte /ro/dashboard/rapoarte [3 taps, 111s]  
+    Contul nu mai există Contul a fost închis și datele lui au fost șterse. Te deconectăm acum. Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de co
+21 p2-notifications /ro/dashboard/notifications [3 taps, 114s]  
+    Contul nu mai există Contul a fost închis și datele lui au fost șterse. Te deconectăm acum. Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de co
+22 p2-relogin /ro/auth/signin [3 taps, 118s]  
+    Autentifică-te în Tutor Accesează platforma ta de învățare adaptivă Continuă cu Google Sau continuă cu Email sau nume de utilizator Parola Email/nume de utilizator sau parolă incorectă Autentificare Nu ai email? Recupere
+23 p2-watcher-dupa-relogin /ro/auth/signin?callbackUrl=%2Fdashboard%2Fwatcher [3 taps, 121s]  
+    Autentifică-te în Tutor Accesează platforma ta de învățare adaptivă Continuă cu Google Sau continuă cu Email sau nume de utilizator Parola Autentificare Nu ai email? Recuperează pe telefon Ai uitat parola? Folosește magi
+24 p2-familia-mea /ro/auth/signin?callbackUrl=%2Fdashboard%2Ffamily [3 taps, 123s]  
+    Autentifică-te în Tutor Accesează platforma ta de învățare adaptivă Continuă cu Google Sau continuă cu Email sau nume de utilizator Parola Autentificare Nu ai email? Recuperează pe telefon Ai uitat parola? Folosește magi
+25 p2-abonament-preturi /ro/auth/signin?callbackUrl=%2Fdashboard%2Fpackages [3 taps, 126s]  
+    Autentifică-te în Tutor Accesează platforma ta de învățare adaptivă Continuă cu Google Sau continuă cu Email sau nume de utilizator Parola Autentificare Nu ai email? Recuperează pe telefon Ai uitat parola? Folosește magi
+26 p3-link-refolosit-vizitator /ro/family/accept/9317159a2c40f05269ada375324e986ca9dea7d4936e0943 [3 taps, 127s]  
+    Invitație inexistentă Linkul nu este valid. Cere persoanei să retrimită invitația. Confidențialitate · Termeni · Cookie-uri 🍪 Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri 
+27 en-accept /en/family/accept/9317159a2c40f05269ada375324e986ca9dea7d4936e0943 [4 taps, 160s]  
+    Invitație inexistentă Linkul nu este valid. Cere persoanei să retrimită invitația. Privacy · Terms · Cookies 🍪 We use essential cookies to run your account. Details in the Cookie Policy · Privacy. Reject Accept

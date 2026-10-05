@@ -1,0 +1,59 @@
+{
+  "cookies": [
+    {
+      "name": "NEXT_LOCALE",
+      "value": "ro",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "authjs.csrf-token",
+      "value": "6bf9f2d4d2ad7c0ef983c4d0d2e3ff0759b85fbcab24125769b054b7d6ab881a%7C550805bb6b77c92b824a5a3d710c6fdf635eef55a5ccc05d11fa9406fceb0e4a",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "authjs.callback-url",
+      "value": "http%3A%2F%2Flocalhost%3A3113%2Fro%2Fauth%2Fregister",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "authjs.session-token",
+      "value": "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwia2lkIjoiZVpoM2lrV2k2T1hTWGdpVzhWSnMzb19kQ2szWkM0ZjZtZWdNM3V2aHVVZVluOUlsNFNtQjVscjFJeW5TVEp1U3lXOG1YTHJVWW5QOG9hZDJkNGd5T3cifQ..kJxayfMEa0fGkG5mD_UWJA.9ro2V4dLaiK1sCn0EC0lmICzzH_QHCrdV0dNclP2jHjf7ppqrkUQ6KVBn1pWSKMX82lXUH5rX-RrU5puYlxjc4TIJ18aFh5v9CEj-V97KX3dUQy2xnnBQgQPKIgGLLpMQ087_ob7w37T7A43mc5uHmaNBkzjy6_8OwpxPmYwCpNNOwfvjIuwcGJH7mWRKfhdaT7cqcS8xQ6ex2QBCgqW0cMIZFNzUbTiC_8o76eOLKHBui6oDGt_vTH_IDiJS5FbFHga5XlOvklWxhjqGicF5K_NOV6ll5g9mWLlB-aQmvei1zteeWQ7CDyzJ5A_gsxL9lwiYZm9XmEyH1KSe3c78XsoTbo5jyHttgjAaJ1C1-V86HCX76PI6VaRbTCT3aT-_WykX7pMfht_oSxAJxNj3yjJa0GHPmqT6FRPDgYQLZC5mVvzHl_EPcWSt8lh4rtsil3Kc8GyU79IJoeHzVh6VTdYz7fxqUVYgeNbyxZ3GnY.xESp_Jo_ptb-x8Tzxt9DZucJ4onTNLoLoT1iSd4AjoI",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1793778074.451558,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "http://localhost:3113",
+      "localStorage": [
+        {
+          "name": "etutor_cookie_consent_v1",
+          "value": "{\"choice\":\"rejected\",\"at\":\"2026-10-05T07:41:06.756Z\"}"
+        },
+        {
+          "name": "session_cmuuxy0oe00bwsnj3280tr8o1",
+          "value": "{\"sessionId\":\"cmuuxy0oe00bwsnj3280tr8o1\",\"type\":\"quick\",\"duration\":4680,\"questions\":[{\"id\":\"cmq5t99ah002lp68y9bot9ydh\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Geometrie plană\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"În figura alăturată este reprezentat paralelogramul ABCD. Punctul M este mijlocul segmentului AB și aria triunghiului ACM este egală cu 10 cm². Aria paralelogramului ABCD este egală cu:\",\"options\":[\"10 cm²\",\"20 cm²\",\"30 cm²\",\"40 cm²\"],\"imageUrl\":\"/exam-figures/en-viii-2024-mate-examen-07-s2-4.png\",\"passage\":null},{\"id\":\"cmq5t99ay0048p68y5cicez2h\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Geometrie plană\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"În figura alăturată sunt reprezentate punctele A, B, C și O, astfel încât A, B și C sunt situate la distanțe egale față de punctul O, iar punctele A, O și C sunt coliniare. Măsura unghiului ABC este egală cu:\",\"options\":[\"120°\",\"90°\",\"60°\",\"30°\"],\"imageUrl\":\"/exam-figures/en-viii-2021-mate-model-2-s2-2.png\",\"passage\":null},{\"id\":\"cmq5t99bq0096p68yn5a4kt0o\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Geometrie plană\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"În figura alăturată, punctele A, B, C și D, în această ordine, sunt coliniare. Dacă punctul B este mijlocul segmentului AC, punctul C este mijlocul segmentului AD și BC = 3 cm, atunci lungimea segmentului AD este egală cu:\",\"options\":[\"15 cm\",\"12 cm\",\"6 cm\",\"3 cm\"],\"imageUrl\":\"/exam-figures/en-viii-2021-mate-test-04-s2-1.png\",\"passage\":null},{\"id\":\"cmq5t99br009zp68yugdc4yl2\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Ecuații, inecuații și mulțimi\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Maria scrie mulțimea formată din literele comune următoarelor trei cuvinte: matematică, gramatică, informatică. Numărul elementelor mulțimii scrise de Maria este egal cu:\",\"options\":[\"11\",\"10\",\"9\",\"6\"],\"imageUrl\":null,\"passage\":null},{\"id\":\"cmq5t99c500bep68y8lttmnu4\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Numere întregi și operații\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Se consideră expresia E(x) = 3 − (x + 2), unde x este număr real. Pentru x = −2, valoarea expresiei este egală cu:\",\"options\":[\"3\",\"0\",\"−1\",\"−3\"],\"imageUrl\":null,\"passage\":null},{\"id\":\"cmq5t99ag0019p68yxbm85lzf\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Geometrie plană\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"În figura alăturată este reprezentat triunghiul isoscel ABC, cu ∢BAC = 120°. Punctul E aparține segmentului BC, astfel încât CE = 4 cm, iar dreptele AB și AE sunt perpendiculare. Lungimea segmentului BC este egală cu:\",\"options\":[\"16 cm\",\"12 cm\",\"8 cm\",\"6 cm\"],\"imageUrl\":\"/exam-figures/en-viii-2025-mate-examen-07-s2-3.png\",\"passage\":null},{\"id\":\"cmq5t99ay003hp68yto6twy16\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Statistică, medii și probleme practice\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"În diagrama alăturată sunt prezentate rezultatele obținute de elevii unei clase, la un test de matematică. Afirmația: „Conform informațiilor din diagramă, jumătate din numărul elevilor acestei clase a obținut la testul de matematică cel puțin nota 8.” este:\",\"options\":[\"adevărată\",\"falsă\"],\"imageUrl\":\"/exam-figures/en-viii-2024-mate-simulare-s1-6.png\",\"passage\":null},{\"id\":\"cmq5t99ag0015p68ywm3n9erp\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Numere reale și radicali\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Patru elevi, Ana, Maria, Dan și Vlad, calculează suma numerelor a = √(3² + 4²) și b = √(3² · 4²). Rezultatele obținute: Ana → 17; Maria → 19; Dan → 37; Vlad → 43. Conform informațiilor din tabel, rezultatul corect a fost obținut de:\",\"options\":[\"Ana\",\"Maria\",\"Dan\",\"Vlad\"],\"imageUrl\":null,\"passage\":null},{\"id\":\"cmq5t99bd0086p68y7r1jrhtw\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Numere întregi și operații\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Produsul numerelor −2 și 7 este egal cu:\",\"options\":[\"−14\",\"−5\",\"5\",\"14\"],\"imageUrl\":null,\"passage\":null},{\"id\":\"cmq5t99ay003sp68yuabu9htz\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Fracții și numere raționale\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Dintre următoarele seturi de numere, cel scris în ordine crescătoare este:\",\"options\":[\"2,14 ; 2,1(4) ; 2,(14) ; 2,144\",\"2,1(4) ; 2,144 ; 2,(14) ; 2,14\",\"2,14 ; 2,(14) ; 2,144 ; 2,1(4)\",\"2,144 ; 2,14 ; 2,(14) ; 2,1(4)\"],\"imageUrl\":null,\"passage\":null},{\"id\":\"cmq5t99ay0045p68yvkz5m81t\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Numere reale și radicali\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Bogdan, Ana, Cătălin și Laura înmulțesc numărul n = √2 − √8 + √18 cu √2 și obțin rezultatele înregistrate în tabelul următor: Bogdan → −4; Ana → 2√2; Cătălin → 0; Laura → 4. Dintre cei patru elevi, cel care a obținut rezultatul corect al înmulțirii este:\",\"options\":[\"Bogdan\",\"Ana\",\"Cătălin\",\"Laura\"],\"imageUrl\":null,\"passage\":null},{\"id\":\"cmq5t99c500bkp68y4gva85v1\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Geometrie plană\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Diametrul unui cerc este de 22 cm. Lungimea cercului este egală cu:\",\"options\":[\"11π cm\",\"22π cm\",\"44π cm\",\"121π cm\"],\"imageUrl\":null,\"passage\":null},{\"id\":\"cmq5t99bq008zp68yh0xu2ipj\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Geometrie plană\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"În figura alăturată, AB și CD sunt diametre în cercul de centru O, iar măsura arcului mic BD este de 60°. Măsura unghiului CDA este de:\",\"options\":[\"30°\",\"60°\",\"90°\",\"120°\"],\"imageUrl\":\"/exam-figures/en-viii-2021-mate-test-03-s2-5.png\",\"passage\":null},{\"id\":\"cmq5t99ay003np68ylpsq1jes\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Geometrie plană\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"În figura alăturată este reprezentat cercul cu centrul în punctul O și raza egală cu 3 cm. Punctul P este situat la o distanță de 6 cm de centrul cercului. Dreptele PA și PB sunt tangente la cerc în punctele A și B. Măsura arcului mic AB este egală cu:\",\"options\":[\"60°\",\"90°\",\"120°\",\"150°\"],\"imageUrl\":\"/exam-figures/en-viii-2024-mate-simulare-s2-5.png\",\"passage\":null},{\"id\":\"cmq5t99ci00e0p68yip3eoywn\",\"subject\":\"Matematica cl. VIII\",\"topic\":\"Geometrie plană\",\"difficulty\":3,\"type\":\"MULTIPLE_CHOICE\",\"content\":\"Figura alăturată reprezintă schița unui teren în formă de trapez ABCD cu suprafața de 424 m². Dacă EF este linia mijlocie a trapezului ABCD, atunci aria triunghiului CEF este:\",\"options\":[\"53 m²\",\"106 m²\",\"207 m²\",\"212 m²\"],\"imageUrl\":\"/exam-figures/en-viii-2022-mate-test-04-s2-4.png\",\"passage\":null}],\"totalQuestions\":15,\"domainSlug\":\"matematica-v-viii\"}"
+        }
+      ]
+    }
+  ]
+}

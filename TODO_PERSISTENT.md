@@ -1870,6 +1870,12 @@ critice** + 6 rute publice / 9 protejate / 3 admin.
 
 ---
 
+> **Rulare True E2E [10] 2026-10-05** (cerere Alex: fluxuri incomplete/incorecte/de optimizat, CTA iminent, pâlnia vizitatori→conturi):
+> raport `Reports/TRUE-E2E-FULL-2026-10-05.md`, constatări `AUDIT_GAPS.md` G-TUT-AUDIT-2026-10-05 (16 gap-uri OPEN). 8/10 faze executate
+> (faza 8: 11/12 fluxuri cu verdict), 2 N/A motivate. [7] 93/100 · [8] 72/72 pagini OK · TG PASSED · E1–E17: 9 PASS, 4 PARTIAL · F1/F2 PASS · stres 0 erori.
+> **Pâlnia (30 zile)**: 115 vizitatori → 6 vederi ale paginii de cont → ~2–4 conturi; cauza nr. 1: bannerul de cookie-uri acoperă CTA-urile pe telefon;
+> demo-ul `/ro/try` merge dar e invizibil (1 vizită). **Nimic aplicat** — planul de reparații în raport §6 așteaptă decizia lui Alex.
+
 ### A. Pre-requisites
 
 - [x] **A1** — Verify all 6 test accounts accessible + correct roles in prod DB — 2026-05-11

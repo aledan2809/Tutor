@@ -1,0 +1,11 @@
+import {createRequire} from 'module';
+const r=createRequire('/Users/danciulescu/Projects/REAL/package.json'); const {PrismaClient}=r('/Users/danciulescu/Projects/Tutor/node_modules/@prisma/client');
+const prisma=new PrismaClient({datasources:{db:{url:'postgresql://tutor:tutorqa@127.0.0.1:55432/tutor_qa'}}});
+const where={OR:[{email:{contains:'qa-e2e-1005-f04'}}]};
+const us=await prisma.user.findMany({where,select:{id:true}}); const ids=us.map(u=>u.id);
+console.log('users',ids.length);
+await prisma.familyInvite.deleteMany({where:{OR:[{inviterId:{in:ids}},{acceptedById:{in:ids}}]}}).then(x=>console.log('invites',x.count)).catch(e=>console.log(String(e).slice(-150)));
+await prisma.recipient.deleteMany({where:{userId:{in:ids}}}).catch(()=>{});
+for(const id of ids) await prisma.user.delete({where:{id}}).catch(e=>console.log('fail',id,String(e).slice(-200)));
+console.log('left',await prisma.user.count({where}));
+await prisma.$disconnect();

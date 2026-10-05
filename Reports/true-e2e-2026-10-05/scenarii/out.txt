@@ -1,0 +1,26 @@
+logins NONE,NONE,NONE,NONE,NONE,NONE
+E1 FAIL | start→401 {"error":"Unauthorized"} 75ms
+E2 PARTIAL | formats→401 {"error":"Unauthorized"} 76ms
+E3 FAIL | assessment GET→401 {"error":"Unauthorized"} 302ms
+E4 FAIL | /api/aviation/bibliography→401 ; /api/student/bibliography→401
+E5 FAIL | /api/aviation/xp→401 ; /api/aviation/progress→401 ; /api/aviation/streak→401 ; /api/aviation/achievements→401 ; /api/student/dashboard?domainId=cmnoldd7100007slwe2ukyv→401
+E6 FAIL | /api/notifications→401 ; /api/notifications/preferences→401
+E7 PASS | /api/dashboard/instructor/groups?domainId=cmnoldd710000→200
+E8 FAIL | /api/dashboard/instructor/students?domainId=cmnoldd7100→200 ; /api/dashboard/instructor/students/undefined?domainId=c→404
+E9 PASS | /api/admin/questions?domainId=cmnoldd7100007slwe2ukyvc4→200
+E10 FAIL | /api/dashboard/instructor/reports?domainId=cmnoldd71000→400 ; /api/dashboard/instructor/analytics?domainId=cmnoldd710→200
+E11 PASS | /api/admin/questions?limit=5→200
+E12 PASS | /api/admin/domains→200 ; /api/student/domains→200
+E13 PASS | /api/admin/lessons→200 ; /api/admin/bibliography→200
+E14 FAIL | watcher→401 {"error":"Unauthorized"} 117ms ; children=0
+E15 PASS | /api/admin/users→200 ; /api/admin/vouchers→200 ; /api/admin/audit→200 ; /api/admin/revenue→200 ; /api/admin/feedback→200
+E16 PASS | try1 user=null cb=302 loc=/auth/signin?error=CredentialsSignin&code=credenti ; try2 user=null cb=302 loc=/auth/signin?error=CredentialsSignin&code=credenti ; try3 user=null cb=302 loc=/auth/signin?error=CredentialsSignin&code=credenti ; anon dashboard→401
+E17 PASS | /ro→200 lang=ro title=Tutor - Mii de grile reale pe materia ta | etutor. ; /en→200 lang=en title=Tutor - Mii de grile reale pe materia ta | etutor.
+F1 PARTIAL | STUDENT→401 {"error":"Unauthorized"} 585ms ; JOURNEY→404 {"error":"Domain not found"} 1082ms
+F2 FAIL | student→401 {"error":"Unauthorized"} 236ms ; watcher→401 {"error":"Unauthorized"} 447ms ; studentOverall=undefined ; watcherContainsSameAttempts=undefined
+STRESS {"name":"/ro","n":30,"p50":2050,"p95":2209,"max":2215,"wall":2220,"codes":{"200":30}}
+STRESS {"name":"/ro/parinte","n":30,"p50":1669,"p95":1754,"max":1764,"wall":1765,"codes":{"200":30}}
+STRESS {"name":"/ro/preturi","n":30,"p50":1239,"p95":1305,"max":1321,"wall":1321,"codes":{"200":30}}
+STRESS {"name":"/ro/auth/signin","n":30,"p50":941,"p95":993,"max":999,"wall":1002,"codes":{"200":30}}
+STRESS {"name":"/api/aviation/progress (auth)","n":10,"p50":277,"p95":296,"max":296,"wall":305,"codes":{"401":10}}
+SUM E1=FAIL E2=PARTIAL E3=FAIL E4=FAIL E5=FAIL E6=FAIL E7=PASS E8=FAIL E9=PASS E10=FAIL E11=PASS E12=PASS E13=PASS E14=FAIL E15=PASS E16=PASS E17=PASS F1=PARTIAL F2=FAIL

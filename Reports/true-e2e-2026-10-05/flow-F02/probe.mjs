@@ -1,0 +1,11 @@
+import {chromium,devices,BASE,mk} from './lib.mjs';
+const b=await chromium.launch();
+const ctx=await b.newContext({viewport:{width:375,height:812},deviceScaleFactor:2,isMobile:true,hasTouch:true,userAgent:devices['iPhone 13'].userAgent});
+const p=await ctx.newPage(); const m=mk('probe',p);
+await p.goto(BASE+'/cafea'); await p.waitForLoadState('networkidle'); await m.snap('parinte');
+console.log(p.url(), JSON.stringify(m.log.steps[0].prim));
+console.log((await p.innerText('body')).slice(0,1500));
+await p.goto(BASE+'/ro/auth/register?plan=FAMILY&voucher=V126S&start=free'); await p.waitForLoadState('networkidle'); await m.snap('register');
+console.log(await p.evaluate(()=>[...document.querySelectorAll('input,select,button')].map(e=>[e.tagName,e.name,e.type,e.getAttribute('aria-label'),(e.innerText||'').slice(0,40)])));
+console.log((await p.innerText('body')).slice(0,1500));
+await b.close();

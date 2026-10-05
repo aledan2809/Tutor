@@ -1,0 +1,192 @@
+{
+ "tag": "mobile-adult-e",
+ "steps": [
+  {
+   "n": 1,
+   "name": "answered",
+   "file": "mobile-adult-e-01-answered.png",
+   "url": "/ro/dashboard/practice/cmuuxsbal003jsnj3ikef3hae",
+   "title": "Practice - Tutor",
+   "sec": "4.5",
+   "taps": 1,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "🔊",
+     "belowFold": false
+    },
+    {
+     "t": "A.30°",
+     "belowFold": false
+    },
+    {
+     "t": "B.60°",
+     "belowFold": false
+    },
+    {
+     "t": "C.90°",
+     "belowFold": false
+    },
+    {
+     "t": "D.120°",
+     "belowFold": false
+    },
+    {
+     "t": "Trimite răspunsul",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "name": "submitted",
+   "file": "mobile-adult-e-02-submitted.png",
+   "url": "/ro/dashboard/practice/cmuuxsbal003jsnj3ikef3hae",
+   "title": "Practice - Tutor",
+   "sec": "6.0",
+   "taps": 1,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "🔊",
+     "belowFold": false
+    },
+    {
+     "t": "A.30°",
+     "belowFold": false
+    },
+    {
+     "t": "B.60°",
+     "belowFold": false
+    },
+    {
+     "t": "C.90°",
+     "belowFold": false
+    },
+    {
+     "t": "D.120°",
+     "belowFold": false
+    },
+    {
+     "t": "Trimite răspunsul",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "name": "login-lowercase",
+   "file": "mobile-adult-e-03-login-lowercase.png",
+   "url": "/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "40.7",
+   "taps": 1,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Astăzi",
+     "belowFold": false
+    },
+    {
+     "t": "Panou complet",
+     "belowFold": false
+    },
+    {
+     "t": "Continuă ▶",
+     "belowFold": false
+    },
+    {
+     "t": "1\nSesiune scurtă de grile",
+     "belowFold": false
+    },
+    {
+     "t": "3\nSimulare completă",
+     "belowFold": false
+    }
+   ]
+  }
+ ],
+ "console": [],
+ "http": []
+}

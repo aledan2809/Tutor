@@ -1,0 +1,721 @@
+{
+ "tag": "desktop-p",
+ "steps": [
+  {
+   "n": 1,
+   "name": "landing-first-visit",
+   "file": "desktop-p-01-landing-first-visit.png",
+   "url": "/ro/parinte?voucher=V126S",
+   "title": "Pentru părinți — liniștea ta, cât o cafea pe lună | eTutor.ro",
+   "sec": "1.6",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "eTUTOR.ro",
+     "belowFold": false
+    },
+    {
+     "t": "Începe cu 24,90 lei/lună\n→",
+     "belowFold": false
+    },
+    {
+     "t": "Încearcă fără card",
+     "belowFold": false
+    },
+    {
+     "t": "Vezi cum funcționează\n↓",
+     "belowFold": false
+    },
+    {
+     "t": "Începe testul ✨",
+     "belowFold": true
+    },
+    {
+     "t": "Începe cu 24,90 lei/lună\n→",
+     "belowFold": true
+    },
+    {
+     "t": "Începe cu 24,90 lei/lună\n→",
+     "belowFold": true
+    },
+    {
+     "t": "sau încearcă fără card",
+     "belowFold": true
+    },
+    {
+     "t": "Ești elev și plătești singur? Vezi pagina pentru e",
+     "belowFold": true
+    },
+    {
+     "t": "Începe cu 24,90 lei/lună\n→",
+     "belowFold": true
+    },
+    {
+     "t": "Încearcă fără card",
+     "belowFold": true
+    },
+    {
+     "t": "Politica de cookie-uri",
+     "belowFold": false
+    },
+    {
+     "t": "Confidențialitate",
+     "belowFold": false
+    },
+    {
+     "t": "Respinge",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "name": "landing-after-accept",
+   "file": "desktop-p-02-landing-after-accept.png",
+   "url": "/ro/parinte?voucher=V126S",
+   "title": "Pentru părinți — liniștea ta, cât o cafea pe lună | eTutor.ro",
+   "sec": "2.2",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "eTUTOR.ro",
+     "belowFold": false
+    },
+    {
+     "t": "Începe cu 24,90 lei/lună\n→",
+     "belowFold": false
+    },
+    {
+     "t": "Încearcă fără card",
+     "belowFold": false
+    },
+    {
+     "t": "Vezi cum funcționează\n↓",
+     "belowFold": false
+    },
+    {
+     "t": "Începe testul ✨",
+     "belowFold": true
+    },
+    {
+     "t": "Începe cu 24,90 lei/lună\n→",
+     "belowFold": true
+    },
+    {
+     "t": "Începe cu 24,90 lei/lună\n→",
+     "belowFold": true
+    },
+    {
+     "t": "sau încearcă fără card",
+     "belowFold": true
+    },
+    {
+     "t": "Ești elev și plătești singur? Vezi pagina pentru e",
+     "belowFold": true
+    },
+    {
+     "t": "Începe cu 24,90 lei/lună\n→",
+     "belowFold": true
+    },
+    {
+     "t": "Încearcă fără card",
+     "belowFold": true
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "name": "register",
+   "file": "desktop-p-03-register.png",
+   "url": "/ro/auth/register?plan=FAMILY&voucher=V126S&start=free",
+   "title": "Sign In - Tutor | Tutor",
+   "sec": "2.3",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Elev",
+     "belowFold": false
+    },
+    {
+     "t": "Părinte",
+     "belowFold": false
+    },
+    {
+     "t": "Arată parola",
+     "belowFold": false
+    },
+    {
+     "t": "Arată parola",
+     "belowFold": false
+    },
+    {
+     "t": "Creează cont",
+     "belowFold": false
+    },
+    {
+     "t": "Autentifică-te",
+     "belowFold": false
+    },
+    {
+     "t": "Încearcă fără cont ✨",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 4,
+   "name": "register-filled",
+   "file": "desktop-p-04-register-filled.png",
+   "url": "/ro/auth/register?plan=FAMILY&voucher=V126S&start=free",
+   "title": "Sign In - Tutor | Tutor",
+   "sec": "2.4",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Elev",
+     "belowFold": false
+    },
+    {
+     "t": "Părinte",
+     "belowFold": false
+    },
+    {
+     "t": "Arată parola",
+     "belowFold": false
+    },
+    {
+     "t": "Arată parola",
+     "belowFold": false
+    },
+    {
+     "t": "Creează cont",
+     "belowFold": false
+    },
+    {
+     "t": "Autentifică-te",
+     "belowFold": false
+    },
+    {
+     "t": "Încearcă fără cont ✨",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 5,
+   "name": "after-register",
+   "file": "desktop-p-05-after-register.png",
+   "url": "/ro/dashboard/family",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "3.3",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "−30% dacă plătești în probă",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\nConfigurare\n4",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Continuă cu Family · −30%",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă copil",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă al 2-lea părinte",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă meditator",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 6,
+   "name": "family",
+   "file": "desktop-p-06-family.png",
+   "url": "/ro/dashboard/family",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "3.4",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "−30% dacă plătești în probă",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\nConfigurare\n4",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Continuă cu Family · −30%",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă copil",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă al 2-lea părinte",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă meditator",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 7,
+   "name": "add-child-open",
+   "file": "desktop-p-07-add-child-open.png",
+   "url": "/ro/dashboard/family",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "3.9",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "−30% dacă plătești în probă",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\nConfigurare\n4",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Continuă cu Family · −30%",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă copil",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă al 2-lea părinte",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă meditator",
+     "belowFold": false
+    },
+    {
+     "t": "Închide",
+     "belowFold": false
+    },
+    {
+     "t": "Invitație",
+     "belowFold": false
+    },
+    {
+     "t": "Creează contul direct",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 8,
+   "name": "direct-form-filled",
+   "file": "desktop-p-08-direct-form-filled.png",
+   "url": "/ro/dashboard/family",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "4.3",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": true
+    },
+    {
+     "t": "−30% dacă plătești în probă",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\nConfigurare\n4",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Continuă cu Family · −30%",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă copil",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă al 2-lea părinte",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă meditator",
+     "belowFold": false
+    },
+    {
+     "t": "Închide",
+     "belowFold": false
+    },
+    {
+     "t": "Invitație",
+     "belowFold": false
+    },
+    {
+     "t": "Creează contul direct",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 9,
+   "name": "child-created",
+   "file": "desktop-p-09-child-created.png",
+   "url": "/ro/dashboard/family",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "5.9",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": true
+    },
+    {
+     "t": "RO",
+     "belowFold": true
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": true
+    },
+    {
+     "t": "−30% dacă plătești în probă",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\nConfigurare\n4",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Continuă cu Family · −30%",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă copil",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă al 2-lea părinte",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă meditator",
+     "belowFold": false
+    },
+    {
+     "t": "Închide",
+     "belowFold": false
+    },
+    {
+     "t": "Invitație",
+     "belowFold": false
+    },
+    {
+     "t": "Creează contul direct",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 10,
+   "name": "after-note",
+   "file": "desktop-p-10-after-note.png",
+   "url": "/ro/dashboard/family",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "6.8",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "−30% dacă plătești în probă",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\nConfigurare\n4",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Continuă cu Family · −30%",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă copil",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă al 2-lea părinte",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă meditator",
+     "belowFold": false
+    },
+    {
+     "t": "Scoate",
+     "belowFold": false
+    },
+    {
+     "t": "Schimbă parola",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 11,
+   "name": "monitorizare",
+   "file": "desktop-p-11-monitorizare.png",
+   "url": "/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "7.6",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "−30% dacă plătești în probă",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Continuă cu Family · −30%",
+     "belowFold": false
+    },
+    {
+     "t": "Astăzi",
+     "belowFold": false
+    },
+    {
+     "t": "Panou complet",
+     "belowFold": false
+    },
+    {
+     "t": "Familia mea →",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 12,
+   "name": "packages",
+   "file": "desktop-p-12-packages.png",
+   "url": "/ro/dashboard/packages?plan=FAMILY&voucher=V126S",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "9.6",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": true
+    },
+    {
+     "t": "RO",
+     "belowFold": true
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": true
+    },
+    {
+     "t": "−30% dacă plătești în probă",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Continuă cu Family · −30%",
+     "belowFold": false
+    },
+    {
+     "t": "Lunar",
+     "belowFold": false
+    },
+    {
+     "t": "Anual · plătești 10 luni",
+     "belowFold": false
+    },
+    {
+     "t": "Conectează Telegram înainte să plătești: 16,71 lei",
+     "belowFold": false
+    },
+    {
+     "t": "Hai să vezi cât →",
+     "belowFold": false
+    },
+    {
+     "t": "Alege pachetul",
+     "belowFold": false
+    },
+    {
+     "t": "Conectează Telegram înainte să plătești: 20,92 lei",
+     "belowFold": false
+    }
+   ]
+  }
+ ],
+ "console": [
+  {
+   "url": "http://localhost:3113/ro/parinte?voucher=V126S",
+   "text": "The request has been aborted."
+  },
+  {
+   "url": "http://localhost:3113/ro/parinte?voucher=V126S",
+   "text": "[GSI_LOGGER]: FedCM get() rejects with AbortError: signal is aborted without reason"
+  },
+  {
+   "url": "http://localhost:3113/ro/auth/register?plan=FAMILY&voucher=V126S&start=free",
+   "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  }
+ ],
+ "http": [
+  {
+   "url": "/api/student/domains",
+   "status": 401
+  }
+ ]
+}

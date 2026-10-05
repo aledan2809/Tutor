@@ -1,0 +1,204 @@
+{
+ "tag": "PI",
+ "steps": [
+  {
+   "n": 1,
+   "name": "add-child",
+   "file": "PI-01-add-child.png",
+   "url": "/ro/dashboard/family",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "3.8",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "−30%",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n4",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Continuă cu Family · −30%",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă copil",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă al 2-lea părinte",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă meditator",
+     "belowFold": false
+    },
+    {
+     "t": "Închide",
+     "belowFold": true
+    },
+    {
+     "t": "Invitație",
+     "belowFold": true
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "name": "cookie-overlays-cta",
+   "file": "PI-02-cookie-overlays-cta.png",
+   "url": "/ro/dashboard/family",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "3.9",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "−30%",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n4",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Continuă cu Family · −30%",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă copil",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă al 2-lea părinte",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă meditator",
+     "belowFold": false
+    },
+    {
+     "t": "Închide",
+     "belowFold": true
+    },
+    {
+     "t": "Invitație",
+     "belowFold": true
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "name": "code-shown",
+   "file": "PI-03-code-shown.png",
+   "url": "/ro/dashboard/family",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "6.5",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "−30%",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n4",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Continuă cu Family · −30%",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă copil",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă al 2-lea părinte",
+     "belowFold": false
+    },
+    {
+     "t": "Adaugă meditator",
+     "belowFold": false
+    },
+    {
+     "t": "Anulează",
+     "belowFold": false
+    }
+   ]
+  }
+ ],
+ "console": [],
+ "http": []
+}

@@ -1,0 +1,26 @@
+email=qa-e2e-1005-inviter-1791186601@example.test
+register: {"success":true,"message":"Account created. You can now sign in.","voucherApplied":false,"voucherDiscount":null,"voucherDeferred":null}
+cmuuy97km00jzsnj3ywikav37|<a href="https://rau.example">Banca ta</a>|PARENT
+UPDATE 1
+signin callback: 302
+{"user":{"name":"<a href=\"https://rau.example\">Banca ta</a>","email":"qa-e2e-1005-inviter-1791186601@example.test","image":null,"id":"cmuuy97km00jzsnj3ywikav37","isSuperAdmin":false,"accountRole":"PARENT","organizationId":null,"isOrgAdmin":false,"enrollments":[]},"expires":"2026-11-04T07:50:02.574
+--- invites
+{"ok":true,"inviteId":"cmuuy97xk00k1snj3p1tc3u84","acceptUrl":"http://localhost:3113/family/accept/d021d439e974d328778b02fd65b61127e27ab0718c760656","code":null,"delivery":{"channel":"EMAIL","delivered":true}} [201]
+{"ok":true,"inviteId":"cmuuy98r400k3snj3ct6kp3cj","acceptUrl":"http://localhost:3113/family/accept/b5ec85eddc0db74f4b002192c7a91568a17f0589a281428a","code":null,"delivery":{"channel":"EMAIL","delivered":true}} [201]
+{"ok":true,"inviteId":"cmuuy98yk00k5snj34ly807ur","acceptUrl":"http://localhost:3113/family/accept/e9fe04bbd91973635c0486c053ad646c2bb8aeeb87ea86b7","code":null,"delivery":{"channel":"EMAIL","delivered":true}} [201]
+{"ok":true,"inviteId":"cmuuy997400k7snj3io1p87e5","acceptUrl":"http://localhost:3113/family/accept/7303a1125e91920f1a5c5701e0fced317eb37bb66da195db","code":null,"delivery":{"channel":"EMAIL","delivered":true}} [201]
+{"ok":true,"inviteId":"cmuuy99cz00k9snj39u2o7t20","acceptUrl":"http://localhost:3113/family/accept/d2611bf37be47384a618e10135106a36b2d4b069f076f639","code":null,"delivery":{"channel":"EMAIL","delivered":true}} [201]
+{"error":"seat_unavailable","seat":{"allowed":false,"reason":"parent_limit","upgradeTo":"FAMILY_DUO","message":"Pachetul „Family\" include un singur părinte. Treci la „Family Duo\" ca să adaugi al doilea părinte."}} [409]
+--- mail html target-1
+Invitație etutor.ro
+
+        <p>Bună!</p>
+        <p><a href="https://rau.example">Banca ta</a> te invită pe etutor.ro ca <strong>elev</strong>.</p>
+        <p>Alegi materia, răspunzi la grile și aplicația reține ce știi și unde te împiedici. De aici încolo îți dă mai des exact ce ai greșit, nu la întâmplare.</p><p>Nu trebuie să ții tu socoteala: reminderele vin la orele pe care ți le pui în program, iar progresul se vede singur în Progresul meu.</p>
+        <p><a href="http://localhost:3113/family/accept/d021d439e974d328778b02fd65b61127e27ab0718c760656">Acceptă invitația</a></p>
+        <p>Sau deschide linkul: http://localhost:3113/family/accept/d021d439e974d328778b02fd65b61127e27ab0718c760656</p>
+        <p s
+--- mails sent for this TS:        5
+--- pending invites
+5
+DONE

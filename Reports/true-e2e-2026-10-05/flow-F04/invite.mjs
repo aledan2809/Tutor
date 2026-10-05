@@ -1,0 +1,11 @@
+import {chromium,BASE,mk} from './lib.mjs'; import fs from 'fs';
+const b=await chromium.launch(); const ctx=await b.newContext({storageState:'parent-state.json',viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true});
+const page=await ctx.newPage(); const m=mk('PI',page);
+await page.goto(BASE+'/ro/dashboard/family'); await page.waitForTimeout(2500);
+await page.getByRole('button',{name:'Adaugă copil'}).click(); await page.waitForTimeout(800); await m.snap('add-child');
+await m.snap('cookie-overlays-cta');await page.getByRole('button',{name:'Respinge'}).click();await page.getByRole('button',{name:'Cod de familie'}).click();
+await page.getByRole('button',{name:'Trimite invitația'}).click(); await page.waitForTimeout(2500); await m.snap('code-shown');
+const t=await page.innerText('body'); const mm=t.match(/Cod de familie:\s*([A-Z0-9]{6,10})/); console.log('CODE',mm&&mm[1]);
+console.log(await page.locator('button',{hasText:/copiaz|copy/i}).count(),'copy buttons');
+fs.writeFileSync('code.txt',mm?mm[1]:'');
+fs.writeFileSync('pi.json',JSON.stringify(m.log,null,1)); await b.close();

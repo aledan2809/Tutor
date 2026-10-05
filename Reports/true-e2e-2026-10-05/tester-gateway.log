@@ -1,0 +1,8 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 tests/generic.spec.ts:423:5 › tutor - parametric E2E audit (32.5s)
+
+  1 passed (33.7s)
+TG_EXIT=0
+2026-10-05T07-18-52-155Z

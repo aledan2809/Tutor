@@ -1,0 +1,10 @@
+import {chromium,devices,BASE,mk} from './lib.mjs';
+const b=await chromium.launch();
+const ctx=await b.newContext({viewport:{width:375,height:812},deviceScaleFactor:2,isMobile:true,hasTouch:true,userAgent:devices['iPhone 13'].userAgent});
+const p=await ctx.newPage(); const m=mk('probe',p);
+await p.goto(BASE+'/ro'); await m.snap('landing');
+console.log(JSON.stringify(m.log.steps[0].prim,null,0));
+await p.goto(BASE+'/ro/auth/register'); await m.snap('register');
+console.log(await p.evaluate(()=>[...document.querySelectorAll('select')].map(s=>[s.name,s.getAttribute('aria-label'),s.options.length,[...s.options].slice(0,3).map(o=>o.text)])));
+console.log(await p.evaluate(()=>[...document.querySelectorAll('label')].filter(l=>l.querySelector('input[type=checkbox]')).map(l=>l.innerText)));
+await b.close();

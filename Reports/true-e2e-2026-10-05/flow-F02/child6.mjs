@@ -1,0 +1,18 @@
+import {chromium,devices,BASE,mk} from './lib.mjs';
+import fs from 'fs';
+const opts={viewport:{width:375,height:812},deviceScaleFactor:2,isMobile:true,hasTouch:true,userAgent:devices['iPhone 13'].userAgent};
+const b=await chromium.launch(); const ctx=await b.newContext({...opts,storageState:`mobile-child-state.json`}); const p=await ctx.newPage(); const m=mk('mobile-c6',p);
+const tt=Date.now();
+await p.goto(BASE+'/ro/dashboard/practice?start=quick&domain=matematica-v-viii'); await p.waitForLoadState('networkidle');
+await p.locator('select').first().selectOption({label:'Clasa a VIII-a'}); await p.waitForTimeout(800);
+const save=p.getByRole('button',{name:'Salvează și continuă'}); await save.evaluate(e=>e.scrollIntoView({block:'center'})); await m.snap('save-btn');
+await save.click(); await p.waitForTimeout(1500); await m.snap('after-save');
+console.log('after save', (await p.innerText('main')).replace(/\n+/g,' | ').slice(0,500));
+const st=p.getByRole('button',{name:'Începe sesiunea'}).first(); await st.evaluate(e=>e.scrollIntoView({block:'center'}));
+console.log('visible start btn covered?', await st.evaluate(e=>{const r=e.getBoundingClientRect();const el=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return !(e===el||e.contains(el))}));
+await st.click(); await p.waitForURL(/practice\/[^?]+/,{timeout:15000}).catch(()=>console.log('no session url',p.url()));
+await p.waitForLoadState('networkidle'); await p.waitForTimeout(1200); await m.snap('first-question');
+console.log(p.url(), (await p.innerText('main')).replace(/\n+/g,' | ').slice(0,500));
+console.log('sec from class-pick page load to first question',(Date.now()-tt)/1000);
+console.log(JSON.stringify(m.log.http),JSON.stringify(m.log.console.slice(-3)));
+await b.close();

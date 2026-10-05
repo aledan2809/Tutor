@@ -1,0 +1,3157 @@
+{
+ "m": [
+  {
+   "step": "signin",
+   "file": "m-01-signin.png",
+   "url": "https://etutor.ro/ro/auth/signin",
+   "title": "Sign In - Tutor | Tutor",
+   "btns": [
+    {
+     "t": "Continuă cu Google",
+     "y": 196,
+     "bottom": 240
+    },
+    {
+     "t": "Arată parola",
+     "y": 412,
+     "bottom": 456
+    },
+    {
+     "t": "Autentificare",
+     "y": 472,
+     "bottom": 516
+    },
+    {
+     "t": "Nu ai email? Recuperează pe telefon",
+     "y": 520,
+     "bottom": 580
+    },
+    {
+     "t": "Ai uitat parola?",
+     "y": 528,
+     "bottom": 572
+    },
+    {
+     "t": "Folosește magic link",
+     "y": 528,
+     "bottom": 572
+    },
+    {
+     "t": "Fă-ți unul",
+     "y": 596,
+     "bottom": 624
+    },
+    {
+     "t": "încearcă fără cont ✨",
+     "y": 632,
+     "bottom": 660
+    },
+    {
+     "t": "Termeni și condiții",
+     "y": 692,
+     "bottom": 716
+    },
+    {
+     "t": "Politica de confidențialitate",
+     "y": 692,
+     "bottom": 716
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 829,
+     "bottom": 873
+    },
+    {
+     "t": "Termeni",
+     "y": 829,
+     "bottom": 873
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 829,
+     "bottom": 873
+    },
+    {
+     "t": "Politica de cookie-uri",
+     "y": 676,
+     "bottom": 693
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 696,
+     "bottom": 713
+    },
+    {
+     "t": "Respinge",
+     "y": 731,
+     "bottom": 775
+    },
+    {
+     "t": "Accept",
+     "y": 731,
+     "bottom": 775
+    }
+   ],
+   "H": 812,
+   "text": "Autentifică-te în Tutor\n\nAccesează platforma ta de învățare adaptivă\n\nContinuă cu Google\nSau continuă cu\nEmail sau nume de utilizator\nParola\nAutentificare\nNu ai email? Recuperează pe telefon\nAi uitat parola?\nFolosește magic link\n\nNu ai cont? Fă-ți unul\n\nSau încearcă fără cont ✨\n\nPrin autentificare, ești de acord cu Termeni și condiții & Politica de confidențialitate\n\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+   "errs": []
+  },
+  {
+   "step": "panou",
+   "file": "m-02-panou.png",
+   "url": "https://etutor.ro/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Close menu",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "RO",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "Deconectare",
+     "y": 752,
+     "bottom": 796
+    },
+    {
+     "t": "🚀\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "Astăzi",
+     "y": 122,
+     "bottom": 166
+    },
+    {
+     "t": "Panou complet",
+     "y": 122,
+     "bottom": 166
+    },
+    {
+     "t": "Continuă ▶",
+     "y": 368,
+     "bottom": 412
+    },
+    {
+     "t": "1\nSesiune scurtă de grile",
+     "y": 477,
+     "bottom": 527
+    },
+    {
+     "t": "3\nSimulare completă",
+     "y": 593,
+     "bottom": 643
+    },
+    {
+     "t": "Grile",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Simulări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Progres",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Setări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 862,
+     "bottom": 906
+    },
+    {
+     "t": "Termeni",
+     "y": 862,
+     "bottom": 906
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 862,
+     "bottom": 906
+    }
+   ],
+   "H": 812,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\n3\n9+\nPanou de control\nAstăzi\nPanou complet\n\nSalut, Test — hai să ținem seria! 🔥\n\n🔥\n1 zile la rând\n\nACȚIUNEA DE AZI\n\nO sesiune scurtă de grile\n\n8 days since last session\n\nContinuă ▶\nDrumul tău\n1\nSesiune scurtă de grile\n2\nRepară o zonă slabă\n3\nSimulare completă\n\nAcuratețe\n\n50%\n\n27 sesiuni\n\nXP total\n\n1.690\n\n310 până la Captain\nGrile\nSimulări\nProgres\nSetări\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+   "tPanelMs": 941,
+   "dashboardRequests": 2,
+   "dashReqs": [
+    {
+     "t": 1791185978048,
+     "u": "/api/student/dashboard",
+     "s": 200
+    },
+    {
+     "t": 1791185978245,
+     "u": "/api/student/dashboard",
+     "s": 200
+    }
+   ],
+   "errs": []
+  },
+  {
+   "step": "dupa-continua",
+   "file": "m-03-dupa-continua.png",
+   "url": "https://etutor.ro/ro/dashboard/practice/cmp15uiwb001w11oreq6ejws5",
+   "title": "Practice - Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Close menu",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "RO",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "Deconectare",
+     "y": 752,
+     "bottom": 796
+    },
+    {
+     "t": "🚀\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "🔊",
+     "y": 330,
+     "bottom": 360
+    },
+    {
+     "t": "A.5",
+     "y": 438,
+     "bottom": 484
+    },
+    {
+     "t": "B.6",
+     "y": 496,
+     "bottom": 542
+    },
+    {
+     "t": "C.7",
+     "y": 554,
+     "bottom": 600
+    },
+    {
+     "t": "D.8",
+     "y": 612,
+     "bottom": 658
+    },
+    {
+     "t": "Trimite răspunsul",
+     "y": 682,
+     "bottom": 726
+    },
+    {
+     "t": "Grile",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Simulări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Progres",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Setări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 829,
+     "bottom": 873
+    },
+    {
+     "t": "Termeni",
+     "y": 829,
+     "bottom": 873
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 829,
+     "bottom": 873
+    }
+   ],
+   "H": 812,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\n3\n9+\nÎntrebarea 1 din 15\n0 rezolvate\n9:57\n👆 Atinge un răspuns ca să vezi pe loc dacă e corect.\nMatematică\nOrele și cifrele III\n★★☆☆☆\n\nCâte cuburi sunt necesare pentru a obține o sumă totală a numerelor de pe fețe egală cu 105?\n\n🔊\nA.5B.6C.7D.8\nTrimite răspunsul\nGrile\nSimulări\nProgres\nSetări\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+   "ms": 4011,
+   "contBtnBox": {
+    "x": 37,
+    "y": 367.5,
+    "width": 301,
+    "height": 44
+   },
+   "errs": []
+  },
+  {
+   "step": "raspuns-intrebare",
+   "file": "m-04-raspuns-intrebare.png",
+   "url": "https://etutor.ro/ro/dashboard/practice/cmp15uiwb001w11oreq6ejws5",
+   "title": "Practice - Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Close menu",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "RO",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "Deconectare",
+     "y": 752,
+     "bottom": 796
+    },
+    {
+     "t": "🚀\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "🔊",
+     "y": 330,
+     "bottom": 360
+    },
+    {
+     "t": "A.5",
+     "y": 438,
+     "bottom": 484
+    },
+    {
+     "t": "B.6",
+     "y": 496,
+     "bottom": 542
+    },
+    {
+     "t": "C.7",
+     "y": 554,
+     "bottom": 600
+    },
+    {
+     "t": "D.8",
+     "y": 612,
+     "bottom": 658
+    },
+    {
+     "t": "Trimite răspunsul",
+     "y": 682,
+     "bottom": 726
+    },
+    {
+     "t": "Grile",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Simulări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Progres",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Setări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 829,
+     "bottom": 873
+    },
+    {
+     "t": "Termeni",
+     "y": 829,
+     "bottom": 873
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 829,
+     "bottom": 873
+    }
+   ],
+   "H": 812,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\n3\n9+\nÎntrebarea 1 din 15\n0 rezolvate\n9:55\n👆 Atinge un răspuns ca să vezi pe loc dacă e corect.\nMatematică\nOrele și cifrele III\n★★☆☆☆\n\nCâte cuburi sunt necesare pentru a obține o sumă totală a numerelor de pe fețe egală cu 105?\n\n🔊\nA.5B.6C.7D.8\nTrimite răspunsul\nGrile\nSimulări\nProgres\nSetări\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+   "errs": []
+  },
+  {
+   "answered": true
+  },
+  {
+   "step": "inapoi-panou",
+   "file": "m-05-inapoi-panou.png",
+   "url": "https://etutor.ro/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Close menu",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "RO",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "Deconectare",
+     "y": 752,
+     "bottom": 796
+    },
+    {
+     "t": "🚀\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "Astăzi",
+     "y": 122,
+     "bottom": 166
+    },
+    {
+     "t": "Panou complet",
+     "y": 122,
+     "bottom": 166
+    },
+    {
+     "t": "Continuă ▶",
+     "y": 368,
+     "bottom": 412
+    },
+    {
+     "t": "1\nSesiune scurtă de grile",
+     "y": 477,
+     "bottom": 527
+    },
+    {
+     "t": "3\nSimulare completă",
+     "y": 593,
+     "bottom": 643
+    },
+    {
+     "t": "Grile",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Simulări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Progres",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Setări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 862,
+     "bottom": 906
+    },
+    {
+     "t": "Termeni",
+     "y": 862,
+     "bottom": 906
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 862,
+     "bottom": 906
+    }
+   ],
+   "H": 812,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\n3\n9+\nPanou de control\nAstăzi\nPanou complet\n\nSalut, Test — hai să ținem seria! 🔥\n\n🔥\n1 zile la rând\n\nACȚIUNEA DE AZI\n\nO sesiune scurtă de grile\n\n8 days since last session\n\nContinuă ▶\nDrumul tău\n1\nSesiune scurtă de grile\n2\nRepară o zonă slabă\n3\nSimulare completă\n\nAcuratețe\n\n50%\n\n27 sesiuni\n\nXP total\n\n1.690\n\n310 până la Captain\nGrile\nSimulări\nProgres\nSetări\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+   "errs": []
+  },
+  {
+   "step": "simulare",
+   "file": "m-06-simulare.png",
+   "url": "https://etutor.ro/ro/dashboard/exam-bank",
+   "title": "Dashboard - Tutor | Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Close menu",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "RO",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "Deconectare",
+     "y": 752,
+     "bottom": 796
+    },
+    {
+     "t": "🚀\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "2026 · Model\n\n18 întrebări · 100p · 120 min\n\nÎncep",
+     "y": 421,
+     "bottom": 511
+    },
+    {
+     "t": "2026 · Simulare\n\n18 întrebări · 100p · 120 min\n\nÎn",
+     "y": 519,
+     "bottom": 609
+    },
+    {
+     "t": "2025 · Model\n\n18 întrebări · 100p · 120 min\n\nÎncep",
+     "y": 617,
+     "bottom": 707
+    },
+    {
+     "t": "2025 · Rezerva\n\n18 întrebări · 100p · 120 min\n\nÎnc",
+     "y": 715,
+     "bottom": 805
+    },
+    {
+     "t": "2025 · Sesiune-Speciala\n\n18 întrebări · 100p · 120",
+     "y": 813,
+     "bottom": 927
+    },
+    {
+     "t": "2025 · Simulare\n\n18 întrebări · 100p · 120 min\n\nÎn",
+     "y": 935,
+     "bottom": 1025
+    },
+    {
+     "t": "2025 · Varianta-07\n\n18 întrebări · 100p · 120 min\n",
+     "y": 1033,
+     "bottom": 1147
+    },
+    {
+     "t": "2024 · Varianta-07\n\n18 întrebări · 100p · 120 min\n",
+     "y": 1155,
+     "bottom": 1269
+    },
+    {
+     "t": "Grile",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Simulări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Progres",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Setări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 1382,
+     "bottom": 1426
+    },
+    {
+     "t": "Termeni",
+     "y": 1382,
+     "bottom": 1426
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 1382,
+     "bottom": 1426
+    }
+   ],
+   "H": 812,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\n3\n9+\nSimulări — examene oficiale\n\nSubiecte reale, corectate după baremul oficial. Răspunzi, trimiți și vezi nota estimată pe 10. Itemii cu rezolvare îi notezi tu, după barem.\n\nCategorie · Materie\nLimba și literatura română (8)\nMatematică (45)\nLimba și literatura română (13)\nMatematică M1 (Mate-Info) (14)\nMatematică M2 (Științele naturii) (16)\nMatematică M3 (Tehnologic) (17)\n\nSubiecte reale (Evaluarea Națională), corectate după baremul oficial.\n\nEvaluarea Națională — clasa a VIII-a · Limba și literatura română\n2026 · Model\n\n18 întrebări · 100p · 120 min\n\nÎncepe simularea\n2026 · Simulare\n\n18 întrebări · 100p · 120 min\n\nÎncepe simularea\n2025 · Model\n\n18 întrebări · 100p · 120 min\n\nÎncepe simularea\n2025 · Rezerva\n\n18 întrebări · 100p · 120 min\n\nÎncepe simularea\n2025 · Sesiune-Speciala\n\n18 întrebări · 100p · 120 min\n\nÎncepe simularea\n2025 · Simulare\n\n18 întrebări · 100p · 120 min\n\nÎncepe simularea\n2025 · Varianta-07\n\n18 întrebări · 100p · 120 min\n\nÎncepe simularea\n2024 · Varianta-07\n\n18 întrebări · 100p · 120 min\n\nÎncepe simularea\nGrile\nSimulări\nProgres\nSetări\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+   "errs": []
+  },
+  {
+   "step": "panou-complet",
+   "file": "m-07-panou-complet.png",
+   "url": "https://etutor.ro/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Close menu",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "RO",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "Deconectare",
+     "y": 752,
+     "bottom": 796
+    },
+    {
+     "t": "🚀\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "Astăzi",
+     "y": 122,
+     "bottom": 166
+    },
+    {
+     "t": "Panou complet",
+     "y": 122,
+     "bottom": 166
+    },
+    {
+     "t": "⚡\n\nSesiune rapidă",
+     "y": 452,
+     "bottom": 526
+    },
+    {
+     "t": "▶\n\nContinuă\n\nReia de unde ai rămas",
+     "y": 542,
+     "bottom": 616
+    },
+    {
+     "t": "📈\n\nEvaluare\n\nAflă-ți nivelul",
+     "y": 632,
+     "bottom": 706
+    },
+    {
+     "t": "Începe acum",
+     "y": 1335,
+     "bottom": 1379
+    },
+    {
+     "t": "Grile",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Simulări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Progres",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Setări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 1493,
+     "bottom": 1537
+    },
+    {
+     "t": "Termeni",
+     "y": 1493,
+     "bottom": 1537
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 1493,
+     "bottom": 1537
+    }
+   ],
+   "H": 812,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\n3\n9+\nPanou de control\nAstăzi\nPanou complet\n\nSerie curentă\n\n1 zile\n\nRecord: 1\n\nXP total\n\n1.690\n\n310 până la Captain\n\nNivel\n\nCo-pilot\n\nAcuratețe\n\n50%\n\n27 sesiuni\n⚡\n\nSesiune rapidă\n\n▶\n\nContinuă\n\nReia de unde ai rămas\n\n📈\n\nEvaluare\n\nAflă-ți nivelul\n\nZone slabe\nNicio zonă slabă detectată încă.\nSesiuni recente\n\nQuick\n\n26.09.2026\n\n0q\n0%\n\nQuick\n\n26.09.2026\n\n0q\n0%\n\nQuick\n\n26.09.2026\n\n0q\n0%\n\nQuick\n\n26.09.2026\n\n0q\n0%\n\nQuick\n\n26.09.2026\n\n0q\n0%\n\nRECOMANDAT ÎN CONTINUARE\n\n8 days since last session\n\nÎncepe acum\nGrile\nSimulări\nProgres\nSetări\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+   "errs": []
+  },
+  {
+   "step": "dupa-reload-preferinta",
+   "file": "m-08-dupa-reload-preferinta.png",
+   "url": "https://etutor.ro/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Close menu",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "RO",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "Deconectare",
+     "y": 752,
+     "bottom": 796
+    },
+    {
+     "t": "🚀\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "Astăzi",
+     "y": 122,
+     "bottom": 166
+    },
+    {
+     "t": "Panou complet",
+     "y": 122,
+     "bottom": 166
+    },
+    {
+     "t": "Continuă ▶",
+     "y": 368,
+     "bottom": 412
+    },
+    {
+     "t": "1\nSesiune scurtă de grile",
+     "y": 477,
+     "bottom": 527
+    },
+    {
+     "t": "3\nSimulare completă",
+     "y": 593,
+     "bottom": 643
+    },
+    {
+     "t": "Grile",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Simulări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Progres",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Setări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 862,
+     "bottom": 906
+    },
+    {
+     "t": "Termeni",
+     "y": 862,
+     "bottom": 906
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 862,
+     "bottom": 906
+    }
+   ],
+   "H": 812,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\n3\n9+\nPanou de control\nAstăzi\nPanou complet\n\nSalut, Test — hai să ținem seria! 🔥\n\n🔥\n1 zile la rând\n\nACȚIUNEA DE AZI\n\nO sesiune scurtă de grile\n\n8 days since last session\n\nContinuă ▶\nDrumul tău\n1\nSesiune scurtă de grile\n2\nRepară o zonă slabă\n3\nSimulare completă\n\nAcuratețe\n\n50%\n\n27 sesiuni\n\nXP total\n\n1.690\n\n310 până la Captain\nGrile\nSimulări\nProgres\nSetări\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+   "errs": []
+  },
+  {
+   "step": "tab-grile",
+   "file": "m-09-tab-grile.png",
+   "url": "https://etutor.ro/ro/dashboard/practice",
+   "title": "Practice - Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Close menu",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "RO",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "Deconectare",
+     "y": 752,
+     "bottom": 796
+    },
+    {
+     "t": "🚀\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "ⓘ",
+     "y": 211,
+     "bottom": 255
+    },
+    {
+     "t": "ⓘ",
+     "y": 211,
+     "bottom": 255
+    },
+    {
+     "t": "ⓘ",
+     "y": 211,
+     "bottom": 255
+    },
+    {
+     "t": "ⓘ",
+     "y": 336,
+     "bottom": 380
+    },
+    {
+     "t": "Începe sesiunea",
+     "y": 444,
+     "bottom": 488
+    },
+    {
+     "t": "⚡ Sesiune micro\n2 min\n5 întrebări",
+     "y": 570,
+     "bottom": 648
+    },
+    {
+     "t": "ⓘ",
+     "y": 570,
+     "bottom": 614
+    },
+    {
+     "t": "🎯 Sesiune rapidă\n10 min\n15 întrebări",
+     "y": 660,
+     "bottom": 738
+    },
+    {
+     "t": "ⓘ",
+     "y": 660,
+     "bottom": 704
+    },
+    {
+     "t": "📚 Sesiune lungă\n20 min\n30 întrebări",
+     "y": 750,
+     "bottom": 828
+    },
+    {
+     "t": "ⓘ",
+     "y": 750,
+     "bottom": 794
+    },
+    {
+     "t": "🔧 Sesiune de remediere\n15 min\n20 întrebări",
+     "y": 840,
+     "bottom": 918
+    },
+    {
+     "t": "ⓘ",
+     "y": 840,
+     "bottom": 884
+    },
+    {
+     "t": "🔥 Sesiune intensivă\n20 min\n30 întrebări",
+     "y": 930,
+     "bottom": 1008
+    },
+    {
+     "t": "ⓘ",
+     "y": 930,
+     "bottom": 974
+    },
+    {
+     "t": "Grile",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Simulări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Progres",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Setări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 1105,
+     "bottom": 1149
+    }
+   ],
+   "H": 812,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\n3\n9+\nGrile\n\n24\n\nÎntrebări disponibile\n\nⓘ\n\n2\n\nCapitole studiate\n\nⓘ\n\n0\n\nPuncte slabe\n\nⓘ\nRECOMANDAT\n🔄 Sesiune de recuperare\nⓘ\n\n8 zile de la ultima sesiune\n\n10 min\n15 întrebări\nÎncepe sesiunea\nToate tipurile de sesiune\n⚡ Sesiune micro\n2 min\n5 întrebări\nⓘ\n🎯 Sesiune rapidă\n10 min\n15 întrebări\nⓘ\n📚 Sesiune lungă\n20 min\n30 întrebări\nⓘ\n🔧 Sesiune de remediere\n15 min\n20 întrebări\nⓘ\n🔥 Sesiune intensivă\n20 min\n30 întrebări\nⓘ\nGrile\nSimulări\nProgres\nSetări\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+   "errs": [
+    "Failed to load resource: the server responded with a status of 404 ()"
+   ]
+  },
+  {
+   "step": "setari-notificari",
+   "file": "m-10-setari-notificari.png",
+   "url": "https://etutor.ro/ro/dashboard/settings/notifications",
+   "title": "Settings - Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Close menu",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "RO",
+     "y": 648,
+     "bottom": 692
+    },
+    {
+     "t": "Deconectare",
+     "y": 752,
+     "bottom": 796
+    },
+    {
+     "t": "🚀\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "← Settings",
+     "y": 116,
+     "bottom": 133
+    },
+    {
+     "t": "Enable Push",
+     "y": 239,
+     "bottom": 283
+    },
+    {
+     "t": "Instalează",
+     "y": 347,
+     "bottom": 379
+    },
+    {
+     "t": "Salvează",
+     "y": 504,
+     "bottom": 540
+    },
+    {
+     "t": "Programul de studiu\n\nZilele și ora reminderelor (e",
+     "y": 578,
+     "bottom": 640
+    },
+    {
+     "t": "Începe conectarea",
+     "y": 1023,
+     "bottom": 1067
+    },
+    {
+     "t": "↑",
+     "y": 1199,
+     "bottom": 1227
+    },
+    {
+     "t": "↓",
+     "y": 1199,
+     "bottom": 1227
+    },
+    {
+     "t": "↑",
+     "y": 1257,
+     "bottom": 1285
+    },
+    {
+     "t": "↓",
+     "y": 1257,
+     "bottom": 1285
+    },
+    {
+     "t": "↑",
+     "y": 1315,
+     "bottom": 1343
+    },
+    {
+     "t": "↓",
+     "y": 1315,
+     "bottom": 1343
+    },
+    {
+     "t": "↑",
+     "y": 1379,
+     "bottom": 1407
+    },
+    {
+     "t": "↓",
+     "y": 1379,
+     "bottom": 1407
+    },
+    {
+     "t": "Salvează preferințele",
+     "y": 2102,
+     "bottom": 2138
+    },
+    {
+     "t": "Grile",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Simulări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Progres",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Setări",
+     "y": 755,
+     "bottom": 812
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 2235,
+     "bottom": 2279
+    }
+   ],
+   "H": 812,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\n3\n9+\n← Settings\nℹ\nCUM FUNCȚIONEAZĂ\nBrowser Push Notifications\n\nReceive real-time alerts even when the app is closed\n\nEnable Push\nInstalează aplicația\n\nAcces rapid de pe ecranul principal, ca o aplicație.\n\nInstalează\nNumărul meu de telefon (WhatsApp)\n\nAdaugă un număr dacă vrei să primești remindere și pe WhatsApp (Meta).\n\nSalvează\nProgramul de studiu\n\nZilele și ora reminderelor (ex. 13:15)\n\n→\nPrimește notificările pe Telegram\n\nE gratuit și ajunge instant, iar butonul din mesaj oprește restul reminderelor dintr-o apăsare.\n\nCUM DECURGE — 3 PAȘI, O SINGURĂ DATĂ\n\n1. Apeși butonul de mai jos. Îți dăm un link și un cod QR.\n2. De pe telefon apeși linkul; de pe calculator scanezi codul QR cu telefonul pe care ai Telegram.\n3. În Telegram apeși START. Gata — pagina asta se schimbă singură.\n\nAi nevoie de telefonul pe care e instalat Telegram. Nu-ți cerem parola și nu vedem conversațiile tale — botul îți poate doar trimite mesaje.\n\nÎncepe conectarea\nOrdinea canalelor\n\nTe căutăm în această ordine — dacă nu răspunzi pe primul, trecem la următorul.\n\n1\nNotificări Push (în aplicație)\n↑\n↓\n2\nTelegram\n↑\n↓\n3\nAlerte Email\n↑\n↓\n4\nMesaje WhatsApp🔒 Disponibil în pachetele plătite\n↑\n↓\nCanale de notificare\n\nAlege cum vrei să primești remindere și alerte\n\nNotificări Push (în aplicație)\nMesaje WhatsApp\n🔒 Disponibil în pachetele plătite\nMesaje SMS\n🔒 Disponibil în pachetele plătite\nAlerte Email\nApel Instructor\nOre de liniște\n\nNu se trimit notificări în acest interval\n\nDe la\nPână la\nFus orar\nEurope/Bucharest\nEurope/London\nEurope/Berlin\nEurope/Paris\nAmerica/New_York\nAmerica/Chica",
+   "errs": [
+    "Failed to load resource: the server responded with a status of 404 ()"
+   ]
+  },
+  {
+   "totalMs": 32523,
+   "allErrs": [
+    "Failed to load resource: the server responded with a status of 404 ()"
+   ]
+  }
+ ],
+ "d": [
+  {
+   "step": "signin",
+   "file": "d-01-signin.png",
+   "url": "https://etutor.ro/ro/auth/signin",
+   "title": "Sign In - Tutor | Tutor",
+   "btns": [
+    {
+     "t": "Continuă cu Google",
+     "y": 234,
+     "bottom": 278
+    },
+    {
+     "t": "Arată parola",
+     "y": 450,
+     "bottom": 494
+    },
+    {
+     "t": "Autentificare",
+     "y": 510,
+     "bottom": 554
+    },
+    {
+     "t": "Nu ai email? Recuperează pe telefon",
+     "y": 560,
+     "bottom": 600
+    },
+    {
+     "t": "Ai uitat parola?",
+     "y": 558,
+     "bottom": 602
+    },
+    {
+     "t": "Folosește magic link",
+     "y": 558,
+     "bottom": 602
+    },
+    {
+     "t": "Fă-ți unul",
+     "y": 618,
+     "bottom": 646
+    },
+    {
+     "t": "încearcă fără cont ✨",
+     "y": 654,
+     "bottom": 682
+    },
+    {
+     "t": "Termeni și condiții",
+     "y": 698,
+     "bottom": 722
+    },
+    {
+     "t": "Politica de confidențialitate",
+     "y": 722,
+     "bottom": 746
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 917,
+     "bottom": 961
+    },
+    {
+     "t": "Termeni",
+     "y": 917,
+     "bottom": 961
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 917,
+     "bottom": 961
+    },
+    {
+     "t": "Politica de cookie-uri",
+     "y": 838,
+     "bottom": 855
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 838,
+     "bottom": 855
+    },
+    {
+     "t": "Respinge",
+     "y": 815,
+     "bottom": 859
+    },
+    {
+     "t": "Accept",
+     "y": 815,
+     "bottom": 859
+    }
+   ],
+   "H": 900,
+   "text": "Autentifică-te în Tutor\n\nAccesează platforma ta de învățare adaptivă\n\nContinuă cu Google\nSau continuă cu\nEmail sau nume de utilizator\nParola\nAutentificare\nNu ai email? Recuperează pe telefon\nAi uitat parola?\nFolosește magic link\n\nNu ai cont? Fă-ți unul\n\nSau încearcă fără cont ✨\n\nPrin autentificare, ești de acord cu Termeni și condiții & Politica de confidențialitate\n\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+   "errs": []
+  },
+  {
+   "step": "panou",
+   "file": "d-02-panou.png",
+   "url": "https://etutor.ro/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 843,
+     "bottom": 887
+    },
+    {
+     "t": "RO",
+     "y": 843,
+     "bottom": 887
+    },
+    {
+     "t": "Deconectare",
+     "y": 947,
+     "bottom": 991
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "Astăzi",
+     "y": 83,
+     "bottom": 127
+    },
+    {
+     "t": "Panou complet",
+     "y": 83,
+     "bottom": 127
+    },
+    {
+     "t": "Continuă ▶",
+     "y": 302,
+     "bottom": 346
+    },
+    {
+     "t": "1\nSesiune scurtă de grile",
+     "y": 411,
+     "bottom": 461
+    },
+    {
+     "t": "3\nSimulare completă",
+     "y": 527,
+     "bottom": 577
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 1024,
+     "bottom": 1068
+    },
+    {
+     "t": "Termeni",
+     "y": 1024,
+     "bottom": 1068
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 1024,
+     "bottom": 1068
+    }
+   ],
+   "H": 900,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\nConfigurare\n3\n9+\nPanou de control\nAstăzi\nPanou complet\n\nSalut, Test — hai să ținem seria! 🔥\n\n🔥\n1 zile la rând\n\nACȚIUNEA DE AZI\n\nO sesiune scurtă de grile\n\n8 days since last session\n\nContinuă ▶\nDrumul tău\n1\nSesiune scurtă de grile\n2\nRepară o zonă slabă\n3\nSimulare completă\n\nAcuratețe\n\n50%\n\n27 sesiuni\n\nXP total\n\n1.690\n\n310 până la Captain\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+   "tPanelMs": 944,
+   "dashboardRequests": 2,
+   "dashReqs": [
+    {
+     "t": 1791186010824,
+     "u": "/api/student/dashboard",
+     "s": 200
+    },
+    {
+     "t": 1791186010983,
+     "u": "/api/student/dashboard",
+     "s": 200
+    }
+   ],
+   "errs": []
+  },
+  {
+   "step": "dupa-continua",
+   "file": "d-03-dupa-continua.png",
+   "url": "https://etutor.ro/ro/dashboard/practice/cmp15uiwb001w11oreq6ejws5",
+   "title": "Practice - Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 843,
+     "bottom": 887
+    },
+    {
+     "t": "RO",
+     "y": 843,
+     "bottom": 887
+    },
+    {
+     "t": "Deconectare",
+     "y": 947,
+     "bottom": 991
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "🔊",
+     "y": 278,
+     "bottom": 308
+    },
+    {
+     "t": "A.5",
+     "y": 358,
+     "bottom": 404
+    },
+    {
+     "t": "B.6",
+     "y": 416,
+     "bottom": 462
+    },
+    {
+     "t": "C.7",
+     "y": 474,
+     "bottom": 520
+    },
+    {
+     "t": "D.8",
+     "y": 532,
+     "bottom": 578
+    },
+    {
+     "t": "Trimite răspunsul",
+     "y": 602,
+     "bottom": 646
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 1024,
+     "bottom": 1068
+    },
+    {
+     "t": "Termeni",
+     "y": 1024,
+     "bottom": 1068
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 1024,
+     "bottom": 1068
+    }
+   ],
+   "H": 900,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\nConfigurare\n3\n9+\nÎntrebarea 1 din 15\n0 rezolvate\n9:57\n👆 Atinge un răspuns ca să vezi pe loc dacă e corect.\nMatematică\nOrele și cifrele III\n★★☆☆☆\n\nCâte cuburi sunt necesare pentru a obține o sumă totală a numerelor de pe fețe egală cu 105?\n\n🔊\nA.5B.6C.7D.8\nTrimite răspunsul\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+   "ms": 4011,
+   "contBtnBox": {
+    "x": 301,
+    "y": 301.5,
+    "width": 141,
+    "height": 44
+   },
+   "errs": []
+  },
+  {
+   "step": "raspuns-intrebare",
+   "file": "d-04-raspuns-intrebare.png",
+   "url": "https://etutor.ro/ro/dashboard/practice/cmp15uiwb001w11oreq6ejws5",
+   "title": "Practice - Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 843,
+     "bottom": 887
+    },
+    {
+     "t": "RO",
+     "y": 843,
+     "bottom": 887
+    },
+    {
+     "t": "Deconectare",
+     "y": 947,
+     "bottom": 991
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "🔊",
+     "y": 278,
+     "bottom": 308
+    },
+    {
+     "t": "A.5",
+     "y": 358,
+     "bottom": 404
+    },
+    {
+     "t": "B.6",
+     "y": 416,
+     "bottom": 462
+    },
+    {
+     "t": "C.7",
+     "y": 474,
+     "bottom": 520
+    },
+    {
+     "t": "D.8",
+     "y": 532,
+     "bottom": 578
+    },
+    {
+     "t": "Trimite răspunsul",
+     "y": 602,
+     "bottom": 646
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 1024,
+     "bottom": 1068
+    },
+    {
+     "t": "Termeni",
+     "y": 1024,
+     "bottom": 1068
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 1024,
+     "bottom": 1068
+    }
+   ],
+   "H": 900,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\nConfigurare\n3\n9+\nÎntrebarea 1 din 15\n0 rezolvate\n9:55\n👆 Atinge un răspuns ca să vezi pe loc dacă e corect.\nMatematică\nOrele și cifrele III\n★★☆☆☆\n\nCâte cuburi sunt necesare pentru a obține o sumă totală a numerelor de pe fețe egală cu 105?\n\n🔊\nA.5B.6C.7D.8\nTrimite răspunsul\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+   "errs": []
+  },
+  {
+   "answered": true
+  },
+  {
+   "step": "inapoi-panou",
+   "file": "d-05-inapoi-panou.png",
+   "url": "https://etutor.ro/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 843,
+     "bottom": 887
+    },
+    {
+     "t": "RO",
+     "y": 843,
+     "bottom": 887
+    },
+    {
+     "t": "Deconectare",
+     "y": 947,
+     "bottom": 991
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "Astăzi",
+     "y": 83,
+     "bottom": 127
+    },
+    {
+     "t": "Panou complet",
+     "y": 83,
+     "bottom": 127
+    },
+    {
+     "t": "Continuă ▶",
+     "y": 302,
+     "bottom": 346
+    },
+    {
+     "t": "1\nSesiune scurtă de grile",
+     "y": 411,
+     "bottom": 461
+    },
+    {
+     "t": "3\nSimulare completă",
+     "y": 527,
+     "bottom": 577
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 1024,
+     "bottom": 1068
+    },
+    {
+     "t": "Termeni",
+     "y": 1024,
+     "bottom": 1068
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 1024,
+     "bottom": 1068
+    }
+   ],
+   "H": 900,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\nConfigurare\n3\n9+\nPanou de control\nAstăzi\nPanou complet\n\nSalut, Test — hai să ținem seria! 🔥\n\n🔥\n1 zile la rând\n\nACȚIUNEA DE AZI\n\nO sesiune scurtă de grile\n\n8 days since last session\n\nContinuă ▶\nDrumul tău\n1\nSesiune scurtă de grile\n2\nRepară o zonă slabă\n3\nSimulare completă\n\nAcuratețe\n\n50%\n\n27 sesiuni\n\nXP total\n\n1.690\n\n310 până la Captain\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+   "errs": []
+  },
+  {
+   "step": "simulare",
+   "file": "d-06-simulare.png",
+   "url": "https://etutor.ro/ro/dashboard/exam-bank",
+   "title": "Dashboard - Tutor | Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 857,
+     "bottom": 901
+    },
+    {
+     "t": "RO",
+     "y": 857,
+     "bottom": 901
+    },
+    {
+     "t": "Deconectare",
+     "y": 961,
+     "bottom": 1005
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "2026 · Model\n\n18 întrebări · 100p · 120 min\n\nÎncep",
+     "y": 333,
+     "bottom": 407
+    },
+    {
+     "t": "2026 · Simulare\n\n18 întrebări · 100p · 120 min\n\nÎn",
+     "y": 415,
+     "bottom": 489
+    },
+    {
+     "t": "2025 · Model\n\n18 întrebări · 100p · 120 min\n\nÎncep",
+     "y": 497,
+     "bottom": 571
+    },
+    {
+     "t": "2025 · Rezerva\n\n18 întrebări · 100p · 120 min\n\nÎnc",
+     "y": 579,
+     "bottom": 653
+    },
+    {
+     "t": "2025 · Sesiune-Speciala\n\n18 întrebări · 100p · 120",
+     "y": 661,
+     "bottom": 735
+    },
+    {
+     "t": "2025 · Simulare\n\n18 întrebări · 100p · 120 min\n\nÎn",
+     "y": 743,
+     "bottom": 817
+    },
+    {
+     "t": "2025 · Varianta-07\n\n18 întrebări · 100p · 120 min\n",
+     "y": 825,
+     "bottom": 899
+    },
+    {
+     "t": "2024 · Varianta-07\n\n18 întrebări · 100p · 120 min\n",
+     "y": 907,
+     "bottom": 981
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 1038,
+     "bottom": 1082
+    },
+    {
+     "t": "Termeni",
+     "y": 1038,
+     "bottom": 1082
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 1038,
+     "bottom": 1082
+    }
+   ],
+   "H": 900,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\nConfigurare\n3\n9+\nSimulări — examene oficiale\n\nSubiecte reale, corectate după baremul oficial. Răspunzi, trimiți și vezi nota estimată pe 10. Itemii cu rezolvare îi notezi tu, după barem.\n\nCategorie · Materie\nLimba și literatura română (8)\nMatematică (45)\nLimba și literatura română (13)\nMatematică M1 (Mate-Info) (14)\nMatematică M2 (Științele naturii) (16)\nMatematică M3 (Tehnologic) (17)\n\nSubiecte reale (Evaluarea Națională), corectate după baremul oficial.\n\nEvaluarea Națională — clasa a VIII-a · Limba și literatura română\n2026 · Model\n\n18 întrebări · 100p · 120 min\n\nÎncepe simularea\n2026 · Simulare\n\n18 întrebări · 100p · 120 min\n\nÎncepe simularea\n2025 · Model\n\n18 întrebări · 100p · 120 min\n\nÎncepe simularea\n2025 · Rezerva\n\n18 întrebări · 100p · 120 min\n\nÎncepe simularea\n2025 · Sesiune-Speciala\n\n18 întrebări · 100p · 120 min\n\nÎncepe simularea\n2025 · Simulare\n\n18 întrebări · 100p · 120 min\n\nÎncepe simularea\n2025 · Varianta-07\n\n18 întrebări · 100p · 120 min\n\nÎncepe simularea\n2024 · Varianta-07\n\n18 întrebări · 100p · 120 min\n\nÎncepe simularea\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+   "errs": []
+  },
+  {
+   "step": "panou-complet",
+   "file": "d-07-panou-complet.png",
+   "url": "https://etutor.ro/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 843,
+     "bottom": 887
+    },
+    {
+     "t": "RO",
+     "y": 843,
+     "bottom": 887
+    },
+    {
+     "t": "Deconectare",
+     "y": 947,
+     "bottom": 991
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "Astăzi",
+     "y": 83,
+     "bottom": 127
+    },
+    {
+     "t": "Panou complet",
+     "y": 83,
+     "bottom": 127
+    },
+    {
+     "t": "⚡\n\nSesiune rapidă",
+     "y": 284,
+     "bottom": 358
+    },
+    {
+     "t": "▶\n\nContinuă\n\nReia de unde ai rămas",
+     "y": 284,
+     "bottom": 358
+    },
+    {
+     "t": "📈\n\nEvaluare\n\nAflă-ți nivelul",
+     "y": 284,
+     "bottom": 358
+    },
+    {
+     "t": "Începe acum",
+     "y": 853,
+     "bottom": 897
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 1024,
+     "bottom": 1068
+    },
+    {
+     "t": "Termeni",
+     "y": 1024,
+     "bottom": 1068
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 1024,
+     "bottom": 1068
+    }
+   ],
+   "H": 900,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\nConfigurare\n3\n9+\nPanou de control\nAstăzi\nPanou complet\n\nSerie curentă\n\n1 zile\n\nRecord: 1\n\nXP total\n\n1.690\n\n310 până la Captain\n\nNivel\n\nCo-pilot\n\nAcuratețe\n\n50%\n\n27 sesiuni\n⚡\n\nSesiune rapidă\n\n▶\n\nContinuă\n\nReia de unde ai rămas\n\n📈\n\nEvaluare\n\nAflă-ți nivelul\n\nZone slabe\nNicio zonă slabă detectată încă.\nSesiuni recente\n\nQuick\n\n26.09.2026\n\n0q\n0%\n\nQuick\n\n26.09.2026\n\n0q\n0%\n\nQuick\n\n26.09.2026\n\n0q\n0%\n\nQuick\n\n26.09.2026\n\n0q\n0%\n\nQuick\n\n26.09.2026\n\n0q\n0%\n\nRECOMANDAT ÎN CONTINUARE\n\n8 days since last session\n\nÎncepe acum\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+   "errs": []
+  },
+  {
+   "step": "dupa-reload-preferinta",
+   "file": "d-08-dupa-reload-preferinta.png",
+   "url": "https://etutor.ro/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 843,
+     "bottom": 887
+    },
+    {
+     "t": "RO",
+     "y": 843,
+     "bottom": 887
+    },
+    {
+     "t": "Deconectare",
+     "y": 947,
+     "bottom": 991
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "Astăzi",
+     "y": 83,
+     "bottom": 127
+    },
+    {
+     "t": "Panou complet",
+     "y": 83,
+     "bottom": 127
+    },
+    {
+     "t": "Continuă ▶",
+     "y": 302,
+     "bottom": 346
+    },
+    {
+     "t": "1\nSesiune scurtă de grile",
+     "y": 411,
+     "bottom": 461
+    },
+    {
+     "t": "3\nSimulare completă",
+     "y": 527,
+     "bottom": 577
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 1024,
+     "bottom": 1068
+    },
+    {
+     "t": "Termeni",
+     "y": 1024,
+     "bottom": 1068
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 1024,
+     "bottom": 1068
+    }
+   ],
+   "H": 900,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\nConfigurare\n3\n9+\nPanou de control\nAstăzi\nPanou complet\n\nSalut, Test — hai să ținem seria! 🔥\n\n🔥\n1 zile la rând\n\nACȚIUNEA DE AZI\n\nO sesiune scurtă de grile\n\n8 days since last session\n\nContinuă ▶\nDrumul tău\n1\nSesiune scurtă de grile\n2\nRepară o zonă slabă\n3\nSimulare completă\n\nAcuratețe\n\n50%\n\n27 sesiuni\n\nXP total\n\n1.690\n\n310 până la Captain\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+   "errs": []
+  },
+  {
+   "step": "setari-notificari",
+   "file": "d-09-setari-notificari.png",
+   "url": "https://etutor.ro/ro/dashboard/settings/notifications",
+   "title": "Settings - Tutor",
+   "btns": [
+    {
+     "t": "Tutor",
+     "y": 10,
+     "bottom": 54
+    },
+    {
+     "t": "Panou de control",
+     "y": 80,
+     "bottom": 124
+    },
+    {
+     "t": "Lecții",
+     "y": 165,
+     "bottom": 209
+    },
+    {
+     "t": "Grile",
+     "y": 213,
+     "bottom": 257
+    },
+    {
+     "t": "Simulări",
+     "y": 261,
+     "bottom": 305
+    },
+    {
+     "t": "Generează test",
+     "y": 309,
+     "bottom": 353
+    },
+    {
+     "t": "Domenii",
+     "y": 357,
+     "bottom": 401
+    },
+    {
+     "t": "Calendar",
+     "y": 405,
+     "bottom": 449
+    },
+    {
+     "t": "Progresul meu",
+     "y": 489,
+     "bottom": 533
+    },
+    {
+     "t": "Abonament",
+     "y": 574,
+     "bottom": 618
+    },
+    {
+     "t": "🔒\nFamilia mea",
+     "y": 622,
+     "bottom": 666
+    },
+    {
+     "t": "Notificări",
+     "y": 670,
+     "bottom": 714
+    },
+    {
+     "t": "Setări",
+     "y": 718,
+     "bottom": 762
+    },
+    {
+     "t": "Ajutor",
+     "y": 766,
+     "bottom": 810
+    },
+    {
+     "t": "EN",
+     "y": 1762,
+     "bottom": 1806
+    },
+    {
+     "t": "RO",
+     "y": 1762,
+     "bottom": 1806
+    },
+    {
+     "t": "Deconectare",
+     "y": 1866,
+     "bottom": 1910
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "y": 13,
+     "bottom": 43
+    },
+    {
+     "t": "9+",
+     "y": 6,
+     "bottom": 50
+    },
+    {
+     "t": "← Settings",
+     "y": 84,
+     "bottom": 101
+    },
+    {
+     "t": "Enable Push",
+     "y": 207,
+     "bottom": 235
+    },
+    {
+     "t": "Instalează",
+     "y": 291,
+     "bottom": 323
+    },
+    {
+     "t": "Salvează",
+     "y": 424,
+     "bottom": 460
+    },
+    {
+     "t": "Programul de studiu\n\nZilele și ora reminderelor (e",
+     "y": 498,
+     "bottom": 560
+    },
+    {
+     "t": "Începe conectarea",
+     "y": 851,
+     "bottom": 895
+    },
+    {
+     "t": "↑",
+     "y": 1007,
+     "bottom": 1035
+    },
+    {
+     "t": "↓",
+     "y": 1007,
+     "bottom": 1035
+    },
+    {
+     "t": "↑",
+     "y": 1065,
+     "bottom": 1093
+    },
+    {
+     "t": "↓",
+     "y": 1065,
+     "bottom": 1093
+    },
+    {
+     "t": "↑",
+     "y": 1123,
+     "bottom": 1151
+    },
+    {
+     "t": "↓",
+     "y": 1123,
+     "bottom": 1151
+    },
+    {
+     "t": "↑",
+     "y": 1181,
+     "bottom": 1209
+    },
+    {
+     "t": "↓",
+     "y": 1181,
+     "bottom": 1209
+    },
+    {
+     "t": "Salvează preferințele",
+     "y": 1866,
+     "bottom": 1902
+    },
+    {
+     "t": "Confidențialitate",
+     "y": 1943,
+     "bottom": 1987
+    },
+    {
+     "t": "Termeni",
+     "y": 1943,
+     "bottom": 1987
+    },
+    {
+     "t": "Cookie-uri",
+     "y": 1943,
+     "bottom": 1987
+    }
+   ],
+   "H": 900,
+   "text": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Student\n\ntest_student@test.com\n\nDeconectare\n🚀\nConfigurare\n3\n9+\n← Settings\nℹ\nCUM FUNCȚIONEAZĂ\nBrowser Push Notifications\n\nReceive real-time alerts even when the app is closed\n\nEnable Push\nInstalează aplicația\n\nAcces rapid de pe ecranul principal, ca o aplicație.\n\nInstalează\nNumărul meu de telefon (WhatsApp)\n\nAdaugă un număr dacă vrei să primești remindere și pe WhatsApp (Meta).\n\nSalvează\nProgramul de studiu\n\nZilele și ora reminderelor (ex. 13:15)\n\n→\nPrimește notificările pe Telegram\n\nE gratuit și ajunge instant, iar butonul din mesaj oprește restul reminderelor dintr-o apăsare.\n\nCUM DECURGE — 3 PAȘI, O SINGURĂ DATĂ\n\n1. Apeși butonul de mai jos. Îți dăm un link și un cod QR.\n2. De pe telefon apeși linkul; de pe calculator scanezi codul QR cu telefonul pe care ai Telegram.\n3. În Telegram apeși START. Gata — pagina asta se schimbă singură.\n\nAi nevoie de telefonul pe care e instalat Telegram. Nu-ți cerem parola și nu vedem conversațiile tale — botul îți poate doar trimite mesaje.\n\nÎncepe conectarea\nOrdinea canalelor\n\nTe căutăm în această ordine — dacă nu răspunzi pe primul, trecem la următorul.\n\n1\nNotificări Push (în aplicație)\n↑\n↓\n2\nTelegram\n↑\n↓\n3\nAlerte Email\n↑\n↓\n4\nMesaje WhatsApp🔒 Disponibil în pachetele plătite\n↑\n↓\nCanale de notificare\n\nAlege cum vrei să primești remindere și alerte\n\nNotificări Push (în aplicație)\nMesaje WhatsApp\n🔒 Disponibil în pachetele plătite\nMesaje SMS\n🔒 Disponibil în pachetele plătite\nAlerte Email\nApel Instructor\nOre de liniște\n\nNu se trimit notificări în acest interval\n\nDe la\nPână la\nFus orar\nEurope/Bucharest\nEurope/London\nEurope/Berlin\nEurope/Paris\nAmerica/New_York\nA",
+   "errs": []
+  },
+  {
+   "totalMs": 29558,
+   "allErrs": []
+  }
+ ]
+}

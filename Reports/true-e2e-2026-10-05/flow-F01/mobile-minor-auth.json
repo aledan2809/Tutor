@@ -1,0 +1,55 @@
+{
+  "cookies": [
+    {
+      "name": "NEXT_LOCALE",
+      "value": "ro",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "authjs.csrf-token",
+      "value": "59cef3f6b89bdd2bf3dd11e496613387d7bc82c5a37ddf8e3aa64addfed285ca%7C81538a18c264513949f637db78e63e3e6e7443670367c6a65dce82694f6b9bcb",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "authjs.callback-url",
+      "value": "http%3A%2F%2Flocalhost%3A3113%2Fro%2Fauth%2Fregister",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "authjs.session-token",
+      "value": "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwia2lkIjoiZVpoM2lrV2k2T1hTWGdpVzhWSnMzb19kQ2szWkM0ZjZtZWdNM3V2aHVVZVluOUlsNFNtQjVscjFJeW5TVEp1U3lXOG1YTHJVWW5QOG9hZDJkNGd5T3cifQ..OnzYg9KDeiy8_nIokbAZcw.JteJezPahJhHdUsK5vJhsbKMIe871T7NZi5z9YIM9_i8ghQ6y2KeIwZiPlGSLxmmCbro5arnuczhX8KQPtl50820cvNy9u0S9ZyhadUEdO87f4iIOrlvyf2glgLAxmkGLyIULfm1DshT8_9KGwCh_4zajxWcTEl8CA7h2W70QnGh3Jv5XDwwcabrSbU_ZsNDTFh6-k9NkWjbhQkiOA4KoFFGeUCRW784OT6kq1JtwO2H7c2eQQNIrm2oOGTf5NUbfTxqrHcyAsv4jqnSU-0i8Ws81-O0RA-C0aieYzHvyV63Pqsk3sW78F6kay1ezP_tV2GWuucMjssiq-lSyD3iUq5IZtSg1k0sdk_ODLQpZvL1mGiozaDgGU32dTqFYrHiq4aQy0dKBPA4GLD4a9LNunW4-o4rvr3ZPTkWH7Qppty4PJ8eoE1xrkR6DW0H40Gdo0DQd6DNwhKbnV9ew5OumCIdNpz-cI9rKn1MUDvRi4M.w-wRIGV8HAnR60GHhP-Q3QemKRjnQv2IjMRhBQORA_M",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1793778038.387191,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "http://localhost:3113",
+      "localStorage": [
+        {
+          "name": "etutor_cookie_consent_v1",
+          "value": "{\"choice\":\"rejected\",\"at\":\"2026-10-05T07:40:37.379Z\"}"
+        }
+      ]
+    }
+  ]
+}

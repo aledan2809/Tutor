@@ -1,0 +1,5 @@
+/ro              n=30 p50=1942ms p95=2012ms max=2014ms non-200=0
+/ro/parinte      n=30 p50=2277ms p95=2362ms max=2377ms non-200=0
+/ro/preturi      n=30 p50=1283ms p95=1361ms max=1366ms non-200=0
+/ro/auth/signin  n=30 p50=832ms p95=874ms max=876ms non-200=0
+/ro/try          n=30 p50=848ms p95=900ms max=903ms non-200=0

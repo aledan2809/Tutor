@@ -1,0 +1,2375 @@
+{
+ "mobile": {
+  "m": {
+   "loginToListSec": 1.946,
+   "kidLinks": [
+    "/ro/dashboard/watcher/notifications",
+    "/ro/dashboard/watcher/setari"
+   ],
+   "totalSec": 43.392
+  },
+  "log": [
+   {
+    "step": 1,
+    "name": "signin",
+    "url": "https://etutor.ro/ro/auth/signin",
+    "shot": "mobile-01-signin.png",
+    "errs": [],
+    "bad": [],
+    "title": "Sign In - Tutor | Tutor",
+    "h1": [
+     "Autentifică-te în Tutor"
+    ],
+    "btns": [
+     {
+      "t": "Continuă cu Google",
+      "y": 210,
+      "href": null
+     },
+     {
+      "t": "Arată parola",
+      "y": 426,
+      "href": null
+     },
+     {
+      "t": "Autentificare",
+      "y": 486,
+      "href": null
+     },
+     {
+      "t": "Nu ai email? Recuperează pe telefon",
+      "y": 536,
+      "href": "/ro/auth/recuperare"
+     },
+     {
+      "t": "Ai uitat parola?",
+      "y": 534,
+      "href": "/ro/auth/forgot-password"
+     },
+     {
+      "t": "Folosește magic link",
+      "y": 534,
+      "href": null
+     },
+     {
+      "t": "Fă-ți unul",
+      "y": 594,
+      "href": "/ro/auth/register"
+     },
+     {
+      "t": "încearcă fără cont ✨",
+      "y": 630,
+      "href": "/ro/try"
+     },
+     {
+      "t": "Termeni și condiții",
+      "y": 690,
+      "href": "/ro/terms"
+     },
+     {
+      "t": "Politica de confidențialitate",
+      "y": 690,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 861,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 861,
+      "href": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 861,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "y": 708,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 728,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Respinge",
+      "y": 763,
+      "href": null
+     },
+     {
+      "t": "Accept",
+      "y": 763,
+      "href": null
+     }
+    ],
+    "vh": 844,
+    "body": "Autentifică-te în Tutor\n\nAccesează platforma ta de învățare adaptivă\n\nContinuă cu Google\nSau continuă cu\nEmail sau nume de utilizator\nParola\nAutentificare\nNu ai email? Recuperează pe telefon\nAi uitat parola?\nFolosește magic link\n\nNu ai cont? Fă-ți unul\n\nSau încearcă fără cont ✨\n\nPrin autentificare, ești de acord cu Termeni și condiții & Politica de confidențialitate\n\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+    "hscroll": false
+   },
+   {
+    "step": 2,
+    "name": "after-login",
+    "url": "https://etutor.ro/ro/dashboard",
+    "shot": "mobile-02-after-login.png",
+    "errs": [],
+    "bad": [],
+    "title": "Dashboard - Tutor | Tutor",
+    "h1": [],
+    "btns": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Close menu",
+      "y": 10,
+      "href": null
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Monitorizare",
+      "y": 165,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 213,
+      "href": "/ro/dashboard/rapoarte"
+     },
+     {
+      "t": "Alerte",
+      "y": 261,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 309,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "Familia mea",
+      "y": 357,
+      "href": "/ro/dashboard/family"
+     },
+     {
+      "t": "Abonament",
+      "y": 441,
+      "href": "/ro/dashboard/packages"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 489,
+      "href": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 537,
+      "href": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 585,
+      "href": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 633,
+      "href": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 680,
+      "href": null
+     },
+     {
+      "t": "RO",
+      "y": 680,
+      "href": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 784,
+      "href": null
+     },
+     {
+      "t": "🚀\n3",
+      "y": 13,
+      "href": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "href": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 861,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 861,
+      "href": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 861,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "y": 708,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 728,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Respinge",
+      "y": 763,
+      "href": null
+     },
+     {
+      "t": "Accept",
+      "y": 763,
+      "href": null
+     }
+    ],
+    "vh": 844,
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\n3\nSe încarcă...\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+    "hscroll": false
+   },
+   {
+    "step": 3,
+    "name": "watcher-list",
+    "url": "https://etutor.ro/ro/dashboard/watcher",
+    "shot": "mobile-03-watcher-list.png",
+    "errs": [],
+    "bad": [],
+    "title": "Watcher - Tutor",
+    "h1": [
+     "Monitor Progres Studenți"
+    ],
+    "btns": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Close menu",
+      "y": 10,
+      "href": null
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Monitorizare",
+      "y": 165,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 213,
+      "href": "/ro/dashboard/rapoarte"
+     },
+     {
+      "t": "Alerte",
+      "y": 261,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 309,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "Familia mea",
+      "y": 357,
+      "href": "/ro/dashboard/family"
+     },
+     {
+      "t": "Abonament",
+      "y": 441,
+      "href": "/ro/dashboard/packages"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 489,
+      "href": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 537,
+      "href": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 585,
+      "href": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 633,
+      "href": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 680,
+      "href": null
+     },
+     {
+      "t": "RO",
+      "y": 680,
+      "href": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 784,
+      "href": null
+     },
+     {
+      "t": "🚀\n3",
+      "y": 13,
+      "href": null
+     },
+     {
+      "t": "9+",
+      "y": 6,
+      "href": null
+     },
+     {
+      "t": "Monitorizare",
+      "y": 112,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Alerte",
+      "y": 112,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 112,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "📈 Rapoarte programate\n+",
+      "y": 347,
+      "href": null
+     },
+     {
+      "t": "▶\nT\nTest Student\nAviation\n🔥 1 zile\n50% corect",
+      "y": 479,
+      "href": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 861,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 861,
+      "href": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 861,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "y": 708,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 728,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Respinge",
+      "y": 763,
+      "href": null
+     },
+     {
+      "t": "Accept",
+      "y": 763,
+      "href": null
+     }
+    ],
+    "vh": 844,
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\n3\n9+\nMonitorizare\nAlerte\nCadență alerte\nMonitor Progres Studenți\n\nFiecare copil are un capitol. Deschide-l pentru program, sesiuni și remindere.\n\nℹ\nCUM FUNCȚIONEAZĂ\n📈 Rapoarte programate\n+\n▶\nT\nTest Student\nAviation\n🔥 1 zile\n50% corect\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+    "hscroll": false
+   },
+   {
+    "step": 4,
+    "name": "card-click",
+    "url": "https://etutor.ro/ro/dashboard/watcher",
+    "shot": "mobile-04-card-click.png",
+    "errs": [],
+    "bad": [],
+    "title": "Watcher - Tutor",
+    "h1": [
+     "Monitor Progres Studenți"
+    ],
+    "btns": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Close menu",
+      "y": 10,
+      "href": null
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Monitorizare",
+      "y": 165,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 213,
+      "href": "/ro/dashboard/rapoarte"
+     },
+     {
+      "t": "Alerte",
+      "y": 261,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 309,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "Familia mea",
+      "y": 357,
+      "href": "/ro/dashboard/family"
+     },
+     {
+      "t": "Abonament",
+      "y": 441,
+      "href": "/ro/dashboard/packages"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 489,
+      "href": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 537,
+      "href": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 585,
+      "href": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 633,
+      "href": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 680,
+      "href": null
+     },
+     {
+      "t": "RO",
+      "y": 680,
+      "href": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 784,
+      "href": null
+     },
+     {
+      "t": "🚀\n3",
+      "y": 13,
+      "href": null
+     },
+     {
+      "t": "9+",
+      "y": 6,
+      "href": null
+     },
+     {
+      "t": "Instalează",
+      "y": 193,
+      "href": null
+     },
+     {
+      "t": "Mai târziu",
+      "y": 193,
+      "href": null
+     },
+     {
+      "t": "Monitorizare",
+      "y": 258,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Alerte",
+      "y": 258,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 258,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "📈 Rapoarte programate\n+",
+      "y": 493,
+      "href": null
+     },
+     {
+      "t": "▶\nT\nTest Student\nAviation\n🔥 1 zile\n50% corect",
+      "y": 625,
+      "href": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 861,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 861,
+      "href": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 861,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "y": 708,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 728,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Respinge",
+      "y": 763,
+      "href": null
+     },
+     {
+      "t": "Accept",
+      "y": 763,
+      "href": null
+     }
+    ],
+    "vh": 844,
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\n3\n9+\n📲\n\nInstalează eTutor\n\nAcces rapid de pe ecranul principal + remindere gratuite ca să-ți păstrezi ritmul de studiu.\n\nInstalează\nMai târziu\nMonitorizare\nAlerte\nCadență alerte\nMonitor Progres Studenți\n\nFiecare copil are un capitol. Deschide-l pentru program, sesiuni și remindere.\n\nℹ\nCUM FUNCȚIONEAZĂ\n📈 Rapoarte programate\n+\n▶\nT\nTest Student\nAviation\n🔥 1 zile\n50% corect\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+    "hscroll": false
+   },
+   {
+    "step": 5,
+    "name": "notifications",
+    "url": "https://etutor.ro/ro/dashboard/watcher/notifications",
+    "shot": "mobile-05-notifications.png",
+    "errs": [],
+    "bad": [],
+    "title": "Watcher - Tutor",
+    "h1": [
+     "Notificări"
+    ],
+    "btns": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Close menu",
+      "y": 10,
+      "href": null
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Monitorizare",
+      "y": 165,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 213,
+      "href": "/ro/dashboard/rapoarte"
+     },
+     {
+      "t": "Alerte",
+      "y": 261,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 309,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "Familia mea",
+      "y": 357,
+      "href": "/ro/dashboard/family"
+     },
+     {
+      "t": "Abonament",
+      "y": 441,
+      "href": "/ro/dashboard/packages"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 489,
+      "href": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 537,
+      "href": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 585,
+      "href": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 633,
+      "href": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 680,
+      "href": null
+     },
+     {
+      "t": "RO",
+      "y": 680,
+      "href": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 784,
+      "href": null
+     },
+     {
+      "t": "🚀\n3",
+      "y": 13,
+      "href": null
+     },
+     {
+      "t": "9+",
+      "y": 6,
+      "href": null
+     },
+     {
+      "t": "Instalează",
+      "y": 193,
+      "href": null
+     },
+     {
+      "t": "Mai târziu",
+      "y": 193,
+      "href": null
+     },
+     {
+      "t": "Monitorizare",
+      "y": 258,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Alerte",
+      "y": 258,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 258,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "Marchează toate ca citite",
+      "y": 385,
+      "href": null
+     },
+     {
+      "t": "Toate",
+      "y": 452,
+      "href": null
+     },
+     {
+      "t": "Necitite",
+      "y": 452,
+      "href": null
+     },
+     {
+      "t": "Aplicație",
+      "y": 684,
+      "href": null
+     },
+     {
+      "t": "Telegram",
+      "y": 718,
+      "href": null
+     },
+     {
+      "t": "Email",
+      "y": 718,
+      "href": null
+     },
+     {
+      "t": "Trimite reminder acum",
+      "y": 752,
+      "href": null
+     },
+     {
+      "t": "Serie de remindere…",
+      "y": 788,
+      "href": null
+     },
+     {
+      "t": "Marchează ca citit",
+      "y": 517,
+      "href": null
+     },
+     {
+      "t": "Aplicație",
+      "y": 1027,
+      "href": null
+     },
+     {
+      "t": "Telegram",
+      "y": 1061,
+      "href": null
+     },
+     {
+      "t": "Email",
+      "y": 1061,
+      "href": null
+     },
+     {
+      "t": "Trimite reminder acum",
+      "y": 1095,
+      "href": null
+     },
+     {
+      "t": "Serie de remindere…",
+      "y": 1131,
+      "href": null
+     },
+     {
+      "t": "Marchează ca citit",
+      "y": 860,
+      "href": null
+     },
+     {
+      "t": "Aplicație",
+      "y": 1370,
+      "href": null
+     },
+     {
+      "t": "Telegram",
+      "y": 1404,
+      "href": null
+     }
+    ],
+    "vh": 844,
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\n3\n9+\n📲\n\nInstalează eTutor\n\nAcces rapid de pe ecranul principal + remindere gratuite ca să-ți păstrezi ritmul de studiu.\n\nInstalează\nMai târziu\nMonitorizare\nAlerte\nCadență alerte\nℹ\nCUM FUNCȚIONEAZĂ\nNotificări\n\n50 necitite\n\nMarchează toate ca citite\nToate\nNecitite\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n05.10.2026, 10:00:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n05.10.2026, 09:30:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n05.10.2026, 09:00:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nNu a reacționat la reminder\n\nTest Student nu a reacționat la niciun canal. Poți autoriza un reminder suplimentar.\n\n05.10.2026, 08:30:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 10:15:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 10:15:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 10:15:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 10:15:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:45:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎnc",
+    "hscroll": false
+   },
+   {
+    "step": 6,
+    "name": "family",
+    "url": "https://etutor.ro/ro/dashboard/family",
+    "shot": "mobile-06-family.png",
+    "errs": [],
+    "bad": [],
+    "title": "Dashboard - Tutor | Tutor",
+    "h1": [
+     "Familia mea",
+     "Copii"
+    ],
+    "btns": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Close menu",
+      "y": 10,
+      "href": null
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Monitorizare",
+      "y": 165,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 213,
+      "href": "/ro/dashboard/rapoarte"
+     },
+     {
+      "t": "Alerte",
+      "y": 261,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 309,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "Familia mea",
+      "y": 357,
+      "href": "/ro/dashboard/family"
+     },
+     {
+      "t": "Abonament",
+      "y": 441,
+      "href": "/ro/dashboard/packages"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 489,
+      "href": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 537,
+      "href": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 585,
+      "href": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 633,
+      "href": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 680,
+      "href": null
+     },
+     {
+      "t": "RO",
+      "y": 680,
+      "href": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 784,
+      "href": null
+     },
+     {
+      "t": "🚀\n3",
+      "y": 13,
+      "href": null
+     },
+     {
+      "t": "9+",
+      "y": 6,
+      "href": null
+     },
+     {
+      "t": "Vezi pachetele",
+      "y": 298,
+      "href": "/dashboard/packages?plan=FAMILY"
+     },
+     {
+      "t": "Adaugă copil",
+      "y": 378,
+      "href": null
+     },
+     {
+      "t": "Adaugă al 2-lea părinte",
+      "y": 462,
+      "href": null
+     },
+     {
+      "t": "Adaugă meditator",
+      "y": 546,
+      "href": null
+     },
+     {
+      "t": "Scoate",
+      "y": 709,
+      "href": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 914,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 914,
+      "href": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 914,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "y": 708,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 728,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Respinge",
+      "y": 763,
+      "href": null
+     },
+     {
+      "t": "Accept",
+      "y": 763,
+      "href": null
+     }
+    ],
+    "vh": 844,
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\n3\n9+\nFamilia mea\n\nAdaugă copilul, al doilea părinte sau meditatorul. Fiecare are cont propriu și vede doar ce i se cuvine.\n\nPachet: Fără pachet de familie\nPărinți: 1/0\nCopii: 1/0\nMeditatori: 0/0\n\nNu ai un pachet de familie activ. Vezi pachetele ca să adaugi membri.\n\nAdaugă copil\nAcest cont nu are un pachet de familie activ. Alege un pachet ca să adaugi membri.\nAdaugă al 2-lea părinte\nAcest cont nu are un pachet de familie activ. Alege un pachet ca să adaugi membri.\nAdaugă meditator\nAcest cont nu are un pachet de familie activ. Alege un pachet ca să adaugi membri.\nCopii\n\nTest Student\n\ntest_student@test.com\n\nScoate\nDoar încurajări calme — Limitează tonul energic pentru acest copil\nEu gestionez notificările pentru acest copil — Când e bifat, tu alegi canalele copilului; el nu le mai schimbă singur.\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+    "hscroll": false
+   },
+   {
+    "step": 7,
+    "name": "setari",
+    "url": "https://etutor.ro/ro/dashboard/watcher/setari",
+    "shot": "mobile-07-setari.png",
+    "errs": [],
+    "bad": [],
+    "title": "Watcher - Tutor",
+    "h1": [
+     "Notificările mele",
+     "Ordinea canalelor",
+     "Cât de des te anunțăm",
+     "Canale de notificare",
+     "Ore de liniște",
+     "Fus orar",
+     "Abonament"
+    ],
+    "btns": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Close menu",
+      "y": 10,
+      "href": null
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Monitorizare",
+      "y": 165,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 213,
+      "href": "/ro/dashboard/rapoarte"
+     },
+     {
+      "t": "Alerte",
+      "y": 261,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 309,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "Familia mea",
+      "y": 357,
+      "href": "/ro/dashboard/family"
+     },
+     {
+      "t": "Abonament",
+      "y": 441,
+      "href": "/ro/dashboard/packages"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 489,
+      "href": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 537,
+      "href": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 585,
+      "href": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 633,
+      "href": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 680,
+      "href": null
+     },
+     {
+      "t": "RO",
+      "y": 680,
+      "href": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 784,
+      "href": null
+     },
+     {
+      "t": "🚀\n3",
+      "y": 13,
+      "href": null
+     },
+     {
+      "t": "9+",
+      "y": 6,
+      "href": null
+     },
+     {
+      "t": "Monitorizare",
+      "y": 112,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Alerte",
+      "y": 112,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 112,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "Enable Push",
+      "y": 343,
+      "href": null
+     },
+     {
+      "t": "Salvează",
+      "y": 506,
+      "href": null
+     },
+     {
+      "t": "Începe conectarea",
+      "y": 975,
+      "href": null
+     },
+     {
+      "t": "↑",
+      "y": 1151,
+      "href": null
+     },
+     {
+      "t": "↓",
+      "y": 1151,
+      "href": null
+     },
+     {
+      "t": "↑",
+      "y": 1209,
+      "href": null
+     },
+     {
+      "t": "↓",
+      "y": 1209,
+      "href": null
+     },
+     {
+      "t": "↑",
+      "y": 1267,
+      "href": null
+     },
+     {
+      "t": "↓",
+      "y": 1267,
+      "href": null
+     },
+     {
+      "t": "↑",
+      "y": 1331,
+      "href": null
+     },
+     {
+      "t": "↓",
+      "y": 1331,
+      "href": null
+     },
+     {
+      "t": "Salvează preferințele",
+      "y": 2451,
+      "href": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 2710,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 2710,
+      "href": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 2710,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "y": 708,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 728,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Respinge",
+      "y": 763,
+      "href": null
+     },
+     {
+      "t": "Accept",
+      "y": 763,
+      "href": null
+     }
+    ],
+    "vh": 844,
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\n3\n9+\nMonitorizare\nAlerte\nCadență alerte\nNotificările mele\n\nAlege cum și în ce ordine vrei să fii anunțat tu când copilul are nevoie de un impuls.\n\nℹ\nCUM FUNCȚIONEAZĂ\nNotificări în browser\n\nPrimești alertele în timp real, chiar și cu aplicația închisă.\n\nEnable Push\nNumărul meu de telefon (WhatsApp)\n\nAdaugă un număr dacă vrei să primești alerte și pe WhatsApp.\n\nSalvează\nPrimește notificările pe Telegram\n\nE gratuit și ajunge instant, iar butonul din mesaj oprește restul reminderelor dintr-o apăsare.\n\nConectat înainte să plătești abonamentul: încă −10% la preț, care rămâne și după.\n\nCUM DECURGE — 3 PAȘI, O SINGURĂ DATĂ\n\n1. Apeși butonul de mai jos. Îți dăm un link și un cod QR.\n2. De pe telefon apeși linkul; de pe calculator scanezi codul QR cu telefonul pe care ai Telegram.\n3. În Telegram apeși START. Gata — pagina asta se schimbă singură.\n\nAi nevoie de telefonul pe care e instalat Telegram. Nu-ți cerem parola și nu vedem conversațiile tale — botul îți poate doar trimite mesaje.\n\nÎncepe conectarea\nOrdinea canalelor\n\nTe căutăm în această ordine — dacă nu răspunzi pe primul, trecem la următorul.\n\n1\nNotificări Push (în aplicație)\n↑\n↓\n2\nTelegram\n↑\n↓\n3\nAlerte Email\n↑\n↓\n4\nMesaje WhatsApp🔒 Disponibil în pachetele plătite\n↑\n↓\nCât de des te anunțăm\n\nCât timp copilul nu reacționează, te re-anunțăm pe canalele tale astfel:\n\nStandard — la 30 de minute\nLa fiecare\nore\nZilnic la ora\nRezumat zilnic la ora\nFără alerte în timpul zilei: un singur mesaj cu tot ce s-a întâmplat, la ora aleasă (și dacă e în orele de liniște).\nO singură alertă, fără renotificare\nCanale de notificare\n\nAlege cum vrei să primești remindere și alerte\n\nNotificări Push (în aplicație)\nMesaje WhatsApp\n🔒 Disponibil în pachetele plătite\nMesaje SMS\n🔒 Disponibil în pachetele plătite\nAlerte Email\nApel Instructor\nOre de liniște\n\nNu se trimit notificări în acest interval\n\nDe la\nPână la\nFus orar\nEurope/Bucharest\nEurope/London\nEurope/Berlin\nEurope/Paris\nAmerica/New_York\nAmerica/Chicago\nAmerica/Los_Angeles\nAsia/Tokyo\nUTC\nSalvează preferințele\nAbonament\n\nAnunțurile cu câte zile gratuite mai ai, când contul intră în pauză și cât costă pachetul. Alertele despre copil nu depind de asta.\n\nMesaje despre proba gratuită și abonament\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru ",
+    "hscroll": false
+   }
+  ]
+ },
+ "desktop": {
+  "m": {
+   "loginToListSec": 1.88,
+   "kidLinks": [
+    "/ro/dashboard/watcher/notifications",
+    "/ro/dashboard/watcher/setari"
+   ],
+   "totalSec": 43.214
+  },
+  "log": [
+   {
+    "step": 1,
+    "name": "signin",
+    "url": "https://etutor.ro/ro/auth/signin",
+    "shot": "desktop-01-signin.png",
+    "errs": [],
+    "bad": [],
+    "title": "Sign In - Tutor | Tutor",
+    "h1": [
+     "Autentifică-te în Tutor"
+    ],
+    "btns": [
+     {
+      "t": "Continuă cu Google",
+      "y": 234,
+      "href": null
+     },
+     {
+      "t": "Arată parola",
+      "y": 450,
+      "href": null
+     },
+     {
+      "t": "Autentificare",
+      "y": 510,
+      "href": null
+     },
+     {
+      "t": "Nu ai email? Recuperează pe telefon",
+      "y": 560,
+      "href": "/ro/auth/recuperare"
+     },
+     {
+      "t": "Ai uitat parola?",
+      "y": 558,
+      "href": "/ro/auth/forgot-password"
+     },
+     {
+      "t": "Folosește magic link",
+      "y": 558,
+      "href": null
+     },
+     {
+      "t": "Fă-ți unul",
+      "y": 618,
+      "href": "/ro/auth/register"
+     },
+     {
+      "t": "încearcă fără cont ✨",
+      "y": 654,
+      "href": "/ro/try"
+     },
+     {
+      "t": "Termeni și condiții",
+      "y": 698,
+      "href": "/ro/terms"
+     },
+     {
+      "t": "Politica de confidențialitate",
+      "y": 722,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 917,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 917,
+      "href": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 917,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "y": 838,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 838,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Respinge",
+      "y": 815,
+      "href": null
+     },
+     {
+      "t": "Accept",
+      "y": 815,
+      "href": null
+     }
+    ],
+    "vh": 900,
+    "body": "Autentifică-te în Tutor\n\nAccesează platforma ta de învățare adaptivă\n\nContinuă cu Google\nSau continuă cu\nEmail sau nume de utilizator\nParola\nAutentificare\nNu ai email? Recuperează pe telefon\nAi uitat parola?\nFolosește magic link\n\nNu ai cont? Fă-ți unul\n\nSau încearcă fără cont ✨\n\nPrin autentificare, ești de acord cu Termeni și condiții & Politica de confidențialitate\n\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+    "hscroll": false
+   },
+   {
+    "step": 2,
+    "name": "after-login",
+    "url": "https://etutor.ro/ro/dashboard",
+    "shot": "desktop-02-after-login.png",
+    "errs": [],
+    "bad": [],
+    "title": "Dashboard - Tutor | Tutor",
+    "h1": [],
+    "btns": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Monitorizare",
+      "y": 165,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 213,
+      "href": "/ro/dashboard/rapoarte"
+     },
+     {
+      "t": "Alerte",
+      "y": 261,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 309,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "Familia mea",
+      "y": 357,
+      "href": "/ro/dashboard/family"
+     },
+     {
+      "t": "Abonament",
+      "y": 441,
+      "href": "/ro/dashboard/packages"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 489,
+      "href": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 537,
+      "href": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 585,
+      "href": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 633,
+      "href": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 736,
+      "href": null
+     },
+     {
+      "t": "RO",
+      "y": 736,
+      "href": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 840,
+      "href": null
+     },
+     {
+      "t": "🚀\nConfigurare\n3",
+      "y": 13,
+      "href": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "href": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 917,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 917,
+      "href": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 917,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "y": 838,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 838,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Respinge",
+      "y": 815,
+      "href": null
+     },
+     {
+      "t": "Accept",
+      "y": 815,
+      "href": null
+     }
+    ],
+    "vh": 900,
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\nConfigurare\n3\nSe încarcă...\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+    "hscroll": false
+   },
+   {
+    "step": 3,
+    "name": "watcher-list",
+    "url": "https://etutor.ro/ro/dashboard/watcher",
+    "shot": "desktop-03-watcher-list.png",
+    "errs": [
+     "Failed to load resource: the server responded with a status of 429 ()",
+     "Failed to load resource: the server responded with a status of 429 ()"
+    ],
+    "bad": [
+     "429 https://etutor.ro/api/dashboard/watcher/reports",
+     "429 https://etutor.ro/api/dashboard/watcher"
+    ],
+    "title": "Watcher - Tutor",
+    "h1": [
+     "Monitor Progres Studenți"
+    ],
+    "btns": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Monitorizare",
+      "y": 165,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 213,
+      "href": "/ro/dashboard/rapoarte"
+     },
+     {
+      "t": "Alerte",
+      "y": 261,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 309,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "Familia mea",
+      "y": 357,
+      "href": "/ro/dashboard/family"
+     },
+     {
+      "t": "Abonament",
+      "y": 441,
+      "href": "/ro/dashboard/packages"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 489,
+      "href": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 537,
+      "href": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 585,
+      "href": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 633,
+      "href": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 736,
+      "href": null
+     },
+     {
+      "t": "RO",
+      "y": 736,
+      "href": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 840,
+      "href": null
+     },
+     {
+      "t": "🚀\nConfigurare\n3",
+      "y": 13,
+      "href": null
+     },
+     {
+      "t": "9+",
+      "y": 6,
+      "href": null
+     },
+     {
+      "t": "Monitorizare",
+      "y": 80,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Alerte",
+      "y": 80,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 80,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "📈 Rapoarte programate\n+",
+      "y": 295,
+      "href": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 917,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 917,
+      "href": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 917,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "y": 838,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 838,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Respinge",
+      "y": 815,
+      "href": null
+     },
+     {
+      "t": "Accept",
+      "y": 815,
+      "href": null
+     }
+    ],
+    "vh": 900,
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\nConfigurare\n3\n9+\nMonitorizare\nAlerte\nCadență alerte\nMonitor Progres Studenți\n\nFiecare copil are un capitol. Deschide-l pentru program, sesiuni și remindere.\n\nℹ\nCUM FUNCȚIONEAZĂ\n📈 Rapoarte programate\n+\n\nNiciun student de monitorizat\n\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+    "hscroll": false
+   },
+   {
+    "step": 4,
+    "name": "card-click",
+    "url": "https://etutor.ro/ro/dashboard/watcher",
+    "shot": "desktop-04-card-click.png",
+    "errs": [],
+    "bad": [],
+    "title": "Watcher - Tutor",
+    "h1": [
+     "Monitor Progres Studenți"
+    ],
+    "btns": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Monitorizare",
+      "y": 165,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 213,
+      "href": "/ro/dashboard/rapoarte"
+     },
+     {
+      "t": "Alerte",
+      "y": 261,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 309,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "Familia mea",
+      "y": 357,
+      "href": "/ro/dashboard/family"
+     },
+     {
+      "t": "Abonament",
+      "y": 441,
+      "href": "/ro/dashboard/packages"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 489,
+      "href": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 537,
+      "href": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 585,
+      "href": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 633,
+      "href": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 736,
+      "href": null
+     },
+     {
+      "t": "RO",
+      "y": 736,
+      "href": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 840,
+      "href": null
+     },
+     {
+      "t": "🚀\nConfigurare\n3",
+      "y": 13,
+      "href": null
+     },
+     {
+      "t": "9+",
+      "y": 6,
+      "href": null
+     },
+     {
+      "t": "Monitorizare",
+      "y": 80,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Alerte",
+      "y": 80,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 80,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "📈 Rapoarte programate\n+",
+      "y": 295,
+      "href": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 917,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 917,
+      "href": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 917,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "y": 838,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 838,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Respinge",
+      "y": 815,
+      "href": null
+     },
+     {
+      "t": "Accept",
+      "y": 815,
+      "href": null
+     }
+    ],
+    "vh": 900,
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\nConfigurare\n3\n9+\nMonitorizare\nAlerte\nCadență alerte\nMonitor Progres Studenți\n\nFiecare copil are un capitol. Deschide-l pentru program, sesiuni și remindere.\n\nℹ\nCUM FUNCȚIONEAZĂ\n📈 Rapoarte programate\n+\n\nNiciun student de monitorizat\n\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+    "hscroll": false
+   },
+   {
+    "step": 5,
+    "name": "notifications",
+    "url": "https://etutor.ro/ro/dashboard/watcher/notifications",
+    "shot": "desktop-05-notifications.png",
+    "errs": [],
+    "bad": [],
+    "title": "Watcher - Tutor",
+    "h1": [
+     "Notificări"
+    ],
+    "btns": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Monitorizare",
+      "y": 165,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 213,
+      "href": "/ro/dashboard/rapoarte"
+     },
+     {
+      "t": "Alerte",
+      "y": 261,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 309,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "Familia mea",
+      "y": 357,
+      "href": "/ro/dashboard/family"
+     },
+     {
+      "t": "Abonament",
+      "y": 441,
+      "href": "/ro/dashboard/packages"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 489,
+      "href": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 537,
+      "href": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 585,
+      "href": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 633,
+      "href": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 10024,
+      "href": null
+     },
+     {
+      "t": "RO",
+      "y": 10024,
+      "href": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 10128,
+      "href": null
+     },
+     {
+      "t": "🚀\nConfigurare\n3",
+      "y": 13,
+      "href": null
+     },
+     {
+      "t": "9+",
+      "y": 6,
+      "href": null
+     },
+     {
+      "t": "Monitorizare",
+      "y": 80,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Alerte",
+      "y": 80,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 80,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "Marchează toate ca citite",
+      "y": 207,
+      "href": null
+     },
+     {
+      "t": "Toate",
+      "y": 274,
+      "href": null
+     },
+     {
+      "t": "Necitite",
+      "y": 274,
+      "href": null
+     },
+     {
+      "t": "Aplicație",
+      "y": 430,
+      "href": null
+     },
+     {
+      "t": "Telegram",
+      "y": 430,
+      "href": null
+     },
+     {
+      "t": "Email",
+      "y": 430,
+      "href": null
+     },
+     {
+      "t": "Trimite reminder acum",
+      "y": 464,
+      "href": null
+     },
+     {
+      "t": "Serie de remindere…",
+      "y": 464,
+      "href": null
+     },
+     {
+      "t": "Marchează ca citit",
+      "y": 339,
+      "href": null
+     },
+     {
+      "t": "Aplicație",
+      "y": 627,
+      "href": null
+     },
+     {
+      "t": "Telegram",
+      "y": 627,
+      "href": null
+     },
+     {
+      "t": "Email",
+      "y": 627,
+      "href": null
+     },
+     {
+      "t": "Trimite reminder acum",
+      "y": 661,
+      "href": null
+     },
+     {
+      "t": "Serie de remindere…",
+      "y": 661,
+      "href": null
+     },
+     {
+      "t": "Marchează ca citit",
+      "y": 536,
+      "href": null
+     },
+     {
+      "t": "Aplicație",
+      "y": 824,
+      "href": null
+     },
+     {
+      "t": "Telegram",
+      "y": 824,
+      "href": null
+     },
+     {
+      "t": "Email",
+      "y": 824,
+      "href": null
+     },
+     {
+      "t": "Trimite reminder acum",
+      "y": 858,
+      "href": null
+     },
+     {
+      "t": "Serie de remindere…",
+      "y": 858,
+      "href": null
+     }
+    ],
+    "vh": 900,
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\nConfigurare\n3\n9+\nMonitorizare\nAlerte\nCadență alerte\nℹ\nCUM FUNCȚIONEAZĂ\nNotificări\n\n50 necitite\n\nMarchează toate ca citite\nToate\nNecitite\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n05.10.2026, 10:00:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n05.10.2026, 09:30:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n05.10.2026, 09:00:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nNu a reacționat la reminder\n\nTest Student nu a reacționat la niciun canal. Poți autoriza un reminder suplimentar.\n\n05.10.2026, 08:30:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 10:15:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 10:15:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 10:15:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 10:15:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:45:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:45:03\nParent Alert\nP",
+    "hscroll": false
+   },
+   {
+    "step": 6,
+    "name": "family",
+    "url": "https://etutor.ro/ro/dashboard/family",
+    "shot": "desktop-06-family.png",
+    "errs": [],
+    "bad": [],
+    "title": "Dashboard - Tutor | Tutor",
+    "h1": [
+     "Familia mea",
+     "Copii"
+    ],
+    "btns": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Monitorizare",
+      "y": 165,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 213,
+      "href": "/ro/dashboard/rapoarte"
+     },
+     {
+      "t": "Alerte",
+      "y": 261,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 309,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "Familia mea",
+      "y": 357,
+      "href": "/ro/dashboard/family"
+     },
+     {
+      "t": "Abonament",
+      "y": 441,
+      "href": "/ro/dashboard/packages"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 489,
+      "href": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 537,
+      "href": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 585,
+      "href": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 633,
+      "href": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 736,
+      "href": null
+     },
+     {
+      "t": "RO",
+      "y": 736,
+      "href": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 840,
+      "href": null
+     },
+     {
+      "t": "🚀\nConfigurare\n3",
+      "y": 13,
+      "href": null
+     },
+     {
+      "t": "9+",
+      "y": 6,
+      "href": null
+     },
+     {
+      "t": "Vezi pachetele",
+      "y": 210,
+      "href": "/dashboard/packages?plan=FAMILY"
+     },
+     {
+      "t": "Adaugă copil",
+      "y": 270,
+      "href": null
+     },
+     {
+      "t": "Adaugă al 2-lea părinte",
+      "y": 270,
+      "href": null
+     },
+     {
+      "t": "Adaugă meditator",
+      "y": 270,
+      "href": null
+     },
+     {
+      "t": "Scoate",
+      "y": 433,
+      "href": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 917,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 917,
+      "href": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 917,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "y": 838,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 838,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Respinge",
+      "y": 815,
+      "href": null
+     },
+     {
+      "t": "Accept",
+      "y": 815,
+      "href": null
+     }
+    ],
+    "vh": 900,
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\nConfigurare\n3\n9+\nFamilia mea\n\nAdaugă copilul, al doilea părinte sau meditatorul. Fiecare are cont propriu și vede doar ce i se cuvine.\n\nPachet: Fără pachet de familie\nPărinți: 1/0\nCopii: 1/0\nMeditatori: 0/0\n\nNu ai un pachet de familie activ. Vezi pachetele ca să adaugi membri.\n\nAdaugă copil\nAcest cont nu are un pachet de familie activ. Alege un pachet ca să adaugi membri.\nAdaugă al 2-lea părinte\nAcest cont nu are un pachet de familie activ. Alege un pachet ca să adaugi membri.\nAdaugă meditator\nAcest cont nu are un pachet de familie activ. Alege un pachet ca să adaugi membri.\nCopii\n\nTest Student\n\ntest_student@test.com\n\nScoate\nDoar încurajări calme — Limitează tonul energic pentru acest copil\nEu gestionez notificările pentru acest copil — Când e bifat, tu alegi canalele copilului; el nu le mai schimbă singur.\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+    "hscroll": false
+   },
+   {
+    "step": 7,
+    "name": "setari",
+    "url": "https://etutor.ro/ro/dashboard/watcher/setari",
+    "shot": "desktop-07-setari.png",
+    "errs": [],
+    "bad": [],
+    "title": "Watcher - Tutor",
+    "h1": [
+     "Notificările mele",
+     "Ordinea canalelor",
+     "Cât de des te anunțăm",
+     "Canale de notificare",
+     "Ore de liniște",
+     "Fus orar",
+     "Abonament"
+    ],
+    "btns": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "href": "/ro/dashboard"
+     },
+     {
+      "t": "Monitorizare",
+      "y": 165,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 213,
+      "href": "/ro/dashboard/rapoarte"
+     },
+     {
+      "t": "Alerte",
+      "y": 261,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 309,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "Familia mea",
+      "y": 357,
+      "href": "/ro/dashboard/family"
+     },
+     {
+      "t": "Abonament",
+      "y": 441,
+      "href": "/ro/dashboard/packages"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 489,
+      "href": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 537,
+      "href": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 585,
+      "href": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 633,
+      "href": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 2225,
+      "href": null
+     },
+     {
+      "t": "RO",
+      "y": 2225,
+      "href": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 2329,
+      "href": null
+     },
+     {
+      "t": "🚀\nConfigurare\n3",
+      "y": 13,
+      "href": null
+     },
+     {
+      "t": "9+",
+      "y": 6,
+      "href": null
+     },
+     {
+      "t": "Monitorizare",
+      "y": 80,
+      "href": "/ro/dashboard/watcher"
+     },
+     {
+      "t": "Alerte",
+      "y": 80,
+      "href": "/ro/dashboard/watcher/notifications"
+     },
+     {
+      "t": "Cadență alerte",
+      "y": 80,
+      "href": "/ro/dashboard/watcher/setari"
+     },
+     {
+      "t": "Enable Push",
+      "y": 291,
+      "href": null
+     },
+     {
+      "t": "Salvează",
+      "y": 422,
+      "href": null
+     },
+     {
+      "t": "Începe conectarea",
+      "y": 783,
+      "href": null
+     },
+     {
+      "t": "↑",
+      "y": 939,
+      "href": null
+     },
+     {
+      "t": "↓",
+      "y": 939,
+      "href": null
+     },
+     {
+      "t": "↑",
+      "y": 997,
+      "href": null
+     },
+     {
+      "t": "↓",
+      "y": 997,
+      "href": null
+     },
+     {
+      "t": "↑",
+      "y": 1055,
+      "href": null
+     },
+     {
+      "t": "↓",
+      "y": 1055,
+      "href": null
+     },
+     {
+      "t": "↑",
+      "y": 1113,
+      "href": null
+     },
+     {
+      "t": "↓",
+      "y": 1113,
+      "href": null
+     },
+     {
+      "t": "Salvează preferințele",
+      "y": 2175,
+      "href": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 2406,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 2406,
+      "href": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 2406,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Politica de cookie-uri",
+      "y": 838,
+      "href": "/ro/cookies"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 838,
+      "href": "/ro/privacy"
+     },
+     {
+      "t": "Respinge",
+      "y": 815,
+      "href": null
+     },
+     {
+      "t": "Accept",
+      "y": 815,
+      "href": null
+     }
+    ],
+    "vh": 900,
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\nConfigurare\n3\n9+\nMonitorizare\nAlerte\nCadență alerte\nNotificările mele\n\nAlege cum și în ce ordine vrei să fii anunțat tu când copilul are nevoie de un impuls.\n\nℹ\nCUM FUNCȚIONEAZĂ\nNotificări în browser\n\nPrimești alertele în timp real, chiar și cu aplicația închisă.\n\nEnable Push\nNumărul meu de telefon (WhatsApp)\n\nAdaugă un număr dacă vrei să primești alerte și pe WhatsApp.\n\nSalvează\nPrimește notificările pe Telegram\n\nE gratuit și ajunge instant, iar butonul din mesaj oprește restul reminderelor dintr-o apăsare.\n\nConectat înainte să plătești abonamentul: încă −10% la preț, care rămâne și după.\n\nCUM DECURGE — 3 PAȘI, O SINGURĂ DATĂ\n\n1. Apeși butonul de mai jos. Îți dăm un link și un cod QR.\n2. De pe telefon apeși linkul; de pe calculator scanezi codul QR cu telefonul pe care ai Telegram.\n3. În Telegram apeși START. Gata — pagina asta se schimbă singură.\n\nAi nevoie de telefonul pe care e instalat Telegram. Nu-ți cerem parola și nu vedem conversațiile tale — botul îți poate doar trimite mesaje.\n\nÎncepe conectarea\nOrdinea canalelor\n\nTe căutăm în această ordine — dacă nu răspunzi pe primul, trecem la următorul.\n\n1\nNotificări Push (în aplicație)\n↑\n↓\n2\nTelegram\n↑\n↓\n3\nAlerte Email\n↑\n↓\n4\nMesaje WhatsApp🔒 Disponibil în pachetele plătite\n↑\n↓\nCât de des te anunțăm\n\nCât timp copilul nu reacționează, te re-anunțăm pe canalele tale astfel:\n\nStandard — la 30 de minute\nLa fiecare\nore\nZilnic la ora\nRezumat zilnic la ora\nFără alerte în timpul zilei: un singur mesaj cu tot ce s-a întâmplat, la ora aleasă (și dacă e în orele de liniște).\nO singură alertă, fără renotificare\nCanale de notificare\n\nAlege cum vrei să primești remindere și alerte\n\nNotificări Push (în aplicație)\nMesaje WhatsApp\n🔒 Disponibil în pachetele plătite\nMesaje SMS\n🔒 Disponibil în pachetele plătite\nAlerte Email\nApel Instructor\nOre de liniște\n\nNu se trimit notificări în acest interval\n\nDe la\nPână la\nFus orar\nEurope/Bucharest\nEurope/London\nEurope/Berlin\nEurope/Paris\nAmerica/New_York\nAmerica/Chicago\nAmerica/Los_Angeles\nAsia/Tokyo\nUTC\nSalvează preferințele\nAbonament\n\nAnunțurile cu câte zile gratuite mai ai, când contul intră în pauză și cât costă pachetul. Alertele despre copil nu depind de asta.\n\nMesaje despre proba gratuită și abonament\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esenț",
+    "hscroll": false
+   }
+  ]
+ }
+}

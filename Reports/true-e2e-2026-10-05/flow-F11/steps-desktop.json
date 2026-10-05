@@ -1,0 +1,974 @@
+{
+ "vp": "desktop",
+ "steps": [
+  {
+   "n": 1,
+   "name": "admin-login",
+   "file": "desktop-01-admin-login.png",
+   "url": "/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "1.4",
+   "taps": 1,
+   "h1": "Panou de control",
+   "vis": [
+    {
+     "t": "Tutor",
+     "below": false
+    },
+    {
+     "t": "EN",
+     "below": true
+    },
+    {
+     "t": "RO",
+     "below": true
+    },
+    {
+     "t": "Deconectare",
+     "below": true
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "below": false
+    },
+    {
+     "t": "Notificări",
+     "below": false
+    },
+    {
+     "t": "Astăzi",
+     "below": false
+    },
+    {
+     "t": "Panou complet",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\nLicență\n\nPROGRES\n\nProgresul meu\n\nELEVII MEI\n\nInstructor\n\nCOPILUL MEU\n\nMonitorizare\nAlerte\nCadență alerte\n\nCONT\n\nAbonament\nFamilia mea\nInvită un prieten\nNotificări\nSetări\nAjutor\nAdministrare\nEN\nRO\n\nqa-e2e-1005 Admin\n\nqa-e2e-1005-admin@demo.tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nPanou de control\nAstăzi\nPanou compl"
+  },
+  {
+   "n": 2,
+   "name": "import-empty-cookiebanner",
+   "file": "desktop-02-import-empty-cookiebanner.png",
+   "url": "/ro/dashboard/admin/import-cursanti",
+   "title": "Admin - Tutor",
+   "sec": "1.5",
+   "taps": 1,
+   "h1": "Administrare",
+   "vis": [
+    {
+     "t": "Tutor",
+     "below": false
+    },
+    {
+     "t": "EN",
+     "below": true
+    },
+    {
+     "t": "RO",
+     "below": true
+    },
+    {
+     "t": "Deconectare",
+     "below": true
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "below": false
+    },
+    {
+     "t": "Notificări",
+     "below": false
+    },
+    {
+     "t": "Vezi ce am înțeles",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\nLicență\n\nPROGRES\n\nProgresul meu\n\nELEVII MEI\n\nInstructor\n\nCOPILUL MEU\n\nMonitorizare\nAlerte\nCadență alerte\n\nCONT\n\nAbonament\nFamilia mea\nInvită un prieten\nNotificări\nSetări\nAjutor\nAdministrare\nEN\nRO\n\nqa-e2e-1005 Admin\n\nqa-e2e-1005-admin@demo.tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nAdministrare\nPrezentare generală\nÎn"
+  },
+  {
+   "n": 3,
+   "name": "import-file-loaded",
+   "file": "desktop-03-import-file-loaded.png",
+   "url": "/ro/dashboard/admin/import-cursanti",
+   "title": "Admin - Tutor",
+   "sec": "6.1",
+   "taps": 2,
+   "h1": "Administrare",
+   "vis": [
+    {
+     "t": "Tutor",
+     "below": false
+    },
+    {
+     "t": "EN",
+     "below": true
+    },
+    {
+     "t": "RO",
+     "below": true
+    },
+    {
+     "t": "Deconectare",
+     "below": true
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "below": false
+    },
+    {
+     "t": "Notificări",
+     "below": false
+    },
+    {
+     "t": "Vezi ce am înțeles",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\nLicență\n\nPROGRES\n\nProgresul meu\n\nELEVII MEI\n\nInstructor\n\nCOPILUL MEU\n\nMonitorizare\nAlerte\nCadență alerte\n\nCONT\n\nAbonament\nFamilia mea\nInvită un prieten\nNotificări\nSetări\nAjutor\nAdministrare\nEN\nRO\n\nqa-e2e-1005 Admin\n\nqa-e2e-1005-admin@demo.tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nAdministrare\nPrezentare generală\nÎn"
+  },
+  {
+   "n": 4,
+   "name": "import-preview",
+   "file": "desktop-04-import-preview.png",
+   "url": "/ro/dashboard/admin/import-cursanti",
+   "title": "Admin - Tutor",
+   "sec": "6.2",
+   "taps": 3,
+   "h1": "Administrare",
+   "vis": [
+    {
+     "t": "Tutor",
+     "below": false
+    },
+    {
+     "t": "EN",
+     "below": true
+    },
+    {
+     "t": "RO",
+     "below": true
+    },
+    {
+     "t": "Deconectare",
+     "below": true
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "below": false
+    },
+    {
+     "t": "Notificări",
+     "below": false
+    },
+    {
+     "t": "Vezi ce am înțeles",
+     "below": false
+    },
+    {
+     "t": "Importă 2 cursanți",
+     "below": true
+    }
+   ],
+   "hscroll": false,
+   "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\nLicență\n\nPROGRES\n\nProgresul meu\n\nELEVII MEI\n\nInstructor\n\nCOPILUL MEU\n\nMonitorizare\nAlerte\nCadență alerte\n\nCONT\n\nAbonament\nFamilia mea\nInvită un prieten\nNotificări\nSetări\nAjutor\nAdministrare\nEN\nRO\n\nqa-e2e-1005 Admin\n\nqa-e2e-1005-admin@demo.tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nAdministrare\nPrezentare generală\nÎn"
+  },
+  {
+   "n": 5,
+   "name": "import-done",
+   "file": "desktop-05-import-done.png",
+   "url": "/ro/dashboard/admin/import-cursanti",
+   "title": "Admin - Tutor",
+   "sec": "6.3",
+   "taps": 4,
+   "h1": "Administrare",
+   "vis": [
+    {
+     "t": "Tutor",
+     "below": false
+    },
+    {
+     "t": "EN",
+     "below": false
+    },
+    {
+     "t": "RO",
+     "below": false
+    },
+    {
+     "t": "Deconectare",
+     "below": false
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "below": false
+    },
+    {
+     "t": "Notificări",
+     "below": false
+    },
+    {
+     "t": "Vezi ce am înțeles",
+     "below": false
+    },
+    {
+     "t": "Vezi cursanții",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\nLicență\n\nPROGRES\n\nProgresul meu\n\nELEVII MEI\n\nInstructor\n\nCOPILUL MEU\n\nMonitorizare\nAlerte\nCadență alerte\n\nCONT\n\nAbonament\nFamilia mea\nInvită un prieten\nNotificări\nSetări\nAjutor\nAdministrare\nEN\nRO\n\nqa-e2e-1005 Admin\n\nqa-e2e-1005-admin@demo.tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nAdministrare\nPrezentare generală\nÎn"
+  },
+  {
+   "n": 6,
+   "name": "invitatii",
+   "file": "desktop-06-invitatii.png",
+   "url": "/ro/dashboard/admin/invitatii",
+   "title": "Admin - Tutor",
+   "sec": "6.5",
+   "taps": 6,
+   "h1": "Administrare",
+   "vis": [
+    {
+     "t": "Tutor",
+     "below": false
+    },
+    {
+     "t": "EN",
+     "below": true
+    },
+    {
+     "t": "RO",
+     "below": true
+    },
+    {
+     "t": "Deconectare",
+     "below": true
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "below": false
+    },
+    {
+     "t": "Notificări",
+     "below": false
+    },
+    {
+     "t": "Trimite invitația pe WhatsApp",
+     "below": true
+    }
+   ],
+   "hscroll": false,
+   "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\nLicență\n\nPROGRES\n\nProgresul meu\n\nELEVII MEI\n\nInstructor\n\nCOPILUL MEU\n\nMonitorizare\nAlerte\nCadență alerte\n\nCONT\n\nAbonament\nFamilia mea\nInvită un prieten\nNotificări\nSetări\nAjutor\nAdministrare\nEN\nRO\n\nqa-e2e-1005 Admin\n\nqa-e2e-1005-admin@demo.tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nAdministrare\nPrezentare generală\nÎn"
+  },
+  {
+   "n": 7,
+   "name": "invitatii-send-result",
+   "file": "desktop-07-invitatii-send-result.png",
+   "url": "/ro/dashboard/admin/invitatii",
+   "title": "Admin - Tutor",
+   "sec": "9.1",
+   "taps": 7,
+   "h1": "Administrare",
+   "vis": [
+    {
+     "t": "Tutor",
+     "below": false
+    },
+    {
+     "t": "EN",
+     "below": false
+    },
+    {
+     "t": "RO",
+     "below": false
+    },
+    {
+     "t": "Deconectare",
+     "below": false
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "below": false
+    },
+    {
+     "t": "Notificări",
+     "below": false
+    },
+    {
+     "t": "Trimite invitația pe WhatsApp",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\nLicență\n\nPROGRES\n\nProgresul meu\n\nELEVII MEI\n\nInstructor\n\nCOPILUL MEU\n\nMonitorizare\nAlerte\nCadență alerte\n\nCONT\n\nAbonament\nFamilia mea\nInvită un prieten\nNotificări\nSetări\nAjutor\nAdministrare\nEN\nRO\n\nqa-e2e-1005 Admin\n\nqa-e2e-1005-admin@demo.tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nAdministrare\nPrezentare generală\nÎn"
+  },
+  {
+   "n": 8,
+   "name": "acces-landing",
+   "file": "desktop-08-acces-landing.png",
+   "url": "/ro/acces/BZE17XKGHU2iBSP0sfBqcA",
+   "title": "Tutor - Adaptive Learning Platform",
+   "sec": "0.7",
+   "taps": 0,
+   "h1": "Ion Popescu qa-e2e-1005-d",
+   "vis": [
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Intră la curs",
+     "below": false
+    },
+    {
+     "t": "Politica de cookie-uri",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": false
+    },
+    {
+     "t": "Respinge",
+     "below": false
+    },
+    {
+     "t": "Accept",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "eTUTOR.ro\n\nBine ai venit,\n\nIon Popescu qa-e2e-1005-d\n\nAi acces la cursul Curs qa-e2e-1005 cu lectii.\n\nAlege cum vrei să intri de acum înainte. Datele tale sunt deja completate — nu mai ai nimic de scris despre tine.\n\nNume de utilizator\n\nLitere mici, cifre, punct sau minus. Cu el intri data viitoare.\n\nParolă\n\nCel puțin 8 caractere.\n\nScrie parola încă o dată\nIntră la curs\nConfidențialitate\n·\nTermeni"
+  },
+  {
+   "n": 9,
+   "name": "acces-fields-filled-bad",
+   "file": "desktop-09-acces-fields-filled-bad.png",
+   "url": "/ro/acces/BZE17XKGHU2iBSP0sfBqcA",
+   "title": "Tutor - Adaptive Learning Platform",
+   "sec": "1.0",
+   "taps": 1,
+   "h1": "Ion Popescu qa-e2e-1005-d",
+   "vis": [
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Intră la curs",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "eTUTOR.ro\n\nBine ai venit,\n\nIon Popescu qa-e2e-1005-d\n\nAi acces la cursul Curs qa-e2e-1005 cu lectii.\n\nAlege cum vrei să intri de acum înainte. Datele tale sunt deja completate — nu mai ai nimic de scris despre tine.\n\nNume de utilizator\n\nLitere mici, cifre, punct sau minus. Cu el intri data viitoare.\n\nParolă\n\nCel puțin 8 caractere.\n\nScrie parola încă o dată\nIntră la curs\nConfidențialitate\n·\nTermeni"
+  },
+  {
+   "n": 10,
+   "name": "acces-bad-submit",
+   "file": "desktop-10-acces-bad-submit.png",
+   "url": "/ro/acces/BZE17XKGHU2iBSP0sfBqcA",
+   "title": "Tutor - Adaptive Learning Platform",
+   "sec": "1.9",
+   "taps": 2,
+   "h1": "Ion Popescu qa-e2e-1005-d",
+   "vis": [
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Intră la curs",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "eTUTOR.ro\n\nBine ai venit,\n\nIon Popescu qa-e2e-1005-d\n\nAi acces la cursul Curs qa-e2e-1005 cu lectii.\n\nAlege cum vrei să intri de acum înainte. Datele tale sunt deja completate — nu mai ai nimic de scris despre tine.\n\nNume de utilizator\n\nLitere mici, cifre, punct sau minus. Cu el intri data viitoare.\n\nParolă\n\nCel puțin 8 caractere.\n\nScrie parola încă o dată\nNumele de utilizator: 3–30 de caractere, "
+  },
+  {
+   "n": 11,
+   "name": "acces-mismatch",
+   "file": "desktop-11-acces-mismatch.png",
+   "url": "/ro/acces/BZE17XKGHU2iBSP0sfBqcA",
+   "title": "Tutor - Adaptive Learning Platform",
+   "sec": "2.5",
+   "taps": 3,
+   "h1": "Ion Popescu qa-e2e-1005-d",
+   "vis": [
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Intră la curs",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "eTUTOR.ro\n\nBine ai venit,\n\nIon Popescu qa-e2e-1005-d\n\nAi acces la cursul Curs qa-e2e-1005 cu lectii.\n\nAlege cum vrei să intri de acum înainte. Datele tale sunt deja completate — nu mai ai nimic de scris despre tine.\n\nNume de utilizator\n\nLitere mici, cifre, punct sau minus. Cu el intri data viitoare.\n\nParolă\n\nCel puțin 8 caractere.\n\nScrie parola încă o dată\nCele două parole nu sunt la fel.\nIntră la"
+  },
+  {
+   "n": 12,
+   "name": "acces-good-filled",
+   "file": "desktop-12-acces-good-filled.png",
+   "url": "/ro/acces/BZE17XKGHU2iBSP0sfBqcA",
+   "title": "Tutor - Adaptive Learning Platform",
+   "sec": "2.5",
+   "taps": 3,
+   "h1": "Ion Popescu qa-e2e-1005-d",
+   "vis": [
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Arată parola",
+     "below": false
+    },
+    {
+     "t": "Intră la curs",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "eTUTOR.ro\n\nBine ai venit,\n\nIon Popescu qa-e2e-1005-d\n\nAi acces la cursul Curs qa-e2e-1005 cu lectii.\n\nAlege cum vrei să intri de acum înainte. Datele tale sunt deja completate — nu mai ai nimic de scris despre tine.\n\nNume de utilizator\n\nLitere mici, cifre, punct sau minus. Cu el intri data viitoare.\n\nParolă\n\nCel puțin 8 caractere.\n\nScrie parola încă o dată\nCele două parole nu sunt la fel.\nIntră la"
+  },
+  {
+   "n": 13,
+   "name": "first-value",
+   "file": "desktop-13-first-value.png",
+   "url": "/ro/dashboard/lessons",
+   "title": "Lessons - Tutor",
+   "sec": "2.8",
+   "taps": 4,
+   "h1": "Încă o întrebare",
+   "vis": [
+    {
+     "t": "Tutor",
+     "below": false
+    },
+    {
+     "t": "EN",
+     "below": false
+    },
+    {
+     "t": "RO",
+     "below": false
+    },
+    {
+     "t": "Deconectare",
+     "below": true
+    },
+    {
+     "t": "🚀\nConfigurare\n2",
+     "below": false
+    },
+    {
+     "t": "Notificări",
+     "below": false
+    },
+    {
+     "t": "Continuă",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nIon Popescu qa-e2e-1005-d\n\nDeconectare\n🚀\nConfigurare\n2\nÎncă o întrebare\n\nCând te-ai născut? Sub 16 ani, legea cere acordul unui părinte pentru cont.\n\nData nașterii\nZiua\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22"
+  },
+  {
+   "n": 14,
+   "name": "after-age-gate",
+   "file": "desktop-14-after-age-gate.png",
+   "url": "/ro/dashboard/lessons",
+   "title": "Lessons - Tutor",
+   "sec": "5.4",
+   "taps": 8,
+   "h1": "Data nașterii e salvată",
+   "vis": [
+    {
+     "t": "Tutor",
+     "below": false
+    },
+    {
+     "t": "EN",
+     "below": false
+    },
+    {
+     "t": "RO",
+     "below": false
+    },
+    {
+     "t": "Deconectare",
+     "below": true
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "below": false
+    },
+    {
+     "t": "Notificări",
+     "below": false
+    },
+    {
+     "t": "Continuă",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nIon Popescu qa-e2e-1005-d\n\nDeconectare\n🚀\nConfigurare\n3\nData nașterii e salvată\n\nNu am putut trimite acum emailul către părinte. Poți trimite din nou pe ecranul următor.\n\nContinuă\nConfidențialitate\n·\nTermeni\n·\nCookie-uri"
+  },
+  {
+   "n": 15,
+   "name": "after-second-continue",
+   "file": "desktop-15-after-second-continue.png",
+   "url": "/ro/dashboard/lessons",
+   "title": "Lessons - Tutor",
+   "sec": "8.0",
+   "taps": 9,
+   "h1": "Lecții",
+   "vis": [
+    {
+     "t": "Tutor",
+     "below": false
+    },
+    {
+     "t": "EN",
+     "below": false
+    },
+    {
+     "t": "RO",
+     "below": false
+    },
+    {
+     "t": "Deconectare",
+     "below": true
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "below": false
+    },
+    {
+     "t": "Notificări",
+     "below": false
+    },
+    {
+     "t": "Lecția 1 qa-e2e-1005\nNiv.1\nqa\nqa\n0% stăpânire",
+     "below": false
+    },
+    {
+     "t": "Lecția 2 qa-e2e-1005\nNiv.1\nqa\nqa\n0% stăpânire",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nIon Popescu qa-e2e-1005-d\n\nDeconectare\nProba gratuită: mai ai\n6z 23:59:55\n🚀\nConfigurare\n3\n\nProba gratuită · mai ai 7 zileAi tot pachetul, în afară de WhatsApp și SMS. Când se termină proba, rămâi pe varianta"
+  },
+  {
+   "n": 16,
+   "name": "lesson-open",
+   "file": "desktop-16-lesson-open.png",
+   "url": "/ro/dashboard/lessons",
+   "title": "Lessons - Tutor",
+   "sec": "8.0",
+   "taps": 10,
+   "h1": "Lecții",
+   "vis": [
+    {
+     "t": "Tutor",
+     "below": false
+    },
+    {
+     "t": "EN",
+     "below": false
+    },
+    {
+     "t": "RO",
+     "below": false
+    },
+    {
+     "t": "Deconectare",
+     "below": true
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "below": false
+    },
+    {
+     "t": "Notificări",
+     "below": false
+    },
+    {
+     "t": "Lecția 1 qa-e2e-1005\nNiv.1\nqa\nqa\n0% stăpânire",
+     "below": false
+    },
+    {
+     "t": "Lecția 2 qa-e2e-1005\nNiv.1\nqa\nqa\n0% stăpânire",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nIon Popescu qa-e2e-1005-d\n\nDeconectare\nProba gratuită: mai ai\n6z 23:59:55\n🚀\nConfigurare\n3\n\nProba gratuită · mai ai 7 zileAi tot pachetul, în afară de WhatsApp și SMS. Când se termină proba, rămâi pe varianta"
+  },
+  {
+   "n": 17,
+   "name": "acces-second-open",
+   "file": "desktop-17-acces-second-open.png",
+   "url": "/ro/acces/BZE17XKGHU2iBSP0sfBqcA",
+   "title": "Tutor - Adaptive Learning Platform",
+   "sec": "8.6",
+   "taps": 10,
+   "h1": "Ion Popescu qa-e2e-1005-d",
+   "vis": [
+    {
+     "t": "Intră în cont",
+     "below": false
+    },
+    {
+     "t": "Politica de cookie-uri",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": false
+    },
+    {
+     "t": "Respinge",
+     "below": false
+    },
+    {
+     "t": "Accept",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "eTUTOR.ro\n\nBine ai venit,\n\nIon Popescu qa-e2e-1005-d\n\nAi acces la cursul Curs qa-e2e-1005 cu lectii.\n\nContul tău e deja creat. Intră cu numele de utilizator și parola ta.\n\nIntră în cont\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept"
+  },
+  {
+   "n": 18,
+   "name": "empty-course-landing",
+   "file": "desktop-18-empty-course-landing.png",
+   "url": "/ro/dashboard/lessons",
+   "title": "Lessons - Tutor",
+   "sec": "11.3",
+   "taps": 10,
+   "h1": "Încă o întrebare",
+   "vis": [
+    {
+     "t": "Tutor",
+     "below": false
+    },
+    {
+     "t": "EN",
+     "below": false
+    },
+    {
+     "t": "RO",
+     "below": false
+    },
+    {
+     "t": "Deconectare",
+     "below": true
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "below": false
+    },
+    {
+     "t": "Notificări",
+     "below": false
+    },
+    {
+     "t": "Continuă",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nAna Vasilescu qa-e2e-1005-d\n\nDeconectare\n🚀\nConfigurare\n3\nÎncă o întrebare\n\nCând te-ai născut? Sub 16 ani, legea cere acordul unui părinte pentru cont.\n\nData nașterii\nZiua\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n"
+  },
+  {
+   "n": 19,
+   "name": "empty-course-after-age",
+   "file": "desktop-19-empty-course-after-age.png",
+   "url": "/ro/dashboard/lessons",
+   "title": "Lessons - Tutor",
+   "sec": "13.9",
+   "taps": 10,
+   "h1": "Data nașterii e salvată",
+   "vis": [
+    {
+     "t": "Tutor",
+     "below": false
+    },
+    {
+     "t": "EN",
+     "below": false
+    },
+    {
+     "t": "RO",
+     "below": false
+    },
+    {
+     "t": "Deconectare",
+     "below": true
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "below": false
+    },
+    {
+     "t": "Notificări",
+     "below": false
+    },
+    {
+     "t": "Continuă",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nNotificări\nSetări\nAjutor\nEN\nRO\n\nAna Vasilescu qa-e2e-1005-d\n\nDeconectare\n🚀\nConfigurare\n3\nData nașterii e salvată\n\nNu am putut trimite acum emailul către părinte. Poți trimite din nou pe ecranul următor.\n\nContinuă\nConfidențialitate\n·\nTermeni\n·\nCookie-uri"
+  },
+  {
+   "n": 20,
+   "name": "empty-course-after-second",
+   "file": "desktop-20-empty-course-after-second.png",
+   "url": "/ro/dashboard/lessons",
+   "title": "Lessons - Tutor",
+   "sec": "16.4",
+   "taps": 10,
+   "h1": "Lecții",
+   "vis": [
+    {
+     "t": "Tutor",
+     "below": false
+    },
+    {
+     "t": "EN",
+     "below": false
+    },
+    {
+     "t": "RO",
+     "below": false
+    },
+    {
+     "t": "Deconectare",
+     "below": true
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "below": false
+    },
+    {
+     "t": "Notificări",
+     "below": false
+    },
+    {
+     "t": "Mergi la Grile",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\n\nPROGRES\n\nProgresul meu\n\nCONT\n\nAbonament\n🔒\nFamilia mea\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nAna Vasilescu qa-e2e-1005-d\n\nDeconectare\nProba gratuită: mai ai\n6z 23:59:53\n🚀\nConfigurare\n3\n\nProba gratuită · mai ai 7 zileAi tot pachetul, în afară de WhatsApp și SMS. Când se termină proba, rămâi pe varian"
+  },
+  {
+   "n": 21,
+   "name": "acces-invalid-token",
+   "file": "desktop-21-acces-invalid-token.png",
+   "url": "/ro/acces/tokeninexistent123",
+   "title": "Tutor - Adaptive Learning Platform",
+   "sec": "16.5",
+   "taps": 10,
+   "h1": "Spune-ne cine ești",
+   "vis": [
+    {
+     "t": "Intră la curs",
+     "below": false
+    },
+    {
+     "t": "Politica de cookie-uri",
+     "below": false
+    },
+    {
+     "t": "Confidențialitate",
+     "below": false
+    },
+    {
+     "t": "Respinge",
+     "below": false
+    },
+    {
+     "t": "Accept",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "eTUTOR.ro\nSpune-ne cine ești\n\nDoar atât — ca șeful tău să vadă că ai făcut cursul. Nu ai de ales nicio parolă acum.\n\nNume\nPrenume\nTelefon\nIntră la curs\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept"
+  },
+  {
+   "n": 22,
+   "name": "roster",
+   "file": "desktop-22-roster.png",
+   "url": "/ro/dashboard/admin/cursanti?materie=cmuuy08o80001muayw1apz8bx",
+   "title": "Admin - Tutor",
+   "sec": "16.6",
+   "taps": 10,
+   "h1": "Administrare",
+   "vis": [
+    {
+     "t": "Tutor",
+     "below": false
+    },
+    {
+     "t": "EN",
+     "below": true
+    },
+    {
+     "t": "RO",
+     "below": true
+    },
+    {
+     "t": "Deconectare",
+     "below": true
+    },
+    {
+     "t": "🚀\nConfigurare\n3",
+     "below": false
+    },
+    {
+     "t": "Notificări",
+     "below": false
+    },
+    {
+     "t": "Trimite invitație",
+     "below": false
+    },
+    {
+     "t": "Aptitudini Aviație — Set extins",
+     "below": false
+    },
+    {
+     "t": "Matematica cl. VIII",
+     "below": false
+    },
+    {
+     "t": "Materie qa-e2e-1005 cu lectii",
+     "below": false
+    },
+    {
+     "t": "Materie qa-e2e-1005 fara lectii",
+     "below": false
+    },
+    {
+     "t": "QA DIAG bio 1789647508347",
+     "below": false
+    },
+    {
+     "t": "QA DIAG mate 1789647508347",
+     "below": false
+    },
+    {
+     "t": "QA DIAG romana 1789647508347",
+     "below": false
+    }
+   ],
+   "hscroll": false,
+   "body": "Tutor\nPanou de control\n\nÎNVAȚĂ\n\nLecții\nGrile\nSimulări\nGenerează test\nDomenii\nCalendar\nLicență\n\nPROGRES\n\nProgresul meu\n\nELEVII MEI\n\nInstructor\n\nCOPILUL MEU\n\nMonitorizare\nAlerte\nCadență alerte\n\nCONT\n\nAbonament\nFamilia mea\nInvită un prieten\nNotificări\nSetări\nAjutor\nAdministrare\nEN\nRO\n\nqa-e2e-1005 Admin\n\nqa-e2e-1005-admin@demo.tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nAdministrare\nPrezentare generală\nÎn"
+  }
+ ],
+ "console": [
+  {
+   "url": "/ro/dashboard/admin/invitatii",
+   "text": "Failed to load resource: the server responded with a status of 502 (Bad Gateway)"
+  },
+  {
+   "url": "/ro/acces/BZE17XKGHU2iBSP0sfBqcA",
+   "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+  }
+ ],
+ "http": [
+  {
+   "url": "/api/admin/course-invite",
+   "status": 502
+  },
+  {
+   "url": "/api/acces/activare",
+   "status": 400
+  }
+ ],
+ "notes": [
+  {
+   "importLoadMs": 80
+  },
+  {
+   "applyBtnText": "Importă 2 cursanți"
+  },
+  {
+   "invitatiiMaterii": [
+    "Materie qa-e2e-1005 cu lectii"
+   ]
+  },
+  {
+   "invitatiiLinkVisible": false
+  },
+  {
+   "tokenA": "BZE17XKGHU2iBSP0sfBqcA",
+   "tokenB": "dCxu-EqChzoP1xKQuW9w9Q",
+   "invitedAt": null,
+   "openedAtBefore": null
+  },
+  {
+   "accesLoadMs": 624
+  },
+  {
+   "openedAtAfterOpen": "2026-10-05T07:50:12.528Z"
+  },
+  {
+   "activateToLandingMs": 293,
+   "firstValueSec": "2.8",
+   "firstValueTaps": 4
+  },
+  {
+   "ageGate": true,
+   "monthOpts": [
+    "Luna",
+    "ianuarie",
+    "februarie",
+    "martie"
+   ]
+  },
+  {
+   "afterAgeGateTaps": 8,
+   "sec": "5.4"
+  },
+  {
+   "realContentTaps": 9,
+   "sec": "8.0"
+  },
+  {
+   "lessonOpenedTaps": 10,
+   "sec": "8.0"
+  },
+  {
+   "rosterText": "Toți (2)\nInvitație netrimisă (1)\nCont creat (1)\nCURSANT\tSTARE\tM1Modulul 1 qa-e2e-1005\n\nIonescu qa-e2e-1005-d Maria\nghiseu · marca PR-2\nOP Slatina 1 · Slatina, Olt\ntel. 0799 200 002\ncont încă necreat\nCorectează datele\tInvitație netrimisă\n\t\nlecția −\ntest −\n\nPopescu qa-e2e-1005-d Ion\ntel. 0799 200 001\ncont qa-e2e-1005-sd1\nCorectează datele\tCont creat\na apăsat 05.10\n\t\nlecția −\ntest −\nConfidențialitate\n·\nTermeni\n·\nCookie-uri"
+  }
+ ]
+}

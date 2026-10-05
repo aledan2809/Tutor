@@ -1,0 +1,2109 @@
+{
+ "referrer": [
+  {
+   "x": "facebook.com",
+   "y": 12
+  },
+  {
+   "x": "m.facebook.com",
+   "y": 6
+  },
+  {
+   "x": "accounts.google.com",
+   "y": 4
+  },
+  {
+   "x": "google.com",
+   "y": 3
+  },
+  {
+   "x": "l.facebook.com",
+   "y": 3
+  },
+  {
+   "x": "bing.com",
+   "y": 3
+  },
+  {
+   "x": "com.google.android.googlequicksearchbox",
+   "y": 1
+  },
+  {
+   "x": "linkedin.com",
+   "y": 1
+  },
+  {
+   "x": "lm.facebook.com",
+   "y": 1
+  }
+ ],
+ "event": [],
+ "device": [
+  {
+   "x": "mobile",
+   "y": 80
+  },
+  {
+   "x": "laptop",
+   "y": 25
+  },
+  {
+   "x": "desktop",
+   "y": 8
+  },
+  {
+   "x": "tablet",
+   "y": 2
+  }
+ ],
+ "country": [
+  {
+   "x": "RO",
+   "y": 98
+  },
+  {
+   "x": "US",
+   "y": 15
+  },
+  {
+   "x": "DE",
+   "y": 1
+  },
+  {
+   "x": "NL",
+   "y": 1
+  }
+ ],
+ "daily": {
+  "pageviews": [
+   {
+    "x": "2026-09-14 00:00:00",
+    "y": 10
+   },
+   {
+    "x": "2026-09-15 00:00:00",
+    "y": 17
+   },
+   {
+    "x": "2026-09-16 00:00:00",
+    "y": 54
+   },
+   {
+    "x": "2026-09-17 00:00:00",
+    "y": 21
+   },
+   {
+    "x": "2026-09-19 00:00:00",
+    "y": 1
+   },
+   {
+    "x": "2026-09-20 00:00:00",
+    "y": 1
+   },
+   {
+    "x": "2026-09-21 00:00:00",
+    "y": 16
+   },
+   {
+    "x": "2026-09-22 00:00:00",
+    "y": 37
+   },
+   {
+    "x": "2026-09-23 00:00:00",
+    "y": 11
+   },
+   {
+    "x": "2026-09-24 00:00:00",
+    "y": 108
+   },
+   {
+    "x": "2026-09-25 00:00:00",
+    "y": 29
+   },
+   {
+    "x": "2026-09-26 00:00:00",
+    "y": 121
+   },
+   {
+    "x": "2026-09-28 00:00:00",
+    "y": 338
+   },
+   {
+    "x": "2026-09-29 00:00:00",
+    "y": 117
+   },
+   {
+    "x": "2026-09-30 00:00:00",
+    "y": 42
+   },
+   {
+    "x": "2026-10-01 00:00:00",
+    "y": 50
+   },
+   {
+    "x": "2026-10-02 00:00:00",
+    "y": 16
+   },
+   {
+    "x": "2026-10-03 00:00:00",
+    "y": 2
+   },
+   {
+    "x": "2026-10-04 00:00:00",
+    "y": 3
+   },
+   {
+    "x": "2026-10-05 00:00:00",
+    "y": 353
+   }
+  ],
+  "sessions": [
+   {
+    "x": "2026-09-14 00:00:00",
+    "y": 2
+   },
+   {
+    "x": "2026-09-15 00:00:00",
+    "y": 9
+   },
+   {
+    "x": "2026-09-16 00:00:00",
+    "y": 7
+   },
+   {
+    "x": "2026-09-17 00:00:00",
+    "y": 1
+   },
+   {
+    "x": "2026-09-19 00:00:00",
+    "y": 1
+   },
+   {
+    "x": "2026-09-20 00:00:00",
+    "y": 1
+   },
+   {
+    "x": "2026-09-21 00:00:00",
+    "y": 3
+   },
+   {
+    "x": "2026-09-22 00:00:00",
+    "y": 6
+   },
+   {
+    "x": "2026-09-23 00:00:00",
+    "y": 3
+   },
+   {
+    "x": "2026-09-24 00:00:00",
+    "y": 9
+   },
+   {
+    "x": "2026-09-25 00:00:00",
+    "y": 5
+   },
+   {
+    "x": "2026-09-26 00:00:00",
+    "y": 8
+   },
+   {
+    "x": "2026-09-28 00:00:00",
+    "y": 3
+   },
+   {
+    "x": "2026-09-29 00:00:00",
+    "y": 2
+   },
+   {
+    "x": "2026-09-30 00:00:00",
+    "y": 3
+   },
+   {
+    "x": "2026-10-01 00:00:00",
+    "y": 21
+   },
+   {
+    "x": "2026-10-02 00:00:00",
+    "y": 4
+   },
+   {
+    "x": "2026-10-03 00:00:00",
+    "y": 2
+   },
+   {
+    "x": "2026-10-04 00:00:00",
+    "y": 2
+   },
+   {
+    "x": "2026-10-05 00:00:00",
+    "y": 13
+   }
+  ]
+ },
+ "path": [
+  {
+   "x": "/ro",
+   "y": 79
+  },
+  {
+   "x": "/ro/auth/signin",
+   "y": 38
+  },
+  {
+   "x": "/ro/dashboard",
+   "y": 27
+  },
+  {
+   "x": "/ro/dashboard/practice",
+   "y": 26
+  },
+  {
+   "x": "/ro/dashboard/lessons",
+   "y": 21
+  },
+  {
+   "x": "/ro/parinte",
+   "y": 12
+  },
+  {
+   "x": "/ro/dashboard/progress",
+   "y": 11
+  },
+  {
+   "x": "/ro/posta",
+   "y": 9
+  },
+  {
+   "x": "/ro/dashboard/family",
+   "y": 7
+  },
+  {
+   "x": "/ro/auth/register",
+   "y": 6
+  },
+  {
+   "x": "/ro/dashboard/watcher/notifications",
+   "y": 5
+  },
+  {
+   "x": "/ro/dashboard/admin/cursanti",
+   "y": 5
+  },
+  {
+   "x": "/ro/dashboard/exam-bank",
+   "y": 4
+  },
+  {
+   "x": "/ro/auth/forgot-password",
+   "y": 4
+  },
+  {
+   "x": "/ro/dashboard/lessons/cmtoovrfi000yah1ifqnzeyv9",
+   "y": 4
+  },
+  {
+   "x": "/ro/dashboard/rapoarte",
+   "y": 4
+  },
+  {
+   "x": "/ro/dashboard/admin",
+   "y": 4
+  },
+  {
+   "x": "/ro/auth/reset-password",
+   "y": 3
+  },
+  {
+   "x": "/ro/dashboard/admin/superadmin",
+   "y": 3
+  },
+  {
+   "x": "/ro/dashboard/packages",
+   "y": 3
+  },
+  {
+   "x": "/ro/dashboard/admin/superadmin/users",
+   "y": 3
+  },
+  {
+   "x": "/ro/dashboard/domains",
+   "y": 3
+  },
+  {
+   "x": "/ro/acces/PEHEVQZN",
+   "y": 3
+  },
+  {
+   "x": "/ro/grile/grile-bacalaureat-romana",
+   "y": 3
+  },
+  {
+   "x": "/ro/preturi",
+   "y": 3
+  },
+  {
+   "x": "/ro/dashboard/watcher/setari",
+   "y": 2
+  },
+  {
+   "x": "/ro/acces/Zr4tV5qKDZKPs1GSMG9VTA",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/lessons/cmtsvd4vi001zty3v1wqz8e7m",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/gamification",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/instructor",
+   "y": 2
+  },
+  {
+   "x": "/ro/family/accept/_",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/lessons/cmtsvd3wz000lty3v2k1gmjmm",
+   "y": 2
+  },
+  {
+   "x": "/ro/family/join",
+   "y": 2
+  },
+  {
+   "x": "/ro/grile",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/lessons/cmtsvd4dt0018ty3vd6q48iyk",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/admin/feedback",
+   "y": 2
+  },
+  {
+   "x": "/ro/acces/IUP7NseQkLnTwtYhdpPTbw",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/admin/invitatii",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/admin/domains",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/lessons/cmtsvd3xf000pty3vknwz4y6m",
+   "y": 2
+  },
+  {
+   "x": "/en/auth/forgot-password",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/settings/notifications",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/watcher",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu4835c900pbezbqs7immvr4",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/lessons/cmtsvd3xl000tty3v4ig1mc3r",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/lessons/cmuuy08ok0007muayd041ibxp",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/notifications",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/packages/anual",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmp15uiwb001w11oreq6ejws5",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmqaop9uv003aytzk1p8skc00",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtor1qse002kah1idf1kxmdl",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtor4wde005yah1i4ad23fbo",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtor73xg0074ah1i6ku6xq3i",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtqt8g6e00af7ih3zw095pxy",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtqt97ss00bx7ih3fh841cdr",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtqtapln00d37ih3f4jv4c9l",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtr5kxyo00hp7ih3awh5x68t",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtr5nipz00iz7ih35whzdpz1",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtr5puy700jp7ih3aso7nvzm",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtr5xtc900op7ih3g962rjeq",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmts9l8r4000929a3wo754du4",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmts9ljmd000b29a34i5jm1s0",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmts9meme001h29a3yh4fp6w9",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtszc1re001ja6x1jk5b5tyj",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtszevgf002va6x1rdgh80k4",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtszfvuo0041a6x1rta3rmtg",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtszhnwp007fa6x1gfy4610k",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtszjkoy00axa6x19fzg8zac",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtszl70r00c5a6x1mg4nm592",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtszm3ux00cja6x1m39halue",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtsznw7600d5a6x1mf44003r",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtszobh300dba6x1uaky1y77",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtszofc200dha6x1ytn0wkf2",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtszpn0v00h3a6x1wrvdyao0",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmttylhlj0003j68f9nuk87e0",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmttzqz73002pj68fjjsuldc6",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmttzthbe005vj68fj8fq29mp",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmttzvhdb009pj68fv1en1n45",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmttzwd9a00b1j68f6vbwssqc",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtu00g58000512vdb4m4nicz",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtu00i0f000712vdxnxdc2mv",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtu00pfm000h12vdc2udsr90",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtu00xe7000n12vdaquqbxnf",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtu01f0o001x12vdloyc0foq",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtu03e25005b12vd5rn3m82f",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtu1k8650001xcypbrepd48f",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtu2vxc4000w22bo0qo138q6",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtuh48c6002tmearbaoeko8u",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtuh5lyi006bmear2kneucsj",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtuh6gia007lmear2qkd5xx9",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtuhb4dj00b9mear82akyl6e",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtuhflif00flmearu9ks94hr",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtuhhgtw00gtmearq7dwxhib",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtvdnrcf0019gps46i2uvwrk",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtvdps5c004ngps4h5zw2dtu",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtvdrynm0085gps4mmaj3h43",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtvdsenn008xgps4cn5f8asb",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtvdub6z009zgps44y48r674",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtvdv7gx00bdgps4xq4j6nq9",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtvdxh1200f7gps4fzr84n1r",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtvnatog003h1sajxy3r27wm",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtwk39ba000t10nxamjuj5z5",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtwk4zyf002310nx2689ymtf",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtwk7x6j005h10nxdu5z23ti",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtwkfb4r007710nxx9wkun4m",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtwkfoy2007910nxcgxio65x",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtwkzf810003ecks700r7sdz",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtwtyekx002b3ugx6gp3zsdu",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtwu1qz8002x3ugxbvfclbi0",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtwu4bb8003d3ugx6w1zvh3f",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtxc4ecr00az3ugxjm57rm5g",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtxc4y6d00c93ugxlejv4vzm",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtxc7f5000fr3ugxemdycbyv",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtxe6stw00jp3ugxqmp5mx8s",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtxe7g5n00kz3ugx3h07dav4",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtysq6ym00rp3ugx1rhit7bg",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtysy35q00yf3ugxbjwneurb",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu084fij000u3w6ij8amr6dr",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu086cpw002k3w6iuhnu332t",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu088lck00623w6igfb01y22",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu08eu40009d3w6iipd4jygy",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu08jedw00d33w6i680op19c",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu08m4u500e73w6iwmcrexa2",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu13bmzk0015nvyv6y5g76ko",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu13e5vw004nnvyvrnv2uh0s",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu13gz1g0085nvyvnwd0hu5u",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu13hvwt009fnvyv1wcrycgw",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu1pymq900k9nvyvmvrq8iop",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu1q3i6j00nrnvyv4ml3lzdl",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu1q6u0700p1nvyvh6t4y442",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu1q8urk00qbnvyvui8pp22o",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu3lri83000rezbqjzsc71h4",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu3luge8006lezbq8g6oc5em",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu3lv6gv007vezbqgmmizcpq",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu40ab6e00czezbq5xf163lt",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu40ateo00e9ezbq4adl06ay",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu40b69s00fjezbqdy1qajjh",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu40cgp100ixezbqrawj4nb3",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu483tia00pdezbqrf2bomzv",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmub5n3og02dno3yc72iaecia",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmub5oafm02h1o3ycdm2c6qeu",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmub5ppda02kbo3yctz3xfv6a",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmub70s8c02mqo3yc3d2sn66w",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmub72rri02qeo3ycjrjpd58q",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuf14olq002pvgotyzjptrri",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuf167yb0068vgotvupnkxjo",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuf1741s007avgotxs6x0ypl",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuf17byj007gvgot6uxzr7p9",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmugqc7su0015131i9ubuwd9k",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuhay91l00fb13f1ixzrsahj",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuhb137j00gb13f1gwvgu6ds",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuhb275n00ju13f1chl7jejl",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuhfp6s500pk13f1gm3sp8ne",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmui3uwdh0011vkevyr5zsr0y",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmui48fol001112xca5khylvx",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmui4n5dt0014jwrj9xx2pl63",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmui4os68002rjwrjwos2b34y",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmui4rsv000141005pkkbojf6",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuku5l2z0014tk179uhv1s44",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmukv9z9d00165mu7u9kwlces",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmukvd6bz00415mu7a28h28dv",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmukw98lm0016f4kxzkq2qmf0",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmukwye7000165hlczvq362vh",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmukxle4c00167qv2jakfb89u",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuky51c6001612k0mqrfx3h2",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmukz26zg001612q70l9bgo3x",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmul0myns0016dmcnz8x6g7ug",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmul0pjo40060dmcnybkw00eg",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmul0s3d100aadmcnrpxy45bd",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmul1qe1c0016eorwzov22hus",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmul2l7dm0017c90jjpdu4exz",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmul32nuo00168qjsto2rng19",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmump55im0016ljib48fj9dus",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmumq4svt002hh2ww7poskqsg",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmun4q8ev00529302350sd2nb",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmun4tykg00ak9302youlk8gh",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmunti6rg003sk4ec2rko21dh",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuntlq8b007dk4eci33oxgag",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmunynz1s00bek4ecslu3zcge",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmunyqdpg00btk4ecf1jtpwjf",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmunysa7l00fvk4ecstdnal4i",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmunyssem00h5k4ec5ja1brut",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmunytfs800ick4ecz6nril1l",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmunytm4c00iik4ecxmy5ckj6",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuo1mhgs00oik4ecx2d6nvm4",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmup379ve01zek4ecrnushiml",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmup39n1z022xk4ecya6s34ar",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmup3cos30246k4ec30j21wcx",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmup3nbzl0276k4eczrzxvdz2",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmup3nimp0278k4ecuw18mlnz",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuqksgtw002psc6hw81gt2o8",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuqkttab003wsc6h49ug2kmd",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuqkvdn3007gsc6h604iezwk",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuuuhyzv00nhsc6hfw5xmqk4",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuuukcxz00r1sc6h9iqfyrl8",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuuuq46a00sdsc6hag8jj1h2",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuuuqvek00snsc6hzw8jkppm",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuuxsbal003jsnj3ikef3hae",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuuxtcjg0052snj39jvjhmqk",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/settings",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/subscription",
+   "y": 1
+  },
+  {
+   "x": "/ro/family/accept/4cdd31c687f62f9cb09abe038697cf4a94168aa0a5b78f92",
+   "y": 1
+  },
+  {
+   "x": "/ro/family/accept/68daaeb40dc4844514c9b4bbe71e874cd8421c446d708d31",
+   "y": 1
+  },
+  {
+   "x": "/ro/family/accept/83c6ded2378dfde457e53b70a8bf01ae4c8f6eff25fca24c",
+   "y": 1
+  },
+  {
+   "x": "/ro/family/accept/9cbd36f1624e6f8da485043a112a9c998f110b92feb7d00f",
+   "y": 1
+  },
+  {
+   "x": "/ro/family/accept/c1e347357210852d84335ece8a93b5e9171d1e6dd2e83254",
+   "y": 1
+  },
+  {
+   "x": "/ro/grile/grile-bacalaureat-matematica",
+   "y": 1
+  },
+  {
+   "x": "/ro/grile/grile-evaluare-nationala-matematica",
+   "y": 1
+  },
+  {
+   "x": "/ro/parinte#cum-functioneaza",
+   "y": 1
+  },
+  {
+   "x": "/ro/privacy",
+   "y": 1
+  },
+  {
+   "x": "/ro/terms",
+   "y": 1
+  },
+  {
+   "x": "/ro/try",
+   "y": 1
+  },
+  {
+   "x": "/en/auth/signin",
+   "y": 1
+  },
+  {
+   "x": "/en/dashboard",
+   "y": 1
+  },
+  {
+   "x": "/en/dashboard/admin",
+   "y": 1
+  },
+  {
+   "x": "/en/dashboard/admin/cursanti",
+   "y": 1
+  },
+  {
+   "x": "/en/dashboard/admin/cursanti/cmqp7m9ev003sln4nvcxr9txb",
+   "y": 1
+  },
+  {
+   "x": "/en/dashboard/admin/cursanti/cmtu2lykg000e22boe88cl7rm",
+   "y": 1
+  },
+  {
+   "x": "/en/dashboard/admin/domains",
+   "y": 1
+  },
+  {
+   "x": "/en/dashboard/admin/invitatii",
+   "y": 1
+  },
+  {
+   "x": "/en/dashboard/admin/superadmin",
+   "y": 1
+  },
+  {
+   "x": "/en/dashboard/admin/superadmin/users",
+   "y": 1
+  },
+  {
+   "x": "/en/family/accept/_",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/FCnq1uwcHpxvtTb_Qx2KVA",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/M-sbxbFGvdmWH1bLshMkmQ",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/MLZ_RwmB5OY_QEDZwXqcOQ",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/PEHE-VQZN",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/SFLA7RLxHhZcmwWffuZMYw",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/SFdekbgn3z7-NloBcMjOTg",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/_",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/dPfwodeKodZrvAEAjhq-wQ",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/lw10D_4_EHDjfpKYx3y6gw",
+   "y": 1
+  },
+  {
+   "x": "/ro/acord-parinte/_",
+   "y": 1
+  },
+  {
+   "x": "/ro/anual",
+   "y": 1
+  },
+  {
+   "x": "/ro/auth/login",
+   "y": 1
+  },
+  {
+   "x": "/ro/certificat/id-inexistent-qa",
+   "y": 1
+  },
+  {
+   "x": "/ro/creatori",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/admin/cursanti/cmslrfy560028v5ysqx4861rz",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/admin/cursanti/cmtu2lykg000e22boe88cl7rm",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/admin/cursanti/cmtvn99ul00391sajzkqo1go1",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/admin/domains/cmtonq90s0003a8xfcjg693s5",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/admin/import-cursanti",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/admin/posta",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/admin/superadmin/firme",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/admin/superadmin/plans",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/bibliography",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/exam-bank/cmpye58qt000jita2rq3sinjj",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/exams",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/instructor/groups",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/instructor/groups/cmp15sbjo001p11ordezw3hok",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/instructor/groups/new",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/instructor/reports",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/instructor/students",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/instructor/students/cmq2icziw0008civtxc2b63k4",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/instructor/students/cmqp7m9ev003sln4nvcxr9txb",
+   "y": 1
+  }
+ ],
+ "entry": [
+  {
+   "x": "/ro",
+   "y": 78
+  },
+  {
+   "x": "/ro/posta",
+   "y": 8
+  },
+  {
+   "x": "/ro/parinte",
+   "y": 7
+  },
+  {
+   "x": "/ro/auth/signin",
+   "y": 7
+  },
+  {
+   "x": "/ro/dashboard/practice",
+   "y": 5
+  },
+  {
+   "x": "/ro/dashboard/watcher/notifications",
+   "y": 3
+  },
+  {
+   "x": "/ro/acces/PEHEVQZN",
+   "y": 3
+  },
+  {
+   "x": "/ro/acces/IUP7NseQkLnTwtYhdpPTbw",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/admin/cursanti",
+   "y": 2
+  },
+  {
+   "x": "/ro/acces/FCnq1uwcHpxvtTb_Qx2KVA",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/domains",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/admin/superadmin/users",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/family",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/lessons/cmtoovrfi000yah1ifqnzeyv9",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/lessons/cmtsvd3wz000lty3v2k1gmjmm",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmub70s8c02mqo3yc3d2sn66w",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/rapoarte",
+   "y": 1
+  },
+  {
+   "x": "/ro/grile",
+   "y": 1
+  },
+  {
+   "x": "/ro/grile/grile-bacalaureat-matematica",
+   "y": 1
+  },
+  {
+   "x": "/ro/grile/grile-bacalaureat-romana",
+   "y": 1
+  },
+  {
+   "x": "/ro/grile/grile-evaluare-nationala-matematica",
+   "y": 1
+  },
+  {
+   "x": "/en/dashboard/admin/cursanti",
+   "y": 1
+  },
+  {
+   "x": "/ro/preturi",
+   "y": 1
+  },
+  {
+   "x": "/en/dashboard/admin/invitatii",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/M-sbxbFGvdmWH1bLshMkmQ",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/MLZ_RwmB5OY_QEDZwXqcOQ",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/SFLA7RLxHhZcmwWffuZMYw",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/SFdekbgn3z7-NloBcMjOTg",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/Zr4tV5qKDZKPs1GSMG9VTA",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/dPfwodeKodZrvAEAjhq-wQ",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/lw10D_4_EHDjfpKYx3y6gw",
+   "y": 1
+  },
+  {
+   "x": "/ro/auth/register",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/admin/feedback",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/admin/invitatii",
+   "y": 1
+  }
+ ],
+ "exit": [
+  {
+   "x": "/ro",
+   "y": 47
+  },
+  {
+   "x": "/ro/auth/signin",
+   "y": 16
+  },
+  {
+   "x": "/ro/posta",
+   "y": 9
+  },
+  {
+   "x": "/ro/parinte",
+   "y": 8
+  },
+  {
+   "x": "/ro/dashboard/lessons",
+   "y": 8
+  },
+  {
+   "x": "/ro/dashboard/practice",
+   "y": 7
+  },
+  {
+   "x": "/ro/dashboard",
+   "y": 4
+  },
+  {
+   "x": "/ro/dashboard/watcher/notifications",
+   "y": 3
+  },
+  {
+   "x": "/ro/dashboard/family",
+   "y": 3
+  },
+  {
+   "x": "/ro/dashboard/progress",
+   "y": 3
+  },
+  {
+   "x": "/ro/dashboard/rapoarte",
+   "y": 2
+  },
+  {
+   "x": "/en/auth/forgot-password",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu1q8urk00qbnvyvui8pp22o",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/admin/superadmin/users",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/admin/cursanti",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/lessons/cmtoovrfi000yah1ifqnzeyv9",
+   "y": 2
+  },
+  {
+   "x": "/ro/dashboard/lessons/cmtsvd3wz000lty3v2k1gmjmm",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/packages/anual",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtor73xg0074ah1i6ku6xq3i",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtqtapln00d37ih3f4jv4c9l",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtr5xtc900op7ih3g962rjeq",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmts9meme001h29a3yh4fp6w9",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtszpn0v00h3a6x1wrvdyao0",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmttylhlj0003j68f9nuk87e0",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtu03e25005b12vd5rn3m82f",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtu1k8650001xcypbrepd48f",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtuhhgtw00gtmearq7dwxhib",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtvdxh1200f7gps4fzr84n1r",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtwkfoy2007910nxcgxio65x",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtwu4bb8003d3ugx6w1zvh3f",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtxc7f5000fr3ugxemdycbyv",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmtxe7g5n00kz3ugx3h07dav4",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu08m4u500e73w6iwmcrexa2",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu13hvwt009fnvyv1wcrycgw",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu3lri83000rezbqjzsc71h4",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu3lv6gv007vezbqgmmizcpq",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu40cgp100ixezbqrawj4nb3",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmu4835c900pbezbqs7immvr4",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmub72rri02qeo3ycjrjpd58q",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuf17byj007gvgot6uxzr7p9",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmugqc7su0015131i9ubuwd9k",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuhb275n00ju13f1chl7jejl",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmunytm4c00iik4ecxmy5ckj6",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuo1mhgs00oik4ecx2d6nvm4",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmup3nimp0278k4ecuw18mlnz",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuqkvdn3007gsc6h604iezwk",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/practice/cmuuuqvek00snsc6hzw8jkppm",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/watcher/setari",
+   "y": 1
+  },
+  {
+   "x": "/ro/family/join",
+   "y": 1
+  },
+  {
+   "x": "/ro/grile",
+   "y": 1
+  },
+  {
+   "x": "/ro/grile/grile-bacalaureat-matematica",
+   "y": 1
+  },
+  {
+   "x": "/ro/grile/grile-bacalaureat-romana",
+   "y": 1
+  },
+  {
+   "x": "/ro/grile/grile-evaluare-nationala-matematica",
+   "y": 1
+  },
+  {
+   "x": "/ro/parinte#cum-functioneaza",
+   "y": 1
+  },
+  {
+   "x": "/ro/preturi",
+   "y": 1
+  },
+  {
+   "x": "/ro/terms",
+   "y": 1
+  },
+  {
+   "x": "/en/auth/signin",
+   "y": 1
+  },
+  {
+   "x": "/en/dashboard/admin/cursanti",
+   "y": 1
+  },
+  {
+   "x": "/en/dashboard/admin/invitatii",
+   "y": 1
+  },
+  {
+   "x": "/en/family/accept/_",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/IUP7NseQkLnTwtYhdpPTbw",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/SFdekbgn3z7-NloBcMjOTg",
+   "y": 1
+  },
+  {
+   "x": "/ro/acces/_",
+   "y": 1
+  },
+  {
+   "x": "/ro/auth/register",
+   "y": 1
+  },
+  {
+   "x": "/ro/creatori",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/admin/cursanti/cmtu2lykg000e22boe88cl7rm",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/admin/feedback",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/admin/invitatii",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/admin/superadmin/plans",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/domains",
+   "y": 1
+  },
+  {
+   "x": "/ro/dashboard/instructor/students/cmqp7m9ev003sln4nvcxr9txb",
+   "y": 1
+  }
+ ],
+ "title": [
+  {
+   "x": "Tutor - Mii de grile reale pe materia ta | etutor.ro | Tutor",
+   "y": 79
+  },
+  {
+   "x": "Sign In - Tutor | Tutor",
+   "y": 40
+  },
+  {
+   "x": "Dashboard - Tutor | Tutor",
+   "y": 32
+  },
+  {
+   "x": "Practice - Tutor",
+   "y": 28
+  },
+  {
+   "x": "Lessons - Tutor",
+   "y": 21
+  },
+  {
+   "x": "Tutor - Adaptive Learning Platform",
+   "y": 19
+  },
+  {
+   "x": "Pentru p\u0103rin\u021bi \u2014 lini\u0219tea ta, c\u00e2t o cafea pe lun\u0103 | eTutor.ro",
+   "y": 12
+  },
+  {
+   "x": "Progress - Tutor",
+   "y": 11
+  },
+  {
+   "x": "eTutor pentru Po\u0219ta Rom\u00e2n\u0103 \u2014 demonstra\u021bie | Tutor",
+   "y": 9
+  },
+  {
+   "x": "Admin - Tutor",
+   "y": 7
+  },
+  {
+   "x": "Watcher - Tutor",
+   "y": 6
+  },
+  {
+   "x": "Pre\u021buri \u2014 gratuit la start, pl\u0103te\u0219ti c\u00e2nd vrei | eTutor.ro | Tutor",
+   "y": 3
+  },
+  {
+   "x": "Grile Bacalaureat Rom\u00e2n\u0103 \u2014 teste gril\u0103 \u0219i subiecte | etutor.ro | Tutor",
+   "y": 3
+  },
+  {
+   "x": "SuperAdmin - Tutor",
+   "y": 3
+  },
+  {
+   "x": "Domains - Tutor",
+   "y": 3
+  },
+  {
+   "x": "Settings - Tutor",
+   "y": 3
+  },
+  {
+   "x": "Grile online \u2014 Bacalaureat, Evaluare Na\u021bional\u0103, Admitere | etutor.ro | Tutor",
+   "y": 2
+  },
+  {
+   "x": "Instructor - Tutor",
+   "y": 2
+  },
+  {
+   "x": "Gamification - Tutor",
+   "y": 2
+  },
+  {
+   "x": "Acordul p\u0103rintelui | Tutor",
+   "y": 1
+  },
+  {
+   "x": "Notifications - Tutor",
+   "y": 1
+  },
+  {
+   "x": "Grile Bacalaureat Matematic\u0103 \u2014 teste gril\u0103 online gratuite | etutor.ro | Tutor",
+   "y": 1
+  },
+  {
+   "x": "Pentru p\u0103rin\u021bi \u2014 lini\u0219tea ta, c\u00e2t o cafea pe lun\u0103 | eTutor.ro | Tutor",
+   "y": 1
+  },
+  {
+   "x": "Pl\u0103te\u0219ti anual \u2014 economise\u0219ti \u0219i mai mult | eTutor.ro",
+   "y": 1
+  },
+  {
+   "x": "Program pentru creatori \u2014 venit recurent din predare | Tutor",
+   "y": 1
+  },
+  {
+   "x": "Confiden\u021bialitate \u00b7 eTutor | Tutor",
+   "y": 1
+  },
+  {
+   "x": "Termeni \u0219i condi\u021bii \u00b7 eTutor | Tutor",
+   "y": 1
+  },
+  {
+   "x": "Certificat: 0/5 la un quiz \ud83c\udf93 | Tutor",
+   "y": 1
+  },
+  {
+   "x": "Grile Evaluare Na\u021bional\u0103 Matematic\u0103 \u2014 teste online | etutor.ro | Tutor",
+   "y": 1
+  }
+ ],
+ "query": [
+  {
+   "x": "callbackUrl=_",
+   "y": 7
+  },
+  {
+   "x": "voucher=V126S",
+   "y": 7
+  },
+  {
+   "x": "callbackUrl=%2Fdashboard",
+   "y": 6
+  },
+  {
+   "x": "materie=cmtsvd3ny000bty3vb0jhouqh",
+   "y": 3
+  },
+  {
+   "x": "start=quick&domain=matematica-v-viii",
+   "y": 3
+  },
+  {
+   "x": "materie=cmtsvd4n6001lty3vtd1f55mo",
+   "y": 2
+  },
+  {
+   "x": "plan=FAMILY&voucher=ONV126S&start=free",
+   "y": 2
+  },
+  {
+   "x": "callbackUrl=_&role=PARENT",
+   "y": 2
+  },
+  {
+   "x": "domain=aviatie-cunostinte",
+   "y": 2
+  },
+  {
+   "x": "domain=posta-factor",
+   "y": 2
+  },
+  {
+   "x": "materie=cmtsvd47l000yty3v1n3imlxo",
+   "y": 2
+  },
+  {
+   "x": "materie=cmtonq90s0003a8xfcjg693s5",
+   "y": 2
+  },
+  {
+   "x": "token=_&email=_",
+   "y": 2
+  },
+  {
+   "x": "token=gresit&email=a%40b.ro",
+   "y": 2
+  },
+  {
+   "x": "plan=FAMILY",
+   "y": 2
+  },
+  {
+   "x": "code=U92YF6BQ",
+   "y": 1
+  },
+  {
+   "x": "code=XSEN8CC6",
+   "y": 1
+  },
+  {
+   "x": "code=_",
+   "y": 1
+  },
+  {
+   "x": "domain=agent-imobiliar",
+   "y": 1
+  },
+  {
+   "x": "domain=posta-ghiseu",
+   "y": 1
+  },
+  {
+   "x": "domain=posta-oficiu",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwY2xjawUTOVFwZG9mAWV4dG4DYWVtAjEwAGJyaWQRMVZ4WWpRTGt4bjZKZG13N25zcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeDnjkKLKBLP4SUeUP9bjMGcVQ6N8k63oGnkv1w1EgV4mqtEDc-C5y07n5_GI_aem_VzL09XHOrllv_OwyQBkKZg",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwY2xjawUWh4dwZG9mBWV4dG4DYWVtAjExAHNydGMGYXBwX2lkDDM1MDY4NTUzMTcyOAABHhlit1UzG9eRyIAQ6nru5zV2r82NwWcJrKyoFUKBECK2CRK6cXgxon-famoT_aem_imbgMFd20NwUBabxIlGqZA",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwY2xjawUs2oNleHRuA2FlbQIxMABwZG9mAWJyaWQRMTl0bWtGY2NySU51NlpPUG1zcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEe5TNIyiJS0WcCotFzTh_GYWqQ-SQPjV7r62dYaMbjMfDUTp9HCwHuJCV32fI_aem_iRsh-a67q7MQJ25jElc2JA",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwY2xjawUvWC9leHRuA2FlbQIxMQBwZG9mA3NydGMGYXBwX2lkDzQwOTk2MjYyMzA4NTYwOQABHibeM48kNBR2gksYrmLRdXnDRKCmAtorG6vW0-xMSuHs3kBgFZumcYNey0DG_aem_XS-yKiQjUaPFQ5MxbnTVJw",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwZXh0bgNhZW0CMTEAcGRvZgFmZGlkFlD3_91ZNMES6PRfON4yuoHwSKaA1-9zcnRjBmFwcF9pZAo2NjI4NTY4Mzc5AAEeeXqN8XGmYCsFxcYLO--5E5YnJvJrHB87eJVFH8kq8R7Bzt3LtXQdH0hohEU_aem_7z2s7YkUD7N1gDmzE9fVSw",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwZXh0bgNhZW0CMTEAcGRvZgNzcnRjBmFwcF9pZA8yNzUyNTQ2OTI1OTgyNzkAAR5vM4H7jt2EUZCRucy7xIej0-3M0d0cGbUrv1D_gxKnV6DX7t2pabZAQTm_Zg_aem_prSV39J60YKh5tkLEHedEw",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwZXh0bgNhZW0CMTEAcGRvZgRzcnRjBmFwcF9pZAwyNTYyODEwNDA1NTgAAR4n5sfyIjcJDEsHSCl173j1sxtf3QZn_i2Lpz9KI0CKshZaJajmx-IypXJRjQ_aem_1VRdzmGydThgzdpfkGnnMg",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwZXh0bgNhZW0CMTEAcGRvZgRzcnRjBmFwcF9pZAwyNTYyODEwNDA1NTgAAR5-D7M40lF5hdoQw1G_JqF8qKV4Gl1T53TUCBKXMWqxF6_GMMzEc40TU5XUew_aem_dh6wwRD2LzJ4pdW1pMnK7Q",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwZXh0bgNhZW0CMTEAcGRvZgRzcnRjBmFwcF9pZAwyNTYyODEwNDA1NTgAAR52hCh3UaXqnMF12MPcJPqKYglCiH7lkjd6rk1iVO9DC6GGuT2fH4ewoNvh_A_aem__l6NJLrPk4mFbo6-qknghQ",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwZXh0bgNhZW0CMTEAcGRvZgRzcnRjBmFwcF9pZAwyNTYyODEwNDA1NTgAAR59IMLKn1oLea7zp4I9wOths9fMAorWzGpPY7hO5bnonYrjm0suq6Bl4bINcw_aem_11t7VipsTF7Nudi0ub32hQ",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwZXh0bgNhZW0CMTEAcGRvZgRzcnRjBmFwcF9pZAwyNTYyODEwNDA1NTgAAR5eOdSimmgUWAdhqS47E6Zucu704hW5WQhSLHapOvTYU-uLiyb-sY2Z_1IS6A_aem_H82jPTr2wcsRnkoJUOOUiQ",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwZXh0bgNhZW0CMTEAcGRvZgRzcnRjBmFwcF9pZAwyNTYyODEwNDA1NTgAAR6D4Qk5tGzPXq1BMuD6t_hkPc564J8jwffW6fFAPNVfbFivpPiFCyT10I8zpg_aem_kwsx22z92Z6nlG0rWBjIqQ",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwZXh0bgNhZW0CMTEAcGRvZgRzcnRjBmFwcF9pZAwyNTYyODEwNDA1NTgAAR77NdI2eAhsg2hZRntgd0Tle7PusnvMKzG6tJ8UO3EUdM7doRtAvLlrgSL8nQ_aem_1yYmqCV_r448Y7qjAh4Svg",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwZXh0bgNhZW0CMTEAcGRvZgVmZGlkFlD38nK_ebKh8p6Uk19UPZZUN9IRhdNzcnRjBmFwcF9pZAo2NjI4NTY4Mzc5AAEeHxcWw20aYV4zjempGH5VTFpeg8tvsVKvuHZDdrXpdmsMagnQ45vTQy1IYEo_aem_ELWLMMNXiHnBWNMjDcnKPQ",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwZXh0bgNhZW0CMTEAcGRvZgVmZGlkFlD3E2sKl3CO3ZdyZd2r3ZCyumdacD5zcnRjBmFwcF9pZAo2NjI4NTY4Mzc5AAEevnypgQ9fQaOn2-f8QB_CKvJlPSDmOsefLGRIQU-pVd2HWDohH3VYXShcL-o_aem_RsLhYkJ0Sk4eb621VpedWw",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwZXh0bgNhZW0CMTEAcGRvZgVmZGlkFlD3XDLUWD1kwDKBnXGXtTK17olYDZBzcnRjBmFwcF9pZAo2NjI4NTY4Mzc5AAEeNgYvJkGnI91Grp0-_htgxq006SmPTcCD8uf7ADojxFA_8YHIXdmfAfPQxx0_aem_cRcOmUCUMJzROw83fCokNQ",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwZXh0bgNhZW0CMTEAcGRvZgVmZGlkFlD3vHQjFsM2Yame8P_wiryMfMWkFuFzcnRjBmFwcF9pZAo2NjI4NTY4Mzc5AAEeRaLIy6QE59IdX8-L1sSNsPjOyDFsG67h6_fh-PEoaUo3-GFPm3JrAjaeAI8_aem_Pa6SSyeuRxpEnhrB9YqhzQ",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwcGRvZgRleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAwyNTYyODEwNDA1NTgAAR4xarbgHVV3srv_unkj8fSqqksKxkH2AkzjtLB2_Q5PUeJk3o5hDmuN6lihjg_aem_Gj03z6V-OSGvhgdjDbAdGQ",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwcGRvZgRleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAwyNTYyODEwNDA1NTgAAR650oXRcxyXavHptepzEq0s4waR0TTTqFsLVAB9VCSAzbXaHG6A8XI2DVGfZA_aem_7tcvDaDBQgfPvtjjBS1aSA",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwcGRvZgRleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAwyNTYyODEwNDA1NTgAAR6QK6mAeIwMurSGfU8-3EwJ4DZ2hQmkIhsi9bTWxbyxBdy8-dTWTDmOjinMrA_aem_aO1uDC3ta8UzoQvTSyxmZQ",
+   "y": 1
+  },
+  {
+   "x": "id=cmqxpfzr8019j14ogdeoz6euq",
+   "y": 1
+  },
+  {
+   "x": "materie=cmpx7pink001h47s5mmbfcmbu",
+   "y": 1
+  },
+  {
+   "x": "materie=cmqruay160000evq4uxkhya81",
+   "y": 1
+  },
+  {
+   "x": "materie=cmuuy08o80001muayw1apz8bx",
+   "y": 1
+  },
+  {
+   "x": "plan=FAMILY&voucher=ONV126S",
+   "y": 1
+  },
+  {
+   "x": "plan=FAMILY&voucher=V126S",
+   "y": 1
+  },
+  {
+   "x": "plan=FAMILY&voucher=V126S&start=free",
+   "y": 1
+  },
+  {
+   "x": "start=micro&domain=aviation",
+   "y": 1
+  },
+  {
+   "x": "start=quick&domain=qa-instr-manual",
+   "y": 1
+  },
+  {
+   "x": "fbclid=IwZXh0bgNhZW0CMTEAcGRvZgVmZGlkFlD3Lt_CQ72I3p7FMELO0RNapbZKUX1zcnRjBmFwcF9pZAo2NjI4NTY4Mzc5AAEeelnWxUloSM7JNWb8KsfvhhBRt4wz8qN2wa9966wBF9Xyy3gJjvnnGa44NZw_aem_kMVPL5c1DxVe_MNikvwJzQ",
+   "y": 1
+  },
+  {
+   "x": "callbackUrl=%2Ffamily%2Faccept%2F4cdd31c687f62f9cb09abe038697cf4a94168aa0a5b78f92&role=PARENT",
+   "y": 1
+  },
+  {
+   "x": "callbackUrl=%2Ffamily%2Faccept%2F68daaeb40dc4844514c9b4bbe71e874cd8421c446d708d31&role=PARENT",
+   "y": 1
+  },
+  {
+   "x": "callbackUrl=%2Ffamily%2Faccept%2F83c6ded2378dfde457e53b70a8bf01ae4c8f6eff25fca24c&role=PARENT",
+   "y": 1
+  },
+  {
+   "x": "callbackUrl=%2Ffamily%2Faccept%2F9cbd36f1624e6f8da485043a112a9c998f110b92feb7d00f&role=PARENT",
+   "y": 1
+  },
+  {
+   "x": "callbackUrl=%2Ffamily%2Faccept%2Fc1e347357210852d84335ece8a93b5e9171d1e6dd2e83254&role=PARENT",
+   "y": 1
+  },
+  {
+   "x": "callbackUrl=%2Ffamily%2Fjoin%3Fcode%3D2FS5VT7K",
+   "y": 1
+  },
+  {
+   "x": "callbackUrl=%2Ffamily%2Fjoin%3Fcode%3D9TUKW7QS",
+   "y": 1
+  },
+  {
+   "x": "callbackUrl=%2Ffamily%2Fjoin%3Fcode%3DRAK2CHX5",
+   "y": 1
+  },
+  {
+   "x": "callbackUrl=%2Ffamily%2Fjoin%3Fcode%3DU92YF6BQ",
+   "y": 1
+  },
+  {
+   "x": "callbackUrl=%2Ffamily%2Fjoin%3Fcode%3DXSEN8CC6",
+   "y": 1
+  },
+  {
+   "x": "callbackUrl=_&role=STUDENT",
+   "y": 1
+  },
+  {
+   "x": "code=2FS5VT7K",
+   "y": 1
+  },
+  {
+   "x": "code=9TUKW7QS",
+   "y": 1
+  },
+  {
+   "x": "code=RAK2CHX5",
+   "y": 1
+  }
+ ],
+ "language": [
+  {
+   "x": "en",
+   "y": 85
+  },
+  {
+   "x": "ro",
+   "y": 26
+  },
+  {
+   "x": "de",
+   "y": 2
+  },
+  {
+   "x": "un",
+   "y": 2
+  }
+ ],
+ "os": [
+  {
+   "x": "iOS",
+   "y": 59
+  },
+  {
+   "x": "Android OS",
+   "y": 23
+  },
+  {
+   "x": "Windows 10",
+   "y": 18
+  },
+  {
+   "x": "Mac OS",
+   "y": 15
+  }
+ ]
+}

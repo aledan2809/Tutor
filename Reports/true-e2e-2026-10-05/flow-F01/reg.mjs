@@ -1,0 +1,27 @@
+import {chromium,devices,BASE,mk,DIR} from './lib.mjs';
+import fs from 'fs';
+const vp=process.argv[2]||'mobile'; const year=process.argv[3]||'2008'; const label=process.argv[4]||'adult';
+const b=await chromium.launch();
+const ctx=await b.newContext(vp==='mobile'?{viewport:{width:375,height:812},deviceScaleFactor:2,isMobile:true,hasTouch:true,userAgent:devices['iPhone 13'].userAgent}:{viewport:{width:1440,height:900}});
+const p=await ctx.newPage(); const m=mk(`${vp}-${label}`,p);
+const ts=Date.now(); const email=`Qa-e2e-1005-elev-${ts}@example.com`;
+const T0=Date.now();
+await p.goto(BASE+'/ro'); await m.snap('landing');
+await p.getByText('Fă-ți cont gratuit').first().click(); m.tap();
+await p.waitForURL(/register/); await p.waitForTimeout(800); await m.snap('register-empty');
+const checks=await p.evaluate(()=>[...document.querySelectorAll('label')].filter(l=>l.querySelector('input[type=checkbox]')).map(l=>l.innerText));
+await p.getByPlaceholder('Numele tău').fill('Qa Elev'); 
+await p.getByPlaceholder('tu@exemplu.ro').fill(email);
+const sel=p.locator('select'); await sel.nth(0).selectOption('15'); await sel.nth(1).selectOption({index:5}); await sel.nth(2).selectOption(year);
+if(year>='2010'){ await p.locator('#parent-email').fill(`qa-e2e-1005-parinte-consent-${ts}@example.com`); }
+await p.getByPlaceholder('Minimum 8 caractere').fill('QaE2e!1005x'); await p.getByPlaceholder('Repetă parola').fill('QaE2e!1005x');
+await m.snap('register-filled',{subjectsOffered:checks});
+await p.getByRole('button',{name:'Respinge'}).click(); m.tap(); await p.waitForTimeout(300);
+const tSub=Date.now(); await p.getByRole('button',{name:'Creează cont'}).click(); m.tap();
+await p.waitForURL(/dashboard/,{timeout:20000}).catch(()=>{}); await p.waitForTimeout(1500);
+await m.snap('after-submit',{submitSec:((Date.now()-tSub)/1000).toFixed(1)});
+fs.writeFileSync(`${DIR}/${m.log.tag}-state.json`,JSON.stringify({email,ts},null,1));
+console.log(email, p.url(), 'sec', (Date.now()-T0)/1000, 'taps', m.taps, 'subjects', checks.length, checks.slice(0,40));
+fs.writeFileSync(`${DIR}/${m.log.tag}-steps.json`,JSON.stringify(m.log,null,1));
+await ctx.storageState({path:`${DIR}/${m.log.tag}-auth.json`});
+await b.close();

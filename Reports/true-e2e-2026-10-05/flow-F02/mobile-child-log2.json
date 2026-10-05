@@ -1,0 +1,443 @@
+{
+ "tag": "mobile-c2",
+ "steps": [
+  {
+   "n": 1,
+   "name": "after-subject",
+   "file": "mobile-c2-01-after-subject.png",
+   "url": "/ro/dashboard",
+   "title": "Dashboard - Tutor | Tutor",
+   "sec": "2.6",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "Astăzi",
+     "belowFold": false
+    },
+    {
+     "t": "Panou complet",
+     "belowFold": false
+    },
+    {
+     "t": "Începe testul ▶",
+     "belowFold": false
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "name": "step1",
+   "file": "mobile-c2-02-step1.png",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "title": "Practice - Tutor",
+   "sec": "3.6",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "Începe sesiunea",
+     "belowFold": false
+    },
+    {
+     "t": "⚡ Sesiune micro\n2 min\n5 întrebări",
+     "belowFold": true
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": true
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "name": "step2",
+   "file": "mobile-c2-03-step2.png",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "title": "Practice - Tutor",
+   "sec": "4.6",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "Începe sesiunea",
+     "belowFold": false
+    },
+    {
+     "t": "⚡ Sesiune micro\n2 min\n5 întrebări",
+     "belowFold": true
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": true
+    }
+   ]
+  },
+  {
+   "n": 4,
+   "name": "step3",
+   "file": "mobile-c2-04-step3.png",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "title": "Practice - Tutor",
+   "sec": "5.7",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "Începe sesiunea",
+     "belowFold": false
+    },
+    {
+     "t": "⚡ Sesiune micro\n2 min\n5 întrebări",
+     "belowFold": true
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": true
+    }
+   ]
+  },
+  {
+   "n": 5,
+   "name": "step4",
+   "file": "mobile-c2-05-step4.png",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "title": "Practice - Tutor",
+   "sec": "6.7",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "Începe sesiunea",
+     "belowFold": false
+    },
+    {
+     "t": "⚡ Sesiune micro\n2 min\n5 întrebări",
+     "belowFold": true
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": true
+    }
+   ]
+  },
+  {
+   "n": 6,
+   "name": "step5",
+   "file": "mobile-c2-06-step5.png",
+   "url": "/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "title": "Practice - Tutor",
+   "sec": "7.8",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Tutor",
+     "belowFold": false
+    },
+    {
+     "t": "Close menu",
+     "belowFold": false
+    },
+    {
+     "t": "EN",
+     "belowFold": false
+    },
+    {
+     "t": "RO",
+     "belowFold": false
+    },
+    {
+     "t": "Deconectare",
+     "belowFold": false
+    },
+    {
+     "t": "🚀\n3",
+     "belowFold": false
+    },
+    {
+     "t": "Notificări",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": false
+    },
+    {
+     "t": "Începe sesiunea",
+     "belowFold": false
+    },
+    {
+     "t": "⚡ Sesiune micro\n2 min\n5 întrebări",
+     "belowFold": true
+    },
+    {
+     "t": "ⓘ",
+     "belowFold": true
+    }
+   ]
+  }
+ ],
+ "console": [
+  {
+   "url": "http://localhost:3113/ro/dashboard",
+   "text": "Failed to load resource: the server responded with a status of 409 (Conflict)"
+  },
+  {
+   "url": "http://localhost:3113/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "text": "Failed to load resource: the server responded with a status of 409 (Conflict)"
+  },
+  {
+   "url": "http://localhost:3113/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "text": "Failed to load resource: the server responded with a status of 409 (Conflict)"
+  },
+  {
+   "url": "http://localhost:3113/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "text": "Failed to load resource: the server responded with a status of 409 (Conflict)"
+  },
+  {
+   "url": "http://localhost:3113/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "text": "Failed to load resource: the server responded with a status of 409 (Conflict)"
+  },
+  {
+   "url": "http://localhost:3113/ro/dashboard/practice?start=quick&domain=matematica-v-viii",
+   "text": "Failed to load resource: the server responded with a status of 409 (Conflict)"
+  }
+ ],
+ "http": [
+  {
+   "url": "/api/matematica-v-viii/session/start",
+   "status": 409
+  },
+  {
+   "url": "/api/matematica-v-viii/session/start",
+   "status": 409
+  },
+  {
+   "url": "/api/matematica-v-viii/session/start",
+   "status": 409
+  },
+  {
+   "url": "/api/matematica-v-viii/session/start",
+   "status": 409
+  },
+  {
+   "url": "/api/matematica-v-viii/session/start",
+   "status": 409
+  },
+  {
+   "url": "/api/matematica-v-viii/session/start",
+   "status": 409
+  }
+ ]
+}

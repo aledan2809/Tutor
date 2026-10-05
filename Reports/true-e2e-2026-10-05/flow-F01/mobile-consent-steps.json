@@ -1,0 +1,46 @@
+{
+ "tag": "mobile-consent",
+ "steps": [
+  {
+   "n": 1,
+   "name": "consent-page",
+   "file": "mobile-consent-01-consent-page.png",
+   "url": "/ro/acord-parinte/74423b64a17bbdf77e6bdbea13241a054e69418a92bcaefb7f1a975020f225c9",
+   "title": "Acordul părintelui | Tutor",
+   "sec": "2.4",
+   "taps": 0,
+   "prim": [
+    {
+     "t": "Politica de confidențialitate",
+     "belowFold": false
+    },
+    {
+     "t": "Sunt de acord",
+     "belowFold": false
+    },
+    {
+     "t": "Nu sunt de acord",
+     "belowFold": false
+    },
+    {
+     "t": "Politica de cookie-uri",
+     "belowFold": false
+    },
+    {
+     "t": "Confidențialitate",
+     "belowFold": false
+    },
+    {
+     "t": "Respinge",
+     "belowFold": false
+    },
+    {
+     "t": "Accept",
+     "belowFold": false
+    }
+   ]
+  }
+ ],
+ "console": [],
+ "http": []
+}

@@ -1,0 +1,122 @@
+{
+ "oldSessionAfter5min": {
+  "sessionApiUser": false,
+  "urlAfterGoto": "/ro/auth/signin?callbackUrl=%2Fdashboard"
+ },
+ "firstValue": {
+  "reached": true,
+  "sec": 8.3,
+  "taps": 7
+ },
+ "mail": {
+  "subject": "Parola nouă pentru eTutor.ro",
+  "at": "2026-10-05T07:38:22.739Z",
+  "delayAfterSubmitSec": "0.3",
+  "count": 1,
+  "text": "Bună, Qa F06,\n\nCineva a cerut schimbarea parolei contului tău de pe eTutor.ro. Cu linkul de mai\njos îți alegi o parolă nouă. Merge o oră și o singură dată.\n\nAlege parola nouă\n[http://localhost:3113/ro/auth/reset-password?token=f0e5da1df45e19ca77d7f17691bb438a71c41d227490587854cba8727d988503&email=qa-e2e-1005-f06-desktop-1791185896931%40example.com]\n\nDacă n-ai cerut tu, ignoră emailul: parola rămâne aceeași.\n\neTutor.ro",
+  "hasEtutorBrand": true,
+  "htmlLinkText": "Alege parola nouă"
+ },
+ "enumeration": {
+  "existing": {
+   "s": 200,
+   "b": "{\"success\":true,\"message\":\"If an account with that email exists, a reset link has been sent.\"}"
+  },
+  "missing": {
+   "s": 200,
+   "b": "{\"success\":true,\"message\":\"If an account with that email exists, a reset link has been sent.\"}"
+  },
+  "sameBody": true,
+  "msExisting": 20,
+  "msMissing": 9
+ },
+ "reuse": {
+  "file": "desktop-10-reuse.png",
+  "text": "Alege o parolă nouă\n\nParola nouă pentru qa-e2e-1005-f06-desktop-1791185896931@example.com\n\nParola nouă\nScrie parola încă o dată\n\nLinkul de resetare e greșit sau a expirat. Cere unul nou.\n\nSalvează parola\nConfidențialitate\n·\nTermeni\n·\nCookie-uri\n🍪\n\nFolosim cookie-uri esențiale pentru funcționarea contului. Detalii în Politica de cookie-uri · Confidențialitate.\n\nRespinge\nAccept",
+  "newLinkCta": 0
+ },
+ "twoInARow": {
+  "before": 1,
+  "after": 2,
+  "newMails": 1
+ },
+ "oldSession": {
+  "sessionApiUserAfter": true,
+  "urlAfterGoto": "/ro/dashboard"
+ },
+ "http": [
+  {
+   "tag": "A",
+   "url": "/api/student/domains",
+   "status": 401
+  },
+  {
+   "tag": "B",
+   "url": "/api/notifications?limit=5&audience=child",
+   "status": 401
+  },
+  {
+   "tag": "B",
+   "url": "/api/presence/ping",
+   "status": 401
+  },
+  {
+   "tag": "B",
+   "url": "/api/notifications?limit=10&audience=self",
+   "status": 401
+  },
+  {
+   "tag": "A",
+   "url": "/api/notifications?limit=10&audience=self",
+   "status": 401
+  },
+  {
+   "tag": "A",
+   "url": "/api/presence/ping",
+   "status": 401
+  },
+  {
+   "tag": "A",
+   "url": "/api/notifications?limit=5&audience=child",
+   "status": 401
+  }
+ ],
+ "console": [
+  {
+   "tag": "A",
+   "url": "http://localhost:3113/ro/auth/register",
+   "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  },
+  {
+   "tag": "B",
+   "url": "http://localhost:3113/ro/dashboard",
+   "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  },
+  {
+   "tag": "B",
+   "url": "http://localhost:3113/ro/dashboard",
+   "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  },
+  {
+   "tag": "B",
+   "url": "http://localhost:3113/ro/dashboard",
+   "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  },
+  {
+   "tag": "A",
+   "url": "http://localhost:3113/ro/dashboard",
+   "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  },
+  {
+   "tag": "A",
+   "url": "http://localhost:3113/ro/dashboard",
+   "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  },
+  {
+   "tag": "A",
+   "url": "http://localhost:3113/ro/dashboard",
+   "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  }
+ ],
+ "submitToScreenMs": 625
+}

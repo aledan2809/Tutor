@@ -1,0 +1,12 @@
+import {chromium,BASE,DIR,mk} from './lib.mjs';
+const b=await chromium.launch(); const ctx=await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true});
+const page=await ctx.newPage(); const m=mk('P',page);
+const pe='qa-e2e-1005-parent@example.com', pw='QaE2e-1005-pass!';
+const r=await page.request.post(BASE+'/api/auth/register',{data:{name:'qa-e2e-1005 Parinte',email:pe,password:pw,role:'PARENT',domainSlugs:[]}});
+console.log('register',r.status(),(await r.text()).slice(0,200));
+await page.goto(BASE+'/ro/auth/signin'); await m.snap('signin');
+await page.locator('input:not([type=password]):not([type=hidden])').first().fill(pe); await page.locator('input[type=password]').first().fill(pw);
+await page.click('button[type=submit]'); await page.waitForTimeout(4000); await m.snap('after-login');
+await page.goto(BASE+'/ro/dashboard/family'); await page.waitForTimeout(3000); await m.snap('family');
+console.log(page.url(), await page.innerText('body').then(t=>t.slice(0,800)));
+await ctx.storageState({path:'parent-state.json'}); await b.close();

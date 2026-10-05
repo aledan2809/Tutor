@@ -1,0 +1,31 @@
+import {chromium,devices,BASE,mk,DIR,latestMail} from './lib.mjs';
+import fs from 'fs';
+const vp=process.argv[2]||'mobile'; const year=process.argv[3]||'2008'; const label=process.argv[4]||'adult';
+const b=await chromium.launch();
+const ctx=await b.newContext(vp==='mobile'?{viewport:{width:375,height:812},deviceScaleFactor:2,isMobile:true,hasTouch:true,userAgent:devices['iPhone 13'].userAgent}:{viewport:{width:1440,height:900}});
+const p=await ctx.newPage(); const m=mk(`${vp}-${label}`,p);
+const ts=Date.now(); const email=`Qa-e2e-1005-elev-${ts}@example.com`; const pe=`qa-e2e-1005-parinte-consent-${ts}@example.com`;
+const T0=Date.now(); const minor=year>='2010';
+const text=async()=> (await p.evaluate(()=>document.body.innerText)).replace(/\n+/g,' | ').slice(0,700);
+const note=(k,v)=>{m.log[k]=v;};
+await p.goto(BASE+'/ro'); await m.snap('landing');
+await p.getByText('Fă-ți cont gratuit').first().click(); m.tap();
+await p.waitForURL(/register/); await p.waitForTimeout(800); 
+await p.getByPlaceholder('Numele tău').fill('Qa Elev'); await p.getByPlaceholder('tu@exemplu.ro').fill(email);
+const sel=p.locator('select'); await sel.nth(0).selectOption('15'); await sel.nth(1).selectOption({index:5}); await sel.nth(2).selectOption(year);
+if(minor){ await p.locator('#parent-email').fill(pe); }
+await p.getByPlaceholder('Minimum 8 caractere').fill('QaE2e!1005x'); await p.getByPlaceholder('Repetă parola').fill('QaE2e!1005x');
+await p.getByRole('button',{name:'Respinge'}).click(); m.tap(); await p.waitForTimeout(300);
+await m.snap('register-filled');
+await p.getByRole('button',{name:'Creează cont'}).click(); m.tap();
+await p.waitForURL(/dashboard/,{timeout:20000}).catch(()=>{}); await p.waitForTimeout(1500);
+await m.snap('after-submit'); note('sec_to_dashboard',(Date.now()-T0)/1000);
+await p.getByText('Matematica cl. VIII').first().click(); m.tap(); await p.waitForTimeout(1500); await m.snap('wizard-step2');
+const sb=p.getByText('Începe testul').first(); const bb=await sb.boundingBox(); note('startBtn',{y:bb?.y,vh:await p.evaluate(()=>innerHeight)});
+await sb.click(); m.tap(); await p.waitForTimeout(3000); await m.snap('after-start',{text:await text()});
+console.log('URL after start', p.url()); console.log(await text());
+fs.writeFileSync(`${DIR}/${m.log.tag}-steps.json`,JSON.stringify({email,pe,...m.log},null,1));
+await ctx.storageState({path:`${DIR}/${m.log.tag}-auth.json`});
+if(process.argv[5]==='stop'){await b.close();process.exit()}
+globalThis.__p=p; globalThis.__m=m; globalThis.__b=b; globalThis.__T0=T0; globalThis.__ctx=ctx; globalThis.__text=text;
+await b.close();

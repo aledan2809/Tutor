@@ -1,0 +1,3236 @@
+{
+ "mobile": {
+  "tChapter": 2.537,
+  "hrefs": [
+   "/ro/dashboard/watcher/notifications",
+   "/ro/dashboard/watcher/setari"
+  ],
+  "L": [
+   {
+    "name": "chapter",
+    "f": "b-mobile-01-chapter.png",
+    "bad": [],
+    "url": "https://etutor.ro/ro/dashboard/watcher",
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\n3\n9+\nMonitorizare\nAlerte\nCadență alerte\nMonitor Progres Studenți\n\nFiecare copil are un capitol. Deschide-l pentru program, sesiuni și remindere.\n\nℹ\nCUM FUNCȚIONEAZĂ\n📈 Rapoarte programate\n+\n▶\nT\nTest Student\nAviation\n🔥 1 zile\n50% corect\nRemindere pe WhatsApp\n\nAdaugă un număr de telefon dacă vrei ca acest copil să primească remindere și pe WhatsApp (Meta).\n\nSalvează\n\nTest nu a mai studiat de 8 zile.\n\nMomentan se împiedică repetat de „Unități de măsură fundamentale” (3 din 4 greșite).\n\nTrimite-i un reminder pe „Unități de măsură fundamentale” →\nSesiuni\nRezultate\nRemindere\nProgram\nSesiuni programate (reminder → rezultat)\n\nNiciun reminder programat declanșat încă.\n\nToate sesiunile efectuate\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:57\nassessment\n67%\n26.09, 10:55\n\ngreșit la: Probleme de mișcare\n\nSesiune rapidă\n25%\n26.09, 10:55\n\ngreșit la: Unități de măsură fundamentale\n\nSesiune micro\n0%\n05.09, 15:11\nSesiune micro\n100%\n05.09, 15:09\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "btns": [
+     [
+      "Tutor",
+      10
+     ],
+     [
+      "Panou de control",
+      80
+     ],
+     [
+      "Monitorizare",
+      165
+     ],
+     [
+      "Rapoarte",
+      213
+     ],
+     [
+      "Alerte",
+      261
+     ],
+     [
+      "Cadență alerte",
+      309
+     ],
+     [
+      "Familia mea",
+      357
+     ],
+     [
+      "Abonament",
+      441
+     ],
+     [
+      "Invită un prieten",
+      489
+     ],
+     [
+      "Notificări",
+      537
+     ],
+     [
+      "Setări",
+      585
+     ],
+     [
+      "Ajutor",
+      633
+     ],
+     [
+      "EN",
+      680
+     ],
+     [
+      "RO",
+      680
+     ],
+     [
+      "Deconectare",
+      784
+     ],
+     [
+      "🚀\n3",
+      13
+     ],
+     [
+      "9+",
+      6
+     ],
+     [
+      "Monitorizare",
+      112
+     ],
+     [
+      "Alerte",
+      112
+     ],
+     [
+      "Cadență alerte",
+      112
+     ],
+     [
+      "📈 Rapoarte programate\n+",
+      347
+     ],
+     [
+      "▶\nT\nTest Student\nAviation\n🔥 1 zile\n50% corect",
+      479
+     ],
+     [
+      "Salvează",
+      646
+     ],
+     [
+      "Trimite-i un reminder pe „Unități de măsură fundam",
+      805
+     ],
+     [
+      "Sesiuni",
+      894
+     ],
+     [
+      "Rezultate",
+      894
+     ],
+     [
+      "Remindere",
+      894
+     ],
+     [
+      "Program",
+      934
+     ],
+     [
+      "Confidențialitate",
+      2164
+     ],
+     [
+      "Termeni",
+      2164
+     ],
+     [
+      "Cookie-uri",
+      2164
+     ]
+    ],
+    "vh": 844
+   },
+   {
+    "name": "chapter-full",
+    "f": "b-mobile-02-chapter-full.png",
+    "bad": [],
+    "url": "https://etutor.ro/ro/dashboard/watcher",
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\n3\n9+\nMonitorizare\nAlerte\nCadență alerte\nMonitor Progres Studenți\n\nFiecare copil are un capitol. Deschide-l pentru program, sesiuni și remindere.\n\nℹ\nCUM FUNCȚIONEAZĂ\n📈 Rapoarte programate\n+\n▶\nT\nTest Student\nAviation\n🔥 1 zile\n50% corect\nRemindere pe WhatsApp\n\nAdaugă un număr de telefon dacă vrei ca acest copil să primească remindere și pe WhatsApp (Meta).\n\nSalvează\n\nTest nu a mai studiat de 8 zile.\n\nMomentan se împiedică repetat de „Unități de măsură fundamentale” (3 din 4 greșite).\n\nTrimite-i un reminder pe „Unități de măsură fundamentale” →\nSesiuni\nRezultate\nRemindere\nProgram\nSesiuni programate (reminder → rezultat)\n\nNiciun reminder programat declanșat încă.\n\nToate sesiunile efectuate\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:57\nassessment\n67%\n26.09, 10:55\n\ngreșit la: Probleme de mișcare\n\nSesiune rapidă\n25%\n26.09, 10:55\n\ngreșit la: Unități de măsură fundamentale\n\nSesiune micro\n0%\n05.09, 15:11\nSesiune micro\n100%\n05.09, 15:09\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "btns": [
+     [
+      "Tutor",
+      10
+     ],
+     [
+      "Panou de control",
+      80
+     ],
+     [
+      "Monitorizare",
+      165
+     ],
+     [
+      "Rapoarte",
+      213
+     ],
+     [
+      "Alerte",
+      261
+     ],
+     [
+      "Cadență alerte",
+      309
+     ],
+     [
+      "Familia mea",
+      357
+     ],
+     [
+      "Abonament",
+      441
+     ],
+     [
+      "Invită un prieten",
+      489
+     ],
+     [
+      "Notificări",
+      537
+     ],
+     [
+      "Setări",
+      585
+     ],
+     [
+      "Ajutor",
+      633
+     ],
+     [
+      "EN",
+      680
+     ],
+     [
+      "RO",
+      680
+     ],
+     [
+      "Deconectare",
+      784
+     ],
+     [
+      "🚀\n3",
+      13
+     ],
+     [
+      "9+",
+      6
+     ],
+     [
+      "Monitorizare",
+      112
+     ],
+     [
+      "Alerte",
+      112
+     ],
+     [
+      "Cadență alerte",
+      112
+     ],
+     [
+      "📈 Rapoarte programate\n+",
+      347
+     ],
+     [
+      "▶\nT\nTest Student\nAviation\n🔥 1 zile\n50% corect",
+      479
+     ],
+     [
+      "Salvează",
+      646
+     ],
+     [
+      "Trimite-i un reminder pe „Unități de măsură fundam",
+      805
+     ],
+     [
+      "Sesiuni",
+      894
+     ],
+     [
+      "Rezultate",
+      894
+     ],
+     [
+      "Remindere",
+      894
+     ],
+     [
+      "Program",
+      934
+     ],
+     [
+      "Confidențialitate",
+      2164
+     ],
+     [
+      "Termeni",
+      2164
+     ],
+     [
+      "Cookie-uri",
+      2164
+     ]
+    ],
+    "vh": 844
+   },
+   {
+    "name": "notifs",
+    "f": "b-mobile-03-notifs.png",
+    "bad": [
+     "429 https://etutor.ro/api/dashboard/family",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets",
+     "429 https://etutor.ro/api/dashboard/watcher/cmmnztvrsrdfe175ec2ea247b9/nudge-targets"
+    ],
+    "url": "https://etutor.ro/ro/dashboard/watcher/notifications",
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\n4\n9+\nMonitorizare\nAlerte\nCadență alerte\nℹ\nCUM FUNCȚIONEAZĂ\nNotificări\n\n50 necitite\n\nMarchează toate ca citite\nToate\nNecitite\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n05.10.2026, 10:00:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n05.10.2026, 09:30:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n05.10.2026, 09:00:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nNu a reacționat la reminder\n\nTest Student nu a reacționat la niciun canal. Poți autoriza un reminder suplimentar.\n\n05.10.2026, 08:30:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 10:15:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 10:15:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 10:15:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 10:15:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:45:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:45:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:45:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:45:01\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:00:10\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:00:09\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:00:06\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:00:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 08:30:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 08:30:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 08:30:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 08:30:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 07:45:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 07:45:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 07:45:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 07:45:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 07:00:05\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 07:00:05\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 07:00:05\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 07:00:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 21:30:05\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 21:30:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 21:30:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 21:30:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 21:00:09\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 21:00:08\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 21:00:07\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 21:00:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 20:30:06\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 20:30:06\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 20:30:05\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 20:30:01\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 19:45:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 19:45:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 19:45:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 19:45:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 19:00:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 19:00:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 19:00:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 19:00:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 18:15:05\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 18:15:05\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "btns": [
+     [
+      "Tutor",
+      10
+     ],
+     [
+      "Panou de control",
+      80
+     ],
+     [
+      "Monitorizare",
+      165
+     ],
+     [
+      "Rapoarte",
+      213
+     ],
+     [
+      "Alerte",
+      261
+     ],
+     [
+      "Cadență alerte",
+      309
+     ],
+     [
+      "Familia mea",
+      357
+     ],
+     [
+      "Abonament",
+      441
+     ],
+     [
+      "Invită un prieten",
+      489
+     ],
+     [
+      "Notificări",
+      537
+     ],
+     [
+      "Setări",
+      585
+     ],
+     [
+      "Ajutor",
+      633
+     ],
+     [
+      "EN",
+      680
+     ],
+     [
+      "RO",
+      680
+     ],
+     [
+      "Deconectare",
+      784
+     ],
+     [
+      "🚀\n4",
+      13
+     ],
+     [
+      "9+",
+      6
+     ],
+     [
+      "Monitorizare",
+      112
+     ],
+     [
+      "Alerte",
+      112
+     ],
+     [
+      "Cadență alerte",
+      112
+     ],
+     [
+      "Marchează toate ca citite",
+      239
+     ],
+     [
+      "Toate",
+      306
+     ],
+     [
+      "Necitite",
+      306
+     ],
+     [
+      "Aplicație",
+      538
+     ],
+     [
+      "Telegram",
+      572
+     ],
+     [
+      "Email",
+      572
+     ],
+     [
+      "Trimite reminder acum",
+      606
+     ],
+     [
+      "Serie de remindere…",
+      642
+     ],
+     [
+      "Marchează ca citit",
+      371
+     ],
+     [
+      "Aplicație",
+      881
+     ],
+     [
+      "Telegram",
+      915
+     ],
+     [
+      "Email",
+      915
+     ],
+     [
+      "Trimite reminder acum",
+      949
+     ],
+     [
+      "Serie de remindere…",
+      985
+     ],
+     [
+      "Marchează ca citit",
+      714
+     ],
+     [
+      "Aplicație",
+      1224
+     ],
+     [
+      "Telegram",
+      1258
+     ],
+     [
+      "Email",
+      1258
+     ],
+     [
+      "Trimite reminder acum",
+      1292
+     ],
+     [
+      "Serie de remindere…",
+      1328
+     ],
+     [
+      "Marchează ca citit",
+      1057
+     ],
+     [
+      "Aplicație",
+      1587
+     ],
+     [
+      "Telegram",
+      1621
+     ],
+     [
+      "Email",
+      1621
+     ],
+     [
+      "Trimite reminder acum",
+      1655
+     ],
+     [
+      "Serie de remindere…",
+      1691
+     ],
+     [
+      "Marchează ca citit",
+      1400
+     ],
+     [
+      "Aplicație",
+      1930
+     ],
+     [
+      "Telegram",
+      1964
+     ],
+     [
+      "Email",
+      1964
+     ],
+     [
+      "Trimite reminder acum",
+      1998
+     ],
+     [
+      "Serie de remindere…",
+      2034
+     ],
+     [
+      "Marchează ca citit",
+      1763
+     ],
+     [
+      "Aplicație",
+      2273
+     ],
+     [
+      "Telegram",
+      2307
+     ],
+     [
+      "Email",
+      2307
+     ],
+     [
+      "Trimite reminder acum",
+      2341
+     ],
+     [
+      "Serie de remindere…",
+      2377
+     ],
+     [
+      "Marchează ca citit",
+      2106
+     ],
+     [
+      "Aplicație",
+      2616
+     ],
+     [
+      "Telegram",
+      2650
+     ],
+     [
+      "Email",
+      2650
+     ],
+     [
+      "Trimite reminder acum",
+      2684
+     ],
+     [
+      "Serie de remindere…",
+      2720
+     ],
+     [
+      "Marchează ca citit",
+      2449
+     ],
+     [
+      "Aplicație",
+      2959
+     ],
+     [
+      "Telegram",
+      2993
+     ],
+     [
+      "Email",
+      2993
+     ],
+     [
+      "Trimite reminder acum",
+      3027
+     ],
+     [
+      "Serie de remindere…",
+      3063
+     ],
+     [
+      "Marchează ca citit",
+      2792
+     ],
+     [
+      "Aplicație",
+      3302
+     ],
+     [
+      "Telegram",
+      3336
+     ],
+     [
+      "Email",
+      3336
+     ],
+     [
+      "Trimite reminder acum",
+      3370
+     ],
+     [
+      "Serie de remindere…",
+      3406
+     ],
+     [
+      "Marchează ca citit",
+      3135
+     ],
+     [
+      "Aplicație",
+      3645
+     ],
+     [
+      "Telegram",
+      3679
+     ],
+     [
+      "Email",
+      3679
+     ],
+     [
+      "Trimite reminder acum",
+      3713
+     ],
+     [
+      "Serie de remindere…",
+      3749
+     ],
+     [
+      "Marchează ca citit",
+      3478
+     ],
+     [
+      "Aplicație",
+      3988
+     ],
+     [
+      "Telegram",
+      4022
+     ],
+     [
+      "Email",
+      4022
+     ],
+     [
+      "Trimite reminder acum",
+      4056
+     ],
+     [
+      "Serie de remindere…",
+      4092
+     ],
+     [
+      "Marchează ca citit",
+      3821
+     ],
+     [
+      "Aplicație",
+      4331
+     ],
+     [
+      "Telegram",
+      4365
+     ],
+     [
+      "Email",
+      4365
+     ],
+     [
+      "Trimite reminder acum",
+      4399
+     ],
+     [
+      "Serie de remindere…",
+      4435
+     ],
+     [
+      "Marchează ca citit",
+      4164
+     ],
+     [
+      "Aplicație",
+      4674
+     ],
+     [
+      "Telegram",
+      4708
+     ],
+     [
+      "Email",
+      4708
+     ],
+     [
+      "Trimite reminder acum",
+      4742
+     ],
+     [
+      "Serie de remindere…",
+      4778
+     ],
+     [
+      "Marchează ca citit",
+      4507
+     ],
+     [
+      "Aplicație",
+      5017
+     ],
+     [
+      "Telegram",
+      5051
+     ],
+     [
+      "Email",
+      5051
+     ],
+     [
+      "Trimite reminder acum",
+      5085
+     ],
+     [
+      "Serie de remindere…",
+      5121
+     ],
+     [
+      "Marchează ca citit",
+      4850
+     ],
+     [
+      "Aplicație",
+      5360
+     ],
+     [
+      "Telegram",
+      5394
+     ],
+     [
+      "Email",
+      5394
+     ],
+     [
+      "Trimite reminder acum",
+      5428
+     ],
+     [
+      "Serie de remindere…",
+      5464
+     ],
+     [
+      "Marchează ca citit",
+      5193
+     ],
+     [
+      "Aplicație",
+      5703
+     ],
+     [
+      "Telegram",
+      5737
+     ],
+     [
+      "Email",
+      5737
+     ],
+     [
+      "Trimite reminder acum",
+      5771
+     ],
+     [
+      "Serie de remindere…",
+      5807
+     ],
+     [
+      "Marchează ca citit",
+      5536
+     ],
+     [
+      "Aplicație",
+      6046
+     ],
+     [
+      "Telegram",
+      6080
+     ],
+     [
+      "Email",
+      6080
+     ],
+     [
+      "Trimite reminder acum",
+      6114
+     ],
+     [
+      "Serie de remindere…",
+      6150
+     ],
+     [
+      "Marchează ca citit",
+      5879
+     ],
+     [
+      "Aplicație",
+      6389
+     ],
+     [
+      "Telegram",
+      6423
+     ],
+     [
+      "Email",
+      6423
+     ],
+     [
+      "Trimite reminder acum",
+      6457
+     ],
+     [
+      "Serie de remindere…",
+      6493
+     ],
+     [
+      "Marchează ca citit",
+      6222
+     ],
+     [
+      "Aplicație",
+      6732
+     ],
+     [
+      "Telegram",
+      6766
+     ],
+     [
+      "Email",
+      6766
+     ],
+     [
+      "Trimite reminder acum",
+      6800
+     ],
+     [
+      "Serie de remindere…",
+      6836
+     ],
+     [
+      "Marchează ca citit",
+      6565
+     ],
+     [
+      "Aplicație",
+      7075
+     ],
+     [
+      "Telegram",
+      7109
+     ],
+     [
+      "Email",
+      7109
+     ],
+     [
+      "Trimite reminder acum",
+      7143
+     ],
+     [
+      "Serie de remindere…",
+      7179
+     ],
+     [
+      "Marchează ca citit",
+      6908
+     ],
+     [
+      "Aplicație",
+      7418
+     ],
+     [
+      "Telegram",
+      7452
+     ],
+     [
+      "Email",
+      7452
+     ],
+     [
+      "Trimite reminder acum",
+      7486
+     ],
+     [
+      "Serie de remindere…",
+      7522
+     ],
+     [
+      "Marchează ca citit",
+      7251
+     ],
+     [
+      "Aplicație",
+      7761
+     ],
+     [
+      "Telegram",
+      7795
+     ],
+     [
+      "Email",
+      7795
+     ],
+     [
+      "Trimite reminder acum",
+      7829
+     ],
+     [
+      "Serie de remindere…",
+      7865
+     ],
+     [
+      "Marchează ca citit",
+      7594
+     ],
+     [
+      "Aplicație",
+      8104
+     ],
+     [
+      "Telegram",
+      8138
+     ],
+     [
+      "Email",
+      8138
+     ],
+     [
+      "Trimite reminder acum",
+      8172
+     ],
+     [
+      "Serie de remindere…",
+      8208
+     ],
+     [
+      "Marchează ca citit",
+      7937
+     ],
+     [
+      "Aplicație",
+      8447
+     ],
+     [
+      "Telegram",
+      8481
+     ],
+     [
+      "Email",
+      8481
+     ],
+     [
+      "Trimite reminder acum",
+      8515
+     ],
+     [
+      "Serie de remindere…",
+      8551
+     ],
+     [
+      "Marchează ca citit",
+      8280
+     ],
+     [
+      "Aplicație",
+      8790
+     ],
+     [
+      "Telegram",
+      8824
+     ],
+     [
+      "Email",
+      8824
+     ],
+     [
+      "Trimite reminder acum",
+      8858
+     ],
+     [
+      "Serie de remindere…",
+      8894
+     ],
+     [
+      "Marchează ca citit",
+      8623
+     ],
+     [
+      "Aplicație",
+      9133
+     ],
+     [
+      "Telegram",
+      9167
+     ],
+     [
+      "Email",
+      9167
+     ],
+     [
+      "Trimite reminder acum",
+      9201
+     ],
+     [
+      "Serie de remindere…",
+      9237
+     ],
+     [
+      "Marchează ca citit",
+      8966
+     ],
+     [
+      "Aplicație",
+      9476
+     ],
+     [
+      "Telegram",
+      9510
+     ],
+     [
+      "Email",
+      9510
+     ],
+     [
+      "Trimite reminder acum",
+      9544
+     ],
+     [
+      "Serie de remindere…",
+      9580
+     ],
+     [
+      "Marchează ca citit",
+      9309
+     ],
+     [
+      "Aplicație",
+      9819
+     ],
+     [
+      "Telegram",
+      9853
+     ],
+     [
+      "Email",
+      9853
+     ],
+     [
+      "Trimite reminder acum",
+      9887
+     ],
+     [
+      "Serie de remindere…",
+      9923
+     ],
+     [
+      "Marchează ca citit",
+      9652
+     ],
+     [
+      "Aplicație",
+      10162
+     ],
+     [
+      "Telegram",
+      10196
+     ],
+     [
+      "Email",
+      10196
+     ],
+     [
+      "Trimite reminder acum",
+      10230
+     ],
+     [
+      "Serie de remindere…",
+      10266
+     ],
+     [
+      "Marchează ca citit",
+      9995
+     ],
+     [
+      "Aplicație",
+      10505
+     ],
+     [
+      "Telegram",
+      10539
+     ],
+     [
+      "Email",
+      10539
+     ],
+     [
+      "Trimite reminder acum",
+      10573
+     ],
+     [
+      "Serie de remindere…",
+      10609
+     ],
+     [
+      "Marchează ca citit",
+      10338
+     ],
+     [
+      "Aplicație",
+      10848
+     ],
+     [
+      "Telegram",
+      10882
+     ],
+     [
+      "Email",
+      10882
+     ],
+     [
+      "Trimite reminder acum",
+      10916
+     ],
+     [
+      "Serie de remindere…",
+      10952
+     ],
+     [
+      "Marchează ca citit",
+      10681
+     ],
+     [
+      "Aplicație",
+      11191
+     ],
+     [
+      "Telegram",
+      11225
+     ],
+     [
+      "Email",
+      11225
+     ],
+     [
+      "Trimite reminder acum",
+      11259
+     ],
+     [
+      "Serie de remindere…",
+      11295
+     ],
+     [
+      "Marchează ca citit",
+      11024
+     ],
+     [
+      "Aplicație",
+      11534
+     ],
+     [
+      "Telegram",
+      11568
+     ],
+     [
+      "Email",
+      11568
+     ],
+     [
+      "Trimite reminder acum",
+      11602
+     ],
+     [
+      "Serie de remindere…",
+      11638
+     ],
+     [
+      "Marchează ca citit",
+      11367
+     ],
+     [
+      "Aplicație",
+      11877
+     ],
+     [
+      "Telegram",
+      11911
+     ],
+     [
+      "Email",
+      11911
+     ],
+     [
+      "Trimite reminder acum",
+      11945
+     ],
+     [
+      "Serie de remindere…",
+      11981
+     ],
+     [
+      "Marchează ca citit",
+      11710
+     ],
+     [
+      "Aplicație",
+      12220
+     ],
+     [
+      "Telegram",
+      12254
+     ],
+     [
+      "Email",
+      12254
+     ],
+     [
+      "Trimite reminder acum",
+      12288
+     ],
+     [
+      "Serie de remindere…",
+      12324
+     ],
+     [
+      "Marchează ca citit",
+      12053
+     ],
+     [
+      "Aplicație",
+      12563
+     ],
+     [
+      "Telegram",
+      12597
+     ],
+     [
+      "Email",
+      12597
+     ],
+     [
+      "Trimite reminder acum",
+      12631
+     ],
+     [
+      "Serie de remindere…",
+      12667
+     ],
+     [
+      "Marchează ca citit",
+      12396
+     ],
+     [
+      "Aplicație",
+      12906
+     ],
+     [
+      "Telegram",
+      12940
+     ],
+     [
+      "Email",
+      12940
+     ],
+     [
+      "Trimite reminder acum",
+      12974
+     ],
+     [
+      "Serie de remindere…",
+      13010
+     ],
+     [
+      "Marchează ca citit",
+      12739
+     ],
+     [
+      "Aplicație",
+      13249
+     ],
+     [
+      "Telegram",
+      13283
+     ],
+     [
+      "Email",
+      13283
+     ],
+     [
+      "Trimite reminder acum",
+      13317
+     ],
+     [
+      "Serie de remindere…",
+      13353
+     ],
+     [
+      "Marchează ca citit",
+      13082
+     ],
+     [
+      "Aplicație",
+      13592
+     ],
+     [
+      "Telegram",
+      13626
+     ],
+     [
+      "Email",
+      13626
+     ],
+     [
+      "Trimite reminder acum",
+      13660
+     ],
+     [
+      "Serie de remindere…",
+      13696
+     ],
+     [
+      "Marchează ca citit",
+      13425
+     ],
+     [
+      "Aplicație",
+      13935
+     ],
+     [
+      "Telegram",
+      13969
+     ],
+     [
+      "Email",
+      13969
+     ],
+     [
+      "Trimite reminder acum",
+      14003
+     ],
+     [
+      "Serie de remindere…",
+      14039
+     ],
+     [
+      "Marchează ca citit",
+      13768
+     ],
+     [
+      "Aplicație",
+      14278
+     ],
+     [
+      "Telegram",
+      14312
+     ],
+     [
+      "Email",
+      14312
+     ],
+     [
+      "Trimite reminder acum",
+      14346
+     ],
+     [
+      "Serie de remindere…",
+      14382
+     ],
+     [
+      "Marchează ca citit",
+      14111
+     ],
+     [
+      "Aplicație",
+      14621
+     ],
+     [
+      "Telegram",
+      14655
+     ],
+     [
+      "Email",
+      14655
+     ],
+     [
+      "Trimite reminder acum",
+      14689
+     ],
+     [
+      "Serie de remindere…",
+      14725
+     ],
+     [
+      "Marchează ca citit",
+      14454
+     ],
+     [
+      "Aplicație",
+      14964
+     ],
+     [
+      "Telegram",
+      14998
+     ],
+     [
+      "Email",
+      14998
+     ],
+     [
+      "Trimite reminder acum",
+      15032
+     ],
+     [
+      "Serie de remindere…",
+      15068
+     ],
+     [
+      "Marchează ca citit",
+      14797
+     ],
+     [
+      "Aplicație",
+      15307
+     ],
+     [
+      "Telegram",
+      15341
+     ],
+     [
+      "Email",
+      15341
+     ],
+     [
+      "Trimite reminder acum",
+      15375
+     ],
+     [
+      "Serie de remindere…",
+      15411
+     ],
+     [
+      "Marchează ca citit",
+      15140
+     ],
+     [
+      "Aplicație",
+      15650
+     ],
+     [
+      "Telegram",
+      15684
+     ],
+     [
+      "Email",
+      15684
+     ],
+     [
+      "Trimite reminder acum",
+      15718
+     ],
+     [
+      "Serie de remindere…",
+      15754
+     ],
+     [
+      "Marchează ca citit",
+      15483
+     ],
+     [
+      "Aplicație",
+      15993
+     ],
+     [
+      "Telegram",
+      16027
+     ],
+     [
+      "Email",
+      16027
+     ],
+     [
+      "Trimite reminder acum",
+      16061
+     ],
+     [
+      "Serie de remindere…",
+      16097
+     ],
+     [
+      "Marchează ca citit",
+      15826
+     ],
+     [
+      "Aplicație",
+      16336
+     ],
+     [
+      "Telegram",
+      16370
+     ],
+     [
+      "Email",
+      16370
+     ],
+     [
+      "Trimite reminder acum",
+      16404
+     ],
+     [
+      "Serie de remindere…",
+      16440
+     ],
+     [
+      "Marchează ca citit",
+      16169
+     ],
+     [
+      "Aplicație",
+      16679
+     ],
+     [
+      "Telegram",
+      16713
+     ],
+     [
+      "Email",
+      16713
+     ],
+     [
+      "Trimite reminder acum",
+      16747
+     ],
+     [
+      "Serie de remindere…",
+      16783
+     ],
+     [
+      "Marchează ca citit",
+      16512
+     ],
+     [
+      "Aplicație",
+      17022
+     ],
+     [
+      "Telegram",
+      17056
+     ],
+     [
+      "Email",
+      17056
+     ],
+     [
+      "Trimite reminder acum",
+      17090
+     ],
+     [
+      "Serie de remindere…",
+      17126
+     ],
+     [
+      "Marchează ca citit",
+      16855
+     ],
+     [
+      "Aplicație",
+      17365
+     ],
+     [
+      "Telegram",
+      17399
+     ],
+     [
+      "Email",
+      17399
+     ],
+     [
+      "Trimite reminder acum",
+      17433
+     ],
+     [
+      "Serie de remindere…",
+      17469
+     ],
+     [
+      "Marchează ca citit",
+      17198
+     ],
+     [
+      "Confidențialitate",
+      17549
+     ],
+     [
+      "Termeni",
+      17549
+     ],
+     [
+      "Cookie-uri",
+      17549
+     ]
+    ],
+    "vh": 844
+   }
+  ]
+ },
+ "desktop": {
+  "tChapter": 2.538,
+  "hrefs": [
+   "/ro/dashboard/watcher/notifications",
+   "/ro/dashboard/watcher/setari"
+  ],
+  "L": [
+   {
+    "name": "chapter",
+    "f": "b-desktop-01-chapter.png",
+    "bad": [],
+    "url": "https://etutor.ro/ro/dashboard/watcher",
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\nConfigurare\n3\n9+\nMonitorizare\nAlerte\nCadență alerte\nMonitor Progres Studenți\n\nFiecare copil are un capitol. Deschide-l pentru program, sesiuni și remindere.\n\nℹ\nCUM FUNCȚIONEAZĂ\n📈 Rapoarte programate\n+\n▶\nT\nTest Student\nAviation\n🔥 1 zile\n50% corect\nRemindere pe WhatsApp\n\nAdaugă un număr de telefon dacă vrei ca acest copil să primească remindere și pe WhatsApp (Meta).\n\nSalvează\n\nTest nu a mai studiat de 8 zile.\n\nMomentan se împiedică repetat de „Unități de măsură fundamentale” (3 din 4 greșite).\n\nTrimite-i un reminder pe „Unități de măsură fundamentale” →\nSesiuni\nRezultate\nRemindere\nProgram\nSesiuni programate (reminder → rezultat)\n\nNiciun reminder programat declanșat încă.\n\nToate sesiunile efectuate\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:57\nassessment\n67%\n26.09, 10:55\n\ngreșit la: Probleme de mișcare\n\nSesiune rapidă\n25%\n26.09, 10:55\n\ngreșit la: Unități de măsură fundamentale\n\nSesiune micro\n0%\n05.09, 15:11\nSesiune micro\n100%\n05.09, 15:09\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "btns": [
+     [
+      "Tutor",
+      10
+     ],
+     [
+      "Panou de control",
+      80
+     ],
+     [
+      "Monitorizare",
+      165
+     ],
+     [
+      "Rapoarte",
+      213
+     ],
+     [
+      "Alerte",
+      261
+     ],
+     [
+      "Cadență alerte",
+      309
+     ],
+     [
+      "Familia mea",
+      357
+     ],
+     [
+      "Abonament",
+      441
+     ],
+     [
+      "Invită un prieten",
+      489
+     ],
+     [
+      "Notificări",
+      537
+     ],
+     [
+      "Setări",
+      585
+     ],
+     [
+      "Ajutor",
+      633
+     ],
+     [
+      "EN",
+      1847
+     ],
+     [
+      "RO",
+      1847
+     ],
+     [
+      "Deconectare",
+      1951
+     ],
+     [
+      "🚀\nConfigurare\n3",
+      13
+     ],
+     [
+      "9+",
+      6
+     ],
+     [
+      "Monitorizare",
+      80
+     ],
+     [
+      "Alerte",
+      80
+     ],
+     [
+      "Cadență alerte",
+      80
+     ],
+     [
+      "📈 Rapoarte programate\n+",
+      295
+     ],
+     [
+      "▶\nT\nTest Student\nAviation\n🔥 1 zile\n50% corect",
+      427
+     ],
+     [
+      "Salvează",
+      578
+     ],
+     [
+      "Trimite-i un reminder pe „Unități de măsură fundam",
+      717
+     ],
+     [
+      "Sesiuni",
+      790
+     ],
+     [
+      "Rezultate",
+      790
+     ],
+     [
+      "Remindere",
+      790
+     ],
+     [
+      "Program",
+      790
+     ],
+     [
+      "Confidențialitate",
+      2028
+     ],
+     [
+      "Termeni",
+      2028
+     ],
+     [
+      "Cookie-uri",
+      2028
+     ]
+    ],
+    "vh": 900
+   },
+   {
+    "name": "chapter-full",
+    "f": "b-desktop-02-chapter-full.png",
+    "bad": [],
+    "url": "https://etutor.ro/ro/dashboard/watcher",
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\nConfigurare\n3\n9+\nMonitorizare\nAlerte\nCadență alerte\nMonitor Progres Studenți\n\nFiecare copil are un capitol. Deschide-l pentru program, sesiuni și remindere.\n\nℹ\nCUM FUNCȚIONEAZĂ\n📈 Rapoarte programate\n+\n▶\nT\nTest Student\nAviation\n🔥 1 zile\n50% corect\nRemindere pe WhatsApp\n\nAdaugă un număr de telefon dacă vrei ca acest copil să primească remindere și pe WhatsApp (Meta).\n\nSalvează\n\nTest nu a mai studiat de 8 zile.\n\nMomentan se împiedică repetat de „Unități de măsură fundamentale” (3 din 4 greșite).\n\nTrimite-i un reminder pe „Unități de măsură fundamentale” →\nSesiuni\nRezultate\nRemindere\nProgram\nSesiuni programate (reminder → rezultat)\n\nNiciun reminder programat declanșat încă.\n\nToate sesiunile efectuate\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:58\nSesiune rapidă\n0%\n26.09, 10:57\nassessment\n67%\n26.09, 10:55\n\ngreșit la: Probleme de mișcare\n\nSesiune rapidă\n25%\n26.09, 10:55\n\ngreșit la: Unități de măsură fundamentale\n\nSesiune micro\n0%\n05.09, 15:11\nSesiune micro\n100%\n05.09, 15:09\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nSesiune rapidă\n0%\n11.05, 15:10\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "btns": [
+     [
+      "Tutor",
+      10
+     ],
+     [
+      "Panou de control",
+      80
+     ],
+     [
+      "Monitorizare",
+      165
+     ],
+     [
+      "Rapoarte",
+      213
+     ],
+     [
+      "Alerte",
+      261
+     ],
+     [
+      "Cadență alerte",
+      309
+     ],
+     [
+      "Familia mea",
+      357
+     ],
+     [
+      "Abonament",
+      441
+     ],
+     [
+      "Invită un prieten",
+      489
+     ],
+     [
+      "Notificări",
+      537
+     ],
+     [
+      "Setări",
+      585
+     ],
+     [
+      "Ajutor",
+      633
+     ],
+     [
+      "EN",
+      1847
+     ],
+     [
+      "RO",
+      1847
+     ],
+     [
+      "Deconectare",
+      1951
+     ],
+     [
+      "🚀\nConfigurare\n3",
+      13
+     ],
+     [
+      "9+",
+      6
+     ],
+     [
+      "Monitorizare",
+      80
+     ],
+     [
+      "Alerte",
+      80
+     ],
+     [
+      "Cadență alerte",
+      80
+     ],
+     [
+      "📈 Rapoarte programate\n+",
+      295
+     ],
+     [
+      "▶\nT\nTest Student\nAviation\n🔥 1 zile\n50% corect",
+      427
+     ],
+     [
+      "Salvează",
+      578
+     ],
+     [
+      "Trimite-i un reminder pe „Unități de măsură fundam",
+      717
+     ],
+     [
+      "Sesiuni",
+      790
+     ],
+     [
+      "Rezultate",
+      790
+     ],
+     [
+      "Remindere",
+      790
+     ],
+     [
+      "Program",
+      790
+     ],
+     [
+      "Confidențialitate",
+      2028
+     ],
+     [
+      "Termeni",
+      2028
+     ],
+     [
+      "Cookie-uri",
+      2028
+     ]
+    ],
+    "vh": 900
+   },
+   {
+    "name": "notifs",
+    "f": "b-desktop-03-notifs.png",
+    "bad": [],
+    "url": "https://etutor.ro/ro/dashboard/watcher/notifications",
+    "body": "Tutor\nPanou de control\n\nCOPILUL MEU\n\nMonitorizare\nRapoarte\nAlerte\nCadență alerte\nFamilia mea\n\nCONT\n\nAbonament\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nTest Watcher\n\ntest_watcher@test.com\n\nDeconectare\n🚀\nConfigurare\n3\n9+\nMonitorizare\nAlerte\nCadență alerte\nℹ\nCUM FUNCȚIONEAZĂ\nNotificări\n\n50 necitite\n\nMarchează toate ca citite\nToate\nNecitite\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n05.10.2026, 10:00:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n05.10.2026, 09:30:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n05.10.2026, 09:00:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nNu a reacționat la reminder\n\nTest Student nu a reacționat la niciun canal. Poți autoriza un reminder suplimentar.\n\n05.10.2026, 08:30:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 10:15:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 10:15:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 10:15:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 10:15:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:45:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:45:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:45:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:45:01\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:00:10\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:00:09\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:00:06\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 09:00:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 08:30:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 08:30:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 08:30:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 08:30:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 07:45:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 07:45:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 07:45:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 07:45:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 07:00:05\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 07:00:05\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 07:00:05\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n01.10.2026, 07:00:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 21:30:05\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 21:30:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 21:30:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 21:30:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 21:00:09\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 21:00:08\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 21:00:07\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 21:00:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 20:30:06\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 20:30:06\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 20:30:05\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 20:30:01\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 19:45:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 19:45:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 19:45:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 19:45:02\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 19:00:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 19:00:04\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 19:00:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 19:00:03\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 18:15:05\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\n!\n\nÎncă nu a reacționat\n\nTest Student încă nu a reacționat. Autorizează un reminder suplimentar?\n\n30.09.2026, 18:15:05\nParent Alert\nPe:\nAplicație\nTelegram\nEmail\nTrimite reminder acum\nSerie de remindere…\nMarchează ca citit\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "btns": [
+     [
+      "Tutor",
+      10
+     ],
+     [
+      "Panou de control",
+      80
+     ],
+     [
+      "Monitorizare",
+      165
+     ],
+     [
+      "Rapoarte",
+      213
+     ],
+     [
+      "Alerte",
+      261
+     ],
+     [
+      "Cadență alerte",
+      309
+     ],
+     [
+      "Familia mea",
+      357
+     ],
+     [
+      "Abonament",
+      441
+     ],
+     [
+      "Invită un prieten",
+      489
+     ],
+     [
+      "Notificări",
+      537
+     ],
+     [
+      "Setări",
+      585
+     ],
+     [
+      "Ajutor",
+      633
+     ],
+     [
+      "EN",
+      10024
+     ],
+     [
+      "RO",
+      10024
+     ],
+     [
+      "Deconectare",
+      10128
+     ],
+     [
+      "🚀\nConfigurare\n3",
+      13
+     ],
+     [
+      "9+",
+      6
+     ],
+     [
+      "Monitorizare",
+      80
+     ],
+     [
+      "Alerte",
+      80
+     ],
+     [
+      "Cadență alerte",
+      80
+     ],
+     [
+      "Marchează toate ca citite",
+      207
+     ],
+     [
+      "Toate",
+      274
+     ],
+     [
+      "Necitite",
+      274
+     ],
+     [
+      "Aplicație",
+      430
+     ],
+     [
+      "Telegram",
+      430
+     ],
+     [
+      "Email",
+      430
+     ],
+     [
+      "Trimite reminder acum",
+      464
+     ],
+     [
+      "Serie de remindere…",
+      464
+     ],
+     [
+      "Marchează ca citit",
+      339
+     ],
+     [
+      "Aplicație",
+      627
+     ],
+     [
+      "Telegram",
+      627
+     ],
+     [
+      "Email",
+      627
+     ],
+     [
+      "Trimite reminder acum",
+      661
+     ],
+     [
+      "Serie de remindere…",
+      661
+     ],
+     [
+      "Marchează ca citit",
+      536
+     ],
+     [
+      "Aplicație",
+      824
+     ],
+     [
+      "Telegram",
+      824
+     ],
+     [
+      "Email",
+      824
+     ],
+     [
+      "Trimite reminder acum",
+      858
+     ],
+     [
+      "Serie de remindere…",
+      858
+     ],
+     [
+      "Marchează ca citit",
+      733
+     ],
+     [
+      "Aplicație",
+      1021
+     ],
+     [
+      "Telegram",
+      1021
+     ],
+     [
+      "Email",
+      1021
+     ],
+     [
+      "Trimite reminder acum",
+      1055
+     ],
+     [
+      "Serie de remindere…",
+      1055
+     ],
+     [
+      "Marchează ca citit",
+      930
+     ],
+     [
+      "Aplicație",
+      1218
+     ],
+     [
+      "Telegram",
+      1218
+     ],
+     [
+      "Email",
+      1218
+     ],
+     [
+      "Trimite reminder acum",
+      1252
+     ],
+     [
+      "Serie de remindere…",
+      1252
+     ],
+     [
+      "Marchează ca citit",
+      1127
+     ],
+     [
+      "Aplicație",
+      1415
+     ],
+     [
+      "Telegram",
+      1415
+     ],
+     [
+      "Email",
+      1415
+     ],
+     [
+      "Trimite reminder acum",
+      1449
+     ],
+     [
+      "Serie de remindere…",
+      1449
+     ],
+     [
+      "Marchează ca citit",
+      1324
+     ],
+     [
+      "Aplicație",
+      1612
+     ],
+     [
+      "Telegram",
+      1612
+     ],
+     [
+      "Email",
+      1612
+     ],
+     [
+      "Trimite reminder acum",
+      1646
+     ],
+     [
+      "Serie de remindere…",
+      1646
+     ],
+     [
+      "Marchează ca citit",
+      1521
+     ],
+     [
+      "Aplicație",
+      1809
+     ],
+     [
+      "Telegram",
+      1809
+     ],
+     [
+      "Email",
+      1809
+     ],
+     [
+      "Trimite reminder acum",
+      1843
+     ],
+     [
+      "Serie de remindere…",
+      1843
+     ],
+     [
+      "Marchează ca citit",
+      1718
+     ],
+     [
+      "Aplicație",
+      2006
+     ],
+     [
+      "Telegram",
+      2006
+     ],
+     [
+      "Email",
+      2006
+     ],
+     [
+      "Trimite reminder acum",
+      2040
+     ],
+     [
+      "Serie de remindere…",
+      2040
+     ],
+     [
+      "Marchează ca citit",
+      1915
+     ],
+     [
+      "Aplicație",
+      2203
+     ],
+     [
+      "Telegram",
+      2203
+     ],
+     [
+      "Email",
+      2203
+     ],
+     [
+      "Trimite reminder acum",
+      2237
+     ],
+     [
+      "Serie de remindere…",
+      2237
+     ],
+     [
+      "Marchează ca citit",
+      2112
+     ],
+     [
+      "Aplicație",
+      2400
+     ],
+     [
+      "Telegram",
+      2400
+     ],
+     [
+      "Email",
+      2400
+     ],
+     [
+      "Trimite reminder acum",
+      2434
+     ],
+     [
+      "Serie de remindere…",
+      2434
+     ],
+     [
+      "Marchează ca citit",
+      2309
+     ],
+     [
+      "Aplicație",
+      2597
+     ],
+     [
+      "Telegram",
+      2597
+     ],
+     [
+      "Email",
+      2597
+     ],
+     [
+      "Trimite reminder acum",
+      2631
+     ],
+     [
+      "Serie de remindere…",
+      2631
+     ],
+     [
+      "Marchează ca citit",
+      2506
+     ],
+     [
+      "Aplicație",
+      2794
+     ],
+     [
+      "Telegram",
+      2794
+     ],
+     [
+      "Email",
+      2794
+     ],
+     [
+      "Trimite reminder acum",
+      2828
+     ],
+     [
+      "Serie de remindere…",
+      2828
+     ],
+     [
+      "Marchează ca citit",
+      2703
+     ],
+     [
+      "Aplicație",
+      2991
+     ],
+     [
+      "Telegram",
+      2991
+     ],
+     [
+      "Email",
+      2991
+     ],
+     [
+      "Trimite reminder acum",
+      3025
+     ],
+     [
+      "Serie de remindere…",
+      3025
+     ],
+     [
+      "Marchează ca citit",
+      2900
+     ],
+     [
+      "Aplicație",
+      3188
+     ],
+     [
+      "Telegram",
+      3188
+     ],
+     [
+      "Email",
+      3188
+     ],
+     [
+      "Trimite reminder acum",
+      3222
+     ],
+     [
+      "Serie de remindere…",
+      3222
+     ],
+     [
+      "Marchează ca citit",
+      3097
+     ],
+     [
+      "Aplicație",
+      3385
+     ],
+     [
+      "Telegram",
+      3385
+     ],
+     [
+      "Email",
+      3385
+     ],
+     [
+      "Trimite reminder acum",
+      3419
+     ],
+     [
+      "Serie de remindere…",
+      3419
+     ],
+     [
+      "Marchează ca citit",
+      3294
+     ],
+     [
+      "Aplicație",
+      3582
+     ],
+     [
+      "Telegram",
+      3582
+     ],
+     [
+      "Email",
+      3582
+     ],
+     [
+      "Trimite reminder acum",
+      3616
+     ],
+     [
+      "Serie de remindere…",
+      3616
+     ],
+     [
+      "Marchează ca citit",
+      3491
+     ],
+     [
+      "Aplicație",
+      3779
+     ],
+     [
+      "Telegram",
+      3779
+     ],
+     [
+      "Email",
+      3779
+     ],
+     [
+      "Trimite reminder acum",
+      3813
+     ],
+     [
+      "Serie de remindere…",
+      3813
+     ],
+     [
+      "Marchează ca citit",
+      3688
+     ],
+     [
+      "Aplicație",
+      3976
+     ],
+     [
+      "Telegram",
+      3976
+     ],
+     [
+      "Email",
+      3976
+     ],
+     [
+      "Trimite reminder acum",
+      4010
+     ],
+     [
+      "Serie de remindere…",
+      4010
+     ],
+     [
+      "Marchează ca citit",
+      3885
+     ],
+     [
+      "Aplicație",
+      4173
+     ],
+     [
+      "Telegram",
+      4173
+     ],
+     [
+      "Email",
+      4173
+     ],
+     [
+      "Trimite reminder acum",
+      4207
+     ],
+     [
+      "Serie de remindere…",
+      4207
+     ],
+     [
+      "Marchează ca citit",
+      4082
+     ],
+     [
+      "Aplicație",
+      4370
+     ],
+     [
+      "Telegram",
+      4370
+     ],
+     [
+      "Email",
+      4370
+     ],
+     [
+      "Trimite reminder acum",
+      4404
+     ],
+     [
+      "Serie de remindere…",
+      4404
+     ],
+     [
+      "Marchează ca citit",
+      4279
+     ],
+     [
+      "Aplicație",
+      4567
+     ],
+     [
+      "Telegram",
+      4567
+     ],
+     [
+      "Email",
+      4567
+     ],
+     [
+      "Trimite reminder acum",
+      4601
+     ],
+     [
+      "Serie de remindere…",
+      4601
+     ],
+     [
+      "Marchează ca citit",
+      4476
+     ],
+     [
+      "Aplicație",
+      4764
+     ],
+     [
+      "Telegram",
+      4764
+     ],
+     [
+      "Email",
+      4764
+     ],
+     [
+      "Trimite reminder acum",
+      4798
+     ],
+     [
+      "Serie de remindere…",
+      4798
+     ],
+     [
+      "Marchează ca citit",
+      4673
+     ],
+     [
+      "Aplicație",
+      4961
+     ],
+     [
+      "Telegram",
+      4961
+     ],
+     [
+      "Email",
+      4961
+     ],
+     [
+      "Trimite reminder acum",
+      4995
+     ],
+     [
+      "Serie de remindere…",
+      4995
+     ],
+     [
+      "Marchează ca citit",
+      4870
+     ],
+     [
+      "Aplicație",
+      5158
+     ],
+     [
+      "Telegram",
+      5158
+     ],
+     [
+      "Email",
+      5158
+     ],
+     [
+      "Trimite reminder acum",
+      5192
+     ],
+     [
+      "Serie de remindere…",
+      5192
+     ],
+     [
+      "Marchează ca citit",
+      5067
+     ],
+     [
+      "Aplicație",
+      5355
+     ],
+     [
+      "Telegram",
+      5355
+     ],
+     [
+      "Email",
+      5355
+     ],
+     [
+      "Trimite reminder acum",
+      5389
+     ],
+     [
+      "Serie de remindere…",
+      5389
+     ],
+     [
+      "Marchează ca citit",
+      5264
+     ],
+     [
+      "Aplicație",
+      5552
+     ],
+     [
+      "Telegram",
+      5552
+     ],
+     [
+      "Email",
+      5552
+     ],
+     [
+      "Trimite reminder acum",
+      5586
+     ],
+     [
+      "Serie de remindere…",
+      5586
+     ],
+     [
+      "Marchează ca citit",
+      5461
+     ],
+     [
+      "Aplicație",
+      5749
+     ],
+     [
+      "Telegram",
+      5749
+     ],
+     [
+      "Email",
+      5749
+     ],
+     [
+      "Trimite reminder acum",
+      5783
+     ],
+     [
+      "Serie de remindere…",
+      5783
+     ],
+     [
+      "Marchează ca citit",
+      5658
+     ],
+     [
+      "Aplicație",
+      5946
+     ],
+     [
+      "Telegram",
+      5946
+     ],
+     [
+      "Email",
+      5946
+     ],
+     [
+      "Trimite reminder acum",
+      5980
+     ],
+     [
+      "Serie de remindere…",
+      5980
+     ],
+     [
+      "Marchează ca citit",
+      5855
+     ],
+     [
+      "Aplicație",
+      6143
+     ],
+     [
+      "Telegram",
+      6143
+     ],
+     [
+      "Email",
+      6143
+     ],
+     [
+      "Trimite reminder acum",
+      6177
+     ],
+     [
+      "Serie de remindere…",
+      6177
+     ],
+     [
+      "Marchează ca citit",
+      6052
+     ],
+     [
+      "Aplicație",
+      6340
+     ],
+     [
+      "Telegram",
+      6340
+     ],
+     [
+      "Email",
+      6340
+     ],
+     [
+      "Trimite reminder acum",
+      6374
+     ],
+     [
+      "Serie de remindere…",
+      6374
+     ],
+     [
+      "Marchează ca citit",
+      6249
+     ],
+     [
+      "Aplicație",
+      6537
+     ],
+     [
+      "Telegram",
+      6537
+     ],
+     [
+      "Email",
+      6537
+     ],
+     [
+      "Trimite reminder acum",
+      6571
+     ],
+     [
+      "Serie de remindere…",
+      6571
+     ],
+     [
+      "Marchează ca citit",
+      6446
+     ],
+     [
+      "Aplicație",
+      6734
+     ],
+     [
+      "Telegram",
+      6734
+     ],
+     [
+      "Email",
+      6734
+     ],
+     [
+      "Trimite reminder acum",
+      6768
+     ],
+     [
+      "Serie de remindere…",
+      6768
+     ],
+     [
+      "Marchează ca citit",
+      6643
+     ],
+     [
+      "Aplicație",
+      6931
+     ],
+     [
+      "Telegram",
+      6931
+     ],
+     [
+      "Email",
+      6931
+     ],
+     [
+      "Trimite reminder acum",
+      6965
+     ],
+     [
+      "Serie de remindere…",
+      6965
+     ],
+     [
+      "Marchează ca citit",
+      6840
+     ],
+     [
+      "Aplicație",
+      7128
+     ],
+     [
+      "Telegram",
+      7128
+     ],
+     [
+      "Email",
+      7128
+     ],
+     [
+      "Trimite reminder acum",
+      7162
+     ],
+     [
+      "Serie de remindere…",
+      7162
+     ],
+     [
+      "Marchează ca citit",
+      7037
+     ],
+     [
+      "Aplicație",
+      7325
+     ],
+     [
+      "Telegram",
+      7325
+     ],
+     [
+      "Email",
+      7325
+     ],
+     [
+      "Trimite reminder acum",
+      7359
+     ],
+     [
+      "Serie de remindere…",
+      7359
+     ],
+     [
+      "Marchează ca citit",
+      7234
+     ],
+     [
+      "Aplicație",
+      7522
+     ],
+     [
+      "Telegram",
+      7522
+     ],
+     [
+      "Email",
+      7522
+     ],
+     [
+      "Trimite reminder acum",
+      7556
+     ],
+     [
+      "Serie de remindere…",
+      7556
+     ],
+     [
+      "Marchează ca citit",
+      7431
+     ],
+     [
+      "Aplicație",
+      7719
+     ],
+     [
+      "Telegram",
+      7719
+     ],
+     [
+      "Email",
+      7719
+     ],
+     [
+      "Trimite reminder acum",
+      7753
+     ],
+     [
+      "Serie de remindere…",
+      7753
+     ],
+     [
+      "Marchează ca citit",
+      7628
+     ],
+     [
+      "Aplicație",
+      7916
+     ],
+     [
+      "Telegram",
+      7916
+     ],
+     [
+      "Email",
+      7916
+     ],
+     [
+      "Trimite reminder acum",
+      7950
+     ],
+     [
+      "Serie de remindere…",
+      7950
+     ],
+     [
+      "Marchează ca citit",
+      7825
+     ],
+     [
+      "Aplicație",
+      8113
+     ],
+     [
+      "Telegram",
+      8113
+     ],
+     [
+      "Email",
+      8113
+     ],
+     [
+      "Trimite reminder acum",
+      8147
+     ],
+     [
+      "Serie de remindere…",
+      8147
+     ],
+     [
+      "Marchează ca citit",
+      8022
+     ],
+     [
+      "Aplicație",
+      8310
+     ],
+     [
+      "Telegram",
+      8310
+     ],
+     [
+      "Email",
+      8310
+     ],
+     [
+      "Trimite reminder acum",
+      8344
+     ],
+     [
+      "Serie de remindere…",
+      8344
+     ],
+     [
+      "Marchează ca citit",
+      8219
+     ],
+     [
+      "Aplicație",
+      8507
+     ],
+     [
+      "Telegram",
+      8507
+     ],
+     [
+      "Email",
+      8507
+     ],
+     [
+      "Trimite reminder acum",
+      8541
+     ],
+     [
+      "Serie de remindere…",
+      8541
+     ],
+     [
+      "Marchează ca citit",
+      8416
+     ],
+     [
+      "Aplicație",
+      8704
+     ],
+     [
+      "Telegram",
+      8704
+     ],
+     [
+      "Email",
+      8704
+     ],
+     [
+      "Trimite reminder acum",
+      8738
+     ],
+     [
+      "Serie de remindere…",
+      8738
+     ],
+     [
+      "Marchează ca citit",
+      8613
+     ],
+     [
+      "Aplicație",
+      8901
+     ],
+     [
+      "Telegram",
+      8901
+     ],
+     [
+      "Email",
+      8901
+     ],
+     [
+      "Trimite reminder acum",
+      8935
+     ],
+     [
+      "Serie de remindere…",
+      8935
+     ],
+     [
+      "Marchează ca citit",
+      8810
+     ],
+     [
+      "Aplicație",
+      9098
+     ],
+     [
+      "Telegram",
+      9098
+     ],
+     [
+      "Email",
+      9098
+     ],
+     [
+      "Trimite reminder acum",
+      9132
+     ],
+     [
+      "Serie de remindere…",
+      9132
+     ],
+     [
+      "Marchează ca citit",
+      9007
+     ],
+     [
+      "Aplicație",
+      9295
+     ],
+     [
+      "Telegram",
+      9295
+     ],
+     [
+      "Email",
+      9295
+     ],
+     [
+      "Trimite reminder acum",
+      9329
+     ],
+     [
+      "Serie de remindere…",
+      9329
+     ],
+     [
+      "Marchează ca citit",
+      9204
+     ],
+     [
+      "Aplicație",
+      9492
+     ],
+     [
+      "Telegram",
+      9492
+     ],
+     [
+      "Email",
+      9492
+     ],
+     [
+      "Trimite reminder acum",
+      9526
+     ],
+     [
+      "Serie de remindere…",
+      9526
+     ],
+     [
+      "Marchează ca citit",
+      9401
+     ],
+     [
+      "Aplicație",
+      9689
+     ],
+     [
+      "Telegram",
+      9689
+     ],
+     [
+      "Email",
+      9689
+     ],
+     [
+      "Trimite reminder acum",
+      9723
+     ],
+     [
+      "Serie de remindere…",
+      9723
+     ],
+     [
+      "Marchează ca citit",
+      9598
+     ],
+     [
+      "Aplicație",
+      9886
+     ],
+     [
+      "Telegram",
+      9886
+     ],
+     [
+      "Email",
+      9886
+     ],
+     [
+      "Trimite reminder acum",
+      9920
+     ],
+     [
+      "Serie de remindere…",
+      9920
+     ],
+     [
+      "Marchează ca citit",
+      9795
+     ],
+     [
+      "Aplicație",
+      10083
+     ],
+     [
+      "Telegram",
+      10083
+     ],
+     [
+      "Email",
+      10083
+     ],
+     [
+      "Trimite reminder acum",
+      10117
+     ],
+     [
+      "Serie de remindere…",
+      10117
+     ],
+     [
+      "Marchează ca citit",
+      9992
+     ],
+     [
+      "Confidențialitate",
+      10205
+     ],
+     [
+      "Termeni",
+      10205
+     ],
+     [
+      "Cookie-uri",
+      10205
+     ]
+    ],
+    "vh": 900
+   }
+  ]
+ }
+}

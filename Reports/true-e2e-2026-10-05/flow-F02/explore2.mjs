@@ -1,0 +1,12 @@
+import {chromium,devices,BASE,mk} from './lib.mjs';
+import fs from 'fs';
+const b=await chromium.launch();
+const ctx=await b.newContext({storageState:'state.json',viewport:{width:375,height:812},deviceScaleFactor:2,isMobile:true,hasTouch:true,userAgent:devices['iPhone 13'].userAgent});
+const p=await ctx.newPage(); const m=mk('y',p);
+let t=Date.now();
+await p.goto(BASE+'/ro/dashboard/family'); await p.waitForSelector('text=Se încarcă',{state:'detached',timeout:15000}).catch(()=>console.log('still loading')); await p.waitForTimeout(800);
+console.log('family load s',(Date.now()-t)/1000);
+await m.snap('family');
+console.log((await p.innerText('main')).slice(0,3000));
+console.log(JSON.stringify(m.log.steps[0].prim));
+await b.close();

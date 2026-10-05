@@ -1,0 +1,3485 @@
+{
+ "mobile": {
+  "groupLinks": [
+   "/ro/dashboard/instructor/groups/cmp15sbjo001p11ordezw3hok",
+   "/ro/dashboard/instructor/groups/cmp15sbjo001p11ordezw3hok",
+   "/ro/dashboard/instructor/groups/cmp15ktu8001111or8gr3lqqs",
+   "/ro/dashboard/instructor/groups/cmp15ktu8001111or8gr3lqqs"
+  ],
+  "studentLinks": [
+   "/ro/dashboard/instructor/students/cmq2icziw0008civtxc2b63k4",
+   "/ro/dashboard/instructor/students/cluser_superadmin_001",
+   "/ro/dashboard/instructor/students/cmq2ors7m002vtdna4joidtmv",
+   "/ro/dashboard/instructor/students/cmq0pno6g0000gjqydayylaf4",
+   "/ro/dashboard/instructor/students/cmp184swf0000urj8ezln37lo"
+  ],
+  "log": [
+   {
+    "step": 1,
+    "name": "signin",
+    "shot": "mobile-01-signin.png",
+    "url": "/ro/auth/signin",
+    "sec": "1.5",
+    "title": "Sign In - Tutor | Tutor",
+    "h1": [
+     "Autentifică-te în Tutor"
+    ],
+    "body": "Autentifică-te în Tutor\n\nAccesează platforma ta de învățare adaptivă\n\nContinuă cu Google\nSau continuă cu\nEmail sau nume de utilizator\nParola\nAutentificare\nNu ai email? Recuperează pe telefon\nAi uitat parola?\nFolosește magic link\n\nNu ai cont? Fă-ți unul\n\nSau încearcă fără cont ✨\n\nPrin autentificare, ești de acord cu Termeni și condiții & Politica de confidențialitate\n\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "ctas": [
+     {
+      "t": "Continuă cu Google",
+      "y": 210,
+      "h": null
+     },
+     {
+      "t": "Arată parola",
+      "y": 426,
+      "h": null
+     },
+     {
+      "t": "Autentificare",
+      "y": 486,
+      "h": null
+     },
+     {
+      "t": "Nu ai email? Recuperează pe telefon",
+      "y": 536,
+      "h": "/ro/auth/recuperare"
+     },
+     {
+      "t": "Ai uitat parola?",
+      "y": 534,
+      "h": "/ro/auth/forgot-password"
+     },
+     {
+      "t": "Folosește magic link",
+      "y": 534,
+      "h": null
+     },
+     {
+      "t": "Fă-ți unul",
+      "y": 594,
+      "h": "/ro/auth/register"
+     },
+     {
+      "t": "încearcă fără cont ✨",
+      "y": 630,
+      "h": "/ro/try"
+     },
+     {
+      "t": "Termeni și condiții",
+      "y": 690,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Politica de confidențialitate",
+      "y": 690,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 861,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 861,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 861,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 844,
+    "errs": [],
+    "bad": []
+   },
+   {
+    "step": 2,
+    "name": "after-login",
+    "shot": "mobile-02-after-login.png",
+    "url": "/ro/dashboard",
+    "sec": "4.5",
+    "title": "Dashboard - Tutor | Tutor",
+    "h1": [
+     "Panou de control",
+     "O sesiune scurtă de grile"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\n3\nPanou de control\nAstăzi\nPanou complet\nAviation\n\nSalut, Instructor — hai să începem o serie nouă!\n\nACȚIUNEA DE AZI\n\nO sesiune scurtă de grile\n\n50 days since last session\n\nContinuă ▶\nDrumul tău\n1\nSesiune scurtă de grile\n2\nRepară o zonă slabă\n3\nSimulare completă\n\nAcuratețe\n\n0%\n\n0 sesiuni\n\nXP total\n\n0\n\n500 până la Co-pilot\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Close menu",
+      "y": 10,
+      "h": null
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 784,
+      "h": null
+     },
+     {
+      "t": "🚀\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Astăzi",
+      "y": 122,
+      "h": null
+     },
+     {
+      "t": "Panou complet",
+      "y": 122,
+      "h": null
+     },
+     {
+      "t": "Aviation",
+      "y": 192,
+      "h": null
+     },
+     {
+      "t": "Continuă ▶",
+      "y": 398,
+      "h": null
+     },
+     {
+      "t": "1\nSesiune scurtă de grile",
+      "y": 507,
+      "h": null
+     },
+     {
+      "t": "3\nSimulare completă",
+      "y": 623,
+      "h": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 861,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 861,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 861,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 844,
+    "errs": [],
+    "bad": []
+   },
+   {
+    "step": 3,
+    "name": "panou",
+    "shot": "mobile-03-panou.png",
+    "url": "/ro/dashboard/instructor",
+    "sec": "6.8",
+    "title": "Instructor - Tutor",
+    "h1": [
+     "Panou Instructor",
+     "3 elevi au nevoie de atenție azi:",
+     "Activitate recentă"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\n3\nPrezentare\nStudenți\nÎntrebări\nGrupuri\nObiective\nMesaje\nAnaliză\nRapoarte\nNotificări\nSetări\nPanou Instructor\n3 elevi au nevoie de atenție azi:\nElly\nInsufficient session data\nVezi profilul →\nAlex Danciulescu\nInsufficient session data\nVezi profilul →\nMiruna\nInsufficient session data\nVezi profilul →\n\nTotal Studenți\n\n19\n\nGrupuri\n\n0\n\nObiective active\n\n0\n\nMesaje necitite\n\n0\n\nVezi studenții\nCreează grup\nVezi analiza\nGenerează raport\nActivitate recentă\nRares Danciulescurecovery\n100%\n05.10.2026\nRares Danciulescumicro\n100%\n30.09.2026\nTest Studentquick\n0%\n26.09.2026\nTest Studentquick\n0%\n26.09.2026\nTest Studentquick\n0%\n26.09.2026\nTest Studentquick\n0%\n26.09.2026\nTest Studentquick\n0%\n26.09.2026\nTest Studentquick\n0%\n",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Close menu",
+      "y": 10,
+      "h": null
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 784,
+      "h": null
+     },
+     {
+      "t": "🚀\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Prezentare",
+      "y": 112,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Studenți",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Întrebări",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/questions"
+     },
+     {
+      "t": "Grupuri",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Obiective",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/goals"
+     },
+     {
+      "t": "Mesaje",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/messages"
+     },
+     {
+      "t": "Analiză",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Notificări",
+      "y": 192,
+      "h": "/ro/dashboard/instructor/notificari"
+     },
+     {
+      "t": "Setări",
+      "y": 192,
+      "h": "/ro/dashboard/instructor/settings"
+     },
+     {
+      "t": "Elly\nInsufficient session data\nVezi profilul →",
+      "y": 336,
+      "h": "/ro/dashboard/instructor/students/cmq2icziw0008civtxc2b63k4"
+     },
+     {
+      "t": "Alex Danciulescu\nInsufficient session data\nVezi pr",
+      "y": 406,
+      "h": "/ro/dashboard/instructor/students/cluser_superadmin_001"
+     },
+     {
+      "t": "Miruna\nInsufficient session data\nVezi profilul →",
+      "y": 476,
+      "h": "/ro/dashboard/instructor/students/cmq2ors7m002vtdna4joidtmv"
+     },
+     {
+      "t": "Total Studenți\n\n19",
+      "y": 570,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Grupuri\n\n0",
+      "y": 570,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Vezi studenții",
+      "y": 822,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Creează grup",
+      "y": 822,
+      "h": "/ro/dashboard/instructor/groups/new"
+     },
+     {
+      "t": "Vezi analiza",
+      "y": 872,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Generează raport",
+      "y": 872,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Rares Danciulescu",
+      "y": 1023,
+      "h": "/ro/dashboard/instructor/students/cmqp7m9ev003sln4nvcxr9txb"
+     },
+     {
+      "t": "Rares Danciulescu",
+      "y": 1103,
+      "h": "/ro/dashboard/instructor/students/cmqp7m9ev003sln4nvcxr9txb"
+     },
+     {
+      "t": "Test Student",
+      "y": 1159,
+      "h": "/ro/dashboard/instructor/students/cmmnztvrsrdfe175ec2ea247b9"
+     },
+     {
+      "t": "Test Student",
+      "y": 1215,
+      "h": "/ro/dashboard/instructor/students/cmmnztvrsrdfe175ec2ea247b9"
+     },
+     {
+      "t": "Test Student",
+      "y": 1271,
+      "h": "/ro/dashboard/instructor/students/cmmnztvrsrdfe175ec2ea247b9"
+     },
+     {
+      "t": "Test Student",
+      "y": 1327,
+      "h": "/ro/dashboard/instructor/students/cmmnztvrsrdfe175ec2ea247b9"
+     }
+    ],
+    "overflowX": false,
+    "vh": 844,
+    "errs": [],
+    "bad": [],
+    "loadMs": 2210
+   },
+   {
+    "step": 4,
+    "name": "grupe",
+    "shot": "mobile-04-grupe.png",
+    "url": "/ro/dashboard/instructor/groups",
+    "sec": "8.9",
+    "title": "Instructor - Tutor",
+    "h1": [
+     "Grupuri"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\n3\nPrezentare\nStudenți\nÎntrebări\nGrupuri\nObiective\nMesaje\nAnaliză\nRapoarte\nNotificări\nSetări\nGrupuri\nCreează grup\nSelectează toate\nTest Group E2E\nAviation\n0 membri\n\nCreated by True Full E2E test\n\nEditează\nȘterge\nE2E Test Group\nAviation\n0 membri\n\nAuto-created for E2E test\n\nEditează\nȘterge\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Close menu",
+      "y": 10,
+      "h": null
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 784,
+      "h": null
+     },
+     {
+      "t": "🚀\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Prezentare",
+      "y": 112,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Studenți",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Întrebări",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/questions"
+     },
+     {
+      "t": "Grupuri",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Obiective",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/goals"
+     },
+     {
+      "t": "Mesaje",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/messages"
+     },
+     {
+      "t": "Analiză",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Notificări",
+      "y": 192,
+      "h": "/ro/dashboard/instructor/notificari"
+     },
+     {
+      "t": "Setări",
+      "y": 192,
+      "h": "/ro/dashboard/instructor/settings"
+     },
+     {
+      "t": "Creează grup",
+      "y": 248,
+      "h": "/ro/dashboard/instructor/groups/new"
+     },
+     {
+      "t": "Test Group E2E",
+      "y": 365,
+      "h": "/ro/dashboard/instructor/groups/cmp15sbjo001p11ordezw3hok"
+     },
+     {
+      "t": "Editează",
+      "y": 388,
+      "h": "/ro/dashboard/instructor/groups/cmp15sbjo001p11ordezw3hok"
+     },
+     {
+      "t": "Șterge",
+      "y": 388,
+      "h": null
+     },
+     {
+      "t": "E2E Test Group",
+      "y": 491,
+      "h": "/ro/dashboard/instructor/groups/cmp15ktu8001111or8gr3lqqs"
+     },
+     {
+      "t": "Editează",
+      "y": 506,
+      "h": "/ro/dashboard/instructor/groups/cmp15ktu8001111or8gr3lqqs"
+     },
+     {
+      "t": "Șterge",
+      "y": 506,
+      "h": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 861,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 861,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 861,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 844,
+    "errs": [],
+    "bad": [],
+    "loadMs": 2001
+   },
+   {
+    "step": 5,
+    "name": "grupa-noua",
+    "shot": "mobile-05-grupa-noua.png",
+    "url": "/ro/dashboard/instructor/groups/new",
+    "sec": "10.8",
+    "title": "Instructor - Tutor",
+    "h1": [
+     "Create Group"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\n3\nPrezentare\nStudenți\nÎntrebări\nGrupuri\nObiective\nMesaje\nAnaliză\nRapoarte\nNotificări\nSetări\nCreate Group\nNumele grupului\nDescriere\nDomeniu\nAviation\nMatematica cl. VIII\nSelectează studenți (0)\nAnto\nvladalionescumariaantonia@gmail.com\nTest Student\ntest_student@test.com\nRares\nrares.danciulescu2004@gmail.com\nTest Reg\ntestreg@test.com\nPuppeteer Admin\npuppeteer-admin@tutor.app\nAlina Danciulescu\niphoenixca@gmail.com\nAdmin Test\nadmin-test@tutor.app\nVoucher Tester\ntester1780651044906@example.com\nElly\nall@elly.com\nAndreea\ndeeatudor12@gmail.com\nRebeca\nrebiionescu112@gmail.com\nRares Danciulescu\nraresdanciulescu9@gmail.com\nAlex Danciulescu\nalexdanciulescu@gmail.com\nMiruna\nmiruna@gmail.com\nLeiba\nleibazibal56@gmail.c",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Close menu",
+      "y": 10,
+      "h": null
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 784,
+      "h": null
+     },
+     {
+      "t": "🚀\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Prezentare",
+      "y": 112,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Studenți",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Întrebări",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/questions"
+     },
+     {
+      "t": "Grupuri",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Obiective",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/goals"
+     },
+     {
+      "t": "Mesaje",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/messages"
+     },
+     {
+      "t": "Analiză",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Notificări",
+      "y": 192,
+      "h": "/ro/dashboard/instructor/notificari"
+     },
+     {
+      "t": "Setări",
+      "y": 192,
+      "h": "/ro/dashboard/instructor/settings"
+     },
+     {
+      "t": "Salvează",
+      "y": 912,
+      "h": null
+     },
+     {
+      "t": "Anulează",
+      "y": 912,
+      "h": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 983,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 983,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 983,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 844,
+    "errs": [],
+    "bad": [],
+    "loadMs": 1911
+   },
+   {
+    "step": 6,
+    "name": "grupa-detaliu",
+    "shot": "mobile-06-grupa-detaliu.png",
+    "url": "/ro/dashboard/instructor/groups/cmp15sbjo001p11ordezw3hok",
+    "sec": "12.8",
+    "title": "Instructor - Tutor",
+    "h1": [
+     "Test Group E2E"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\n3\nPrezentare\nStudenți\nÎntrebări\nGrupuri\nObiective\nMesaje\nAnaliză\nRapoarte\nNotificări\nSetări\nTest Group E2E\nNumele grupului\nDescriere\nSelectează studenți (0)\nAnto\nvladalionescumariaantonia@gmail.com\nTest Student\ntest_student@test.com\nRares\nrares.danciulescu2004@gmail.com\nTest Reg\ntestreg@test.com\nPuppeteer Admin\npuppeteer-admin@tutor.app\nElly\nall@elly.com\nRares Danciulescu\nraresdanciulescu9@gmail.com\nAlex Danciulescu\nalexdanciulescu@gmail.com\nMiruna\nmiruna@gmail.com\nAdmin Test\nadmin-test@tutor.app\nSalvează\nAnulează\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Close menu",
+      "y": 10,
+      "h": null
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 784,
+      "h": null
+     },
+     {
+      "t": "🚀\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Prezentare",
+      "y": 112,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Studenți",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Întrebări",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/questions"
+     },
+     {
+      "t": "Grupuri",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Obiective",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/goals"
+     },
+     {
+      "t": "Mesaje",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/messages"
+     },
+     {
+      "t": "Analiză",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Notificări",
+      "y": 192,
+      "h": "/ro/dashboard/instructor/notificari"
+     },
+     {
+      "t": "Setări",
+      "y": 192,
+      "h": "/ro/dashboard/instructor/settings"
+     },
+     {
+      "t": "Salvează",
+      "y": 826,
+      "h": null
+     },
+     {
+      "t": "Anulează",
+      "y": 826,
+      "h": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 897,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 897,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 897,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 844,
+    "errs": [],
+    "bad": [],
+    "loadMs": 1874
+   },
+   {
+    "step": 7,
+    "name": "elevi",
+    "shot": "mobile-07-elevi.png",
+    "url": "/ro/dashboard/instructor/students",
+    "sec": "14.9",
+    "title": "Instructor - Tutor",
+    "h1": [
+     "Studenți"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\n3\nPrezentare\nStudenți\nÎntrebări\nGrupuri\nObiective\nMesaje\nAnaliză\nRapoarte\nNotificări\nSetări\nStudenți\nSortare după risc\nSortare după acuratețe\nSortare după nume\nE\nElly\n\nall@elly.com\n\nCadet\n\n0%\n\nAcuratețe\n\n1\n\nSerie\n\n160\n\nPuncte\n\n0\n\nSubiecte\n\nMatematica cl. VIII\nRisc de eșec: 87%\n→\nA\nAlex Danciulescu\n\nalexdanciulescu@gmail.com\n\nCadet\n\n0%\n\nAcuratețe\n\n1\n\nSerie\n\n50\n\nPuncte\n\n0\n\nSubiecte\n\nAviation\nRisc de eșec: 87%\n→\nM\nMiruna\n\nmiruna@gmail.com\n\nCadet\n\n0%\n\nAcuratețe\n\n0\n\nSerie\n\n0\n\nPuncte\n\n0\n\nSubiecte\n\nAviation\nRisc de eșec: 85%\n→\nV\nVoucher Tester\n\ntester1780651044906@example.com\n\nCadet\n\n0%\n\nAcuratețe\n\n0\n\nSerie\n\n0\n\nPuncte\n\n0\n\nSubiecte\n\nMatematica cl. VIII\nRisc de eșec: 85%\n→\nP\nPuppeteer Admin\n\npuppeteer-admin@tut",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Close menu",
+      "y": 10,
+      "h": null
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 784,
+      "h": null
+     },
+     {
+      "t": "🚀\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Prezentare",
+      "y": 112,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Studenți",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Întrebări",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/questions"
+     },
+     {
+      "t": "Grupuri",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Obiective",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/goals"
+     },
+     {
+      "t": "Mesaje",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/messages"
+     },
+     {
+      "t": "Analiză",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Notificări",
+      "y": 192,
+      "h": "/ro/dashboard/instructor/notificari"
+     },
+     {
+      "t": "Setări",
+      "y": 192,
+      "h": "/ro/dashboard/instructor/settings"
+     },
+     {
+      "t": "Elly",
+      "y": 442,
+      "h": "/ro/dashboard/instructor/students/cmq2icziw0008civtxc2b63k4"
+     },
+     {
+      "t": "Alex Danciulescu",
+      "y": 668,
+      "h": "/ro/dashboard/instructor/students/cluser_superadmin_001"
+     },
+     {
+      "t": "Miruna",
+      "y": 894,
+      "h": "/ro/dashboard/instructor/students/cmq2ors7m002vtdna4joidtmv"
+     },
+     {
+      "t": "Voucher Tester",
+      "y": 1120,
+      "h": "/ro/dashboard/instructor/students/cmq0pno6g0000gjqydayylaf4"
+     },
+     {
+      "t": "Puppeteer Admin",
+      "y": 1346,
+      "h": "/ro/dashboard/instructor/students/cmp184swf0000urj8ezln37lo"
+     },
+     {
+      "t": "Test Reg",
+      "y": 1572,
+      "h": "/ro/dashboard/instructor/students/cmo01aiib0000uf0t4t66no0a"
+     },
+     {
+      "t": "Babadac Cristina",
+      "y": 1798,
+      "h": "/ro/dashboard/instructor/students/cmslrfy560028v5ysqx4861rz"
+     },
+     {
+      "t": "Leiba",
+      "y": 2024,
+      "h": "/ro/dashboard/instructor/students/cmrwif5qm01xwmidxdeqxyhce"
+     },
+     {
+      "t": "Elly",
+      "y": 2250,
+      "h": "/ro/dashboard/instructor/students/cmq2icziw0008civtxc2b63k4"
+     },
+     {
+      "t": "Admin Test",
+      "y": 2476,
+      "h": "/ro/dashboard/instructor/students/cmo7dml8s0000i9rkq18tybai"
+     },
+     {
+      "t": "Admin Test",
+      "y": 2702,
+      "h": "/ro/dashboard/instructor/students/cmo7dml8s0000i9rkq18tybai"
+     },
+     {
+      "t": "Test Student",
+      "y": 2928,
+      "h": "/ro/dashboard/instructor/students/cmmnztvrsrdfe175ec2ea247b9"
+     },
+     {
+      "t": "Leak Test",
+      "y": 3154,
+      "h": "/ro/dashboard/instructor/students/cmtnyaacl0000xzh7amgn0lqb"
+     },
+     {
+      "t": "Alina Danciulescu",
+      "y": 3380,
+      "h": "/ro/dashboard/instructor/students/cmo0fkq5l0000l6fqo4ic18np"
+     },
+     {
+      "t": "Rares",
+      "y": 3606,
+      "h": "/ro/dashboard/instructor/students/cmnzrb0uj0000qypnp8ny8cqd"
+     }
+    ],
+    "overflowX": false,
+    "vh": 844,
+    "errs": [],
+    "bad": [],
+    "loadMs": 2040
+   },
+   {
+    "step": 8,
+    "name": "elev-detaliu",
+    "shot": "mobile-08-elev-detaliu.png",
+    "url": "/ro/dashboard/instructor/students/cmq2icziw0008civtxc2b63k4",
+    "sec": "16.9",
+    "title": "Instructor - Tutor",
+    "h1": [
+     "Elly",
+     "Materia parcursă la școală"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\n3\nPrezentare\nStudenți\nÎntrebări\nGrupuri\nObiective\nMesaje\nAnaliză\nRapoarte\nNotificări\nSetări\n← Înapoi la studenți\nE\nElly\n\nall@elly.com\n\nAviation\nMatematica cl. VIII\nAviation\n\n0%\n\nAcuratețe\n\n0\n\nSerie\n\n0\n\nXP\n\n0\n\nSubiecte\n\nCadet\n\nNivel\n\nElly\n\nAviation\n\n82%\n\nRisc ridicat\n\n→ Stabil\n\nFactori de risc\n\n· Insufficient session data\n· Broken streak (inactive)\n· Low overall mastery\n\nImmediate intervention needed. Consider intensive review sessions and 1-on-1 support.\n\nMatematica cl. VIII\nMateria parcursă la școală\n\nBulina arată ce ar fi trebuit predat până azi, după programă. Bifează în dreptul fiecărei lecții dacă s-a predat efectiv la clasa ta — grilele se potrivesc pe ce ai bifat.\n\nÎn ce clasă ești?\nAlege clasa\n",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Close menu",
+      "y": 10,
+      "h": null
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 784,
+      "h": null
+     },
+     {
+      "t": "🚀\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Prezentare",
+      "y": 112,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Studenți",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Întrebări",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/questions"
+     },
+     {
+      "t": "Grupuri",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Obiective",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/goals"
+     },
+     {
+      "t": "Mesaje",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/messages"
+     },
+     {
+      "t": "Analiză",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Notificări",
+      "y": 192,
+      "h": "/ro/dashboard/instructor/notificari"
+     },
+     {
+      "t": "Setări",
+      "y": 192,
+      "h": "/ro/dashboard/instructor/settings"
+     },
+     {
+      "t": "← Înapoi la studenți",
+      "y": 251,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Atribuie sesiune",
+      "y": 1934,
+      "h": null
+     },
+     {
+      "t": "Setează obiectiv",
+      "y": 1934,
+      "h": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 2185,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 2185,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 2185,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 844,
+    "errs": [
+     "Failed to load resource: the server responded with a status of 404 ()"
+    ],
+    "bad": [
+     "404 /api/aviation/curriculum?childId=cmq2icziw0008civtxc2b63k4"
+    ],
+    "loadMs": 1918
+   },
+   {
+    "step": 9,
+    "name": "rapoarte",
+    "shot": "mobile-09-rapoarte.png",
+    "url": "/ro/dashboard/instructor/reports",
+    "sec": "18.9",
+    "title": "Instructor - Tutor",
+    "h1": [
+     "Rapoarte"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\n3\nPrezentare\nStudenți\nÎntrebări\nGrupuri\nObiective\nMesaje\nAnaliză\nRapoarte\nNotificări\nSetări\nRapoarte\nTip raport\nPer student\nPer grup\nPer domeniu\nSelectează ținta\nSelectează student\nLeak Test\nBabadac Cristina\nLeiba\nMiruna\nRares Danciulescu\nRebeca\nAndreea\nElly\nElly\nVoucher Tester\nAdmin Test\nAlina Danciulescu\nPuppeteer Admin\nAdmin Test\nAlex Danciulescu\nTest Reg\nRares\nTest Student\nAnto\nFormat export\nCSV\nJSON\nGenerează raport\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Close menu",
+      "y": 10,
+      "h": null
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 784,
+      "h": null
+     },
+     {
+      "t": "🚀\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Prezentare",
+      "y": 112,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Studenți",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Întrebări",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/questions"
+     },
+     {
+      "t": "Grupuri",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Obiective",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/goals"
+     },
+     {
+      "t": "Mesaje",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/messages"
+     },
+     {
+      "t": "Analiză",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Notificări",
+      "y": 192,
+      "h": "/ro/dashboard/instructor/notificari"
+     },
+     {
+      "t": "Setări",
+      "y": 192,
+      "h": "/ro/dashboard/instructor/settings"
+     },
+     {
+      "t": "Generează raport",
+      "y": 559,
+      "h": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 861,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 861,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 861,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 844,
+    "errs": [
+     "Failed to load resource: the server responded with a status of 403 ()"
+    ],
+    "bad": [
+     "403 /api/admin/domains"
+    ],
+    "loadMs": 1887
+   },
+   {
+    "step": 10,
+    "name": "rapoarte-preview",
+    "shot": "mobile-10-rapoarte-preview.png",
+    "url": "/ro/dashboard/instructor/reports",
+    "sec": "51.9",
+    "title": "Instructor - Tutor",
+    "h1": [
+     "Rapoarte"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\n3\nPrezentare\nStudenți\nÎntrebări\nGrupuri\nObiective\nMesaje\nAnaliză\nRapoarte\nNotificări\nSetări\nRapoarte\nTip raport\nPer student\nPer grup\nPer domeniu\nSelectează ținta\nSelectează student\nLeak Test\nBabadac Cristina\nLeiba\nMiruna\nRares Danciulescu\nRebeca\nAndreea\nElly\nElly\nVoucher Tester\nAdmin Test\nAlina Danciulescu\nPuppeteer Admin\nAdmin Test\nAlex Danciulescu\nTest Reg\nRares\nTest Student\nAnto\nFormat export\nCSV\nJSON\nGenerează raport\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Close menu",
+      "y": 10,
+      "h": null
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 680,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 784,
+      "h": null
+     },
+     {
+      "t": "🚀\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Prezentare",
+      "y": 112,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Studenți",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Întrebări",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/questions"
+     },
+     {
+      "t": "Grupuri",
+      "y": 112,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Obiective",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/goals"
+     },
+     {
+      "t": "Mesaje",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/messages"
+     },
+     {
+      "t": "Analiză",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 152,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Notificări",
+      "y": 192,
+      "h": "/ro/dashboard/instructor/notificari"
+     },
+     {
+      "t": "Setări",
+      "y": 192,
+      "h": "/ro/dashboard/instructor/settings"
+     },
+     {
+      "t": "Generează raport",
+      "y": 559,
+      "h": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 861,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 861,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 861,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 844,
+    "errs": [],
+    "bad": []
+   },
+   {
+    "step": 11,
+    "name": "certificat",
+    "shot": "mobile-11-certificat.png",
+    "url": "/ro/certificat/id-inexistent-qa",
+    "sec": "53.8",
+    "title": "Certificat: 0/5 la un quiz 🎓 | Tutor",
+    "h1": [],
+    "body": "Certificatul nu există sau a expirat.\n\nÎncearcă și tu\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "ctas": [
+     {
+      "t": "Încearcă și tu",
+      "y": 140,
+      "h": "/ro/try"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 861,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 861,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 861,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 844,
+    "errs": [],
+    "bad": [],
+    "loadMs": 1811
+   }
+  ]
+ },
+ "desktop": {
+  "groupLinks": [
+   "/ro/dashboard/instructor/groups/cmp15sbjo001p11ordezw3hok",
+   "/ro/dashboard/instructor/groups/cmp15sbjo001p11ordezw3hok",
+   "/ro/dashboard/instructor/groups/cmp15ktu8001111or8gr3lqqs",
+   "/ro/dashboard/instructor/groups/cmp15ktu8001111or8gr3lqqs"
+  ],
+  "studentLinks": [
+   "/ro/dashboard/instructor/students/cmq2icziw0008civtxc2b63k4",
+   "/ro/dashboard/instructor/students/cluser_superadmin_001",
+   "/ro/dashboard/instructor/students/cmq2ors7m002vtdna4joidtmv",
+   "/ro/dashboard/instructor/students/cmq0pno6g0000gjqydayylaf4",
+   "/ro/dashboard/instructor/students/cmp184swf0000urj8ezln37lo"
+  ],
+  "log": [
+   {
+    "step": 1,
+    "name": "signin",
+    "shot": "desktop-01-signin.png",
+    "url": "/ro/auth/signin",
+    "sec": "1.8",
+    "title": "Sign In - Tutor | Tutor",
+    "h1": [
+     "Autentifică-te în Tutor"
+    ],
+    "body": "Autentifică-te în Tutor\n\nAccesează platforma ta de învățare adaptivă\n\nContinuă cu Google\nSau continuă cu\nEmail sau nume de utilizator\nParola\nAutentificare\nNu ai email? Recuperează pe telefon\nAi uitat parola?\nFolosește magic link\n\nNu ai cont? Fă-ți unul\n\nSau încearcă fără cont ✨\n\nPrin autentificare, ești de acord cu Termeni și condiții & Politica de confidențialitate\n\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "ctas": [
+     {
+      "t": "Continuă cu Google",
+      "y": 234,
+      "h": null
+     },
+     {
+      "t": "Arată parola",
+      "y": 450,
+      "h": null
+     },
+     {
+      "t": "Autentificare",
+      "y": 510,
+      "h": null
+     },
+     {
+      "t": "Nu ai email? Recuperează pe telefon",
+      "y": 560,
+      "h": "/ro/auth/recuperare"
+     },
+     {
+      "t": "Ai uitat parola?",
+      "y": 558,
+      "h": "/ro/auth/forgot-password"
+     },
+     {
+      "t": "Folosește magic link",
+      "y": 558,
+      "h": null
+     },
+     {
+      "t": "Fă-ți unul",
+      "y": 618,
+      "h": "/ro/auth/register"
+     },
+     {
+      "t": "încearcă fără cont ✨",
+      "y": 654,
+      "h": "/ro/try"
+     },
+     {
+      "t": "Termeni și condiții",
+      "y": 698,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Politica de confidențialitate",
+      "y": 722,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 917,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 917,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 917,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 900,
+    "errs": [],
+    "bad": []
+   },
+   {
+    "step": 2,
+    "name": "after-login",
+    "shot": "desktop-02-after-login.png",
+    "url": "/ro/dashboard",
+    "sec": "3.6",
+    "title": "Dashboard - Tutor | Tutor",
+    "h1": [
+     "Panou de control",
+     "O sesiune scurtă de grile"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nPanou de control\nAstăzi\nPanou complet\nAviation\n\nSalut, Instructor — hai să începem o serie nouă!\n\nACȚIUNEA DE AZI\n\nO sesiune scurtă de grile\n\n50 days since last session\n\nContinuă ▶\nDrumul tău\n1\nSesiune scurtă de grile\n2\nRepară o zonă slabă\n3\nSimulare completă\n\nAcuratețe\n\n0%\n\n0 sesiuni\n\nXP total\n\n0\n\n500 până la Co-pilot\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 736,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 736,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 840,
+      "h": null
+     },
+     {
+      "t": "🚀\nConfigurare\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Astăzi",
+      "y": 83,
+      "h": null
+     },
+     {
+      "t": "Panou complet",
+      "y": 83,
+      "h": null
+     },
+     {
+      "t": "Aviation",
+      "y": 88,
+      "h": null
+     },
+     {
+      "t": "Continuă ▶",
+      "y": 302,
+      "h": null
+     },
+     {
+      "t": "1\nSesiune scurtă de grile",
+      "y": 411,
+      "h": null
+     },
+     {
+      "t": "3\nSimulare completă",
+      "y": 527,
+      "h": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 917,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 917,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 917,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 900,
+    "errs": [
+     "Provider's accounts list is empty."
+    ],
+    "bad": []
+   },
+   {
+    "step": 3,
+    "name": "panou",
+    "shot": "desktop-03-panou.png",
+    "url": "/ro/dashboard/instructor",
+    "sec": "5.7",
+    "title": "Instructor - Tutor",
+    "h1": [
+     "Panou Instructor",
+     "3 elevi au nevoie de atenție azi:",
+     "Activitate recentă"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nPrezentare\nStudenți\nÎntrebări\nGrupuri\nObiective\nMesaje\nAnaliză\nRapoarte\nNotificări\nSetări\nPanou Instructor\n3 elevi au nevoie de atenție azi:\nElly\nInsufficient session data\nVezi profilul →\nAlex Danciulescu\nInsufficient session data\nVezi profilul →\nMiruna\nInsufficient session data\nVezi profilul →\n\nTotal Studenți\n\n19\n\nGrupuri\n\n0\n\nObiective active\n\n0\n\nMesaje necitite\n\n0\n\nVezi studenții\nCreează grup\nVezi analiza\nGenerează raport\nActivitate recentă\nRares Danciulescurecovery\n100%\n05.10.2026\nRares Danciulescumicro\n100%\n30.09.2026\nTest Studentquick\n0%\n26.09.2026\nTest Studentquick\n0%\n26.09.2026\nTest Studentquick\n0%\n26.09.2026\nTest Studentquick\n0%\n26.09.2026\nTest Studentquick\n0%\n26.09.2026\nTest Stud",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 1160,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 1160,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 1264,
+      "h": null
+     },
+     {
+      "t": "🚀\nConfigurare\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Prezentare",
+      "y": 80,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Studenți",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Întrebări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/questions"
+     },
+     {
+      "t": "Grupuri",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Obiective",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/goals"
+     },
+     {
+      "t": "Mesaje",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/messages"
+     },
+     {
+      "t": "Analiză",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Notificări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/notificari"
+     },
+     {
+      "t": "Setări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/settings"
+     },
+     {
+      "t": "Elly\nInsufficient session data\nVezi profilul →",
+      "y": 224,
+      "h": "/ro/dashboard/instructor/students/cmq2icziw0008civtxc2b63k4"
+     },
+     {
+      "t": "Alex Danciulescu\nInsufficient session data\nVezi pr",
+      "y": 294,
+      "h": "/ro/dashboard/instructor/students/cluser_superadmin_001"
+     },
+     {
+      "t": "Miruna\nInsufficient session data\nVezi profilul →",
+      "y": 364,
+      "h": "/ro/dashboard/instructor/students/cmq2ors7m002vtdna4joidtmv"
+     },
+     {
+      "t": "Total Studenți\n\n19",
+      "y": 458,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Grupuri\n\n0",
+      "y": 458,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Vezi studenții",
+      "y": 592,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Creează grup",
+      "y": 592,
+      "h": "/ro/dashboard/instructor/groups/new"
+     },
+     {
+      "t": "Vezi analiza",
+      "y": 592,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Generează raport",
+      "y": 592,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Rares Danciulescu",
+      "y": 743,
+      "h": "/ro/dashboard/instructor/students/cmqp7m9ev003sln4nvcxr9txb"
+     },
+     {
+      "t": "Rares Danciulescu",
+      "y": 799,
+      "h": "/ro/dashboard/instructor/students/cmqp7m9ev003sln4nvcxr9txb"
+     },
+     {
+      "t": "Test Student",
+      "y": 855,
+      "h": "/ro/dashboard/instructor/students/cmmnztvrsrdfe175ec2ea247b9"
+     },
+     {
+      "t": "Test Student",
+      "y": 911,
+      "h": "/ro/dashboard/instructor/students/cmmnztvrsrdfe175ec2ea247b9"
+     },
+     {
+      "t": "Test Student",
+      "y": 967,
+      "h": "/ro/dashboard/instructor/students/cmmnztvrsrdfe175ec2ea247b9"
+     },
+     {
+      "t": "Test Student",
+      "y": 1023,
+      "h": "/ro/dashboard/instructor/students/cmmnztvrsrdfe175ec2ea247b9"
+     },
+     {
+      "t": "Test Student",
+      "y": 1079,
+      "h": "/ro/dashboard/instructor/students/cmmnztvrsrdfe175ec2ea247b9"
+     }
+    ],
+    "overflowX": false,
+    "vh": 900,
+    "errs": [],
+    "bad": [],
+    "loadMs": 2071
+   },
+   {
+    "step": 4,
+    "name": "grupe",
+    "shot": "desktop-04-grupe.png",
+    "url": "/ro/dashboard/instructor/groups",
+    "sec": "7.7",
+    "title": "Instructor - Tutor",
+    "h1": [
+     "Grupuri"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nPrezentare\nStudenți\nÎntrebări\nGrupuri\nObiective\nMesaje\nAnaliză\nRapoarte\nNotificări\nSetări\nGrupuri\nCreează grup\nSelectează toate\nTest Group E2E\nAviation\n0 membri\n\nCreated by True Full E2E test\n\nEditează\nȘterge\nE2E Test Group\nAviation\n0 membri\n\nAuto-created for E2E test\n\nEditează\nȘterge\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 736,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 736,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 840,
+      "h": null
+     },
+     {
+      "t": "🚀\nConfigurare\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Prezentare",
+      "y": 80,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Studenți",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Întrebări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/questions"
+     },
+     {
+      "t": "Grupuri",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Obiective",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/goals"
+     },
+     {
+      "t": "Mesaje",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/messages"
+     },
+     {
+      "t": "Analiză",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Notificări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/notificari"
+     },
+     {
+      "t": "Setări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/settings"
+     },
+     {
+      "t": "Creează grup",
+      "y": 136,
+      "h": "/ro/dashboard/instructor/groups/new"
+     },
+     {
+      "t": "Test Group E2E",
+      "y": 253,
+      "h": "/ro/dashboard/instructor/groups/cmp15sbjo001p11ordezw3hok"
+     },
+     {
+      "t": "Editează",
+      "y": 268,
+      "h": "/ro/dashboard/instructor/groups/cmp15sbjo001p11ordezw3hok"
+     },
+     {
+      "t": "Șterge",
+      "y": 268,
+      "h": null
+     },
+     {
+      "t": "E2E Test Group",
+      "y": 363,
+      "h": "/ro/dashboard/instructor/groups/cmp15ktu8001111or8gr3lqqs"
+     },
+     {
+      "t": "Editează",
+      "y": 378,
+      "h": "/ro/dashboard/instructor/groups/cmp15ktu8001111or8gr3lqqs"
+     },
+     {
+      "t": "Șterge",
+      "y": 378,
+      "h": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 917,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 917,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 917,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 900,
+    "errs": [],
+    "bad": [],
+    "loadMs": 1939
+   },
+   {
+    "step": 5,
+    "name": "grupa-noua",
+    "shot": "desktop-05-grupa-noua.png",
+    "url": "/ro/dashboard/instructor/groups/new",
+    "sec": "9.6",
+    "title": "Instructor - Tutor",
+    "h1": [
+     "Create Group"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nPrezentare\nStudenți\nÎntrebări\nGrupuri\nObiective\nMesaje\nAnaliză\nRapoarte\nNotificări\nSetări\nCreate Group\nNumele grupului\nDescriere\nDomeniu\nAviation\nMatematica cl. VIII\nSelectează studenți (0)\nAnto\nvladalionescumariaantonia@gmail.com\nTest Student\ntest_student@test.com\nRares\nrares.danciulescu2004@gmail.com\nTest Reg\ntestreg@test.com\nPuppeteer Admin\npuppeteer-admin@tutor.app\nAlina Danciulescu\niphoenixca@gmail.com\nAdmin Test\nadmin-test@tutor.app\nVoucher Tester\ntester1780651044906@example.com\nElly\nall@elly.com\nAndreea\ndeeatudor12@gmail.com\nRebeca\nrebiionescu112@gmail.com\nRares Danciulescu\nraresdanciulescu9@gmail.com\nAlex Danciulescu\nalexdanciulescu@gmail.com\nMiruna\nmiruna@gmail.com\nLeiba\nleibazib",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 736,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 736,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 840,
+      "h": null
+     },
+     {
+      "t": "🚀\nConfigurare\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Prezentare",
+      "y": 80,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Studenți",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Întrebări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/questions"
+     },
+     {
+      "t": "Grupuri",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Obiective",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/goals"
+     },
+     {
+      "t": "Mesaje",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/messages"
+     },
+     {
+      "t": "Analiză",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Notificări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/notificari"
+     },
+     {
+      "t": "Setări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/settings"
+     },
+     {
+      "t": "Salvează",
+      "y": 800,
+      "h": null
+     },
+     {
+      "t": "Anulează",
+      "y": 800,
+      "h": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 917,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 917,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 917,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 900,
+    "errs": [],
+    "bad": [],
+    "loadMs": 1943
+   },
+   {
+    "step": 6,
+    "name": "grupa-detaliu",
+    "shot": "desktop-06-grupa-detaliu.png",
+    "url": "/ro/dashboard/instructor/groups/cmp15sbjo001p11ordezw3hok",
+    "sec": "12.1",
+    "title": "Instructor - Tutor",
+    "h1": [
+     "Test Group E2E"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nPrezentare\nStudenți\nÎntrebări\nGrupuri\nObiective\nMesaje\nAnaliză\nRapoarte\nNotificări\nSetări\nTest Group E2E\nNumele grupului\nDescriere\nSelectează studenți (0)\nAnto\nvladalionescumariaantonia@gmail.com\nTest Student\ntest_student@test.com\nRares\nrares.danciulescu2004@gmail.com\nTest Reg\ntestreg@test.com\nPuppeteer Admin\npuppeteer-admin@tutor.app\nElly\nall@elly.com\nRares Danciulescu\nraresdanciulescu9@gmail.com\nAlex Danciulescu\nalexdanciulescu@gmail.com\nMiruna\nmiruna@gmail.com\nAdmin Test\nadmin-test@tutor.app\nSalvează\nAnulează\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 736,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 736,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 840,
+      "h": null
+     },
+     {
+      "t": "🚀\nConfigurare\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Prezentare",
+      "y": 80,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Studenți",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Întrebări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/questions"
+     },
+     {
+      "t": "Grupuri",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Obiective",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/goals"
+     },
+     {
+      "t": "Mesaje",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/messages"
+     },
+     {
+      "t": "Analiză",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Notificări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/notificari"
+     },
+     {
+      "t": "Setări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/settings"
+     },
+     {
+      "t": "Salvează",
+      "y": 714,
+      "h": null
+     },
+     {
+      "t": "Anulează",
+      "y": 714,
+      "h": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 917,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 917,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 917,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 900,
+    "errs": [],
+    "bad": [],
+    "loadMs": 2473
+   },
+   {
+    "step": 7,
+    "name": "elevi",
+    "shot": "desktop-07-elevi.png",
+    "url": "/ro/dashboard/instructor/students",
+    "sec": "14.4",
+    "title": "Instructor - Tutor",
+    "h1": [
+     "Studenți"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nPrezentare\nStudenți\nÎntrebări\nGrupuri\nObiective\nMesaje\nAnaliză\nRapoarte\nNotificări\nSetări\nStudenți\nSortare după risc\nSortare după acuratețe\nSortare după nume\nE\nElly\n\nall@elly.com\n\nCadet\n\n0%\n\nAcuratețe\n\n1\n\nSerie\n\n160\n\nPuncte\n\n0\n\nSubiecte\n\nMatematica cl. VIII\nRisc de eșec: 87%\n→\nA\nAlex Danciulescu\n\nalexdanciulescu@gmail.com\n\nCadet\n\n0%\n\nAcuratețe\n\n1\n\nSerie\n\n50\n\nPuncte\n\n0\n\nSubiecte\n\nAviation\nRisc de eșec: 87%\n→\nM\nMiruna\n\nmiruna@gmail.com\n\nCadet\n\n0%\n\nAcuratețe\n\n0\n\nSerie\n\n0\n\nPuncte\n\n0\n\nSubiecte\n\nAviation\nRisc de eșec: 85%\n→\nV\nVoucher Tester\n\ntester1780651044906@example.com\n\nCadet\n\n0%\n\nAcuratețe\n\n0\n\nSerie\n\n0\n\nPuncte\n\n0\n\nSubiecte\n\nMatematica cl. VIII\nRisc de eșec: 85%\n→\nP\nPuppeteer Admin\n\npuppete",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 1684,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 1684,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 1788,
+      "h": null
+     },
+     {
+      "t": "🚀\nConfigurare\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Prezentare",
+      "y": 80,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Studenți",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Întrebări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/questions"
+     },
+     {
+      "t": "Grupuri",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Obiective",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/goals"
+     },
+     {
+      "t": "Mesaje",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/messages"
+     },
+     {
+      "t": "Analiză",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Notificări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/notificari"
+     },
+     {
+      "t": "Setări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/settings"
+     },
+     {
+      "t": "Elly",
+      "y": 281,
+      "h": "/ro/dashboard/instructor/students/cmq2icziw0008civtxc2b63k4"
+     },
+     {
+      "t": "Alex Danciulescu",
+      "y": 281,
+      "h": "/ro/dashboard/instructor/students/cluser_superadmin_001"
+     },
+     {
+      "t": "Miruna",
+      "y": 281,
+      "h": "/ro/dashboard/instructor/students/cmq2ors7m002vtdna4joidtmv"
+     },
+     {
+      "t": "Voucher Tester",
+      "y": 507,
+      "h": "/ro/dashboard/instructor/students/cmq0pno6g0000gjqydayylaf4"
+     },
+     {
+      "t": "Puppeteer Admin",
+      "y": 507,
+      "h": "/ro/dashboard/instructor/students/cmp184swf0000urj8ezln37lo"
+     },
+     {
+      "t": "Test Reg",
+      "y": 507,
+      "h": "/ro/dashboard/instructor/students/cmo01aiib0000uf0t4t66no0a"
+     },
+     {
+      "t": "Babadac Cristina",
+      "y": 733,
+      "h": "/ro/dashboard/instructor/students/cmslrfy560028v5ysqx4861rz"
+     },
+     {
+      "t": "Leiba",
+      "y": 733,
+      "h": "/ro/dashboard/instructor/students/cmrwif5qm01xwmidxdeqxyhce"
+     },
+     {
+      "t": "Elly",
+      "y": 733,
+      "h": "/ro/dashboard/instructor/students/cmq2icziw0008civtxc2b63k4"
+     },
+     {
+      "t": "Admin Test",
+      "y": 959,
+      "h": "/ro/dashboard/instructor/students/cmo7dml8s0000i9rkq18tybai"
+     },
+     {
+      "t": "Admin Test",
+      "y": 959,
+      "h": "/ro/dashboard/instructor/students/cmo7dml8s0000i9rkq18tybai"
+     },
+     {
+      "t": "Test Student",
+      "y": 959,
+      "h": "/ro/dashboard/instructor/students/cmmnztvrsrdfe175ec2ea247b9"
+     },
+     {
+      "t": "Leak Test",
+      "y": 1185,
+      "h": "/ro/dashboard/instructor/students/cmtnyaacl0000xzh7amgn0lqb"
+     },
+     {
+      "t": "Alina Danciulescu",
+      "y": 1185,
+      "h": "/ro/dashboard/instructor/students/cmo0fkq5l0000l6fqo4ic18np"
+     },
+     {
+      "t": "Rares",
+      "y": 1185,
+      "h": "/ro/dashboard/instructor/students/cmnzrb0uj0000qypnp8ny8cqd"
+     },
+     {
+      "t": "Rebeca",
+      "y": 1411,
+      "h": "/ro/dashboard/instructor/students/cmqcr8b9o00346qnxw62pbnk6"
+     }
+    ],
+    "overflowX": false,
+    "vh": 900,
+    "errs": [],
+    "bad": [],
+    "loadMs": 2202
+   },
+   {
+    "step": 8,
+    "name": "elev-detaliu",
+    "shot": "desktop-08-elev-detaliu.png",
+    "url": "/ro/dashboard/instructor/students/cmq2icziw0008civtxc2b63k4",
+    "sec": "16.5",
+    "title": "Instructor - Tutor",
+    "h1": [
+     "Elly",
+     "Materia parcursă la școală"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nPrezentare\nStudenți\nÎntrebări\nGrupuri\nObiective\nMesaje\nAnaliză\nRapoarte\nNotificări\nSetări\n← Înapoi la studenți\nE\nElly\n\nall@elly.com\n\nAviation\nMatematica cl. VIII\nAviation\n\n0%\n\nAcuratețe\n\n0\n\nSerie\n\n0\n\nXP\n\n0\n\nSubiecte\n\nCadet\n\nNivel\n\nElly\n\nAviation\n\n82%\n\nRisc ridicat\n\n→ Stabil\n\nFactori de risc\n\n· Insufficient session data\n· Broken streak (inactive)\n· Low overall mastery\n\nImmediate intervention needed. Consider intensive review sessions and 1-on-1 support.\n\nMatematica cl. VIII\nMateria parcursă la școală\n\nBulina arată ce ar fi trebuit predat până azi, după programă. Bifează în dreptul fiecărei lecții dacă s-a predat efectiv la clasa ta — grilele se potrivesc pe ce ai bifat.\n\nÎn ce clasă ești?\n",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 1454,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 1454,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 1558,
+      "h": null
+     },
+     {
+      "t": "🚀\nConfigurare\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Prezentare",
+      "y": 80,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Studenți",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Întrebări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/questions"
+     },
+     {
+      "t": "Grupuri",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Obiective",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/goals"
+     },
+     {
+      "t": "Mesaje",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/messages"
+     },
+     {
+      "t": "Analiză",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Notificări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/notificari"
+     },
+     {
+      "t": "Setări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/settings"
+     },
+     {
+      "t": "← Înapoi la studenți",
+      "y": 139,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Atribuie sesiune",
+      "y": 1397,
+      "h": null
+     },
+     {
+      "t": "Setează obiectiv",
+      "y": 1397,
+      "h": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 1635,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 1635,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 1635,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 900,
+    "errs": [
+     "Failed to load resource: the server responded with a status of 404 ()"
+    ],
+    "bad": [
+     "404 /api/aviation/curriculum?childId=cmq2icziw0008civtxc2b63k4"
+    ],
+    "loadMs": 2059
+   },
+   {
+    "step": 9,
+    "name": "rapoarte",
+    "shot": "desktop-09-rapoarte.png",
+    "url": "/ro/dashboard/instructor/reports",
+    "sec": "18.5",
+    "title": "Instructor - Tutor",
+    "h1": [
+     "Rapoarte"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nPrezentare\nStudenți\nÎntrebări\nGrupuri\nObiective\nMesaje\nAnaliză\nRapoarte\nNotificări\nSetări\nRapoarte\nTip raport\nPer student\nPer grup\nPer domeniu\nSelectează ținta\nSelectează student\nLeak Test\nBabadac Cristina\nLeiba\nMiruna\nRares Danciulescu\nRebeca\nAndreea\nElly\nElly\nVoucher Tester\nAdmin Test\nAlina Danciulescu\nPuppeteer Admin\nAdmin Test\nAlex Danciulescu\nTest Reg\nRares\nTest Student\nAnto\nFormat export\nCSV\nJSON\nGenerează raport\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 736,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 736,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 840,
+      "h": null
+     },
+     {
+      "t": "🚀\nConfigurare\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Prezentare",
+      "y": 80,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Studenți",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Întrebări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/questions"
+     },
+     {
+      "t": "Grupuri",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Obiective",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/goals"
+     },
+     {
+      "t": "Mesaje",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/messages"
+     },
+     {
+      "t": "Analiză",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Notificări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/notificari"
+     },
+     {
+      "t": "Setări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/settings"
+     },
+     {
+      "t": "Generează raport",
+      "y": 447,
+      "h": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 917,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 917,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 917,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 900,
+    "errs": [
+     "Failed to load resource: the server responded with a status of 403 ()"
+    ],
+    "bad": [
+     "403 /api/admin/domains"
+    ],
+    "loadMs": 1983
+   },
+   {
+    "step": 10,
+    "name": "rapoarte-preview",
+    "shot": "desktop-10-rapoarte-preview.png",
+    "url": "/ro/dashboard/instructor/reports",
+    "sec": "51.5",
+    "title": "Instructor - Tutor",
+    "h1": [
+     "Rapoarte"
+    ],
+    "body": "Tutor\nPanou de control\n\nELEVII MEI\n\nInstructor\n\nCONȚINUT\n\nGrile\nSimulări\n\nCONT\n\nInvită un prieten\nNotificări\nSetări\nAjutor\nEN\nRO\n\nInstructor Test\n\ninstructor-test@tutor.app\n\nDeconectare\n🚀\nConfigurare\n3\nPrezentare\nStudenți\nÎntrebări\nGrupuri\nObiective\nMesaje\nAnaliză\nRapoarte\nNotificări\nSetări\nRapoarte\nTip raport\nPer student\nPer grup\nPer domeniu\nSelectează ținta\nSelectează student\nLeak Test\nBabadac Cristina\nLeiba\nMiruna\nRares Danciulescu\nRebeca\nAndreea\nElly\nElly\nVoucher Tester\nAdmin Test\nAlina Danciulescu\nPuppeteer Admin\nAdmin Test\nAlex Danciulescu\nTest Reg\nRares\nTest Student\nAnto\nFormat export\nCSV\nJSON\nGenerează raport\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "ctas": [
+     {
+      "t": "Tutor",
+      "y": 10,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Panou de control",
+      "y": 80,
+      "h": "/ro/dashboard"
+     },
+     {
+      "t": "Instructor",
+      "y": 165,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Grile",
+      "y": 249,
+      "h": "/ro/dashboard/practice"
+     },
+     {
+      "t": "Simulări",
+      "y": 297,
+      "h": "/ro/dashboard/exam-bank"
+     },
+     {
+      "t": "Invită un prieten",
+      "y": 382,
+      "h": "/ro/dashboard/referrals"
+     },
+     {
+      "t": "Notificări",
+      "y": 430,
+      "h": "/ro/dashboard/notifications"
+     },
+     {
+      "t": "Setări",
+      "y": 478,
+      "h": "/ro/dashboard/settings"
+     },
+     {
+      "t": "Ajutor",
+      "y": 526,
+      "h": "/ro/dashboard/ajutor"
+     },
+     {
+      "t": "EN",
+      "y": 736,
+      "h": null
+     },
+     {
+      "t": "RO",
+      "y": 736,
+      "h": null
+     },
+     {
+      "t": "Deconectare",
+      "y": 840,
+      "h": null
+     },
+     {
+      "t": "🚀\nConfigurare\n3",
+      "y": 13,
+      "h": null
+     },
+     {
+      "t": "Notificări",
+      "y": 6,
+      "h": null
+     },
+     {
+      "t": "Prezentare",
+      "y": 80,
+      "h": "/ro/dashboard/instructor"
+     },
+     {
+      "t": "Studenți",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/students"
+     },
+     {
+      "t": "Întrebări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/questions"
+     },
+     {
+      "t": "Grupuri",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/groups"
+     },
+     {
+      "t": "Obiective",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/goals"
+     },
+     {
+      "t": "Mesaje",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/messages"
+     },
+     {
+      "t": "Analiză",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/analytics"
+     },
+     {
+      "t": "Rapoarte",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/reports"
+     },
+     {
+      "t": "Notificări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/notificari"
+     },
+     {
+      "t": "Setări",
+      "y": 80,
+      "h": "/ro/dashboard/instructor/settings"
+     },
+     {
+      "t": "Generează raport",
+      "y": 447,
+      "h": null
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 917,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 917,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 917,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 900,
+    "errs": [],
+    "bad": []
+   },
+   {
+    "step": 11,
+    "name": "certificat",
+    "shot": "desktop-11-certificat.png",
+    "url": "/ro/certificat/id-inexistent-qa",
+    "sec": "53.2",
+    "title": "Certificat: 0/5 la un quiz 🎓 | Tutor",
+    "h1": [],
+    "body": "Certificatul nu există sau a expirat.\n\nÎncearcă și tu\nConfidențialitate\n·\nTermeni\n·\nCookie-uri",
+    "ctas": [
+     {
+      "t": "Încearcă și tu",
+      "y": 140,
+      "h": "/ro/try"
+     },
+     {
+      "t": "Confidențialitate",
+      "y": 917,
+      "h": "/ro/privacy"
+     },
+     {
+      "t": "Termeni",
+      "y": 917,
+      "h": "/ro/terms"
+     },
+     {
+      "t": "Cookie-uri",
+      "y": 917,
+      "h": "/ro/cookies"
+     }
+    ],
+    "overflowX": false,
+    "vh": 900,
+    "errs": [],
+    "bad": [],
+    "loadMs": 1690
+   }
+  ]
+ }
+}
