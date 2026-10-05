@@ -1,5 +1,6 @@
 /**
- * New accounts per address: at most SIGNUPS_PER_IP_PER_HOUR in a sliding hour.
+ * New accounts per address: at most SIGNUPS_PER_IP_PER_HOUR in a sliding hour (20: a class signing up
+ * together from the school Wi-Fi shares one address — Alex, 05.10).
  *
  * Signup sends an email to any address typed as "the parent's" (consent for under-16s), so an
  * unlimited signup was an unlimited mail-sender to strangers from the site's own domain (True E2E
@@ -7,7 +8,7 @@
  * account after account. Kept in memory, like the middleware's limits: the site runs as one process,
  * and a restart forgetting the last hour costs at most one more hour's worth.
  */
-export const SIGNUPS_PER_IP_PER_HOUR = 5;
+export const SIGNUPS_PER_IP_PER_HOUR = 20;
 const WINDOW_MS = 3600 * 1000;
 const MAX_TRACKED = 50_000;
 

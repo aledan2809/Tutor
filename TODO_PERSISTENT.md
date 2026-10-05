@@ -5,8 +5,8 @@
 - [x] 2 „Încearcă o grilă acum — fără cont” pe `/ro`, `/ro/grile*`, `/ro/parinte`; la finalul demo-ului un singur buton „Salvează progresul — fă-ți cont (gratuit)”
 - [x] 3 „Cont nou gratuit” mare pe signin (primul când vine cu `callbackUrl`); titluri „… | eTutor.ro” în limba paginii
 - [x] 4 evenimente `cta_try`/`cta_register`/`cta_parinte_fara_card`/`register_done`/`first_question` (verificate în pagină; **în Umami real — după livrare**)
-- [x] 5 S1 (escapeHtml + 10/zi per invitator + 2/zi per adresă) + S2 (5 conturi/oră per IP, rezervare sincronă + 100 e-mailuri de acord/zi pe tot site-ul)
-- [ ] **Alex**: OK de livrare pe VPS2 (rețeta DEPLOY_REGISTRY rândul 12; fără migrare) + confirmare prag 5 conturi/oră/IP (o clasă pe Wi-Fi-ul școlii îl atinge)
+- [x] 5 S1 (escapeHtml + 10/zi per invitator + 2/zi per adresă) + S2 (20 de conturi/oră per IP — Alex 05.10, rezervare sincronă + 100 e-mailuri de acord/zi pe tot site-ul)
+- [ ] **Alex**: OK de livrare pe VPS2 (rețeta DEPLOY_REGISTRY rândul 12; fără migrare)
 - [ ] După livrare: `sonda-palnie-qa.mjs` cu `BASE=https://etutor.ro` vs capturile din 05.10; evenimentele în Umami (site etutor.ro → Events)
 - [ ] 🆕 Migrare „doar adaugă” pentru coloanele `Question` care lipsesc din `prisma/migrations` (`sourceReference`, `bookOrder`, `bookPage`, `chapterIndex`, `pdfPage`, `qNumberInBook`, `imageUrl`, `explanationVideoUrl`; pe prod există) — o bază nouă din migrări dă demo-ul gol
 
