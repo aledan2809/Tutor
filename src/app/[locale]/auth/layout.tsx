@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Sign In - Tutor",
-  description:
-    "Sign in to Tutor to access your personalized adaptive learning dashboard. Use Google or email magic link.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const ro = (await params).locale !== "en";
+  return {
+    title: ro ? "Intră în cont" : "Sign in",
+    description: ro
+      ? "Intră în contul tău eTutor.ro: grilele, progresul și seriile tale."
+      : "Sign in to your eTutor.ro account: your quizzes, progress and streaks.",
+  };
+}
 
 export default function AuthLayout({
   children,

@@ -78,6 +78,9 @@
     "errorGeneric": "Intrarea n-a reușit. Încearcă din nou.",
     "noAccount": "Nu ai cont?",
     "createAccount": "Fă-ți unul",
+    "newAccountFree": "Cont nou gratuit",
+    "newHere": "E prima dată pe eTutor.ro? Fă-ți cont în 1 minut — e gratuit.",
+    "haveAccount": "Am deja cont",
     "errorOneTap": "Intrarea cu Google n-a mers pentru acest cont. Intră cu emailul și parola; dacă n-o mai știi, folosește „Ai uitat parola?”."
   },
   "nav": {
@@ -1202,6 +1205,8 @@
     "parentUpgradeSomeone": "un adult al familiei"
   },
   "cookieBanner": {
+    "short": "Folosim doar cookie-uri esențiale.",
+    "details": "Detalii",
     "aria": "Consimțământ cookie-uri",
     "text": "Folosim cookie-uri esențiale pentru funcționarea contului. Detalii în",
     "cookiesLink": "Politica de cookie-uri",

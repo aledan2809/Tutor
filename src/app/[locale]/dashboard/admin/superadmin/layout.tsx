@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { SuperAdminNav } from "@/components/admin/superadmin-nav";
 
 export const metadata: Metadata = {
-  title: "SuperAdmin - Tutor",
+  title: "SuperAdmin",
   description:
     "Platform-wide administration: users, plans, vouchers, revenue, ads, and audit logs.",
 };

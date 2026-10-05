@@ -15,6 +15,8 @@ import {
   recordCampaignSignup,
 } from "@/lib/campaign-attribution";
 import { logger } from "@/lib/logger";
+import { clientIp } from "@/lib/client-ip";
+import { releaseSignupSlot, takeSignupSlot } from "@/lib/signup-limit";
 import { SIGNUP_ROLES, accountRoleForSignup, enrollmentsForSignup } from "@/lib/signup-role";
 import { loadVoucherPreview, planForCodeYear } from "@/lib/voucher-preview-server";
 
@@ -56,8 +58,15 @@ async function _POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid input", details: { fieldErrors: { birthDate: ["Invalid date"] } } }, { status: 400 });
   }
 
+  const ip = clientIp(req.headers);
+  const slotAt = Date.now();
+  if (!takeSignupSlot(ip, slotAt)) {
+    return NextResponse.json({ error: "Too many accounts from this address. Try again later.", reason: "signup-ip" }, { status: 429 });
+  }
+
   // Check if user already exists (whatever the capitals of an older row)
   if (await emailTaken(email)) {
+    releaseSignupSlot(ip, slotAt);
     return NextResponse.json(
       { error: "An account with this email already exists" },
       { status: 409 }

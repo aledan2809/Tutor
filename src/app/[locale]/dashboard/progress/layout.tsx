@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Progress - Tutor",
+  title: "Progress",
   description: "Track your learning progress, accuracy trends, and subject mastery across all enrolled domains.",
 };
 

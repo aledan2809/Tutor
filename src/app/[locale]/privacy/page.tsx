@@ -3,7 +3,7 @@ import { getLegalDocument } from "@/lib/legal-doc";
 import { DsrRequestForm } from "@/components/legal/DsrRequestForm";
 
 export const metadata = {
-  title: "Confidențialitate · eTutor",
+  title: "Confidențialitate",
   description: "Politica de confidențialitate eTutor (etutor.ro).",
 };
 

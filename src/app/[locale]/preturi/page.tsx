@@ -6,7 +6,7 @@ import { MONTHS_PAID_PER_YEAR, TELEGRAM_PERCENT, TRIAL_PAYMENT_PERCENT } from "@
 import { childDiscountPercent, subjectDiscountPercent } from "@/lib/family";
 
 export const metadata: Metadata = {
-  title: "Prețuri — gratuit la start, plătești când vrei | eTutor.ro",
+  title: "Prețuri — gratuit la start, plătești când vrei",
   description:
     `Începe gratuit 7 zile, fără card. Apoi alegi planul: Elev/Student, Părinte + copil, Părinți + copil sau cu meditator. −${TRIAL_PAYMENT_PERCENT}% dacă plătești în primele 7 zile, −${TELEGRAM_PERCENT}% cu Telegram, anual plătești ${MONTHS_PAID_PER_YEAR} luni.`,
 };

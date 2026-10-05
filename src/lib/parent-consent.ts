@@ -21,12 +21,20 @@ export const CONSENT_ERASE_AFTER_DAYS = 30;
 export const CONSENT_LINK_DAYS = 14;
 /** Emails to a parent one account may trigger in a day (a mistyped address, a lost email). */
 export const CONSENT_SENDS_PER_DAY = 3;
+/**
+ * Consent emails the whole site sends in a day (first requests, not reminders). Signup lets anyone type
+ * any address as "the parent's"; the per-account and per-address ceilings don't stop many accounts
+ * writing to many addresses (True E2E 2026-10-05, S2). Far above real use (a few a day).
+ */
+export const CONSENT_EMAILS_PER_DAY_SITE = 100;
+/** Prefix of the per-recipient markers below — one row per consent email sent, living a day. */
+export const CONSENT_TO_PREFIX = "parent-consent-to:";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export const consentTokenId = (userId: string) => `parent-consent:${userId}`;
 export const consentSentId = (userId: string) => `parent-consent-sent:${userId}`;
 /** Emails one address may receive in a day, from all accounts together (anyone can type an address). */
-export const consentToId = (email: string) => `parent-consent-to:${email.toLowerCase()}`;
+export const consentToId = (email: string) => `${CONSENT_TO_PREFIX}${email.toLowerCase()}`;
 export const newConsentToken = () => randomBytes(32).toString("hex");
 
 export type ConsentFacts = {

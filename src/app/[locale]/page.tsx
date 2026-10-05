@@ -5,10 +5,11 @@ import { prisma } from "@/lib/prisma";
 import SubjectQuizDemo from "@/components/SubjectQuizDemo";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Brand } from "@/components/Brand";
+import { TrackedLink } from "@/components/TrackedLink";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Tutor - Mii de grile reale pe materia ta | etutor.ro",
+  title: "Mii de grile reale pe materia ta",
   description:
     "Alege o materie și exersează pe grile reale, gratuit și fără cont — BAC, Evaluare Națională, admitere. Îți salvezi progresul, serii zilnice și învățare adaptivă.",
 };
@@ -56,8 +57,8 @@ export default async function LandingPage() {
         headline: "Mii de grile reale, pe materia ta — gata de exersat",
         sub: "Grile verificate pe BAC, Evaluare Națională și admitere — exersezi pe loc, îți salvezi progresul și primești serii zilnice.",
         demoHeading: "Încearcă chiar acum 👇",
+        ctaTry: "Încearcă o grilă acum — fără cont",
         ctaPrimary: "Fă-ți cont gratuit",
-        ctaSecondary: "Vezi demo-ul complet",
         proofTitle: "De ce elevii, părinții și profesorii aleg ",
         proofLead:
           "Progresul nu rămâne ascuns: elevul îl vede, părintele îl vede — iar la pachetul cu meditator, îl vede și acesta. Aceleași scoruri, aceeași evoluție, aceleași greșeli de corectat. Crește pas cu pas și ține elevul „în priză”.",
@@ -105,8 +106,8 @@ export default async function LandingPage() {
         headline: "Thousands of real practice questions, on your subject",
         sub: "Verified questions for Bac, National Exam and admissions — practice right away, save your progress and earn daily streaks.",
         demoHeading: "Try it right now 👇",
+        ctaTry: "Try a quiz now — no account",
         ctaPrimary: "Create a free account",
-        ctaSecondary: "See the full demo",
         proofTitle: "Why students, parents and teachers choose ",
         proofLead:
           "Progress doesn't stay hidden: the student sees it, the parent sees it — and on the plan with a tutor, the tutor sees it too. Same scores, same trajectory, same mistakes to work on. It grows step by step and keeps you hooked.",
@@ -152,36 +153,42 @@ export default async function LandingPage() {
 
       <main className="flex-1">
         {/* Hero — interactive demo above the fold */}
-        {/* On a phone the visitor meets the quiz BEFORE being asked for an account: the words first (so
-            they know where they are), then the demo, then the buttons. On a wide screen nothing moves —
-            the words and the buttons stay on the left, the demo on the right (explicit rows below). */}
-        <section className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-6 px-4 py-12 lg:grid-cols-2 lg:grid-rows-[auto_auto] lg:gap-x-10 lg:gap-y-6 lg:py-20">
+        {/* On a phone: the words (so they know where they are), then the buttons — the first one is the
+            no-account demo, so the visitor still meets a quiz before being asked for an account — then the
+            inline demo. The buttons must sit in the first screen above the cookie strip (390×664: True E2E
+            2026-10-05 §0 found them at 625–677 px, under the banner). On a wide screen nothing moves — the
+            words and the buttons on the left, the demo on the right (explicit rows below). */}
+        <section className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-5 px-4 py-6 sm:gap-6 sm:py-12 lg:grid-cols-2 lg:grid-rows-[auto_auto] lg:gap-x-10 lg:gap-y-6 lg:py-20">
           <div className="order-1 text-center lg:order-none lg:col-start-1 lg:row-start-1 lg:text-left">
             <span className="inline-block rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-300">
               {L.badge}
             </span>
-            <h1 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+            <h1 className="mt-3 text-3xl font-bold tracking-tight text-white sm:mt-4 sm:text-5xl">
               {L.headline}
             </h1>
-            <p className="mt-4 max-w-xl text-lg text-gray-300 lg:mx-0 mx-auto">
+            <p className="mx-auto mt-3 max-w-xl text-base text-gray-300 sm:mt-4 sm:text-lg lg:mx-0">
               {L.sub}
             </p>
           </div>
 
-          <div className="order-3 text-center lg:order-none lg:col-start-1 lg:row-start-2 lg:text-left">
-            <div className="flex flex-col items-center gap-3 sm:flex-row lg:justify-start justify-center">
-              <Link
+          <div className="order-2 text-center lg:order-none lg:col-start-1 lg:row-start-2 lg:text-left">
+            <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center lg:justify-start justify-center">
+              <TrackedLink
+                href="/try"
+                event="cta_try"
+                data={{ from: "home" }}
+                className="inline-flex min-h-[48px] items-center justify-center rounded-lg bg-blue-600 px-5 py-3 text-base font-semibold sm:px-6 sm:text-lg text-white hover:bg-blue-700 transition-colors"
+              >
+                {L.ctaTry}
+              </TrackedLink>
+              <TrackedLink
                 href="/auth/register"
-                className="rounded-lg bg-blue-600 px-8 py-3 text-lg font-medium text-white hover:bg-blue-700 transition-colors"
+                event="cta_register"
+                data={{ from: "home" }}
+                className="inline-flex min-h-[48px] items-center justify-center rounded-lg border border-gray-700 bg-gray-900 px-5 py-3 text-base font-medium sm:px-6 sm:text-lg text-white hover:bg-gray-800 transition-colors"
               >
                 {L.ctaPrimary}
-              </Link>
-              <Link
-                href="/try"
-                className="rounded-lg border border-gray-700 bg-gray-900 px-8 py-3 text-lg font-medium text-white hover:bg-gray-800 transition-colors"
-              >
-                {L.ctaSecondary}
-              </Link>
+              </TrackedLink>
             </div>
 
             {/* Comic-style speech bubble that nudges parents toward /parinte.
@@ -209,8 +216,8 @@ export default async function LandingPage() {
             )}
           </div>
 
-          {/* Live demo card — second on a phone (right after the words), on the right on a wide screen */}
-          <div className="order-2 rounded-2xl border border-gray-800 bg-gray-900/60 p-5 shadow-2xl shadow-blue-950/30 sm:p-6 lg:order-none lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          {/* Live demo card — after the buttons on a phone, on the right on a wide screen */}
+          <div className="order-3 rounded-2xl border border-gray-800 bg-gray-900/60 p-5 shadow-2xl shadow-blue-950/30 sm:p-6 lg:order-none lg:col-start-2 lg:row-span-2 lg:row-start-1">
             <p className="mb-4 text-center text-sm font-semibold text-blue-300">
               {L.demoHeading}
             </p>
@@ -349,12 +356,14 @@ export default async function LandingPage() {
         <section className="mx-auto max-w-7xl px-4 py-16 text-center">
           <h2 className="text-3xl font-bold text-white">{L.ctaBandTitle}</h2>
           <p className="mt-3 text-lg text-gray-400">{L.ctaBandSub}</p>
-          <Link
+          <TrackedLink
             href="/auth/register"
+            event="cta_register"
+            data={{ from: "home_bottom" }}
             className="mt-8 inline-block rounded-lg bg-blue-600 px-10 py-4 text-lg font-medium text-white hover:bg-blue-700 transition-colors"
           >
             {L.ctaBandButton}
-          </Link>
+          </TrackedLink>
           <p className="mt-4">
             <Link
               href="/preturi"

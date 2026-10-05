@@ -5,6 +5,8 @@ import { BirthDateFields, type BirthDateValue } from "@/components/consent/birth
 import { useState, useEffect } from "react";
 import { useLocale } from "next-intl";
 import { signIn } from "next-auth/react";
+import { TrackedLink } from "@/components/TrackedLink";
+import { trackFunnel } from "@/lib/funnel-events";
 import { Link } from "@/i18n/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { Brand } from "@/components/Brand";
@@ -227,6 +229,7 @@ export default function RegisterPage() {
       });
       const data = await res.json();
       if (data.success) {
+        trackFunnel("register_done", { role, minor: Boolean(minorSignup), ...(plan ? { plan } : {}) });
         setVoucherApplied(Boolean(data.voucherApplied));
         setVoucherDiscount(typeof data.voucherDiscount === "number" ? data.voucherDiscount : null);
         // Straight in: the account was just created with this email and password, so asking for
@@ -261,6 +264,10 @@ export default function RegisterPage() {
             ? ro
               ? "Există deja un cont cu acest email. Intră în cont; dacă nu mai știi parola, folosește „Ai uitat parola?”."
               : "An account with this email already exists. Sign in; if you don't remember the password, use “Forgot password?”."
+            : res.status === 429 && data.reason === "signup-ip"
+              ? ro
+                ? "Din rețeaua aceasta s-au făcut deja mai multe conturi în ultima oră. Încearcă din nou peste o oră."
+                : "Several accounts were already made from this network in the last hour. Try again in an hour."
             : res.status === 429
               ? ro
                 ? "Prea multe încercări. Așteaptă un minut și încearcă din nou."
@@ -339,7 +346,7 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-sm rounded-xl border border-gray-800 bg-gray-900 p-8">
+      <div className="w-full max-w-sm rounded-xl border border-gray-800 bg-gray-900 p-6 sm:p-8">
         {campaign && (
           <div className="mb-4 rounded-lg border border-blue-800 bg-blue-900/30 p-3 text-center">
             <p className="text-sm font-semibold text-blue-200">{campaign.titleRo}</p>
@@ -372,7 +379,7 @@ export default function RegisterPage() {
             ? ro ? "Cont de părinte" : "Parent account"
             : ro ? "Creează cont" : "Create account"}
         </h2>
-        <p className="mb-6 text-center text-sm text-gray-400">
+        <p className="mb-4 text-center text-sm sm:mb-6 text-gray-400">
           {ro ? "Intră în " : "Join "}
           <Brand className="text-sm" />
           {role === "PARENT" && !campaign
@@ -589,7 +596,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50"
+            className="min-h-[48px] w-full rounded-lg bg-blue-600 px-4 py-3 text-base font-semibold text-white hover:bg-blue-500 disabled:opacity-50"
           >
             {loading
               ? ro ? "Se creează contul..." : "Creating account..."
@@ -601,7 +608,7 @@ export default function RegisterPage() {
           {ro ? "Ai deja cont? " : "Already have an account? "}
           <Link
             href={returnTo ? `/auth/signin?callbackUrl=${encodeURIComponent(returnTo)}&role=${role}` : "/auth/signin"}
-            className="text-blue-400 hover:text-blue-300"
+            className="inline-flex min-h-[44px] items-center text-blue-400 hover:text-blue-300"
           >
             {ro ? "Autentifică-te" : "Sign in"}
           </Link>
@@ -609,9 +616,14 @@ export default function RegisterPage() {
 
         <p className="mt-3 text-center text-sm text-gray-500">
           {ro ? "Nehotărât? " : "Not sure yet? "}
-          <Link href="/try" className="text-blue-400 hover:text-blue-300">
+          <TrackedLink
+            href="/try"
+            event="cta_try"
+            data={{ from: "register" }}
+            className="inline-flex min-h-[44px] items-center text-blue-400 hover:text-blue-300"
+          >
             {ro ? "Încearcă fără cont ✨" : "Try without an account ✨"}
-          </Link>
+          </TrackedLink>
         </p>
       </div>
     </div>

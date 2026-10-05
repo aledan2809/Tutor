@@ -35,7 +35,7 @@ export const SUBJECTS: SubjectLanding[] = [
     slug: "grile-bacalaureat-matematica",
     examType: "Bacalaureat",
     subject: "Matematică",
-    title: "Grile Bacalaureat Matematică — teste grilă online gratuite | etutor.ro",
+    title: "Grile Bacalaureat Matematică — teste grilă online gratuite",
     metaDescription:
       "Exersează cu grile de Bacalaureat la Matematică: teste grilă online, rezolvări pas cu pas și quiz generat din propriile materiale. Gratuit, fără cont.",
     h1: "Grile Bacalaureat — Matematică",
@@ -85,7 +85,7 @@ export const SUBJECTS: SubjectLanding[] = [
     slug: "grile-bacalaureat-romana",
     examType: "Bacalaureat",
     subject: "Limba și literatura română",
-    title: "Grile Bacalaureat Română — teste grilă și subiecte | etutor.ro",
+    title: "Grile Bacalaureat Română — teste grilă și subiecte",
     metaDescription:
       "Grile de Bacalaureat la Limba și literatura română: noțiuni de teorie literară, curente, autori canonici și quiz generat din propriile materiale. Gratuit.",
     h1: "Grile Bacalaureat — Limba și literatura română",
@@ -129,7 +129,7 @@ export const SUBJECTS: SubjectLanding[] = [
     slug: "grile-bacalaureat-istorie",
     examType: "Bacalaureat",
     subject: "Istorie",
-    title: "Grile Bacalaureat Istorie — teste grilă online | etutor.ro",
+    title: "Grile Bacalaureat Istorie — teste grilă online",
     metaDescription:
       "Grile de Bacalaureat la Istorie: statul român modern, secolul XX, comunismul și integrarea europeană. Quiz din propriile materiale, gratuit, fără cont.",
     h1: "Grile Bacalaureat — Istorie",
@@ -173,7 +173,7 @@ export const SUBJECTS: SubjectLanding[] = [
     slug: "grile-bacalaureat-biologie",
     examType: "Bacalaureat",
     subject: "Biologie",
-    title: "Grile Bacalaureat Biologie — teste grilă online | etutor.ro",
+    title: "Grile Bacalaureat Biologie — teste grilă online",
     metaDescription:
       "Grile de Bacalaureat la Biologie: celula, genetică, sisteme ale corpului uman și ecologie. Quiz generat din propriile materiale, gratuit, fără cont.",
     h1: "Grile Bacalaureat — Biologie",
@@ -217,7 +217,7 @@ export const SUBJECTS: SubjectLanding[] = [
     slug: "grile-evaluare-nationala-matematica",
     examType: "Evaluare Națională",
     subject: "Matematică",
-    title: "Grile Evaluare Națională Matematică — teste online | etutor.ro",
+    title: "Grile Evaluare Națională Matematică — teste online",
     metaDescription:
       "Grile pentru Evaluarea Națională la Matematică (clasa a VIII-a): calcul, ecuații, geometrie. Quiz generat din propriile materiale, gratuit, fără cont.",
     h1: "Grile Evaluare Națională — Matematică",
@@ -261,7 +261,7 @@ export const SUBJECTS: SubjectLanding[] = [
     slug: "grile-evaluare-nationala-romana",
     examType: "Evaluare Națională",
     subject: "Limba și literatura română",
-    title: "Grile Evaluare Națională Română — teste online | etutor.ro",
+    title: "Grile Evaluare Națională Română — teste online",
     metaDescription:
       "Grile pentru Evaluarea Națională la Limba română (clasa a VIII-a): gramatică, vocabular, comprehensiune. Quiz din propriile materiale, gratuit, fără cont.",
     h1: "Grile Evaluare Națională — Limba și literatura română",
@@ -305,7 +305,7 @@ export const SUBJECTS: SubjectLanding[] = [
     slug: "grile-admitere-inm-barou-drept",
     examType: "Admitere",
     subject: "Drept (INM / Barou)",
-    title: "Grile Admitere INM și Barou — Drept, teste grilă | etutor.ro",
+    title: "Grile Admitere INM și Barou — Drept, teste grilă",
     metaDescription:
       "Grile pentru admiterea la INM și în Barou: drept civil, penal, procedură. Generează grile din propriile coduri și note de curs. Gratuit, fără cont.",
     h1: "Grile Admitere INM / Barou — Drept",

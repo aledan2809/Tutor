@@ -78,6 +78,9 @@
     "errorGeneric": "Sign-in didn't work. Please try again.",
     "noAccount": "Don't have an account?",
     "createAccount": "Create one",
+    "newAccountFree": "New free account",
+    "newHere": "First time on eTutor.ro? Make an account in a minute — it's free.",
+    "haveAccount": "I already have an account",
     "errorOneTap": "Signing in with Google didn't work for this account. Sign in with your email and password; if you don't remember it, use “Forgot password?”."
   },
   "nav": {
@@ -1202,6 +1205,8 @@
     "parentUpgradeSomeone": "an adult of the family"
   },
   "cookieBanner": {
+    "short": "We only use essential cookies.",
+    "details": "Details",
     "aria": "Cookie consent",
     "text": "We use essential cookies to run your account. Details in the",
     "cookiesLink": "Cookie Policy",

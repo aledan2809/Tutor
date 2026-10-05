@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { AdminNav } from "@/components/admin/admin-nav";
 
 export const metadata: Metadata = {
-  title: "Admin - Tutor",
+  title: "Admin",
   description:
     "Manage domains, questions, users, and platform settings. Admin control panel for Tutor adaptive learning platform.",
 };

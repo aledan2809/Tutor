@@ -18,6 +18,7 @@
 
 import { randomBytes } from "crypto";
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 import { emailTaken } from "@/lib/email-lookup";
 import { logger } from "@/lib/logger";
 import {
@@ -43,6 +44,7 @@ import { payingForAccess, trialDaysLeft } from "@/lib/access";
 import { loadPauseStartsAt } from "@/lib/access-server";
 import { closeChainsOf } from "@/lib/escalation/engine";
 import { sendAppEmail, isEmailConfigured } from "@/lib/email";
+import { escapeHtml } from "@/lib/sanitize";
 import {
   getTelegramClient,
   telegramConfigured,
@@ -598,6 +600,69 @@ export class RoleConflictError extends Error {
   }
 }
 
+/**
+ * Daily ceilings on invitations (True E2E 2026-10-05, S1: 5 invitations to 5 addresses all went out,
+ * from one account, with no limit — the site's mail could be used to write to strangers, under a
+ * name the sender typed). Counted in the database, so they hold across restarts and both doors.
+ */
+export const INVITE_DAILY_CAP_PER_INVITER = 10;
+/** One address gets at most this many invitation emails a day, whoever sends them. */
+export const INVITE_DAILY_CAP_PER_ADDRESS = 2;
+const INVITE_CAP_WINDOW_MS = 24 * 3600 * 1000;
+
+export class InviteRateLimitError extends Error {
+  reason: "inviter" | "address";
+  constructor(reason: "inviter" | "address") {
+    super(
+      reason === "inviter"
+        ? `Ai trimis deja ${INVITE_DAILY_CAP_PER_INVITER} invitații azi. Poți trimite altele mâine.`
+        : "Adresa aceasta a primit deja invitații azi. Încearcă mâine sau trimite linkul pe altă cale.",
+    );
+    this.name = "InviteRateLimitError";
+    this.reason = reason;
+  }
+}
+
+type InviteCapDb = { familyInvite: { count: (args: Prisma.FamilyInviteCountArgs) => Promise<number> } };
+
+/** Throws InviteRateLimitError when this invitation would go over a daily ceiling. */
+export async function assertInviteCaps(
+  db: InviteCapDb,
+  params: { inviterId: string; channel: InviteChannel; email?: string | null; now?: Date },
+): Promise<void> {
+  const since = new Date((params.now ?? new Date()).getTime() - INVITE_CAP_WINDOW_MS);
+  const byInviter = await db.familyInvite.count({
+    where: { inviterId: params.inviterId, createdAt: { gte: since } },
+  });
+  if (byInviter >= INVITE_DAILY_CAP_PER_INVITER) throw new InviteRateLimitError("inviter");
+  const email = params.email?.trim();
+  if (params.channel === INVITE_CHANNEL.EMAIL && email) {
+    const toAddress = await db.familyInvite.count({
+      where: { channel: INVITE_CHANNEL.EMAIL, email: { equals: email, mode: "insensitive" }, createdAt: { gte: since } },
+    });
+    if (toAddress >= INVITE_DAILY_CAP_PER_ADDRESS) throw new InviteRateLimitError("address");
+  }
+}
+
+/**
+ * The invitation email. The inviter's name is whatever the account typed, so it is escaped (and kept
+ * to one short line) — it used to go into the HTML as is (True E2E 2026-10-05, S1).
+ */
+export function inviteEmailHtml(params: { inviterName: string | null; target: InviteTargetRole; acceptUrl: string }): string {
+  const name = params.inviterName?.replace(/[\r\n\t]+/g, " ").trim().slice(0, 80) ?? "";
+  const who = name ? `${escapeHtml(name)} ` : "";
+  const url = escapeHtml(params.acceptUrl);
+  return `
+        <p>Bună!</p>
+        <p>${who}te invită pe eTutor.ro ca <strong>${inviteRoleLabel(params.target)}</strong>.</p>
+        ${inviteBlurb(params.target)
+          .map((line) => `<p>${line}</p>`)
+          .join("")}
+        <p><a href="${url}">Acceptă invitația</a></p>
+        <p>Sau deschide linkul: ${url}</p>
+        <p style="color:#888;font-size:12px">Linkul expiră în 7 zile.</p>`;
+}
+
 export async function createAndDeliverInvite(params: {
   inviterId: string;
   inviterName?: string | null;
@@ -611,6 +676,7 @@ export async function createAndDeliverInvite(params: {
   const db = params.db ?? prisma;
   const seat = await checkSeat(params.inviterId, params.target, db);
   if (!seat.allowed) throw new FamilySeatError(seat);
+  await assertInviteCaps(db, { inviterId: params.inviterId, channel: params.channel, email: params.email });
 
   const token = genToken();
   const code = params.channel === INVITE_CHANNEL.CODE ? genCode() : null;
@@ -662,26 +728,15 @@ async function deliverInvite(params: {
   acceptUrl: string;
   code: string | null;
 }): Promise<{ channel: InviteChannel; delivered: boolean; reason?: string }> {
-  const who = params.inviterName ? `${params.inviterName} ` : "";
-  const roleRo = inviteRoleLabel(params.target);
-
   try {
     if (params.channel === INVITE_CHANNEL.EMAIL) {
       if (!params.email) return { channel: params.channel, delivered: false, reason: "no_email" };
       if (!isEmailConfigured())
         return { channel: params.channel, delivered: false, reason: "email_not_configured" };
-      const html = `
-        <p>Bună!</p>
-        <p>${who}te invită pe etutor.ro ca <strong>${roleRo}</strong>.</p>
-        ${inviteBlurb(params.target)
-          .map((line) => `<p>${line}</p>`)
-          .join("")}
-        <p><a href="${params.acceptUrl}">Acceptă invitația</a></p>
-        <p>Sau deschide linkul: ${params.acceptUrl}</p>
-        <p style="color:#888;font-size:12px">Linkul expiră în 7 zile.</p>`;
+      const html = inviteEmailHtml({ inviterName: params.inviterName, target: params.target, acceptUrl: params.acceptUrl });
       const ok = await sendAppEmail({
         to: params.email,
-        subject: "Invitație etutor.ro",
+        subject: "Invitație eTutor.ro",
         html,
       });
       return { channel: params.channel, delivered: ok, reason: ok ? undefined : "send_failed" };

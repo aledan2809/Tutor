@@ -9,6 +9,8 @@
 
 export const COOKIE_CONSENT_KEY = "etutor_cookie_consent_v1";
 export const COOKIE_CONSENT_EVENT = "etutor:cookie-consent";
+/** CSS variable the banner sets on <html> to its own height while shown (globals.css pads the body by it). */
+export const COOKIE_BANNER_HEIGHT_VAR = "--cookie-banner-h";
 
 export type ConsentChoice = "accepted" | "rejected";
 

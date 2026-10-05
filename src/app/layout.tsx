@@ -7,11 +7,20 @@ import { UMAMI_DEFAULT_SRC } from "@aledan/analytics/react";
 import { getLocale } from "next-intl/server";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: {
-    default: "Tutor - Adaptive Learning Platform",
-    template: "%s | Tutor",
-  },
+// One title pattern for the whole site, in the page's language: "<page> | eTutor.ro" (True E2E
+// 2026-10-05: „Sign In - Tutor" on the signup page, „Tutor - Adaptive Learning Platform" on /ro/try,
+// „… | etutor.ro | Tutor" doubled on the home page).
+const SITE_TITLE = {
+  ro: "eTutor.ro — grile reale pentru BAC, Evaluare Națională și admitere",
+  en: "eTutor.ro — real practice questions for Bac, National Exam and admissions",
+} as const;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) === "en" ? "en" : "ro";
+  return { ...baseMetadata, title: { default: SITE_TITLE[locale], template: "%s | eTutor.ro" } };
+}
+
+const baseMetadata: Metadata = {
   description: "Adaptive learning platform with spaced repetition, gamification, and exam simulation. Multi-domain education for aviation and more.",
   keywords: ["learning", "education", "adaptive learning", "spaced repetition", "aviation", "exam preparation", "tutoring"],
   authors: [{ name: "Tutor Platform" }],
@@ -19,13 +28,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://etutor.ro"),
   openGraph: {
     type: "website",
-    title: "Tutor - Adaptive Learning Platform",
+    title: "eTutor.ro",
     description: "Adaptive learning platform with spaced repetition and gamification",
-    siteName: "Tutor",
+    siteName: "eTutor.ro",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tutor - Adaptive Learning Platform",
+    title: "eTutor.ro",
     description: "Adaptive learning platform",
   },
   robots: {

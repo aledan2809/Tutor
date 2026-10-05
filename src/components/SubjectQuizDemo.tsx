@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import NextLink from "next/link";
-import { Link } from "@/i18n/navigation";
+import { TrackedLink, TrackedPlainLink } from "@/components/TrackedLink";
+import { trackFunnelOnce } from "@/lib/funnel-events";
 
 // No-account demo: pick a subject from the real PUBLISHED question bank and take
 // a short quiz from it. Mirrors the MagicQuiz take→score loop but sources real
@@ -30,7 +30,7 @@ export default function SubjectQuizDemo({
    * signup link, so the plan, the code and the parent role survive the quiz; elsewhere the plain
    * signup form.
    */
-  cta?: { href: string; label?: string };
+  cta?: { href: string; label?: string; track?: boolean };
 }) {
   const ro = locale !== "en";
   const L = ro
@@ -49,7 +49,7 @@ export default function SubjectQuizDemo({
         explLabel: "De ce:",
         sourceLabel: "Sursă:",
         retry: "Altă materie",
-        cta: "Fă-ți cont gratuit ca să-ți salvezi progresul",
+        cta: "Salvează progresul — fă-ți cont (gratuit)",
         answerAll: "Răspunde la toate întrebările ca să vezi rezultatul.",
         seeText: "📖 Vezi textul",
       }
@@ -68,7 +68,7 @@ export default function SubjectQuizDemo({
         explLabel: "Why:",
         sourceLabel: "Source:",
         retry: "Another subject",
-        cta: "Create a free account to save your progress",
+        cta: "Save your progress — make an account (free)",
         answerAll: "Answer every question to see your result.",
         seeText: "📖 See the text",
       };
@@ -170,6 +170,27 @@ export default function SubjectQuizDemo({
             </span>{" "}
           </p>
         </div>
+        {/* One button, right under the score (not below the answers list, off a phone's screen). */}
+        {cta ? (
+          <TrackedPlainLink
+            href={cta.href}
+            event="cta_register"
+            data={{ from: "demo_end" }}
+            track={cta.track !== false}
+            className="flex min-h-[48px] w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-center text-base font-semibold text-white hover:bg-blue-700"
+          >
+            {cta.label ?? L.cta}
+          </TrackedPlainLink>
+        ) : (
+          <TrackedLink
+            href="/auth/register"
+            event="cta_register"
+            data={{ from: "demo_end" }}
+            className="flex min-h-[48px] w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-center text-base font-semibold text-white hover:bg-blue-700"
+          >
+            {L.cta}
+          </TrackedLink>
+        )}
         <div className="space-y-3 max-h-72 overflow-y-auto">
           {questions.map((q, i) => {
             const ok = answers[i] === q.correctIndex;
@@ -201,29 +222,12 @@ export default function SubjectQuizDemo({
             );
           })}
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          {cta ? (
-            <NextLink
-              href={cta.href}
-              className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-center font-medium text-white hover:bg-blue-700"
-            >
-              {cta.label ?? L.cta}
-            </NextLink>
-          ) : (
-            <Link
-              href="/auth/register"
-              className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-center font-medium text-white hover:bg-blue-700"
-            >
-              {L.cta}
-            </Link>
-          )}
-          <button
-            onClick={reset}
-            className="rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 font-medium text-gray-200 hover:bg-gray-800"
-          >
-            {L.retry}
-          </button>
-        </div>
+        <button
+          onClick={reset}
+          className="mx-auto flex min-h-[44px] items-center text-sm font-medium text-gray-300 underline-offset-4 hover:text-white hover:underline"
+        >
+          {L.retry}
+        </button>
       </div>
     );
   }
@@ -258,7 +262,10 @@ export default function SubjectQuizDemo({
                 return (
                   <button
                     key={oi}
-                    onClick={() => setAnswers((prev) => prev.map((a, idx) => (idx === qi ? oi : a)))}
+                    onClick={() => {
+                      trackFunnelOnce("first_question", { where: "demo" });
+                      setAnswers((prev) => prev.map((a, idx) => (idx === qi ? oi : a)));
+                    }}
                     className={`flex w-full gap-2 rounded-md border px-3 py-2 text-left text-sm transition-colors ${
                       chosen
                         ? "border-blue-500 bg-blue-600/10 text-blue-300"

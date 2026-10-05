@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { WatcherNav } from "@/components/watcher/watcher-nav";
 
 export const metadata: Metadata = {
-  title: "Watcher - Tutor",
+  title: "Watcher",
   description: "Monitor student activity and learning progress in real-time.",
 };
 

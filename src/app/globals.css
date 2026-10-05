@@ -11,3 +11,9 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-float-bubble { animation: none; }
 }
+
+/* While the cookie banner is shown it publishes its height here (CookieConsentBanner);
+   the page gets that much room at the bottom so the strip never sits on top of content. */
+body {
+  padding-bottom: var(--cookie-banner-h, 0px);
+}

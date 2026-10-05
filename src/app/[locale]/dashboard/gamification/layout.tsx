@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Gamification - Tutor",
+  title: "Gamification",
   description: "View your achievements, levels, and stats. Track your learning streaks, XP progress, and compete on leaderboards.",
 };
 

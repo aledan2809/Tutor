@@ -5,6 +5,7 @@ import { withErrorHandler } from "@/lib/api-handler";
 import {
   createAndDeliverInvite,
   FamilySeatError,
+  InviteRateLimitError,
 } from "@/lib/family-invite";
 import { INVITE_TARGET_ROLE, INVITE_CHANNEL } from "@/lib/family";
 
@@ -79,6 +80,10 @@ async function _POST(req: NextRequest) {
         { error: "seat_unavailable", seat: err.check },
         { status: 409 }
       );
+    }
+    // The family page shows `error` as is: the sentence is written for the parent.
+    if (err instanceof InviteRateLimitError) {
+      return NextResponse.json({ error: err.message, reason: err.reason }, { status: 429 });
     }
     throw err;
   }

@@ -1,4 +1,14 @@
-## [ ] 🔴 PÂLNIA — lotul 1 de reparații (pașii 1–5 din `Reports/TRUE-E2E-FULL-2026-10-05.md` §6) — SESIUNE NOUĂ (decizia lui Alex 05.10)
+## [~] 🔴 PÂLNIA — lotul 1 de reparații (pașii 1–5 din `Reports/TRUE-E2E-FULL-2026-10-05.md` §6) — **COD GATA 05.10, verificat pe QA; NELIVRAT** (așteaptă OK-ul lui Alex)
+
+**Stare 05.10 (sesiunea din cloud):** raport `Reports/palnie-lot1-2026-10-05/RAPORT.md`. vitest 1.408/1.408, tsc curat, sonda pe build-ul de producție QA OK pe telefon (`/ro`, `/ro/parinte`, register, signin cu callback, `/grile*`, `/family/join`, `/acces/*`), pâlnia cap-coadă cu cele 4 evenimente.
+- [x] 1 banner compact (57 px, nu acoperă; spațiu jos + WhatsApp/meniu/bara fixă ridicate) + butoanele principale pe primul ecran
+- [x] 2 „Încearcă o grilă acum — fără cont” pe `/ro`, `/ro/grile*`, `/ro/parinte`; la finalul demo-ului un singur buton „Salvează progresul — fă-ți cont (gratuit)”
+- [x] 3 „Cont nou gratuit” mare pe signin (primul când vine cu `callbackUrl`); titluri „… | eTutor.ro” în limba paginii
+- [x] 4 evenimente `cta_try`/`cta_register`/`cta_parinte_fara_card`/`register_done`/`first_question` (verificate în pagină; **în Umami real — după livrare**)
+- [x] 5 S1 (escapeHtml + 10/zi per invitator + 2/zi per adresă) + S2 (5 conturi/oră per IP, rezervare sincronă + 100 e-mailuri de acord/zi pe tot site-ul)
+- [ ] **Alex**: OK de livrare pe VPS2 (rețeta DEPLOY_REGISTRY rândul 12; fără migrare) + confirmare prag 5 conturi/oră/IP (o clasă pe Wi-Fi-ul școlii îl atinge)
+- [ ] După livrare: `sonda-palnie-qa.mjs` cu `BASE=https://etutor.ro` vs capturile din 05.10; evenimentele în Umami (site etutor.ro → Events)
+- [ ] 🆕 Migrare „doar adaugă” pentru coloanele `Question` care lipsesc din `prisma/migrations` (`sourceReference`, `bookOrder`, `bookPage`, `chapterIndex`, `pdfPage`, `qNumberInBook`, `imageUrl`, `explanationVideoUrl`; pe prod există) — o bază nouă din migrări dă demo-ul gol
 
 **De ce**: în 30 de zile, 115 vizitatori (80 pe telefon) → pagina de cont văzută **6 ori** → ~2–4 conturi. Cauza nr. 1 dovedită cu capturi
 (`Reports/true-e2e-2026-10-05/funnel/*-mobil.png`): pe iPhone (390×664 px utili) bannerul de cookie-uri ocupă 470–664 px și acoperă

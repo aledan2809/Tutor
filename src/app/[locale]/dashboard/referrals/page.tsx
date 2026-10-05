@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { ReferralsClient } from "./referrals-client";
 
 export const metadata: Metadata = {
-  title: "Invite & Earn - Tutor",
+  title: "Invite & Earn",
   description: "Invite others and earn a perpetual 50% commission on every subscription.",
 };
 

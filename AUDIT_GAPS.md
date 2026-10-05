@@ -9,11 +9,11 @@
 ### G-TUT-AUDIT-2026-10-05 — Pâlnia vizitatori→conturi + fluxuri incomplete/incorecte (True E2E [10]) — **OPEN**
 
 Raport: `Reports/TRUE-E2E-FULL-2026-10-05.md` (artefacte în `Reports/true-e2e-2026-10-05/`). Nimic aplicat — plan de reparații în raport §6.
-- **G-TUT-1005-01 (P1 pâlnie)** — Bannerul de cookie-uri acoperă CTA-urile pe telefon la prima vizită (`/ro`, `/ro/parinte`, `/ro/auth/register`, `/acces/*`, `/family/join`); 6 vederi ale paginii de cont în 30 de zile la 115 vizitatori. Dovadă: `funnel/*-mobil.png`, `umami-30d.json`.
-- **G-TUT-1005-02 (P1 pâlnie)** — Demo-ul fără cont `/ro/try` merge în 2 atingeri dar e invizibil (buton sub banner, link de 20 px pe `/grile`); 1 vizită/30 zile.
-- **G-TUT-1005-03 (P2 pâlnie)** — Anonimii pe `/dashboard*` ajung la signin cu „Fă-ți unul” de 28 px; titlul paginii de înregistrare e „Sign In - Tutor”; `/ro/preturi` fără CTA pe primul ecran; `/ro/parinte` începe cu prețul, „fără card” sub margine; 0 evenimente Umami.
-- **G-TUT-1005-04 (P1 securitate ✔)** — Invitația pe e-mail: numele invitatorului intră ca HTML neescapat (`src/lib/family-invite.ts:665,675`) și nu există plafon (5 invitații → 5 adrese, livrate, pe QA). Dovadă `verif-invite-html/`.
-- **G-TUT-1005-05 (P1 securitate ✔)** — E-mailul de acord al părintelui se trimite spre orice adresă fără plafon pe IP (`register/route.ts:229`).
+- **G-TUT-1005-01 (P1 pâlnie)** — **[cod gata 05.10, nelivrat — `Reports/palnie-lot1-2026-10-05/`]** Bannerul de cookie-uri acoperă CTA-urile pe telefon la prima vizită (`/ro`, `/ro/parinte`, `/ro/auth/register`, `/acces/*`, `/family/join`); 6 vederi ale paginii de cont în 30 de zile la 115 vizitatori. Dovadă: `funnel/*-mobil.png`, `umami-30d.json`.
+- **G-TUT-1005-02 (P1 pâlnie)** — **[cod gata 05.10, nelivrat]** Demo-ul fără cont `/ro/try` merge în 2 atingeri dar e invizibil (buton sub banner, link de 20 px pe `/grile`); 1 vizită/30 zile.
+- **G-TUT-1005-03 (P2 pâlnie)** — **[parțial 05.10: signin + titluri + evenimente; `/ro/preturi` și `/ro/parinte` „fără card” primul rămân pentru pasul 9]** Anonimii pe `/dashboard*` ajung la signin cu „Fă-ți unul” de 28 px; titlul paginii de înregistrare e „Sign In - Tutor”; `/ro/preturi` fără CTA pe primul ecran; `/ro/parinte` începe cu prețul, „fără card” sub margine; 0 evenimente Umami.
+- **G-TUT-1005-04 (P1 securitate ✔)** — **[cod gata 05.10, nelivrat]** Invitația pe e-mail: numele invitatorului intră ca HTML neescapat (`src/lib/family-invite.ts:665,675`) și nu există plafon (5 invitații → 5 adrese, livrate, pe QA). Dovadă `verif-invite-html/`.
+- **G-TUT-1005-05 (P1 securitate ✔)** — **[cod gata 05.10, nelivrat]** E-mailul de acord al părintelui se trimite spre orice adresă fără plafon pe IP (`register/route.ts:229`).
 - **G-TUT-1005-06 (P1 ✔ cod)** — Adultul venit pe cod B2B primește fals „Nu am putut trimite emailul către părinte” (`api/me/age/route.ts:68`, `sent: minor`) și e blocat de poarta de vârstă înaintea primei lecții (F11).
 - **G-TUT-1005-07 (P1)** — Notificările părintelui: ~50 cereri `nudge-targets` → 429; 429 afișat ca „Niciun student de monitorizat” (F08).
 - **G-TUT-1005-08 (P1 produs)** — Invitația B2B depinde doar de WhatsApp; la eșec niciun link de copiat (F11).

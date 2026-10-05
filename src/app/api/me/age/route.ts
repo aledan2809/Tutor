@@ -58,9 +58,17 @@ async function _POST(req: NextRequest) {
     const issued = await issueConsentRequest(session.user.id, parentEmail);
     if (issued.ok) after(() => sendConsentEmail(session.user.id, issued.token, locale));
     // The date is saved; say truthfully that no email went out (the page then asks for the address again).
-    else if (issued.reason === "too-many" || issued.reason === "address-busy") {
+    else if (issued.reason === "too-many" || issued.reason === "address-busy" || issued.reason === "site-busy") {
       return NextResponse.json(
-        { ok: true, minor, sent: false, error: "Acestei adrese i-am scris de prea multe ori azi. Scrie adresa celuilalt părinte sau încearcă mâine." },
+        {
+          ok: true,
+          minor,
+          sent: false,
+          error:
+            issued.reason === "site-busy"
+              ? "Am trimis foarte multe emailuri azi. Încearcă din nou mâine."
+              : "Acestei adrese i-am scris de prea multe ori azi. Scrie adresa celuilalt părinte sau încearcă mâine.",
+        },
         { status: 200 },
       );
     }

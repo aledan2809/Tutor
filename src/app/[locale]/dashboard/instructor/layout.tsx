@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { InstructorNav } from "@/components/instructor/instructor-nav";
 
 export const metadata: Metadata = {
-  title: "Instructor - Tutor",
+  title: "Instructor",
   description:
     "Instructor dashboard: monitor student progress, manage groups, set goals, and review analytics.",
 };

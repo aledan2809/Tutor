@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { sendAppEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
+import type { Prisma } from "@prisma/client";
 import { needsParentConsent } from "@/lib/age";
 import { payingForAccess } from "@/lib/access";
 import { answerRequestId, recordGuardianEvent } from "@/lib/legal/guardian";
@@ -8,6 +9,8 @@ import {
   CONSENT_GRACE_DAYS,
   CONSENT_LINK_DAYS,
   CONSENT_SENDS_PER_DAY,
+  CONSENT_EMAILS_PER_DAY_SITE,
+  CONSENT_TO_PREFIX,
   consentEmail,
   consentEraseOnFrom,
   consentLatestEraseAt,
@@ -29,7 +32,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 export type IssueResult =
   | { ok: true; token: string }
-  | { ok: false; reason: "too-many" | "address-busy" | "same-as-child" | "no-account" | "refused" | "not-needed" };
+  | { ok: false; reason: "too-many" | "address-busy" | "site-busy" | "same-as-child" | "no-account" | "refused" | "not-needed" };
 
 /** Everything consentState needs about one account, read in one go (+ the company check when it matters). */
 export async function loadConsentFacts(userId: string): Promise<ConsentFacts | null> {
@@ -137,6 +140,20 @@ export function forgetConsentStop(userId: string): void {
  * emails a day: a learner can type any address here. A reminder isn't counted against those limits, so
  * nobody can use them up to keep the last reminder (and the erasure) from happening.
  */
+/**
+ * The whole site's day of consent emails is used up. Counts the live per-recipient markers (each lives a
+ * day; expired ones linger until that address is written to again, so they are filtered out).
+ */
+export async function siteConsentCapReached(
+  db: { verificationToken: { count: (args: { where: Prisma.VerificationTokenWhereInput }) => Promise<number> } },
+  now: Date = new Date(),
+): Promise<boolean> {
+  const sent = await db.verificationToken.count({
+    where: { identifier: { startsWith: CONSENT_TO_PREFIX }, expires: { gt: now } },
+  });
+  return sent >= CONSENT_EMAILS_PER_DAY_SITE;
+}
+
 export async function issueConsentRequest(
   userId: string,
   parentEmail: string,
@@ -172,6 +189,10 @@ export async function issueConsentRequest(
       // Emails one address may receive in a day, from all accounts together (anyone can type an address).
       if ((await tx.verificationToken.count({ where: { identifier: consentToId(parentEmail) } })) >= CONSENT_SENDS_PER_DAY) {
         return { ok: false, reason: "address-busy" } as const;
+      }
+      if (await siteConsentCapReached(tx, now)) {
+        logger.warn("Parent consent emails: the site's daily ceiling is reached", { ceiling: CONSENT_EMAILS_PER_DAY_SITE });
+        return { ok: false, reason: "site-busy" } as const;
       }
     }
 

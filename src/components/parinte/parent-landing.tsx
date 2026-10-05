@@ -7,6 +7,7 @@ import { Brand } from "@/components/Brand";
 import type { LandingChannel } from "@/lib/parent-landing";
 import { chainStepTiming, type LandingFacts, type Locale, type landingCopy } from "./landing-copy";
 import { LandingStickyCta } from "./landing-sticky-cta";
+import { TrackedPlainLink } from "@/components/TrackedLink";
 import s from "./parent-landing.module.css";
 
 export type OtherPlanRow = { key: string; name: string; seats: string; price: string };
@@ -173,14 +174,18 @@ export function ParentLanding({
           )}
 
           <div className={s.ctaRow}>
-            <Link className={s.btn} href={payHref}>
+            <TrackedPlainLink className={s.btn} href={payHref} event="cta_register" data={{ from: "parinte_pay" }}>
               {c.hero.ctaPay} <span aria-hidden="true">→</span>
-            </Link>
+            </TrackedPlainLink>
             {c.hero.ctaFree && (
-              <Link className={s.btnGhost} href={freeHref}>
+              <TrackedPlainLink className={s.btnGhost} href={freeHref} event="cta_parinte_fara_card" data={{ from: "parinte_hero" }}>
                 {c.hero.ctaFree}
-              </Link>
+              </TrackedPlainLink>
             )}
+            {/* The product before any account or price: the no-account demo (True E2E 2026-10-05, leak 2). */}
+            <TrackedPlainLink className={s.btnGhost} href={`/${locale}/try`} event="cta_try" data={{ from: "parinte" }}>
+              {c.hero.ctaTry}
+            </TrackedPlainLink>
           </div>
           <p className={s.trialLine}>
             <span aria-hidden="true">✓</span>
@@ -328,7 +333,7 @@ export function ParentLanding({
           <h2 className={`${s.sTitle} ${s.sTitleSm}`}>{c.quiz.title}</h2>
           <p className={s.sLead}>{c.quiz.sub}</p>
           <div className={s.quizBox}>
-            <SubjectQuizDemo locale={locale} cta={{ href: freeHref, label: c.quiz.cta ?? undefined }} />
+            <SubjectQuizDemo locale={locale} cta={{ href: freeHref, label: c.quiz.cta ?? undefined, track: !c.quiz.cta }} />
           </div>
         </div>
       </section>

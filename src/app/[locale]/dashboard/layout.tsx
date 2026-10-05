@@ -28,7 +28,7 @@ import { AppBanner } from "@/components/app-banner";
 import { SetupChecklist } from "@/components/setup-checklist";
 
 export const metadata: Metadata = {
-  title: "Dashboard - Tutor",
+  title: "Dashboard",
   description:
     "Your personalized learning dashboard. Track progress, practice sessions, and manage your adaptive learning journey.",
 };

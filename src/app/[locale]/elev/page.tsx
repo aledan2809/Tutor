@@ -8,7 +8,7 @@ import { TELEGRAM_PERCENT, TRIAL_PAYMENT_PERCENT } from "@/lib/checkout-price";
 const ELEV_PROMO_AMOUNT = 19.9;
 
 export const metadata: Metadata = {
-  title: "Pentru elevi și studenți — ține-te de ritm, vezi-ți progresul | eTutor.ro",
+  title: "Pentru elevi și studenți — ține-te de ritm, vezi-ți progresul",
   description:
     "Înveți pe cont propriu? Exersezi zilnic pe grile reale, îți salvezi progresul și streak-urile, și primești remindere blânde ca să nu pierzi ritmul. Începe gratuit, fără card.",
 };

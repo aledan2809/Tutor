@@ -75,7 +75,7 @@ export function MobileBottomNav() {
   const t = useTranslations("nav");
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-gray-800 bg-gray-950/95 backdrop-blur lg:hidden">
+    <nav className="fixed inset-x-0 bottom-[var(--cookie-banner-h,0px)] z-40 flex border-t border-gray-800 bg-gray-950/95 backdrop-blur lg:hidden">
       {TABS.map((tab) => {
         const active = pathname === tab.href || pathname.startsWith(tab.href + "/");
         return (

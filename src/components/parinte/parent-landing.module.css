@@ -330,7 +330,7 @@
 
 /* Bottom bar, on a phone */
 .sticky {
-  position: fixed; left: 10px; right: 10px; bottom: 10px; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  position: fixed; left: 10px; right: 10px; bottom: calc(10px + var(--cookie-banner-h, 0px)); z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 12px;
   background: rgba(17, 24, 39, 0.94); backdrop-filter: blur(10px); border: 1px solid var(--line-2); border-radius: 16px; padding: 9px 9px 9px 15px;
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5); transform: translateY(150%); opacity: 0; visibility: hidden;
   transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s;
@@ -340,6 +340,20 @@
 .stickyText b { display: block; font-size: 16px; font-weight: 700; color: #fff; line-height: 1.2; }
 .stickyText span { display: block; font-size: 12px; color: var(--muted); }
 .sticky .btn { min-height: 46px; padding: 10px 18px; font-size: 15px; box-shadow: none; }
+
+/* ── Phone: the photo gives way so the first button sits in the first screen, above the cookie strip
+   (390×664: it was at 636 px under a 470 px photo — True E2E 2026-10-05 §0). ── */
+@media (max-width: 639px) {
+  .heroPhoto { height: 230px; }
+  .heroImg { object-position: 50% 30%; }
+  .heroSheet { margin-top: -64px; }
+  .pillOver { top: 76px; }
+  .heroTitle { font-size: 28px; margin: 10px 0 8px; }
+  .heroSub { font-size: 15px; }
+  .priceCard { margin-top: 12px; padding: 10px 12px; }
+  .ctaRow { margin-top: 12px; }
+  .hero .ctaRow .btnGhost { min-height: 46px; padding: 10px 16px; }
+}
 
 /* ── Tablet and desktop ── */
 @media (min-width: 640px) {

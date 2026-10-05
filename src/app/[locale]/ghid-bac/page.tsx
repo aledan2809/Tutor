@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { GhidBacForm } from "@/components/ghid-bac-form";
 
 export const metadata: Metadata = {
-  title: "Ghid gratuit: Top 10 greșeli la Bac matematică | etutor.ro",
+  title: "Ghid gratuit: Top 10 greșeli la Bac matematică",
   description:
     "Descarcă gratuit ghidul cu cele 10 greșeli care costă puncte la Bac matematică — și cum le eviți. Bazat pe baremele oficiale.",
 };

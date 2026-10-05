@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Settings - Tutor",
+  title: "Settings",
   description: "Customize your learning preferences, notification settings, and study schedule.",
 };
 

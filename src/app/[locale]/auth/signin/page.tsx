@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useRouter } from "next/navigation";
+import { TrackedLink } from "@/components/TrackedLink";
 
 export default function SignInPage() {
   const t = useTranslations("auth");
@@ -21,6 +22,9 @@ export default function SignInPage() {
   // already taken by another way of signing in. The page used to show nothing.
   // Carried to „create an account", so someone who came from an invitation returns to it.
   const [registerHref, setRegisterHref] = useState("/auth/register");
+  // Sent here from a link into the app (middleware's ?callbackUrl=): mostly visitors with no account
+  // yet (13 such visits in 30 days, True E2E 2026-10-05 §0) — so „new account" leads, sign-in follows.
+  const [sentFromApp, setSentFromApp] = useState(false);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const cb = params.get("callbackUrl");
@@ -28,6 +32,7 @@ export default function SignInPage() {
     const roleParam = role === "PARENT" || role === "STUDENT" ? `&role=${role}` : "";
     if (cb && cb.startsWith("/") && !cb.startsWith("//") && !cb.startsWith("/\\")) {
       setRegisterHref(`/auth/register?callbackUrl=${encodeURIComponent(cb)}${roleParam}`);
+      setSentFromApp(true);
     }
   }, []);
 
@@ -122,6 +127,20 @@ export default function SignInPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm rounded-xl border border-gray-800 bg-gray-900 p-8">
+        {sentFromApp && (
+          <div className="mb-6 border-b border-gray-800 pb-6 text-center">
+            <p className="mb-3 text-sm text-gray-300">{t("newHere")}</p>
+            <TrackedLink
+              href={registerHref}
+              event="cta_register"
+              data={{ from: "signin_top" }}
+              className="flex min-h-[48px] w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-base font-semibold text-white hover:bg-blue-700 transition-colors"
+            >
+              {t("newAccountFree")}
+            </TrackedLink>
+            <p className="mt-5 text-xs font-medium uppercase tracking-wide text-gray-400">{t("haveAccount")}</p>
+          </div>
+        )}
         <h2 className="mb-1 text-2xl font-bold text-white">
           {t("signInTitle")}
         </h2>
@@ -303,18 +322,31 @@ export default function SignInPage() {
           </>
         )}
 
-        <p className="mt-4 text-center text-sm text-gray-400">
-          {t("noAccount")}{" "}
-          <Link href={registerHref} className="inline-block py-1 text-blue-400 hover:text-blue-300">
-            {t("createAccount")}
-          </Link>
-        </p>
+        {/* A button, not a 28 px text link under two rows of links (True E2E 2026-10-05, leak 3). */}
+        {!sentFromApp && (
+          <div className="mt-5 border-t border-gray-800 pt-5 text-center">
+            <p className="mb-2 text-sm text-gray-400">{t("noAccount")}</p>
+            <TrackedLink
+              href={registerHref}
+              event="cta_register"
+              data={{ from: "signin" }}
+              className="flex min-h-[48px] w-full items-center justify-center rounded-lg border border-blue-500/60 bg-blue-500/10 px-4 py-3 text-base font-semibold text-blue-200 hover:bg-blue-500/20 transition-colors"
+            >
+              {t("newAccountFree")}
+            </TrackedLink>
+          </div>
+        )}
 
         <p className="mt-2 text-center text-sm text-gray-400">
           {locale === "ro" ? "Sau " : "Or "}
-          <Link href="/try" className="inline-block py-1 text-blue-400 hover:text-blue-300">
+          <TrackedLink
+            href="/try"
+            event="cta_try"
+            data={{ from: "signin" }}
+            className="inline-flex min-h-[44px] items-center text-blue-400 hover:text-blue-300"
+          >
             {locale === "ro" ? "încearcă fără cont ✨" : "try without an account ✨"}
-          </Link>
+          </TrackedLink>
         </p>
 
         <p className="mt-4 text-center text-xs text-gray-400">

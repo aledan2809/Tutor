@@ -211,6 +211,7 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
       codeLabel: ro ? "cu codul" : "with code",
       ctaPay,
       ctaFree,
+      ctaTry: ro ? "Încearcă o grilă acum — fără cont" : "Try a quiz now — no account",
       trialLine: hasTrial
         ? ro
           ? `${trial.sentence}. Dacă anulezi înainte, nu plătești nimic.`

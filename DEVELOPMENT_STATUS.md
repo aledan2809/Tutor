@@ -1,9 +1,28 @@
 # Project Status - Tutor
-Last Updated: 2026-09-09 (demo Poșta: invitație cu identitate, tablou manager, recuperare parolă, import în masă)
+Last Updated: 2026-10-05 (pâlnia — lotul 1: banner, demo vizibil, cont nou, evenimente, S1+S2; cod gata, nelivrat)
+<!-- anterior: 2026-09-09 (demo Poșta: invitație cu identitate, tablou manager, recuperare parolă, import în masă) -->
 <!-- anterior: 2026-09-08 (cursul publicat pentru agenți; limba curățată în trei treceri; demo Poșta) -->
 <!-- anterior: 2026-09-03 (conținutul memento-ului Telegram reparat; incident 502 provocat de mine, remediat în ~4 min) -->
 <!-- anterior: 2026-09-01 (treapta Telegram din cascadă -->
 <!--  — sărită tăcut pentru TOȚI utilizatorii; reparată, deployată, verificată pe date de producție) -->
+
+## Current State (Sesiunea 2026-10-05 — pâlnia vizitatori→conturi, lotul 1)
+
+**Cod gata pe `master` (local), verificat pe QA; NELIVRAT** — livrarea pe VPS2 așteaptă OK-ul lui Alex. Raport:
+`Reports/palnie-lot1-2026-10-05/RAPORT.md`.
+- Pe telefon, bannerul de cookie-uri e o bandă de 57 px care nu mai acoperă nimic; pe `/ro`, `/ro/parinte` și pe pagina de
+  cont, butoanele principale sunt pe primul ecran.
+- Demo-ul fără cont e butonul principal pe `/ro`, `/grile*` și `/parinte`; la final, un singur buton spre cont.
+- Signin are buton mare „Cont nou gratuit”; titlurile sunt „… | eTutor.ro”, în limba paginii.
+- Evenimente Umami pe pâlnie (`lib/funnel-events.ts`).
+- Securitate: numele escapat în invitații + plafoane; plafon de conturi per IP; plafon zilnic pe e-mailurile de acord.
+- Ultima livrare pe prod rămâne `10543f7` (rezumatul zilnic, 01.10).
+
+## Lessons Learned (sesiunea 2026-10-05)
+- **L604** — pe `next dev`, CSP-ul site-ului (fără `unsafe-eval`) blochează hidratarea: bannerul și demo-ul nu apar deloc și sonda
+  „trece” fals. Măsurătorile de UI se fac pe `next build` + `next start` (sau, pe dev, cu `bypassCSP` doar în browserul de test).
+- **L605** — un plafon „verific sus, număr jos” peste un handler cu `await`-uri se ocolește cu cereri simultane; rezervarea locului
+  se face sincron, în același pas cu verificarea, iar locul se dă înapoi la eșec.
 
 ## Current State (Sesiunea 2026-09-23 — prezența conturilor în Administrare)
 

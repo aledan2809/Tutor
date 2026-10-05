@@ -10,6 +10,7 @@ import { SPRINT_DOMAIN_SLUG, SPRINT_TIMEOUT_ANSWER } from "@/lib/mental-chain";
 import { QuestionRenderer } from "@/components/session/question-renderer";
 import { FeedbackDisplay } from "@/components/session/feedback-display";
 import { bumpAnswered } from "@/lib/engagement";
+import { trackFunnel } from "@/lib/funnel-events";
 import { QuestionFeedback } from "@/components/session/question-feedback";
 import { SessionResults } from "@/components/session/session-results";
 import { TtsCalibration } from "@/components/session/tts-calibration";
@@ -294,7 +295,9 @@ export default function ActiveSessionPage() {
         setCorrectStreak((s) => (result.isCorrect ? s + 1 : 0));
         setCameBack(result.isCorrect && lastWrong.current);
         lastWrong.current = !result.isCorrect;
-        bumpAnswered(); // first-value signal (gates the install/notifications banner)
+        // first-value signal (gates the install/notifications banner); the very first answer in this
+        // browser is also the funnel's last step.
+        if (bumpAnswered() === 1) trackFunnel("first_question", { where: "account" });
         try {
           localStorage.setItem("tutor_coachmark_seen", "1");
         } catch {}

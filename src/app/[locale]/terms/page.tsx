@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { getLegalDocument } from "@/lib/legal-doc";
 
 export const metadata = {
-  title: "Termeni și condiții · eTutor",
+  title: "Termeni și condiții",
   description: "Termenii și condițiile eTutor (etutor.ro).",
 };
 

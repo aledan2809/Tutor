@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Brand } from "@/components/Brand";
+import { TrackedLink } from "@/components/TrackedLink";
 import { Link } from "@/i18n/navigation";
 import { getSubject, listSubjects } from "@/lib/seo-subjects";
 import { SampleQuiz } from "@/components/sample-quiz";
@@ -79,19 +81,33 @@ export default async function SubjectLandingPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      <header className="flex items-center justify-between px-4 py-4 sm:px-6">
-        <Link href="/" className="text-xl font-bold text-blue-500">
-          etutor.ro
+      <header className="flex items-center justify-between px-4 py-2 sm:px-6">
+        <Link href="/" aria-label="eTutor.ro" className="inline-flex min-h-[44px] items-center">
+          <Brand className="text-xl" />
         </Link>
-        <Link href="/try" className="text-sm text-gray-400 hover:text-gray-200">
+        <TrackedLink
+          href="/try"
+          event="cta_try"
+          data={{ from: "grile_header" }}
+          className="inline-flex min-h-[44px] items-center text-sm text-gray-300 hover:text-white"
+        >
           {ro ? "Demo gratuit" : "Free demo"}
-        </Link>
+        </TrackedLink>
       </header>
 
       <main className="mx-auto max-w-3xl px-4 pb-16 sm:px-6">
         <p className="mt-4 text-sm font-medium text-blue-400">{s.examType}</p>
         <h1 className="mt-1 text-3xl font-bold">{s.h1}</h1>
         <p className="mt-4 text-gray-300">{s.intro}</p>
+        {/* The no-account demo as the page's main button (it was only a 20 px header link — True E2E 2026-10-05, leak 2). */}
+        <TrackedLink
+          href="/try"
+          event="cta_try"
+          data={{ from: "grile_subject" }}
+          className="mt-5 flex min-h-[48px] w-full items-center justify-center rounded-lg bg-blue-600 px-5 py-3 text-base font-semibold text-white hover:bg-blue-700 sm:inline-flex sm:w-auto sm:text-lg"
+        >
+          {ro ? "Încearcă o grilă acum — fără cont" : "Try a quiz now — no account"}
+        </TrackedLink>
 
         <section className="mt-8">
           <h2 className="text-lg font-semibold">{T.topics}</h2>

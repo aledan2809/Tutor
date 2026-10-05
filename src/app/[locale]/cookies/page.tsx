@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { getLegalDocument } from "@/lib/legal-doc";
 
 export const metadata = {
-  title: "Politica de cookie-uri · eTutor",
+  title: "Politica de cookie-uri",
   description: "Politica de cookie-uri eTutor (etutor.ro).",
 };
 

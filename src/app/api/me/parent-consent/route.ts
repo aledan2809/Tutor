@@ -37,6 +37,8 @@ async function _POST(req: NextRequest) {
       ? NextResponse.json({ error: "Am trimis deja de trei ori azi. Mai încearcă mâine." }, { status: 429 })
       : issued.reason === "address-busy"
         ? NextResponse.json({ error: "Acestei adrese i-am scris de prea multe ori azi. Scrie adresa celuilalt părinte sau încearcă mâine." }, { status: 429 })
+      : issued.reason === "site-busy"
+        ? NextResponse.json({ error: "Am trimis foarte multe emailuri azi. Încearcă din nou mâine." }, { status: 429 })
       : issued.reason === "same-as-child"
         ? NextResponse.json({ error: "Scrie adresa unui părinte, nu pe a ta." }, { status: 400 })
         : issued.reason === "refused"
