@@ -19,7 +19,11 @@ verificat cap-coadă pe QA cu comutatorul pornit: **merge**. Pe prod comutatorul
   `https://stripe.knowbest.ro` → excepția nginx `/api/subscription` e necesară (o face scriptul brokerului).
 - [x] **Livrare broker — LIVE 13.10 (~15:18)**: `stripe-module` `b6e9c1c` pe stripe.knowbest.ro (probe 401/401/400, `data/` neatins);
   nginx: `/api/subscription` fără parolă (bloc adăugat de script, `nginx -t` OK, verificat public).
-- [ ] **Alex**: `customer.subscription.updated` bifat pe webhook-ul Class RDA în Stripe Dashboard (ultimul pas al evidenței lunii).
+- [x] `customer.subscription.updated` era deja pe webhook-ul Class RDA (verificat 13.10 cu scriptul brokerului).
+- [ ] 🔴 **Webhook-ul Class RDA primește doar 2 evenimente** (G-TUT-1013-08): de rulat (Alex) verificarea abonamentelor
+  `scripts/ops/verifica-abonamente-card.cjs` (doar citire), apoi `adauga-eveniment-webhook.mjs` din stripe-module (DRY_RUN, apoi
+  aplicat) → `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`, `checkout.session.expired`,
+  `payment_intent.payment_failed`. Dacă verificarea arată nepotriviri: corectarea stărilor în eTutor, separat.
 - [ ] `/var/www/deploy-tutor.sh` diferă de `scripts/deploy-tutor.sh` (avertisment la livrarea din 13.10): de adus copia din repo la zi
   cu cea de pe server (Alex: `ssh root@72.62.155.74 cat /var/www/deploy-tutor.sh` → în sesiune).
 - [x] **După plată: data următoarei plăți + zilele rămase din lună** — cod gata 13.10 (broker v3 + Tutor, migrarea 0078), verificat
