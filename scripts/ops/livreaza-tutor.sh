@@ -1,7 +1,8 @@
 #!/bin/bash
-# Livrarea eTutor pe VPS2, cu copie a bazei înainte (13.10.2026). Rulat de Alex, din folderul Tutor de pe Mac:
+# Livrarea eTutor pe VPS2, cu copie a bazei înainte (13.10.2026). Rulat de Alex, din orice folder de pe Mac (serverul ia
+# scriptul din GitHub într-un fișier, iar scriptul rulează din fișier, nu din intrarea standard):
 #
-#   git pull && ssh root@72.62.155.74 'bash -s' < scripts/ops/livreaza-tutor.sh
+#   ssh root@72.62.155.74 'cd /var/www/tutor && git fetch -q origin master && git show origin/master:scripts/ops/livreaza-tutor.sh > /root/livreaza-tutor.sh && bash /root/livreaza-tutor.sh'
 #
 # Ce face, în ordine — se oprește la prima problemă, iar până la pasul 4 site-ul nu e atins deloc:
 #   1. arată ce versiune rulează acum și ce urmează să intre;

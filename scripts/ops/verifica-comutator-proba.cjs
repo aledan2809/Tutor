@@ -5,7 +5,9 @@
  * României) a putut trimite părinților mesajul de lansare „7 zile cu tot pachetul Family… apoi contul intră în pauză”
  * (notificare în aplicație + e-mail/Telegram/push). Pauze n-au putut apărea: fiecare cont mai vechi primea întâi 7 zile.
  *
- * Rulare (din folderul Tutor de pe Mac, după `git pull`):
+ * Rulare, din orice folder de pe Mac (serverul ia scriptul din GitHub, fără să schimbe nimic în /var/www/tutor):
+ *   ssh root@72.62.155.74 'cd /var/www/tutor && git fetch -q origin master && git show origin/master:scripts/ops/verifica-comutator-proba.cjs | node --env-file=.env -'
+ * sau, din folderul Tutor de pe Mac, după `git pull`:
  *   ssh root@72.62.155.74 'cd /var/www/tutor && node --env-file=.env -' < scripts/ops/verifica-comutator-proba.cjs
  * Nu scrie nimic în bază.
  */
