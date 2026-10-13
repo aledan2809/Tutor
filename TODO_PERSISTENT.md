@@ -11,23 +11,29 @@ verificat cap-coadă pe QA cu comutatorul pornit: **merge**. Pe prod comutatorul
   (cron-ul de 15 minute n-a prins fereastra). Nimic de corectat.
 - [x] **Mesajul de lansare așteaptă o oră după pornire** (`LAUNCH_MESSAGE_HOLD_MS`, `access-lifecycle.ts`): pornit din greșeală și
   oprit în ora aceea = niciun mesaj. Panoul arată „Mesajul către părinți pleacă de la HH:MM”; confirmarea spune asta. Verificat pe QA
-  9/9 (pornit → cron → nimic → oprit → nimic; pornit acum 61 min → pleacă o dată). Cod gata, nelivrat.
-- [ ] **Livrare** (Alex, din Mac): `scripts/ops/livreaza-tutor.sh` (copie bază → migrări 0078+0079 → build atomic → verificări →
-  figurile grilelor), apoi brokerul cu `stripe-module/scripts/ops/livreaza-broker.sh` (+ excepția nginx automată).
+  9/9 (pornit → cron → nimic → oprit → nimic; pornit acum 61 min → pleacă o dată). LIVE 13.10 (`85b135c`).
+- [x] **Livrare Tutor** — Alex a rulat `scripts/ops/livreaza-tutor.sh` pe 13.10 (~15:07): `10543f7` → `85b135c`; copie
+  `/root/backups/tutor-pre-livrare-2026-10-13-1207.dump` (2 MB); tabelele sunt ale utilizatorului aplicației → 0078+0079 aplicate de
+  `migrate deploy` („Database schema is up to date!”); codul nou în build; `/api/health`, `/ro`, `/ro/try`, `/ro/parinte`,
+  `/ro/auth/register`, `/ro/grile` → 200; grile cu figură fără imagine: 0 (nimic de completat). `STRIPE_BROKER_URL` pe prod =
+  `https://stripe.knowbest.ro` → excepția nginx `/api/subscription` e necesară (o face scriptul brokerului).
+- [ ] **Livrare broker** (Alex, din Mac): comanda din capul lui `stripe-module/scripts/ops/livreaza-broker.sh` (+ excepția nginx automată).
+- [ ] `/var/www/deploy-tutor.sh` diferă de `scripts/deploy-tutor.sh` (avertisment la livrarea din 13.10): de adus copia din repo la zi
+  cu cea de pe server (Alex: `ssh root@72.62.155.74 cat /var/www/deploy-tutor.sh` → în sesiune).
 - [x] **După plată: data următoarei plăți + zilele rămase din lună** — cod gata 13.10 (broker v3 + Tutor, migrarea 0078), verificat
-  cap-coadă local 12/12, NELIVRAT. Livrare: (1) migrarea 0078 pe VPS2 ca owner (rețeta din CLAUDE), (2) Tutor, (3) brokerul pe VPS2
+  cap-coadă local 12/12. Tutor + migrarea 0078: LIVE 13.10 (`85b135c`). Rămas: (3) brokerul pe VPS2
   + excepția nginx `/api/subscription`, (4) Alex bifează `customer.subscription.updated` pe webhook-ul Class RDA în Stripe Dashboard.
 - [x] Bannerul părintelui în probă spune și ce urmează („Când se termină proba, fără abonament, contul intră în pauză”) cu
-  comutatorul pornit; oprit, „rămâi pe varianta gratuită”. Cod gata 13.10, nelivrat.
+  comutatorul pornit; oprit, „rămâi pe varianta gratuită”. LIVE 13.10 (`85b135c`).
 - [x] **Alex 13.10: fără grație la reînnoirea eșuată** — pauză pe loc (părinte + copii), ecran „Plata abonamentului n-a trecut”
-  + „Actualizează cardul”, mesaj imediat; revine la plata reușită. Cod gata, verificat pe QA, nelivrat.
-- [x] **Alex 13.10: plata sosită după anulare dă o perioadă de acces** (o lună / un an, cu dată de sfârșit) + mesaj. Cod gata, nelivrat.
+  + „Actualizează cardul”, mesaj imediat; revine la plata reușită. Verificat pe QA, LIVE 13.10 (`85b135c`).
+- [x] **Alex 13.10: plata sosită după anulare dă o perioadă de acces** (o lună / un an, cu dată de sfârșit) + mesaj. LIVE 13.10 (`85b135c`).
 - [x] **Demo-ul fără figură (captura 1)**: ruta publică nu citea `imageUrl`; reparat + grilele „figura alăturată” fără imagine
-  sunt excluse din demo (cod gata 13.10, nelivrat). **După livrare**: dacă pe prod `Question.imageUrl` e gol la grilele din banca
-  de examene → UPDATE țintit din `ExamItem.figureUrl` (SQL în raport §1). **NU rula `grile-from-exambank.mjs` pe prod**:
+  sunt excluse din demo (LIVE 13.10 (`85b135c`)). Pe prod: 0 grile din banca de examene cu figură în text și fără imagine (verificat la livrare) —
+  nimic de completat. **NU rula `grile-from-exambank.mjs` pe prod**:
   șterge și recreează grilele, iar `Attempt` are `onDelete: Cascade` → ar șterge istoricul elevilor.
 
-## [~] 🔴 PÂLNIA — lotul 1 de reparații (pașii 1–5 din `Reports/TRUE-E2E-FULL-2026-10-05.md` §6) — **COD GATA 05.10, verificat pe QA; NELIVRAT** (așteaptă OK-ul lui Alex)
+## [~] 🔴 PÂLNIA — lotul 1 de reparații (pașii 1–5 din `Reports/TRUE-E2E-FULL-2026-10-05.md` §6) — **LIVE 13.10 (`85b135c`)**, de confirmat în Umami + sondă
 
 **Stare 05.10 (sesiunea din cloud):** raport `Reports/palnie-lot1-2026-10-05/RAPORT.md`. vitest 1.408/1.408, tsc curat, sonda pe build-ul de producție QA OK pe telefon (`/ro`, `/ro/parinte`, register, signin cu callback, `/grile*`, `/family/join`, `/acces/*`), pâlnia cap-coadă cu cele 4 evenimente.
 - [x] 1 banner compact (57 px, nu acoperă; spațiu jos + WhatsApp/meniu/bara fixă ridicate) + butoanele principale pe primul ecran
@@ -35,7 +41,7 @@ verificat cap-coadă pe QA cu comutatorul pornit: **merge**. Pe prod comutatorul
 - [x] 3 „Cont nou gratuit” mare pe signin (primul când vine cu `callbackUrl`); titluri „… | eTutor.ro” în limba paginii
 - [x] 4 evenimente `cta_try`/`cta_register`/`cta_parinte_fara_card`/`register_done`/`first_question` (verificate în pagină; **în Umami real — după livrare**)
 - [x] 5 S1 (escapeHtml + 10/zi per invitator + 2/zi per adresă) + S2 (20 de conturi/oră per IP — Alex 05.10, rezervare sincronă + 100 e-mailuri de acord/zi pe tot site-ul)
-- [ ] **Alex**: OK de livrare pe VPS2 (rețeta DEPLOY_REGISTRY rândul 12; fără migrare)
+- [x] **Alex**: livrat pe VPS2 — LIVE 13.10 (`85b135c`), cu scriptul `scripts/ops/livreaza-tutor.sh`
 - [ ] După livrare: `sonda-palnie-qa.mjs` cu `BASE=https://etutor.ro` vs capturile din 05.10; evenimentele în Umami (site etutor.ro → Events)
 - [x] Migrarea `0079_catch_up_schema` („doar adaugă”, IF NOT EXISTS): coloanele `Question` (`sourceReference`, `bookOrder`, `bookPage`, `chapterIndex`, `pdfPage`, `qNumberInBook`, `imageUrl`, `explanationVideoUrl`) + tabelele `Bibliography`, `PushSubscription` + 15 indexuri + 2 chei străine, toate lipsă din `prisma/migrations` (pe prod există — acolo e no-op). Verificat: bază nouă din migrări = schema, minus vechiturile pe care NU le șterge; a doua rulare = no-op; QA aplicat cu `migrate deploy`.
 

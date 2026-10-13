@@ -1,5 +1,6 @@
 # Project Status - Tutor
-Last Updated: 2026-10-13 (incidentul comutatorului: mesajul de lansare ține o oră; migrarea 0079; scripturile de livrare VPS2)
+Last Updated: 2026-10-13 (LIVRAT pe etutor.ro `85b135c`: pâlnia lot 1, plăți, evidența lunii, mesajul de lansare ținut o oră)
+<!-- anterior: 2026-10-13 (incidentul comutatorului: mesajul de lansare ține o oră; migrarea 0079; scripturile de livrare VPS2) -->
 <!-- anterior: 2026-10-13 (proba de 7 zile verificată cap-coadă pe QA; figura din demo reparată) -->
 <!-- anterior: 2026-10-05 (pâlnia — lotul 1: banner, demo vizibil, cont nou, evenimente, S1+S2; cod gata, nelivrat) -->
 <!-- anterior: 2026-09-09 (demo Poșta: invitație cu identitate, tablou manager, recuperare parolă, import în masă) -->
@@ -21,7 +22,9 @@ Last Updated: 2026-10-13 (incidentul comutatorului: mesajul de lansare ține o o
   doar adaugă) și o arată pe Pachete + avertisment pe panou cu 3 zile înainte ca accesul să se încheie fără reînnoire.
 - **Decizii Alex 13.10 (cod gata, nelivrat):** reînnoirea eșuată = pauză pe loc, fără grație (cauza „payment”, mesaj imediat,
   cardul e drumul înapoi); o plată sosită după anulare = o perioadă de acces cu dată de sfârșit.
-- Nelivrat pe etutor.ro: lotul 1 (`8ed92ce`) + acest commit; prod rămâne `10543f7`.
+- **LIVE pe etutor.ro 13.10 (~15:07)**: `10543f7` → `85b135c` (lotul 1 al pâlniei, demo-ul cu figură, regulile de plată, evidența
+  lunii, mesajul de lansare ținut o oră, migrările 0078+0079), cu `scripts/ops/livreaza-tutor.sh` rulat de Alex. Copie
+  `/root/backups/tutor-pre-livrare-2026-10-13-1207.dump`; paginile 200; grile cu figură fără imagine: 0. Brokerul v3: de livrat.
 - **Incident 13.10 (comutatorul pornit din greșeală, oprit la loc):** codul nou ține mesajul de lansare o oră după pornire
   (`LAUNCH_MESSAGE_HOLD_MS`); panoul arată ora. Verificat pe prod (`scripts/ops/verifica-comutator-proba.cjs`): pornit 14:30:03,
   oprit 14:31:14, **0 mesaje** — nimic de corectat.
