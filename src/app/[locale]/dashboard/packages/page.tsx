@@ -20,6 +20,7 @@ import {
   TRIAL_PAYMENT_PERCENT,
 } from "@/lib/checkout-price";
 import { FREE_TRIAL_DAYS } from "@/lib/free-trial";
+import type { BillingSummary } from "@/lib/billing-period";
 import type { SeatHolderNote } from "@/lib/access-server";
 import { TrialCountdown } from "@/components/access/trial-countdown";
 import { holderWords } from "@/components/access/holder-words";
@@ -50,8 +51,10 @@ interface PlansResponse {
     subscriptionPlanId: string | null;
     /** The current subscription is paid by card: another package would start a second one. */
     byCard?: boolean;
-    /** A declined renewal Stripe is still retrying (within the grace). */
+    /** A declined renewal Stripe is still retrying (no grace: the account is paused meanwhile). */
     retrying?: boolean;
+    /** The paid period and the next charge, a scheduled stop, a fixed end, the bank's next retry (billing-period.ts). */
+    billing?: BillingSummary | null;
     freeTrialDaysLeft?: number;
     /** The payer's own free week: paying in it gives −30% for life (checkout-price.ts). Null for a child. */
     trialOffer?: { active: boolean; endsAt: string; kind?: "trial" | "winback" } | null;
@@ -359,6 +362,30 @@ export default function PackagesPage() {
   const upgradeName = (p: { name: string | null }) => p.name?.trim() || t("parentUpgradeSomeone");
 
   const lei = (amount: number) => fmtPrice(amount, locale);
+  // „13 noiembrie" (with the year when it isn't this one), in Bucharest time.
+  const day = (iso: string) => {
+    const d = new Date(iso);
+    return d.toLocaleDateString(locale === "en" ? "en-GB" : "ro-RO", {
+      timeZone: "Europe/Bucharest",
+      day: "numeric",
+      month: "long",
+      ...(d.getFullYear() !== new Date().getFullYear() ? { year: "numeric" } : {}),
+    });
+  };
+  // Where the paid period stands: until when, how many days, the next automatic charge (or the stop).
+  const b = current.billing;
+  const billingLine =
+    !b || b.kind === "retrying"
+      ? null
+      : b.kind === "renews"
+        ? b.amountMinor !== null
+          ? t("billingRenews", { date: day(b.at), days: b.daysLeft, amount: fmtPrice(b.amountMinor / 100, locale) })
+          : t("billingRenewsNoAmount", { date: day(b.at), days: b.daysLeft })
+        : b.kind === "trial"
+          ? t("billingTrial", { date: day(b.at), days: b.daysLeft })
+          : b.kind === "ends"
+            ? t("billingEnds", { date: day(b.at), days: b.daysLeft })
+            : t("billingFixed", { date: day(b.at), days: b.daysLeft });
   const bani = (minorUnits: number) => fmtPrice(minorUnits / 100, locale);
   // The −30% offer runs while the payer's own free week does (a paying account has no offer, a child
   // is never made one).
@@ -423,7 +450,9 @@ export default function PackagesPage() {
             <span>
               {current.subscriptionStatus === "trialing" ? t("currentTrial") : t("currentActive")}
             </span>
-            {cardSubscription && <p className="mt-1 text-xs text-green-300/80">{t("switchPlanByCard")}</p>}
+            {billingLine && <p className="mt-1 text-sm text-green-200">{billingLine}</p>}
+            {/* Already stopped: nothing left to stop before choosing another package after it ends. */}
+            {cardSubscription && b?.kind !== "ends" && <p className="mt-1 text-xs text-green-300/80">{t("switchPlanByCard")}</p>}
             {current.parentUpgradeRedundant && current.upgradedPlanName && (
               <p className="mt-1 text-xs text-amber-300/90">{t("parentUpgradeRedundant", { plan: current.upgradedPlanName })}</p>
             )}
@@ -450,7 +479,14 @@ export default function PackagesPage() {
 
       {isRetrying && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-800/60 bg-amber-900/15 px-4 py-3 text-sm text-amber-200">
-          <span>{t("currentPastDue")}</span>
+          <div>
+            <span>{t("currentPastDue")}</span>
+            {current.billing?.kind === "retrying" && (
+              <p className="mt-1 text-xs text-amber-100/90">
+                {current.billing.retryAt ? t("billingRetry", { date: day(current.billing.retryAt) }) : t("billingNoRetry")}
+              </p>
+            )}
+          </div>
           <button
             onClick={() => void openPortal()}
             disabled={portalBusy !== null}

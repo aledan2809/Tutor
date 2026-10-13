@@ -140,6 +140,16 @@ model User {
   // Main plan's Stripe subscription id (persisted from the broker callback) — lets
   // /api/stripe/portal open the Customer Portal / cancel without re-deriving it.
   stripeSubscriptionId   String?
+  // Where the card subscription stands, as the payment broker reports it (callback contract v3, or read
+  // on demand from it): the end of the period paid for — the next charge date while it renews —, a
+  // scheduled stop, what a period costs (minor units), when the bank retries a declined charge, when it
+  // was last read. Shown to the payer (Pachete, the dashboard's end-of-access notice); access itself
+  // still follows subscriptionStatus/subscriptionEndsAt.
+  subscriptionPeriodEnd  DateTime?
+  subscriptionCancelAt   DateTime?
+  subscriptionPrice      Int?
+  subscriptionRetryAt    DateTime?
+  subscriptionSyncedAt   DateTime?
   // Child seats bought as a discounted add-on beyond the plan's base seat. The
   // family-seat check honours base + this. 0 for everyone until they buy one.
   paidExtraChildSeats    Int                     @default(0)

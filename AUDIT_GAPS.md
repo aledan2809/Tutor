@@ -11,7 +11,7 @@
 Raport: `Reports/proba-flux-2026-10-13/RAPORT.md`.
 - **G-TUT-1013-01 (P1 produs)** — Demo-ul public afișa grile despre „figura alăturată” fără figură (`api/public/practice/quiz` nu citea `imageUrl`; `SubjectQuizDemo` nu desena). **Cod gata 13.10, nelivrat**; pe prod de completat `imageUrl` cu UPDATE țintit (raport §1), niciodată prin re-rularea scriptului de copiere.
 - **G-TUT-1013-02 (P1 decizie)** — Comutatorul `accessTrial` e OPRIT pe prod: proba promisă nu se încheie cu nimic (fără pauză, fără mesaje). Fluxul complet verificat pe QA; decizia e a lui Alex (= G-TUT-1005 pasul 14).
-- **G-TUT-1013-03 (P2 produs)** — După plată nu există data următoarei plăți / zilele rămase din lună: brokerul `stripe-module` nu trimite `current_period_end`, Tutor n-are câmp. Plan în raport §4.1 (propose-confirm pe broker).
+- **G-TUT-1013-03 (P2 produs)** — **[cod gata 13.10, nelivrat: broker v3 + migrarea 0078 + Pachete/panou]** După plată nu există data următoarei plăți / zilele rămase din lună: brokerul `stripe-module` nu trimite `current_period_end`, Tutor n-are câmp. Plan în raport §4.1 (propose-confirm pe broker).
 - **G-TUT-1013-05 (P2, decizie Alex 13.10)** — Reînnoirea eșuată păstra accesul 14 zile; o plată sosită după anulare nu dădea nimic. **Cod gata 13.10, nelivrat**: pauză pe loc + mesaj; plata întârziată = o perioadă cu dată de sfârșit.
 - **G-TUT-1013-04 (P3 UX)** — Bannerul părintelui în probă nu spune ce urmează la final; brokerul anunță `active` și pentru o probă Stripe cu card (Pachete nu poate arăta „Ești în perioada de probă”).
 

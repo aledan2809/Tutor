@@ -5,9 +5,9 @@ verificat cap-coadă pe QA cu comutatorul pornit: **merge**. Pe prod comutatorul
 întâmplă nimic (contorul și bannerul se văd 7 zile, apoi dispar; doar simulările/lecțiile/calendarul/progresul avansat se închid).
 - [ ] **Alex**: pornești comutatorul (Administrare → Utilizatori → „Pornește proba și pauza”; înainte marchezi conturile
   de test/prieteni „Gratuit permanent”) SAU scoți promisiunea „7 zile” din pagini. Conturile existente primesc 7 zile de la pornire.
-- [ ] **După plată: data următoarei plăți + zilele rămase din lună** — brokerul (`stripe-module`, Lego comun → propose-confirm)
-  nu trimite `current_period_end`; Tutor n-are unde-l ține/arăta. Plan: broker adaugă `currentPeriodEnd`/`cancelAtPeriodEnd`/`trialEnd`
-  la `subscription.activated/renewed` → Tutor `User.subscriptionPeriodEnd` (migrare doar-adaugă) → Pachete „Următoarea plată: … · … lei”.
+- [x] **După plată: data următoarei plăți + zilele rămase din lună** — cod gata 13.10 (broker v3 + Tutor, migrarea 0078), verificat
+  cap-coadă local 12/12, NELIVRAT. Livrare: (1) migrarea 0078 pe VPS2 ca owner (rețeta din CLAUDE), (2) Tutor, (3) brokerul pe VPS2
+  + excepția nginx `/api/subscription`, (4) Alex bifează `customer.subscription.updated` pe webhook-ul Class RDA în Stripe Dashboard.
 - [ ] Bannerul părintelui în probă să spună și ce urmează („contul intră în pauză”) când comutatorul e pornit — azi doar al elevului o spune.
 - [x] **Alex 13.10: fără grație la reînnoirea eșuată** — pauză pe loc (părinte + copii), ecran „Plata abonamentului n-a trecut”
   + „Actualizează cardul”, mesaj imediat; revine la plata reușită. Cod gata, verificat pe QA, nelivrat.

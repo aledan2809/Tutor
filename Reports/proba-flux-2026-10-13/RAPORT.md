@@ -93,7 +93,7 @@ părinți pornesc de la sine (cron `*/15`). Alternativa: scoaterea promisiunii �
 
 ## 4. Lipsuri găsite (de decis / de făcut)
 
-1. **După plată nu există evidența lunii: nici data următoarei plăți, nici zilele rămase.** `/api/plans` nu are nicio
+1. ~~**După plată nu există evidența lunii**~~ → **făcut 13.10, vezi §4bis.** (Constatarea inițială:) `/api/plans` nu are nicio
    cheie de perioadă; pagina Pachete spune doar „Ai un pachet activ” + „Gestionează abonamentul” (portalul Stripe).
    Cauza: brokerul (`stripe-module`, `admin/src/app/api/stripe/webhook/[companySlug]/route.ts`) nu trimite
    `current_period_end` în callback (îl are — `src/server/subscriptions.ts:170–173` îl calculează pentru registrul lui).
@@ -110,6 +110,24 @@ părinți pornesc de la sine (cron `*/15`). Alternativa: scoaterea promisiunii �
 4. Adresele `.test`/`example.com` nu primesc mesajele probei (prin design, `resolveIsTest`). De știut la testarea pe prod:
    conturile de probă ale lui Alex trebuie să aibă adrese reale ca să vadă mesajele.
 5. `/dashboard/packages?plan=FAMILY` din e-mailuri e fără limbă — serverul redirecționează la `/ro/…` (307), merge.
+
+## 4bis. Evidența lunii după plată — făcută (13.10, cerere Alex, cu brokerul)
+
+- **Broker** (`stripe-module`, commit pe `master`, nelivrat): contract callback v3 — pe orice `subscription.*` vine
+  rezumatul abonamentului (sfârșitul perioadei = următoarea plată, oprirea programată, proba, prețul pe perioadă),
+  `nextPaymentAttempt` la plata refuzată, evenimentul nou `subscription.updated` (oprire/repornire din portal) și ruta
+  `POST /api/subscription` pentru citire la cerere.
+- **Tutor**: migrarea `0078_subscription_period` (doar adaugă 5 coloane pe `User`), callback-ul le ține, iar Pachete le
+  citește din broker la cerere când lipsesc sau au peste 6 h (`subscription-sync.ts`, cel mult 3 s, fără să blocheze pagina).
+  Pachete arată: „Plătit până pe 13 noiembrie — mai ai 31 de zile. Următoarea plată se face automat pe 13 noiembrie: 34,86 lei.”;
+  la oprire din portal „nu se mai reînnoiește, ai acces până pe …”; la plata refuzată „Banca reîncearcă plata pe …”; la o
+  perioadă fixă (an din cod, plată după anulare) „Ai acces până pe … · nu se încasează nimic de la sine”. Panoul plătitorului
+  arată un avertisment în ultimele 3 zile înainte ca accesul să se încheie fără reînnoire. Nimic din toate acestea copilului.
+- **Verificat**: broker (build de producție) + Tutor QA, evenimente Stripe semnate → callback-uri v3 → afișare: 12/12;
+  capturi 10–13 trimise lui Alex; vitest 1.426/1.426 (10 teste noi în `billing-summary.test.ts`).
+- **Rămas pentru livrare**: migrarea 0078 pe VPS2 înaintea codului (rețeta din CLAUDE/DEPLOY_REGISTRY), brokerul pe VPS2,
+  excepția nginx pentru `/api/subscription`, evenimentul `customer.subscription.updated` bifat în Stripe Dashboard pe
+  webhook-ul firmei (Class RDA).
 
 ## 5. Starea codului
 

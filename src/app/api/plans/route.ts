@@ -3,6 +3,8 @@ import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
 import { payingForAccess, renewalFailed } from "@/lib/access";
+import { billingSummary } from "@/lib/billing-period";
+import { syncSubscriptionFromBroker } from "@/lib/subscription-sync";
 import { loadAccess, loadSeatHolder } from "@/lib/access-server";
 import { getFamilyOverview } from "@/lib/family-invite";
 import { parentUpgradeQuote } from "@/lib/parent-upgrade";
@@ -69,6 +71,11 @@ async function _GET() {
         subscriptionEndsAt: true,
         subscriptionPlanId: true,
         stripeSubscriptionId: true,
+        subscriptionPeriodEnd: true,
+        subscriptionCancelAt: true,
+        subscriptionPrice: true,
+        subscriptionRetryAt: true,
+        subscriptionSyncedAt: true,
         createdAt: true,
         pendingVoucherCode: true,
         paidExtraParentSeats: true,
@@ -166,9 +173,20 @@ async function _GET() {
   // the difference buys nothing any more and is only worth stopping.
   const parentUpgradeRedundant = me.paidExtraParentSeats > 0 && parentUpgradeOf(ownPlan) === null;
 
+  // Where the card subscription stands: read from the broker when the copy is missing or stale (bought
+  // before the broker sent it, a stop scheduled in the Billing Portal) — at most every few hours, briefly.
+  const billingFacts = (await syncSubscriptionFromBroker(me))
+    ? ((await prisma.user.findUnique({
+        where: { id: userId },
+        select: { subscriptionStatus: true, subscriptionEndsAt: true, subscriptionPeriodEnd: true, subscriptionCancelAt: true, subscriptionPrice: true, subscriptionRetryAt: true },
+      })) ?? me)
+    : me;
+
   return NextResponse.json({
     plans: plans.map((p) => ({ ...p, price: shownPrice(p) })),
     current: {
+      // The paid period and the next charge, a scheduled stop, a fixed end, the bank's next retry (billing-period.ts).
+      billing: billingSummary(billingFacts),
       subscriptionStatus: me.subscriptionStatus,
       paid,
       // The plan the account pays for right now. A cancelled package or an expired year from a code keeps

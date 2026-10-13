@@ -15,6 +15,7 @@ import {
   subscriptionEnded,
 } from "@/lib/card-subscription";
 import { grantLatePaidPeriod, notifyPaymentFailed } from "@/lib/billing-messages";
+import { CLEARED_PERIOD_FIELDS, parseBrokerSubscription, periodFieldsFrom } from "@/lib/billing-period";
 
 /**
  * Stripe Checkout Broker → Tutor callback.
@@ -68,6 +69,10 @@ interface BrokerCallback {
   stripePaymentIntentId?: string | null;
   stripeSubscriptionId?: string | null;
   subscriptionStatus?: string | null;
+  /** Contract v3: where the subscription stands (billing-period.ts BrokerSubscription). */
+  subscription?: unknown;
+  /** Contract v3, subscription.payment_failed: when the bank is retried next (ISO), null when it won't be. */
+  nextPaymentAttempt?: string | null;
 }
 
 async function accrueReferral(payment: { id: string; userId: string; amount: number; currency: string }) {
@@ -275,6 +280,10 @@ async function _POST(req: NextRequest) {
   const isAddon = addonType !== null;
   const amount = typeof p.amountTotal === "number" ? p.amountTotal : 0;
   const currency = p.currency || "ron";
+  // Contract v3: the paid period, a scheduled stop, the price of a period. An older broker sends none:
+  // the columns then stay as they are (Pachete reads them from the broker on demand — subscription-sync.ts).
+  const brokerSub = parseBrokerSubscription(p.subscription);
+  const period = brokerSub ? periodFieldsFrom(brokerSub) : {};
   if (!userId) {
     return NextResponse.json({ received: true, ignored: "no userId" });
   }
@@ -334,6 +343,8 @@ async function _POST(req: NextRequest) {
             subscriptionEndsAt: null,
             // Persist the subscription id so /api/stripe/portal can open the portal.
             ...(p.stripeSubscriptionId ? { stripeSubscriptionId: p.stripeSubscriptionId } : {}),
+            ...period,
+            subscriptionRetryAt: null,
             // The code kept since signup has done its job once the plan is paid with it. When the trial
             // offer beat it, it wasn't used and stays on the account for later (checkout-price.ts).
             ...(typeof p.metadata?.discountPercent === "number" && !p.metadata?.voucherId ? {} : { pendingVoucherCode: null }),
@@ -383,7 +394,7 @@ async function _POST(req: NextRequest) {
         // doesn't turn into access with no end.
         const renewed = await prisma.user.updateMany({
           where: { id: userId, ...NOT_ENDED },
-          data: { subscriptionStatus: "active", subscriptionEndsAt: null },
+          data: { subscriptionStatus: "active", subscriptionEndsAt: null, ...period, subscriptionRetryAt: null },
         });
         if (renewed.count === 0) {
           // The subscription was cancelled meanwhile (status "canceled"): the same bounded period.
@@ -418,6 +429,11 @@ async function _POST(req: NextRequest) {
           where: { id: userId, AND: [NOT_ENDED, { OR: [{ subscriptionStatus: null }, { subscriptionStatus: { not: "past_due" } }] }] },
           data: { subscriptionStatus: "past_due", subscriptionEndsAt: new Date() },
         });
+        // When the bank is retried next, and the period as Stripe sees it (on every failure, not only the first).
+        await prisma.user.updateMany({
+          where: { id: userId, subscriptionStatus: "past_due" },
+          data: { ...period, ...(p.nextPaymentAttempt !== undefined ? { subscriptionRetryAt: p.nextPaymentAttempt ? new Date(p.nextPaymentAttempt) : null } : {}) },
+        });
         if (failed.count === 1) await notifyPaymentFailed(userId);
       }
       break;
@@ -440,12 +456,22 @@ async function _POST(req: NextRequest) {
             subscriptionEndsAt: new Date(),
             // Nothing is charged any more: a later year from a code isn't taken for a card subscription.
             ...(p.stripeSubscriptionId ? { stripeSubscriptionId: null } : {}),
+            ...CLEARED_PERIOD_FIELDS,
           },
         });
       }
       // Either way the subscription has ended: whatever arrives for it later is late. Recorded after
       // the account's own change, so a retry of a cancellation that failed midway still applies it.
       if (p.stripeSubscriptionId) await recordEndedSubscription(userId, p.stripeSubscriptionId);
+      break;
+    }
+
+    case "subscription.updated": {
+      // Contract v3: a stop scheduled (or undone) in the Billing Portal, a new period, the trial's end.
+      // Only the period columns: status and access stay with activation/renewal/failure/cancellation.
+      if (addonType || !brokerSub) break;
+      if (!(await currentSubscription(userId, p, "updated"))) break;
+      await prisma.user.updateMany({ where: { id: userId, ...NOT_ENDED }, data: period });
       break;
     }
 

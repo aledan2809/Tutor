@@ -12,7 +12,8 @@ import { sessionFromHeaders } from "@/lib/session-cookie";
 import { getLocale } from "next-intl/server";
 import { loadAccess, loadPauseStartsAt, loadSeatHolder } from "@/lib/access-server";
 import { teaserOffer, teaserStats } from "@/lib/access-teaser";
-import { PausedLearnerScreen, PausedParentScreen, TrialBanner } from "@/components/access/access-screens";
+import { AccessEndingBanner, PausedLearnerScreen, PausedParentScreen, TrialBanner } from "@/components/access/access-screens";
+import { ACCESS_ENDING_NOTICE_DAYS, billingSummary } from "@/lib/billing-period";
 import { PauseGate, RefreshAt, RefreshOnReturn } from "@/components/access/pause-gate";
 import { TrialTopBar } from "@/components/access/trial-top-bar";
 import { TRIAL_PAYMENT_PERCENT } from "@/lib/checkout-price";
@@ -71,6 +72,10 @@ export default async function DashboardLayout({
       select: {
         subscriptionStatus: true,
         subscriptionEndsAt: true,
+        subscriptionPeriodEnd: true,
+        subscriptionCancelAt: true,
+        subscriptionPrice: true,
+        subscriptionRetryAt: true,
         subscriptionPlan: {
           select: { name: true, familyPlanKey: true, maxParents: true, maxChildren: true, maxTutors: true },
         },
@@ -152,6 +157,10 @@ export default async function DashboardLayout({
       : null;
   // A price only to whoever may be shown one (price-visibility.ts).
   const showPrices = consentFacts !== null && mayShowPrices(consentFacts);
+  // The payer's own access ending soon without renewing (a stopped subscription, a time paid for without one).
+  const billing = sub ? billingSummary(sub) : null;
+  const accessEnding =
+    showPrices && billing && (billing.kind === "ends" || billing.kind === "fixed") && billing.daysLeft <= ACCESS_ENDING_NOTICE_DAYS ? billing : null;
 
   // Which pause screen this account gets is decided by who it is, not by the page: a child only
   // ever sees the learner screen, without an offer (UCPD Annex I point 28); a parent sees the family
@@ -243,6 +252,9 @@ export default async function DashboardLayout({
               // Paying in the account's own free week gives −30% for life; a paying account has no offer.
               offer={bannerAudience === "parent" && access.via === "own" && !trialHolder ? { endsAt: access.endsAt.toISOString(), serverNow: new Date().toISOString() } : null}
             />
+          )}
+          {!consentBlocks && accessEnding && (
+            <AccessEndingBanner locale={locale} kind={accessEnding.kind} at={accessEnding.at} daysLeft={accessEnding.daysLeft} />
           )}
           <RefreshAt at={access?.kind === "trial" ? access.endsAt.toISOString() : null} now={new Date().toISOString()} />
           <PresencePinger />

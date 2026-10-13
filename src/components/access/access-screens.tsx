@@ -423,3 +423,30 @@ export function PausedParentScreen({
     </div>
   );
 }
+
+/**
+ * The payer's notice in the last days before access ends without renewing: a subscription they stopped,
+ * or a time paid for without one (a year from a code, a payment that came after a cancellation). Never
+ * shown to someone who may be a child (the layout passes it only with prices allowed).
+ */
+export function AccessEndingBanner({ locale, kind, at, daysLeft }: { locale: Locale; kind: "ends" | "fixed"; at: string; daysLeft: number }) {
+  const ro = locale === "ro";
+  const date = new Date(at).toLocaleDateString(ro ? "ro-RO" : "en-GB", { timeZone: "Europe/Bucharest", day: "numeric", month: "long" });
+  const left = ro ? (daysLeft === 1 ? "mai ai o zi" : `mai ai ${countRo(daysLeft, "o zi", "zile")}`) : daysLeft === 1 ? "one day left" : `${daysLeft} days left`;
+  return (
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-700/60 bg-amber-950/30 px-4 py-3 text-sm text-amber-100">
+      <p>
+        {kind === "ends"
+          ? ro
+            ? `Abonamentul e oprit: accesul se încheie pe ${date} (${left}). Îl repornești din Pachete → „Gestionează abonamentul”.`
+            : `The subscription is stopped: access ends on ${date} (${left}). Restart it from Plans → “Manage subscription”.`
+          : ro
+            ? `Accesul plătit se încheie pe ${date} (${left}). Nu se încasează nimic de la sine; ca să continui, alegi un pachet.`
+            : `Paid access ends on ${date} (${left}). Nothing is charged automatically; to continue, choose a plan.`}
+      </p>
+      <Link href={`/${locale}/dashboard/packages`} className="shrink-0 rounded-lg border border-amber-600/60 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-900/40">
+        {ro ? "Vezi Pachete" : "See plans"}
+      </Link>
+    </div>
+  );
+}
