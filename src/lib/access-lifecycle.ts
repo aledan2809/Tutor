@@ -1,6 +1,7 @@
 /**
  * The messages of the 7-day trial, to the parent only (approved mockup, Alex 16.09.2026):
- *  - at launch, to accounts that already existed: they have 7 days with the whole package;
+ *  - at launch, to accounts that already existed: they have 7 days with the whole package (an hour
+ *    after the switch, so a switch turned on by mistake and off again sends nothing);
  *  - 3 days before the end, 48 hours before (Alex, 29.09.2026: the −30% brought forward in the last
  *    48 hours), the last day, and day 8 (the account is paused).
  * Each says what the child worked on, what happens next and what it costs; one button, to payment.
@@ -40,6 +41,11 @@ export const LIFECYCLE_TYPE: Record<LifecycleStage, string> = {
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** A pause older than this gets no „your account is paused" message (the run was late or off). */
 const PAUSED_MESSAGE_MAX_AGE_MS = 3 * DAY_MS;
+/**
+ * The launch message waits this long after the switch is turned on (13.10.2026: it was turned on by
+ * mistake and off again a minute later). Turned off within the hour, nothing has gone to anyone.
+ */
+export const LAUNCH_MESSAGE_HOLD_MS = 60 * 60_000;
 /** Messages go out between 9:00 and 20:00 in Bucharest (message-window.ts), and never in the parent's own quiet hours. */
 
 /**
@@ -68,9 +74,10 @@ export function dueLifecycleStage(input: {
   if (access.daysLeft <= 1) return sent.has("last_day") ? null : "last_day";
   if (access.daysLeft <= 2) return sent.has("two_days") || sent.has("last_day") ? null : "two_days";
   if (access.daysLeft <= 3) return sent.has("three_days") || sent.has("two_days") || sent.has("last_day") ? null : "three_days";
-  // An account older than the switch got its week at launch: say so once.
+  // An account older than the switch got its week at launch: say so once, after the hold.
   const startedAtLaunch = trialStartOf(createdAt, pauseStartsAt).getTime() === pauseStartsAt.getTime();
-  return startedAtLaunch && sent.size === 0 ? "launch" : null;
+  const held = now.getTime() - pauseStartsAt.getTime() < LAUNCH_MESSAGE_HOLD_MS;
+  return startedAtLaunch && sent.size === 0 && !held ? "launch" : null;
 }
 
 export type LifecycleKid = {

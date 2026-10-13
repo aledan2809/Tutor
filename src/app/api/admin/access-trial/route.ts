@@ -6,6 +6,7 @@ import { requireSuperAdmin } from "@/lib/superadmin-auth";
 import { logAudit } from "@/lib/audit";
 import { withErrorHandler } from "@/lib/api-handler";
 import { ACCESS_TRIAL_SETTING, forgetPauseSwitch, loadPauseStartsAt } from "@/lib/access-server";
+import { LAUNCH_MESSAGE_HOLD_MS } from "@/lib/access-lifecycle";
 
 /**
  * The platform switch for the 7-day trial and the day-8 pause (Alex, 16.09.2026).
@@ -15,7 +16,13 @@ import { ACCESS_TRIAL_SETTING, forgetPauseSwitch, loadPauseStartsAt } from "@/li
  * them, a family that hasn't paid is paused. Accounts marked „Gratuit permanent" are never touched.
  *
  * Turning it on again while it is on doesn't restart anyone's week.
+ *
+ * `launchMessagesAt`: when the launch message to existing parents may start going out (access-lifecycle.ts
+ * holds it an hour). Turned off before then, nobody gets anything.
  */
+const launchMessagesAt = (startsAt: Date | null) =>
+  startsAt ? new Date(startsAt.getTime() + LAUNCH_MESSAGE_HOLD_MS).toISOString() : null;
+
 async function _GET() {
   const { error } = await requireSuperAdmin();
   if (error) return error;
@@ -39,6 +46,7 @@ async function _GET() {
   return NextResponse.json({
     enabled: startsAt !== null,
     startsAt: startsAt?.toISOString() ?? null,
+    launchMessagesAt: launchMessagesAt(startsAt),
     counts: { freeForever, withoutOwnPlan },
   });
 }
@@ -84,7 +92,11 @@ async function _PUT(req: NextRequest) {
 
   forgetPauseSwitch();
   const startsAt = await loadPauseStartsAt();
-  return NextResponse.json({ enabled: startsAt !== null, startsAt: startsAt?.toISOString() ?? null });
+  return NextResponse.json({
+    enabled: startsAt !== null,
+    startsAt: startsAt?.toISOString() ?? null,
+    launchMessagesAt: launchMessagesAt(startsAt),
+  });
 }
 
 export const GET = withErrorHandler(_GET);

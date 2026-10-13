@@ -1,5 +1,6 @@
 # Project Status - Tutor
-Last Updated: 2026-10-13 (proba de 7 zile verificată cap-coadă pe QA — merge, dar comutatorul e oprit pe prod; figura din demo reparată)
+Last Updated: 2026-10-13 (incidentul comutatorului: mesajul de lansare ține o oră; migrarea 0079; scripturile de livrare VPS2)
+<!-- anterior: 2026-10-13 (proba de 7 zile verificată cap-coadă pe QA; figura din demo reparată) -->
 <!-- anterior: 2026-10-05 (pâlnia — lotul 1: banner, demo vizibil, cont nou, evenimente, S1+S2; cod gata, nelivrat) -->
 <!-- anterior: 2026-09-09 (demo Poșta: invitație cu identitate, tablou manager, recuperare parolă, import în masă) -->
 <!-- anterior: 2026-09-08 (cursul publicat pentru agenți; limba curățată în trei treceri; demo Poșta) -->
@@ -21,12 +22,22 @@ Last Updated: 2026-10-13 (proba de 7 zile verificată cap-coadă pe QA — merge
 - **Decizii Alex 13.10 (cod gata, nelivrat):** reînnoirea eșuată = pauză pe loc, fără grație (cauza „payment”, mesaj imediat,
   cardul e drumul înapoi); o plată sosită după anulare = o perioadă de acces cu dată de sfârșit.
 - Nelivrat pe etutor.ro: lotul 1 (`8ed92ce`) + acest commit; prod rămâne `10543f7`.
+- **Incident 13.10 (comutatorul pornit din greșeală, oprit la loc):** codul nou ține mesajul de lansare o oră după pornire
+  (`LAUNCH_MESSAGE_HOLD_MS`); panoul arată ora; verificare pe prod cu `scripts/ops/verifica-comutator-proba.cjs` (doar citire).
+- **Livrare pregătită:** `scripts/ops/livreaza-tutor.sh` (copie bază, migrări ca proprietar dacă tabelele nu sunt ale aplicației,
+  `/var/www/deploy-tutor.sh`, verificări, figurile grilelor) + `stripe-module/scripts/ops/livreaza-broker.sh` (build cu revenire,
+  probe 401/400, excepția nginx `/api/subscription` cu `nginx -t` și revenire). Migrarea `0079_catch_up_schema` (doar adaugă).
 
 ## Lessons Learned (sesiunea 2026-10-13)
 - **L606** — un script „idempotent” care șterge și recreează rânduri (`grile-from-exambank.mjs`) nu e idempotent pentru
   tabelele cu `onDelete: Cascade` spre ele (`Attempt`): pe prod completezi coloanele lipsă cu UPDATE țintit, nu rulând scriptul.
 - **L607** — conturile cu adrese `.test` nu primesc mesajele de probă (prin design); o verificare a mesajelor se face cu o
   adresă reală ca formă, prinsă de cutia poștală falsă.
+- **L608** — un comutator care trimite mesaje la prima rulare a cron-ului nu se poate „anula”: oprit după un minut, mesajele
+  au plecat deja. Orice acțiune de administrare cu efect în afară (mesaje către clienți) are o fereastră de răzgândire
+  (aici o oră), afișată în panou cu ora exactă.
+- **L609** — `prisma migrate diff --from-migrations … --to-schema-datamodel …` cu o bază-umbră locală arată tot ce a intrat
+  doar prin `db push`; migrarea de recuperare se scrie „doar adaugă” (IF NOT EXISTS), ca pe prod să fie no-op.
 
 ## Current State (Sesiunea 2026-10-05 — pâlnia vizitatori→conturi, lotul 1)
 

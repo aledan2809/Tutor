@@ -148,6 +148,14 @@ export function TrialBanner({
     : ro
       ? "Când se termină proba, rămâi pe varianta gratuită; tot ce ai lucrat rămâne salvat."
       : "When the trial ends you keep the free tier; everything you did stays saved.";
+  // What the end of the week means for the family (G-TUT-1013-04: the parent's banner didn't say).
+  const parentAfter = pauseOn
+    ? ro
+      ? "Când se termină proba, fără abonament, contul intră în pauză; tot ce s-a lucrat rămâne salvat."
+      : "When the trial ends, without a plan, the account is paused; everything done so far stays saved."
+    : ro
+      ? "Când se termină proba, rămâi pe varianta gratuită; tot ce s-a lucrat rămâne salvat."
+      : "When the trial ends you keep the free tier; everything done so far stays saved.";
   const left = audience === "parent" && holder ? holderWords(holder, ro) : null;
   const text = left
     ? ro
@@ -155,8 +163,8 @@ export function TrialBanner({
       : `You have the whole package during the trial. ${left.plan} After the trial your account ${pauseOn ? "is paused" : "keeps the free tier"}, while your child carries on as usual. ${holder?.upgrade ? `To stay on the plan, ${left.who} can move to ${holder.upgrade}.` : left.noLargerPlan}`
     : audience === "parent"
       ? ro
-        ? "Ai tot pachetul Family. Reminderele pe WhatsApp și SMS pornesc când pui cardul — nu plătești nimic până se termină proba."
-        : "You have the whole Family package. WhatsApp and SMS reminders start once you add your card — you pay nothing until the trial ends."
+        ? `Ai tot pachetul Family. Reminderele pe WhatsApp și SMS pornesc când pui cardul — nu plătești nimic până se termină proba. ${parentAfter}`
+        : `You have the whole Family package. WhatsApp and SMS reminders start once you add your card — you pay nothing until the trial ends. ${parentAfter}`
       : ro
         ? `Ai tot pachetul, în afară de WhatsApp și SMS. ${after}`
         : `You have the whole package except WhatsApp and SMS. ${after}`;

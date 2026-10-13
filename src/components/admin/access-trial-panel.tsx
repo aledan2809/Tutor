@@ -6,6 +6,8 @@ import { useLocale, useTranslations } from "next-intl";
 type TrialState = {
   enabled: boolean;
   startsAt: string | null;
+  /** When the launch message to existing parents may start going out (an hour after the switch). */
+  launchMessagesAt?: string | null;
   counts?: { freeForever: number; withoutOwnPlan: number };
 };
 
@@ -66,6 +68,16 @@ export function AccessTrialPanel({ refreshKey = 0 }: { refreshKey?: number }) {
         timeStyle: "short",
       })
     : null;
+  // Still inside the hour: turning it off now sends nothing. Read when the panel loads or changes.
+  const launchAt = state.enabled && state.launchMessagesAt ? new Date(state.launchMessagesAt) : null;
+  const launchPending =
+    launchAt && launchAt.getTime() > Date.now()
+      ? launchAt.toLocaleTimeString(locale === "en" ? "en-GB" : "ro-RO", {
+          timeZone: "Europe/Bucharest",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : null;
 
   return (
     <section
@@ -78,6 +90,7 @@ export function AccessTrialPanel({ refreshKey = 0 }: { refreshKey?: number }) {
             {t("trialPanelTitle")}
           </h2>
           <p className="mt-1 text-sm text-gray-300">{state.enabled ? t("trialOn", { date: since ?? "" }) : t("trialOff")}</p>
+          {launchPending && <p className="mt-1 text-sm text-amber-300">{t("trialLaunchPending", { time: launchPending })}</p>}
           {state.counts && (
             <p className="mt-1 text-xs text-gray-400">
               {t("trialCounts", { freeForever: state.counts.freeForever, withoutPlan: state.counts.withoutOwnPlan })}

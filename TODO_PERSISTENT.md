@@ -5,10 +5,21 @@ verificat cap-coadă pe QA cu comutatorul pornit: **merge**. Pe prod comutatorul
 întâmplă nimic (contorul și bannerul se văd 7 zile, apoi dispar; doar simulările/lecțiile/calendarul/progresul avansat se închid).
 - [ ] **Alex**: pornești comutatorul (Administrare → Utilizatori → „Pornește proba și pauza”; înainte marchezi conturile
   de test/prieteni „Gratuit permanent”) SAU scoți promisiunea „7 zile” din pagini. Conturile existente primesc 7 zile de la pornire.
+  **Abia DUPĂ livrare** (codul vechi de pe prod trimite mesajul de lansare la primul cron, fără așteptare).
+- [ ] **Incident 13.10**: Alex a pornit comutatorul din greșeală pe prod (cod vechi) și l-a oprit la loc. Singurul efect posibil:
+  mesajul de lansare „7 zile cu tot pachetul Family” către părinți, dacă cron-ul a rulat între 9 și 20. **De rulat** (doar citire):
+  `ssh root@72.62.155.74 'cd /var/www/tutor && node --env-file=.env -' < scripts/ops/verifica-comutator-proba.cjs` → dacă
+  listează mesaje, pregătesc mesajul de corectare.
+- [x] **Mesajul de lansare așteaptă o oră după pornire** (`LAUNCH_MESSAGE_HOLD_MS`, `access-lifecycle.ts`): pornit din greșeală și
+  oprit în ora aceea = niciun mesaj. Panoul arată „Mesajul către părinți pleacă de la HH:MM”; confirmarea spune asta. Verificat pe QA
+  9/9 (pornit → cron → nimic → oprit → nimic; pornit acum 61 min → pleacă o dată). Cod gata, nelivrat.
+- [ ] **Livrare** (Alex, din Mac): `scripts/ops/livreaza-tutor.sh` (copie bază → migrări 0078+0079 → build atomic → verificări →
+  figurile grilelor), apoi brokerul cu `stripe-module/scripts/ops/livreaza-broker.sh` (+ excepția nginx automată).
 - [x] **După plată: data următoarei plăți + zilele rămase din lună** — cod gata 13.10 (broker v3 + Tutor, migrarea 0078), verificat
   cap-coadă local 12/12, NELIVRAT. Livrare: (1) migrarea 0078 pe VPS2 ca owner (rețeta din CLAUDE), (2) Tutor, (3) brokerul pe VPS2
   + excepția nginx `/api/subscription`, (4) Alex bifează `customer.subscription.updated` pe webhook-ul Class RDA în Stripe Dashboard.
-- [ ] Bannerul părintelui în probă să spună și ce urmează („contul intră în pauză”) când comutatorul e pornit — azi doar al elevului o spune.
+- [x] Bannerul părintelui în probă spune și ce urmează („Când se termină proba, fără abonament, contul intră în pauză”) cu
+  comutatorul pornit; oprit, „rămâi pe varianta gratuită”. Cod gata 13.10, nelivrat.
 - [x] **Alex 13.10: fără grație la reînnoirea eșuată** — pauză pe loc (părinte + copii), ecran „Plata abonamentului n-a trecut”
   + „Actualizează cardul”, mesaj imediat; revine la plata reușită. Cod gata, verificat pe QA, nelivrat.
 - [x] **Alex 13.10: plata sosită după anulare dă o perioadă de acces** (o lună / un an, cu dată de sfârșit) + mesaj. Cod gata, nelivrat.
@@ -27,7 +38,7 @@ verificat cap-coadă pe QA cu comutatorul pornit: **merge**. Pe prod comutatorul
 - [x] 5 S1 (escapeHtml + 10/zi per invitator + 2/zi per adresă) + S2 (20 de conturi/oră per IP — Alex 05.10, rezervare sincronă + 100 e-mailuri de acord/zi pe tot site-ul)
 - [ ] **Alex**: OK de livrare pe VPS2 (rețeta DEPLOY_REGISTRY rândul 12; fără migrare)
 - [ ] După livrare: `sonda-palnie-qa.mjs` cu `BASE=https://etutor.ro` vs capturile din 05.10; evenimentele în Umami (site etutor.ro → Events)
-- [ ] 🆕 Migrare „doar adaugă” pentru coloanele `Question` care lipsesc din `prisma/migrations` (`sourceReference`, `bookOrder`, `bookPage`, `chapterIndex`, `pdfPage`, `qNumberInBook`, `imageUrl`, `explanationVideoUrl`; pe prod există) — o bază nouă din migrări dă demo-ul gol
+- [x] Migrarea `0079_catch_up_schema` („doar adaugă”, IF NOT EXISTS): coloanele `Question` (`sourceReference`, `bookOrder`, `bookPage`, `chapterIndex`, `pdfPage`, `qNumberInBook`, `imageUrl`, `explanationVideoUrl`) + tabelele `Bibliography`, `PushSubscription` + 15 indexuri + 2 chei străine, toate lipsă din `prisma/migrations` (pe prod există — acolo e no-op). Verificat: bază nouă din migrări = schema, minus vechiturile pe care NU le șterge; a doua rulare = no-op; QA aplicat cu `migrate deploy`.
 
 **De ce**: în 30 de zile, 115 vizitatori (80 pe telefon) → pagina de cont văzută **6 ori** → ~2–4 conturi. Cauza nr. 1 dovedită cu capturi
 (`Reports/true-e2e-2026-10-05/funnel/*-mobil.png`): pe iPhone (390×664 px utili) bannerul de cookie-uri ocupă 470–664 px și acoperă

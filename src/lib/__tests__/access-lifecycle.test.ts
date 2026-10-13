@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 // The pure parts only; the senders stay out of the test.
 vi.mock("@/lib/escalation/parent-monitor", () => ({ deliverParentAlert: vi.fn(), userInQuietHours: vi.fn() }));
 
-import { dueLifecycleStage, lifecycleCopy, STOP_LINE, type LifecycleStage } from "@/lib/access-lifecycle";
+import { dueLifecycleStage, LAUNCH_MESSAGE_HOLD_MS, lifecycleCopy, STOP_LINE, type LifecycleStage } from "@/lib/access-lifecycle";
 import type { Access } from "@/lib/access";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -26,6 +26,17 @@ describe("ce mesaj din probă e scadent", () => {
     const old = new Date("2026-05-01T00:00:00Z");
     expect(dueLifecycleStage({ access: trial(6), createdAt: old, pauseStartsAt: switchOn, now, sent: none })).toBe("launch");
     expect(dueLifecycleStage({ access: trial(6), createdAt: old, pauseStartsAt: switchOn, now, sent: new Set(["launch"]) })).toBeNull();
+  });
+
+  it("anunțul de lansare așteaptă o oră după pornire: pornit din greșeală și oprit la loc, nu pleacă nimic", () => {
+    const old = new Date("2026-05-01T00:00:00Z");
+    const at = (ms: number) => new Date(switchOn.getTime() + ms);
+    const due = (t: Date) => dueLifecycleStage({ access: trial(7), createdAt: old, pauseStartsAt: switchOn, now: t, sent: none });
+    expect(due(at(0))).toBeNull();
+    expect(due(at(LAUNCH_MESSAGE_HOLD_MS - 1))).toBeNull();
+    expect(due(at(LAUNCH_MESSAGE_HOLD_MS))).toBe("launch");
+    // The hold is the launch message's only: the last days are not delayed.
+    expect(dueLifecycleStage({ access: trial(3), createdAt: switchOn, pauseStartsAt: switchOn, now: at(0), sent: none })).toBe("three_days");
   });
 
   it("un cont nou (creat după comutator) nu primește anunțul de lansare", () => {

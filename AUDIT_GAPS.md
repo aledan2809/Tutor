@@ -13,7 +13,9 @@ Raport: `Reports/proba-flux-2026-10-13/RAPORT.md`.
 - **G-TUT-1013-02 (P1 decizie)** — Comutatorul `accessTrial` e OPRIT pe prod: proba promisă nu se încheie cu nimic (fără pauză, fără mesaje). Fluxul complet verificat pe QA; decizia e a lui Alex (= G-TUT-1005 pasul 14).
 - **G-TUT-1013-03 (P2 produs)** — **[cod gata 13.10, nelivrat: broker v3 + migrarea 0078 + Pachete/panou]** După plată nu există data următoarei plăți / zilele rămase din lună: brokerul `stripe-module` nu trimite `current_period_end`, Tutor n-are câmp. Plan în raport §4.1 (propose-confirm pe broker).
 - **G-TUT-1013-05 (P2, decizie Alex 13.10)** — Reînnoirea eșuată păstra accesul 14 zile; o plată sosită după anulare nu dădea nimic. **Cod gata 13.10, nelivrat**: pauză pe loc + mesaj; plata întârziată = o perioadă cu dată de sfârșit.
-- **G-TUT-1013-04 (P3 UX)** — Bannerul părintelui în probă nu spune ce urmează la final; brokerul anunță `active` și pentru o probă Stripe cu card (Pachete nu poate arăta „Ești în perioada de probă”).
+- **G-TUT-1013-04 (P3 UX)** — **[cod gata 13.10, nelivrat]** Bannerul părintelui în probă nu spunea ce urmează la final (acum: pauza cu comutatorul pornit, varianta gratuită cu el oprit); brokerul anunța `active` și pentru o probă Stripe cu card (rezolvat în contractul v3: `trialing` + `billingSummary` „trial”).
+- **G-TUT-1013-06 (P1 incident, 13.10)** — Comutatorul pornit din greșeală pe prod și oprit la loc; codul vechi trimite mesajul de lansare la primul cron (9–20). Verificare de rulat: `scripts/ops/verifica-comutator-proba.cjs` (doar citire). **Cod gata, nelivrat**: mesajul de lansare așteaptă o oră după pornire, panoul arată ora, confirmarea o spune.
+- **G-TUT-1013-07 (P2 infra)** — Istoricul migrărilor nu putea reconstrui baza: `Bibliography`, `PushSubscription`, coloanele `Question` și 15 indexuri existau doar prin `db push` (QA din migrări = demo gol). **Cod gata**: `0079_catch_up_schema`, doar adaugă.
 
 ### G-TUT-AUDIT-2026-10-05 — Pâlnia vizitatori→conturi + fluxuri incomplete/incorecte (True E2E [10]) — **OPEN**
 
