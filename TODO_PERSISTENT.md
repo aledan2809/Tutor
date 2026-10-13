@@ -17,12 +17,13 @@ verificat cap-coadă pe QA cu comutatorul pornit: **merge**. Pe prod comutatorul
   `migrate deploy` („Database schema is up to date!”); codul nou în build; `/api/health`, `/ro`, `/ro/try`, `/ro/parinte`,
   `/ro/auth/register`, `/ro/grile` → 200; grile cu figură fără imagine: 0 (nimic de completat). `STRIPE_BROKER_URL` pe prod =
   `https://stripe.knowbest.ro` → excepția nginx `/api/subscription` e necesară (o face scriptul brokerului).
-- [ ] **Livrare broker** (Alex, din Mac): comanda din capul lui `stripe-module/scripts/ops/livreaza-broker.sh` (+ excepția nginx automată).
+- [x] **Livrare broker — LIVE 13.10 (~15:18)**: `stripe-module` `b6e9c1c` pe stripe.knowbest.ro (probe 401/401/400, `data/` neatins);
+  nginx: `/api/subscription` fără parolă (bloc adăugat de script, `nginx -t` OK, verificat public).
+- [ ] **Alex**: `customer.subscription.updated` bifat pe webhook-ul Class RDA în Stripe Dashboard (ultimul pas al evidenței lunii).
 - [ ] `/var/www/deploy-tutor.sh` diferă de `scripts/deploy-tutor.sh` (avertisment la livrarea din 13.10): de adus copia din repo la zi
   cu cea de pe server (Alex: `ssh root@72.62.155.74 cat /var/www/deploy-tutor.sh` → în sesiune).
 - [x] **După plată: data următoarei plăți + zilele rămase din lună** — cod gata 13.10 (broker v3 + Tutor, migrarea 0078), verificat
-  cap-coadă local 12/12. Tutor + migrarea 0078: LIVE 13.10 (`85b135c`). Rămas: (3) brokerul pe VPS2
-  + excepția nginx `/api/subscription`, (4) Alex bifează `customer.subscription.updated` pe webhook-ul Class RDA în Stripe Dashboard.
+  cap-coadă local 12/12. Tutor + migrarea 0078 + brokerul v3 + excepția nginx: LIVE 13.10. Rămas: Alex bifează `customer.subscription.updated` pe webhook-ul Class RDA în Stripe Dashboard.
 - [x] Bannerul părintelui în probă spune și ce urmează („Când se termină proba, fără abonament, contul intră în pauză”) cu
   comutatorul pornit; oprit, „rămâi pe varianta gratuită”. LIVE 13.10 (`85b135c`).
 - [x] **Alex 13.10: fără grație la reînnoirea eșuată** — pauză pe loc (părinte + copii), ecran „Plata abonamentului n-a trecut”

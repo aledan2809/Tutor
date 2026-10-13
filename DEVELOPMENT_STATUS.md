@@ -24,7 +24,8 @@ Last Updated: 2026-10-13 (LIVRAT pe etutor.ro `85b135c`: pâlnia lot 1, plăți,
   cardul e drumul înapoi); o plată sosită după anulare = o perioadă de acces cu dată de sfârșit.
 - **LIVE pe etutor.ro 13.10 (~15:07)**: `10543f7` → `85b135c` (lotul 1 al pâlniei, demo-ul cu figură, regulile de plată, evidența
   lunii, mesajul de lansare ținut o oră, migrările 0078+0079), cu `scripts/ops/livreaza-tutor.sh` rulat de Alex. Copie
-  `/root/backups/tutor-pre-livrare-2026-10-13-1207.dump`; paginile 200; grile cu figură fără imagine: 0. Brokerul v3: de livrat.
+  `/root/backups/tutor-pre-livrare-2026-10-13-1207.dump`; paginile 200; grile cu figură fără imagine: 0. Brokerul v3 LIVE 13.10 (~15:18, `b6e9c1c`) + nginx `/api/subscription`
+  fără parolă; rămas: `customer.subscription.updated` pe webhook-ul Class RDA (Alex).
 - **Incident 13.10 (comutatorul pornit din greșeală, oprit la loc):** codul nou ține mesajul de lansare o oră după pornire
   (`LAUNCH_MESSAGE_HOLD_MS`); panoul arată ora. Verificat pe prod (`scripts/ops/verifica-comutator-proba.cjs`): pornit 14:30:03,
   oprit 14:31:14, **0 mesaje** — nimic de corectat.
