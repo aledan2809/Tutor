@@ -16,6 +16,8 @@ Last Updated: 2026-10-13 (proba de 7 zile verificată cap-coadă pe QA — merge
 - **Pe prod comutatorul e OPRIT** → după 7 zile nu se întâmplă nimic; decizia e a lui Alex (TODO, primul item).
 - **Lipsă**: după plată nu se vede data următoarei plăți / zilele rămase — brokerul nu trimite `current_period_end`.
 - **Demo-ul fără figură**: ruta publică nu citea `imageUrl` — reparat (+ excluderea grilelor cu figură lipsă), nelivrat.
+- **Decizii Alex 13.10 (cod gata, nelivrat):** reînnoirea eșuată = pauză pe loc, fără grație (cauza „payment”, mesaj imediat,
+  cardul e drumul înapoi); o plată sosită după anulare = o perioadă de acces cu dată de sfârșit.
 - Nelivrat pe etutor.ro: lotul 1 (`8ed92ce`) + acest commit; prod rămâne `10543f7`.
 
 ## Lessons Learned (sesiunea 2026-10-13)

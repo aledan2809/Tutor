@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "@/lib/api-handler";
-import { payingForAccess } from "@/lib/access";
+import { payingForAccess, renewalFailed } from "@/lib/access";
 import { loadAccess, loadSeatHolder } from "@/lib/access-server";
 import { getFamilyOverview } from "@/lib/family-invite";
 import { parentUpgradeQuote } from "@/lib/parent-upgrade";
@@ -184,9 +184,10 @@ async function _GET() {
       parentUpgradeRedundant,
       // The discount the card subscription keeps (for a family comparing a year with what it pays now).
       locked: locked ? { percent: locked.percent, base: locked.base, telegram: locked.telegram, interval: locked.interval } : null,
-      // Stripe is still retrying a declined renewal (inside the grace). Past it, nothing is being
-      // retried any more and the family must be able to choose a package again.
-      retrying: me.subscriptionStatus === "past_due" && payingForAccess(me),
+      // Stripe is still retrying a declined renewal: no grace (access.ts), but the subscription exists,
+      // so the way back is the card, not a second package. Once Stripe gives up it cancels (or the
+      // retry window passes — RENEWAL_RETRY_WINDOW_MS), and then the family can choose a package again.
+      retrying: renewalFailed(me),
       // Same start as the no-card week and as checkout (access.ts trialStartOf).
       freeTrialDaysLeft: trial?.daysLeft ?? 0,
       trialOffer:

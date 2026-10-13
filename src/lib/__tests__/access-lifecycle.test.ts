@@ -62,8 +62,10 @@ describe("ce mesaj din probă e scadent", () => {
   });
 
   it("ziua 8: „contul e în pauză”, o dată, și nu pentru o pauză veche", () => {
-    const paused = (sinceDaysAgo: number): Access => ({ kind: "paused", since: new Date(now.getTime() - sinceDaysAgo * DAY), payer: "self" });
+    const paused = (sinceDaysAgo: number, cause: "trial" | "payment" = "trial"): Access => ({ kind: "paused", since: new Date(now.getTime() - sinceDaysAgo * DAY), payer: "self", cause });
     expect(dueLifecycleStage({ access: paused(0.2), createdAt: switchOn, pauseStartsAt: switchOn, now, sent: none })).toBe("paused");
+    // A declined renewal is not the trial's end: the payer gets the card message at once (billing-messages.ts), not this one.
+    expect(dueLifecycleStage({ access: paused(0.2, "payment"), createdAt: switchOn, pauseStartsAt: switchOn, now, sent: none })).toBeNull();
     expect(dueLifecycleStage({ access: paused(0.2), createdAt: switchOn, pauseStartsAt: switchOn, now, sent: new Set(["paused"]) })).toBeNull();
     expect(dueLifecycleStage({ access: paused(5), createdAt: switchOn, pauseStartsAt: switchOn, now, sent: none })).toBeNull();
   });

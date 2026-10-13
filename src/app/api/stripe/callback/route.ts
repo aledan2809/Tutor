@@ -14,6 +14,7 @@ import {
   recordEndedSubscription,
   subscriptionEnded,
 } from "@/lib/card-subscription";
+import { grantLatePaidPeriod, notifyPaymentFailed } from "@/lib/billing-messages";
 
 /**
  * Stripe Checkout Broker → Tutor callback.
@@ -29,8 +30,6 @@ import {
 
 const SECRET = process.env.STRIPE_BROKER_CALLBACK_SECRET;
 const MAX_AGE_SECONDS = 300; // anti-replay window (broker payload carries `t`)
-/** How long a declined renewal keeps the family's access: Stripe's default retry period. */
-const PAST_DUE_GRACE_MS = 14 * 24 * 60 * 60 * 1000;
 /**
  * The account's subscription hasn't ended. A cancellation is final — Stripe neither retries nor
  * renews a deleted subscription — so a failure or a charge arriving after it is late and mustn't
@@ -319,7 +318,10 @@ async function _POST(req: NextRequest) {
           target ? (db) => enableLearnerSubject(target.learnerId, target.domainId, target.setById, db) : undefined,
         );
       } else if (await staleActivation(userId, p, isNew)) {
-        // Recorded as a payment above; the account keeps the subscription it has now.
+        // Recorded as a payment above. A first delivery whose subscription has meanwhile ended still
+        // brought money: it buys one period with an end date, never the subscription back
+        // (billing-messages.ts). A repeated delivery (isNew false) brought nothing new.
+        if (isNew) await grantLatePaidPeriod({ userId, planId, interval: p.metadata?.interval, amountMinor: amount });
       } else {
         await prisma.user.update({
           where: { id: userId },
@@ -367,6 +369,10 @@ async function _POST(req: NextRequest) {
       // reactivate the main plan's status. Neither may a charge on a subscription the account left
       // behind: it is recorded, and flagged, since the family is paying twice.
       if (!isAddon && !(await currentSubscription(userId, p, "renewed"))) {
+        // Money for a subscription the account no longer has: when nothing else pays for the account
+        // now, it buys one period from today (Alex, 13.10.2026) — a parent who paid an old invoice by
+        // hand gets what they paid for; an account paying a newer subscription is left as it is.
+        if (isNew) await grantLatePaidPeriod({ userId, planId, interval: p.metadata?.interval, amountMinor: amount });
         if (isNew) await accrueReferral(payment);
         break;
       }
@@ -380,11 +386,14 @@ async function _POST(req: NextRequest) {
           data: { subscriptionStatus: "active", subscriptionEndsAt: null },
         });
         if (renewed.count === 0) {
-          logger.warn("Charge on an account whose subscription already ended — recorded, access unchanged", {
-            userId,
-            subscriptionId: p.stripeSubscriptionId ?? "",
-            eventId: p.eventId ?? "",
-          });
+          // The subscription was cancelled meanwhile (status "canceled"): the same bounded period.
+          const late = isNew ? await grantLatePaidPeriod({ userId, planId, interval: p.metadata?.interval, amountMinor: amount }) : { granted: false };
+          logger.warn(
+            late.granted
+              ? "Charge on an account whose subscription already ended — one paid period granted"
+              : "Charge on an account whose subscription already ended — recorded, access unchanged",
+            { userId, subscriptionId: p.stripeSubscriptionId ?? "", eventId: p.eventId ?? "", until: late.until?.toISOString() ?? "" },
+          );
         }
         await recordVoucherRedemption(p.metadata?.voucherId, userId, p.sessionId);
       }
@@ -398,16 +407,18 @@ async function _POST(req: NextRequest) {
       if (!isAddon && (await currentSubscription(userId, p, "payment_failed"))) {
         // Stripe sends the last failure and the cancellation together, in either order: a failure
         // applied after the cancellation would leave the family „retrying" a subscription that no
-        // longer exists, with every package locked. Both writes are conditional, so a cancellation
-        // landing between them wins.
-        await prisma.user.updateMany({ where: { id: userId, ...NOT_ENDED }, data: { subscriptionStatus: "past_due" } });
-        // Access stays while Stripe retries (access.ts), but not forever: the first failure sets an
-        // end to it, as long as Stripe's retries (two weeks by default). Later failures of the same
-        // renewal don't move it; a renewal that goes through clears it (subscription.renewed).
-        await prisma.user.updateMany({
-          where: { id: userId, subscriptionEndsAt: null, ...NOT_ENDED },
-          data: { subscriptionEndsAt: new Date(Date.now() + PAST_DUE_GRACE_MS) },
+        // longer exists, with every package locked. The write is conditional, so a cancellation
+        // landing first wins.
+        // No grace (Alex, 13.10.2026): the account pays for nothing from this moment (access.ts
+        // payingForAccess) and the family is told at once — on the first failure of this renewal
+        // only; Stripe's later retries of the same invoice fail into an account already past_due.
+        // A renewal that goes through clears it (subscription.renewed).
+        const failed = await prisma.user.updateMany({
+          // NOT on a nullable column skips NULL rows in SQL: both conditions spelled with an explicit null.
+          where: { id: userId, AND: [NOT_ENDED, { OR: [{ subscriptionStatus: null }, { subscriptionStatus: { not: "past_due" } }] }] },
+          data: { subscriptionStatus: "past_due", subscriptionEndsAt: new Date() },
         });
+        if (failed.count === 1) await notifyPaymentFailed(userId);
       }
       break;
     }

@@ -42,6 +42,7 @@ interface Overview {
   trial: boolean;
   access: {
     kind: "full" | "trial" | "free" | "paused";
+    cause?: "trial" | "payment";
     daysLeft?: number;
     reason?: string;
     via?: "own" | "family";
@@ -260,7 +261,9 @@ export default function FamilyPage() {
         {/* Someone the family covers (a child, a second parent) is never sent to buy: a child
             must not be pushed to purchase (UCPD Annex I point 28), and the family already pays. */}
         {!plan && !admin && noOffer && data.access?.kind === "paused" && (
-          <p className="mt-3 text-sm text-amber-400">Proba gratuită s-a încheiat. Tot ce ai lucrat e păstrat.</p>
+          <p className="mt-3 text-sm text-amber-400">
+            {data.access.cause === "payment" ? "Plata abonamentului n-a trecut; contul e în pauză până trece. Tot ce ai lucrat e păstrat." : "Proba gratuită s-a încheiat. Tot ce ai lucrat e păstrat."}
+          </p>
         )}
         {!plan && !admin && holder && data.seatHolder && (
           <p className="mt-3 text-sm text-gray-300">
@@ -273,13 +276,15 @@ export default function FamilyPage() {
         {!plan && !admin && !noOffer && (
           <p className="mt-3 text-sm text-amber-400">
             {data.access?.kind === "paused"
-              ? "Proba gratuită s-a încheiat, iar contul e în pauză. Tot ce ați lucrat e păstrat."
+              ? data.access.cause === "payment"
+                ? "Plata abonamentului n-a trecut, iar contul e în pauză până trece. Tot ce ați lucrat e păstrat."
+                : "Proba gratuită s-a încheiat, iar contul e în pauză. Tot ce ați lucrat e păstrat."
               : "Nu ai un pachet de familie activ."}{" "}
             {/* Paused: the pause screen names the package that fits this account (Family or Elev). */}
             <Link href={data.access?.kind === "paused" ? "/dashboard/packages" : "/dashboard/packages?plan=FAMILY"} className="underline">
               Vezi pachetele
             </Link>{" "}
-            {data.access?.kind === "paused" ? "ca să continuați." : "ca să adaugi membri."}
+            {data.access?.kind === "paused" ? (data.access.cause === "payment" ? "și actualizează cardul." : "ca să continuați.") : "ca să adaugi membri."}
           </p>
         )}
       </div>

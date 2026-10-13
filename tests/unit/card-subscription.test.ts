@@ -14,9 +14,11 @@ describe("abonamentul plătit cu cardul", () => {
     expect(cardShaped({ subscriptionStatus: "active", subscriptionEndsAt: new Date(Date.now() + 300 * DAY) })).toBe(false);
   });
 
-  it("un abonament oprit sau o grație expirată nu mai plătește nimic", () => {
+  it("un abonament oprit nu mai plătește nimic; unul cu plata refuzată există încă (cardul e drumul înapoi, nu alt pachet)", () => {
     expect(cardShaped({ subscriptionStatus: "canceled", subscriptionEndsAt: new Date(Date.now() - DAY) })).toBe(false);
-    expect(cardShaped({ subscriptionStatus: "past_due", subscriptionEndsAt: new Date(Date.now() - DAY) })).toBe(false);
+    expect(cardShaped({ subscriptionStatus: "past_due", subscriptionEndsAt: new Date(Date.now() - DAY) })).toBe(true);
+    // Past Stripe's retry window with no cancellation received: no longer in the way of a new package.
+    expect(cardShaped({ subscriptionStatus: "past_due", subscriptionEndsAt: new Date(Date.now() - 22 * DAY) })).toBe(false);
     expect(cardShaped({ subscriptionStatus: null, subscriptionEndsAt: null })).toBe(false);
   });
 });

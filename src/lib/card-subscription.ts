@@ -6,7 +6,7 @@
  */
 import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
-import { payingForAccess } from "@/lib/access";
+import { payingForAccess, renewalFailed } from "@/lib/access";
 
 export type CardPayerFields = {
   id: string;
@@ -17,12 +17,15 @@ export type CardPayerFields = {
 
 /**
  * Pure: the account's access has the shape a Stripe subscription gives it — paid with no end date
- * (the callback clears it on every payment), or retrying a declined renewal. A year from a 100% code
- * is paid too, but carries its end date.
+ * (the callback clears it on every payment), or a declined renewal Stripe is still retrying (it
+ * pays for nothing meanwhile — access.ts — but the subscription exists, and a new package on top
+ * of it would be a second one; the way back is the card). A year from a 100% code is paid too,
+ * but carries its end date.
  */
 export function cardShaped(u: Pick<CardPayerFields, "subscriptionStatus" | "subscriptionEndsAt">): boolean {
+  if (renewalFailed(u)) return true;
   if (!payingForAccess(u)) return false;
-  return u.subscriptionStatus === "past_due" || u.subscriptionEndsAt === null;
+  return u.subscriptionEndsAt === null;
 }
 
 /**

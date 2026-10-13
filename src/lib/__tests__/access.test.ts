@@ -110,7 +110,7 @@ describe("cine are acces complet, fără probă și fără pauză", () => {
     const second = person({ id: "c2", createdAt: at("2025-05-01T00:00:00Z") });
     expect(resolveAccess(input({ self: first, now: later, parents: [parent(0)] }))).toEqual({ kind: "full", reason: "family_paid" });
     expect(resolveAccess(input({ self: second, now: later, parents: [parent(1)] }))).toEqual({ kind: "full", reason: "family_paid" });
-    expect(resolveAccess(input({ self: second, now: later, parents: [parent(0)] }))).toEqual({ kind: "paused", since: expect.any(Date), payer: "parent" });
+    expect(resolveAccess(input({ self: second, now: later, parents: [parent(0)] }))).toEqual({ kind: "paused", since: expect.any(Date), payer: "parent", cause: "trial" });
   });
 
   it("cel care plătește ține mereu un loc, chiar legat ultimul: Family Duo tot doi părinți acoperă (review r6, A2)", () => {
@@ -149,14 +149,24 @@ describe("cine are acces complet, fără probă și fără pauză", () => {
     expect(resolveAccess(input({ self: elevParent, now: later }))).toEqual({ kind: "full", reason: "paid" });
   });
 
-  it("o reînnoire refuzată de bancă (Stripe mai încearcă) nu pune familia în pauză", () => {
+  it("o reînnoire refuzată de bancă pune familia în pauză pe loc, fără grație — pauza e „de plată”, nu „de probă” (Alex, 13.10)", () => {
     const later = at("2026-10-15T00:00:00Z");
-    const retrying = person({ createdAt: at("2025-05-01T00:00:00Z"), subscriptionStatus: "past_due", subscriptionPlan: { name: "Family", familyPlanKey: "FAMILY" } });
-    expect(resolveAccess(input({ self: retrying, now: later }))).toEqual({ kind: "full", reason: "paid" });
+    const failedAt = at("2026-10-14T09:00:00Z");
+    const retrying = person({ createdAt: at("2025-05-01T00:00:00Z"), subscriptionStatus: "past_due", subscriptionEndsAt: failedAt, subscriptionPlan: { name: "Family", familyPlanKey: "FAMILY" } });
+    expect(resolveAccess(input({ self: retrying, now: later }))).toEqual({ kind: "paused", since: failedAt, payer: "self", cause: "payment" });
     const child = person({ createdAt: at("2025-05-01T00:00:00Z") });
-    expect(resolveAccess(input({ self: child, now: later, parents: [retrying] }))).toEqual({ kind: "full", reason: "family_paid" });
-    // Once Stripe gives up it cancels: that ends it.
-    expect(resolveAccess(input({ self: { ...retrying, subscriptionStatus: "canceled" }, now: later })).kind).toBe("paused");
+    expect(resolveAccess(input({ self: child, now: later, parents: [retrying] }))).toEqual({ kind: "paused", since: failedAt, payer: "parent", cause: "payment" });
+    // The other parent of the same children, seated by the payer's plan, pauses with the payer.
+    const spouse = person({ createdAt: at("2025-05-01T00:00:00Z") });
+    expect(resolveAccess(input({ self: spouse, now: later, coParents: [{ ...retrying, subscriptionPlan: { name: "Family Duo", familyPlanKey: "FAMILY_DUO" } }] }))).toMatchObject({ kind: "paused", cause: "payment" });
+    // The payment going through (renewed → active) brings everything back.
+    expect(resolveAccess(input({ self: { ...retrying, subscriptionStatus: "active", subscriptionEndsAt: null }, now: later }))).toEqual({ kind: "full", reason: "paid" });
+    // Once Stripe gives up it cancels: a pause like any other.
+    expect(resolveAccess(input({ self: { ...retrying, subscriptionStatus: "canceled" }, now: later }))).toMatchObject({ kind: "paused", cause: "trial" });
+    // With the pause switched off nobody is paused: the family drops to the free tier.
+    expect(resolveAccess(input({ self: retrying, now: later, pauseStartsAt: null }))).toEqual({ kind: "free" });
+    // Past Stripe's retry window with no cancellation received: simply unpaid (the usual pause, a package can be chosen).
+    expect(resolveAccess(input({ self: retrying, now: new Date(failedAt.getTime() + 22 * DAY) }))).toMatchObject({ kind: "paused", cause: "trial" });
   });
 
   it("cursantul plătit de firmă și meditatorul/instructorul", () => {
@@ -179,7 +189,7 @@ describe("proba de 7 zile", () => {
     expect(day7.kind === "trial" && day7.daysLeft).toBe(1);
 
     const day8 = resolveAccess(input({ self, now: new Date(created.getTime() + 7 * DAY) }));
-    expect(day8).toEqual({ kind: "paused", since: new Date(created.getTime() + 7 * DAY), payer: "self" });
+    expect(day8).toEqual({ kind: "paused", since: new Date(created.getTime() + 7 * DAY), payer: "self", cause: "trial" });
   });
 
   it("cât timp pauza e oprită, un cont nou are tot proba, iar unul vechi rămâne gratuit ca azi", () => {
@@ -242,7 +252,7 @@ describe("funcțiile plătite", () => {
     expect(accessOpensPaidFeatures({ kind: "full", reason: "paid" })).toBe(true);
     expect(accessOpensPaidFeatures({ kind: "trial", endsAt: new Date(), daysLeft: 3, via: "own" })).toBe(true);
     expect(accessOpensPaidFeatures({ kind: "free" })).toBe(false);
-    expect(accessOpensPaidFeatures({ kind: "paused", since: new Date(), payer: "self" })).toBe(false);
+    expect(accessOpensPaidFeatures({ kind: "paused", since: new Date(), payer: "self", cause: "trial" })).toBe(false);
   });
 });
 

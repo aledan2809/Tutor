@@ -202,6 +202,7 @@ export function PausedLearnerScreen({
   parentName,
   offer,
   askParent = false,
+  cause = "trial",
 }: {
   locale: Locale;
   name: string | null;
@@ -214,17 +215,26 @@ export function PausedLearnerScreen({
    * only that a parent resumes it, and the family code (Alex, 28.09.2026).
    */
   askParent?: boolean;
+  /** Why: the free week ran out, or the payer's card was declined (access.ts). */
+  cause?: "trial" | "payment";
 }) {
   const ro = locale === "ro";
+  const payment = cause === "payment";
   return (
     <div className="mx-auto max-w-md space-y-3">
       <h1 className="text-2xl font-bold text-white">{ro ? `Salut${firstName(name) ? `, ${firstName(name)}` : ""}!` : `Hi${firstName(name) ? `, ${firstName(name)}` : ""}!`}</h1>
       <div className={card}>
         <span className="rounded-full border border-gray-600 bg-gray-800 px-2.5 py-1 text-xs font-semibold text-gray-200">
-          {ro ? "Perioada de probă s-a încheiat" : "The trial has ended"}
+          {payment ? (ro ? "Plata abonamentului n-a trecut" : "The subscription payment failed") : ro ? "Perioada de probă s-a încheiat" : "The trial has ended"}
         </span>
         <p className="mt-3 text-sm text-gray-300">
-          {ro ? "Contul tău e în pauză. Tot ce ai lucrat e salvat și te așteaptă." : "Your account is paused. Everything you did is saved and waiting for you."}
+          {payment
+            ? ro
+              ? "Contul tău e în pauză până trece plata. Tot ce ai lucrat e salvat și te așteaptă."
+              : "Your account is paused until the payment goes through. Everything you did is saved and waiting for you."
+            : ro
+              ? "Contul tău e în pauză. Tot ce ai lucrat e salvat și te așteaptă."
+              : "Your account is paused. Everything you did is saved and waiting for you."}
         </p>
         <Kpis
           items={[
@@ -250,7 +260,21 @@ export function PausedLearnerScreen({
         </div>
       )}
 
-      {payer === "self" && !askParent && offer && (
+      {payer === "self" && payment && (
+        // The card, not a new package: the subscription exists and Stripe retries it; a second one would be paid twice.
+        <div className={card}>
+          <p className="text-sm text-gray-300">
+            {ro
+              ? "Banca n-a acceptat plata. Actualizează cardul din Pachete → „Gestionează abonamentul”; accesul revine imediat ce plata reușește."
+              : "The bank declined the payment. Update your card from Plans → “Manage subscription”; access returns the moment the payment goes through."}
+          </p>
+          <Link href={`/${locale}/dashboard/packages`} className="mt-3 inline-flex min-h-[44px] items-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-500">
+            {ro ? "Actualizează cardul" : "Update the card"}
+          </Link>
+        </div>
+      )}
+
+      {payer === "self" && !payment && !askParent && offer && (
         <div className={card}>
           <h2 className="font-semibold text-white">{ro ? "Pachetul Elev" : "The Student plan"}</h2>
           <p className="mt-1 text-sm text-gray-400">
@@ -273,9 +297,13 @@ export function PausedLearnerScreen({
 
       {payer === "parent" && (
         <p className="px-1 text-xs text-gray-500">
-          {ro
-            ? `Accesul se reia când ${parentName ?? "părintele tău"} activează pachetul.`
-            : `Access resumes when ${parentName ?? "your parent"} activates the plan.`}
+          {payment
+            ? ro
+              ? `Accesul se reia când ${parentName ?? "părintele tău"} reia plata.`
+              : `Access resumes when ${parentName ?? "your parent"} resumes the payment.`
+            : ro
+              ? `Accesul se reia când ${parentName ?? "părintele tău"} activează pachetul.`
+              : `Access resumes when ${parentName ?? "your parent"} activates the plan.`}
         </p>
       )}
     </div>
@@ -290,17 +318,43 @@ export function PausedParentScreen({
   kids,
   offer,
   holder = null,
+  cause = "trial",
 }: {
   locale: Locale;
   kids: PausedChild[];
   offer: TeaserOffer | null;
   /** Another parent's plan covers the children but leaves this parent out: say so, offer nothing. */
   holder?: SeatHolderNote | null;
+  /** Why: the free week ran out, or this parent's card was declined (access.ts). */
+  cause?: "trial" | "payment";
 }) {
   const ro = locale === "ro";
   const first = firstName(kids[0]?.name);
   const left = holder ? holderWords(holder, ro) : null;
   const unlock = left ? (ro ? "când intri în pachet" : "once you're on the plan") : ro ? "după activare" : "after activation";
+  if (cause === "payment") {
+    // The card is the way back (Stripe keeps retrying the same subscription); a new package would be a second one.
+    return (
+      <div className="mx-auto max-w-md space-y-3">
+        <div className="rounded-2xl border border-amber-500/40 bg-gray-900 p-5">
+          <span className="rounded-full border border-amber-400/40 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-300">
+            {ro ? "Plata abonamentului n-a trecut" : "The subscription payment failed"}
+          </span>
+          <p className="mt-3 text-sm text-gray-300">
+            {ro
+              ? `Banca n-a acceptat plata pentru pachetul tău. Până trece plata, contul e în pauză${first ? ` — și al lui ${first}` : ""}: fără exerciții, alerte sau rapoarte. Tot ce s-a lucrat rămâne salvat și revine imediat ce plata reușește.`
+              : `The bank declined the payment for your plan. Until it goes through the account is paused${first ? ` — and ${first}'s` : ""}: no exercises, alerts or reports. Everything is kept and comes back the moment the payment succeeds.`}
+          </p>
+          <Link href={`/${locale}/dashboard/packages`} className="mt-4 inline-flex min-h-[48px] w-full items-center justify-center rounded-lg bg-blue-600 px-4 text-base font-semibold text-white hover:bg-blue-500">
+            {ro ? "Actualizează cardul" : "Update the card"}
+          </Link>
+          <p className="mt-2 text-xs text-gray-500">
+            {ro ? "Din Pachete → „Gestionează abonamentul”. Nu alege alt pachet: ar porni un al doilea abonament." : "From Plans → “Manage subscription”. Don't pick another plan: it would start a second subscription."}
+          </p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="mx-auto max-w-md space-y-3">
       <div className="rounded-2xl border border-amber-500/40 bg-gray-900 p-5">

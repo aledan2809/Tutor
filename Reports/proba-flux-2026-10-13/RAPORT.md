@@ -48,11 +48,30 @@ Logica e în `src/lib/access.ts` (pură) + `access-server.ts`, `access-gate.ts`,
 | Ziua 5 / 6 / 7 | mesaje către părinte: „Mai ai 3 zile”, „Ultimele 48 de ore” (−30% cât rămâi abonat, 34,86 în loc de 49,80), „se încheie mâine la 10:48”; bara devine galbenă/roșie | ✓ (4 e-mailuri în cutia falsă, 1 per etapă, fără dubluri la a doua rulare) |
 | Ziua 8 | părinte: ecranul de pauză cu „Activează Family” 49,80 lei; copil: „Perioada de probă s-a încheiat”, progres estompat, „În pauză”; API-ul de învățare 403 `paused`; Setările/Abonamentul rămân deschise; mesajul „Contul e în pauză” | ✓ |
 | Plata | callback `subscription.activated` → `active`, plan pe cont, rând în `Payment`; părintele fără contor, copilul deblocat (pachetul părintelui), API 200; Pachete: „Ai un pachet activ” + „Gestionează abonamentul” | ✓ |
-| Reînnoire eșuată | `subscription.payment_failed` → `past_due` + 14 zile de grație (accesul rămâne, Pachete: „Actualizează cardul”); după cele 14 zile → pauză din nou | ✓ |
-| Anulare | `subscription.canceled` → `canceled`, data de sfârșit = acum → părinte și copil în pauză; poate alege iar un pachet; o încasare întârziată după anulare nu redeschide accesul | ✓ |
+| Reînnoire eșuată | ~~14 zile de grație~~ → **schimbat 13.10 (decizia lui Alex): fără grație.** `subscription.payment_failed` → `past_due` și pauză **pe loc** pentru părinte, copii și al doilea părinte; ecran „Plata abonamentului n-a trecut” + „Actualizează cardul” (fără ofertă de pachet nou — ar fi al doilea abonament, checkout-ul îl refuză 409); copilul: „Accesul se reia când părintele reia plata”; API 403 `cause: payment`; mesaj imediat (notificare + e-mail), o singură dată pe eșec | ✓ |
+| Reîncercarea băncii reușește | `subscription.renewed` → `active`, acces înapoi imediat pentru toată familia | ✓ |
+| Anulare | `subscription.canceled` → `canceled` → pauză (ecranul obișnuit, cu „Activează Family”); poate alege iar un pachet | ✓ |
+| Plată sosită după anulare | ~~nu redeschide accesul~~ → **schimbat 13.10 (decizia lui Alex): o perioadă de acces.** Banii cumpără exact o lună (sau un an, după interval) de azi, cu dată de sfârșit — nu abonamentul înapoi; mesaj „Am primit plata ta … ai acces până pe … · nu se mai încasează nimic de la sine”; o livrare repetată nu adaugă încă o lună; la final, pauză din nou | ✓ |
 
-Testele unitare existente acoperă regulile: `access.test.ts`, `access-lifecycle.test.ts`, `free-trial.test.ts`,
-`card-subscription.test.ts`, `access-paths.test.ts`. vitest **1.411/1.411** (3 teste noi).
+Testele unitare acoperă regulile: `access.test.ts`, `access-lifecycle.test.ts`, `free-trial.test.ts`,
+`card-subscription.test.ts`, `access-paths.test.ts`, `billing-period.test.ts`.
+
+### Deciziile lui Alex din 13.10 (aplicate în cod, nelivrate)
+
+1. **Fără perioadă de grație la reînnoirea eșuată.** Înainte: `past_due` păstra accesul 14 zile (fereastra de reîncercări
+   Stripe). Acum: `payingForAccess` nu mai acceptă `past_due`; pauza vine pe loc (cauza „payment”, separată de „trial”,
+   ca ecranele, mesajele și API-ul să vorbească de card, nu de probă). Mesajul către părinte pleacă imediat
+   (`src/lib/billing-messages.ts`); mesajele de probă (lifecycle) nu se mai trimit pentru o pauză de plată. Cât timp
+   Stripe mai reîncearcă (cel mult 21 de zile de la primul eșec), drumul înapoi e cardul (un pachet nou e refuzat — ar
+   porni al doilea abonament); după 21 de zile fără anulare primită, contul e tratat ca neplătit și poate alege un pachet.
+   **Cu comutatorul oprit (prod azi)**, nimeni nu e pus în pauză: o plată eșuată coboară familia pe varianta gratuită
+   (funcțiile de pachet se închid pe loc, exersatul merge).
+2. **O plată sosită pentru un abonament deja anulat dă acces.** Exact o perioadă plătită (`src/lib/billing-period.ts`,
+   ziua lunii păstrată, 31 → ultima zi), cu dată de sfârșit, plus mesaj; doar când contul nu plătește deja altceva.
+
+Teste: `access.test.ts` (pauza de plată pe loc, copil + al doilea părinte, revenire la plată, fereastra de 21 de zile),
+`access-lifecycle.test.ts`, `card-subscription.test.ts`, `billing-period.test.ts` (nou). vitest **1.416/1.416**.
+Verificat pe build-ul de producție QA, cu callback-uri semnate: toate rândurile de mai sus ✓ (capturi 07–09 trimise lui Alex).
 
 ## 3. De ce pe etutor.ro nu se vede nicio diferență după 7 zile
 

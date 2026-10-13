@@ -9,6 +9,9 @@ verificat cap-coadă pe QA cu comutatorul pornit: **merge**. Pe prod comutatorul
   nu trimite `current_period_end`; Tutor n-are unde-l ține/arăta. Plan: broker adaugă `currentPeriodEnd`/`cancelAtPeriodEnd`/`trialEnd`
   la `subscription.activated/renewed` → Tutor `User.subscriptionPeriodEnd` (migrare doar-adaugă) → Pachete „Următoarea plată: … · … lei”.
 - [ ] Bannerul părintelui în probă să spună și ce urmează („contul intră în pauză”) când comutatorul e pornit — azi doar al elevului o spune.
+- [x] **Alex 13.10: fără grație la reînnoirea eșuată** — pauză pe loc (părinte + copii), ecran „Plata abonamentului n-a trecut”
+  + „Actualizează cardul”, mesaj imediat; revine la plata reușită. Cod gata, verificat pe QA, nelivrat.
+- [x] **Alex 13.10: plata sosită după anulare dă o perioadă de acces** (o lună / un an, cu dată de sfârșit) + mesaj. Cod gata, nelivrat.
 - [x] **Demo-ul fără figură (captura 1)**: ruta publică nu citea `imageUrl`; reparat + grilele „figura alăturată” fără imagine
   sunt excluse din demo (cod gata 13.10, nelivrat). **După livrare**: dacă pe prod `Question.imageUrl` e gol la grilele din banca
   de examene → UPDATE țintit din `ExamItem.figureUrl` (SQL în raport §1). **NU rula `grile-from-exambank.mjs` pe prod**:

@@ -17,7 +17,7 @@ import { PauseGate, RefreshAt, RefreshOnReturn } from "@/components/access/pause
 import { TrialTopBar } from "@/components/access/trial-top-bar";
 import { TRIAL_PAYMENT_PERCENT } from "@/lib/checkout-price";
 import { prisma } from "@/lib/prisma";
-import { payingForAccess } from "@/lib/access";
+import { payingForAccess, renewalFailed } from "@/lib/access";
 import { resolveFamilyPlanFromRecord } from "@/lib/family";
 import { FREE_TRIAL_DAYS } from "@/lib/free-trial";
 import { Sidebar } from "@/components/sidebar";
@@ -87,10 +87,11 @@ export default async function DashboardLayout({
   // The account is gone (erased after a parent's „no”) but the browser still holds its session.
   if (sub === null) return <AccountGone locale={locale} />;
   const fam = resolveFamilyPlanFromRecord(sub?.subscriptionPlan);
-  // A renewal Stripe is still retrying keeps the menu: the parent must reach the family, not lose it.
+  // A renewal Stripe is still retrying keeps the menu (the access itself is paused — access.ts): the
+  // parent must reach the family, not lose it.
   // Past its end (an expired year from a code, a retry period that ran out) the plan is gone, and the
   // menu with it — the same rule as access (payingForAccess; review r6, A6).
-  const hasFamilyPlan = sub !== null && payingForAccess(sub) && !!fam && (fam.maxChildren > 0 || fam.maxParents > 0);
+  const hasFamilyPlan = sub !== null && (payingForAccess(sub) || renewalFailed(sub)) && !!fam && (fam.maxChildren > 0 || fam.maxParents > 0);
 
   const isWatcher = session.user.enrollments?.some((e) =>
     e.roles.includes("WATCHER" as never)
@@ -180,7 +181,8 @@ export default async function DashboardLayout({
           locale={locale}
           kids={kids}
           holder={holder}
-          offer={holder ? null : await teaserOffer(session.user.id, "FAMILY")}
+          cause={access.cause}
+          offer={holder || access.cause === "payment" ? null : await teaserOffer(session.user.id, "FAMILY")}
         />
       );
     } else {
@@ -197,6 +199,7 @@ export default async function DashboardLayout({
           parentName={parentLinks[0]?.parent.name ?? null}
           offer={offer}
           askParent={access.payer === "self" && !showPrices}
+          cause={access.cause}
         />
       );
     }

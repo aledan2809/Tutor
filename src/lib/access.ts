@@ -90,8 +90,11 @@ export type Access =
   | { kind: "trial"; endsAt: Date; daysLeft: number; via: "own" | "family" }
   /** Pause switched off and nothing paid: today's free tier, nothing is blocked. */
   | { kind: "free" }
-  /** Trial over, nothing paid. `payer` is who can lift it: the account itself or its parent. */
-  | { kind: "paused"; since: Date; payer: "self" | "parent" };
+  /**
+   * Nothing paid and the trial over. `payer` is who can lift it: the account itself or its parent.
+   * `cause`: the free week ran out, or a paying family's renewal was declined (the card is the way back).
+   */
+  | { kind: "paused"; since: Date; payer: "self" | "parent"; cause: "trial" | "payment" };
 
 /**
  * When this account's 7 days start: at creation, or at the switch for accounts older than it
@@ -115,14 +118,30 @@ export function trialDaysLeft(createdAt: Date, pauseStartsAt: Date | null, now: 
 }
 
 /**
- * Paying for access right now: a paid subscription, or one whose renewal failed while Stripe is
- * still retrying (past_due). A declined card doesn't lock a paying family out on renewal day; if
- * Stripe gives up it cancels the subscription, and that ends it. (WhatsApp/SMS stay stricter:
- * meteredChannelsCovered sends nothing paid while a payment is failing.)
+ * Paying for access right now: a paid subscription, not past its end. A renewal the bank declined
+ * (past_due) pays for nothing from that moment — no grace (Alex, 13.10.2026: after a week of trial
+ * messages there is no further free period); the family is told at once (billing-messages.ts) and
+ * access returns the moment Stripe's retry or a new card goes through (subscription.renewed).
  */
 export function payingForAccess(p: Pick<AccessPerson, "subscriptionStatus" | "subscriptionEndsAt">): boolean {
-  if (isPaidSubscriber(p)) return true;
-  return p.subscriptionStatus === "past_due" && !(p.subscriptionEndsAt && p.subscriptionEndsAt.getTime() < Date.now());
+  return isPaidSubscriber(p);
+}
+
+/**
+ * How long after a declined renewal Stripe may still retry it (its default schedule ends within about
+ * three weeks, then it cancels). Past this the account counts as simply unpaid: should the cancellation
+ * never arrive (a Stripe setting that marks the subscription unpaid instead), the family must still be
+ * able to choose a package again rather than stay stuck on „update the card".
+ */
+export const RENEWAL_RETRY_WINDOW_MS = 21 * DAY_MS;
+
+/**
+ * The bank declined this account's renewal and Stripe may still retry it. The callback stamps the
+ * moment of the first failure in `subscriptionEndsAt` (api/stripe/callback).
+ */
+export function renewalFailed(p: Pick<AccessPerson, "subscriptionStatus" | "subscriptionEndsAt">, now: Date = new Date()): boolean {
+  if (p.subscriptionStatus !== "past_due") return false;
+  return !p.subscriptionEndsAt || now.getTime() - p.subscriptionEndsAt.getTime() < RENEWAL_RETRY_WINDOW_MS;
 }
 
 export { individualPlan };
@@ -283,8 +302,17 @@ export function resolveAccess(input: AccessInput): Access {
   if (running) return { kind: "trial", ...running };
 
   if (!pauseStartsAt) return { kind: "free" };
+  // A declined renewal of whoever would be paying for this account — its own, a parent's, the other
+  // parent's or a tutored family's: the pause is about the card, not about the trial.
+  const failed = [self, ...parents, ...groups.flatMap((g) => g.others.map((o) => o.person)), ...tutorFamilies].find((p) =>
+    renewalFailed(p, now),
+  );
+  if (failed) {
+    const failedAt = failed.subscriptionEndsAt && failed.subscriptionEndsAt.getTime() <= now.getTime() ? failed.subscriptionEndsAt : now;
+    return { kind: "paused", since: failedAt, payer: parents.length > 0 ? "parent" : "self", cause: "payment" };
+  }
   const since = candidates.map((c) => c.endsAt).sort((a, b) => b.getTime() - a.getTime())[0];
-  return { kind: "paused", since, payer: parents.length > 0 ? "parent" : "self" };
+  return { kind: "paused", since, payer: parents.length > 0 ? "parent" : "self", cause: "trial" };
 }
 
 /** Paid functions (simulations, lessons, calendar, advanced progress) are open. */

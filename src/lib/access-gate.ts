@@ -12,9 +12,13 @@ type Paused = Extract<Access, { kind: "paused" }>;
 export function pausedResponse(access: Paused, extra: Record<string, unknown> = {}): NextResponse {
   return NextResponse.json(
     {
-      error: "Contul e în pauză: proba gratuită s-a încheiat. Tot ce ai lucrat e păstrat.",
+      error:
+        access.cause === "payment"
+          ? "Contul e în pauză: plata abonamentului n-a trecut. Accesul revine imediat ce plata reușește. Tot ce ai lucrat e păstrat."
+          : "Contul e în pauză: proba gratuită s-a încheiat. Tot ce ai lucrat e păstrat.",
       paused: true,
       payer: access.payer,
+      cause: access.cause,
       ...extra,
     },
     { status: 403 },

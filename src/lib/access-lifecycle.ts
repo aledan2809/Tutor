@@ -57,6 +57,8 @@ export function dueLifecycleStage(input: {
   if (!pauseStartsAt) return null;
 
   if (access.kind === "paused") {
+    // A declined renewal is not the trial's end: the family was told at once (billing-messages.ts).
+    if (access.cause === "payment") return null;
     if (sent.has("paused")) return null;
     return now.getTime() - access.since.getTime() <= PAUSED_MESSAGE_MAX_AGE_MS ? "paused" : null;
   }

@@ -9,7 +9,7 @@ type AccessView =
   | { kind: "full"; reason: "paid" | "family_paid" | "free_forever" | "staff" | "org" }
   | { kind: "trial"; daysLeft: number; endsAt: string; via: "own" | "family" }
   | { kind: "free" }
-  | { kind: "paused"; since: string; payer: "self" | "parent" }
+  | { kind: "paused"; since: string; payer: "self" | "parent"; cause?: "trial" | "payment" }
   | null;
 
 interface UserRow {
@@ -188,7 +188,7 @@ export function UserManagement() {
         : access.kind === "trial"
           ? [t("accessTrial", { days: access.daysLeft }), "bg-blue-600/20 text-blue-300"]
           : access.kind === "paused"
-            ? [t("accessPaused", { date: fmtDate(access.since) }), "bg-amber-600/20 text-amber-300"]
+            ? [t(access.cause === "payment" ? "accessPausedPayment" : "accessPaused", { date: fmtDate(access.since) }), "bg-amber-600/20 text-amber-300"]
             : [t("accessFree"), "bg-gray-600/30 text-gray-300"];
     return (
       <>
