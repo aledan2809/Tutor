@@ -6,10 +6,9 @@ verificat cap-coadă pe QA cu comutatorul pornit: **merge**. Pe prod comutatorul
 - [ ] **Alex**: pornești comutatorul (Administrare → Utilizatori → „Pornește proba și pauza”; înainte marchezi conturile
   de test/prieteni „Gratuit permanent”) SAU scoți promisiunea „7 zile” din pagini. Conturile existente primesc 7 zile de la pornire.
   **Abia DUPĂ livrare** (codul vechi de pe prod trimite mesajul de lansare la primul cron, fără așteptare).
-- [ ] **Incident 13.10**: Alex a pornit comutatorul din greșeală pe prod (cod vechi) și l-a oprit la loc. Singurul efect posibil:
-  mesajul de lansare „7 zile cu tot pachetul Family” către părinți, dacă cron-ul a rulat între 9 și 20. **De rulat** (doar citire):
-  `ssh root@72.62.155.74 'cd /var/www/tutor && git fetch -q origin master && git show origin/master:scripts/ops/verifica-comutator-proba.cjs | node --env-file=.env -'` → dacă
-  listează mesaje, pregătesc mesajul de corectare.
+- [x] **Incident 13.10 — închis, fără efect**: comutatorul pornit din greșeală pe prod la 14:30:03 și oprit la 14:31:14
+  (71 s). Verificat pe prod cu `scripts/ops/verifica-comutator-proba.cjs`: **0 mesaje de probă** create de la pornire
+  (cron-ul de 15 minute n-a prins fereastra). Nimic de corectat.
 - [x] **Mesajul de lansare așteaptă o oră după pornire** (`LAUNCH_MESSAGE_HOLD_MS`, `access-lifecycle.ts`): pornit din greșeală și
   oprit în ora aceea = niciun mesaj. Panoul arată „Mesajul către părinți pleacă de la HH:MM”; confirmarea spune asta. Verificat pe QA
   9/9 (pornit → cron → nimic → oprit → nimic; pornit acum 61 min → pleacă o dată). Cod gata, nelivrat.

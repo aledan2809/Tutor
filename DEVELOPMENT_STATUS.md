@@ -23,7 +23,8 @@ Last Updated: 2026-10-13 (incidentul comutatorului: mesajul de lansare ține o o
   cardul e drumul înapoi); o plată sosită după anulare = o perioadă de acces cu dată de sfârșit.
 - Nelivrat pe etutor.ro: lotul 1 (`8ed92ce`) + acest commit; prod rămâne `10543f7`.
 - **Incident 13.10 (comutatorul pornit din greșeală, oprit la loc):** codul nou ține mesajul de lansare o oră după pornire
-  (`LAUNCH_MESSAGE_HOLD_MS`); panoul arată ora; verificare pe prod cu `scripts/ops/verifica-comutator-proba.cjs` (doar citire).
+  (`LAUNCH_MESSAGE_HOLD_MS`); panoul arată ora. Verificat pe prod (`scripts/ops/verifica-comutator-proba.cjs`): pornit 14:30:03,
+  oprit 14:31:14, **0 mesaje** — nimic de corectat.
 - **Livrare pregătită:** `scripts/ops/livreaza-tutor.sh` (copie bază, migrări ca proprietar dacă tabelele nu sunt ale aplicației,
   `/var/www/deploy-tutor.sh`, verificări, figurile grilelor) + `stripe-module/scripts/ops/livreaza-broker.sh` (build cu revenire,
   probe 401/400, excepția nginx `/api/subscription` cu `nginx -t` și revenire). Migrarea `0079_catch_up_schema` (doar adaugă).
