@@ -1,3 +1,19 @@
+## [ ] 🔴 PROBA DE 7 ZILE — decizia pe comutatorul `accessTrial` + evidența lunii după plată (Alex, din capturile 13.10)
+
+Raport: `Reports/proba-flux-2026-10-13/RAPORT.md` — fluxul probă → pauză → mesaje → plată → reînnoire eșuată → anulare
+verificat cap-coadă pe QA cu comutatorul pornit: **merge**. Pe prod comutatorul e OPRIT, de aceea după 7 zile nu se
+întâmplă nimic (contorul și bannerul se văd 7 zile, apoi dispar; doar simulările/lecțiile/calendarul/progresul avansat se închid).
+- [ ] **Alex**: pornești comutatorul (Administrare → Utilizatori → „Pornește proba și pauza”; înainte marchezi conturile
+  de test/prieteni „Gratuit permanent”) SAU scoți promisiunea „7 zile” din pagini. Conturile existente primesc 7 zile de la pornire.
+- [ ] **După plată: data următoarei plăți + zilele rămase din lună** — brokerul (`stripe-module`, Lego comun → propose-confirm)
+  nu trimite `current_period_end`; Tutor n-are unde-l ține/arăta. Plan: broker adaugă `currentPeriodEnd`/`cancelAtPeriodEnd`/`trialEnd`
+  la `subscription.activated/renewed` → Tutor `User.subscriptionPeriodEnd` (migrare doar-adaugă) → Pachete „Următoarea plată: … · … lei”.
+- [ ] Bannerul părintelui în probă să spună și ce urmează („contul intră în pauză”) când comutatorul e pornit — azi doar al elevului o spune.
+- [x] **Demo-ul fără figură (captura 1)**: ruta publică nu citea `imageUrl`; reparat + grilele „figura alăturată” fără imagine
+  sunt excluse din demo (cod gata 13.10, nelivrat). **După livrare**: dacă pe prod `Question.imageUrl` e gol la grilele din banca
+  de examene → UPDATE țintit din `ExamItem.figureUrl` (SQL în raport §1). **NU rula `grile-from-exambank.mjs` pe prod**:
+  șterge și recreează grilele, iar `Attempt` are `onDelete: Cascade` → ar șterge istoricul elevilor.
+
 ## [~] 🔴 PÂLNIA — lotul 1 de reparații (pașii 1–5 din `Reports/TRUE-E2E-FULL-2026-10-05.md` §6) — **COD GATA 05.10, verificat pe QA; NELIVRAT** (așteaptă OK-ul lui Alex)
 
 **Stare 05.10 (sesiunea din cloud):** raport `Reports/palnie-lot1-2026-10-05/RAPORT.md`. vitest 1.408/1.408, tsc curat, sonda pe build-ul de producție QA OK pe telefon (`/ro`, `/ro/parinte`, register, signin cu callback, `/grile*`, `/family/join`, `/acces/*`), pâlnia cap-coadă cu cele 4 evenimente.

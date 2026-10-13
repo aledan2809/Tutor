@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { demoAnswerable } from "@/lib/demo-questions";
 
 // Public: a short quiz of real PUBLISHED questions for a chosen subject.
 // correctIndex is computed server-side (options + correctAnswer are stored
@@ -41,6 +42,7 @@ export async function GET(req: Request) {
         explanation: true,
         topic: true,
         passage: true,
+        imageUrl: true,
         sourceReference: true,
       },
     });
@@ -63,10 +65,13 @@ export async function GET(req: Request) {
           explanation: q.explanation,
           topic: q.topic,
           passage: q.passage,
+          imageUrl: q.imageUrl,
           source: sr || null,
         };
       })
-      .filter((q) => q.correctIndex >= 0 && q.options.length >= 2);
+      .filter((q) => q.correctIndex >= 0 && q.options.length >= 2)
+      // An item about „figura alăturată" with no figure to show stays out (demo-questions.ts).
+      .filter(demoAnswerable);
 
     // Shuffle so each demo run feels fresh…
     for (let i = usable.length - 1; i > 0; i--) {

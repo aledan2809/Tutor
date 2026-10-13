@@ -14,11 +14,26 @@ type Q = {
   explanation: string | null;
   topic: string | null;
   passage: string | null;
+  /** The item's drawing (geometry, charts), when it has one. */
+  imageUrl: string | null;
   source: string | null;
 };
 type Subject = { subject: string; count: number; display?: string };
 type Group = { level: string; label: string; subjects: Subject[] };
 type Phase = "select" | "take" | "score";
+
+/** The drawing an item refers to, on a white card so black lines stay legible on the dark theme (as in sessions). */
+function QuestionFigure({ src }: { src: string | null }) {
+  if (!src) return null;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt="Figura exercițiului"
+      className="mx-auto mt-2 max-h-72 w-auto max-w-full rounded-lg border border-gray-700 bg-white p-2"
+    />
+  );
+}
 
 export default function SubjectQuizDemo({
   locale,
@@ -199,6 +214,7 @@ export default function SubjectQuizDemo({
                 <p className="font-medium text-white">
                   {ok ? "✅" : "❌"} {q.content}
                 </p>
+                <QuestionFigure src={q.imageUrl} />
                 <p className="mt-1 text-green-400">
                   {L.correct}: {String.fromCharCode(65 + q.correctIndex)}. {q.options[q.correctIndex]}
                 </p>
@@ -256,6 +272,7 @@ export default function SubjectQuizDemo({
             <p className="text-sm font-medium text-white">
               {qi + 1}. {q.content}
             </p>
+            <QuestionFigure src={q.imageUrl} />
             <div className="mt-2 space-y-1.5">
               {q.options.map((opt, oi) => {
                 const chosen = answers[qi] === oi;

@@ -1,10 +1,28 @@
 # Project Status - Tutor
-Last Updated: 2026-10-05 (pâlnia — lotul 1: banner, demo vizibil, cont nou, evenimente, S1+S2; cod gata, nelivrat)
+Last Updated: 2026-10-13 (proba de 7 zile verificată cap-coadă pe QA — merge, dar comutatorul e oprit pe prod; figura din demo reparată)
+<!-- anterior: 2026-10-05 (pâlnia — lotul 1: banner, demo vizibil, cont nou, evenimente, S1+S2; cod gata, nelivrat) -->
 <!-- anterior: 2026-09-09 (demo Poșta: invitație cu identitate, tablou manager, recuperare parolă, import în masă) -->
 <!-- anterior: 2026-09-08 (cursul publicat pentru agenți; limba curățată în trei treceri; demo Poșta) -->
 <!-- anterior: 2026-09-03 (conținutul memento-ului Telegram reparat; incident 502 provocat de mine, remediat în ~4 min) -->
 <!-- anterior: 2026-09-01 (treapta Telegram din cascadă -->
 <!--  — sărită tăcut pentru TOȚI utilizatorii; reparată, deployată, verificată pe date de producție) -->
+
+## Current State (Sesiunea 2026-10-13 — proba de 7 zile, cap-coadă)
+
+**Verificat pe QA, cu comutatorul `accessTrial` pornit** (`Reports/proba-flux-2026-10-13/RAPORT.md`): contor + banner +
+−30% pentru părinte, mesajele la 3 zile / 48 h / ultima zi / pauză (prețul ca la plată), pauza din ziua 8 pentru părinte
+și copil (ecrane + 403 pe API), plata prin callback-ul brokerului (deblocare imediată, copilul inclus), reînnoirea eșuată
+(14 zile de grație, apoi pauză), anularea (pauză; o încasare întârziată nu redeschide). Nimic de reparat în flux.
+- **Pe prod comutatorul e OPRIT** → după 7 zile nu se întâmplă nimic; decizia e a lui Alex (TODO, primul item).
+- **Lipsă**: după plată nu se vede data următoarei plăți / zilele rămase — brokerul nu trimite `current_period_end`.
+- **Demo-ul fără figură**: ruta publică nu citea `imageUrl` — reparat (+ excluderea grilelor cu figură lipsă), nelivrat.
+- Nelivrat pe etutor.ro: lotul 1 (`8ed92ce`) + acest commit; prod rămâne `10543f7`.
+
+## Lessons Learned (sesiunea 2026-10-13)
+- **L606** — un script „idempotent” care șterge și recreează rânduri (`grile-from-exambank.mjs`) nu e idempotent pentru
+  tabelele cu `onDelete: Cascade` spre ele (`Attempt`): pe prod completezi coloanele lipsă cu UPDATE țintit, nu rulând scriptul.
+- **L607** — conturile cu adrese `.test` nu primesc mesajele de probă (prin design); o verificare a mesajelor se face cu o
+  adresă reală ca formă, prinsă de cutia poștală falsă.
 
 ## Current State (Sesiunea 2026-10-05 — pâlnia vizitatori→conturi, lotul 1)
 
