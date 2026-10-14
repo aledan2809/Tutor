@@ -50,6 +50,27 @@ Stare 14.10: etutor.ro `85b135c`, broker `b6e9c1c`, webhook-ul Class RDA 7/7 eve
   nimic de completat. **NU rula `grile-from-exambank.mjs` pe prod**:
   șterge și recreează grilele, iar `Attempt` are `onDelete: Cascade` → ar șterge istoricul elevilor.
 
+## [~] 🟠 PÂLNIA — lotul 2 (pașii 6–15 din `Reports/TRUE-E2E-FULL-2026-10-05.md` §6) — ordinea lui Alex 14.10: întâi 10 + 13, apoi 9 + 6 + 11
+
+- [x] **Pasul 10 — primii pași ai elevului** (macheta aprobată 14.10: `Reports/formular-calibrare-2026-10-14/macheta.png`), `9d0f795`,
+  **pe `master`, NELIVRAT**: formular de 4 câmpuri (fără „Confirmă parola”; lista de materii doar la campanii și la un elev
+  venit cu cod); clasa propusă după data nașterii + capitolele confirmate cu un buton (regula din 24.08 rămâne); primul test
+  al unui elev nou = 5 întrebări, fără cronometru; în test fără bannerul probei și fără anunțul de acord, se deschide de sus,
+  figura 220 px pe telefon (se mărește la atingere); pe telefon, panoul fără cei 56 px goi sub bara de sus.
+  Verificare: `Reports/formular-calibrare-2026-10-14/verificare.mjs` (build de producție QA).
+- [x] **Pasul 13 — panoul elevului (S9–S14)**, `8972680`, **pe `master`, NELIVRAT**: „Astăzi” fără eroare luată drept date, o
+  singură cerere, text și butoane din același răspuns; zone slabe/sesiuni recente pe materia de pe ecran; „Continuă ▶” pe
+  materia de pe ecran; asistentul fără materii goale (curs → prima lecție); „Simulare completă” pe lucrările materiei sau
+  ascunsă. S8 neschimbat intenționat (aceeași poartă ca toate rutele, datele întoarse sunt doar ale elevului).
+  Verificare: `Reports/panou-elev-2026-10-14/verificare.mjs`.
+- [ ] **Următorii (în lucru):** 9 (`/ro/parinte` „fără card” primul, `/ro/preturi` buton vizibil, logat → `packages?plan=`) ·
+  6 (Notificările părintelui fără 429) · 11 (panoul părintelui după crearea copilului + codul de familie vizibil) ·
+  adresele `@test.com` / `@test.invalid` recunoscute ca test.
+- [ ] **Livrarea** lui 10 + 13 (+ următorii): doar cu OK-ul lui Alex, `scripts/ops/livreaza-tutor.sh`. Fără migrații.
+- [ ] Văzut în treacăt, de reparat separat: pagina de intrare pe telefon — titlul „Autentifică-te în Tutor” (marca e eTutor.ro),
+  linkurile „Recuperează pe telefon” / „Ai uitat parola?” lipite, „magic link” (jargon). Banca BAC: un elev de clasa a IX-a
+  pe o materie de liceu vede lista de capitole goală (rândurile sunt ale clasei a X-a) — de verificat, nu reprodus.
+
 ## [x] 🔴 PÂLNIA — lotul 1 de reparații (pașii 1–5 din `Reports/TRUE-E2E-FULL-2026-10-05.md` §6) — **LIVE 13.10 (`85b135c`)**, confirmat pe prod 14.10
 
 **Stare 05.10 (sesiunea din cloud):** raport `Reports/palnie-lot1-2026-10-05/RAPORT.md`. vitest 1.408/1.408, tsc curat, sonda pe build-ul de producție QA OK pe telefon (`/ro`, `/ro/parinte`, register, signin cu callback, `/grile*`, `/family/join`, `/acces/*`), pâlnia cap-coadă cu cele 4 evenimente.
