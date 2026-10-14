@@ -1,5 +1,6 @@
 # Project Status - Tutor
-Last Updated: 2026-10-13 (LIVRAT pe etutor.ro `85b135c`: pâlnia lot 1, plăți, evidența lunii, mesajul de lansare ținut o oră)
+Last Updated: 2026-10-14 (webhook-ul Stripe Class RDA complet; 0 abonamente cu card; handoff ST-2026-10-14)
+<!-- anterior: 2026-10-13 (LIVRAT pe etutor.ro `85b135c`: pâlnia lot 1, plăți, evidența lunii, mesajul de lansare ținut o oră) -->
 <!-- anterior: 2026-10-13 (incidentul comutatorului: mesajul de lansare ține o oră; migrarea 0079; scripturile de livrare VPS2) -->
 <!-- anterior: 2026-10-13 (proba de 7 zile verificată cap-coadă pe QA; figura din demo reparată) -->
 <!-- anterior: 2026-10-05 (pâlnia — lotul 1: banner, demo vizibil, cont nou, evenimente, S1+S2; cod gata, nelivrat) -->
@@ -8,6 +9,20 @@ Last Updated: 2026-10-13 (LIVRAT pe etutor.ro `85b135c`: pâlnia lot 1, plăți,
 <!-- anterior: 2026-09-03 (conținutul memento-ului Telegram reparat; incident 502 provocat de mine, remediat în ~4 min) -->
 <!-- anterior: 2026-09-01 (treapta Telegram din cascadă -->
 <!--  — sărită tăcut pentru TOȚI utilizatorii; reparată, deployată, verificată pe date de producție) -->
+
+## Current State (Sesiunea 2026-10-14 — după livrare)
+
+- **Producție:** etutor.ro `85b135c` (livrat 13.10 ~15:07, migrările 0078+0079), brokerul `b6e9c1c` pe stripe.knowbest.ro
+  (contract v3 + nginx `/api/subscription`), webhook-ul Stripe Class RDA cu toate 7 evenimentele (Alex, 14.10 — primea doar 2:
+  fără ele plățile eșuate și anulările n-ar fi ajuns la eTutor). 0 abonamente cu card pe prod (verificat). Comutatorul probei OPRIT.
+- **Deschis:** decizia pe comutator (Alex); recomandat înainte: o probă reală cu cardul; confirmarea pâlniei în Umami + sondă;
+  `deploy-tutor.sh` de sincronizat; lotul 2 al pâlniei. Handoff: `Reports/handoffs/ST-2026-10-14-Tutor.md`.
+
+## Lessons Learned (sesiunea 2026-10-14)
+- **L610** — codul brokerului care tratează un eveniment Stripe nu ajută dacă webhook-ul din Stripe nu-l trimite: la orice flux
+  de plată se citește `enabled_events` al endpoint-ului live (`adauga-eveniment-webhook.mjs` cu DRY_RUN=1), nu doar codul.
+- **L611** — `ssh … 'bash -s' < scripts/x.sh` caută fișierul pe Mac, în folderul curent; comanda dată lui Alex ia scriptul din
+  GitHub pe server (`git show origin/master:… > /root/x.sh && bash /root/x.sh`) și merge din orice folder.
 
 ## Current State (Sesiunea 2026-10-13 — proba de 7 zile, cap-coadă)
 
@@ -25,7 +40,7 @@ Last Updated: 2026-10-13 (LIVRAT pe etutor.ro `85b135c`: pâlnia lot 1, plăți,
 - **LIVE pe etutor.ro 13.10 (~15:07)**: `10543f7` → `85b135c` (lotul 1 al pâlniei, demo-ul cu figură, regulile de plată, evidența
   lunii, mesajul de lansare ținut o oră, migrările 0078+0079), cu `scripts/ops/livreaza-tutor.sh` rulat de Alex. Copie
   `/root/backups/tutor-pre-livrare-2026-10-13-1207.dump`; paginile 200; grile cu figură fără imagine: 0. Brokerul v3 LIVE 13.10 (~15:18, `b6e9c1c`) + nginx `/api/subscription`
-  fără parolă; rămas: `customer.subscription.updated` pe webhook-ul Class RDA (Alex).
+  fără parolă; webhook-ul Class RDA completat de Alex 14.10.
 - **Incident 13.10 (comutatorul pornit din greșeală, oprit la loc):** codul nou ține mesajul de lansare o oră după pornire
   (`LAUNCH_MESSAGE_HOLD_MS`); panoul arată ora. Verificat pe prod (`scripts/ops/verifica-comutator-proba.cjs`): pornit 14:30:03,
   oprit 14:31:14, **0 mesaje** — nimic de corectat.
