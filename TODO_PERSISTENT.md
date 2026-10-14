@@ -75,8 +75,11 @@ Stare 14.10: etutor.ro `85b135c`, broker `b6e9c1c`, webhook-ul Class RDA 7/7 eve
   în `api/student/assessment` GET și POST și mesajul în pagină. `Reports/revizie-openai-2026-10-14/RAPORT.md`.
 - [ ] **Rămase din lotul 2:** 7 (B2B: poarta de vârstă + mesaj fals + „Copiază link”), 8 (intrarea cu cod: reintrare în același
   cont — atinge autentificarea), 12, 15 (texte RO/EN, „Monitor Progres Studenți” → vocabular de părinte).
-- [ ] **Livrarea** lui 10 + 13 + 9 + 6 + 11: doar cu OK-ul lui Alex, `scripts/ops/livreaza-tutor.sh`. Fără migrații.
-  După livrare: cele trei `verificare.mjs` nu se rulează pe producție (creează conturi); pe prod doar sonda de pâlnie.
+- [x] **Livrat pe etutor.ro 14.10 ~12:50** (OK-ul lui Alex): `3ed8efa` → `932bb1d` cu `scripts/ops/livreaza-tutor.sh`; copie
+  `/root/backups/tutor-pre-livrare-2026-10-14-0946.dump`; migrări la zi, cod nou în build, `/api/health` + paginile principale 200,
+  jurnalul de erori gol după repornire. Sonda pe prod (`Reports/livrare-2026-10-14/sonda.txt`): `/ro/parinte` primul buton
+  „Încearcă 7 zile fără card”; `/ro/preturi` bara „Începe gratuit” pe primul ecran (sonda o marchează doar fiindcă ia întâi
+  butonul din cardul „Gratuit”). Cele trei `verificare.mjs` NU se rulează pe prod (creează conturi).
 - [ ] Văzut în treacăt, de reparat separat: pagina de intrare pe telefon — titlul „Autentifică-te în Tutor” (marca e eTutor.ro),
   linkurile „Recuperează pe telefon” / „Ai uitat parola?” lipite, „magic link” (jargon). Banca BAC: un elev de clasa a IX-a
   pe o materie de liceu vede lista de capitole goală (rândurile sunt ale clasei a X-a) — de verificat, nu reprodus.

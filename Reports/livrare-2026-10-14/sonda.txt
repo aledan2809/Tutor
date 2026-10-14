@@ -1,0 +1,51 @@
+
+### [mobil] /ro → /ro (200) OK
+title: Mii de grile reale pe materia ta | eTutor.ro
+banner: top=607 h=57
+primul buton principal: Încearcă o grilă acum — fără cont @340-388
+vizibile fără scroll: Încearcă o grilă acum — fără cont →/ro/try @340/48px | Fă-ți cont gratuit →/ro/auth/register @400/50px
+
+### [mobil] /ro/parinte → /ro/parinte (200) OK
+title: Pentru părinți — liniștea ta, cât o cafea pe lună | eTutor.ro
+banner: top=607 h=57
+primul buton principal: Încearcă 7 zile fără card → @413-467
+vizibile fără scroll: Încearcă 7 zile fără card → →/ro/auth/register?plan=FAMILY&voucher=ONV126S&start=free @413/54px | Începe cu 24,90 lei/lună →/ro/auth/register?plan=FAMILY&voucher=ONV126S @475/46px | Încearcă o grilă acum — fără cont →/ro/try @529/46px
+
+### [mobil] /ro/preturi → /ro/preturi (200) PROBLEMĂ
+title: Prețuri — gratuit la start, plătești când vrei | eTutor.ro
+banner: top=607 h=57
+primul buton principal: Începe gratuit @674-722
+vizibile fără scroll: Începe gratuit →/ro/auth/register @542/44px
+
+### [mobil] /ro/auth/register → /ro/auth/register (200) PROBLEMĂ
+title: Cont nou gratuit | eTutor.ro
+banner: top=607 h=57
+primul buton principal: Creează cont @472-520
+ACOPERITE de banner: Încearcă fără cont ✨ @600-644
+vizibile fără scroll: Creează cont @472/48px
+
+### [desktop] /ro → /ro (200) OK
+title: Mii de grile reale pe materia ta | eTutor.ro
+banner: top=709 h=59
+primul buton principal: Încearcă o grilă acum — fără cont @381-433
+vizibile fără scroll: Încearcă o grilă acum — fără cont →/ro/try @381/52px | Fă-ți cont gratuit →/ro/auth/register @380/54px | Începe testul ✨ @360/52px
+
+### [desktop] /ro/parinte → /ro/parinte (200) OK
+title: Pentru părinți — liniștea ta, cât o cafea pe lună | eTutor.ro
+banner: top=709 h=59
+primul buton principal: Încearcă 7 zile fără card → @470-524
+vizibile fără scroll: Încearcă 7 zile fără card → →/ro/auth/register?plan=FAMILY&voucher=ONV126S&start=free @470/54px | Începe cu 24,90 lei/lună →/ro/auth/register?plan=FAMILY&voucher=ONV126S @472/50px | Încearcă o grilă acum — fără cont →/ro/try @532/50px
+
+### [desktop] /ro/preturi → /ro/preturi (200) OK
+title: Prețuri — gratuit la start, plătești când vrei | eTutor.ro
+banner: top=709 h=59
+primul buton principal: Începe gratuit @622-670
+vizibile fără scroll: Începe gratuit →/ro/auth/register @622/48px
+
+### [desktop] /ro/auth/register → /ro/auth/register (200) OK
+title: Cont nou gratuit | eTutor.ro
+banner: top=709 h=59
+primul buton principal: Creează cont @526-574
+vizibile fără scroll: Creează cont @526/48px | Încearcă fără cont ✨ →/ro/try @654/44px
+
+2 pagini cu probleme
