@@ -788,7 +788,7 @@ function DirectChildForm({ onDone, onCreated }: { onDone: () => void; onCreated:
   const [error, setError] = useState<string | null>(null);
   // After creation the parent needs the sign-in details in front of them: the child
   // can't use the account without them, and the form used to just close.
-  const [created, setCreated] = useState<{ username: string; email: string | null; password: string } | null>(null);
+  const [created, setCreated] = useState<{ id: string | null; name: string; username: string; email: string | null; password: string } | null>(null);
 
   const submit = async () => {
     const user = normalizeUsername(username);
@@ -815,7 +815,13 @@ function DirectChildForm({ onDone, onCreated }: { onDone: () => void; onCreated:
       });
       const d = await r.json().catch(() => ({}));
       if (r.ok) {
-        setCreated({ username: user, email: email.trim().toLowerCase() || null, password });
+        setCreated({
+          id: typeof d.childId === "string" ? d.childId : null,
+          name: name.trim(),
+          username: user,
+          email: email.trim().toLowerCase() || null,
+          password,
+        });
         onCreated();
       }
       else {
@@ -856,12 +862,27 @@ function DirectChildForm({ onDone, onCreated }: { onDone: () => void; onCreated:
           Parola n-o mai arătăm după ce închizi. Dacă o uitați, o schimbi tu din „Familia mea”, cu
           „Schimbă parola” lângă numele copilului.
         </p>
-        <button
-          onClick={onDone}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500"
-        >
-          Gata, am notat
-        </button>
+        {/* The next step (Alex 14.10.2026, after the 05.10 audit): the child's subjects, chosen in its chapter. */}
+        <div className="flex flex-wrap items-center gap-3">
+          {created.id && (
+            <Link
+              href={`/dashboard/watcher?child=${encodeURIComponent(created.id)}&open=materii`}
+              className="inline-flex min-h-[44px] items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500"
+            >
+              Am notat — alege materiile lui {created.name.split(" ")[0] || "copilului"} →
+            </Link>
+          )}
+          <button
+            onClick={onDone}
+            className={
+              created.id
+                ? "inline-flex min-h-[44px] items-center text-sm text-gray-400 hover:text-white"
+                : "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500"
+            }
+          >
+            Gata, am notat
+          </button>
+        </div>
       </div>
     );
   }

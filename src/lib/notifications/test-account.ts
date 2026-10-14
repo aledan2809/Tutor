@@ -13,7 +13,9 @@
 import { isTestAccount } from '@aledan/notify-ladder'
 import { prisma } from '@/lib/prisma'
 
-const TUTOR_TEST_DOMAINS = ['tutor.app', 'demo.tutor.app']
+// test.com / *.invalid: the audit and QA accounts on prod (test_watcher@test.com, e2e-…@test.invalid, 14.10.2026) —
+// without them the trial's launch message went to a stranger's domain. `.invalid` is reserved (RFC 2606).
+const TUTOR_TEST_DOMAINS = ['tutor.app', 'demo.tutor.app', 'test.com', 'invalid']
 
 /** True when the email belongs to a synthetic test/seed account. Safe on null. */
 export function resolveIsTest(email: string | null | undefined): boolean {

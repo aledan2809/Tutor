@@ -113,7 +113,7 @@ function fmtDay(d: string): string {
 
 type Tab = "sesiuni" | "rezultate" | "remindere" | "program";
 
-export function ChildChapter({ child }: { child: ChildLite }) {
+export function ChildChapter({ child, onSubjectsChanged }: { child: ChildLite; onSubjectsChanged?: () => void }) {
   const tw = useTranslations("watcher");
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("sesiuni");
@@ -138,8 +138,20 @@ export function ChildChapter({ child }: { child: ChildLite }) {
   const toggle = async () => {
     const next = !open;
     setOpen(next);
+    // A child without a subject yet: the chapter opens where the parent gives it one.
+    if (next && child.domains.length === 0) setTab("program");
     if (next && !detail) await loadDetail();
   };
+
+  // Opened from a link (dashboard card, „Am notat — alege materiile”): ?child=<id>[&open=materii].
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("child") !== child.id || q.get("subject") === "paid") return;
+    setOpen(true);
+    if (q.get("open") === "materii" || child.domains.length === 0) setTab("program");
+    void loadDetail();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [child.id]);
 
   // Back from paying for one more subject for this child (subject-addon-checkout): open on the subjects.
   const [paid, setPaid] = useState<{ domainId: string | null } | null>(null);
@@ -192,6 +204,22 @@ export function ChildChapter({ child }: { child: ChildLite }) {
     }));
   })();
 
+  const subjectsSection = detail?.canManageSubjects ? (
+    <div>
+      <h3 className="mb-2 text-sm font-medium text-gray-400">{tw("subjectManager.heading")}</h3>
+      <SubjectManager
+        childId={child.id}
+        onChange={() => {
+          void loadDetail();
+          // The list carries the child's subjects (header, reminder subjects): read it again.
+          onSubjectsChanged?.();
+        }}
+        paid={paid}
+        onPaymentSettled={() => setPaid(null)}
+      />
+    </div>
+  ) : null;
+
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900">
       {/* Chapter header (collapsed by default) */}
@@ -211,7 +239,7 @@ export function ChildChapter({ child }: { child: ChildLite }) {
         <span className="flex-1 min-w-0">
           <span className="block truncate font-semibold text-white">{child.name ?? child.email}</span>
           <span className="block truncate text-xs text-gray-400">
-            {child.domains.map((d) => d.name).join(" · ")}
+            {child.domains.length > 0 ? child.domains.map((d) => d.name).join(" · ") : "Fără materie încă — deschide și alege-i una"}
           </span>
         </span>
         <span className="flex items-center gap-3 text-xs text-gray-400">
@@ -277,22 +305,14 @@ export function ChildChapter({ child }: { child: ChildLite }) {
           ) : tab === "program" ? (
             detail.canManageSchedule ? (
               <div className="space-y-6">
+                {/* A child without a subject yet: the subjects first — reminders need a subject anyway. */}
+                {child.domains.length === 0 && subjectsSection}
                 <ReminderManager
                   apiBase={`/api/dashboard/watcher/${child.id}/reminders`}
                   domains={child.domains.map((d) => ({ slug: d.slug, name: d.name }))}
                   viewer="guardian"
                 />
-                {detail.canManageSubjects && (
-                  <div>
-                    <h3 className="mb-2 text-sm font-medium text-gray-400">{tw("subjectManager.heading")}</h3>
-                    <SubjectManager
-                      childId={child.id}
-                      onChange={() => void loadDetail()}
-                      paid={paid}
-                      onPaymentSettled={() => setPaid(null)}
-                    />
-                  </div>
-                )}
+                {child.domains.length > 0 && subjectsSection}
                 <div>
                   <h3 className="mb-2 text-sm font-medium text-gray-400">Vacanță / excepții</h3>
                   <BreaksManager apiBase={`/api/dashboard/watcher/${child.id}/breaks`} />

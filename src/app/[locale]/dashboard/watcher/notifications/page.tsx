@@ -22,16 +22,22 @@ export default function WatcherNotificationsPage() {
   const t = useTranslations("watcher");
   const [notifications, setNotifications] = useState<WatcherNotification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [filter, setFilter] = useState<"all" | "unread">("all");
 
-  useEffect(() => {
+  const load = () => {
+    setLoading(true);
+    setLoadFailed(false);
     // Watcher context → only parent-about-child alerts (not the user's own
     // student notifications, which live in the main Notification Center).
+    // An error (e.g. 429) is said as one, not shown as „no notifications” (audit B1).
     fetch("/api/notifications?audience=child")
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((data) => setNotifications(data.notifications ?? []))
+      .catch(() => setLoadFailed(true))
       .finally(() => setLoading(false));
-  }, []);
+  };
+  useEffect(load, []);
 
   const handleMarkRead = async (id: string) => {
     await fetch(`/api/notifications/${id}`, {
@@ -63,6 +69,26 @@ export default function WatcherNotificationsPage() {
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
+  // The „send a memento” form only on the newest „no reaction” alert of each child: older ones are history,
+  // and one form per alert made a page with many alerts unusable (audit B1).
+  const actionable = (n: WatcherNotification) =>
+    n.type === "parent_alert" &&
+    ["no_reaction", "no_reaction_reminder"].includes((n.metadata?.alertType as string) ?? "") &&
+    typeof n.metadata?.childId === "string";
+  const formOn = new Set<string>();
+  const childrenWithForm = new Set<string>();
+  const newestFirst = notifications
+    .slice()
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  // From every alert, not the filtered view: the form doesn't jump to another alert when the filter changes.
+  for (const n of newestFirst) {
+    if (!actionable(n)) continue;
+    const child = n.metadata!.childId as string;
+    if (childrenWithForm.has(child)) continue;
+    childrenWithForm.add(child);
+    formOn.add(n.id);
+  }
+
   // Classify notification types for styling
   const getTypeStyle = (type: string) => {
     if (type.includes("escalation") || type.includes("alert")) {
@@ -86,6 +112,16 @@ export default function WatcherNotificationsPage() {
   };
 
   if (loading) return <p className="text-gray-500">{t("loading")}</p>;
+  if (loadFailed) {
+    return (
+      <div className="rounded-lg border border-amber-800 bg-amber-950/20 px-4 py-3 text-sm text-amber-200">
+        {t("loadError")}{" "}
+        <button type="button" onClick={load} className="ml-1 inline-flex min-h-[44px] items-center underline hover:no-underline">
+          {t("retry")}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -177,13 +213,7 @@ export default function WatcherNotificationsPage() {
                       {notif.type.replace(/_/g, " ")}
                     </span>
                   </div>
-                  {notif.type === "parent_alert" &&
-                    ["no_reaction", "no_reaction_reminder"].includes(
-                      (notif.metadata?.alertType as string) ?? ""
-                    ) &&
-                    typeof notif.metadata?.childId === "string" && (
-                      <ParentAlertActions childId={notif.metadata.childId as string} />
-                    )}
+                  {formOn.has(notif.id) && <ParentAlertActions childId={notif.metadata!.childId as string} />}
                 </div>
                 {!notif.isRead && (
                   <button

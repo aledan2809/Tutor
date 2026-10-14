@@ -61,6 +61,19 @@ export async function getLinkedChildIds(parentId: string): Promise<string[]> {
 }
 
 /**
+ * Active children this account is a PARENT of — not a family tutor (same rule as isParentOf). A parent
+ * whose child has no subject yet follows nothing, yet the child is theirs: they reach „Copiii mei” to give
+ * the child a subject (Alex 14.10.2026, after the 05.10 audit: the parent was sent back to the dashboard).
+ */
+export async function getParentChildIds(parentId: string): Promise<string[]> {
+  const links = await prisma.guardian.findMany({
+    where: { parentId, status: "active", relation: "PARENT" },
+    select: { childId: true },
+  });
+  return links.map((l) => l.childId).filter((id) => id !== parentId);
+}
+
+/**
  * True when `parentId` is an active PARENT of `childId`. Deliberately excludes
  * TUTOR-relation family links: everywhere the codebase grants parent powers it
  * filters `relation: PARENT` (threshold-monitor, parent-monitor, family-invite)

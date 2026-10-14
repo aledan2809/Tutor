@@ -49,6 +49,8 @@ interface WeakArea {
 interface DashboardData {
   /** The subject this answer is about (api/student/dashboard). */
   activeDomainId?: string | null;
+  /** A parent's children (api/student/dashboard). */
+  children?: { id: string; name: string | null }[];
   streak: {
     current: number;
     longest: number;
@@ -188,6 +190,10 @@ export default function DashboardPage() {
   // Text and actions from the subject of the answer on screen (not yet from a switch still loading).
   const activeDomain =
     data.domains.find((d) => d.domainId === (data.activeDomainId ?? activeDomainId)) || data.domains[0];
+  // A parent who learns nothing themselves: once a child has a subject the parent follows it (WATCHER), and
+  // the learner's home then offered the parent a test of their own. Their home is their children instead.
+  const isParentHome =
+    session?.user?.accountRole === "PARENT" && !data.domains.some((d) => d.roles.includes("STUDENT"));
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -195,6 +201,7 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-white">{t("dashboard.title")}</h1>
+          {!isParentHome && (
           <div className="flex rounded-lg border border-gray-700 p-0.5" role="group" aria-label={t("dashboard.viewToday") + " / " + t("dashboard.viewFull")}>
             <button
               onClick={() => setView("today")}
@@ -215,8 +222,9 @@ export default function DashboardPage() {
               {t("dashboard.viewFull")}
             </button>
           </div>
+          )}
         </div>
-        <DomainSwitcher activeDomainId={activeDomainId} onSwitch={handleDomainSwitch} />
+        {!isParentHome && <DomainSwitcher activeDomainId={activeDomainId} onSwitch={handleDomainSwitch} />}
       </div>
 
       {/* Lazy-save: surface a demo quiz claimed at signup (renders nothing otherwise) */}
@@ -231,7 +239,28 @@ export default function DashboardPage() {
       {/* A parent with nothing linked yet: the student wizard would have enrolled
           them in a subject as a LEARNER, which is how parents ended up with the
           student menu in the first place. */}
-      {data.domains.length === 0 && session?.user?.accountRole === "PARENT" && (
+      {/* A parent whose child is already linked: to the child, not „link your child” (audit B5). */}
+      {isParentHome && (data.children?.length ?? 0) > 0 && (
+        <div className="mb-6 rounded-xl border border-blue-800 bg-blue-950/20 p-4">
+          <h3 className="text-sm font-medium text-white">
+            {data.children!.length === 1 ? `Copilul tău: ${data.children![0].name ?? "copilul"}` : "Copiii tăi"}
+          </h3>
+          <p className="mt-1 text-sm text-gray-400">Vezi ce lucrează, alege-i materiile și primește alerte.</p>
+          <div className="mt-1 flex flex-col">
+            {data.children!.map((c) => (
+              <Link
+                key={c.id}
+                href={`/dashboard/watcher?child=${encodeURIComponent(c.id)}`}
+                className="inline-flex min-h-[44px] items-center text-sm text-blue-400 hover:text-blue-300"
+              >
+                Vezi ce face {c.name ?? "copilul"} →
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {isParentHome && (data.children?.length ?? 0) === 0 && (
         <div className="mb-6 rounded-xl border border-blue-800 bg-blue-950/20 p-4">
           <h3 className="text-sm font-medium text-white">Leagă contul copilului</h3>
           <p className="mt-1 text-sm text-gray-400">
@@ -247,7 +276,7 @@ export default function DashboardPage() {
       )}
 
       {/* TODAY view — one clear next action + guided path (proactive default) */}
-      {data.domains.length > 0 && view === "today" && (
+      {data.domains.length > 0 && !isParentHome && view === "today" && (
         <TodayView
           data={data}
           activeDomain={activeDomain}
@@ -273,7 +302,7 @@ export default function DashboardPage() {
       )}
 
       {/* FULL dashboard — the classic stats view, kept as an option */}
-      {data.domains.length > 0 && view === "full" && (
+      {data.domains.length > 0 && !isParentHome && view === "full" && (
         <>
           {/* Top stats row */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

@@ -186,8 +186,19 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
       : `*Family (1 parent + 1 child), for one subject.${trialRule}`;
 
   const ctaPay = mainPrice ? (ro ? `Începe cu ${mainPrice} lei/lună` : `Start with ${mainPrice} lei/month`) : ro ? "Începe cu Family" : "Start with Family";
-  // Without free days left there is nothing to try without a card.
-  const ctaFree = hasTrial ? (ro ? "Încearcă fără card" : "Try without a card") : null;
+  // Without free days left there is nothing to try without a card. With them it is the first button at the
+  // top and at the end of the page (Alex 14.10.2026, after the 05.10 audit: 8 of 12 parents left).
+  // A signed-in account with days left continues its own week — not a new trial.
+  const daysLeftOnly = ctx.signedIn && n < facts.trialTotalDays;
+  const ctaFree = !hasTrial
+    ? null
+    : daysLeftOnly
+      ? ro
+        ? `Continuă fără card — ${lowerFirst(trial.sentence)}`
+        : `Continue without a card — ${lowerFirst(trial.sentence)}`
+      : ro
+        ? n === 1 ? "Încearcă o zi fără card" : `Încearcă ${daysRo(n)} fără card`
+        : n === 1 ? "Try 1 day without a card" : `Try ${n} days without a card`;
 
   return {
     hero: {

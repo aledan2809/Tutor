@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { WatcherNav } from "@/components/watcher/watcher-nav";
+import { getParentChildIds } from "@/lib/guardian";
 
 export const metadata: Metadata = {
   title: "Watcher",
@@ -24,7 +25,8 @@ export default async function WatcherLayout({ children }: { children: React.Reac
         e.roles.includes("ADMIN")
     );
 
-  if (!isWatcher) {
+  // A parent whose child has no subject yet follows nothing, but comes here to give the child one.
+  if (!isWatcher && (await getParentChildIds(user.id)).length === 0) {
     redirect("/dashboard");
   }
 

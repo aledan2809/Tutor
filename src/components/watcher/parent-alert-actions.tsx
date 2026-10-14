@@ -9,6 +9,25 @@ interface NudgeTarget {
   url: string;
 }
 
+type NudgeTargets = { recent?: NudgeTarget[]; upcoming?: NudgeTarget[]; meteredAllowed?: boolean };
+
+// One request per child, shared by every alert on the page for a minute (audit B1: a parent with ~50
+// alerts sent ~50 requests at once and got 429). A failed load isn't kept: the next form asks again.
+const TARGETS_TTL_MS = 60_000;
+const targetsCache = new Map<string, { at: number; load: Promise<NudgeTargets | null> }>();
+function loadTargets(childId: string): Promise<NudgeTargets | null> {
+  const hit = targetsCache.get(childId);
+  if (hit && Date.now() - hit.at < TARGETS_TTL_MS) return hit.load;
+  const load = fetch(`/api/dashboard/watcher/${childId}/nudge-targets`)
+    .then((r) => (r.ok ? (r.json() as Promise<NudgeTargets>) : null))
+    .catch(() => null);
+  targetsCache.set(childId, { at: Date.now(), load });
+  void load.then((d) => {
+    if (!d && targetsCache.get(childId)?.load === load) targetsCache.delete(childId);
+  });
+  return load;
+}
+
 /**
  * CTA shown on a "no reaction" parent alert: send a memento for ONE or SEVERAL
  * un-done sessions (recent ignored ≤4h + upcoming ≤4h), or a free-text message;
@@ -30,14 +49,15 @@ export function ParentAlertActions({ childId }: { childId: string }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/dashboard/watcher/${childId}/nudge-targets`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (!d) return;
-        setTargets({ recent: d.recent ?? [], upcoming: d.upcoming ?? [] });
-        setMeteredAllowed(d.meteredAllowed === true);
-      })
-      .catch(() => {});
+    let live = true;
+    void loadTargets(childId).then((d) => {
+      if (!d || !live) return;
+      setTargets({ recent: d.recent ?? [], upcoming: d.upcoming ?? [] });
+      setMeteredAllowed(d.meteredAllowed === true);
+    });
+    return () => {
+      live = false;
+    };
   }, [childId]);
 
   const allTargets = [...targets.recent, ...targets.upcoming];

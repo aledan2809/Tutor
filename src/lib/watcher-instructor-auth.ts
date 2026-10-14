@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import { getParentChildIds } from "@/lib/guardian";
 
 export async function requireWatcher() {
   const session = await auth();
@@ -64,7 +65,9 @@ export async function requireWatcherOrInstructor() {
       e.roles.includes("WATCHER" as never) ||
       e.roles.includes("INSTRUCTOR" as never) ||
       e.roles.includes("ADMIN" as never)
-    );
+    ) ||
+    // A parent whose child has no subject yet (guardian.ts getParentChildIds); each route still checks the child.
+    (await getParentChildIds(user.id)).length > 0;
 
   if (!hasAccess) {
     return { error: NextResponse.json({ error: "Forbidden" }, { status: 403 }), session: null };

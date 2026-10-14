@@ -4,6 +4,8 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { isPromoActive, normalFromPromo, fmtPrice } from "@/lib/pricing";
 import { MONTHS_PAID_PER_YEAR, TELEGRAM_PERCENT, TRIAL_PAYMENT_PERCENT } from "@/lib/checkout-price";
 import { childDiscountPercent, subjectDiscountPercent } from "@/lib/family";
+import { auth } from "@/lib/auth";
+import { HideAtFooter } from "@/components/hide-at-footer";
 
 export const metadata: Metadata = {
   title: "Prețuri — gratuit la start, plătești când vrei",
@@ -46,6 +48,11 @@ type Copy = {
   promo: string;
   priceSuffix: string;
   fromLabel: string;
+  /** The phone-only bar at the bottom (Alex 14.10.2026): the action stays in view. */
+  stickyNote: string;
+  stickyCta: string;
+  /** Signed in: straight to the family package, not to a signup form. */
+  stickyCtaIn: string;
 };
 
 const RO: Copy = {
@@ -141,6 +148,9 @@ const RO: Copy = {
     "🎁 Prețuri promoționale până la 31.08.2026 — toate pachetele au o reducere suplimentară de 25%. De la 1 septembrie 2026, prețurile revin la normal.",
   priceSuffix: "lei / materie / lună",
   fromLabel: "de la",
+  stickyNote: "7 zile gratuite, fără card",
+  stickyCta: "Începe gratuit",
+  stickyCtaIn: "Alege Family",
 };
 
 const EN: Copy = {
@@ -235,6 +245,9 @@ const EN: Copy = {
     "🎁 Promotional prices until 31.08.2026 — all packages get an extra 25% off. From 1 September 2026, prices return to normal.",
   priceSuffix: "lei / subject / month",
   fromLabel: "from",
+  stickyNote: "7 days free, no card",
+  stickyCta: "Start free",
+  stickyCtaIn: "Choose Family",
 };
 
 export default async function PreturiPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -243,11 +256,20 @@ export default async function PreturiPage({ params }: { params: Promise<{ locale
 
   const promoActive = isPromoActive();
   const fmt = (n: number) => fmtPrice(n, locale);
+  // Signed in, a plan leads to its checkout (the packages page highlights it), not to a signup form.
+  const signedIn = Boolean((await auth())?.user);
+  const planHref = (key: string) => (signedIn ? `/dashboard/packages?plan=${key}` : `/auth/register?plan=${key}`);
+  // Family first (Alex 14.10.2026): the package parents come for. Each card keeps its own key.
+  const plans = c.plans
+    .map((p, i) => ({ p, key: PLAN_KEYS[i] ?? "ELEV" }))
+    .sort((a, b) => Number(b.key === "FAMILY") - Number(a.key === "FAMILY"));
+  // The floating WhatsApp button (layout) sits bottom-right when a support number is configured.
+  const whatsappRoom = Boolean(process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP?.replace(/[^\d]/g, ""));
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
       <SiteHeader locale={locale} />
-      <main className="mx-auto max-w-6xl px-4 py-16">
+      <main className="mx-auto max-w-6xl px-4 pb-28 pt-16 sm:pb-16">
         {/* Hero */}
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="text-4xl font-bold sm:text-5xl">{c.hero}</h1>
@@ -272,7 +294,7 @@ export default async function PreturiPage({ params }: { params: Promise<{ locale
               ))}
             </ul>
             <Link
-              href="/auth/register"
+              href={signedIn ? "/dashboard" : "/auth/register"}
               className="mt-6 block rounded-xl bg-green-600 px-4 py-3 text-center font-semibold text-white hover:bg-green-500"
             >
               {c.freeCta}
@@ -283,7 +305,7 @@ export default async function PreturiPage({ params }: { params: Promise<{ locale
           <div className="lg:col-span-2">
             <h2 className="mb-4 text-center text-xl font-bold text-white lg:text-left">{c.paidTitle}</h2>
             <div className="grid gap-5 sm:grid-cols-2">
-              {c.plans.map((p, i) => {
+              {plans.map(({ p, key }) => {
                 const normal = normalFromPromo(p.amount);
                 return (
                 <div
@@ -320,7 +342,7 @@ export default async function PreturiPage({ params }: { params: Promise<{ locale
                     ))}
                   </ul>
                   <Link
-                    href={`/auth/register?plan=${PLAN_KEYS[i] ?? "ELEV"}`}
+                    href={planHref(key)}
                     className="mt-5 block rounded-xl bg-blue-600 px-4 py-2.5 text-center font-semibold text-white hover:bg-blue-500"
                   >
                     {p.cta}
@@ -354,6 +376,22 @@ export default async function PreturiPage({ params }: { params: Promise<{ locale
           </div>
         )}
       </main>
+
+      {/* Phone only: the action stays in view, above the cookie strip (--cookie-banner-h) and left of
+          the WhatsApp button; the page has room for it at the bottom (pb-28). */}
+      <HideAtFooter
+        className={`fixed bottom-[calc(0.75rem+var(--cookie-banner-h,0px))] left-3 z-40 flex items-center justify-between gap-3 rounded-2xl border border-gray-700 bg-gray-900/95 py-2 pl-4 pr-2 shadow-lg backdrop-blur sm:hidden ${
+          whatsappRoom ? "right-[76px]" : "right-3"
+        }`}
+      >
+        <span className="text-sm text-gray-300">{signedIn ? plans.find((x) => x.key === "FAMILY")?.p.name : c.stickyNote}</span>
+        <Link
+          href={signedIn ? planHref("FAMILY") : "/auth/register"}
+          className="inline-flex min-h-[44px] items-center rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-500"
+        >
+          {signedIn ? c.stickyCtaIn : c.stickyCta}
+        </Link>
+      </HideAtFooter>
     </div>
   );
 }

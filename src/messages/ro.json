@@ -769,6 +769,8 @@
     "searchStudents": "Caută studenți...",
     "loading": "Se încarcă...",
     "noStudents": "Niciun student de monitorizat",
+    "loadError": "Nu am putut încărca acum. Mai încearcă o dată peste câteva secunde.",
+    "retry": "Încearcă din nou",
     "studentNotFound": "Studentul nu a fost găsit",
     "accuracy": "Acuratețe",
     "streak": "Serie",

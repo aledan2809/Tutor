@@ -174,12 +174,19 @@ export function ParentLanding({
           )}
 
           <div className={s.ctaRow}>
-            <TrackedPlainLink className={s.btn} href={payHref} event="cta_register" data={{ from: "parinte_pay" }}>
-              {c.hero.ctaPay} <span aria-hidden="true">→</span>
-            </TrackedPlainLink>
-            {c.hero.ctaFree && (
-              <TrackedPlainLink className={s.btnGhost} href={freeHref} event="cta_parinte_fara_card" data={{ from: "parinte_hero" }}>
-                {c.hero.ctaFree}
+            {/* The free week first when there is one (Alex 14.10.2026); paying straight away stays next to it. */}
+            {c.hero.ctaFree ? (
+              <>
+                <TrackedPlainLink className={s.btn} href={freeHref} event="cta_parinte_fara_card" data={{ from: "parinte_hero" }}>
+                  {c.hero.ctaFree} <span aria-hidden="true">→</span>
+                </TrackedPlainLink>
+                <TrackedPlainLink className={s.btnGhost} href={payHref} event="cta_register" data={{ from: "parinte_pay" }}>
+                  {c.hero.ctaPay}
+                </TrackedPlainLink>
+              </>
+            ) : (
+              <TrackedPlainLink className={s.btn} href={payHref} event="cta_register" data={{ from: "parinte_pay" }}>
+                {c.hero.ctaPay} <span aria-hidden="true">→</span>
               </TrackedPlainLink>
             )}
             {/* The product before any account or price: the no-account demo (True E2E 2026-10-05, leak 2). */}
@@ -597,12 +604,18 @@ export function ParentLanding({
             </div>
           )}
           <div className={s.ctaRow}>
-            <Link className={s.btn} href={payHref}>
-              {c.final.ctaPay} <span aria-hidden="true">→</span>
-            </Link>
-            {c.final.ctaFree && (
-              <Link className={`${s.btnGhost} ${s.btnGhostOnDark}`} href={freeHref}>
-                {c.final.ctaFree}
+            {c.final.ctaFree ? (
+              <>
+                <Link className={s.btn} href={freeHref}>
+                  {c.final.ctaFree} <span aria-hidden="true">→</span>
+                </Link>
+                <Link className={`${s.btnGhost} ${s.btnGhostOnDark}`} href={payHref}>
+                  {c.final.ctaPay}
+                </Link>
+              </>
+            ) : (
+              <Link className={s.btn} href={payHref}>
+                {c.final.ctaPay} <span aria-hidden="true">→</span>
               </Link>
             )}
           </div>

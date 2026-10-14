@@ -23,14 +23,20 @@ export default function WatcherDashboardPage() {
   const t = useTranslations("watcher");
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
+  // An error (e.g. 429) is said as one — it used to read „no students to watch” (audit B1).
+  const load = () => {
+    setLoading(true);
+    setLoadFailed(false);
     fetch("/api/dashboard/watcher")
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((data) => setStudents(data.students ?? []))
+      .catch(() => setLoadFailed(true))
       .finally(() => setLoading(false));
-  }, []);
+  };
+  useEffect(load, []);
 
   const filtered = students.filter(
     (s) =>
@@ -48,7 +54,8 @@ export default function WatcherDashboardPage() {
 
       <HowItWorks storageKey="watcher" steps={HOW_IT_WORKS.watcher[locale as "ro" | "en"].steps} moreHref={`/dashboard/ajutor#${HOW_IT_WORKS.watcher[locale as "ro" | "en"].more}`} />
 
-      <ReportsManager />
+      {/* Reports are about progress in subjects: none yet (a parent whose child has no subject) = no panel. */}
+      {students.some((s) => s.domains.length > 0) && <ReportsManager />}
 
       <div className="mb-6">
         <input
@@ -62,12 +69,19 @@ export default function WatcherDashboardPage() {
 
       {loading ? (
         <p className="text-gray-500">{t("loading")}</p>
+      ) : loadFailed ? (
+        <div className="rounded-lg border border-amber-800 bg-amber-950/20 px-4 py-3 text-sm text-amber-200">
+          {t("loadError")}{" "}
+          <button type="button" onClick={load} className="ml-1 inline-flex min-h-[44px] items-center underline hover:no-underline">
+            {t("retry")}
+          </button>
+        </div>
       ) : filtered.length === 0 ? (
         <p className="text-gray-500">{t("noStudents")}</p>
       ) : (
         <div className="space-y-3">
           {filtered.map((student) => (
-            <ChildChapter key={student.id} child={student} />
+            <ChildChapter key={student.id} child={student} onSubjectsChanged={load} />
           ))}
         </div>
       )}

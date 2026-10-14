@@ -14,6 +14,15 @@ describe("resolveIsTest (Tutor seam over @aledan/notify-ladder)", () => {
     expect(resolveIsTest("qa@sub.tutor.app")).toBe(true);
   });
 
+  it("flags the audit/QA addresses used on prod (test.com, *.invalid)", () => {
+    expect(resolveIsTest("test_watcher@test.com")).toBe(true);
+    expect(resolveIsTest("e2e-pwlen-72-1787040967@test.invalid")).toBe(true);
+    expect(resolveIsTest("merchant-real-2026-09-05@test.invalid")).toBe(true);
+    // A real domain that merely contains the word stays real.
+    expect(resolveIsTest("ana@mytest.com")).toBe(false);
+    expect(resolveIsTest("ana@test.com.ro")).toBe(false);
+  });
+
   it("still honors the built-in defaults", () => {
     expect(resolveIsTest("x@eat.test")).toBe(true);
     expect(resolveIsTest("x@example.com")).toBe(true);

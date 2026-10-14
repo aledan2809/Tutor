@@ -3,7 +3,7 @@ import { requireWatcherOrInstructor } from "@/lib/watcher-instructor-auth";
 import { prisma } from "@/lib/prisma";
 import { getStudentProgressSummary } from "@/lib/predictive-analytics";
 import { withErrorHandler } from "@/lib/api-handler";
-import { getLinkedChildIds, requestedWatcherDomains, watcherScope } from "@/lib/guardian";
+import { getLinkedChildIds, getParentChildIds, requestedWatcherDomains, watcherScope } from "@/lib/guardian";
 import { refuseIfPaused } from "@/lib/access-gate";
 
 async function _GET(req: NextRequest) {
@@ -66,6 +66,19 @@ async function _GET(req: NextRequest) {
         image: enrollment.user.image,
         domains: [enrollment.domain],
       });
+    }
+  }
+
+  // The parent's own child with no subject yet is listed too (not under a subject filter): its chapter
+  // is where the parent gives it one (Alex 14.10.2026, after the 05.10 audit).
+  if (!domainId) {
+    const missing = (await getParentChildIds(userId)).filter((id) => !studentMap.has(id));
+    if (missing.length > 0) {
+      const kids = await prisma.user.findMany({
+        where: { id: { in: missing } },
+        select: { id: true, name: true, email: true, image: true },
+      });
+      for (const k of kids) studentMap.set(k.id, { ...k, domains: [] });
     }
   }
 

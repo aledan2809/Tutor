@@ -769,6 +769,8 @@
     "searchStudents": "Search students...",
     "loading": "Loading...",
     "noStudents": "No students to monitor",
+    "loadError": "Couldn't load right now. Try again in a few seconds.",
+    "retry": "Try again",
     "studentNotFound": "Student not found",
     "accuracy": "Accuracy",
     "streak": "Streak",

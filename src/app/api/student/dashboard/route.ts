@@ -47,8 +47,21 @@ async function _GET(req: NextRequest) {
     orderBy: { createdAt: "asc" },
   });
 
+  // A parent's children (relation PARENT): the dashboard points to them instead of „link your child” —
+  // also, above all, for a parent with no subject of their own (the answer right below).
+  const children = (
+    await prisma.guardian.findMany({
+      where: { parentId: userId, status: "active", relation: "PARENT" },
+      select: { child: { select: { id: true, name: true } } },
+      orderBy: { createdAt: "asc" },
+    })
+  )
+    .map((g) => g.child)
+    .filter((c) => c.id !== userId);
+
   if (enrollments.length === 0) {
     return NextResponse.json({
+      children,
       streak: { current: 0, longest: 0, isDecayed: false, canRecover: false },
       xp: { total: 0, level: "Cadet", progressToNext: 0, nextLevel: null, xpToNextLevel: 0 },
       domains: [],
@@ -180,6 +193,7 @@ async function _GET(req: NextRequest) {
       : { total: 0, level: "Cadet", progressToNext: 0, nextLevel: null, xpToNextLevel: 0 },
     // The subject this answer is about: the page takes text and actions from the same answer.
     activeDomainId: activeDomainId ?? null,
+    children,
     domains: domainProgress,
     recentSessions: recentSessions.map((s) => ({
       id: s.id,
