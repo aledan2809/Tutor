@@ -1,17 +1,22 @@
 > **Handoff pentru sesiunea următoare: `Reports/handoffs/ST-2026-10-14-Tutor.md`** (starea producției, ce e deschis, cum se livrează din cloud).
 
-## [ ] 🔴 PROBA DE 7 ZILE — rămâne decizia pe comutatorul `accessTrial` (tot restul LIVE 13–14.10)
+## [~] 🔴 PROBA DE 7 ZILE — comutatorul PORNIT pe prod 14.10, 09:23 (Alex, intenționat); pauza vine pe 21.10, 09:23
 
 Raport: `Reports/proba-flux-2026-10-13/RAPORT.md` — fluxul probă → pauză → mesaje → plată → reînnoire eșuată → anulare
-verificat cap-coadă pe QA cu comutatorul pornit: **merge**. Pe prod comutatorul e OPRIT, de aceea după 7 zile nu se
-întâmplă nimic (contorul și bannerul se văd 7 zile, apoi dispar; doar simulările/lecțiile/calendarul/progresul avansat se închid).
-Stare 14.10: etutor.ro `85b135c`, broker `b6e9c1c`, webhook-ul Class RDA 7/7 evenimente, 0 abonamente cu card, comutatorul OPRIT.
-- [ ] **Alex**: pornești comutatorul (Administrare → Utilizatori → „Pornește proba și pauza”; înainte marchezi conturile
-  de test/prieteni „Gratuit permanent”) SAU scoți promisiunea „7 zile” din pagini. Conturile existente primesc 7 zile de la pornire.
-  Livrarea e făcută (13.10): după pornire, mesajul de lansare către părinți pleacă abia peste o oră (oprit în ora aceea = nimic).
-- [ ] **Recomandat înainte de pornire: probă reală cu cardul lui Alex** — abonare Family dintr-un cont de test → Pachete arată
-  următoarea plată → anulare din portal → refund din Stripe. De pregătit: pașii pentru Alex + script doar-citire în `scripts/ops/`
-  care arată ce a înregistrat eTutor la fiecare pas. Pe prod nu s-a întâmplat încă nicio plată cu card (fluxul e verificat pe QA).
+verificat cap-coadă pe QA cu comutatorul pornit: **merge**.
+Stare 14.10: etutor.ro `85b135c`, broker `b6e9c1c`, webhook-ul Class RDA 7/7 evenimente, 0 abonamente cu card, comutatorul PORNIT din 09:23.
+- [x] **Alex 14.10: comutatorul pornit intenționat** (09:23:31 RO, contul de super-administrator; confirmat în sesiune).
+  Toate conturile existente au 7 zile de la pornire → pauza pe **21.10, 09:23**. 13 conturi „Gratuit permanent”.
+  Mesajul de lansare: un singur părinte în listă, „Test Watcher” (`test_watcher@test.com`) — Alex îl bifează „Gratuit
+  permanent” din panou (decizia lui, 14.10 ~09:55), ca să nu plece e-mail spre test.com.
+- [ ] **De reparat (cod, următoarea livrare):** `@test.com` și `@test.invalid` nu sunt recunoscute ca adrese de test
+  (`src/lib/notifications/test-account.ts` are doar `tutor.app` / `demo.tutor.app` + `.test` / `example.com`). Pe prod sunt
+  ~10 conturi de test cu aceste domenii (elevi, profesori, administratori). De adăugat `test.com` și `test.invalid` la
+  `TUTOR_TEST_DOMAINS` + test unitar.
+- [~] **Proba cu cardul lui Alex — varianta fără bani (decizia lui 14.10):** cu comutatorul pornit, orice abonare de
+  săptămâna asta are 7 zile gratuite, deci cardul nu e taxat. Pașii: `Reports/proba-card-2026-10-14/PASI-ALEX.md`;
+  script doar-citire `scripts/ops/urmareste-proba-card.cjs` (verificat pe prod pe contul lui Alex, 14.10). Rămâne: Alex
+  face pașii 0–5 și trimite rezultatul scriptului după fiecare. Taxarea reală rămâne neverificată pe prod (prima: 21.10 sau un client).
 - [x] **Incident 13.10 — închis, fără efect**: comutatorul pornit din greșeală pe prod la 14:30:03 și oprit la 14:31:14
   (71 s). Verificat pe prod cu `scripts/ops/verifica-comutator-proba.cjs`: **0 mesaje de probă** create de la pornire
   (cron-ul de 15 minute n-a prins fereastra). Nimic de corectat.
@@ -31,8 +36,8 @@ Stare 14.10: etutor.ro `85b135c`, broker `b6e9c1c`, webhook-ul Class RDA 7/7 eve
   `scripts/ops/verifica-abonamente-card.cjs` (doar citire), apoi `adauga-eveniment-webhook.mjs` din stripe-module (DRY_RUN, apoi
   aplicat) → `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`, `checkout.session.expired`,
   `payment_intent.payment_failed`. Dacă verificarea arată nepotriviri: corectarea stărilor în eTutor, separat.
-- [ ] `/var/www/deploy-tutor.sh` diferă de `scripts/deploy-tutor.sh` (avertisment la livrarea din 13.10): de adus copia din repo la zi
-  cu cea de pe server (Alex: `ssh root@72.62.155.74 cat /var/www/deploy-tutor.sh` → în sesiune).
+- [x] `/var/www/deploy-tutor.sh` vs `scripts/deploy-tutor.sh` — 14.10: singura diferență era comentariul „copie” din repo (logica
+  identică). Copia din repo e acum identică octet cu octet cu serverul; nota a trecut lângă verificarea din `livreaza-tutor.sh`.
 - [x] **După plată: data următoarei plăți + zilele rămase din lună** — cod gata 13.10 (broker v3 + Tutor, migrarea 0078), verificat
   cap-coadă local 12/12. Tutor + migrarea 0078 + brokerul v3 + excepția nginx: LIVE 13.10; webhook-ul Class RDA complet 14.10.
 - [x] Bannerul părintelui în probă spune și ce urmează („Când se termină proba, fără abonament, contul intră în pauză”) cu
@@ -45,7 +50,7 @@ Stare 14.10: etutor.ro `85b135c`, broker `b6e9c1c`, webhook-ul Class RDA 7/7 eve
   nimic de completat. **NU rula `grile-from-exambank.mjs` pe prod**:
   șterge și recreează grilele, iar `Attempt` are `onDelete: Cascade` → ar șterge istoricul elevilor.
 
-## [~] 🔴 PÂLNIA — lotul 1 de reparații (pașii 1–5 din `Reports/TRUE-E2E-FULL-2026-10-05.md` §6) — **LIVE 13.10 (`85b135c`)**, de confirmat în Umami + sondă
+## [x] 🔴 PÂLNIA — lotul 1 de reparații (pașii 1–5 din `Reports/TRUE-E2E-FULL-2026-10-05.md` §6) — **LIVE 13.10 (`85b135c`)**, confirmat pe prod 14.10
 
 **Stare 05.10 (sesiunea din cloud):** raport `Reports/palnie-lot1-2026-10-05/RAPORT.md`. vitest 1.408/1.408, tsc curat, sonda pe build-ul de producție QA OK pe telefon (`/ro`, `/ro/parinte`, register, signin cu callback, `/grile*`, `/family/join`, `/acces/*`), pâlnia cap-coadă cu cele 4 evenimente.
 - [x] 1 banner compact (57 px, nu acoperă; spațiu jos + WhatsApp/meniu/bara fixă ridicate) + butoanele principale pe primul ecran
@@ -54,7 +59,9 @@ Stare 14.10: etutor.ro `85b135c`, broker `b6e9c1c`, webhook-ul Class RDA 7/7 eve
 - [x] 4 evenimente `cta_try`/`cta_register`/`cta_parinte_fara_card`/`register_done`/`first_question` (verificate în pagină; **în Umami real — după livrare**)
 - [x] 5 S1 (escapeHtml + 10/zi per invitator + 2/zi per adresă) + S2 (20 de conturi/oră per IP — Alex 05.10, rezervare sincronă + 100 e-mailuri de acord/zi pe tot site-ul)
 - [x] **Alex**: livrat pe VPS2 — LIVE 13.10 (`85b135c`), cu scriptul `scripts/ops/livreaza-tutor.sh`
-- [ ] După livrare: `sonda-palnie-qa.mjs` cu `BASE=https://etutor.ro` vs capturile din 05.10; evenimentele în Umami (site etutor.ro → Events)
+- [x] După livrare (14.10): sonda pe etutor.ro — banner 57 px, butoanele principale pe primul ecran; evenimentele ajung în Umami
+  (`cta_try`, `first_question`; restul 0 din cauza traficului: 4 vizitatori de la livrare). Raport `Reports/palnie-lot1-2026-10-05/prod-2026-10-14/RAPORT.md`.
+  De recitit evenimentele peste o săptămână.
 - [x] Migrarea `0079_catch_up_schema` („doar adaugă”, IF NOT EXISTS): coloanele `Question` (`sourceReference`, `bookOrder`, `bookPage`, `chapterIndex`, `pdfPage`, `qNumberInBook`, `imageUrl`, `explanationVideoUrl`) + tabelele `Bibliography`, `PushSubscription` + 15 indexuri + 2 chei străine, toate lipsă din `prisma/migrations` (pe prod există — acolo e no-op). Verificat: bază nouă din migrări = schema, minus vechiturile pe care NU le șterge; a doua rulare = no-op; QA aplicat cu `migrate deploy`.
 
 **De ce**: în 30 de zile, 115 vizitatori (80 pe telefon) → pagina de cont văzută **6 ori** → ~2–4 conturi. Cauza nr. 1 dovedită cu capturi

@@ -17,11 +17,6 @@
 #   mv .next .next.broken && mv .next.old .next \\
 #     && mv node_modules node_modules.broken && mv node_modules.old node_modules \\
 #     && pm2 restart tutor
-#
-# ⚠️  ORIGINALUL RULEAZĂ PE VPS2 la `/var/www/deploy-tutor.sh`. Copia asta există ca să
-# aibă istoric — un script de livrare care trăiește într-un singur loc, fără versionare,
-# e exact felul de fișier care se pierde. La orice modificare, schimbă-le pe amândouă.
-
 set -euo pipefail
 
 LIVE=/var/www/tutor

@@ -34,6 +34,8 @@ if [ -n "$(git status --porcelain --untracked-files=no | grep -v ' package-lock.
   exit 1
 fi
 test -f /var/www/deploy-tutor.sh || { echo "  ✗ lipsește /var/www/deploy-tutor.sh"; exit 1; }
+# scripts/deploy-tutor.sh e oglinda, octet cu octet, a originalului de pe server (există doar ca să aibă istoric).
+# Orice schimbare se face în ambele locuri; altfel apare avertismentul de mai jos.
 if ! git show origin/master:scripts/deploy-tutor.sh | diff -q - /var/www/deploy-tutor.sh >/dev/null; then
   echo "  ⚠ /var/www/deploy-tutor.sh diferă de copia din repo (scripts/deploy-tutor.sh); îl folosesc pe cel de pe server."
 fi
