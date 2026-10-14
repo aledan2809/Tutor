@@ -5,6 +5,8 @@ import {
   selectQuestions,
   recommendSessionType,
   SESSION_TYPES,
+  FIRST_TEST_QUESTION_COUNT,
+  isFirstQuickTest,
 } from "@/lib/session-engine";
 import { withErrorHandler } from "@/lib/api-handler";
 import { bandForDomainSlug } from "@/lib/curriculum";
@@ -70,12 +72,15 @@ async function _POST(req: NextRequest) {
   const recommendation = await recommendSessionType(session.user.id, domainId);
   const sessionType = recommendation.type;
   const config = SESSION_TYPES[sessionType];
+  // Same first-test rule as /[domain]/session/start (session-engine.ts): 5 questions, no clock.
+  const firstTest = await isFirstQuickTest(session.user.id, sessionType);
+  const duration = firstTest ? 0 : config.duration;
 
   const questions = await selectQuestions(
     session.user.id,
     domainId,
     sessionType,
-    config.questionCount,
+    firstTest ? FIRST_TEST_QUESTION_COUNT : config.questionCount,
     { topicIn }
   );
 
@@ -107,7 +112,7 @@ async function _POST(req: NextRequest) {
       domainId,
       type: sessionType,
       metadata: {
-        duration: config.duration,
+        duration,
         totalQuestions: filteredQuestions.length,
         questionIds: filteredQuestions.map((q) => q.id),
         reason: recommendation.reason,
@@ -119,7 +124,7 @@ async function _POST(req: NextRequest) {
     sessionId: newSession.id,
     type: sessionType,
     reason: recommendation.reason,
-    duration: config.duration,
+    duration,
     questions: filteredQuestions.map((q) => ({
       id: q.id,
       subject: q.subject,

@@ -70,6 +70,9 @@ Stare 14.10: etutor.ro `85b135c`, broker `b6e9c1c`, webhook-ul Class RDA 7/7 eve
   copil fără materie intră în „Copiii mei”, capitolul se deschide pe „Materii”, „Am notat — alege materiile lui X”, panoul de
   părinte („Vezi ce face X”) în locul celui de elev; `test.com` / `.invalid` = test. Codul de familie (B6) era deja vizibil în
   „Invitații în așteptare”. Verificare: `Reports/parinte-copil-2026-10-14/verificare.mjs` (22/22).
+- [ ] **Găsit la revizia OpenAI 14.10 (exista dinainte):** testul inițial (`/dashboard/assessment`, „Panou complet”) pornește pe o
+  materie cu programă fără bifarea capitolelor — încalcă regula din 24.08. De pus poarta (`visibleTopicsFor` + filtrul pe capitole)
+  în `api/student/assessment` GET și POST și mesajul în pagină. `Reports/revizie-openai-2026-10-14/RAPORT.md`.
 - [ ] **Rămase din lotul 2:** 7 (B2B: poarta de vârstă + mesaj fals + „Copiază link”), 8 (intrarea cu cod: reintrare în același
   cont — atinge autentificarea), 12, 15 (texte RO/EN, „Monitor Progres Studenți” → vocabular de părinte).
 - [ ] **Livrarea** lui 10 + 13 + 9 + 6 + 11: doar cu OK-ul lui Alex, `scripts/ops/livreaza-tutor.sh`. Fără migrații.

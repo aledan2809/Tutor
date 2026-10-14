@@ -386,7 +386,11 @@ export function unitsForStudent(band: SubjectBand, schoolYear: number): Curricul
  * se salveze ceva (inițierea cu un buton, Alex 14.10.2026). Data nașterii vine ca dată fără oră (UTC).
  */
 export function schoolYearFromBirthDate(birth: Date, now: Date = new Date()): number {
-  const startYear = now.getUTCMonth() >= 8 ? now.getUTCFullYear() : now.getUTCFullYear() - 1;
+  // „Azi” e data din România: între 00:00 și 03:00 pe 1 septembrie, UTC e încă 31 august (OpenAI review 14.10).
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit" }).formatToParts(now);
+  const year = Number(parts.find((p) => p.type === "year")?.value);
+  const month = Number(parts.find((p) => p.type === "month")?.value) - 1;
+  const startYear = month >= 8 ? year : year - 1;
   const ageOnAug31 = startYear - birth.getUTCFullYear() - (birth.getUTCMonth() > 7 ? 1 : 0);
   return ageOnAug31 - 6;
 }

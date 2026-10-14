@@ -360,6 +360,10 @@ describe("schoolYearFromBirthDate — clasa propusă după data nașterii", () =
     expect(schoolYearFromBirthDate(d("2012-08-31"), d("2026-10-14"))).toBe(8);
     expect(schoolYearFromBirthDate(d("2012-09-01"), d("2026-10-14"))).toBe(7);
   });
+  it("1 septembrie începe după ora României, nu după UTC (01:30 în România = încă 31 august în UTC)", () => {
+    expect(schoolYearFromBirthDate(d("2018-08-31"), new Date("2026-08-31T22:30:00Z"))).toBe(2);
+    expect(schoolYearFromBirthDate(d("2018-08-31"), new Date("2026-08-31T20:30:00Z"))).toBe(1);
+  });
   it("trece la clasa următoare în septembrie, nu în ianuarie", () => {
     expect(schoolYearFromBirthDate(d("2012-05-15"), d("2027-08-31"))).toBe(8);
     expect(schoolYearFromBirthDate(d("2012-05-15"), d("2027-09-01"))).toBe(9);
