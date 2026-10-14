@@ -63,10 +63,17 @@ Stare 14.10: etutor.ro `85b135c`, broker `b6e9c1c`, webhook-ul Class RDA 7/7 eve
   materia de pe ecran; asistentul fără materii goale (curs → prima lecție); „Simulare completă” pe lucrările materiei sau
   ascunsă. S8 neschimbat intenționat (aceeași poartă ca toate rutele, datele întoarse sunt doar ale elevului).
   Verificare: `Reports/panou-elev-2026-10-14/verificare.mjs`.
-- [ ] **Următorii (în lucru):** 9 (`/ro/parinte` „fără card” primul, `/ro/preturi` buton vizibil, logat → `packages?plan=`) ·
-  6 (Notificările părintelui fără 429) · 11 (panoul părintelui după crearea copilului + codul de familie vizibil) ·
-  adresele `@test.com` / `@test.invalid` recunoscute ca test.
-- [ ] **Livrarea** lui 10 + 13 (+ următorii): doar cu OK-ul lui Alex, `scripts/ops/livreaza-tutor.sh`. Fără migrații.
+- [x] **Pașii 9 + 6 + 11 + adresele de test**, `e4dff34`, **pe `master`, NELIVRAT** (deciziile lui Alex 14.10: proba fără card
+  întâi; Family primul + bară fixă; repar cap-coadă fundătura părinte → copil):
+  `/ro/parinte` „Încearcă 7 zile fără card” primul (sus și la final); `/ro/preturi` Family primul, bară pe telefon ascunsă la
+  subsol, logat → pachete; notificările părintelui o cerere/copil + un formular/copil + erorile spuse ca erori; părintele cu
+  copil fără materie intră în „Copiii mei”, capitolul se deschide pe „Materii”, „Am notat — alege materiile lui X”, panoul de
+  părinte („Vezi ce face X”) în locul celui de elev; `test.com` / `.invalid` = test. Codul de familie (B6) era deja vizibil în
+  „Invitații în așteptare”. Verificare: `Reports/parinte-copil-2026-10-14/verificare.mjs` (22/22).
+- [ ] **Rămase din lotul 2:** 7 (B2B: poarta de vârstă + mesaj fals + „Copiază link”), 8 (intrarea cu cod: reintrare în același
+  cont — atinge autentificarea), 12, 15 (texte RO/EN, „Monitor Progres Studenți” → vocabular de părinte).
+- [ ] **Livrarea** lui 10 + 13 + 9 + 6 + 11: doar cu OK-ul lui Alex, `scripts/ops/livreaza-tutor.sh`. Fără migrații.
+  După livrare: cele trei `verificare.mjs` nu se rulează pe producție (creează conturi); pe prod doar sonda de pâlnie.
 - [ ] Văzut în treacăt, de reparat separat: pagina de intrare pe telefon — titlul „Autentifică-te în Tutor” (marca e eTutor.ro),
   linkurile „Recuperează pe telefon” / „Ai uitat parola?” lipite, „magic link” (jargon). Banca BAC: un elev de clasa a IX-a
   pe o materie de liceu vede lista de capitole goală (rândurile sunt ale clasei a X-a) — de verificat, nu reprodus.
