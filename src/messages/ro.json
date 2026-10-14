@@ -161,6 +161,7 @@
     "starting": "Se pornește...",
     "allTypes": "Toate tipurile de sesiune",
     "questions": "întrebări",
+    "noTimer": "fără cronometru",
     "types": {
       "micro": "Sesiune micro",
       "quick": "Sesiune rapidă",
@@ -1273,7 +1274,13 @@
     "lagBanner": "Programa a avansat cu {count} lecții peste bifele salvate — bifează ce s-a predat sau confirmă că la clasă nu s-au făcut.",
     "conflictReloaded": "Altcineva a salvat lista între timp — am reîncărcat-o. Verifică bifele și salvează din nou.",
     "gateSetup": "Înainte de prima sesiune, bifează ce s-a predat la clasă — grilele se aleg după bifele tale. Durează un minut.",
-    "gateEmpty": "Nu există încă grile pentru lecțiile bifate. Bifează și alte lecții predate sau revino după ce avansează programa."
+    "gateEmpty": "Nu există încă grile pentru lecțiile bifate. Bifează și alte lecții predate sau revino după ce avansează programa.",
+    "firstTag": "Ultimul pas",
+    "firstTitle": "Ești în clasa {year}?",
+    "yearFromBirth": "Am ales-o după data nașterii. O poți schimba.",
+    "firstSummary": "Am bifat ce ar fi trebuit predat până azi, după programă: <b>{count, plural, one {o lecție} few {# lecții} other {# de lecții}}</b>. Grilele vin doar din ele.",
+    "firstConfirm": "Da, e corect — începe testul",
+    "firstChange": "Vreau să schimb bifele"
   },
   "help": {
     "title": "Ajutor",

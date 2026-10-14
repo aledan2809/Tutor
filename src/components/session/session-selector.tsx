@@ -94,7 +94,7 @@ export function SessionSelector({
         </h3>
         <p className="mb-3 text-sm text-gray-400">{reasonText(recommended.reason)}</p>
         <div className="mb-4 flex gap-4 text-sm text-gray-500">
-          <span>{Math.round(recommended.duration / 60)} min</span>
+          <span>{recommended.duration > 0 ? `${Math.round(recommended.duration / 60)} min` : t("noTimer")}</span>
           <span>{recommended.questionCount} {t("questions")}</span>
         </div>
         <button
@@ -125,7 +125,7 @@ export function SessionSelector({
                     {SESSION_ICONS[st.type]} {typeLabel(st.type)}
                   </h4>
                   <div className="mt-1 flex gap-3 text-xs text-gray-400">
-                    <span>{Math.round(st.duration / 60)} min</span>
+                    <span>{st.duration > 0 ? `${Math.round(st.duration / 60)} min` : t("noTimer")}</span>
                     <span>{st.questionCount} {t("questions")}</span>
                   </div>
                 </button>

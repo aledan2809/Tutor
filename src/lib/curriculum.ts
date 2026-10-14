@@ -380,6 +380,18 @@ export function unitsForStudent(band: SubjectBand, schoolYear: number): Curricul
 }
 
 /**
+ * Clasa probabilă după data nașterii (România): cine împlinește 6 ani până la 31 august intră în
+ * pregătitoare în septembrie, deci clasa = vârsta la 31 august al anului în care a început anul
+ * școlar, minus 6 (pregătitoare = 0). E doar o propunere: elevul o confirmă sau o schimbă înainte să
+ * se salveze ceva (inițierea cu un buton, Alex 14.10.2026). Data nașterii vine ca dată fără oră (UTC).
+ */
+export function schoolYearFromBirthDate(birth: Date, now: Date = new Date()): number {
+  const startYear = now.getUTCMonth() >= 8 ? now.getUTCFullYear() : now.getUTCFullYear() - 1;
+  const ageOnAug31 = startYear - birth.getUTCFullYear() - (birth.getUTCMonth() > 7 ? 1 : 0);
+  return ageOnAug31 - 6;
+}
+
+/**
  * Rândul 1 al checklistului: o unitate "ar fi trebuit predată" dacă e dintr-un
  * an anterior, sau dacă e din anul curent și intervalul ei de săptămâni a
  * ÎNCEPUT (prima lecție a fost atinsă — deblocare la primul contact, regula

@@ -463,6 +463,15 @@ export default function ActiveSessionPage() {
     handleAnswer(SPRINT_TIMEOUT_ANSWER);
   }, [handleAnswer]);
 
+  // The test opens at the top. Arriving here from the subject page (same dashboard layout), the
+  // navigation kept a scrolled position: the top bar was off screen and the menu button sat on the title.
+  const openedAtTop = useRef(false);
+  useEffect(() => {
+    if (!sessionData || openedAtTop.current) return;
+    openedAtTop.current = true;
+    window.scrollTo(0, 0);
+  }, [sessionData]);
+
   if (phase === "loading") {
     return (
       <div className="py-12 text-center text-gray-500">Se încarcă sesiunea…</div>
@@ -557,7 +566,7 @@ export default function ActiveSessionPage() {
     30;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="mx-auto max-w-2xl space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold text-white">
@@ -568,7 +577,8 @@ export default function ActiveSessionPage() {
         </span>
       </div>
 
-      {/* Timer — sprints are clocked per question, everything else per session. */}
+      {/* Timer — sprints are clocked per question, everything else per session. A duration of 0 is a
+          test without a clock (a new student's first test, session/start): the questions' progress instead. */}
       {isSprint && currentQuestion ? (
         <QuestionTimer
           // Remount per question: fresh state, no value can survive the advance.
@@ -578,12 +588,29 @@ export default function ActiveSessionPage() {
           active={phase === "answering" && !submitting}
           onExpire={handleQuestionTimeout}
         />
-      ) : (
+      ) : sessionData.duration > 0 ? (
         <SessionTimer
           durationSeconds={sessionData.duration}
           onTimeUp={handleTimeUp}
           isPaused={phase === "feedback"}
         />
+      ) : (
+        <div className="flex items-center gap-3">
+          <div
+            role="progressbar"
+            aria-label="Întrebări rezolvate"
+            aria-valuemin={0}
+            aria-valuemax={sessionData.totalQuestions}
+            aria-valuenow={answeredBase + answeredCount}
+            className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-800"
+          >
+            <div
+              className="h-full rounded-full bg-green-500 transition-all"
+              style={{ width: `${Math.round(((answeredBase + answeredCount) / Math.max(1, sessionData.totalQuestions)) * 100)}%` }}
+            />
+          </div>
+          <span className="text-xs text-gray-500">fără cronometru</span>
+        </div>
       )}
 
       {/* Inline retry — keeps the same question + session (no restart).
@@ -617,11 +644,6 @@ export default function ActiveSessionPage() {
 
       {phase === "answering" && currentQuestion && (
         <>
-          {!coachmarkSeen && answeredCount === 0 && (
-            <div className="mb-3 rounded-lg border border-blue-700/50 bg-blue-900/20 px-4 py-2 text-sm text-blue-200">
-              👆 Atinge un răspuns ca să vezi pe loc dacă e corect.
-            </div>
-          )}
           <QuestionRenderer
             key={currentQuestion.id}
             question={currentQuestion}
@@ -631,6 +653,14 @@ export default function ActiveSessionPage() {
             // meaningful slice of a 12-second budget.
             instantAnswer={isSprint}
           />
+          {/* Under the answers, short: above them it pushed the answers off a phone's first screen. */}
+          {!coachmarkSeen && answeredCount === 0 && (
+            <p className="text-center text-sm text-blue-200/80">
+              {isSprint
+                ? "👆 Atinge un răspuns ca să vezi pe loc dacă e corect."
+                : "👆 Alege un răspuns și apasă „Trimite răspunsul”: vezi pe loc dacă e corect."}
+            </p>
+          )}
         </>
       )}
 

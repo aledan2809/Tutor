@@ -13,6 +13,7 @@ import {
   expectedByWeek,
   buildChecklist,
   visibleChaptersFromChecklist,
+  schoolYearFromBirthDate,
   type CurriculumUnit,
 } from "@/lib/curriculum";
 
@@ -346,5 +347,25 @@ describe("curriculumLag — decalajul programă↔bife", () => {
     const rows = buildChecklist("mate-gimnaziu", 8, 1, allFalse);
     // În S1, programa cere toți anii anteriori (17 unități) — toate nebifate.
     expect(curriculumLag(rows).lag).toBeGreaterThanOrEqual(17);
+  });
+});
+
+describe("schoolYearFromBirthDate — clasa propusă după data nașterii", () => {
+  const d = (iso: string) => new Date(`${iso}T00:00:00Z`);
+  it("născut în mai 2012 → clasa a VIII-a în anul școlar 2026–2027 (toamnă și primăvară)", () => {
+    expect(schoolYearFromBirthDate(d("2012-05-15"), d("2026-10-14"))).toBe(8);
+    expect(schoolYearFromBirthDate(d("2012-05-15"), d("2027-05-20"))).toBe(8);
+  });
+  it("31 august intră cu cei mari, 1 septembrie cu cei mici", () => {
+    expect(schoolYearFromBirthDate(d("2012-08-31"), d("2026-10-14"))).toBe(8);
+    expect(schoolYearFromBirthDate(d("2012-09-01"), d("2026-10-14"))).toBe(7);
+  });
+  it("trece la clasa următoare în septembrie, nu în ianuarie", () => {
+    expect(schoolYearFromBirthDate(d("2012-05-15"), d("2027-08-31"))).toBe(8);
+    expect(schoolYearFromBirthDate(d("2012-05-15"), d("2027-09-01"))).toBe(9);
+  });
+  it("un adult dă o clasă în afara benzilor (nu se propune nimic)", () => {
+    const y = schoolYearFromBirthDate(d("1990-03-02"), d("2026-10-14"));
+    expect(Object.values(BAND_YEARS).some((years) => years.includes(y))).toBe(false);
   });
 });

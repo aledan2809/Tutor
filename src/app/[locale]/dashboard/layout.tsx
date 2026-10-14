@@ -5,6 +5,7 @@ import { AgeConsent, type AgeConsentView } from "@/components/consent/age-consen
 import { AccountGone } from "@/components/consent/account-gone";
 import type { Metadata } from "next";
 import { PresencePinger } from "@/components/presence-pinger";
+import { HideDuringTest } from "@/components/access/hide-during-test";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
@@ -232,26 +233,32 @@ export default async function DashboardLayout({
           <SetupChecklist showLinkChild={showLinkChild} />
           <NotificationBell />
         </header>
-        <main className={`flex-1 p-4 pt-14 sm:p-6 lg:pt-6 ${isStudent ? "pb-20 lg:pb-6" : ""}`}>
+        {/* Phones: the 56px header above already holds the menu button, so no second 56px gap here. */}
+        <main className={`flex-1 p-4 sm:p-6 lg:pt-6 ${isStudent ? "pb-20 lg:pb-6" : ""}`}>
           <AppBanner isWatcherOnly={isWatcherOnly} />
           {consentView?.kind === "waiting" && (
             <>
-              <AgeConsent view={consentView} locale={locale} />
+              {/* Shown on every page but inside a test, where it pushed the answers off a phone's screen. */}
+              <HideDuringTest>
+                <AgeConsent view={consentView} locale={locale} />
+              </HideDuringTest>
               {/* The account stops the moment the 7 days end, or when a parent answers elsewhere. */}
               <RefreshAt at={consentDeadline} now={new Date().toISOString()} />
               <RefreshOnReturn active />
             </>
           )}
           {!consentBlocks && access?.kind === "trial" && bannerAudience && (
-            <TrialBanner
-              locale={locale}
-              daysLeft={access.daysLeft}
-              audience={bannerAudience}
-              pauseOn={(await loadPauseStartsAt()) !== null}
-              holder={trialHolder}
-              // Paying in the account's own free week gives −30% for life; a paying account has no offer.
-              offer={bannerAudience === "parent" && access.via === "own" && !trialHolder ? { endsAt: access.endsAt.toISOString(), serverNow: new Date().toISOString() } : null}
-            />
+            <HideDuringTest>
+              <TrialBanner
+                locale={locale}
+                daysLeft={access.daysLeft}
+                audience={bannerAudience}
+                pauseOn={(await loadPauseStartsAt()) !== null}
+                holder={trialHolder}
+                // Paying in the account's own free week gives −30% for life; a paying account has no offer.
+                offer={bannerAudience === "parent" && access.via === "own" && !trialHolder ? { endsAt: access.endsAt.toISOString(), serverNow: new Date().toISOString() } : null}
+              />
+            </HideDuringTest>
           )}
           {!consentBlocks && accessEnding && (
             <AccessEndingBanner locale={locale} kind={accessEnding.kind} at={accessEnding.at} daysLeft={accessEnding.daysLeft} />

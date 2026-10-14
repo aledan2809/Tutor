@@ -161,6 +161,7 @@
     "starting": "Starting...",
     "allTypes": "All session types",
     "questions": "questions",
+    "noTimer": "no timer",
     "types": {
       "micro": "Micro session",
       "quick": "Quick session",
@@ -1273,7 +1274,13 @@
     "lagBanner": "The plan is {count} lessons ahead of the saved ticks — tick what was taught, or confirm your class hasn't covered them.",
     "conflictReloaded": "Someone else saved this list in the meantime — it has been reloaded. Check the ticks and save again.",
     "gateSetup": "Before your first session, tick what was taught in class — questions are picked from your ticks. It takes a minute.",
-    "gateEmpty": "No questions yet for the ticked lessons. Tick more taught lessons, or come back as the syllabus advances."
+    "gateEmpty": "No questions yet for the ticked lessons. Tick more taught lessons, or come back as the syllabus advances.",
+    "firstTag": "Last step",
+    "firstTitle": "Are you in {year} grade?",
+    "yearFromBirth": "Picked from your date of birth. You can change it.",
+    "firstSummary": "We ticked what should have been taught by now, per the official plan: <b>{count, plural, one {# lesson} other {# lessons}}</b>. Questions come only from them.",
+    "firstConfirm": "Yes, that’s right — start the test",
+    "firstChange": "I want to change the ticks"
   },
   "help": {
     "title": "Help",

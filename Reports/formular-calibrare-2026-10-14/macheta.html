@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Primii pași — machetă</title>
+<style>
+  :root { --bg:#040812; --card:#0f1626; --line:#1f2a3d; --muted:#8b97ab; --text:#e8edf5; --blue:#1d5cff; --blue2:#3b82f6; --amber:#f5b942; --green:#22c55e; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#e9edf3; font-family: -apple-system, "Segoe UI", Inter, Roboto, sans-serif; color:#0b1220; padding:24px 16px 48px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .lead { color:#475569; margin:0 0 24px; max-width:1100px; }
+  .row { display:flex; flex-wrap:wrap; gap:28px; align-items:flex-start; }
+  .col { width:390px; max-width:100%; }
+  .tag { font-size:13px; font-weight:700; color:#1d4ed8; text-transform:uppercase; letter-spacing:.04em; margin:0 0 8px; }
+  .phone { width:390px; max-width:100%; height:740px; background:var(--bg); border-radius:28px; overflow:hidden; position:relative; color:var(--text); box-shadow:0 10px 30px rgba(0,0,0,.25); border:6px solid #111827; }
+  .top { height:58px; display:flex; align-items:center; justify-content:space-between; padding:0 16px; border-bottom:1px solid var(--line); }
+  .burger { width:38px; height:38px; border:1px solid #2b3648; border-radius:10px; display:grid; place-items:center; color:#9aa6ba; }
+  .pill { border:1px solid #2a4fb3; background:#0b1a3d; color:#cfe0ff; border-radius:999px; padding:5px 12px; font-size:14px; font-weight:600; }
+  .bell { color:#9aa6ba; font-size:18px; }
+  .nav { position:absolute; bottom:0; left:0; right:0; height:62px; border-top:1px solid var(--line); background:var(--bg); display:flex; justify-content:space-around; align-items:center; font-size:11px; color:#9aa6ba; }
+  .nav .on { color:var(--blue2); }
+  .body { padding:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px; }
+  label { display:block; font-size:13px; color:var(--muted); margin:12px 0 5px; }
+  .in { height:44px; border:1px solid #2a3547; background:#1b2537; border-radius:10px; display:flex; align-items:center; padding:0 12px; font-size:15px; color:#dfe6f1; }
+  .in.muted { color:#6f7c91; }
+  .seg { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .seg div { height:44px; border-radius:10px; display:grid; place-items:center; font-size:15px; border:1px solid #2a3547; background:#1b2537; color:#c5cfdd; }
+  .seg .on { border-color:var(--blue2); background:#0d1d42; color:#fff; }
+  .three { display:grid; grid-template-columns:1fr 1.6fr 1.1fr; gap:8px; }
+  .btn { height:50px; border-radius:12px; display:grid; place-items:center; font-weight:700; font-size:16px; background:var(--blue); color:#fff; margin-top:16px; }
+  .btn2 { height:46px; border-radius:12px; display:grid; place-items:center; font-weight:600; font-size:15px; border:1px solid #2f3b50; color:#cdd6e3; margin-top:10px; }
+  .small { font-size:13px; color:var(--muted); }
+  .eye { margin-left:auto; color:#8794a9; }
+  .gone { margin-top:12px; border:1px dashed #b45309; border-radius:10px; padding:8px 10px; font-size:12.5px; color:#fbbf77; background:rgba(180,83,9,.08); }
+  .note { list-style:none; padding:0; margin:12px 0 0; font-size:14px; color:#1e293b; }
+  .note li { padding:6px 0 6px 22px; position:relative; border-bottom:1px solid #d6dde7; }
+  .note li::before { content:"→"; position:absolute; left:0; color:#1d4ed8; font-weight:700; }
+  .note li.was::before { content:"✕"; color:#b91c1c; }
+  .h { font-size:19px; font-weight:800; margin:2px 0 6px; }
+  .chip { display:inline-block; font-size:12px; color:#9fb0c8; background:#17202f; border:1px solid #243046; border-radius:6px; padding:3px 8px; margin-right:6px; }
+  .q { font-size:17px; line-height:1.45; margin:10px 0 10px; }
+  .fig { background:#fff; border-radius:10px; height:70px; position:relative; }
+  .fig .ln { position:absolute; left:6%; right:8%; top:24px; height:2px; background:#111; }
+  .fig span { position:absolute; top:34px; font: italic 15px Georgia, serif; color:#111; }
+  .ans { height:46px; border:1px solid #2a3547; background:#162034; border-radius:12px; display:flex; align-items:center; padding:0 14px; font-size:16px; margin-top:8px; }
+  .ans b { color:#7e8aa0; width:26px; font-weight:600; }
+  .bar { height:6px; background:#1b2537; border-radius:9px; overflow:hidden; flex:1; }
+  .bar i { display:block; height:100%; width:20%; background:var(--green); }
+  .qhead { display:flex; align-items:center; gap:12px; font-weight:700; }
+  .list { margin-top:12px; border-top:1px solid var(--line); padding-top:10px; }
+  .list div { font-size:13.5px; color:#c3ccd9; padding:4px 0; display:flex; gap:8px; }
+  .list .y { color:var(--blue2); }
+  .ok { color:var(--green); font-weight:700; }
+</style>
+</head>
+<body>
+<h1>Primii pași ai unui elev nou — machetă (pasul 10 din audit)</h1>
+<p class="lead">Telefon, 390 px. Trei ecrane: înscrierea, pasul cu clasa și capitolele, prima grilă. Azi, de la „Creează cont” până la prima întrebare sunt 4–5 atingeri, o listă de 28 de rânduri și un test de 15 întrebări cu cronometru de 82 de minute. Propunerea: 2 atingeri și 5 întrebări.</p>
+
+<div class="row">
+
+  <!-- 1. Înscriere -->
+  <div class="col">
+    <p class="tag">1 · Înscriere — 4 câmpuri</p>
+    <div class="phone">
+      <div class="body" style="padding-top:28px">
+        <div class="card">
+          <div style="text-align:center"><div class="h">Creează cont</div><div class="small">Intră în eTutor.ro și începe să înveți</div></div>
+          <label>Sunt</label>
+          <div class="seg"><div class="on">Elev</div><div>Părinte</div></div>
+          <label>Nume</label><div class="in">Andrei</div>
+          <label>Email</label><div class="in">andrei@exemplu.ro</div>
+          <label>Data nașterii</label>
+          <div class="three"><div class="in">15 ▾</div><div class="in">mai ▾</div><div class="in">2012 ▾</div></div>
+          <label>Parolă</label><div class="in">••••••••••<span class="eye">👁</span></div>
+          <div class="btn">Creează cont</div>
+          <div class="gone">Scos: „Confirmă parola”. Ochiul arată ce ai scris.</div>
+        </div>
+        <p class="small" style="text-align:center;margin-top:14px">Ai deja cont? <span style="color:#60a5fa">Autentifică-te</span></p>
+      </div>
+    </div>
+    <ul class="note">
+      <li class="was">„Confirmă parola” dispare (ochiul de lângă parolă rămâne).</li>
+      <li>Data nașterii rămâne: sub 16 ani legea cere acordul unui părinte, deci trebuie știută de la început.</li>
+      <li>Lista de materii nu mai e în formular: o alegi pe ecranul următor (linkurile din reclame o aduc deja aleasă).</li>
+    </ul>
+  </div>
+
+  <!-- 2. Clasa și capitolele -->
+  <div class="col">
+    <p class="tag">2 · Clasa și capitolele — o atingere</p>
+    <div class="phone">
+      <div class="top"><div class="burger">☰</div><div class="pill">⏳ 7 zile gratuite</div><div class="bell">🔔</div></div>
+      <div class="body">
+        <div class="card">
+          <div class="small" style="font-weight:700;letter-spacing:.06em;color:#93b4ff">ULTIMUL PAS · MATEMATICĂ</div>
+          <div class="h" style="margin-top:6px">Ești în clasa a VIII-a?</div>
+          <div class="in" style="margin-top:8px">Clasa a VIII-a ▾</div>
+          <p class="small" style="margin:6px 0 0">Am ales-o după data nașterii. O poți schimba.</p>
+          <p style="font-size:15px;line-height:1.45;margin:16px 0 0">Am bifat ce ar fi trebuit predat până azi, după programă: <b>21 de lecții</b> din clasele V–VIII. Grilele vin doar din ele.</p>
+          <div class="btn">Da, e corect — începe testul</div>
+          <div class="btn2">Vreau să schimb bifele ▾</div>
+          <div class="list">
+            <div><span class="y">●</span>☑ Numere naturale. Operații, puteri</div>
+            <div><span class="y">●</span>☑ Fracții ordinare și zecimale</div>
+            <div><span class="y">●</span>☑ Elemente de geometrie …</div>
+            <div class="small" style="padding-top:6px">(lista întreagă se deschide doar dacă apeși „Vreau să schimb bifele”)</div>
+          </div>
+        </div>
+      </div>
+      <div class="nav"><span class="on">▢<br>Grile</span><span>☑<br>Simulări</span><span>▥<br>Progres</span><span>◯<br>Setări</span></div>
+    </div>
+    <ul class="note">
+      <li>Respectă regula ta din 24.08: capitolele se confirmă în aplicație înainte de primul test, dar cu un singur buton, nu cu 28 de bife de verificat.</li>
+      <li>Clasa vine din data nașterii (2012 → clasa a VIII-a în 2026–2027).</li>
+      <li>Bannerul mare al probei nu mai apare aici; rămâne doar ceasul din bara de sus.</li>
+    </ul>
+  </div>
+
+  <!-- 3. Prima grilă -->
+  <div class="col">
+    <p class="tag">3 · Prima grilă — toate răspunsurile vizibile</p>
+    <div class="phone">
+      <div class="top"><div class="burger">☰</div><div class="pill">⏳ 7 zile gratuite</div><div class="bell">🔔</div></div>
+      <div class="body" style="padding-top:12px">
+        <div class="qhead"><span>1 / 5</span><div class="bar"><i></i></div><span class="small" style="font-weight:500">fără cronometru</span></div>
+        <div style="margin-top:10px"><span class="chip">Geometrie plană</span><span class="chip">★★★☆☆</span></div>
+        <p class="q">În figura alăturată, punctele A, B, C și D sunt coliniare, în această ordine, astfel încât CD = 3 cm, BD = 3·CD și AD = 3·BD. Lungimea segmentului AC este egală cu:</p>
+        <div class="fig"><div class="ln"></div><span style="left:5%">A</span><span style="left:58%">B</span><span style="left:75%">C</span><span style="left:86%">D</span></div>
+        <div class="ans"><b>A.</b>27 cm</div>
+        <div class="ans"><b>B.</b>24 cm</div>
+        <div class="ans"><b>C.</b>21 cm</div>
+        <div class="ans"><b>D.</b>18 cm</div>
+        <p class="small" style="margin:10px 0 0;text-align:center">Atinge un răspuns ca să vezi pe loc dacă e corect.</p>
+      </div>
+      <div class="nav"><span class="on">▢<br>Grile</span><span>☑<br>Simulări</span><span>▥<br>Progres</span><span>◯<br>Setări</span></div>
+    </div>
+    <ul class="note">
+      <li>Primul test are 5 întrebări, fără cronometru (azi: 15 întrebări, 82 de minute). De la al doilea test, totul ca acum.</li>
+      <li class="was">Bannerul mare al probei și caseta „Atinge un răspuns…” de deasupra întrebării dispar; indicația rămâne, scurtă, sub răspunsuri.</li>
+      <li>Figura e mai joasă, ca toate cele 4 răspunsuri să încapă pe primul ecran.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

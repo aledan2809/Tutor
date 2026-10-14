@@ -4,7 +4,7 @@ import { withErrorHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
 import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import { isParentOf } from "@/lib/guardian";
-import { bandForDomainSlug, BAND_YEARS, unitsForStudent } from "@/lib/curriculum";
+import { bandForDomainSlug, BAND_YEARS, schoolYearFromBirthDate, unitsForStudent } from "@/lib/curriculum";
 import { getCurriculumState, saveChecklist } from "@/lib/curriculum-service";
 import { refuseIfPaused } from "@/lib/access-gate";
 
@@ -94,14 +94,33 @@ async function _GET(
   const rawYear = _req.nextUrl.searchParams.get("schoolYear");
   const previewYear = rawYear !== null ? Number(rawYear) : undefined;
 
-  const state = await getCurriculumState(subjectUserId, domainSlug, previewYear);
+  let state = await getCurriculumState(subjectUserId, domainSlug, previewYear);
   if (!state) {
     return NextResponse.json({ error: "Domain has no curriculum band" }, { status: 404 });
+  }
+  // Nicio clasă știută (nici salvată, nici în profil): o propunem după data nașterii, cu rândurile ei.
+  // Nu se salvează nimic — elevul (sau adultul care face inițierea) o confirmă ori o schimbă.
+  let yearFromBirthDate = false;
+  if (state.schoolYear === null && previewYear === undefined) {
+    const who = await prisma.user.findUnique({ where: { id: subjectUserId }, select: { birthDate: true, birthYear: true } });
+    // An account that gave only the year (28.09.2026) got 31 December in migration 0075: that day would
+    // put almost everyone a grade too low, so no proposal then — the learner picks the grade.
+    const onlyYear =
+      who?.birthYear != null && who.birthDate?.getUTCMonth() === 11 && who.birthDate.getUTCDate() === 31;
+    const guess = who?.birthDate && !onlyYear ? schoolYearFromBirthDate(who.birthDate) : null;
+    if (guess !== null && BAND_YEARS[state.band].includes(guess)) {
+      const guessed = await getCurriculumState(subjectUserId, domainSlug, guess);
+      if (guessed) {
+        state = guessed;
+        yearFromBirthDate = true;
+      }
+    }
   }
   return NextResponse.json({
     band: state.band,
     initiated: state.initiated,
     schoolYear: state.schoolYear,
+    yearFromBirthDate,
     week: state.week,
     revision: state.revision,
     bandYears: BAND_YEARS[state.band],

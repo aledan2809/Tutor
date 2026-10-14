@@ -29,6 +29,8 @@ type ApiState = {
   revision: string | null;
   bandYears: number[];
   rows: Row[];
+  /** Clasa e doar propusă, după data nașterii (nimic salvat încă). */
+  yearFromBirthDate?: boolean;
 };
 
 // Etichetele claselor vin din i18n (curriculum.year5..year12) — ordinalele
@@ -49,7 +51,8 @@ export function CurriculumChecklist({
   childId?: string;
   /** Pagina o setează când start-ul a răspuns 409 needsCurriculumSetup. */
   forceOpen?: boolean;
-  onSaved?: () => void;
+  /** `first`: a fost inițierea (prima salvare) — pagina pornește atunci testul promis de buton. */
+  onSaved?: (info: { first: boolean }) => void;
 }) {
   const t = useTranslations("curriculum");
   const [state, setState] = useState<ApiState | null>(null);
@@ -58,6 +61,10 @@ export function CurriculumChecklist({
   const [taught, setTaught] = useState<Map<string, boolean>>(new Map());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Inițierea elevului e un singur buton (Alex 14.10.2026); lista întreagă doar la cerere.
+  const [showAll, setShowAll] = useState(false);
+  // Between picking a grade and its rows arriving, the ticks on screen belong to the old grade.
+  const [loadingYear, setLoadingYear] = useState(false);
 
   // Rândurile serverului sunt sursa unică — nu ținem o copie separată (o copie
   // "rows" în paralel cu state.rows a ascuns exact bug-ul listei goale la
@@ -110,14 +117,20 @@ export function CurriculumChecklist({
   // pre-completarea din calendar pentru acel an (rândul 1 + rândul 2 implicit).
   const pickYear = async (year: number) => {
     setSchoolYear(year);
-    await load(year);
+    setLoadingYear(true);
+    try {
+      await load(year);
+    } finally {
+      setLoadingYear(false);
+    }
     setOpen(true);
   };
 
   const save = async () => {
-    if (schoolYear === null) return;
+    if (schoolYear === null || loadingYear) return;
     setSaving(true);
     setError(null);
+    const first = !state?.initiated;
     try {
       const params = new URLSearchParams();
       if (childId) params.set("childId", childId);
@@ -147,15 +160,21 @@ export function CurriculumChecklist({
       }
       await load();
       setOpen(false);
-      onSaved?.();
+      onSaved?.({ first });
     } finally {
       setSaving(false);
     }
   };
 
-  // Fără stare (domeniu fără programă / fetch eșuat) dar cu forceOpen activ ar
-  // rămâne un blank tăcut; componenta pur și simplu nu se randează.
-  if (!state) return null;
+  // Fără stare (domeniu fără programă / fetch eșuat / încă se încarcă): nimic — dar dacă pagina a cerut
+  // lista (start refuzat cu 409), măcar motivul, ca apăsarea pe „Începe” să nu pară că nu face nimic.
+  if (!state) {
+    return forceOpen ? (
+      <p role="status" className="mb-3 rounded-lg border border-amber-800 bg-amber-950/20 px-3 py-2 text-sm text-amber-200">
+        {t("gateSetup")}
+      </p>
+    ) : null;
+  }
 
   const visibleRows = schoolYear === null ? [] : rows.filter((r) => r.year <= schoolYear);
   const taughtCount = visibleRows.filter((r) => taught.get(r.key)).length;
@@ -195,9 +214,68 @@ export function CurriculumChecklist({
 
   if (!open) return null;
 
+  const yearSelect = (
+    <select
+      id="curriculum-year"
+      value={schoolYear ?? ""}
+      onChange={(e) => void pickYear(Number(e.target.value))}
+      className="min-h-[44px] w-full max-w-xs rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
+    >
+      <option value="" disabled>
+        {t("pickClass")}
+      </option>
+      {state.bandYears.map((y) => (
+        <option key={y} value={y}>
+          {t("classLabel")} {t(`year${y}`)}
+        </option>
+      ))}
+    </select>
+  );
+
+  // Inițierea elevului: clasa (propusă după data nașterii) + capitolele pre-bifate după programă,
+  // confirmate cu un buton. Regula din 24.08 rămâne: se confirmă în aplicație înaintea primului test.
+  // Nu și pe paginile părintelui/meditatorului (childId) și nu când nimic nu e încă în programă.
+  if (!childId && !state.initiated && !showAll && schoolYear !== null && taughtCount > 0) {
+    return (
+      <div className="mb-6 rounded-2xl border border-gray-700 bg-gray-900 p-4 sm:p-5">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-blue-300">{t("firstTag")}</p>
+        <h2 className="mt-1.5 text-lg font-extrabold text-white">
+          {t("firstTitle", { year: t(`year${schoolYear}`) })}
+        </h2>
+        <label htmlFor="curriculum-year" className="sr-only">
+          {t("whichClass")}
+        </label>
+        <div className="mt-2">{yearSelect}</div>
+        {state.yearFromBirthDate && <p className="mt-1 text-xs text-gray-500">{t("yearFromBirth")}</p>}
+        <p className="mt-4 text-sm leading-relaxed text-gray-300">
+          {t.rich("firstSummary", { count: taughtCount, b: (c) => <b className="text-white">{c}</b> })}
+        </p>
+        {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+        <button
+          type="button"
+          onClick={() => void save()}
+          disabled={saving || loadingYear}
+          className="mt-4 min-h-[48px] w-full rounded-xl bg-blue-600 px-4 py-3 text-base font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+        >
+          {saving ? t("saving") : t("firstConfirm")}
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowAll(true)}
+          disabled={loadingYear}
+          className="mt-2 min-h-[44px] w-full rounded-xl border border-gray-600 px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800"
+        >
+          {t("firstChange")}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="mb-6 rounded-lg border border-gray-700 bg-gray-900 p-4 sm:p-5">
       <h2 className="text-base font-semibold text-white">{t("title")}</h2>
+      {/* Prima completare a elevului: spune și de ce nu a pornit testul (pagina nu mai repetă). */}
+      {!childId && !state.initiated && <p className="mt-1 text-sm text-amber-200">{t("gateSetup")}</p>}
       <p className="mt-1 text-sm text-gray-400">{t("intro")}</p>
       {lagVisible && (
         <p className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
@@ -210,21 +288,9 @@ export function CurriculumChecklist({
         <label htmlFor="curriculum-year" className="mb-1 block text-sm text-gray-400">
           {t("whichClass")}
         </label>
-        <select
-          id="curriculum-year"
-          value={schoolYear ?? ""}
-          onChange={(e) => void pickYear(Number(e.target.value))}
-          className="w-full max-w-xs rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
-        >
-          <option value="" disabled>
-            {t("pickClass")}
-          </option>
-          {state.bandYears.map((y) => (
-            <option key={y} value={y}>
-              {t("classLabel")} {t(`year${y}`)}
-            </option>
-          ))}
-        </select>
+        {yearSelect}
+        {/* Also for a parent or tutor: the grade shown is only a proposal until someone saves it. */}
+        {state.yearFromBirthDate && <p className="mt-1 text-xs text-gray-500">{t("yearFromBirth")}</p>}
       </div>
 
       {/* Pasul 2: cele două rânduri, grupate pe an */}
@@ -287,7 +353,7 @@ export function CurriculumChecklist({
             <button
               type="button"
               onClick={() => void save()}
-              disabled={saving}
+              disabled={saving || loadingYear}
               className="min-h-[44px] rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {saving ? t("saving") : t("save")}

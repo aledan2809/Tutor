@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
-import { recommendSessionType, SESSION_TYPES } from "@/lib/session-engine";
+import { recommendSessionType, SESSION_TYPES, FIRST_TEST_QUESTION_COUNT, isFirstQuickTest } from "@/lib/session-engine";
 import { withErrorHandler } from "@/lib/api-handler";
 import { resolveDomainOrForbid } from "@/lib/domain-gate";
 import {
@@ -64,9 +64,15 @@ async function _GET(
   // aptitude domain — everywhere else it would offer a session with nothing
   // behind it. Filtered out rather than hidden client-side so the API can't
   // hand another domain a session type its start route will reject.
-  const availableTypes = Object.entries(SESSION_TYPES)
-    .filter(([key]) => key !== SPRINT_SESSION_TYPE || isSprintDomain)
-    .map(([key, val]) => ({ type: key, ...val }));
+  // A new learner's first quick test is 5 questions with no clock (session/start): describe it so.
+  const firstQuick = await isFirstQuickTest(session.user.id, "quick");
+  const described = (key: string) => {
+    const val = SESSION_TYPES[key as keyof typeof SESSION_TYPES];
+    return key === "quick" && firstQuick ? { ...val, questionCount: FIRST_TEST_QUESTION_COUNT, duration: 0 } : val;
+  };
+  const availableTypes = Object.keys(SESSION_TYPES)
+    .filter((key) => key !== SPRINT_SESSION_TYPE || isSprintDomain)
+    .map((key) => ({ type: key, ...described(key) }));
 
   // Everything the sprint card needs to describe the run before it starts:
   // which difficulty band it will span and how the clock will tighten.
@@ -95,7 +101,7 @@ async function _GET(
     recommended: {
       type: recommendation.type,
       reason: recommendation.reason,
-      ...SESSION_TYPES[recommendation.type],
+      ...described(recommendation.type),
     },
     availableTypes,
     sprint,

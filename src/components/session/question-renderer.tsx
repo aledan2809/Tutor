@@ -144,7 +144,8 @@ export function QuestionRenderer({
 
   const metaHeader = (
     <div className="flex items-center gap-2 text-xs text-gray-500">
-      <span className="rounded bg-gray-800 px-2 py-0.5">{question.subject}</span>
+      {/* The subject is known on a phone (it is the chosen one) and took a second line there. */}
+      <span className="hidden rounded bg-gray-800 px-2 py-0.5 sm:inline">{question.subject}</span>
       <span className="rounded bg-gray-800 px-2 py-0.5">{question.topic}</span>
       <span className="rounded bg-gray-800 px-2 py-0.5">
         {"★".repeat(question.difficulty)}
@@ -266,7 +267,8 @@ export function QuestionRenderer({
   }
 
   return (
-    <div className="space-y-6">
+    // Tighter on a phone: the first screen should hold the question and all the answers.
+    <div className="space-y-4 sm:space-y-6">
       {/* Question metadata */}
       {metaHeader}
 
@@ -294,7 +296,7 @@ export function QuestionRenderer({
 
       {/* Question content (+ read-aloud — voice variant for cube/spatial tasks) */}
       <div className="flex items-start gap-2">
-        <p className="flex-1 whitespace-pre-line text-lg text-white">{question.content}</p>
+        <p className="flex-1 whitespace-pre-line text-base text-white sm:text-lg">{question.content}</p>
         <SpeakButton text={question.content} />
       </div>
 
@@ -321,18 +323,21 @@ export function QuestionRenderer({
 
       {/* Figure (geometry / chart items) — rendered on a white card so the black line
           drawings stay legible on the dark theme */}
+      {/* Shorter on a phone so the answers stay near; a tap opens it full size (small labels stay readable). */}
       {question.imageUrl && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={question.imageUrl}
-          alt="Figura exercițiului"
-          className="mx-auto max-h-[420px] w-auto max-w-full rounded-lg border border-gray-700 bg-white p-2"
-        />
+        <a href={question.imageUrl} target="_blank" rel="noopener noreferrer" className="block" title="Deschide figura mărită">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={question.imageUrl}
+            alt="Figura exercițiului (atinge ca s-o mărești)"
+            className="mx-auto max-h-[220px] w-auto max-w-full rounded-lg border border-gray-700 bg-white p-2 sm:max-h-[420px]"
+          />
+        </a>
       )}
 
       {/* Multiple choice options */}
       {question.type === "MULTIPLE_CHOICE" && options && (
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {options.map((opt, idx) => (
             <button
               key={idx}

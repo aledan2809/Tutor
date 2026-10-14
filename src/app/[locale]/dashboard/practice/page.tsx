@@ -44,7 +44,7 @@ export default function PracticePage() {
   const [starting, setStarting] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<string>("");
   const [curriculumSetupNeeded, setCurriculumSetupNeeded] = useState(false);
-  const [gateReason, setGateReason] = useState<"setup" | "empty" | null>(null);
+  const [gateReason, setGateReason] = useState<"empty" | null>(null);
   /**
    * Poarta de modul („testezi doar din ce ai parcurs") răspunde 409 cu o explicație.
    * Până acum niciun `if` nu o prindea, deci apelul cădea în `else`, sesiunea nu
@@ -150,7 +150,12 @@ export default function PracticePage() {
       .finally(() => setLoading(false));
   }, [selectedDomain]);
 
+  // One start at a time: an automatic start (?start=) and the first-setup button can otherwise both
+  // reach the server and open two sessions.
+  const startInFlight = useRef(false);
   const handleSelect = async (type: string, topic?: string | null) => {
+    if (startInFlight.current) return;
+    startInFlight.current = true;
     setStarting(true);
     try {
       setStartNotice(null);
@@ -171,7 +176,8 @@ export default function PracticePage() {
       if (res.status === 409 && (session.needsCurriculumSetup || session.emptyBecauseCurriculum)) {
         // Say WHY. The checklist used to just appear: the session did not start and
         // nothing explained that it could not, which reads as the app being broken.
-        setGateReason(session.needsCurriculumSetup ? "setup" : "empty");
+        // „setup”: the checklist says why itself (curriculum-checklist.tsx); „empty” is said here.
+        setGateReason(session.needsCurriculumSetup ? null : "empty");
         // Remember what was asked for, so saving the checklist starts it (no second tap).
         startAfterSetup.current = { type, topic: topic ?? null };
         setCurriculumSetupNeeded(true);
@@ -196,6 +202,8 @@ export default function PracticePage() {
       }
     } catch {
       setStarting(false);
+    } finally {
+      startInFlight.current = false;
     }
   };
 
@@ -345,12 +353,12 @@ export default function PracticePage() {
             </div>
           )}
 
-          {gateReason && (
+          {gateReason === "empty" && (
             <div
               role="status"
               className="mb-3 rounded-lg border border-amber-800 bg-amber-950/20 px-3 py-2 text-sm text-amber-200"
             >
-              {tCur(gateReason === "setup" ? "gateSetup" : "gateEmpty")}
+              {tCur("gateEmpty")}
             </div>
           )}
 
@@ -359,12 +367,14 @@ export default function PracticePage() {
               key={selectedDomain}
               domainSlug={selectedDomain}
               forceOpen={curriculumSetupNeeded}
-              onSaved={() => {
+              onSaved={({ first }) => {
                 setCurriculumSetupNeeded(false);
                 setGateReason(null);
                 const pending = startAfterSetup.current;
                 startAfterSetup.current = null;
                 if (pending) handleSelect(pending.type, pending.topic);
+                // Inițierea confirmată cu „Da, e corect — începe testul”: butonul promite testul.
+                else if (first) handleSelect("quick");
               }}
             />
           )}

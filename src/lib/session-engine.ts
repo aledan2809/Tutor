@@ -20,6 +20,18 @@ export const SESSION_TYPES = {
 export type SessionType = keyof typeof SESSION_TYPES;
 
 /**
+ * Primul test al unui elev nou (niciun test terminat încă): 5 întrebări, fără cronometru (Alex 14.10.2026).
+ * Primul contact trebuie să fie scurt; de la al doilea test, sesiunea are lungimea ei obișnuită.
+ */
+export const FIRST_TEST_QUESTION_COUNT = 5;
+
+/** A „quick" test is this learner's first: no test ended yet, in any subject. */
+export async function isFirstQuickTest(userId: string, sessionType: string): Promise<boolean> {
+  if (sessionType !== "quick") return false;
+  return (await prisma.session.count({ where: { userId, endedAt: { not: null } } })) === 0;
+}
+
+/**
  * Sprint questions are generated fresh per session and only make sense under
  * their per-question clock, so every generic selector below skips them.
  *

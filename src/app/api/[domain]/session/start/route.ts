@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import {
   selectQuestions,
   SESSION_TYPES,
+  FIRST_TEST_QUESTION_COUNT,
+  isFirstQuickTest,
   estimateQuestionSeconds,
   isExamGrileSet,
   type SessionType,
@@ -186,11 +188,13 @@ async function _POST(
   }
 
   const config = SESSION_TYPES[sessionType];
+  // Primul test al unui elev nou: niciun test terminat, pe nicio materie (session-engine.ts).
+  const firstTest = await isFirstQuickTest(session.user.id, sessionType);
   const questions = await selectQuestions(
     session.user.id,
     domain.id,
     sessionType,
-    config.questionCount,
+    firstTest ? FIRST_TEST_QUESTION_COUNT : config.questionCount,
     // Licență is a short-window cram with a small bank → allow repeats so the
     // whole material can be drilled every session.
     { excludeRecent: domainSlug !== LICENTA_DOMAIN_SLUG, topicIn }
@@ -232,9 +236,12 @@ async function _POST(
   // Official EN VIII norm for exam-bank grile: timer = sum of per-question time
   // estimates (RO language 3 min, geometry/figure 6 min, other Mate 4 min).
   // Other domains keep their flat session-type duration.
-  const duration = isExamGrileSet(questions)
-    ? questions.reduce((sum, q) => sum + estimateQuestionSeconds(q), 0)
-    : config.duration;
+  // 0 = fără cronometru (primul test); pagina testului nu mai arată ceasul.
+  const duration = firstTest
+    ? 0
+    : isExamGrileSet(questions)
+      ? questions.reduce((sum, q) => sum + estimateQuestionSeconds(q), 0)
+      : config.duration;
 
   const newSession = await prisma.session.create({
     data: {
