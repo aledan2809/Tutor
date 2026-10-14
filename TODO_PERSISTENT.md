@@ -20,7 +20,8 @@ verificat cap-coadă pe QA cu comutatorul pornit: **merge**. Pe prod comutatorul
 - [x] **Livrare broker — LIVE 13.10 (~15:18)**: `stripe-module` `b6e9c1c` pe stripe.knowbest.ro (probe 401/401/400, `data/` neatins);
   nginx: `/api/subscription` fără parolă (bloc adăugat de script, `nginx -t` OK, verificat public).
 - [x] `customer.subscription.updated` era deja pe webhook-ul Class RDA (verificat 13.10 cu scriptul brokerului).
-- [ ] 🔴 **Webhook-ul Class RDA primește doar 2 evenimente** (G-TUT-1013-08): de rulat (Alex) verificarea abonamentelor
+- [x] **Webhook-ul Class RDA primește acum toate 7 evenimentele** (G-TUT-1013-08, rezolvat 14.10: Alex le-a bifat manual, citit cu
+  scriptul; `verifica-abonamente-card.cjs` pe prod: 0 abonamente cu card → nimic de corectat). Istoric: de rulat (Alex) verificarea abonamentelor
   `scripts/ops/verifica-abonamente-card.cjs` (doar citire), apoi `adauga-eveniment-webhook.mjs` din stripe-module (DRY_RUN, apoi
   aplicat) → `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`, `checkout.session.expired`,
   `payment_intent.payment_failed`. Dacă verificarea arată nepotriviri: corectarea stărilor în eTutor, separat.
