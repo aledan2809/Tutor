@@ -13,7 +13,17 @@ Stare 14.10: etutor.ro `85b135c`, broker `b6e9c1c`, webhook-ul Class RDA 7/7 eve
   (`src/lib/notifications/test-account.ts` are doar `tutor.app` / `demo.tutor.app` + `.test` / `example.com`). Pe prod sunt
   ~10 conturi de test cu aceste domenii (elevi, profesori, administratori). De adăugat `test.com` și `test.invalid` la
   `TUTOR_TEST_DOMAINS` + test unitar.
-- [~] **Proba cu cardul lui Alex — varianta fără bani (decizia lui 14.10):** cu comutatorul pornit, orice abonare de
+- [x] **14.10 după-amiază, cu acordul lui Alex:** „Gratuit permanent” bifat pe prod la 12 conturi de test/demo (Test Instructor,
+  Instructor Test, Test Student, Test Admin, Admin Test, Puppeteer Admin, E2E Temp User, Leak Test, Test Reg, Test2 Demo,
+  AD (REAL1) Demo, Admin REAL), cu rând `FREE_FOREVER_ON` în jurnalul de administrare; starea de dinainte în
+  `VPS2:/root/backups/tutor-freeforever-pre-2026-10-14.json`. **„Demo Poșta Română” lăsat neatins** (alegerea lui Alex) → intră
+  în pauză pe 21.10 dacă nu e bifat. Rămân candidați la pauză (aprox.): Demo Poșta Română, Jeeeeeee, Irina, Leiba, Rebeca,
+  Georgiana, Adriana, Elisa Palasca, Ioana Marinescu, Catalin Ciucanu, Tureanschi Anastasia + un cont fără nume.
+  Proba de 7 zile de la pornire până la 14:00: 12 notificări + 6 mesaje (push/Telegram), 0 reîncercări, fără buclă; un cont are
+  abonamentul de notificări mort („Push not delivered … 0 delivered”), merge pe Telegram.
+- [~] **Proba cu cardul lui Alex — varianta fără bani (decizia lui 14.10):** varianta scurtă (14.10 după-amiază) e în capul
+  `PASI-ALEX.md`. Brokerul n-a primit încă niciun eveniment live de la Class RDA (4 plăți eTutor începute, toate neterminate;
+  jurnalul nginx fără apeluri `/api/stripe/webhook/class-rda`) — deci legătura live e nedovedită până la probă. cu comutatorul pornit, orice abonare de
   săptămâna asta are 7 zile gratuite, deci cardul nu e taxat. Pașii: `Reports/proba-card-2026-10-14/PASI-ALEX.md`;
   script doar-citire `scripts/ops/urmareste-proba-card.cjs` (verificat pe prod pe contul lui Alex, 14.10). Rămâne: Alex
   face pașii 0–5 și trimite rezultatul scriptului după fiecare. Taxarea reală rămâne neverificată pe prod (prima: 21.10 sau un client).
@@ -70,9 +80,21 @@ Stare 14.10: etutor.ro `85b135c`, broker `b6e9c1c`, webhook-ul Class RDA 7/7 eve
   copil fără materie intră în „Copiii mei”, capitolul se deschide pe „Materii”, „Am notat — alege materiile lui X”, panoul de
   părinte („Vezi ce face X”) în locul celui de elev; `test.com` / `.invalid` = test. Codul de familie (B6) era deja vizibil în
   „Invitații în așteptare”. Verificare: `Reports/parinte-copil-2026-10-14/verificare.mjs` (22/22).
-- [ ] **Găsit la revizia OpenAI 14.10 (exista dinainte):** testul inițial (`/dashboard/assessment`, „Panou complet”) pornește pe o
-  materie cu programă fără bifarea capitolelor — încalcă regula din 24.08. De pus poarta (`visibleTopicsFor` + filtrul pe capitole)
-  în `api/student/assessment` GET și POST și mesajul în pagină. `Reports/revizie-openai-2026-10-14/RAPORT.md`.
+- [x] **Poarta testului inițial + pagina de intrare + lista goală BAC — 14.10 după-amiază, pe `master`, NELIVRAT** (Alex: „fă-le
+  cât sunt ocupat”, fără publicare). Poarta comună `src/lib/test-topic-gate.ts` (aceeași regulă ca `session/start`): testul
+  inițial (`api/student/assessment` GET + POST) și testul rapid (`sessions/quick`, căruia îi lipsea poarta cursului) cer capitolele
+  confirmate și iau doar din capitolele bifate / modulele cu lecțiile terminate; un răspuns din afara lor (capitol debifat în timpul
+  testului) e refuzat cu 409, fără notă și fără răspunsuri dezvăluite (revizia OpenAI, P2). Pagina „Evaluare” spune de ce nu
+  pornește, cu link. Pagina de intrare: „Intră în contul tău eTutor.ro”, cele trei linkuri pe rânduri separate (44 px), „Primește
+  un link de intrare pe email” în loc de „magic link”. Lista BAC la clasa a IX-a: pagina filtra iar capitolele (toate sunt „clasa
+  a X-a”) → goală; acum „Toate capitolele materiei”. Tot acolo: cardul „Da, e corect” se deschidea la prima bifă făcută de mână
+  pe o listă goală (și spunea că a bifat-o programa) — acum ține doar de precompletarea serverului. Verificare:
+  `Reports/poarta-evaluare-2026-10-14/verificare.mjs` (23/23; pe build-ul vechi se oprește la bifă), plus cele trei verificări
+  de dimineață; vitest 1441; revizia OpenAI: o constatare, reparată.
+- [ ] **Pagina „Evaluare” e în engleză** („Level Assessment”, „Start Assessment”, „Question 1 of 10”…) pe un site în română —
+  doar mesajele noi sunt traduse. De trecut pe `useTranslations` (lotul 2, pasul 15, texte RO/EN).
+- [ ] **„AI” într-un text public:** `src/lib/seo-subjects.ts:60` („…demo-ul Magic Quiz și AI-ul generează grile…”) — regula e
+  fără „AI” în textele pentru utilizatori.
 - [ ] **Rămase din lotul 2:** 7 (B2B: poarta de vârstă + mesaj fals + „Copiază link”), 8 (intrarea cu cod: reintrare în același
   cont — atinge autentificarea), 12, 15 (texte RO/EN, „Monitor Progres Studenți” → vocabular de părinte).
 - [x] **Livrat pe etutor.ro 14.10 ~12:50** (OK-ul lui Alex): `3ed8efa` → `932bb1d` cu `scripts/ops/livreaza-tutor.sh`; copie
@@ -80,9 +102,8 @@ Stare 14.10: etutor.ro `85b135c`, broker `b6e9c1c`, webhook-ul Class RDA 7/7 eve
   jurnalul de erori gol după repornire. Sonda pe prod (`Reports/livrare-2026-10-14/sonda.txt`): `/ro/parinte` primul buton
   „Încearcă 7 zile fără card”; `/ro/preturi` bara „Începe gratuit” pe primul ecran (sonda o marchează doar fiindcă ia întâi
   butonul din cardul „Gratuit”). Cele trei `verificare.mjs` NU se rulează pe prod (creează conturi).
-- [ ] Văzut în treacăt, de reparat separat: pagina de intrare pe telefon — titlul „Autentifică-te în Tutor” (marca e eTutor.ro),
-  linkurile „Recuperează pe telefon” / „Ai uitat parola?” lipite, „magic link” (jargon). Banca BAC: un elev de clasa a IX-a
-  pe o materie de liceu vede lista de capitole goală (rândurile sunt ale clasei a X-a) — de verificat, nu reprodus.
+- [x] Văzut în treacăt: pagina de intrare (titlu, linkuri lipite, „magic link”) și lista goală la BAC clasa a IX-a — reparate
+  14.10 după-amiază, vezi itemul „Poarta testului inițial” de mai sus.
 
 ## [x] 🔴 PÂLNIA — lotul 1 de reparații (pașii 1–5 din `Reports/TRUE-E2E-FULL-2026-10-05.md` §6) — **LIVE 13.10 (`85b135c`)**, confirmat pe prod 14.10
 

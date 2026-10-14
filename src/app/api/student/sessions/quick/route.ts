@@ -9,8 +9,7 @@ import {
   isFirstQuickTest,
 } from "@/lib/session-engine";
 import { withErrorHandler } from "@/lib/api-handler";
-import { bandForDomainSlug } from "@/lib/curriculum";
-import { visibleTopicsFor } from "@/lib/curriculum-service";
+import { testTopicGate, emptyGatedTestResponse } from "@/lib/test-topic-gate";
 import { resolveDomainByIdOrForbid } from "@/lib/domain-gate";
 import { z } from "zod";
 import { refuseIfPaused } from "@/lib/access-gate";
@@ -50,23 +49,13 @@ async function _POST(req: NextRequest) {
   const gate = await resolveDomainByIdOrForbid(domainId, session.user);
   if (!gate.ok) return gate.response;
 
-  // Poarta programei parcurse — ACEEAȘI ca în [domain]/session/start. Ruta
-  // asta era al doilea apelant al lui selectQuestions și, negardată, oferea
-  // bazinul întreg exact elevului blocat dincolo (finding review 2026-08-24).
-  const domain = await prisma.domain.findUnique({
-    where: { id: domainId },
-    select: { slug: true },
-  });
-  let topicIn: string[] | null = null;
-  if (domain && bandForDomainSlug(domain.slug)) {
-    topicIn = await visibleTopicsFor(session.user.id, domain.slug);
-    if (topicIn === null) {
-      return NextResponse.json(
-        { error: "Curriculum setup required", needsCurriculumSetup: true },
-        { status: 409 }
-      );
-    }
-  }
+  // Poarta programei parcurse / a cursului — ACEEAȘI ca în [domain]/session/start
+  // (test-topic-gate.ts). Ruta asta era al doilea apelant al lui selectQuestions și,
+  // negardată, oferea bazinul întreg exact elevului blocat dincolo (review 2026-08-24);
+  // poarta cursului lipsea până la 14.10.2026.
+  const topics = await testTopicGate(session.user.id, gate.domain);
+  if (!topics.ok) return topics.response;
+  const topicIn = topics.topicIn;
 
   // Get recommended session type
   const recommendation = await recommendSessionType(session.user.id, domainId);
@@ -85,11 +74,8 @@ async function _POST(req: NextRequest) {
   );
 
   if (questions.length === 0) {
-    if (topicIn !== null) {
-      return NextResponse.json(
-        { error: "No questions in covered chapters", emptyBecauseCurriculum: true },
-        { status: 409 }
-      );
+    if (topics.kind !== null) {
+      return emptyGatedTestResponse(session.user.id, gate.domain, topics.kind);
     }
     return NextResponse.json(
       { error: "No published questions available" },

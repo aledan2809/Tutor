@@ -176,8 +176,16 @@ export function CurriculumChecklist({
     ) : null;
   }
 
-  const visibleRows = schoolYear === null ? [] : rows.filter((r) => r.year <= schoolYear);
+  const byYear = schoolYear === null ? [] : rows.filter((r) => r.year <= schoolYear);
+  // Same rule as unitsForStudent (curriculum.ts): the BAC chapters are all filed under grade X, so for a
+  // grade-IX student this filter left nothing and the list showed up empty (14.10.2026) — show them all.
+  const allChapters = schoolYear !== null && byYear.length === 0 && rows.length > 0;
+  const visibleRows = allChapters ? rows : byYear;
   const taughtCount = visibleRows.filter((r) => taught.get(r.key)).length;
+  // What the server pre-ticked from the curriculum (not the ticks being edited on screen): the one-button
+  // card is for that pre-fill only. Keyed on the live ticks, the first box a student ticked by hand on an
+  // empty list swapped the list for the card, which then said the curriculum had ticked it (14.10.2026).
+  const prefilledCount = visibleRows.filter((r) => r.taught).length;
   // Decalajul programă↔bife (starea SALVATĂ, nu editarea în curs): aceeași
   // regulă ca atenționarea săptămânală — vizibil aici oricând, nu doar lunea.
   const lag = state.rows.filter((r) => r.expectedByNow && !r.taught).length;
@@ -235,7 +243,7 @@ export function CurriculumChecklist({
   // Inițierea elevului: clasa (propusă după data nașterii) + capitolele pre-bifate după programă,
   // confirmate cu un buton. Regula din 24.08 rămâne: se confirmă în aplicație înaintea primului test.
   // Nu și pe paginile părintelui/meditatorului (childId) și nu când nimic nu e încă în programă.
-  if (!childId && !state.initiated && !showAll && schoolYear !== null && taughtCount > 0) {
+  if (!childId && !state.initiated && !showAll && schoolYear !== null && prefilledCount > 0) {
     return (
       <div className="mb-6 rounded-2xl border border-gray-700 bg-gray-900 p-4 sm:p-5">
         <p className="text-[11px] font-bold uppercase tracking-widest text-blue-300">{t("firstTag")}</p>
@@ -306,8 +314,14 @@ export function CurriculumChecklist({
           {years.map((y) => (
             <div key={y} className="mt-4">
               <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                {t("classLabel")} {t(`year${y}`)}
-                {y === schoolYear && <span className="ml-2 text-blue-400">{t("currentYear")}</span>}
+                {allChapters ? (
+                  t("allChapters")
+                ) : (
+                  <>
+                    {t("classLabel")} {t(`year${y}`)}
+                    {y === schoolYear && <span className="ml-2 text-blue-400">{t("currentYear")}</span>}
+                  </>
+                )}
               </h3>
               <ul className="space-y-1">
                 {visibleRows

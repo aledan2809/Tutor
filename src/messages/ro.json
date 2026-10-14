@@ -16,7 +16,7 @@
   "auth": {
     "signIn": "Autentificare",
     "signOut": "Deconectare",
-    "signInTitle": "Autentifică-te în Tutor",
+    "signInTitle": "Intră în contul tău eTutor.ro",
     "signInDescription": "Accesează platforma ta de învățare adaptivă",
     "emailLabel": "Adresă de email",
     "identifierLabel": "Email sau nume de utilizator",
@@ -33,7 +33,7 @@
     "passwordLabel": "Parola",
     "signInButton": "Autentificare",
     "forgotPassword": "Ai uitat parola?",
-    "useMagicLink": "Folosește magic link",
+    "useMagicLink": "Primește un link de intrare pe email",
     "usePassword": "Folosește parola",
     "invalidCredentials": "Email/nume de utilizator sau parolă incorectă",
     "networkError": "Nu am putut trimite cererea. Verifică conexiunea și încearcă din nou.",
@@ -1253,6 +1253,7 @@
     "whichClass": "În ce clasă ești?",
     "pickClass": "Alege clasa",
     "classLabel": "Clasa",
+    "allChapters": "Toate capitolele materiei",
     "currentYear": "· anul curent",
     "legendExpected": "în programă până azi",
     "legendTaught": "predat la clasa ta",
@@ -1353,5 +1354,18 @@
     "paidList": "Plata a trecut. Materia apare în listă imediat ce se confirmă plata, de obicei în câteva secunde.",
     "paidDomains": "Plata a trecut. Materia apare la domeniile tale imediat ce se confirmă plata, de obicei în câteva secunde.",
     "paidLate": "Plata încă nu s-a confirmat. Reîncarcă pagina peste un minut."
+  },
+  "assessment": {
+    "notice": {
+      "setup": "Înainte de test, confirmă capitolele pe care le-ai făcut deja la școală la materia asta. Testul ia întrebări doar din ele.",
+      "setupCta": "Confirmă capitolele →",
+      "emptyChapters": "Capitolele bifate la materia asta nu au încă întrebări. Mai bifează un capitol sau alege altă materie.",
+      "emptyChaptersCta": "Vezi capitolele →",
+      "course": "Testul se deschide din lecțiile terminate. Termină o lecție și revino.",
+      "courseCta": "Deschide lecția →",
+      "chaptersChanged": "Capitolele bifate s-au schimbat cât timp răspundeai. Pornește testul din nou.",
+      "noQuestions": "La materia asta nu sunt încă întrebări pentru test.",
+      "error": "Nu am putut porni testul acum. Încearcă din nou."
+    }
   }
 }

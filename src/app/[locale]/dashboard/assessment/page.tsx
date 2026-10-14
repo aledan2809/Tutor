@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 interface Question {
   id: string;
@@ -35,8 +37,30 @@ interface EnrolledDomain {
 
 type Phase = "select" | "loading" | "quiz" | "results";
 
+// Why the test didn't start (test-topic-gate.ts): chapters not confirmed yet, confirmed
+// chapters without questions, a course whose lessons aren't done, or a plain failure.
+type Notice =
+  | { kind: "setup"; slug: string }
+  | { kind: "emptyChapters"; slug: string }
+  | { kind: "course"; lessonId: string | null }
+  | { kind: "chaptersChanged" }
+  | { kind: "noQuestions" }
+  | { kind: "error" };
+
+function noticeFrom(data: Record<string, unknown> | null, slug: string): Notice {
+  if (data?.needsCurriculumSetup === true) return { kind: "setup", slug };
+  if (data?.chaptersChanged === true) return { kind: "chaptersChanged" };
+  if (data?.emptyBecauseCurriculum === true) return { kind: "emptyChapters", slug };
+  if (data?.emptyBecauseCourse === true) {
+    return { kind: "course", lessonId: typeof data.lessonId === "string" ? data.lessonId : null };
+  }
+  return { kind: "error" };
+}
+
 export default function AssessmentPage() {
+  const t = useTranslations("assessment");
   const [phase, setPhase] = useState<Phase>("select");
+  const [notice, setNotice] = useState<Notice | null>(null);
   const [domains, setDomains] = useState<EnrolledDomain[]>([]);
   const [selectedDomain, setSelectedDomain] = useState("");
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -60,10 +84,17 @@ export default function AssessmentPage() {
 
   const startAssessment = async () => {
     if (!selectedDomain) return;
+    const slug = domains.find((d) => d.id === selectedDomain)?.slug ?? "";
+    setNotice(null);
     setPhase("loading");
     try {
       const res = await fetch(`/api/student/assessment?domainId=${selectedDomain}`);
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setNotice(noticeFrom(data, slug));
+        setPhase("select");
+        return;
+      }
       if (data.questions?.length) {
         setQuestions(data.questions);
         setCurrentIndex(0);
@@ -71,9 +102,11 @@ export default function AssessmentPage() {
         setCurrentAnswer("");
         setPhase("quiz");
       } else {
+        setNotice({ kind: "noQuestions" });
         setPhase("select");
       }
     } catch {
+      setNotice({ kind: "error" });
       setPhase("select");
     }
   };
@@ -105,7 +138,14 @@ export default function AssessmentPage() {
           })),
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        // Refused (e.g. the chapters were un-ticked meanwhile): say why instead of showing empty results.
+        setNotice(noticeFrom(data, domains.find((d) => d.id === selectedDomain)?.slug ?? ""));
+        setSubmitting(false);
+        setPhase("select");
+        return;
+      }
       setResults(data);
       setPhase("results");
     } catch {
@@ -121,13 +161,37 @@ export default function AssessmentPage() {
         <p className="text-sm text-gray-400">
           Answer 10 questions to determine your initial level (Beginner, Intermediate, or Advanced).
         </p>
+        {notice && (
+          <div role="status" className="rounded-lg border border-amber-600/40 bg-amber-600/10 p-4 text-sm text-amber-100">
+            <p>{t(`notice.${notice.kind}`)}</p>
+            {(notice.kind === "setup" || notice.kind === "emptyChapters") && (
+              <Link
+                href={`/dashboard/practice?start=quick&domain=${encodeURIComponent(notice.slug)}`}
+                className="mt-2 inline-block font-medium text-amber-300 underline underline-offset-2"
+              >
+                {t(notice.kind === "setup" ? "notice.setupCta" : "notice.emptyChaptersCta")}
+              </Link>
+            )}
+            {notice.kind === "course" && (
+              <Link
+                href={notice.lessonId ? `/dashboard/lessons/${notice.lessonId}` : "/dashboard/lessons"}
+                className="mt-2 inline-block font-medium text-amber-300 underline underline-offset-2"
+              >
+                {t("notice.courseCta")}
+              </Link>
+            )}
+          </div>
+        )}
         {domains.length > 0 ? (
           <>
             <div>
               <label className="mb-2 block text-sm text-gray-400">Select Domain</label>
               <select
                 value={selectedDomain}
-                onChange={(e) => setSelectedDomain(e.target.value)}
+                onChange={(e) => {
+                  setSelectedDomain(e.target.value);
+                  setNotice(null);
+                }}
                 className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
               >
                 {domains.map((d) => (

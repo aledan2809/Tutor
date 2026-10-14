@@ -252,22 +252,8 @@ export default function SignInPage() {
                 {t("signInButton") || "Sign In"}
               </button>
             </form>
-            <div className="mt-1 flex items-center justify-between">
-              {/* Recuperare pe telefon/marcă: omul de teren n-are email, deci calea pe
-
-                  email nu-l ajută cu nimic. */}
-
-              <Link
-
-                href="/auth/recuperare"
-
-                className="text-sm text-blue-400 hover:text-blue-300"
-
-              >
-
-                {t("phoneRecovery")}
-
-              </Link>
+            {/* One per row: side by side, the three links ran into each other on a phone (14.10.2026). */}
+            <div className="mt-2 flex flex-col items-start">
               <Link
                 href="/auth/forgot-password"
                 className="inline-flex min-h-[44px] items-center text-sm font-medium text-blue-400 hover:text-blue-300"
@@ -276,10 +262,18 @@ export default function SignInPage() {
               </Link>
               <button
                 onClick={() => setMode("magic")}
-                className="inline-flex min-h-[44px] items-center text-xs text-gray-400 hover:text-gray-200"
+                className="inline-flex min-h-[44px] items-center text-sm text-gray-400 hover:text-gray-200"
               >
                 {t("useMagicLink") || "Use magic link instead"}
               </button>
+              {/* Recuperare pe telefon/marcă: omul de teren n-are email, deci calea pe
+                  email nu-l ajută cu nimic. */}
+              <Link
+                href="/auth/recuperare"
+                className="inline-flex min-h-[44px] items-center text-sm text-blue-400 hover:text-blue-300"
+              >
+                {t("phoneRecovery")}
+              </Link>
             </div>
           </>
         ) : (

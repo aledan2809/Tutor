@@ -1,5 +1,19 @@
 # Proba cu cardul pe etutor.ro, fără bani — pașii pentru Alex (14.10.2026)
 
+## Varianta scurtă (14.10 după-amiază) — ~5 minute, de pe telefon, oricând
+
+Nu te grăbește nimic: un cont nou primește 7 zile gratuite de la crearea lui, deci azi plătești 0 lei oricând faci proba.
+
+1. **Pasul 0** — contul de test (părinte, `alexdanciulescu+etutor-card@gmail.com`).
+2. **Pasul 1** — Pachete → Family → „Alege pachetul” → cardul. Dacă pagina Stripe cere altă sumă decât 0 lei azi, te oprești.
+3. **Pasul 3** — Pachete → „Gestionează abonamentul” → Anulează.
+
+Îmi scrii „gata” după fiecare pas: scriptul de mai jos îl rulez eu (doar citește). **Pasul 4 nu mai e nevoie:** abonamentul anulat
+se încheie singur la capătul celor 7 zile, iar atunci verific eu că eTutor a primit încheierea. **Pasul 5** (bifa „Gratuit
+permanent” pe contul de test) îl fac eu, după ce văd anularea.
+
+---
+
 **Ce verificăm:** că legătura Stripe → broker → eTutor merge pe producție la abonare, la anularea din portal și la
 încheierea abonamentului. **Nu se ia niciun ban:** cu proba de 7 zile pornită (azi, 09:23), orice abonare de săptămâna
 asta începe cu 7 zile gratuite. Ce NU verificăm azi: o taxare reală (prima va fi pe 21.10 sau la primul client).

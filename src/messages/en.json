@@ -16,7 +16,7 @@
   "auth": {
     "signIn": "Sign In",
     "signOut": "Sign Out",
-    "signInTitle": "Sign in to Tutor",
+    "signInTitle": "Sign in to your eTutor.ro account",
     "signInDescription": "Access your adaptive learning platform",
     "emailLabel": "Email address",
     "identifierLabel": "Email or username",
@@ -33,7 +33,7 @@
     "passwordLabel": "Password",
     "signInButton": "Sign In",
     "forgotPassword": "Forgot password?",
-    "useMagicLink": "Use magic link instead",
+    "useMagicLink": "Get a sign-in link by email",
     "usePassword": "Use password instead",
     "invalidCredentials": "Invalid email/username or password",
     "networkError": "We could not send the request. Check your connection and try again.",
@@ -1253,6 +1253,7 @@
     "whichClass": "Which grade are you in?",
     "pickClass": "Pick your grade",
     "classLabel": "Grade",
+    "allChapters": "All chapters of the subject",
     "currentYear": "· current year",
     "legendExpected": "in the plan by now",
     "legendTaught": "taught in your class",
@@ -1353,5 +1354,18 @@
     "paidList": "Payment went through. The subject shows up in the list as soon as the payment is confirmed, usually within seconds.",
     "paidDomains": "Payment went through. The subject shows up in your subjects as soon as the payment is confirmed, usually within seconds.",
     "paidLate": "The payment isn't confirmed yet. Reload the page in a minute."
+  },
+  "assessment": {
+    "notice": {
+      "setup": "Before the test, confirm the chapters you've already covered at school in this subject. The test only uses questions from them.",
+      "setupCta": "Confirm chapters →",
+      "emptyChapters": "The chapters you ticked in this subject don't have questions yet. Tick another chapter or pick another subject.",
+      "emptyChaptersCta": "See chapters →",
+      "course": "The test opens from the lessons you've finished. Finish a lesson and come back.",
+      "courseCta": "Open the lesson →",
+      "chaptersChanged": "The ticked chapters changed while you were answering. Start the test again.",
+      "noQuestions": "There are no test questions in this subject yet.",
+      "error": "We couldn't start the test right now. Try again."
+    }
   }
 }

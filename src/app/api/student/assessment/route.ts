@@ -5,6 +5,7 @@ import { withErrorHandler } from "@/lib/api-handler";
 import { resolveDomainByIdOrForbid } from "@/lib/domain-gate";
 import { z } from "zod";
 import { refuseIfPaused } from "@/lib/access-gate";
+import { testTopicGate, emptyGatedTestResponse } from "@/lib/test-topic-gate";
 
 const assessmentSchema = z.object({
   domainId: z.string().min(1),
@@ -45,6 +46,9 @@ async function _POST(req: NextRequest) {
   // Poarta comună (înscriere + ocolire pentru superadmin + 404 în loc de 403).
   const gate = await resolveDomainByIdOrForbid(domainId, session.user);
   if (!gate.ok) return gate.response;
+  // Doar din materia parcursă (test-topic-gate.ts): capitolele neconfirmate → 409.
+  const topics = await testTopicGate(session.user.id, gate.domain);
+  if (!topics.ok) return topics.response;
 
   // Get questions and check answers
   const questionIds = answers.map((a) => a.questionId);
@@ -54,6 +58,12 @@ async function _POST(req: NextRequest) {
   const questions = await prisma.question.findMany({
     where: { id: { in: questionIds }, domainId, status: "PUBLISHED" },
   });
+  // A chapter un-ticked (or a course lesson reset) after the quiz loaded: refuse, with no session and no
+  // answers revealed, instead of scoring those answers as wrong (OpenAI review 14.10.2026).
+  const open = topics.topicIn ? new Set(topics.topicIn) : null;
+  if (open && questions.some((q) => !open.has(q.topic))) {
+    return NextResponse.json({ error: "Chapters changed", chaptersChanged: true }, { status: 409 });
+  }
 
   const questionMap = new Map(questions.map((q) => [q.id, q]));
 
@@ -173,9 +183,13 @@ async function _GET(req: NextRequest) {
   // Poarta comună (înscriere + ocolire pentru superadmin + 404 în loc de 403).
   const getGate = await resolveDomainByIdOrForbid(domainId, session.user);
   if (!getGate.ok) return getGate.response;
+  // Aceeași poartă ca testele obișnuite: capitolele bifate / modulele cu lecțiile terminate.
+  const topics = await testTopicGate(session.user.id, getGate.domain);
+  if (!topics.ok) return topics.response;
+  const topicWhere = topics.topicIn ? { topic: { in: topics.topicIn } } : {};
 
   // Select 10 MULTIPLE_CHOICE questions with valid options across difficulties
-  const baseWhere = { domainId, status: "PUBLISHED" as const, type: "MULTIPLE_CHOICE" as const, options: { not: null as unknown as undefined } };
+  const baseWhere = { domainId, status: "PUBLISHED" as const, type: "MULTIPLE_CHOICE" as const, options: { not: null as unknown as undefined }, ...topicWhere };
 
   const easyQuestions = await prisma.question.findMany({
     where: { ...baseWhere, difficulty: { lte: 2 } },
@@ -228,6 +242,9 @@ async function _GET(req: NextRequest) {
     const opts = q.options as unknown[];
     return Array.isArray(opts) && opts.length >= 2;
   });
+  if (questions.length === 0 && topics.kind !== null) {
+    return emptyGatedTestResponse(session.user.id, getGate.domain, topics.kind);
+  }
 
   // Shuffle
   for (let i = questions.length - 1; i > 0; i--) {
