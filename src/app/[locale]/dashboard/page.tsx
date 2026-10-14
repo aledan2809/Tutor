@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -25,6 +25,8 @@ interface DomainProgress {
   accuracy: number;
   sessionsCompleted: number;
   topicsStudied: number;
+  /** The subject has official papers (Simulări) — api/student/dashboard. */
+  hasSimulations?: boolean;
 }
 
 interface RecentSession {
@@ -45,6 +47,8 @@ interface WeakArea {
 }
 
 interface DashboardData {
+  /** The subject this answer is about (api/student/dashboard). */
+  activeDomainId?: string | null;
   streak: {
     current: number;
     longest: number;
@@ -102,20 +106,32 @@ export default function DashboardPage() {
     } catch {}
   };
 
+  // One request per subject on screen (audit S9/S10): an error answer is never taken for data, and a
+  // late answer for an earlier request doesn't overwrite the subject just picked.
+  // The switcher moves at once; the text and the buttons follow the answer that arrived, and a failed
+  // switch goes back to the subject still on screen.
+  const lastRequest = useRef(0);
+  const shownDomainId = useRef<string | null>(null);
   const fetchDashboard = useCallback((domainId?: string) => {
+    const id = ++lastRequest.current;
     setLoading(true);
-    const params = domainId ? `?domainId=${domainId}` : "";
+    const params = domainId ? `?domainId=${encodeURIComponent(domainId)}` : "";
     fetch(`/api/student/dashboard${params}`)
-      .then((r) => r.json())
-      .then((d) => {
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`dashboard ${r.status}`))))
+      .then((d: DashboardData) => {
+        if (id !== lastRequest.current) return;
+        const shown = d.activeDomainId ?? d.domains?.[0]?.domainId ?? null;
+        shownDomainId.current = shown;
         setData(d);
-        if (!activeDomainId && d.domains?.length > 0) {
-          setActiveDomainId(d.domains[0].domainId);
-        }
+        setActiveDomainId(shown);
       })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [activeDomainId]);
+      .catch(() => {
+        if (id === lastRequest.current && shownDomainId.current) setActiveDomainId(shownDomainId.current);
+      })
+      .finally(() => {
+        if (id === lastRequest.current) setLoading(false);
+      });
+  }, []);
 
   useEffect(() => {
     fetchDashboard();
@@ -128,18 +144,38 @@ export default function DashboardPage() {
 
   // Resume the in-progress session or fall back to starting practice. Shared by
   // the Today hero CTA and the full-dashboard quick action.
-  const continueSession = useCallback(async () => {
-    try {
-      const res = await fetch("/api/student/sessions/continue", { method: "POST" });
-      const result = await res.json();
-      if (result.sessionId) {
+  // Of the subject on screen (audit S12): the hero names that subject. With nothing to resume, the hero
+  // starts a test on it; the full dashboard's „Continuă” opens the practice page, as before.
+  const continueSession = useCallback(
+    async (opts?: { startIfNone?: boolean }) => {
+      // The subject of the answer on screen — the one the hero's text is about.
+      const shownId = data?.activeDomainId ?? activeDomainId;
+      const dom = data?.domains.find((d) => d.domainId === shownId) ?? data?.domains[0];
+      const resume = async (domainId?: string) => {
+        const res = await fetch("/api/student/sessions/continue", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(domainId ? { domainId } : {}),
+        });
+        const result = await res.json();
+        if (!result.sessionId) return false;
         localStorage.setItem(`session_${result.sessionId}`, JSON.stringify(result));
         router.push(`/dashboard/practice/${result.sessionId}`);
-        return;
-      }
-    } catch {}
-    router.push("/dashboard/practice");
-  }, [router]);
+        return true;
+      };
+      try {
+        if (await resume(dom?.domainId)) return;
+        // The full dashboard's „Continuă” names no subject: an unfinished test of another one counts too.
+        if (!opts?.startIfNone && dom && (await resume())) return;
+      } catch {}
+      router.push(
+        opts?.startIfNone && dom
+          ? `/dashboard/practice?start=quick&domain=${encodeURIComponent(dom.domainSlug)}`
+          : "/dashboard/practice",
+      );
+    },
+    [router, data, activeDomainId],
+  );
 
   if (loading && !data) {
     return <div className="py-12 text-center text-gray-400">{t("common.loading")}</div>;
@@ -149,7 +185,9 @@ export default function DashboardPage() {
     return <div className="py-12 text-center text-gray-400">{t("dashboard.couldNotLoad")}</div>;
   }
 
-  const activeDomain = data.domains.find((d) => d.domainId === activeDomainId) || data.domains[0];
+  // Text and actions from the subject of the answer on screen (not yet from a switch still loading).
+  const activeDomain =
+    data.domains.find((d) => d.domainId === (data.activeDomainId ?? activeDomainId)) || data.domains[0];
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -214,8 +252,13 @@ export default function DashboardPage() {
           data={data}
           activeDomain={activeDomain}
           userName={session?.user?.name ?? null}
-          onContinue={continueSession}
-          onSimulate={() => router.push("/dashboard/exam-bank")}
+          onContinue={() => void continueSession({ startIfNone: true })}
+          // Its own papers, or no step at all when the subject has none (audit S14).
+          onSimulate={
+            activeDomain?.hasSimulations
+              ? () => router.push(`/dashboard/exam-bank?domain=${encodeURIComponent(activeDomain.domainSlug)}`)
+              : null
+          }
           onOpenLesson={(id) => router.push(`/dashboard/lessons/${id}`)}
           onCourseTest={() => {
             const topic = data.course?.current?.questionTopic;
@@ -290,7 +333,7 @@ export default function DashboardPage() {
               </div>
             </button>
             <button
-              onClick={continueSession}
+              onClick={() => void continueSession()}
               className="flex items-center gap-3 rounded-xl border border-gray-800 bg-gray-900 p-4 text-left transition-colors hover:border-green-600/50 hover:bg-gray-800"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-600/10 text-lg">
@@ -471,7 +514,7 @@ function TodayView({
   activeDomain: DomainProgress | undefined;
   userName: string | null;
   onContinue: () => void;
-  onSimulate: () => void;
+  onSimulate: (() => void) | null;
   onOpenLesson: (lessonId: string) => void;
   onCourseTest: () => void;
   t: ReturnType<typeof useTranslations>;
@@ -612,7 +655,7 @@ function TodayView({
             }
             onClick={step1Done ? onContinue : undefined}
           />
-          <PathStep state="next" n={3} label={t("dashboard.todayStep3")} onClick={onSimulate} />
+          {onSimulate && <PathStep state="next" n={3} label={t("dashboard.todayStep3")} onClick={onSimulate} />}
         </div>
       </section>
 

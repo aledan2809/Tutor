@@ -8,6 +8,7 @@ import { z } from "zod";
 import { refuseIfPaused } from "@/lib/access-gate";
 import { coursePathFor } from "@/lib/course-path";
 import { bandForDomainSlug } from "@/lib/curriculum";
+import { simulationGroupKeyFor, stripLevelSuffix } from "@/lib/exam-level";
 
 const dashboardQuerySchema = z.object({
   // Materiile au id-uri cuid, nu uuid: `.uuid()` respingea orice comutare de materie cu 400.
@@ -42,6 +43,8 @@ async function _GET(req: NextRequest) {
   const enrollments = await prisma.enrollment.findMany({
     where: { userId, isActive: true },
     include: { domain: true },
+    // A stable order: the first subject is the default one, the same on every load.
+    orderBy: { createdAt: "asc" },
   });
 
   if (enrollments.length === 0) {
@@ -67,6 +70,11 @@ async function _GET(req: NextRequest) {
   ]);
 
   // Per-domain progress
+  // Official papers (Simulări): which subjects have any — the „Simulări” step is offered only for those.
+  const paperGroups = (
+    await prisma.examPaper.groupBy({ by: ["examType", "subjectName"], where: { isActive: true } })
+  ).map((p) => ({ key: `${p.examType}::${p.subjectName}`, level: p.examType, subjectDisplay: stripLevelSuffix(p.subjectName) }));
+
   const domainProgress = await Promise.all(
     enrollments.map(async (enrollment) => {
       const progress = await prisma.progress.findMany({
@@ -110,16 +118,18 @@ async function _GET(req: NextRequest) {
         accuracy: domainAttempts > 0 ? Math.round((domainCorrect / domainAttempts) * 100) : 0,
         sessionsCompleted: domainSessions.length,
         topicsStudied: domainProgress.length,
+        hasSimulations: simulationGroupKeyFor({ slug: enrollment.domain.slug, name: enrollment.domain.name }, paperGroups) !== null,
       };
     })
   );
 
-  // Recent sessions (last 10)
+  // Recent sessions (last 10) and weak areas: of the subject on screen. Across subjects, the hero
+  // proposed a topic from another subject than the one shown (audit S11).
   const recentSessions = await prisma.session.findMany({
     where: {
       userId,
       endedAt: { not: null },
-      ...(domainId ? { domainId } : {}),
+      ...(activeDomainId ? { domainId: activeDomainId } : {}),
     },
     orderBy: { startedAt: "desc" },
     take: 10,
@@ -130,7 +140,7 @@ async function _GET(req: NextRequest) {
 
   // Weak areas
   const weakAreas = await prisma.weakArea.findMany({
-    where: { userId },
+    where: { userId, ...(activeDomainId ? { domainId: activeDomainId } : {}) },
     orderBy: { errorRate: "desc" },
     take: 5,
   });
@@ -168,6 +178,8 @@ async function _GET(req: NextRequest) {
           xpToNextLevel: xpInfo.xpToNextLevel,
         }
       : { total: 0, level: "Cadet", progressToNext: 0, nextLevel: null, xpToNextLevel: 0 },
+    // The subject this answer is about: the page takes text and actions from the same answer.
+    activeDomainId: activeDomainId ?? null,
     domains: domainProgress,
     recentSessions: recentSessions.map((s) => ({
       id: s.id,

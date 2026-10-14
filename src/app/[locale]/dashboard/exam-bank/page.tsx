@@ -2,12 +2,17 @@ import { prisma } from "@/lib/prisma";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { accountPaused } from "@/lib/access-gate";
-import { EXAM_LEVELS, EXAM_LEVEL_LABEL, stripLevelSuffix } from "@/lib/exam-level";
+import { EXAM_LEVELS, EXAM_LEVEL_LABEL, simulationGroupKeyFor, stripLevelSuffix } from "@/lib/exam-level";
 import { ExamBankBrowser, type SubjectGroup } from "@/components/exam-bank/exam-bank-browser";
 
 // Simulări (elev) — examene oficiale. Categorie (nivel) → Subcategorie (materie) prin dropdown,
 // ca la Grile, ca să nu se scroleze o listă lungă. O singură materie afișată o dată.
-export default async function ExamBankStudentPage() {
+export default async function ExamBankStudentPage({
+  searchParams,
+}: {
+  // ?domain=<slug>: opened from a subject (the Today step „Simulări”) — show that subject's papers.
+  searchParams: Promise<{ domain?: string }>;
+}) {
   // Same as the paper page: the pause screen shows in the browser, so the list isn't sent either.
   const session = await auth();
   if (session?.user && (await accountPaused(session.user.id))) return null;
@@ -61,6 +66,14 @@ export default async function ExamBankStudentPage() {
     (a, b) => levelRank(a.level) - levelRank(b.level) || a.subjectDisplay.localeCompare(b.subjectDisplay, "ro")
   );
 
+  // Only the subject's name is read (to pick its papers); nothing of the subject is shown from it.
+  const { domain: domainSlug } = await searchParams;
+  const fromDomain =
+    typeof domainSlug === "string" && domainSlug.length <= 64
+      ? await prisma.domain.findUnique({ where: { slug: domainSlug }, select: { slug: true, name: true } })
+      : null;
+  const initialKey = fromDomain ? simulationGroupKeyFor(fromDomain, groups) : null;
+
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-4">
       <div>
@@ -76,7 +89,7 @@ export default async function ExamBankStudentPage() {
           Nicio simulare disponibilă încă.
         </p>
       ) : (
-        <ExamBankBrowser groups={groups} />
+        <ExamBankBrowser groups={groups} initialKey={initialKey} />
       )}
     </div>
   );

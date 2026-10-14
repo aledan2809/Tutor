@@ -21,6 +21,8 @@ interface AvailableDomain {
   name: string;
   icon: string | null;
   description?: string | null;
+  questionsAvailable?: number;
+  coursesAvailable?: number;
 }
 
 export function OnboardingWizard() {
@@ -35,7 +37,15 @@ export function OnboardingWizard() {
   useEffect(() => {
     fetch("/api/student/domains")
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => setAvailable(d?.available ?? []))
+      // Only subjects that can start something: questions, or a course to read first (audit S13). A
+      // subject with neither used to be offered and then failed at the next step.
+      .then((d) =>
+        setAvailable(
+          ((d?.available ?? []) as AvailableDomain[]).filter(
+            (dom) => (dom.questionsAvailable ?? 1) > 0 || (dom.coursesAvailable ?? 0) > 0,
+          ),
+        ),
+      )
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -76,9 +86,14 @@ export function OnboardingWizard() {
         router.push(`/dashboard/practice/${result.sessionId}`);
         return;
       }
-      // 409 = the subject asks for something first (tick what was taught in class, or read
-      // the first lesson). The practice page explains it and shows that step, then starts
-      // the test by itself — the guide must not end on the server's English error.
+      // A course subject: its tests open lesson by lesson, so the first step is the first lesson.
+      if (res.status === 409 && result.emptyBecauseCourse && typeof result.lessonId === "string") {
+        router.push(`/dashboard/lessons/${result.lessonId}`);
+        return;
+      }
+      // 409 = the subject asks for something first (tick what was taught in class). The practice
+      // page explains it and shows that step, then starts the test by itself — the guide must not
+      // end on the server's English error.
       if (res.status === 409) {
         router.push(`/dashboard/practice?start=quick&domain=${encodeURIComponent(chosen.slug)}`);
         return;

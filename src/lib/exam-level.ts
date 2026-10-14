@@ -39,3 +39,37 @@ export function stripLevelSuffix(name: string): string {
     .trim();
   return d || name;
 }
+
+const fold = (s: string) =>
+  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+
+/** The words that identify a subject: folded, whole words of 5+ letters („romana”, „matematica”, „limba”). */
+const keyWords = (s: string) => fold(s).split(/[^a-z0-9]+/).filter((w) => w.length >= 5);
+
+/**
+ * The Simulări group of a subject (ExamPaper has no domain, only a level and a subject name): the
+ * same exam level, and the subject's name without its level suffix equals the paper's subject, or all
+ * the identifying words of one appear among the other's („Română” ⊂ „Limba și literatura română”),
+ * diacritics ignored. Null when the subject has no official papers — the „Simulări” step is then not
+ * offered for it. A general subject over several papers („Matematica IX-XII” vs M1/M2/M3) gets the
+ * first of them in the given order: only a preselection, the list stays open.
+ */
+export function simulationGroupKeyFor(
+  domain: { slug: string; name: string },
+  groups: readonly { key: string; level: string; subjectDisplay: string }[],
+): string | null {
+  const level = classifyDomainSlug(domain.slug);
+  if (!level) return null;
+  const name = fold(stripLevelSuffix(domain.name));
+  if (!name) return null;
+  const sameLevel = groups.filter((g) => examTypeToLevel(g.level) === level && fold(g.subjectDisplay) !== "");
+  const exact = sameLevel.find((g) => fold(g.subjectDisplay) === name);
+  if (exact) return exact.key;
+  const words = keyWords(name);
+  if (words.length === 0) return null;
+  const loose = sameLevel.find((g) => {
+    const paper = keyWords(g.subjectDisplay);
+    return paper.length > 0 && (words.every((w) => paper.includes(w)) || paper.every((w) => words.includes(w)));
+  });
+  return loose?.key ?? null;
+}

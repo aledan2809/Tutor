@@ -26,8 +26,11 @@ const LEVEL_BLURB: Record<string, string> = {
   BAC: "Subiecte reale de Bacalaureat (proba scrisă), corectate după baremul oficial.",
 };
 
-export function ExamBankBrowser({ groups }: { groups: SubjectGroup[] }) {
-  const [selectedKey, setSelectedKey] = useState<string>(groups[0]?.key ?? "");
+export function ExamBankBrowser({ groups, initialKey = null }: { groups: SubjectGroup[]; initialKey?: string | null }) {
+  // Opened from a subject: its papers first (exam-bank/page.tsx); otherwise the first group, as before.
+  const [selectedKey, setSelectedKey] = useState<string>(
+    initialKey && groups.some((g) => g.key === initialKey) ? initialKey : (groups[0]?.key ?? ""),
+  );
   const selected = groups.find((g) => g.key === selectedKey) ?? groups[0];
 
   // optgroups: ordinea nivelurilor e deja dată de `groups` (server o trimite sortată)

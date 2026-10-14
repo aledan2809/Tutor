@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { getSession } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { SPRINT_SESSION_TYPE } from "@/lib/sprint-session";
 import { withErrorHandler } from "@/lib/api-handler";
 import { refuseIfPaused } from "@/lib/access-gate";
 
-async function _POST() {
+// Optional: continue only a test of this subject (the Today hero names one — audit S12).
+const continueSchema = z.object({ domainId: z.string().min(1).max(64).optional() });
+
+async function _POST(req: Request) {
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -14,11 +18,18 @@ async function _POST() {
   const paused = await refuseIfPaused(session.user.id);
   if (paused) return paused;
 
+  // No body = any subject, as before (the session page); a body that names no valid subject is refused
+  // rather than silently widened to every subject.
+  const body = continueSchema.safeParse(await req.json().catch(() => ({})));
+  if (!body.success) return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  const domainId = body.data.domainId;
+
   // Find last incomplete session
   const lastSession = await prisma.session.findFirst({
     where: {
       userId: session.user.id,
       endedAt: null,
+      ...(domainId ? { domainId } : {}),
     },
     orderBy: { startedAt: "desc" },
     include: {

@@ -138,6 +138,7 @@ async function _GET() {
         select: {
           questions: isContentEditor ? true : { where: { status: "PUBLISHED" as const } },
           enrollments: true,
+          courses: { where: { isPublished: true } },
         },
       },
     },
@@ -161,6 +162,8 @@ async function _GET() {
       description: d.description,
       questionsAvailable: d._count.questions,
       totalStudents: d._count.enrollments,
+      // A subject with a course but few questions still starts (with its first lesson): onboarding-wizard.
+      coursesAvailable: d._count.courses,
     }));
 
   // SuperAdmin previews ALL active subjects in Grile/Practice, not just enrolled ones
