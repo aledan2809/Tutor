@@ -20,6 +20,10 @@ V126S/ONV126S folosite. Prima plată reală trece printr-o legătură Stripe →
 - [x] `d793bf3` **LIVE 15.10 ~21:00 UTC** (a doua revizie Codex pe tot ce s-a livrat azi): alertele nu mai înghit a doua
   reînnoire a unei sesiuni fără cod de eveniment și nu se repetă la o încheiere retrimisă; Abonamentul nu mai scrie
   „Total pentru N copii” când un loc e deja plătit separat. QA 43/43 + 28/28 + 23/23. Copie `/root/backups/tutor-pre-livrare-2026-10-15-2055.dump`.
+- [x] `2ae4649` **LIVE 15.10 ~22:30 UTC** (a treia revizie Codex): alerta „Abonament încheiat” pleacă o singură dată și la
+  încheieri simultane (o singură scriere condiționată). Propunerea Codex „alt părinte” pe „Familia mea” retrasă: ar fi numit
+  greșit al doilea părinte din Family Duo, iar celălalt părinte vede deja cine are pachetul (verificat în QA). QA 45/45 + 28/28 +
+  23/23, vitest 1441. Copie `/root/backups/tutor-pre-livrare-2026-10-15-2226.dump`.
 - [ ] **Plata unică pentru familie** (pachet + locurile copiilor într-o singură plată) — declanșator: proba lui Alex cu cardul
   arată că plata locului cere din nou cardul, SAU apare în probă prima familie reală cu 2+ copii. De verificat înainte:
   taxa fixă Stripe pe tranzacție (contul Class RDA) și, cu un jurist, afișarea prețului total la plata familiei.
