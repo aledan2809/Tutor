@@ -1,5 +1,20 @@
 > **Handoff pentru sesiunea următoare: `Reports/handoffs/ST-2026-10-14-Tutor.md`** (starea producției, ce e deschis, cum se livrează din cloud).
 
+## [~] 💰 /bani 15.10.2026 — drumul banilor (harta: `FLUXURI-BANI.md`)
+
+Cifre (30 zile, fără test, Umami doar etutor.ro): 128 vizitatori · 14 vederi `/ro/parinte` · 5 conturi · 1 copil legat ·
+**0 plăți de la lansare** (brokerul: 4 plăți începute, niciuna terminată) · flyerul: 3 scanări `/cafea` în 15 zile, 0 coduri
+V126S/ONV126S folosite. Prima plată reală trece printr-o legătură Stripe → eTutor care n-a primit niciun eveniment live.
+- [x] Lotul `b3db8a1` + `5624f8d` LIVE 15.10 19:14 UTC (pagina /parinte, proba spusă clar, invitația WhatsApp, poarta capitolelor).
+- [~] `32e2389` (commit local, **nelivrat** — așteaptă OK-ul lui Alex): copilul rămas fără loc după plată pe „Familia mea”
+  (cu prețul locului; „Adaugă copil” nu mai promite „al 3-lea −30%”), alerte pe Telegram către administrator la plată /
+  reînnoire / plată eșuată / încheiere / plată abandonată / ultima zi / pauză (contul super-admin cu Telegram legat: 1 din 3),
+  Umami doar pe etutor.ro. QA 30/30, vitest 1441, revizie Codex reparată.
+- [ ] Alarma zilnică din `FLUXURI-BANI.md`: probată (`money-flows-check --force`: 3 pași + 6 dependențe ok), `"enabled": false`
+  până o pornește Alex.
+- [ ] Lipsă rămasă: anunțul înainte de reînnoire / card care expiră (etapa 9); flyerul nu aduce trafic — de întrebat Poșta
+  dacă distribuția a pornit.
+
 ## [~] 🔴 PROBA DE 7 ZILE — comutatorul PORNIT pe prod 14.10, 09:23 (Alex, intenționat); pauza vine pe 21.10, 09:23
 
 Raport: `Reports/proba-flux-2026-10-13/RAPORT.md` — fluxul probă → pauză → mesaje → plată → reînnoire eșuată → anulare
