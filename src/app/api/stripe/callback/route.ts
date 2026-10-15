@@ -1,5 +1,5 @@
 export const dynamic = "force-dynamic";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import crypto from "crypto";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -16,6 +16,7 @@ import {
 } from "@/lib/card-subscription";
 import { grantLatePaidPeriod, notifyPaymentFailed } from "@/lib/billing-messages";
 import { CLEARED_PERIOD_FIELDS, parseBrokerSubscription, periodFieldsFrom } from "@/lib/billing-period";
+import { alertOwners, lei, payerForAlert } from "@/lib/owner-alerts";
 
 /**
  * Stripe Checkout Broker → Tutor callback.
@@ -73,6 +74,29 @@ interface BrokerCallback {
   subscription?: unknown;
   /** Contract v3, subscription.payment_failed: when the bank is retried next (ISO), null when it won't be. */
   nextPaymentAttempt?: string | null;
+}
+
+const ADDON_WORDS: Record<string, string> = {
+  child_addon: "loc pentru încă un copil",
+  subject_addon: "materie în plus",
+  parent_addon: "diferența pentru încă un părinte",
+};
+
+/** Events already alerted in this process (bounded): a broker redelivery doesn't alert twice. */
+const alerted = new Set<string>();
+function firstAlertFor(key: string): boolean {
+  if (alerted.has(key)) return false;
+  alerted.add(key);
+  if (alerted.size > 1000) alerted.delete(alerted.values().next().value as string);
+  return true;
+}
+
+/** What the event is about, as the owner's alert names it: the package, or the add-on. */
+async function boughtWords(planId: string | undefined, addonType: string | null): Promise<string> {
+  if (addonType) return ADDON_WORDS[addonType] ?? "abonament separat";
+  if (!planId) return "pachet";
+  const plan = await prisma.subscriptionPlan.findUnique({ where: { id: planId }, select: { name: true } }).catch(() => null);
+  return plan?.name ?? "pachet";
 }
 
 async function accrueReferral(payment: { id: string; userId: string; amount: number; currency: string }) {
@@ -287,6 +311,9 @@ async function _POST(req: NextRequest) {
   if (!userId) {
     return NextResponse.json({ received: true, ignored: "no userId" });
   }
+  // The owner hears of money once per real change (/bani 15.10.2026): set below only on a first
+  // delivery, sent after the bookkeeping so a failed write is retried by the broker without an alert.
+  let alert: string | null = null;
 
   switch (p.event) {
     case "payment.succeeded": {
@@ -300,6 +327,7 @@ async function _POST(req: NextRequest) {
         type: "one_time",
       });
       if (isNew) await accrueReferral(payment);
+      if (isNew) alert = `💳 Plată unică încasată: ${await boughtWords(planId, null)} · ${lei(amount, currency)}`;
       await recordVoucherRedemption(p.metadata?.voucherId, userId, p.sessionId);
       break;
     }
@@ -313,6 +341,10 @@ async function _POST(req: NextRequest) {
         currency,
         type: "subscription",
       });
+      if (isNew) {
+        const words = await boughtWords(planId, addonType);
+        alert = amount > 0 ? `💳 Abonament nou: ${words} · ${lei(amount, currency)}` : `💳 Abonament nou, cu zile gratuite în Stripe (0 lei azi): ${words}`;
+      }
       if (addonType) {
         // Its place — a child's seat or a subject — is counted together with its entry in the payer's
         // list of subscriptions bought next to the plan and the subject it was bought for turned on, in
@@ -409,6 +441,7 @@ async function _POST(req: NextRequest) {
         await recordVoucherRedemption(p.metadata?.voucherId, userId, p.sessionId);
       }
       if (isNew) await accrueReferral(payment);
+      if (isNew) alert = `🔁 Reînnoire încasată: ${await boughtWords(planId, addonType)} · ${lei(amount, currency)}`;
       break;
     }
 
@@ -434,7 +467,10 @@ async function _POST(req: NextRequest) {
           where: { id: userId, subscriptionStatus: "past_due" },
           data: { ...period, ...(p.nextPaymentAttempt !== undefined ? { subscriptionRetryAt: p.nextPaymentAttempt ? new Date(p.nextPaymentAttempt) : null } : {}) },
         });
-        if (failed.count === 1) await notifyPaymentFailed(userId);
+        if (failed.count === 1) {
+          await notifyPaymentFailed(userId);
+          alert = `⚠️ Plata n-a trecut, contul e în pauză până trece: ${await boughtWords(planId, null)}${p.nextPaymentAttempt ? " · banca mai e încercată" : " · nu mai e reîncercată"}`;
+        }
       }
       break;
     }
@@ -444,7 +480,7 @@ async function _POST(req: NextRequest) {
         // Its place goes with its entry, and for a subject at most one subject is switched off, its own
         // first — in one transaction, so a repeated delivery finds nothing left to do. The main
         // subscription stays untouched.
-        await endAddon(userId, p.sessionId);
+        if (await endAddon(userId, p.sessionId)) alert = `➖ Abonament separat oprit: ${await boughtWords(undefined, addonType)}`;
         break;
       }
       // The end of a subscription the account left behind doesn't end the one it pays now.
@@ -459,6 +495,7 @@ async function _POST(req: NextRequest) {
             ...CLEARED_PERIOD_FIELDS,
           },
         });
+        alert = `🛑 Abonament încheiat: ${await boughtWords(planId, null)}`;
       }
       // Either way the subscription has ended: whatever arrives for it later is late. Recorded after
       // the account's own change, so a retry of a cancellation that failed midway still applies it.
@@ -475,11 +512,24 @@ async function _POST(req: NextRequest) {
       break;
     }
 
-    // payment.expired / payment.failed → no local state change (checkout abandoned).
+    // payment.expired / payment.failed → no local state change (checkout abandoned), but the owner hears
+    // of it: four checkouts had been started and dropped before anyone noticed (/bani 15.10.2026).
     default:
+      if (p.event === "payment.expired") alert = `⌛ Plată începută și neterminată: ${await boughtWords(planId, addonType)}`;
+      else if (p.event === "payment.failed") alert = `❌ Cardul a fost refuzat la plată: ${await boughtWords(planId, addonType)}`;
       break;
   }
 
+  // After the answer has gone back to the broker: a slow Telegram never holds the callback into a retry.
+  // Once per event and session, so a redelivery of an event with nothing to dedup on (an abandoned
+  // checkout) doesn't alert twice.
+  if (alert && firstAlertFor(`${p.event}:${p.sessionId}:${p.eventId ?? ""}`)) {
+    const text = alert;
+    after(async () => {
+      const who = await payerForAlert(userId).catch(() => null);
+      if (who) await alertOwners(`${text}\n${who}`);
+    });
+  }
   return NextResponse.json({ received: true });
 }
 

@@ -126,7 +126,7 @@ function OfferCard({ offer, locale, planName, cta }: { offer: TeaserOffer; local
  * „mai ai 7 zile" (today counted, like the card checkout) right under the top bar's „6z 13:22" — a tester
  * read the two as different clocks (14.10.2026). One end, said as a date, in both places.
  */
-function trialEndWords(endsAt: string, ro: boolean): string {
+export function trialEndWords(endsAt: string, ro: boolean): string {
   const parts = new Intl.DateTimeFormat(ro ? "ro-RO" : "en-GB", {
     timeZone: "Europe/Bucharest",
     weekday: ro ? "long" : "short",

@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { holderWords } from "@/components/access/holder-words";
 import type { SeatHolderNote } from "@/lib/access-server";
+import type { ChildSeatQuote } from "@/lib/child-seat";
+import { trialEndWords } from "@/components/access/access-screens";
 import { useSession } from "next-auth/react";
 import {
   getFamilyPlan,
@@ -87,6 +89,8 @@ interface Overview {
     leftOut: { id: string; name: string | null }[];
     seats: number;
   } | null;
+  /** For the payer: a child the package doesn't seat (paused, or pausing when the trial ends) and the seat's price. */
+  childSeat?: ChildSeatQuote | null;
 }
 
 const ROLE_RO: Record<string, string> = {
@@ -159,6 +163,8 @@ export default function FamilyPage() {
 
   /** The family reads a name, not an id. */
   const upgradeName = (p: { name: string | null }) => p.name?.trim() || "un adult al familiei";
+  /** A child by their first name, as the rest of the page calls them. */
+  const childName = (c: { name: string | null }) => c.name?.trim().split(/\s+/)[0] || "copilul";
 
   const buyAddon = useCallback(async (type: "child" | "parent") => {
     setAddonBusy(true);
@@ -237,11 +243,16 @@ export default function FamilyPage() {
     !admin && !plan && !data.trial && noOffer
       ? { allowed: false, reason: "no_family_plan", message: "Membrii familiei îi adaugă părintele care are pachetul." }
       : null;
+  // A child already in the family without a seat comes first: the next seat bought is theirs (link order),
+  // so „add the 3rd child at −30%" would charge the 2nd child's −20% seat and leave the new one out too.
+  const unseatedChild = data.childSeat?.leftOut[0];
   const childCheck: SeatCheck = admin
     ? { allowed: true }
-    : byHolder ?? (data.trial
-      ? trialChildCheck(childSeat)
-      : childSeat);
+    : unseatedChild
+      ? { allowed: false, reason: "child_addon", message: `Întâi locul pentru ${childName(unseatedChild)}, mai sus.` }
+      : byHolder ?? (data.trial
+        ? trialChildCheck(childSeat)
+        : childSeat);
   const parentCheck: SeatCheck = admin
     ? { allowed: true }
     // The difference paid to the package with one more parent counts like that package's seat.
@@ -271,6 +282,49 @@ export default function FamilyPage() {
           <Seat label="Copii" used={data.seats.children.used} max={data.seats.children.max} admin={admin} />
           <Seat label="Meditatori" used={data.seats.tutors.used} max={data.seats.tutors.max} admin={admin} />
         </div>
+        {/* The payer is told which child the package doesn't seat — the free week opened every child, Family
+            seats one — and what that child's seat costs (/bani 15.10.2026). The child never sees a price. */}
+        {data.childSeat && (
+          <div className="mt-3 rounded-lg border border-amber-800/60 bg-amber-950/30 p-3 text-sm">
+            <p className="font-semibold text-white">
+              {data.childSeat.leftOut.length === 1
+                ? `${childName(data.childSeat.leftOut[0])} nu are loc în pachet`
+                : `${data.childSeat.leftOut.length} copii nu au loc în pachet`}
+            </p>
+            <p className="mt-1 text-gray-300">
+              {data.childSeat.leftOut
+                .map((c) =>
+                  c.trialEndsAt
+                    ? `${childName(c)} are acces din probă ${trialEndWords(c.trialEndsAt, true)}, apoi intră în pauză.`
+                    : `${childName(c)} e în pauză: nu poate exersa și nu primește remindere. Tot ce a lucrat e păstrat.`
+                )
+                .join(" ")}{" "}
+              Pachetul plătit acoperă {data.seats.children.max === 1 ? "un copil" : `${data.seats.children.max} copii`}. Locul pentru{" "}
+              {childName(data.childSeat.leftOut[0])} costă{" "}
+              <strong className="text-white">
+                {data.childSeat.price.toFixed(2).replace(".", ",")} lei {data.childSeat.interval === "YEAR" ? "pe an" : "pe lună"}
+              </strong>{" "}
+              ({data.childSeat.discountPercent}% mai puțin decât primul copil).
+              {data.childSeat.seatsNeeded > 1 &&
+                ` Locurile se dau în ordinea în care au fost legați copiii, așa că pentru ${childName(data.childSeat.leftOut[0])} trebuie ${data.childSeat.seatsNeeded} locuri; acesta e primul.`}
+            </p>
+            <button
+              onClick={() => void buyAddon("child")}
+              disabled={addonBusy}
+              className="mt-3 min-h-[40px] rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-500 disabled:opacity-60"
+            >
+              {addonBusy
+                ? "Se pregătește plata…"
+                : data.childSeat.seatsNeeded > 1
+                  ? `Adaugă un loc de copil · +${data.childSeat.price.toFixed(2).replace(".", ",")} lei`
+                  : `Adaugă locul pentru ${childName(data.childSeat.leftOut[0])} · +${data.childSeat.price.toFixed(2).replace(".", ",")} lei`}
+            </button>
+            <p className="mt-2 text-xs text-gray-500">
+              Locul se plătește separat, lângă pachet, și se oprește oricând din Abonament → Abonamente separate.
+              {data.childSeat.leftOut.length > 1 ? " Fiecare copil are locul lui." : ""}
+            </p>
+          </div>
+        )}
         {/* The payer is told that an adult of the family is left out, and what the package that
             includes them costs — the other parent only ever sees who holds the package, never a price. */}
         {data.parentUpgrade && (

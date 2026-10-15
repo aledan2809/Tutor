@@ -56,6 +56,9 @@ export function getTelegramClient(): TelegramClient | null {
   return new TelegramClient({
     botToken,
     webhookSecretToken: process.env.TELEGRAM_WEBHOOK_SECRET,
+    // Unset in production (api.telegram.org). The QA stack points it at a local fake to read the
+    // messages that would go out.
+    apiBaseUrl: process.env.TELEGRAM_API_BASE_URL || undefined,
   });
 }
 

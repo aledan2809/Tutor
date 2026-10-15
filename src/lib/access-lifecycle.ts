@@ -26,6 +26,7 @@ import { withCronLease } from "@/lib/cron-lease";
 import { deliverParentAlert, userInQuietHours } from "@/lib/escalation/parent-monitor";
 import { ACCESS_MESSAGES_PAGE, ACCESS_MESSAGES_SETTING, accessMessagesOff } from "@/lib/access-messages";
 import { resolveIsTest } from "@/lib/notifications/test-account";
+import { alertOwners } from "@/lib/owner-alerts";
 import { isPaidSubscriber } from "@/lib/escalation/segmentation";
 
 export type LifecycleStage = "launch" | "three_days" | "two_days" | "last_day" | "paused";
@@ -302,6 +303,7 @@ export async function runAccessLifecycle(now: Date = new Date()): Promise<{ ran:
     );
 
     let sent = 0;
+    const byStage: Partial<Record<LifecycleStage, number>> = {};
     for (const parent of parents) {
       try {
         const access = await loadAccess(parent.id, now);
@@ -377,10 +379,17 @@ export async function runAccessLifecycle(now: Date = new Date()): Promise<{ ran:
         if (!recorded) continue;
         await deliverParentAlert(parent.id, copy.title, copy.message, 0, { url: PACKAGES_URL, label: copy.button });
         sent++;
+        byStage[stage] = (byStage[stage] ?? 0) + 1;
       } catch (err) {
         console.error("access lifecycle message failed", parent.id, err);
       }
     }
+    // The owner hears when families reach the end of the week, once per run that told them (/bani 15.10).
+    const lines = [
+      byStage.last_day ? `⏳ ${byStage.last_day} ${byStage.last_day === 1 ? "familie e" : "familii sunt"} în ultima zi a probei.` : null,
+      byStage.paused ? `⏸ ${byStage.paused} ${byStage.paused === 1 ? "familie a intrat" : "familii au intrat"} în pauză la finalul probei.` : null,
+    ].filter(Boolean);
+    if (lines.length > 0) await alertOwners(lines.join("\n"));
     return sent;
   });
 

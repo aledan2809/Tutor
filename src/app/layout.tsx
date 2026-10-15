@@ -86,10 +86,13 @@ export default async function RootLayout({
         {/* The scrubber first (deferred scripts run in order): addresses with a reset token, an
             invitation or an access code must not reach the shared analytics server. */}
         <script defer src="/umami-scrub.js" />
+        {/* Only the real site counts (data-domains): the QA stack and local dev carry the same id, and on
+            15.10.2026 they were 59 of the week's 61 „register_done” events. Other hosts send nothing. */}
         <script
           defer
           src={UMAMI_DEFAULT_SRC}
           data-website-id="7cc3296f-5e08-49ad-adca-b161dc7400d0"
+          data-domains="etutor.ro"
           data-before-send="etutorUmamiScrub"
         />
       </body>

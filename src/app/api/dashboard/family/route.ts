@@ -5,6 +5,7 @@ import { withErrorHandler } from "@/lib/api-handler";
 import { canBecomeParent, familyBuyer, familyViewerFacts, getFamilyOverview } from "@/lib/family-invite";
 import { loadAccess, loadSeatHolder } from "@/lib/access-server";
 import { parentUpgradeQuote } from "@/lib/parent-upgrade";
+import { childSeatQuote } from "@/lib/child-seat";
 
 /**
  * GET the current user's family household (members + seats + pending invites), the account's
@@ -27,12 +28,17 @@ async function _GET() {
   const seatHolder = access && (access.kind === "trial" || access.kind === "paused") ? await loadSeatHolder(session.user.id) : null;
   // The other way round: the payer is told that an adult of the family is left out, and what the move
   // to the package that includes them costs (Alex, decisions 6-7 of 22.09).
-  const parentUpgrade = await parentUpgradeQuote(session.user.id, overview);
+  // And a child the package doesn't seat — tried in the free week, paused after the family paid (/bani 15.10).
+  const [parentUpgrade, childSeat] = await Promise.all([
+    parentUpgradeQuote(session.user.id, overview),
+    childSeatQuote(session.user.id, overview),
+  ]);
   return NextResponse.json({
     ...overview,
     access,
     seatHolder,
     parentUpgrade,
+    childSeat,
     offersFamily: facts !== null && familyBuyer(facts),
     canBecomeParent: facts !== null && canBecomeParent(facts),
   });
