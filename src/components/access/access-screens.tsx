@@ -121,16 +121,39 @@ function OfferCard({ offer, locale, planName, cta }: { offer: TeaserOffer; local
  * Trial countdown. A parent gets the offer and the way to the packages; a learner who made their own
  * account gets only the countdown — no price, no link (never shown to a child whose parent pays).
  */
+/**
+ * When the free week ends, as the parent reads a date: „marți, 21 oct., la 09:23". The banner used to say
+ * „mai ai 7 zile" (today counted, like the card checkout) right under the top bar's „6z 13:22" — a tester
+ * read the two as different clocks (14.10.2026). One end, said as a date, in both places.
+ */
+function trialEndWords(endsAt: string, ro: boolean): string {
+  const parts = new Intl.DateTimeFormat(ro ? "ro-RO" : "en-GB", {
+    timeZone: "Europe/Bucharest",
+    weekday: ro ? "long" : "short",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date(endsAt));
+  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
+  const time = `${part("hour")}:${part("minute")}`;
+  return ro
+    ? `până ${part("weekday")}, ${part("day")} ${part("month")}, la ${time}`
+    : `until ${part("weekday")} ${part("day")} ${part("month")}, ${time}`;
+}
+
 export function TrialBanner({
   locale,
-  daysLeft,
+  endsAt,
   audience,
   pauseOn,
   holder = null,
   offer = null,
 }: {
   locale: Locale;
-  daysLeft: number;
+  /** When the free week ends (ISO). */
+  endsAt: string;
   audience: "parent" | "self";
   /** The day-8 pause is switched on; off, the account keeps the free tier after the trial. */
   pauseOn: boolean;
@@ -140,7 +163,7 @@ export function TrialBanner({
   offer?: { endsAt: string; serverNow: string } | null;
 }) {
   const ro = locale === "ro";
-  const days = ro ? (daysLeft === 1 ? "mai ai o zi" : `mai ai ${daysLeft} zile`) : daysLeft === 1 ? "one day left" : `${daysLeft} days left`;
+  const days = trialEndWords(endsAt, ro);
   const after = pauseOn
     ? ro
       ? "Când se termină proba, contul intră în pauză; tot ce ai lucrat rămâne salvat."
@@ -163,8 +186,8 @@ export function TrialBanner({
       : `You have the whole package during the trial. ${left.plan} After the trial your account ${pauseOn ? "is paused" : "keeps the free tier"}, while your child carries on as usual. ${holder?.upgrade ? `To stay on the plan, ${left.who} can move to ${holder.upgrade}.` : left.noLargerPlan}`
     : audience === "parent"
       ? ro
-        ? `Ai tot pachetul Family. Reminderele pe WhatsApp și SMS pornesc când pui cardul — nu plătești nimic până se termină proba. ${parentAfter}`
-        : `You have the whole Family package. WhatsApp and SMS reminders start once you add your card — you pay nothing until the trial ends. ${parentAfter}`
+        ? `În probă încerci tot: oricâți copii și oricâte materii. Reminderele pe WhatsApp și SMS pornesc când pui cardul — nu plătești nimic până se termină proba. ${parentAfter}`
+        : `During the trial you try everything: any number of children and subjects. WhatsApp and SMS reminders start once you add your card — you pay nothing until the trial ends. ${parentAfter}`
       : ro
         ? `Ai tot pachetul, în afară de WhatsApp și SMS. ${after}`
         : `You have the whole package except WhatsApp and SMS. ${after}`;

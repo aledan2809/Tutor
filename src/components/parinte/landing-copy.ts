@@ -35,9 +35,11 @@ export type LandingFacts = {
   /** A parent's repeating reminder also stops after this many sends (often well before the hours). */
   nudgeMaxFires: number;
   onTimeWindowMin: number;
-  inviteValidDays: number;
   secondChildPct: number;
   thirdChildPct: number;
+  /** An extra subject at checkout: the 2nd and, from the 3rd, each one (family.ts subjectDiscountPercent). */
+  secondSubjectPct: number;
+  thirdSubjectPct: number;
 };
 
 export type LandingContext = {
@@ -69,7 +71,6 @@ const hoursRo = (n: number) => countRo(n, "o oră", "ore");
 const daysRo = (n: number) => countRo(n, "o zi", "zile");
 const minutesEn = (n: number) => (n === 1 ? "one minute" : `${n} minutes`);
 const hoursEn = (n: number) => (n === 1 ? "one hour" : `${n} hours`);
-const daysEn = (n: number) => (n === 1 ? "one day" : `${n} days`);
 
 /**
  * How the free days are said. A new visitor gets the whole period („Primele 7 zile sunt gratuite");
@@ -173,17 +174,20 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
       ? ` Zilele gratuite, ${facts.trialTotalDays} în total, se socotesc de la crearea contului.`
       : ` The free days, ${facts.trialTotalDays} in all, count from the day the account is created.`
     : "";
-  const fine = ro
-    ? offer
-      ? `*Family (1 părinte + 1 copil), pentru o materie. Activezi codul ${code}${expiresShort ? ` până la ${expiresShort}` : ""}; ${
-          offer.recurring ? "reducerea rămâne în fiecare lună cât ții abonamentul ales atunci" : "reducerea se aplică la prima plată"
-        }. Fiecare cod se folosește o singură dată pe cont.${trialRule}`
-      : `*Family (1 părinte + 1 copil), pentru o materie.${trialRule}`
-    : offer
-      ? `*Family (1 parent + 1 child), for one subject. Activate code ${code}${expiresShort ? ` by ${expiresShort}` : ""}; ${
-          offer.recurring ? "the discount stays on every monthly payment for as long as you keep that subscription" : "the discount applies to the first payment"
-        }. Each code can be used once per account.${trialRule}`
-      : `*Family (1 parent + 1 child), for one subject.${trialRule}`;
+  // The rest of the fine print, under „Condițiile ofertei"; the plan's limits stay in view (fineShort).
+  const fineRest = (
+    ro
+      ? offer
+        ? `Activezi codul ${code}${expiresShort ? ` până la ${expiresShort}` : ""}; ${
+            offer.recurring ? "reducerea rămâne în fiecare lună cât ții abonamentul ales atunci" : "reducerea se aplică la prima plată"
+          }. Fiecare cod se folosește o singură dată pe cont.${trialRule}`
+        : trialRule
+      : offer
+        ? `Activate code ${code}${expiresShort ? ` by ${expiresShort}` : ""}; ${
+            offer.recurring ? "the discount stays on every monthly payment for as long as you keep that subscription" : "the discount applies to the first payment"
+          }. Each code can be used once per account.${trialRule}`
+        : trialRule
+  ).trim();
 
   const ctaPay = mainPrice ? (ro ? `Începe cu ${mainPrice} lei/lună` : `Start with ${mainPrice} lei/month`) : ro ? "Începe cu Family" : "Start with Family";
   // Without free days left there is nothing to try without a card. With them it is the first button at the
@@ -230,14 +234,15 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
         : ro
           ? "Anulezi oricând, din pagina Abonament."
           : "Cancel any time from the Subscription page.",
-      fine,
-      scrollCue: ro ? "Vezi cum funcționează" : "See how it works",
+      fineRest,
+      // The plan's limits stay in view next to the price; the code's terms open on demand (Alex 15.10.2026).
+      fineShort: ro ? "*Family: 1 părinte + 1 copil, o materie." : "*Family: 1 parent + 1 child, one subject.",
+      fineMore: ro ? "Condițiile ofertei" : "Offer conditions",
+      scrollCue: ro ? "Vezi ce primești" : "See what you get",
       badge: hasTrial ? { ...trial.badge, small: ro ? "fără card" : "no card" } : null,
     },
 
     worries: {
-      kicker: ro ? "Hai să fim sinceri" : "Let's be honest",
-      title: ro ? "Nu nota te frământă, ci „oare chiar învață?”" : "It's not the grade that worries you — it's “are they actually learning?”",
       answerLead: ro ? "Cu eTutor.ro" : "With eTutor.ro",
       items: ro
         ? [
@@ -253,9 +258,6 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
     },
 
     how: {
-      kicker: ro ? "Cum funcționează, pe larg" : "How it works, in detail",
-      title: ro ? "Nu mai ești tu cel care întreabă „ai învățat?”" : "You're no longer the one asking “did you study?”",
-      lead: ro ? "Patru lucruri se întâmplă singure, în fiecare zi în care copilul are program." : "Four things happen on their own, every day your child has study time scheduled.",
       step1: ro
         ? {
             title: "Programul îl face copilul, ultimul cuvânt e al tău",
@@ -331,95 +333,23 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
       },
     },
 
-    quiz: {
-      // Signed in: the button leads to the family page, not to a new account.
-      cta: ctx.signedIn ? (ro ? "Continuă în contul tău" : "Continue in your account") : null,
-      title: ro ? "Vezi exact ce exersează copilul" : "See exactly what your child practises",
-      sub: ro ? "Alege o materie și încearcă un test real chiar acum — fără cont." : "Pick a subject and try a real quiz right now — no account.",
+    // What the family gets, as three lines that open on demand; the details of „how" live inside them (Alex 15.10.2026).
+    get: {
+      title: ro ? "Ce primești" : "What you get",
+      see: ro ? "Vezi ce a lucrat azi" : "See what they did today",
+      remind: ro ? "Reminderele îl găsesc singure" : "Reminders find them on their own",
+      alert: ro ? "Te anunțăm doar dacă ignoră tot" : "We tell you only if they ignore it all",
     },
 
-    journey: {
-      kicker: ro ? (flyer ? "Ce urmează după ce ai scanat" : "Ce urmează după un click") : flyer ? "What happens after you scan" : "What happens after one click",
-      title: ro ? (flyer ? "De pe flyer în aplicație, în 4 pași" : "De aici în aplicație, în 4 pași") : flyer ? "From the flyer to the app, in 4 steps" : "From here to the app, in 4 steps",
-      lead: ro
-        ? `Durează cam 5 minute.${code ? ` Codul ${code} te urmează singur până la plată.` : ""}`
-        : `It takes about 5 minutes.${code ? ` Code ${code} follows you all the way to payment.` : ""}`,
-      flyerStep: ro
-        ? { label: "Ai făcut deja", title: "Ai scanat flyerul", text: "Sau ai scris eTutor.ro/cafea. Ai ajuns aici, cu codul pus." }
-        : { label: "Already done", title: "You scanned the flyer", text: "Or typed eTutor.ro/cafea. You're here, with the code in." },
-      steps: ro
-        ? [
-            { label: "Pasul 1", title: "Îți faci contul", text: code ? "Nume, email și o parolă. Codul e deja trecut." : "Nume, email și o parolă." },
-            {
-              label: "Pasul 2",
-              title: "Alegi Family",
-              text: `${mainPrice ? `Vezi direct ${mainPrice} lei pe lună. ` : ""}Pui cardul${hasTrial ? `, iar ${lowerFirst(trial.sentence)}` : " și plătești lunar"}.`,
-            },
-            { label: "Pasul 3", title: "Îți inviți copilul", text: "Are contul lui și vede doar ce e al lui." },
-            { label: "Pasul 4", title: "Îi pui programul — gata", text: "Reminderele pleacă singure; tu primești raportul." },
-          ]
-        : [
-            { label: "Step 1", title: "Create your account", text: code ? "Name, email and a password. The code is already in." : "Name, email and a password." },
-            {
-              label: "Step 2",
-              title: "Choose Family",
-              text: `${mainPrice ? `You see ${mainPrice} lei a month straight away. ` : ""}Add your card${hasTrial ? ` — ${lowerFirst(trial.sentence)}` : " and pay monthly"}.`,
-            },
-            { label: "Step 3", title: "Invite your child", text: "They get their own account and see only what's theirs." },
-            { label: "Step 4", title: "Set their schedule — done", text: "Reminders go out on their own; you get the report." },
-          ],
-      phone: ro
-        ? {
-            signupTitle: "Cont de părinte",
-            codeIncluded: code ? `✓ Codul ${code} e inclus` : null,
-            fields: [["Nume", "Maria Popescu"], ["Email", "maria@exemplu.ro"], ["Parolă", "••••••••••"]] as [string, string][],
-            signupButton: "Creează contul",
-            plansTitle: "Alege pachetul",
-            planSeats: "1 părinte + 1 copil",
-            planBadge: offer ? `${offer.code} −${offer.percentOff}%` : null,
-            planOld: offer ? price(offer.normalMinor, locale) : null,
-            planPrice: mainPrice ? `${mainPrice} lei` : "",
-            planPer: "/ lună",
-            planNote: `o materie${hasTrial ? ` · ${trial.short}` : ""}`,
-            planButton: hasTrial ? trial.start : "Alege Family",
-            planFoot: "🔒 Plată securizată · anulezi oricând",
-            inviteTitle: "Invită copilul",
-            inviteText: `Îi trimiți codul pe email sau i-l dai tu. Expiră în ${daysRo(facts.inviteValidDays)}.`,
-            inviteSend: "Trimite",
-            inviteCopy: "Copiază",
-            inviteJoined: "s-a alăturat ✓",
-            lockTime: "16:00",
-            lockDate: "marți, 22 septembrie",
-            notifFrom: "eTutor.ro · acum",
-            notifText: "E ora de matematică. Te așteaptă 5 întrebări.",
-            miniReport: "Raportul tău de duminică",
-          }
-        : {
-            signupTitle: "Parent account",
-            codeIncluded: code ? `✓ Code ${code} included` : null,
-            fields: [["Name", "Maria Popescu"], ["Email", "maria@example.com"], ["Password", "••••••••••"]] as [string, string][],
-            signupButton: "Create account",
-            plansTitle: "Choose a plan",
-            planSeats: "1 parent + 1 child",
-            planBadge: offer ? `${offer.code} −${offer.percentOff}%` : null,
-            planOld: offer ? price(offer.normalMinor, locale) : null,
-            planPrice: mainPrice ? `${mainPrice} lei` : "",
-            planPer: "/ month",
-            planNote: `one subject${hasTrial ? ` · ${trial.short}` : ""}`,
-            planButton: hasTrial ? trial.start : "Choose Family",
-            planFoot: "🔒 Secure payment · cancel any time",
-            inviteTitle: "Invite your child",
-            inviteText: `Send them the code by email or give it to them. It expires in ${daysEn(facts.inviteValidDays)}.`,
-            inviteSend: "Send",
-            inviteCopy: "Copy",
-            inviteJoined: "joined ✓",
-            lockTime: "16:00",
-            lockDate: "Tuesday, 22 September",
-            notifFrom: "eTutor.ro · now",
-            notifText: "Maths time. 5 questions are waiting.",
-            miniReport: "Your Sunday report",
-          },
-    },
+    // The trial lets a family try more than the plan it pays for later — said before the card, not after (tester 14.10.2026).
+    trialBox: hasTrial
+      ? {
+          title: ro ? `Proba de ${daysRo(facts.trialTotalDays)}, pe înțeles` : `The ${facts.trialTotalDays}-day trial, in plain words`,
+          text: ro
+            ? `În probă încerci tot: oricâți copii și oricâte materii. La plată păstrezi ce vrei — Family acoperă un copil și o materie; a doua materie costă cu ${facts.secondSubjectPct}% mai puțin decât prima (de la a treia, ${facts.thirdSubjectPct}%), iar al doilea copil cu ${facts.secondChildPct}% mai puțin. Suma exactă o vezi în pagina Abonament, înainte să pui cardul.`
+            : `During the trial you try everything: any number of children and subjects. When you pay you keep what you want — Family covers one child and one subject; a second subject costs ${facts.secondSubjectPct}% less than the first (from the third, ${facts.thirdSubjectPct}%), and a second child ${facts.secondChildPct}% less. You see the exact amount on the Subscription page before adding a card.`,
+        }
+      : null,
 
     offer: {
       kicker: ro ? (flyer ? "Oferta de pe flyer" : "Oferta online") : flyer ? "The flyer offer" : "The online offer",
@@ -445,7 +375,7 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
             `Remindere ${listChannels(facts.chain, "ro")}`,
             "Alertă pentru tine doar când ignoră tot lanțul de remindere",
             "Raport zilnic sau săptămânal, cu locurile unde greșește des",
-            "Simulări de examen și lecții structurate, la materiile care le au",
+            "Simulări de examen și lecții structurate, dacă materia aleasă le are",
             "Anulezi oricând, din pagina Abonament",
           ]
         : [
@@ -454,7 +384,7 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
             `Reminders ${listChannels(facts.chain, "en")}`,
             "An alert for you only when they ignore the whole reminder chain",
             "Daily or weekly report, with the topics they often get wrong",
-            "Exam simulations and structured lessons, for subjects that have them",
+            "Exam simulations and structured lessons, if the chosen subject has them",
             "Cancel any time from the Subscription page",
           ],
       ctaPay,
@@ -512,9 +442,10 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
       oldPrice: offer ? normalPrice : null,
       price: mainPrice ? `${mainPrice} lei` : null,
       per: ro ? "/ lună*" : "/ month*",
+      steps: ro ? "5 minute: contul tău → invitația copilului → programul lui." : "5 minutes: your account → your child's invite → their schedule.",
       ctaPay,
       ctaFree,
-      fine,
+      fineShort: ro ? "*Family: 1 părinte + 1 copil, o materie. Condițiile codului sunt mai sus." : "*Family: 1 parent + 1 child, one subject. The code's conditions are above.",
     },
 
     sticky: {
@@ -570,13 +501,13 @@ function faqItems(locale: Locale, ctx: LandingContext, trial: ReturnType<typeof 
       ? {
           q: "Pot încerca înainte să plătesc?",
           a: hasTrial
-            ? `Da. ${trial.sentence}, fără card: tot pachetul Family, în afară de WhatsApp și SMS (acolo plătim fiecare mesaj).${afterTrial} Poți pune și cardul de la început, direct pe Family; dacă anulezi în zilele gratuite, nu plătești nimic.${offer ? " Codul rămâne salvat în cont până plătești." : ""}`
+            ? `Da. ${trial.sentence}, fără card: încerci tot, oricâți copii și oricâte materii, în afară de WhatsApp și SMS (acolo plătim fiecare mesaj).${afterTrial} Poți pune și cardul de la început, direct pe Family; dacă anulezi în zilele gratuite, nu plătești nimic.${offer ? " Codul rămâne salvat în cont până plătești." : ""}`
             : `Zilele gratuite ale contului tău (${ctx.facts.trialTotalDays}) au trecut. Poți anula oricând, din pagina Abonament.`,
         }
       : {
           q: "Can I try before I pay?",
           a: hasTrial
-            ? `Yes. ${trial.sentence}, without a card: the whole Family package, except WhatsApp and SMS (we pay for each of those messages).${afterTrial} You can also add your card from the start, straight on Family; cancel within the free days and you pay nothing.${offer ? " The code stays saved on your account until you pay." : ""}`
+            ? `Yes. ${trial.sentence}, without a card: you try everything, any number of children and subjects, except WhatsApp and SMS (we pay for each of those messages).${afterTrial} You can also add your card from the start, straight on Family; cancel within the free days and you pay nothing.${offer ? " The code stays saved on your account until you pay." : ""}`
             : `Your account's free days (${ctx.facts.trialTotalDays}) have passed. You can cancel any time from the Subscription page.`,
         },
     ro
@@ -630,12 +561,12 @@ function faqItems(locale: Locale, ctx: LandingContext, trial: ReturnType<typeof 
       : { q: "How do I cancel?", a: "From the Subscription page, with the “Manage subscription” button. No phone calls, no forms." },
     ro
       ? {
-          q: offer ? "Am doi copii. Pot folosi codul pentru amândoi?" : "Am doi copii. Cât costă al doilea?",
-          a: `${offer ? "Codul reduce abonamentul Family, care e pentru un copil. " : ""}${secondChildWords}`,
+          q: "Am doi copii sau mai multe materii. Cât plătesc?",
+          a: `${offer ? "Codul reduce abonamentul Family, care e pentru un copil. " : ""}${secondChildWords} O materie în plus costă cu ${ctx.facts.secondSubjectPct}% mai puțin decât prima (de la a treia, ${ctx.facts.thirdSubjectPct}%).`,
         }
       : {
-          q: offer ? "I have two children. Can I use the code for both?" : "I have two children. What does the second cost?",
-          a: `${offer ? "The code discounts the Family subscription, which is for one child. " : ""}${secondChildWords}`,
+          q: "I have two children or more subjects. What do I pay?",
+          a: `${offer ? "The code discounts the Family subscription, which is for one child. " : ""}${secondChildWords} An extra subject costs ${ctx.facts.secondSubjectPct}% less than the first (from the third, ${ctx.facts.thirdSubjectPct}%).`,
         },
   );
   if (offer && ctx.codesAlike) {

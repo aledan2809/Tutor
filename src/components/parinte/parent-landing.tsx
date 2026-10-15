@@ -1,9 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { EscalationChannel } from "@prisma/client";
-import SubjectQuizDemo from "@/components/SubjectQuizDemo";
 import { SiteHeader } from "@/components/SiteHeader";
-import { Brand } from "@/components/Brand";
 import type { LandingChannel } from "@/lib/parent-landing";
 import { chainStepTiming, type LandingFacts, type Locale, type landingCopy } from "./landing-copy";
 import { LandingStickyCta } from "./landing-sticky-cta";
@@ -89,7 +87,6 @@ export function ParentLanding({
   locale,
   copy,
   facts,
-  channel,
   code,
   payHref,
   freeHref,
@@ -105,7 +102,6 @@ export function ParentLanding({
   otherPlans: OtherPlanRow[];
 }) {
   const c = copy;
-  const flyer = channel === "flyer";
 
   return (
     <div className={s.root}>
@@ -198,7 +194,13 @@ export function ParentLanding({
             <span aria-hidden="true">✓</span>
             {c.hero.trialLine}
           </p>
-          <p className={s.fine}>{c.hero.fine}</p>
+          <p className={s.fine}>{c.hero.fineShort}</p>
+          {c.hero.fineRest && (
+            <details className={s.fineMore}>
+              <summary>{c.hero.fineMore}</summary>
+              <p>{c.hero.fineRest}</p>
+            </details>
+          )}
           <a className={s.scrollCue} href="#cum-functioneaza">
             {c.hero.scrollCue} <span aria-hidden="true">↓</span>
           </a>
@@ -207,48 +209,65 @@ export function ParentLanding({
       </div>
       <div className={s.fadeToApp} aria-hidden="true" />
 
-      {/* 2. The parent's worries */}
-      <section className={s.s}>
-        <div className={s.wrap}>
-          <div className={s.center}>
-            <p className={s.kicker}>{c.worries.kicker}</p>
-            <h2 className={s.sTitle}>{c.worries.title}</h2>
-          </div>
-          <div className={s.worries}>
-            {c.worries.items.map((w) => (
-              <article key={w.q} className={s.worry}>
-                <p className={s.q}>{w.q}</p>
-                <p className={s.a}>
-                  <b>{c.worries.answerLead}</b> {w.a}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 3. How it works, in detail — channels and minutes read from the engine */}
+      {/* 2. What the family gets — three lines that open on demand. The worries and the details of how it
+          works are inside them (Alex 15.10.2026: the page had ~1,500 words in view, 12–14 phone screens). */}
       <section className={s.s} id="cum-functioneaza">
         <div className={`${s.wrap} ${s.narrow}`}>
-          <div className={s.center}>
-            <p className={s.kicker}>{c.how.kicker}</p>
-            <h2 className={s.sTitle}>{c.how.title}</h2>
-            <p className={s.sLead}>{c.how.lead}</p>
-          </div>
-
-          <div className={s.how}>
-            <div className={s.howStep}>
-              <span className={s.num}>1</span>
-              <h3>{c.how.step1.title}</h3>
-              <div className={s.howBody}>
-                <p>{c.how.step1.text}</p>
+          <h2 className={`${s.sTitle} ${s.center}`}>{c.get.title}</h2>
+          <div className={s.faq}>
+            <details>
+              <summary>{c.get.see}</summary>
+              <div className={s.getBody}>
+                <p className={s.getQ}>{c.worries.items[0].q}</p>
+                <p>
+                  <b>{c.worries.answerLead}</b> {c.worries.items[0].a}
+                </p>
+                <p>
+                  <b>{c.how.step4.title}.</b> {c.how.step4.text}
+                </p>
+                <div className={s.seeGrid}>
+                  {c.how.step4.tiles.map((tile) => (
+                    <div key={tile.title} className={s.see}>
+                      <b>{tile.title}</b>
+                      <span>{tile.text}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className={s.report}>
+                  <div className={s.reportH}>
+                    <span className={s.ex}>{c.how.step4.report.label}</span>
+                    <span>{c.how.step4.report.when}</span>
+                  </div>
+                  <p className={s.reportName}>{c.how.step4.report.name}</p>
+                  <div className={s.reportStats}>
+                    <div className={s.stOk}><b>4</b><span>{c.how.step4.report.onTime}</span></div>
+                    <div className={s.stLate}><b>1</b><span>{c.how.step4.report.late}</span></div>
+                    <div className={s.stMiss}><b>0</b><span>{c.how.step4.report.ignored}</span></div>
+                  </div>
+                  <p className={s.trend}>{c.how.step4.report.trend}</p>
+                  <p className={s.weak}>
+                    {c.how.step4.report.weak}{" "}
+                    {c.how.step4.report.chips.map((chip) => (
+                      <span key={chip} className={s.chip}>{chip}</span>
+                    ))}
+                  </p>
+                </div>
+                <p className={s.legend}>{c.how.step4.legend}</p>
+                <p className={s.getQ}>{c.worries.items[2].q}</p>
+                <p>
+                  <b>{c.worries.answerLead}</b> {c.worries.items[2].a}
+                </p>
               </div>
-            </div>
-
-            <div className={s.howStep}>
-              <span className={s.num}>2</span>
-              <h3>{c.how.step2.title}</h3>
-              <div className={s.howBody}>
+            </details>
+            <details>
+              <summary>{c.get.remind}</summary>
+              <div className={s.getBody}>
+                <p>
+                  <b>{c.how.step1.title}.</b> {c.how.step1.text}
+                </p>
+                <p>
+                  <b>{c.how.step2.title}:</b>
+                </p>
                 <ol className={s.chain} style={{ ["--steps" as string]: facts.chain.length }}>
                   {facts.chain.map((step, i) => (
                     <li key={step.channel} className={s.node}>
@@ -278,13 +297,17 @@ export function ParentLanding({
                   ))}
                 </ul>
               </div>
-            </div>
-
-            <div className={s.howStep}>
-              <span className={s.num}>3</span>
-              <h3>{c.how.step3.title}</h3>
-              <div className={s.howBody}>
-                <p>{c.how.step3.text}</p>
+            </details>
+            <details>
+              <summary>{c.get.alert}</summary>
+              <div className={s.getBody}>
+                <p className={s.getQ}>{c.worries.items[1].q}</p>
+                <p>
+                  <b>{c.worries.answerLead}</b> {c.worries.items[1].a}
+                </p>
+                <p>
+                  <b>{c.how.step3.title}.</b> {c.how.step3.text}
+                </p>
                 <ul className={s.facts}>
                   {c.how.step3.facts.map((f) => (
                     <li key={f.lead}>
@@ -293,192 +316,7 @@ export function ParentLanding({
                   ))}
                 </ul>
               </div>
-            </div>
-
-            <div className={s.howStep}>
-              <span className={s.num}>4</span>
-              <h3>{c.how.step4.title}</h3>
-              <div className={s.howBody}>
-                <p>{c.how.step4.text}</p>
-                <div className={s.seeGrid}>
-                  {c.how.step4.tiles.map((tile) => (
-                    <div key={tile.title} className={s.see}>
-                      <b>{tile.title}</b>
-                      <span>{tile.text}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className={s.report}>
-                  <div className={s.reportH}>
-                    <span className={s.ex}>{c.how.step4.report.label}</span>
-                    <span>{c.how.step4.report.when}</span>
-                  </div>
-                  <p className={s.reportName}>{c.how.step4.report.name}</p>
-                  <div className={s.reportStats}>
-                    <div className={s.stOk}><b>4</b><span>{c.how.step4.report.onTime}</span></div>
-                    <div className={s.stLate}><b>1</b><span>{c.how.step4.report.late}</span></div>
-                    <div className={s.stMiss}><b>0</b><span>{c.how.step4.report.ignored}</span></div>
-                  </div>
-                  <p className={s.trend}>{c.how.step4.report.trend}</p>
-                  <p className={s.weak}>
-                    {c.how.step4.report.weak}{" "}
-                    {c.how.step4.report.chips.map((chip) => (
-                      <span key={chip} className={s.chip}>{chip}</span>
-                    ))}
-                  </p>
-                </div>
-                <p className={s.legend}>{c.how.step4.legend}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. A real quiz, no account (existing component) */}
-      <section className={s.s}>
-        <div className={`${s.wrap} ${s.narrow} ${s.center}`}>
-          <h2 className={`${s.sTitle} ${s.sTitleSm}`}>{c.quiz.title}</h2>
-          <p className={s.sLead}>{c.quiz.sub}</p>
-          <div className={s.quizBox}>
-            <SubjectQuizDemo locale={locale} cta={{ href: freeHref, label: c.quiz.cta ?? undefined, track: !c.quiz.cta }} />
-          </div>
-        </div>
-      </section>
-
-      {/* 5. From the flyer (or this page) to the app */}
-      <section className={s.s}>
-        <div className={s.wrap}>
-          <div className={s.center}>
-            <p className={s.kicker}>{c.journey.kicker}</p>
-            <h2 className={s.sTitle}>{c.journey.title}</h2>
-            <p className={s.sLead}>{c.journey.lead}</p>
-          </div>
-
-          <ol className={`${s.journey} ${flyer ? s.journeyFlyer : s.journeySite}`}>
-            {flyer && (
-              <li className={`${s.j} ${s.jFlyer}`}>
-                <span className={s.jDot} aria-hidden="true">✓</span>
-                <div className={s.jBody}>
-                  <div className={s.jVisual}>
-                    <div className={s.flyerCard}>
-                      <Image src="/images/parinte/flyer-cafea.jpg" alt="" width={480} height={640} sizes="190px" />
-                      <span className={s.qrRing} aria-hidden="true" />
-                    </div>
-                  </div>
-                  <span className={s.jLabel}>{c.journey.flyerStep.label}</span>
-                  <h3>{c.journey.flyerStep.title}</h3>
-                  <p>{c.journey.flyerStep.text}</p>
-                </div>
-              </li>
-            )}
-
-            <li className={s.j}>
-              <span className={s.jDot} aria-hidden="true">1</span>
-              <div className={s.jBody}>
-                <div className={s.jVisual} aria-hidden="true">
-                  <div className={s.phone}>
-                    <Brand className={s.phBrand} />
-                    <p className={s.phTitle}>{c.journey.phone.signupTitle}</p>
-                    {c.journey.phone.codeIncluded && <span className={s.phChip}>{c.journey.phone.codeIncluded}</span>}
-                    {c.journey.phone.fields.map(([label, value]) => (
-                      <div key={label} className={s.phField}>
-                        <span>{label}</span>
-                        <i>{value}</i>
-                      </div>
-                    ))}
-                    <div className={s.phBtn}>{c.journey.phone.signupButton}</div>
-                  </div>
-                </div>
-                <span className={s.jLabel}>{c.journey.steps[0].label}</span>
-                <h3>{c.journey.steps[0].title}</h3>
-                <p>{c.journey.steps[0].text}</p>
-              </div>
-            </li>
-
-            <li className={s.j}>
-              <span className={s.jDot} aria-hidden="true">2</span>
-              <div className={s.jBody}>
-                <div className={s.jVisual} aria-hidden="true">
-                  <div className={s.phone}>
-                    <p className={s.phTitle}>{c.journey.phone.plansTitle}</p>
-                    <div className={s.phPlan}>
-                      <div className={s.phPlanH}>
-                        <b>Family</b>
-                        {c.journey.phone.planBadge && <span className={s.phBadge}>{c.journey.phone.planBadge}</span>}
-                      </div>
-                      <p className={s.phDim}>{c.journey.phone.planSeats}</p>
-                      <p className={s.phPrice}>
-                        {c.journey.phone.planOld && <s>{c.journey.phone.planOld}</s>} <b>{c.journey.phone.planPrice}</b> {c.journey.phone.planPer}
-                      </p>
-                      <p className={s.phDim}>{c.journey.phone.planNote}</p>
-                    </div>
-                    <div className={s.phBtn}>{c.journey.phone.planButton}</div>
-                    <p className={s.phFoot}>{c.journey.phone.planFoot}</p>
-                  </div>
-                </div>
-                <span className={s.jLabel}>{c.journey.steps[1].label}</span>
-                <h3>{c.journey.steps[1].title}</h3>
-                <p>{c.journey.steps[1].text}</p>
-              </div>
-            </li>
-
-            <li className={s.j}>
-              <span className={s.jDot} aria-hidden="true">3</span>
-              <div className={s.jBody}>
-                <div className={s.jVisual} aria-hidden="true">
-                  <div className={s.phone}>
-                    <p className={s.phTitle}>{c.journey.phone.inviteTitle}</p>
-                    <p className={s.phDim}>{c.journey.phone.inviteText}</p>
-                    <div className={s.phCode}>K7M 2QX</div>
-                    <div className={s.phRow}>
-                      <div className={s.phBtn}>{c.journey.phone.inviteSend}</div>
-                      <div className={`${s.phBtn} ${s.phBtnGhost}`}>{c.journey.phone.inviteCopy}</div>
-                    </div>
-                    <p className={s.phJoined}>
-                      👦 Andrei · <span className={s.phOk}>{c.journey.phone.inviteJoined}</span>
-                    </p>
-                  </div>
-                </div>
-                <span className={s.jLabel}>{c.journey.steps[2].label}</span>
-                <h3>{c.journey.steps[2].title}</h3>
-                <p>{c.journey.steps[2].text}</p>
-              </div>
-            </li>
-
-            <li className={s.j}>
-              <span className={s.jDot} aria-hidden="true">4</span>
-              <div className={s.jBody}>
-                <div className={s.jVisual} aria-hidden="true">
-                  <div className={s.phone}>
-                    <div className={s.phLock}>
-                      <p className={s.phTime}>{c.journey.phone.lockTime}</p>
-                      <p className={s.phDate}>{c.journey.phone.lockDate}</p>
-                      <div className={s.phNotif}>
-                        <b>{c.journey.phone.notifFrom}</b>
-                        <span>{c.journey.phone.notifText}</span>
-                      </div>
-                    </div>
-                    <div className={s.phMiniReport}>
-                      <p className={s.phDim} style={{ marginTop: 0 }}>{c.journey.phone.miniReport}</p>
-                      <div className={s.phMiniRow}>
-                        <div><b style={{ color: "#34d399" }}>4</b><span>{c.how.step4.report.onTime}</span></div>
-                        <div><b style={{ color: "#fbbf24" }}>1</b><span>{c.how.step4.report.late}</span></div>
-                        <div><b style={{ color: "#f87171" }}>0</b><span>{c.how.step4.report.ignored}</span></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <span className={s.jLabel}>{c.journey.steps[3].label}</span>
-                <h3>{c.journey.steps[3].title}</h3>
-                <p>{c.journey.steps[3].text}</p>
-              </div>
-            </li>
-          </ol>
-
-          <div className={`${s.center} ${s.journeyCta}`}>
-            <Link className={s.btn} href={payHref}>
-              {c.hero.ctaPay} <span aria-hidden="true">→</span>
-            </Link>
+            </details>
           </div>
         </div>
       </section>
@@ -522,11 +360,17 @@ export function ParentLanding({
             </div>
 
             <div className={s.offerSide}>
+              {c.trialBox && (
+                <div className={s.trialBox}>
+                  <h3>{c.trialBox.title}</h3>
+                  <p>{c.trialBox.text}</p>
+                </div>
+              )}
               {c.offer.terms && code && (
-                <div className={s.terms}>
-                  <h3>
+                <details className={s.terms}>
+                  <summary>
                     {c.offer.terms.title[0]} <span className={s.codeChip}>{code}</span>, {c.offer.terms.title[1]}
-                  </h3>
+                  </summary>
                   <ul>
                     {c.offer.terms.items.map((item, i) => (
                       <li key={item.lead}>
@@ -538,12 +382,12 @@ export function ParentLanding({
                       </li>
                     ))}
                   </ul>
-                </div>
+                </details>
               )}
 
               {otherPlans.length > 0 && (
-                <div className={s.others}>
-                  <h3>{c.offer.othersTitle}</h3>
+                <details className={s.others}>
+                  <summary>{c.offer.othersTitle}</summary>
                   <div className={s.othersGrid}>
                     {otherPlans.map((p) => (
                       <div key={p.key} className={s.o}>
@@ -561,7 +405,7 @@ export function ParentLanding({
                       {c.offer.studentLink}
                     </Link>
                   </p>
-                </div>
+                </details>
               )}
             </div>
           </div>
@@ -573,8 +417,8 @@ export function ParentLanding({
         <div className={`${s.wrap} ${s.narrow}`}>
           <h2 className={`${s.sTitle} ${s.center}`}>{c.faq.title}</h2>
           <div className={s.faq}>
-            {c.faq.items.map((item, i) => (
-              <details key={item.q} open={i === 0}>
+            {c.faq.items.map((item) => (
+              <details key={item.q}>
                 <summary>{item.q}</summary>
                 <p>{item.a}</p>
               </details>
@@ -603,6 +447,7 @@ export function ParentLanding({
               <span>{c.final.per}</span>
             </div>
           )}
+          <p className={s.finalSub}>{c.final.steps}</p>
           <div className={s.ctaRow}>
             {c.final.ctaFree ? (
               <>
@@ -619,7 +464,7 @@ export function ParentLanding({
               </Link>
             )}
           </div>
-          <p className={s.fine}>{c.final.fine}</p>
+          <p className={s.fine}>{c.final.fineShort}</p>
         </div>
       </section>
 

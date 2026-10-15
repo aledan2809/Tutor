@@ -251,7 +251,7 @@ export default async function DashboardLayout({
             <HideDuringTest>
               <TrialBanner
                 locale={locale}
-                daysLeft={access.daysLeft}
+                endsAt={access.endsAt.toISOString()}
                 audience={bannerAudience}
                 pauseOn={(await loadPauseStartsAt()) !== null}
                 holder={trialHolder}

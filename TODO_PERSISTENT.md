@@ -91,6 +91,23 @@ Stare 14.10: etutor.ro `85b135c`, broker `b6e9c1c`, webhook-ul Class RDA 7/7 eve
   pe o listă goală (și spunea că a bifat-o programa) — acum ține doar de precompletarea serverului. Verificare:
   `Reports/poarta-evaluare-2026-10-14/verificare.mjs` (23/23; pe build-ul vechi se oprește la bifă), plus cele trei verificări
   de dimineață; vitest 1441; revizia OpenAI: o constatare, reparată.
+- [x] **Observațiile testerului (14.10 seara), 15.10 dimineață, pe `master`, NELIVRAT** (Alex: macheta aprobată, „în rest
+  OK” = variantele recomandate). Judecate pe datele de pe prod („Mama” 14.10 20:12: Miruna legată pe email, o invitație
+  WhatsApp în așteptare; Miruna și-a pus matematică + română la 00:17–00:20):
+  1. Ceasul „6z 13:22” e corect (timp real, proba până 21.10 09:23); confuzia venea din bannerul „mai ai 7 zile” (ziua de azi
+     numărată) → bannerul spune data: „Proba gratuită · până miercuri, 21 oct., la 09:23”.
+  2. Proba lasă oricâți copii și oricâte materii (regula de azi, `access.ts`), iar la plată Family acoperă un copil și o materie
+     (a doua materie −15%, de la a treia −25%, al doilea copil −20%) — pagina nu spunea. Acum: caseta „Proba de 7 zile, pe
+     înțeles” pe `/ro/parinte`, bannerul părintelui, nota din „Familia mea”, întrebarea „Am doi copii sau mai multe materii”.
+  3. `/ro/parinte` după machetă: 1.478 → 444 de cuvinte la vedere, 17 → 7 ecrane pe telefon; „Ce primești” pe trei rânduri
+     care se deschid (conținutul de dinainte, păstrat), grila și „În 4 pași” scoase (grila rămâne ca buton sus), codul și
+     celelalte pachete închise, întrebările închise; Family la singular („dacă materia aleasă le are”, observația lui Alex).
+  4. Invitația pe WhatsApp nu pleca: pe prod nu există șablon de invitație (`WHATSAPP_INVITE_TEMPLATE`), iar panoul se
+     închidea la trimitere, deci părintele nu vedea nici măcar linkul. Acum: „Trimite pe WhatsApp” (WhatsApp-ul părintelui,
+     mesaj gata scris, `wa.me`) + „Copiază invitația”, și la invitațiile în așteptare; panoul rămâne deschis. Pe drum: o
+     trimitere refuzată de Meta nu mai e numărată „Invitație trimisă.” (`deliverInvite`).
+  Verificare: `Reports/tester-2026-10-15/verificare.mjs` (29/29) + cele patru verificări mai vechi; vitest 1441; revizia
+  OpenAI: o constatare (invitația expirată încă oferea linkul), reparată.
 - [ ] **Pagina „Evaluare” e în engleză** („Level Assessment”, „Start Assessment”, „Question 1 of 10”…) pe un site în română —
   doar mesajele noi sunt traduse. De trecut pe `useTranslations` (lotul 2, pasul 15, texte RO/EN).
 - [ ] **„AI” într-un text public:** `src/lib/seo-subjects.ts:60` („…demo-ul Magic Quiz și AI-ul generează grile…”) — regula e

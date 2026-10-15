@@ -11,6 +11,8 @@ import {
   canAddChild,
   canAddTutor,
   trialChildCheck,
+  childDiscountPercent,
+  subjectDiscountPercent,
   INVITE_TARGET_ROLE,
   INVITE_CHANNEL,
   type FamilyPlanKey,
@@ -68,6 +70,7 @@ interface Overview {
     code: string | null;
     expiresAt: string;
     createdAt: string;
+    acceptUrl: string;
   }[];
   /** A role-less account taken for a learner, which may say it is a parent's (family-invite.ts). */
   canBecomeParent?: boolean;
@@ -91,6 +94,61 @@ const ROLE_RO: Record<string, string> = {
   PARENT: "părinte",
   TUTOR: "meditator",
 };
+
+/** wa.me wants the number with its country code and no „+": a Romanian 07… number becomes 407…. */
+function waNumber(phone: string | null): string {
+  const digits = (phone ?? "").replace(/\D/g, "");
+  if (digits.startsWith("00")) return digits.slice(2);
+  if (digits.startsWith("0")) return `40${digits.slice(1)}`;
+  return digits;
+}
+
+function inviteText(target: string, url: string): string {
+  if (target === INVITE_TARGET_ROLE.CHILD) {
+    return `Salut! Te-am adăugat în familia noastră pe eTutor.ro, ca să exersezi și să-ți vezi progresul. Intră pe linkul ăsta ca să ne legăm conturile: ${url}`;
+  }
+  if (target === INVITE_TARGET_ROLE.TUTOR) {
+    return `Salut! Te invit pe eTutor.ro, ca să vezi cum lucrează copilul nostru. Intră pe linkul ăsta: ${url}`;
+  }
+  return `Salut! Te invit în familia noastră pe eTutor.ro, ca să vezi și tu ce lucrează copilul. Intră pe linkul ăsta: ${url}`;
+}
+
+/**
+ * The invite goes out from the parent's own WhatsApp, written and ready (tester 14.10.2026: the WhatsApp
+ * invite never arrived — no business template for it, and the page only showed a bare link). Free, works
+ * in the trial, and the child gets it from their parent, not from a number they don't know.
+ */
+function ShareInvite({ target, url, phone }: { target: string; url: string; phone: string | null }) {
+  const [copied, setCopied] = useState(false);
+  const text = inviteText(target, url);
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      <a
+        href={`https://wa.me/${waNumber(phone)}?text=${encodeURIComponent(text)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex min-h-[44px] items-center rounded-lg bg-green-700 px-3 text-sm font-medium text-white hover:bg-green-600"
+      >
+        Trimite pe WhatsApp
+      </a>
+      <button
+        type="button"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(text);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2500);
+          } catch {
+            /* clipboard refused: the WhatsApp button still works */
+          }
+        }}
+        className="inline-flex min-h-[44px] items-center rounded-lg border border-gray-600 px-3 text-sm text-gray-200 hover:bg-gray-700"
+      >
+        {copied ? "Copiat" : "Copiază invitația"}
+      </button>
+    </div>
+  );
+}
 
 export default function FamilyPage() {
   const [data, setData] = useState<Overview | null>(null);
@@ -256,7 +314,19 @@ export default function FamilyPage() {
         )}
         {/* The days left and the payment button are in the trial banner above the page. */}
         {data.trial && (
-          <p className="mt-3 text-sm text-blue-300">În proba gratuită îți poți lega copilul acum, fără card.</p>
+          <>
+            <p className="mt-3 text-sm text-blue-300">În proba gratuită îți poți lega copilul acum, fără card.</p>
+            {/* The trial opens every child and subject; the plan bought after it doesn't (tester 14.10.2026). */}
+            <p className="mt-1 text-sm text-gray-300">
+              În probă au acces toți copiii și toate materiile. După probă, Family acoperă un copil și o materie; a doua materie
+              costă cu {subjectDiscountPercent(2)}% mai puțin decât prima, al doilea copil cu {childDiscountPercent(2)}% mai puțin.
+              Suma exactă o vezi în{" "}
+              <Link href="/dashboard/packages" className="text-blue-300 underline underline-offset-2">
+                Abonament
+              </Link>
+              , înainte să pui cardul.
+            </p>
+          </>
         )}
         {/* Someone the family covers (a child, a second parent) is never sent to buy: a child
             must not be pushed to purchase (UCPD Annex I point 28), and the family already pays. */}
@@ -581,8 +651,10 @@ function AddMember({
         )}
       </div>
 
+      {/* An invite refreshes quietly: the panel stays open, so the result and its WhatsApp button stay in view
+          (it used to close at once, and the parent never saw that the invite still had to be sent — tester 14.10.2026). */}
       {method === "invite" ? (
-        <InviteForm target={target} onDone={onDone} />
+        <InviteForm target={target} onDone={onCreated} />
       ) : (
         <DirectChildForm onDone={onDone} onCreated={onCreated} />
       )}
@@ -606,6 +678,9 @@ function InviteForm({
     code?: string | null;
     delivery?: { delivered: boolean; reason?: string };
     error?: string;
+    /** Where it was sent, as typed when it was sent (the tabs above may change after). */
+    sentChannel?: InviteChannel;
+    sentPhone?: string;
   } | null>(null);
 
   const submit = async () => {
@@ -624,7 +699,7 @@ function InviteForm({
     const d = await r.json();
     setBusy(false);
     if (r.ok) {
-      setResult(d);
+      setResult({ ...d, sentChannel: channel, sentPhone: phone });
       onDone(); // refresh list (pending invite appears) but keep result visible
     } else {
       setResult({ error: d.seat?.message ?? d.error ?? "Eroare" });
@@ -689,19 +764,24 @@ function InviteForm({
         <div className="rounded-lg border border-gray-700 bg-gray-800 p-3 text-sm">
           {result.delivery?.delivered ? (
             <p className="text-green-400">Invitație trimisă.</p>
-          ) : (
+          ) : result.sentChannel === INVITE_CHANNEL.WHATSAPP ? (
             <p className="text-gray-300">
-              Trimite tu linkul de mai jos persoanei (canalul direct nu a putut
-              livra automat).
+              Ultimul pas: apasă „Trimite pe WhatsApp”. Se deschide WhatsApp-ul tău, cu mesajul și linkul gata scrise.
             </p>
+          ) : (
+            <p className="text-gray-300">Trimite-i tu invitația: pe WhatsApp sau copiată, oriunde vrei.</p>
           )}
           {result.code && (
             <p className="mt-2 text-white">
               Cod de familie: <strong className="font-mono">{result.code}</strong>
             </p>
           )}
-          {result.acceptUrl && (
-            <p className="mt-2 break-all text-blue-300">{result.acceptUrl}</p>
+          {result.acceptUrl && !result.delivery?.delivered && (
+            <ShareInvite
+              target={target}
+              url={result.acceptUrl}
+              phone={result.sentChannel === INVITE_CHANNEL.WHATSAPP ? result.sentPhone ?? null : null}
+            />
           )}
         </div>
       )}
@@ -1047,6 +1127,12 @@ function PendingInvites({
                 <p className="text-gray-400">
                   Cod: <span className="font-mono text-white">{inv.code}</span>
                 </p>
+              )}
+              {/* An invite stays „pending" past its 7 days until someone tries it; its link no longer works then. */}
+              {new Date(inv.expiresAt).getTime() > Date.now() ? (
+                <ShareInvite target={inv.targetRole} url={inv.acceptUrl} phone={inv.phone} />
+              ) : (
+                <p className="mt-1 text-amber-400">Invitația a expirat — anuleaz-o și trimite una nouă.</p>
               )}
             </div>
             <button

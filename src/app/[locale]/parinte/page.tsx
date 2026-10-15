@@ -16,7 +16,7 @@ import {
   QUIET_HOURS_DEFAULT,
 } from "@/lib/escalation/config";
 import { serverChannelAvailability } from "@/lib/escalation/channel-availability";
-import { FAMILY_INVITE_TTL_DAYS, FAMILY_PLANS, childDiscountPercent, type FamilyPlanKey } from "@/lib/family";
+import { FAMILY_PLANS, childDiscountPercent, subjectDiscountPercent, type FamilyPlanKey } from "@/lib/family";
 import { FREE_TRIAL_DAYS, checkoutTrialDays } from "@/lib/free-trial";
 import { trialStartOf } from "@/lib/access";
 import { loadPauseStartsAt } from "@/lib/access-server";
@@ -198,9 +198,10 @@ export default async function ParintePage({
     nudgeMaxAgeHours: NUDGE_MAX_AGE_HOURS,
     nudgeMaxFires: NUDGE_MAX_FIRES,
     onTimeWindowMin: ON_TIME_WINDOW_MIN,
-    inviteValidDays: FAMILY_INVITE_TTL_DAYS,
     secondChildPct: childDiscountPercent(2),
     thirdChildPct: childDiscountPercent(3),
+    secondSubjectPct: subjectDiscountPercent(2),
+    thirdSubjectPct: subjectDiscountPercent(3),
   };
 
   const copy = landingCopy(lp, {

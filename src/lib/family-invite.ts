@@ -308,6 +308,7 @@ export interface FamilyOverview {
     code: string | null;
     expiresAt: Date;
     createdAt: Date;
+    acceptUrl: string;
   }[];
 }
 
@@ -382,6 +383,7 @@ export async function getFamilyOverview(
       email: true,
       phone: true,
       code: true,
+      token: true,
       expiresAt: true,
       createdAt: true,
     },
@@ -417,7 +419,9 @@ export async function getFamilyOverview(
       children: { used: children.length, max: maxChildren },
       tutors: { used: tutors.length, max: maxTutors },
     },
-    pendingInvites: pending,
+    // The link goes back to the parent who sent it (the list is only ever the caller's own invites), so a
+    // WhatsApp invite can be sent again from their own phone — nothing sends one for them (tester 14.10.2026).
+    pendingInvites: pending.map(({ token, ...invite }) => ({ ...invite, acceptUrl: inviteAcceptUrl(token) })),
   };
 }
 
@@ -756,13 +760,17 @@ async function deliverInvite(params: {
         return { channel: params.channel, delivered: false, reason: "invite_template_not_configured" };
       const { WhatsAppClient, normalizePhone } = await import("@aledan/whatsapp");
       const client = new WhatsAppClient({ phoneNumberId, accessToken });
-      await client.sendTemplate(normalizePhone(params.phone), template, "ro", [
+      // `sendTemplate` doesn't throw on a refusal — it answers {success:false} (course-invite route); counting
+      // that as sent would tell the parent „Invitație trimisă." for a message Meta never delivered.
+      const sent = await client.sendTemplate(normalizePhone(params.phone), template, "ro", [
         {
           type: "body" as const,
           parameters: [{ type: "text" as const, text: params.acceptUrl }],
         },
       ]);
-      return { channel: params.channel, delivered: true };
+      return sent.success
+        ? { channel: params.channel, delivered: true }
+        : { channel: params.channel, delivered: false, reason: "send_failed" };
     }
 
     if (params.channel === INVITE_CHANNEL.TELEGRAM) {
