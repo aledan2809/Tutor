@@ -6,7 +6,7 @@ Cifre (30 zile, fără test, Umami doar etutor.ro): 128 vizitatori · 14 vederi 
 **0 plăți de la lansare** (brokerul: 4 plăți începute, niciuna terminată) · flyerul: 3 scanări `/cafea` în 15 zile, 0 coduri
 V126S/ONV126S folosite. Prima plată reală trece printr-o legătură Stripe → eTutor care n-a primit niciun eveniment live.
 - [x] Lotul `b3db8a1` + `5624f8d` LIVE 15.10 19:14 UTC (pagina /parinte, proba spusă clar, invitația WhatsApp, poarta capitolelor).
-- [~] `32e2389` (commit local, **nelivrat** — așteaptă OK-ul lui Alex): copilul rămas fără loc după plată pe „Familia mea”
+- [x] `32e2389` **LIVE 15.10 ~19:45 UTC** (livrat ca `06b84b7`, OK-ul lui Alex; copie `/root/backups/tutor-pre-livrare-2026-10-15-1931.dump`; probe: `data-domains` servit, callback fără semnătură 400, familie fără cont 401, codul nou în build): copilul rămas fără loc după plată pe „Familia mea”
   (cu prețul locului; „Adaugă copil” nu mai promite „al 3-lea −30%”), alerte pe Telegram către administrator la plată /
   reînnoire / plată eșuată / încheiere / plată abandonată / ultima zi / pauză (contul super-admin cu Telegram legat: 1 din 3),
   Umami doar pe etutor.ro. QA 30/30, vitest 1441, revizie Codex reparată.
