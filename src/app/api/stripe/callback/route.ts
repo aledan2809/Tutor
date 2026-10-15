@@ -485,9 +485,13 @@ async function _POST(req: NextRequest) {
       }
       // The end of a subscription the account left behind doesn't end the one it pays now.
       if (await currentSubscription(userId, p, "canceled")) {
-        // The owner hears of the end once: a redelivery (or a legacy callback with no subscription id, which
-        // passes currentSubscription every time) finds the account already ended.
-        const before = await prisma.user.findUnique({ where: { id: userId }, select: { subscriptionStatus: true } });
+        // The owner hears of the end once: only the delivery whose conditional write flips the status does
+        // — a redelivery, a legacy callback with no subscription id (it passes currentSubscription every
+        // time) or one running at the same moment finds it already ended (the row lock serialises them).
+        const flipped = await prisma.user.updateMany({
+          where: { id: userId, OR: [{ subscriptionStatus: null }, { subscriptionStatus: { not: "canceled" } }] },
+          data: { subscriptionStatus: "canceled" },
+        });
         await prisma.user.update({
           where: { id: userId },
           data: {
@@ -498,7 +502,7 @@ async function _POST(req: NextRequest) {
             ...CLEARED_PERIOD_FIELDS,
           },
         });
-        if (before?.subscriptionStatus !== "canceled") alert = `🛑 Abonament încheiat: ${await boughtWords(planId, null)}`;
+        if (flipped.count === 1) alert = `🛑 Abonament încheiat: ${await boughtWords(planId, null)}`;
       }
       // Either way the subscription has ended: whatever arrives for it later is late. Recorded after
       // the account's own change, so a retry of a cancellation that failed midway still applies it.

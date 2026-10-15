@@ -225,6 +225,15 @@ try {
       (await p4.getByRole("button", { name: /Adaugă locul pentru Petra/ }).count()) === 0,
   );
 
+  // Revizia Codex (16.10): un al doilea părinte al copilului nu poate cumpăra după ce familia plătește (access.ts
+  // seatHolder: i se spune cine are pachetul), deci anunțul rămâne „apoi intră în pauză” și când copilul are alt părinte.
+  const other = await mkUser("alt-parinte", { name: "Mihaela Alta", accountRole: "PARENT" });
+  await link(other.id, d2.id, 1);
+  const octx = await browser.newContext();
+  await login(octx, other.email);
+  const otherPlans = await api(octx, "GET", "/api/plans");
+  check("1 celălalt părinte al copilului vede cine are pachetul, fără ofertă de cumpărat", otherPlans.body?.current?.seatHolder != null, JSON.stringify(otherPlans.body?.current?.seatHolder));
+
   // Familie cu un singur copil: niciun anunț.
   const payer3 = await mkUser("platitor3", { name: "Dan Unul", accountRole: "PARENT", subscriptionPlanId: family.id, subscriptionStatus: "active", stripeSubscriptionId: `sub_${tag}_3` });
   const e1 = await mkUser("copil5", { name: "Sara Una", accountRole: "STUDENT" });
@@ -270,10 +279,18 @@ try {
   await callback("subscription.canceled", { userId: buyer.id, planId: family.id }, { stripeSubscriptionId: `sub_${tag}_b` });
   await settle();
   check("2 abonament încheiat: „🛑 Abonament încheiat”", tgFor().some((t) => t.startsWith("🛑 Abonament încheiat")), JSON.stringify(tgFor()));
+  // Revizia Codex (16.10): două încheieri sosite în aceeași clipă, pe alt abonament → o singură alertă.
+  const buyer2 = await mkUser("cumparator2", { name: "Ilinca Doi", accountRole: "PARENT" });
+  await callback("subscription.activated", { userId: buyer2.id, planId: family.id }, { amountTotal: family.price, currency: "ron", subscriptionStatus: "active", stripeSubscriptionId: `sub_${tag}_b2` });
+  await settle();
+  const stopBefore = tgFor().filter((t) => t.startsWith("🛑")).length;
+  await Promise.all([1, 2, 3].map(() => callback("subscription.canceled", { userId: buyer2.id, planId: family.id }, { stripeSubscriptionId: `sub_${tag}_b2` })));
+  await settle();
+  check("2 trei încheieri simultane: o singură alertă „🛑”", tgFor().filter((t) => t.startsWith("🛑")).length === stopBefore + 1, JSON.stringify(tgFor().filter((t) => t.startsWith("🛑"))));
   // Revizia Codex: aceeași încheiere, retrimisă fără codul abonamentului (apel vechi) → nicio a doua alertă.
   await callback("subscription.canceled", { userId: buyer.id, planId: family.id });
   await settle();
-  check("2 încheierea retrimisă: o singură alertă „🛑”", tgFor().filter((t) => t.startsWith("🛑")).length === 1, JSON.stringify(tgFor()));
+  check("2 încheierea retrimisă: nicio alertă „🛑” în plus", tgFor().filter((t) => t.startsWith("🛑")).length === 2, JSON.stringify(tgFor()));
   await callback("payment.expired", { userId: buyer.id, planId: family.id });
   await settle();
   check("2 plată abandonată: „⌛ Plată începută și neterminată”", tgFor().some((t) => t.startsWith("⌛ Plată începută și neterminată")), JSON.stringify(tgFor()));
