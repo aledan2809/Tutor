@@ -14,6 +14,13 @@ V126S/ONV126S folosite. Prima plată reală trece printr-o legătură Stripe →
   — rulează la Optimise, dimineața.
 - [ ] Lipsă rămasă: anunțul înainte de reînnoire / card care expiră (etapa 9); flyerul nu aduce trafic — de întrebat Poșta
   dacă distribuția a pornit.
+- [x] `5a20a49` **LIVE 15.10 ~20:30 UTC** (poziția contrară + revizie Codex): textul nu mai promite „Suma exactă” /
+  „La plată păstrezi ce vrei” (al doilea copil = loc separat, după pachet); Abonamentul arată locul fiecărui copil în plus
+  și totalul familiei, la prețul cerut apoi de plata locului. QA 39/39 + 28/28 + 23/23. Copie `/root/backups/tutor-pre-livrare-2026-10-15-2022.dump`.
+- [ ] **Plata unică pentru familie** (pachet + locurile copiilor într-o singură plată) — declanșator: proba lui Alex cu cardul
+  arată că plata locului cere din nou cardul, SAU apare în probă prima familie reală cu 2+ copii. De verificat înainte:
+  taxa fixă Stripe pe tranzacție (contul Class RDA) și, cu un jurist, afișarea prețului total la plata familiei.
+  Atenție: un loc pus în același abonament nu se mai poate opri separat (brokerul nu modifică un abonament).
 
 ## [~] 🔴 PROBA DE 7 ZILE — comutatorul PORNIT pe prod 14.10, 09:23 (Alex, intenționat); pauza vine pe 21.10, 09:23
 
