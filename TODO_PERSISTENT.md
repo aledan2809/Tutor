@@ -10,8 +10,8 @@ V126S/ONV126S folosite. Prima plată reală trece printr-o legătură Stripe →
   (cu prețul locului; „Adaugă copil” nu mai promite „al 3-lea −30%”), alerte pe Telegram către administrator la plată /
   reînnoire / plată eșuată / încheiere / plată abandonată / ultima zi / pauză (contul super-admin cu Telegram legat: 1 din 3),
   Umami doar pe etutor.ro. QA 30/30, vitest 1441, revizie Codex reparată.
-- [ ] Alarma zilnică din `FLUXURI-BANI.md`: probată (`money-flows-check --force`: 3 pași + 6 dependențe ok), `"enabled": false`
-  până o pornește Alex.
+- [x] Alarma zilnică din `FLUXURI-BANI.md`: probată (`money-flows-check --force`: 3 pași + 6 dependențe ok), PORNITĂ 15.10 (Alex)
+  — rulează la Optimise, dimineața.
 - [ ] Lipsă rămasă: anunțul înainte de reînnoire / card care expiră (etapa 9); flyerul nu aduce trafic — de întrebat Poșta
   dacă distribuția a pornit.
 

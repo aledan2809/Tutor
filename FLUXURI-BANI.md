@@ -56,7 +56,7 @@ care copil, de când e în pauză (sau când intră) și prețul locului (`src/l
 ```bani-check
 {
   "version": 1,
-  "enabled": false,
+  "enabled": true,
   "host": "vps2",
   "database": "tutor",
   "steps": [
