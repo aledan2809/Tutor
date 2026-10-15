@@ -105,6 +105,12 @@ async function callback(event, metadata, extra = {}) {
 }
 const settle = () => new Promise((r) => setTimeout(r, 700));
 
+// Cu comutatorul probei oprit nimeni nu intră în pauză și toate verificările ar trece în gol: îl cerem aprins
+// înainte de pornirea serverului (serverul îl ține minte 30 s).
+if (!(await prisma.appSetting.findUnique({ where: { key: "accessTrial" } }))) {
+  console.error("Comutatorul probei e oprit în baza QA: pornește-l înainte de server (AppSetting accessTrial).");
+  process.exit(2);
+}
 const browser = await chromium.launch();
 try {
   const family = await prisma.subscriptionPlan.findFirstOrThrow({ where: { isActive: true, interval: "MONTH", familyPlanKey: "FAMILY" }, orderBy: { price: "asc" } });
