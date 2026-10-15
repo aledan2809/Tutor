@@ -1216,7 +1216,9 @@
     "parentUpgradeCta": "Move to {plan} · +{price} lei",
     "parentUpgradeSomeone": "an adult of the family",
     "extraSeat": "Seat for child {index}: {price} lei{interval}, paid separately after the plan.",
-    "familyTotal": "Total for {n} children: {price} lei{interval}."
+    "familyTotal": "Total for {n} children: {price} lei{interval}.",
+    "newSeatsTotal": "The plan and the new seats: {price} lei{interval}.",
+    "runningSeats": "{n, plural, one {The seat already paid separately continues at its own price.} other {The # seats already paid separately continue at their own price.}}"
   },
   "cookieBanner": {
     "short": "We only use essential cookies.",

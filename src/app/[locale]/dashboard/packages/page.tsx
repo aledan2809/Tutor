@@ -407,7 +407,8 @@ export default function PackagesPage() {
   const extraSeatsFor = (plan: Plan, fam: FamilyPlan | null, priced: ReturnType<typeof priceFor> | null) => {
     const linked = current.childrenLinked ?? 0;
     // A child's seat still paid by its own running subscription (it can outlast the plan) isn't charged again.
-    const seated = fam ? fam.maxChildren + (current.addons ?? []).filter((a) => a.type === "child_addon").length : 0;
+    const running = (current.addons ?? []).filter((a) => a.type === "child_addon").length;
+    const seated = fam ? fam.maxChildren + running : 0;
     if (!fam || !priced || fam.maxChildren < 1 || plan.interval === "ONE_TIME" || linked <= seated) return null;
     const monthly = planMonthlyMinor({ price: Math.round(plan.price * 100), interval: plan.interval });
     const interval = plan.interval === "YEAR" ? "YEAR" : "MONTH";
@@ -415,7 +416,9 @@ export default function PackagesPage() {
       index: seated + 1 + i,
       minor: forInterval(childSeatMonthlyMinor(monthly, seated + 1 + i, priced.discount.pricesPercent), interval),
     }));
-    return { seats, total: priced.total + seats.reduce((sum, s) => sum + s.minor, 0) };
+    // With a seat already paid separately its price isn't known here: the sum then covers the plan and the
+    // new seats only, and says so (review 15.10), never „the total for N children".
+    return { seats, total: priced.total + seats.reduce((sum, s) => sum + s.minor, 0), running };
   };
   const trialFor = (plan: Plan): number =>
     plan.interval === "ONE_TIME" ? 0 : Math.min(plan.trialDays ?? 0, current.freeTrialDaysLeft ?? 0);
@@ -763,8 +766,11 @@ export default function PackagesPage() {
                         <p key={s.index}>{t("extraSeat", { index: s.index, price: bani(s.minor), interval: intervalLabel(plan.interval) })}</p>
                       ))}
                       <p className="mt-1 font-semibold text-white">
-                        {t("familyTotal", { n: (current.childrenLinked ?? 0), price: bani(extra.total), interval: intervalLabel(plan.interval) })}
+                        {extra.running > 0
+                          ? t("newSeatsTotal", { price: bani(extra.total), interval: intervalLabel(plan.interval) })
+                          : t("familyTotal", { n: (current.childrenLinked ?? 0), price: bani(extra.total), interval: intervalLabel(plan.interval) })}
                       </p>
+                      {extra.running > 0 && <p className="mt-1">{t("runningSeats", { n: extra.running })}</p>}
                     </div>
                   )}
                   {withTelegram && withTelegram.first < (priced?.first ?? 0) && (

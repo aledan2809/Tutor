@@ -250,12 +250,30 @@ try {
   await callback("subscription.renewed", { userId: buyer.id, planId: family.id }, { eventId: `evt_${tag}_r`, amountTotal: family.price, currency: "ron", stripeSubscriptionId: `sub_${tag}_b` });
   await settle();
   check("2 reînnoire: „🔁 Reînnoire încasată”", tgFor().some((t) => t.startsWith("🔁 Reînnoire încasată")), JSON.stringify(tgFor()));
+  // Revizia Codex: două reînnoiri pe aceeași sesiune, fără cod de eveniment (apeluri vechi) → două alerte.
+  const legacySession = `cs_${tag}_legacy`;
+  const nBefore = tgFor().filter((t) => t.startsWith("🔁")).length;
+  await callback("subscription.renewed", { userId: buyer.id, planId: family.id }, { sessionId: legacySession, amountTotal: family.price, currency: "ron", stripeSubscriptionId: `sub_${tag}_b` });
+  await callback("subscription.renewed", { userId: buyer.id, planId: family.id }, { sessionId: legacySession, amountTotal: family.price, currency: "ron", stripeSubscriptionId: `sub_${tag}_b` });
+  await settle();
+  check("2 două reînnoiri fără cod de eveniment, aceeași sesiune: două alerte", tgFor().filter((t) => t.startsWith("🔁")).length === nBefore + 2, JSON.stringify(tgFor()));
+  // Aceeași plată abandonată trimisă de două ori: o singură alertă.
+  const expiredSession = `cs_${tag}_expired`;
+  const nExp = tgFor().filter((t) => t.startsWith("⌛")).length;
+  await callback("payment.expired", { userId: buyer.id, planId: family.id }, { sessionId: expiredSession });
+  await callback("payment.expired", { userId: buyer.id, planId: family.id }, { sessionId: expiredSession });
+  await settle();
+  check("2 aceeași plată abandonată de două ori: o singură alertă", tgFor().filter((t) => t.startsWith("⌛")).length === nExp + 1, JSON.stringify(tgFor()));
   await callback("subscription.payment_failed", { userId: buyer.id, planId: family.id }, { stripeSubscriptionId: `sub_${tag}_b`, nextPaymentAttempt: new Date(Date.now() + 3 * DAY).toISOString() });
   await settle();
   check("2 plată eșuată: „⚠️ Plata n-a trecut …”", tgFor().some((t) => t.startsWith("⚠️ Plata n-a trecut") && t.includes("banca mai e încercată")), JSON.stringify(tgFor()));
   await callback("subscription.canceled", { userId: buyer.id, planId: family.id }, { stripeSubscriptionId: `sub_${tag}_b` });
   await settle();
   check("2 abonament încheiat: „🛑 Abonament încheiat”", tgFor().some((t) => t.startsWith("🛑 Abonament încheiat")), JSON.stringify(tgFor()));
+  // Revizia Codex: aceeași încheiere, retrimisă fără codul abonamentului (apel vechi) → nicio a doua alertă.
+  await callback("subscription.canceled", { userId: buyer.id, planId: family.id });
+  await settle();
+  check("2 încheierea retrimisă: o singură alertă „🛑”", tgFor().filter((t) => t.startsWith("🛑")).length === 1, JSON.stringify(tgFor()));
   await callback("payment.expired", { userId: buyer.id, planId: family.id });
   await settle();
   check("2 plată abandonată: „⌛ Plată începută și neterminată”", tgFor().some((t) => t.startsWith("⌛ Plată începută și neterminată")), JSON.stringify(tgFor()));
@@ -331,8 +349,10 @@ try {
     const parent = await mkUser("loc-ramas", { name: "Sorin Ramas", accountRole: "PARENT" });
     const k1 = await mkUser("copil12", { name: "Ada Unu", accountRole: "STUDENT" });
     const k2 = await mkUser("copil13", { name: "Bogdan Doi", accountRole: "STUDENT" });
+    const k3 = await mkUser("copil14", { name: "Cora Trei", accountRole: "STUDENT" });
     await link(parent.id, k1.id, 6);
     await link(parent.id, k2.id, 5);
+    await link(parent.id, k3.id, 4);
     await callback("subscription.activated", { userId: parent.id, planId: family.id, discountPercent: 0 }, { amountTotal: family.price, currency: "ron", subscriptionStatus: "active", stripeSubscriptionId: `sub_${tag}_sorin` });
     await callback("subscription.activated", { userId: parent.id, type: "child_addon", childIndex: "2" }, { amountTotal: Math.round(family.price * 0.8), currency: "ron", subscriptionStatus: "active", stripeSubscriptionId: `sub_${tag}_sorin_c2` });
     await callback("subscription.canceled", { userId: parent.id, planId: family.id }, { stripeSubscriptionId: `sub_${tag}_sorin` });
@@ -347,8 +367,14 @@ try {
     const famCard = (await sp.locator(`#plan-card-${family.id}`).innerText().catch(() => "")).replace(/\s+/g, " ");
     check(
       "4 pachet încheiat, locul copilului încă plătit: Abonamentul nu-l mai cere o dată",
-      hasAddon && pl.body?.current?.childrenLinked === 2 && famCard.length > 0 && !famCard.includes("Locul pentru al 2-lea copil"),
+      hasAddon && pl.body?.current?.childrenLinked === 3 && famCard.length > 0 && !famCard.includes("Locul pentru al 2-lea copil"),
       JSON.stringify({ hasAddon, linked: pl.body?.current?.childrenLinked, card: famCard.slice(0, 200) }),
+    );
+    check(
+      "4 cu un loc plătit deja separat: arată locul celui de-al 3-lea copil și nu pretinde „Total pentru 3 copii”",
+      famCard.includes("Locul pentru al 3-lea copil") && famCard.includes("Pachetul și locurile noi:") &&
+        famCard.includes("Locul plătit deja separat continuă la prețul lui.") && !famCard.includes("Total pentru 3 copii"),
+      famCard.slice(0, 400),
     );
   }
 

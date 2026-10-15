@@ -1216,7 +1216,9 @@
     "parentUpgradeCta": "Treci pe {plan} · +{price} lei",
     "parentUpgradeSomeone": "un adult al familiei",
     "extraSeat": "Locul pentru al {index}-lea copil: {price} lei{interval}, plătit separat, după pachet.",
-    "familyTotal": "Total pentru {n} copii: {price} lei{interval}."
+    "familyTotal": "Total pentru {n} copii: {price} lei{interval}.",
+    "newSeatsTotal": "Pachetul și locurile noi: {price} lei{interval}.",
+    "runningSeats": "{n, plural, one {Locul plătit deja separat continuă la prețul lui.} few {Cele # locuri plătite deja separat continuă la prețul lor.} other {Cele # de locuri plătite deja separat continuă la prețul lor.}}"
   },
   "cookieBanner": {
     "short": "Folosim doar cookie-uri esențiale.",

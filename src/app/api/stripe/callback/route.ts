@@ -82,7 +82,7 @@ const ADDON_WORDS: Record<string, string> = {
   parent_addon: "diferența pentru încă un părinte",
 };
 
-/** Events already alerted in this process (bounded): a broker redelivery doesn't alert twice. */
+/** Abandoned / refused checkouts already alerted in this process (bounded): they leave nothing in the database. */
 const alerted = new Set<string>();
 function firstAlertFor(key: string): boolean {
   if (alerted.has(key)) return false;
@@ -485,6 +485,9 @@ async function _POST(req: NextRequest) {
       }
       // The end of a subscription the account left behind doesn't end the one it pays now.
       if (await currentSubscription(userId, p, "canceled")) {
+        // The owner hears of the end once: a redelivery (or a legacy callback with no subscription id, which
+        // passes currentSubscription every time) finds the account already ended.
+        const before = await prisma.user.findUnique({ where: { id: userId }, select: { subscriptionStatus: true } });
         await prisma.user.update({
           where: { id: userId },
           data: {
@@ -495,7 +498,7 @@ async function _POST(req: NextRequest) {
             ...CLEARED_PERIOD_FIELDS,
           },
         });
-        alert = `🛑 Abonament încheiat: ${await boughtWords(planId, null)}`;
+        if (before?.subscriptionStatus !== "canceled") alert = `🛑 Abonament încheiat: ${await boughtWords(planId, null)}`;
       }
       // Either way the subscription has ended: whatever arrives for it later is late. Recorded after
       // the account's own change, so a retry of a cancellation that failed midway still applies it.
@@ -521,9 +524,12 @@ async function _POST(req: NextRequest) {
   }
 
   // After the answer has gone back to the broker: a slow Telegram never holds the callback into a retry.
-  // Once per event and session, so a redelivery of an event with nothing to dedup on (an abandoned
-  // checkout) doesn't alert twice.
-  if (alert && firstAlertFor(`${p.event}:${p.sessionId}:${p.eventId ?? ""}`)) {
+  // The money events alert only on a first change in the database (isNew, a first failure, a cancellation
+  // that applied), so a redelivery finds nothing new. An abandoned or refused checkout writes nothing:
+  // only those are remembered here — keying every event by session would silence the second renewal of
+  // a session whose callbacks carry no event id (review 15.10).
+  const dbGated = p.event !== "payment.expired" && p.event !== "payment.failed";
+  if (alert && (dbGated || firstAlertFor(`${p.event}:${p.sessionId}`))) {
     const text = alert;
     after(async () => {
       const who = await payerForAlert(userId).catch(() => null);
