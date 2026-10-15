@@ -1214,7 +1214,9 @@
     "parentUpgradeTotal": "Total {total} lei {interval, select, YEAR {pe an} other {pe lună}}, prețul pachetului {plan}. Diferența se plătește separat și se poate opri oricând — atunci familia revine la pachetul de acum.",
     "parentUpgradeRedundant": "Plătești în continuare diferența pentru {plan}, dar pachetul tău o include deja — o poți opri din lista de mai jos.",
     "parentUpgradeCta": "Treci pe {plan} · +{price} lei",
-    "parentUpgradeSomeone": "un adult al familiei"
+    "parentUpgradeSomeone": "un adult al familiei",
+    "extraSeat": "Locul pentru al {index}-lea copil: {price} lei{interval}, plătit separat, după pachet.",
+    "familyTotal": "Total pentru {n} copii: {price} lei{interval}."
   },
   "cookieBanner": {
     "short": "Folosim doar cookie-uri esențiale.",

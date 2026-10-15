@@ -102,7 +102,7 @@ async function _GET() {
   // offer and its countdown), Telegram in the family (−10%), and the subjects each kind of plan would
   // bill — the payer's own for Elev, the first linked child's for a family plan — less the ones still
   // paid by their own subscriptions, as checkout counts them.
-  const [trial, lifetimeOffer, telegram, counted, parentLinks, firstChild, addons, byCard] = await Promise.all([
+  const [trial, lifetimeOffer, telegram, counted, parentLinks, firstChild, addons, byCard, childrenLinked] = await Promise.all([
     payerTrial(userId, new Date(), me.createdAt),
     // The free week's −30%, or the same −30% before an inactive account is erased (winback.ts).
     payerLifetimeOffer(userId, new Date(), me.createdAt),
@@ -112,6 +112,9 @@ async function _GET() {
     firstLinkedChild(userId),
     runningAddons(userId),
     paysByCard(me),
+    // The children this account links as a parent: a family plan seats one, each other one is a seat paid
+    // separately after the plan — the card shows it before the card is added (/bani 15.10.2026).
+    prisma.guardian.count({ where: { parentId: userId, status: "active", relation: "PARENT" } }),
   ]);
   // A child whose parent is in the account is never offered a price to pay now (UCPD Annex I point
   // 28): no countdown, no −30% in the trial, no Telegram saving — the rule of the trial banner and of
@@ -216,6 +219,7 @@ async function _GET() {
           : null,
       seatHolder,
       telegram,
+      childrenLinked: child ? 0 : childrenLinked,
       subjects: {
         self: selfSubjects,
         child: childSubjects !== null ? { count: childSubjects } : null,

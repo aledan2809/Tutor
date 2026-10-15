@@ -278,6 +278,80 @@ try {
   await settle();
   check("2 cron-ul: „⏸ … în pauză la finalul probei”", cron.status === 200 && tgFor().some((t) => /^⏸ \d+ famil(ie a intrat|ii au intrat) în pauză la finalul probei\./m.test(t)), JSON.stringify({ status: cron.status, tg: tgFor() }));
 
+  // ── 4. Poziția contrară (15.10): textul nu mai promite o „sumă exactă” care lasă afară al doilea copil ──
+  {
+    const lp = await (await browser.newContext({ ...devices["iPhone 13"], locale: "ro-RO" })).newPage();
+    await lp.goto(`${BASE}/ro/parinte`, { waitUntil: "networkidle" });
+    const all = await lp.evaluate(() => document.body.textContent ?? "");
+    check("4 /parinte: fără „La plată păstrezi ce vrei” și fără „Suma exactă”", !all.includes("păstrezi ce vrei") && !all.includes("Suma exactă"));
+    check("4 /parinte: al doilea copil are locul lui, plătit separat, după pachet", all.includes("Al doilea copil are locul lui, cu 20% mai puțin, plătit separat, după pachet"));
+    check("4 /parinte (întrebări): locul se plătește separat și primește reducerea familiei", all.includes("plătit separat, după pachet: cu 20% mai puțin") && all.includes("reducerea familiei se aplică și locului"));
+  }
+  {
+    // Părinte în probă, cu doi copii: Abonamentul arată locul celui de-al doilea și totalul; după plată, „Familia mea”
+    // cere exact prețul arătat înainte (prețul afișat = prețul încasat).
+    const parent = await mkUser("proba-doi-copii", { name: "Rita Doi", accountRole: "PARENT", createdAt: new Date() });
+    const k1 = await mkUser("copil10", { name: "Toma Primul", accountRole: "STUDENT", createdAt: new Date() });
+    const k2 = await mkUser("copil11", { name: "Lia Adoua", accountRole: "STUDENT", createdAt: new Date() });
+    await prisma.guardian.create({ data: { parentId: parent.id, childId: k1.id, relation: "PARENT", status: "active", createdAt: new Date(Date.now() - 60_000) } });
+    await prisma.guardian.create({ data: { parentId: parent.id, childId: k2.id, relation: "PARENT", status: "active" } });
+    const pctx = await browser.newContext({ ...devices["iPhone 13"], locale: "ro-RO", serviceWorkers: "block" });
+    await login(pctx, parent.email);
+    const plans = await api(pctx, "GET", "/api/plans");
+    check("4 API: Abonamentul știe că familia are 2 copii", plans.body?.current?.childrenLinked === 2, JSON.stringify(plans.body?.current?.childrenLinked));
+    const pk = await pctx.newPage();
+    await pk.goto(`${BASE}/ro/dashboard/packages`, { waitUntil: "networkidle" });
+    await pk.getByRole("button", { name: "Respinge" }).click().catch(() => {});
+    const card = pk.locator(`#plan-card-${family.id}`);
+    const cardText = (await card.innerText().catch(() => "")).replace(/\s+/g, " ");
+    const seatMatch = cardText.match(/Locul pentru al 2-lea copil: ([\d.,]+) lei\/lună, plătit separat, după pachet\./);
+    const totalMatch = cardText.match(/Total pentru 2 copii: ([\d.,]+) lei\/lună\./);
+    check("4 Abonament, cardul Family: locul celui de-al doilea copil și totalul familiei", Boolean(seatMatch && totalMatch), cardText.slice(0, 400));
+    await card.screenshot({ path: `${SHOTS}4-abonament-doi-copii.png` }).catch(() => {});
+    const before = brokerCalls.length;
+    const co = await api(pctx, "POST", "/api/admin/stripe/checkout", { planId: family.id });
+    const sentPlan = brokerCalls[before];
+    check("4 plata pachetului pleacă la broker", co.status === 200 && sentPlan?.metadata?.planId === family.id, JSON.stringify({ status: co.status, body: co.body }));
+    const planMinor = (sentPlan?.lineItems ?? []).reduce((sum, l) => sum + Math.round(l.amount * 100), 0);
+    await callback("subscription.activated", sentPlan?.metadata ?? {}, { amountTotal: planMinor, currency: "ron", subscriptionStatus: "active", stripeSubscriptionId: `sub_${tag}_rita` });
+    await settle();
+    const after = await api(pctx, "GET", "/api/dashboard/family");
+    const shown = seatMatch ? Number(seatMatch[1].replace(/\./g, "").replace(",", ".")) : NaN;
+    const shownTotal = totalMatch ? Number(totalMatch[1].replace(/\./g, "").replace(",", ".")) : NaN;
+    check(
+      "4 după plată, locul cerut în „Familia mea” = locul arătat înainte în Abonament",
+      after.body?.childSeat?.leftOut?.[0]?.name === "Lia Adoua" && after.body.childSeat.price === shown,
+      JSON.stringify({ shown, quote: after.body?.childSeat }),
+    );
+    check("4 totalul arătat = pachetul plătit + locul", Math.round((planMinor / 100 + shown) * 100) === Math.round(shownTotal * 100), JSON.stringify({ planMinor, shown, shownTotal }));
+  }
+
+  {
+    // Revizia Codex: pachetul s-a încheiat, dar abonamentul locului de copil încă merge — locul nu se mai cere o dată.
+    const parent = await mkUser("loc-ramas", { name: "Sorin Ramas", accountRole: "PARENT" });
+    const k1 = await mkUser("copil12", { name: "Ada Unu", accountRole: "STUDENT" });
+    const k2 = await mkUser("copil13", { name: "Bogdan Doi", accountRole: "STUDENT" });
+    await link(parent.id, k1.id, 6);
+    await link(parent.id, k2.id, 5);
+    await callback("subscription.activated", { userId: parent.id, planId: family.id, discountPercent: 0 }, { amountTotal: family.price, currency: "ron", subscriptionStatus: "active", stripeSubscriptionId: `sub_${tag}_sorin` });
+    await callback("subscription.activated", { userId: parent.id, type: "child_addon", childIndex: "2" }, { amountTotal: Math.round(family.price * 0.8), currency: "ron", subscriptionStatus: "active", stripeSubscriptionId: `sub_${tag}_sorin_c2` });
+    await callback("subscription.canceled", { userId: parent.id, planId: family.id }, { stripeSubscriptionId: `sub_${tag}_sorin` });
+    await settle();
+    const sctx = await browser.newContext({ ...devices["iPhone 13"], locale: "ro-RO", serviceWorkers: "block" });
+    await login(sctx, parent.email);
+    const pl = await api(sctx, "GET", "/api/plans");
+    const hasAddon = (pl.body?.current?.addons ?? []).some((a) => a.type === "child_addon");
+    const sp = await sctx.newPage();
+    await sp.goto(`${BASE}/ro/dashboard/packages`, { waitUntil: "networkidle" });
+    await sp.getByRole("button", { name: "Respinge" }).click().catch(() => {});
+    const famCard = (await sp.locator(`#plan-card-${family.id}`).innerText().catch(() => "")).replace(/\s+/g, " ");
+    check(
+      "4 pachet încheiat, locul copilului încă plătit: Abonamentul nu-l mai cere o dată",
+      hasAddon && pl.body?.current?.childrenLinked === 2 && famCard.length > 0 && !famCard.includes("Locul pentru al 2-lea copil"),
+      JSON.stringify({ hasAddon, linked: pl.body?.current?.childrenLinked, card: famCard.slice(0, 200) }),
+    );
+  }
+
   // ── 3. Umami doar pe etutor.ro ──────────────────────────────────────────────────────────────────
   const anon = await browser.newContext();
   const ap = await anon.newPage();

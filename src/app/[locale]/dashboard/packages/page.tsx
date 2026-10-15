@@ -15,6 +15,9 @@ import { previewAppliesToPlan, VOUCHER_ERROR_KEYS, type VoucherPreview } from "@
 import { packagePrice } from "@/lib/package-price";
 import {
   checkoutDiscount,
+  childSeatMonthlyMinor,
+  forInterval,
+  planMonthlyMinor,
   MONTHS_PAID_PER_YEAR,
   TELEGRAM_PERCENT,
   TRIAL_PAYMENT_PERCENT,
@@ -64,6 +67,8 @@ interface PlansResponse {
     child?: boolean;
     /** Subjects each kind of plan bills: the payer's own (Elev) or the first linked child's. */
     subjects?: { self: number; child: { count: number } | null };
+    /** Children this account links as a parent (the plans API): those past a plan's seats pay their own seat. */
+    childrenLinked?: number;
     subjectsPaid?: { count: number; self: boolean; name: string | null } | null;
     /** Another parent's plan covers the children without a seat for this one: who has it (no offer). */
     seatHolder?: SeatHolderNote | null;
@@ -394,6 +399,24 @@ export default function PackagesPage() {
   /** What a package costs this family, by the same rules as checkout (package-price.ts). Minor units. */
   const priceFor = (plan: Plan, opts: { telegram?: boolean } = {}) =>
     packagePrice(plan, { trialActive, telegram: current.telegram === true, subjects: current.subjects }, preview, opts);
+  /**
+   * Each linked child past the plan's seats has its own seat, paid separately after the plan, with the
+   * family's lifetime discount — the price the seat's checkout charges (addon-checkout). Shown before the
+   * card so „the family's total" on this page is the family's (/bani 15.10.2026). Minor units.
+   */
+  const extraSeatsFor = (plan: Plan, fam: FamilyPlan | null, priced: ReturnType<typeof priceFor> | null) => {
+    const linked = current.childrenLinked ?? 0;
+    // A child's seat still paid by its own running subscription (it can outlast the plan) isn't charged again.
+    const seated = fam ? fam.maxChildren + (current.addons ?? []).filter((a) => a.type === "child_addon").length : 0;
+    if (!fam || !priced || fam.maxChildren < 1 || plan.interval === "ONE_TIME" || linked <= seated) return null;
+    const monthly = planMonthlyMinor({ price: Math.round(plan.price * 100), interval: plan.interval });
+    const interval = plan.interval === "YEAR" ? "YEAR" : "MONTH";
+    const seats = Array.from({ length: linked - seated }, (_, i) => ({
+      index: seated + 1 + i,
+      minor: forInterval(childSeatMonthlyMinor(monthly, seated + 1 + i, priced.discount.pricesPercent), interval),
+    }));
+    return { seats, total: priced.total + seats.reduce((sum, s) => sum + s.minor, 0) };
+  };
   const trialFor = (plan: Plan): number =>
     plan.interval === "ONE_TIME" ? 0 : Math.min(plan.trialDays ?? 0, current.freeTrialDaysLeft ?? 0);
 
@@ -676,6 +699,7 @@ export default function PackagesPage() {
               // What connecting Telegram before paying would bring (a family without it yet).
               const withTelegram = priced && !current.telegram && !isPaid && !isRetrying ? priceFor(plan, { telegram: true }) : null;
               const trial = trialFor(plan);
+              const extra = extraSeatsFor(plan, fam, priced);
               return (
                 <div
                   key={plan.id}
@@ -733,6 +757,16 @@ export default function PackagesPage() {
                       ? t("subjectsIncluded", { n: priced.subjects, second: subjectDiscountPercent(2), third: subjectDiscountPercent(3) })
                       : t("perSubject")}
                   </p>
+                  {extra && (
+                    <div className="mb-2 rounded-lg border border-amber-800/50 bg-amber-950/20 px-3 py-2 text-xs text-amber-100">
+                      {extra.seats.map((s) => (
+                        <p key={s.index}>{t("extraSeat", { index: s.index, price: bani(s.minor), interval: intervalLabel(plan.interval) })}</p>
+                      ))}
+                      <p className="mt-1 font-semibold text-white">
+                        {t("familyTotal", { n: (current.childrenLinked ?? 0), price: bani(extra.total), interval: intervalLabel(plan.interval) })}
+                      </p>
+                    </div>
+                  )}
                   {withTelegram && withTelegram.first < (priced?.first ?? 0) && (
                     <Link href="/dashboard/settings/notifications" className="mb-2 block text-xs text-sky-300 hover:text-sky-200">
                       {t("telegramHint", { price: bani(withTelegram.first), percent: TELEGRAM_PERCENT })}

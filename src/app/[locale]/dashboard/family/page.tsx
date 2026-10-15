@@ -373,8 +373,9 @@ export default function FamilyPage() {
             {/* The trial opens every child and subject; the plan bought after it doesn't (tester 14.10.2026). */}
             <p className="mt-1 text-sm text-gray-300">
               În probă au acces toți copiii și toate materiile. După probă, Family acoperă un copil și o materie; a doua materie
-              costă cu {subjectDiscountPercent(2)}% mai puțin decât prima, al doilea copil cu {childDiscountPercent(2)}% mai puțin.
-              Suma exactă o vezi în{" "}
+              costă cu {subjectDiscountPercent(2)}% mai puțin decât prima. Al doilea copil are locul lui, cu{" "}
+              {childDiscountPercent(2)}% mai puțin, plătit separat, după pachet. Prețul pachetului, al locurilor și totalul
+              familiei le vezi în{" "}
               <Link href="/dashboard/packages" className="text-blue-300 underline underline-offset-2">
                 Abonament
               </Link>

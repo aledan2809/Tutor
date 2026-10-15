@@ -346,8 +346,8 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
       ? {
           title: ro ? `Proba de ${daysRo(facts.trialTotalDays)}, pe înțeles` : `The ${facts.trialTotalDays}-day trial, in plain words`,
           text: ro
-            ? `În probă încerci tot: oricâți copii și oricâte materii. La plată păstrezi ce vrei — Family acoperă un copil și o materie; a doua materie costă cu ${facts.secondSubjectPct}% mai puțin decât prima (de la a treia, ${facts.thirdSubjectPct}%), iar al doilea copil cu ${facts.secondChildPct}% mai puțin. Suma exactă o vezi în pagina Abonament, înainte să pui cardul.`
-            : `During the trial you try everything: any number of children and subjects. When you pay you keep what you want — Family covers one child and one subject; a second subject costs ${facts.secondSubjectPct}% less than the first (from the third, ${facts.thirdSubjectPct}%), and a second child ${facts.secondChildPct}% less. You see the exact amount on the Subscription page before adding a card.`,
+            ? `În probă încerci tot: oricâți copii și oricâte materii. După probă, Family acoperă un copil și o materie; a doua materie costă cu ${facts.secondSubjectPct}% mai puțin decât prima (de la a treia, ${facts.thirdSubjectPct}%). Al doilea copil are locul lui, cu ${facts.secondChildPct}% mai puțin, plătit separat, după pachet. În pagina Abonament vezi, înainte să pui cardul, prețul pachetului, al locului pentru fiecare copil în plus și totalul familiei.`
+            : `During the trial you try everything: any number of children and subjects. After it, Family covers one child and one subject; a second subject costs ${facts.secondSubjectPct}% less than the first (from the third, ${facts.thirdSubjectPct}%). A second child has their own seat, ${facts.secondChildPct}% less, paid separately after the plan. Before adding a card, the Subscription page shows the plan's price, each extra child's seat and the family's total.`,
         }
       : null,
 
@@ -550,8 +550,8 @@ function faqItems(locale: Locale, ctx: LandingContext, trial: ReturnType<typeof 
     );
   }
   const secondChildWords = ro
-    ? `Al doilea copil se adaugă din aplicație, la ${ctx.facts.secondChildPct}% mai puțin decât prețul normal al pachetului${secondChild ? `: ${secondChild} lei pe lună la Family` : ""}.`
-    : `A second child is added from the app at ${ctx.facts.secondChildPct}% off the plan's normal price${secondChild ? `: ${secondChild} lei a month on Family` : ""}.`;
+    ? `Al doilea copil are locul lui, plătit separat, după pachet: cu ${ctx.facts.secondChildPct}% mai puțin decât prețul normal al pachetului${secondChild ? ` (${secondChild} lei pe lună la Family)` : ""}, iar reducerea familiei se aplică și locului.`
+    : `A second child has their own seat, paid separately after the plan: ${ctx.facts.secondChildPct}% off the plan's normal price${secondChild ? ` (${secondChild} lei a month on Family)` : ""}, and the family's discount applies to the seat too.`;
   items.push(
     ro
       ? { q: "Vedeți conversațiile noastre de pe Telegram sau WhatsApp?", a: "Nu. Doar trimitem reminderele. Pe Telegram te dezabonezi oricând scriind /stop." }

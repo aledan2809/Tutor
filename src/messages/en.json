@@ -1214,7 +1214,9 @@
     "parentUpgradeTotal": "Total {total} lei {interval, select, YEAR {a year} other {a month}}, the price of {plan}. The difference is paid separately and can be stopped at any time — the family then returns to its current package.",
     "parentUpgradeRedundant": "You are still paying the difference for {plan}, but your package already includes it — you can stop it in the list below.",
     "parentUpgradeCta": "Move to {plan} · +{price} lei",
-    "parentUpgradeSomeone": "an adult of the family"
+    "parentUpgradeSomeone": "an adult of the family",
+    "extraSeat": "Seat for child {index}: {price} lei{interval}, paid separately after the plan.",
+    "familyTotal": "Total for {n} children: {price} lei{interval}."
   },
   "cookieBanner": {
     "short": "We only use essential cookies.",
