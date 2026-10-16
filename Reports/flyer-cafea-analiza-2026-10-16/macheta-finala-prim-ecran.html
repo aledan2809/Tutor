@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Macheta finală — primul ecran pentru părinți</title>
+<style>
+  :root {
+    --cream: #f7f1e8;
+    --paper: #fffdf9;
+    --green: #0a5f42;
+    --btn: #0d7a54;
+    --brown: #8b4b23;
+    --ink: #2a2622;
+    --muted: #6d655d;
+    --rule: #e2d9cc;
+    --serif: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e6e0d6; font-family: var(--sans); color: var(--ink); }
+  .stage { display: flex; gap: 44px; justify-content: center; align-items: flex-start; flex-wrap: wrap; padding: 28px 16px 48px; }
+
+  .phone { width: 375px; height: 812px; border-radius: 30px; overflow: hidden; background: var(--cream); position: relative;
+           box-shadow: 0 0 0 10px #1d1b19, 0 22px 50px rgba(40, 30, 20, .28); flex: none; }
+  .scr { padding: 12px 20px 0; }
+
+  .top { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-weight: 800; color: #2a59d6; font-size: 21px; letter-spacing: -.5px; }
+  .logo sup { font-size: 12px; } .logo sub { font-size: 10px; vertical-align: baseline; }
+  .signin { color: var(--green); font-weight: 700; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+
+  .meta { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .for { border: 1.5px solid var(--green); color: var(--green); border-radius: 999px; padding: 3px 10px; font-weight: 700; font-size: 12.5px; background: #eef4ee; }
+  .free { background: var(--brown); color: #fff; border-radius: 8px; padding: 3px 9px; font-weight: 700; font-size: 12.5px; }
+  .code { color: var(--green); font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+  .code i { width: 15px; height: 15px; border-radius: 50%; background: var(--btn); color: #fff; font-style: normal; font-size: 9.5px; display: grid; place-items: center; }
+
+  /* the one memorable thing: the evening message */
+  .evening { margin-top: 12px; position: relative; }
+  .evening .note { position: absolute; top: -8px; right: 4px; font-size: 10.5px; color: var(--muted); background: var(--cream); padding: 0 5px; }
+  .msg { background: var(--paper); border-radius: 18px; padding: 11px 13px 12px; border: 1px solid var(--rule);
+         box-shadow: 0 10px 26px rgba(10, 95, 66, .13); }
+  .msg .app { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--muted); }
+  .msg .ic { width: 20px; height: 20px; border-radius: 6px; background: #2a59d6; color: #fff; font-weight: 800; font-size: 11px; display: grid; place-items: center; }
+  .msg .app b { color: var(--ink); font-weight: 700; }
+  .msg .app span:last-child { margin-left: auto; }
+  .msg p { margin: 6px 0 0; font-size: 14.5px; line-height: 1.42; }
+  .msg .weak { display: inline-block; margin-top: 6px; background: #fbefe6; color: var(--brown); border-radius: 8px; padding: 3px 8px; font-size: 13px; font-weight: 600; }
+
+  h1 { font-family: var(--serif); color: var(--green); font-size: 31px; line-height: 1.06; margin: 12px 0 5px; font-weight: 700; letter-spacing: -.3px; }
+  .what { margin: 0; font-size: 14.5px; line-height: 1.38; }
+
+  .price { margin-top: 10px; display: grid; grid-template-columns: 1fr; gap: 1px;
+           border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 8px 0; }
+  .price .big { font-family: var(--serif); font-size: 32px; line-height: 1.1; font-weight: 700; color: var(--green); white-space: nowrap; }
+  .price .small { font-size: 12.5px; line-height: 1.4; color: var(--muted); }
+  .price .small b { color: var(--ink); }
+
+  .go { margin-top: 10px; display: block; background: var(--btn); color: #fff; border-radius: 14px; padding: 13px; text-align: center; font-weight: 700; font-size: 17px; }
+  .google { margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 9px; background: #fff; border: 1.5px solid #d6cdc0; border-radius: 14px; padding: 11px; font-weight: 600; font-size: 15px; color: var(--ink); }
+  .google svg { width: 18px; height: 18px; }
+  .after { margin: 8px 2px 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; text-align: center; }
+
+  .quiz { margin-top: 9px; display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 12px; background: #eef4ee; color: var(--green); font-size: 14px; }
+  .quiz b { font-family: var(--serif); font-size: 15.5px; }
+  .quiz .q { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--green); display: grid; place-items: center; font-family: var(--serif); font-weight: 700; flex: none; }
+  .quiz span { display: block; font-size: 12px; color: var(--muted); }
+
+  .cookie { position: absolute; left: 0; right: 0; bottom: 0; background: #1c2333; color: #eee; font-size: 11.5px; padding: 11px 12px; display: flex; align-items: center; gap: 7px; }
+  .cookie .cb { margin-left: auto; border: 1px solid #556; border-radius: 9px; padding: 6px 9px; font-weight: 600; }
+  .cookie .cb + .cb { margin-left: 0; } .cookie .blue { background: #1f5be8; border-color: #1f5be8; }
+
+  /* side notes */
+  .notes { width: 430px; max-width: 100%; font-size: 14.5px; line-height: 1.5; }
+  .notes h2 { font-family: var(--serif); color: var(--green); font-size: 22px; margin: 4px 0 10px; }
+  .notes ol { padding-left: 20px; margin: 0; }
+  .notes li { margin-bottom: 10px; }
+  .notes li b { color: var(--ink); }
+  .notes .src { color: var(--muted); font-size: 12.5px; }
+  .notes .warn { margin-top: 14px; background: #fff; border-left: 3px solid var(--brown); padding: 9px 12px; border-radius: 0 10px 10px 0; font-size: 13.5px; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="phone">
+    <div class="scr">
+      <div class="top"><div class="logo"><sup>e</sup>TUTOR<sub>.ro</sub></div><div class="signin">Intră în cont</div></div>
+
+      <div class="meta">
+        <span class="for">Pentru părinți</span>
+        <span class="free">7 zile gratuite, fără card</span>
+        <span class="code"><i>✓</i>Codul V126S e pus</span>
+      </div>
+
+      <div class="evening">
+        <span class="note">exemplu de mesaj seara</span>
+        <div class="msg">
+          <div class="app"><span class="ic">e</span><b>eTutor.ro</b><span>azi, 20:14</span></div>
+          <p>Andrei a lucrat azi 24 de minute la matematică: 18 grile, 15 corecte.</p>
+          <span class="weak">Greșește des la ecuații cu fracții</span>
+        </div>
+      </div>
+
+      <h1>Liniștea ta, cât o cafea pe lună.</h1>
+      <p class="what">Teste și lecții de matematică și română pentru clasa a VIII-a și liceu, până la Evaluare și BAC. Tu afli seara ce a lucrat, fără să-l mai întrebi.</p>
+
+      <div class="price">
+        <div class="big">sub 1 leu pe zi</div>
+        <div class="small"><b>23,24 lei pe lună</b> dacă plătești în primele 7 zile, cât rămâi abonat. După, 24,90 lei cu codul V126S, în loc de 33,20. Family: 1 părinte, 1 copil, o materie.</div>
+      </div>
+
+      <div class="go">Încearcă 7 zile gratuit</div>
+      <div class="google">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.2l7.9 6.1C12.5 13.5 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17.1z"/><path fill="#FBBC05" d="M10.6 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.3.8-4.7l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.5 2.3-6.2 0-11.5-4-13.4-9.8l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>
+        Continuă cu Google
+      </div>
+      <p class="after">Contul tău ia 2 minute. Apoi îi trimiți copilului linkul pe WhatsApp.</p>
+
+      <div class="quiz">
+        <div class="q">5</div>
+        <div><b>Câte din 5 grile de clasa a VIII-a știi tu?</b><span>Două minute, fără cont</span></div>
+      </div>
+    </div>
+    <div class="cookie">Folosim doar cookie-uri esențiale.<span class="cb">Respinge</span><span class="cb blue">Accept</span></div>
+  </div>
+
+  <div class="notes">
+    <h2>De unde vine fiecare bucată</h2>
+    <ol>
+      <li><b>Mesajul de seară, primul lucru văzut.</b> Arată „aha”-ul înainte de orice preț: ce primește părintele, nu ce funcții avem.<br><span class="src">onboarding · paywalls („arată, nu spune”)</span></li>
+      <li><b>Titlul de pe flyer rămâne</b>, ca cine a scanat să recunoască pagina.<br><span class="src">continuitate cu flyerul</span></li>
+      <li><b>Ce face copilul și pentru ce</b> (clase, materii, examene) și fraza „afli seara ce a lucrat, fără să-l mai întrebi”.<br><span class="src">marketing-psychology (ce „angajează” părintele)</span></li>
+      <li><b>Un singur preț mare, în bani de zi cu zi</b>, cu prețul real din probă (23,24) și cel de după (24,90) spuse cinstit, mic.<br><span class="src">marketing-psychology · drumul banilor (prețul trebuie calculat cu aceeași funcție ca plata)</span></li>
+      <li><b>Un drum principal</b> (încearcă gratuit) și Google lângă el, pentru telefon.<br><span class="src">signup · Hick</span></li>
+      <li><b>Ce urmează după cont</b>, spus dinainte: linkul copilului pe WhatsApp.<br><span class="src">onboarding · churn-prevention</span></li>
+      <li><b>Cârligul pentru părinte</b>: 5 grile pentru el, fără cont.<br><span class="src">marketing-psychology (pas mic, curiozitate)</span></li>
+    </ol>
+    <div class="warn"><b>Înainte de a o pune pe site:</b> mesajul de seară trebuie să arate exact ce trimite azi rezumatul zilnic; prețul 23,24 apare doar cât proba e pornită; „Continuă cu Google” trebuie să păstreze rolul de părinte, codul și acordul termenilor; cârligul cu 5 grile nu există încă.</div>
+  </div>
+</div>
+</body>
+</html>
