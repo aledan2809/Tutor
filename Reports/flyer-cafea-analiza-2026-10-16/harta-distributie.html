@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harta distribuției flyerelor</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root { --ink:#2a2a2a; --muted:#6b6b6b; --bg:#faf7f2; --line:#e3ddd3; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--ink); background:var(--bg); }
+  header { padding:16px 20px 6px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  header p { margin:0; color:var(--muted); font-size:14px; }
+  #map { height:560px; margin:10px 20px; border-radius:14px; border:1px solid var(--line); }
+  .grid { display:grid; grid-template-columns: 1.2fr 1fr; gap:20px; padding:0 20px 24px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  table { width:100%; border-collapse:collapse; font-size:14px; background:#fff; border-radius:12px; overflow:hidden; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { background:#f1ece4; font-size:13px; }
+  td.n { text-align:right; font-variant-numeric: tabular-nums; white-space:nowrap; }
+  .dot { display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-size:14px; line-height:1.5; }
+  .card h2 { font-size:15px; margin:0 0 6px; }
+  .card ul { margin:6px 0 0; padding-left:18px; }
+  .lbl { background:transparent; border:none; box-shadow:none; font-weight:700; font-size:12px; color:#222; text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff; }
+  .muted { color:var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Flyerul „cafea” — unde s-au împărțit cele 11.100 de bucăți</h1>
+  <p>Cercurile sunt pe măsura numărului de flyere. Aceleași străzi au primit și flyerele REAL ONE.</p>
+</header>
+<div id="map"></div>
+<div class="grid">
+  <div>
+    <table>
+      <thead><tr><th>Zona</th><th>Străzi</th><th>Data</th><th class="n">Flyere</th><th>Tip (presupus)</th></tr></thead>
+      <tbody id="rows"></tbody>
+      <tfoot><tr><th colspan="3">Total</th><th class="n" id="total"></th><th></th></tr></tfoot>
+    </table>
+  </div>
+  <div class="card">
+    <h2>Vizite pe site cu codul de pe flyer (Umami)</h2>
+    <table>
+      <thead><tr><th>Ziua</th><th>Ce s-a întâmplat înainte</th><th class="n">Vizite</th></tr></thead>
+      <tbody>
+        <tr><td>22.09</td><td class="muted">înainte de prima distribuție — nu vine din flyer</td><td class="n">1</td></tr>
+        <tr><td>25.09</td><td>2 zile după Titan (23.09, 3.700)</td><td class="n">1</td></tr>
+        <tr><td>29.09</td><td>a doua zi după Tineretului (28.09, 1.500)</td><td class="n">1</td></tr>
+        <tr><td>01.10</td><td></td><td class="n">2</td></tr>
+        <tr><td>08.10</td><td></td><td class="n">1</td></tr>
+        <tr><td>11.10</td><td></td><td class="n">1</td></tr>
+      </tbody>
+    </table>
+    <p class="muted" style="margin:8px 0 0">Din 6 vizite venite din flyer, niciuna n-a trecut de prima pagină; 0 coduri V126S folosite. Toate zonele au același QR, deci o vizită nu se poate lega de o zonă.</p>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const zones = [
+  { id: "A", name: "Titan – Balta Albă", sector: "Sector 3", date: "23.09", n: 3700, color: "#d9480f", kind: "blocuri vechi",
+    streets: "Miniș, Pătulului, Becaței, Ghiță Șerban, Stelian Mihale, Bd. 1 Decembrie 1918 nr. 66–72",
+    pts: [[44.4151,26.1666],[44.4136,26.1672],[44.4126,26.1709],[44.4149,26.1709],[44.4141,26.1684],[44.4129,26.1729]] },
+  { id: "B", name: "Tineretului", sector: "Sector 4", date: "28.09", n: 1500, color: "#1971c2", kind: "case",
+    streets: "Vișana, Aleea Trestiana, Trestiana, Poenari",
+    pts: [[44.4112,26.1113],[44.4125,26.1106],[44.4121,26.1083],[44.4125,26.1090]] },
+  { id: "C", name: "Berceni – Apărătorii Patriei", sector: "Sector 4", date: "?", n: 2000, color: "#2f9e44", kind: "blocuri noi",
+    streets: "Dumitru Brumărescu, Drumul Dealul Bradului",
+    pts: [[44.3594,26.1387],[44.3646,26.1267]] },
+  { id: "D", name: "Titan – Th. Pallady", sector: "Sector 3", date: "?", n: 2200, color: "#9c36b5", kind: "complexe noi",
+    streets: "Th. Pallady 66A (Complex Hils), Th. Pallady 30 bl. T1, T2, T3",
+    pts: [[44.4046,26.2064],[44.4082,26.1789]] },
+  { id: "E", name: "Bd. Timișoara 14A", sector: "Sector 6", date: "?", n: 1700, color: "#e8590c", kind: "complex nou",
+    streets: "Bd. Timișoara 14A, complex rezidențial",
+    pts: [[44.4288,26.0422]] },
+];
+const map = L.map("map", { scrollWheelZoom: false }).setView([44.405, 26.13], 12);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "© OpenStreetMap" }).addTo(map);
+const all = [];
+const rows = document.getElementById("rows");
+let total = 0;
+for (const z of zones) {
+  total += z.n;
+  const c = [z.pts.reduce((s,p)=>s+p[0],0)/z.pts.length, z.pts.reduce((s,p)=>s+p[1],0)/z.pts.length];
+  all.push(c);
+  const r = 260 * Math.sqrt(z.n / 1000);
+  L.circle(c, { radius: r, color: z.color, weight: 2, fillColor: z.color, fillOpacity: .28 }).addTo(map)
+    .bindTooltip(`${z.id} · ${z.name} · ${z.n.toLocaleString("ro-RO")}`, { permanent: true, direction: z.id === "D" ? "bottom" : "top", className: "lbl", offset: [0, z.id === "D" ? 8 : -6] });
+  for (const p of z.pts) L.circleMarker(p, { radius: 3, color: z.color, weight: 1, fillOpacity: 1 }).addTo(map);
+  rows.insertAdjacentHTML("beforeend",
+    `<tr><td><span class="dot" style="background:${z.color}"></span><b>${z.id}</b> ${z.name}<br><span class="muted">${z.sector}</span></td>
+     <td>${z.streets}</td><td>${z.date}</td><td class="n">${z.n.toLocaleString("ro-RO")}</td><td>${z.kind}</td></tr>`);
+}
+document.getElementById("total").textContent = total.toLocaleString("ro-RO");
+map.fitBounds(L.latLngBounds(all).pad(0.25));
+</script>
+</body>
+</html>

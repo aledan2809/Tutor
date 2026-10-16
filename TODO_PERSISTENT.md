@@ -20,6 +20,11 @@ V126S/ONV126S folosite. Prima plată reală trece printr-o legătură Stripe →
   bannerul de cookie-uri nu acoperă butoanele; înscrierea are 3 câmpuri, codul inclus). Ipoteze, nedovedite: flyerul și
   primul ecran nu spun ce face copilul (lecții și teste la ce clase/materii, Evaluare/BAC); poza nu arată nici copil, nici
   aplicația; cutia poștală ajunge mai ales la case fără copii de școală. Cu 7 oameni, cifrele nu dovedesc nimic.
+  **Zonele (Alex, 16.10): 11.100 buc. în 5 zone** — Titan/Balta Albă 3.700 (23.09), Tineretului 1.500 (28.09), Berceni
+  2.000, Th. Pallady (Hils + T1–T3) 2.200, Bd. Timișoara 14A 1.700 (datele ultimelor trei necunoscute); aceleași străzi au
+  primit și flyerul REAL (fără QR/cod; real1.ro fără creștere vizibilă). Harta + analiza: `Reports/flyer-cafea-analiza-2026-10-16/`
+  (`harta-distributie.html`/`.png`); notă transferată în `REAL/Reports/` și `MarketingAutomation/Reports/distributie-flyere-posta-2026-09.md`.
+  Macheta primului ecran `/ro/parinte` (ce primește copilul + exemplu de ecran al părintelui): `macheta-prim-ecran.html`, așteaptă OK.
 - [x] **„Demo Poșta Română”** (contul demonstrativ pentru prezentarea la Poșta, `d***a@etutor.ro`): decizia lui Alex 16.10 —
   **îl lasă să intre în pauză pe 21.10**. La o prezentare după 21.10: bifează „Gratuit permanent” din Administrare → Utilizatori.
 - [x] `5a20a49` **LIVE 15.10 ~20:30 UTC** (poziția contrară + revizie Codex): textul nu mai promite „Suma exactă” /
