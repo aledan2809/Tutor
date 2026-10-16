@@ -12,8 +12,16 @@ V126S/ONV126S folosite. Prima plată reală trece printr-o legătură Stripe →
   Umami doar pe etutor.ro. QA 30/30, vitest 1441, revizie Codex reparată.
 - [x] Alarma zilnică din `FLUXURI-BANI.md`: probată (`money-flows-check --force`: 3 pași + 6 dependențe ok), PORNITĂ 15.10 (Alex)
   — rulează la Optimise, dimineața.
-- [ ] Lipsă rămasă: anunțul înainte de reînnoire / card care expiră (etapa 9); flyerul nu aduce trafic — de întrebat Poșta
-  dacă distribuția a pornit.
+- [ ] Lipsă rămasă: anunțul înainte de reînnoire / card care expiră (etapa 9).
+- [ ] **Flyerul „cafea” aduce prea puțin (16.10, doar citire).** Alex: ~8.000 de flyere împărțite până azi (din 20.000, modelul 2).
+  Umami, sesiuni cu `voucher=V126S` din 21.09: **7** (22.09, 25.09, 29.09, 01.10 ×2, 08.10, 11.10; scoase: 16.09 = probă,
+  05.10 = auditul QA, 16.10 = verificarea mea). **0 din 7 au mers mai departe de `/ro/parinte`** (unul a citit Termenii și
+  Confidențialitatea), 0 coduri V126S/ONV126S folosite. Pagina de destinație e în regulă pe telefon (7 zile, codul pus,
+  bannerul de cookie-uri nu acoperă butoanele; înscrierea are 3 câmpuri, codul inclus). Ipoteze, nedovedite: flyerul și
+  primul ecran nu spun ce face copilul (lecții și teste la ce clase/materii, Evaluare/BAC); poza nu arată nici copil, nici
+  aplicația; cutia poștală ajunge mai ales la case fără copii de școală. Cu 7 oameni, cifrele nu dovedesc nimic.
+- [x] **„Demo Poșta Română”** (contul demonstrativ pentru prezentarea la Poșta, `d***a@etutor.ro`): decizia lui Alex 16.10 —
+  **îl lasă să intre în pauză pe 21.10**. La o prezentare după 21.10: bifează „Gratuit permanent” din Administrare → Utilizatori.
 - [x] `5a20a49` **LIVE 15.10 ~20:30 UTC** (poziția contrară + revizie Codex): textul nu mai promite „Suma exactă” /
   „La plată păstrezi ce vrei” (al doilea copil = loc separat, după pachet); Abonamentul arată locul fiecărui copil în plus
   și totalul familiei, la prețul cerut apoi de plata locului. QA 39/39 + 28/28 + 23/23. Copie `/root/backups/tutor-pre-livrare-2026-10-15-2022.dump`.
