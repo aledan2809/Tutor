@@ -24,7 +24,20 @@ V126S/ONV126S folosite. Prima plată reală trece printr-o legătură Stripe →
   2.000, Th. Pallady (Hils + T1–T3) 2.200, Bd. Timișoara 14A 1.700 (datele ultimelor trei necunoscute); aceleași străzi au
   primit și flyerul REAL (fără QR/cod; real1.ro fără creștere vizibilă). Harta + analiza: `Reports/flyer-cafea-analiza-2026-10-16/`
   (`harta-distributie.html`/`.png`); notă transferată în `REAL/Reports/` și `MarketingAutomation/Reports/distributie-flyere-posta-2026-09.md`.
-  Macheta primului ecran `/ro/parinte` (ce primește copilul + exemplu de ecran al părintelui): `macheta-prim-ecran.html`, așteaptă OK.
+  Macheta primului ecran `/ro/parinte` (ce primește copilul + exemplu de ecran al părintelui): `macheta-prim-ecran.html` → aprobată, livrată în pachetul 1 (mai jos).
+- [x] **Pachetul 1 `25ccaa8` LIVE 16.10 ~19:40 UTC** (OK-ul lui Alex; din cele 7 unghiuri din `Reports/flyer-cafea-analiza-2026-10-16/UNGHIURI.md`):
+  primul ecran `/ro/parinte` după macheta finală (exemplul din contul părintelui, ce primește copilul, „sub 1 leu pe zi”,
+  prețul real din probă 23,24 calculat cu aceleași funcții ca plata, data până la care ține pentru un cont logat; un copil
+  logat nu mai vede pagina cu prețuri) + **„Continuă cu Google”** pentru părinți pe `/ro/parinte` și la înregistrare
+  (`/auth/google-done`: rolul de părinte, codul de pe flyer, sursa campaniei, recomandarea și testul demo — doar pentru un cont
+  creat în ultimele 30 de minute, fără parolă). QA 30/30 + 45/45 + 28/28 + 23/23, vitest 1453, revizie Codex reparată.
+  Live 17/17 ca vizitator anonim (`Reports/pachet1-2026-10-16/verificare-live.mjs`; butonul Google urmărit doar până la
+  cererea spre Google). Copie `/root/backups/tutor-pre-livrare-2026-10-16-1937.dump`.
+- [ ] **Prima înscriere reală cu Google, cap-coadă** — n-o pot face eu (fără conturi pe prod). Alex, dacă vrei: cu un cont Google
+  secundar, pe telefon, de pe `etutor.ro/cafea` → „Continuă cu Google” → trebuie să ajungi pe „Familia mea”, cu V126S păstrat.
+  Atenție: în iunie, pe Android, Google dădea uneori `iss missing` (vezi #1 mai jos); în jurnalele ultimelor ~10 zile: 0 erori.
+- [ ] Pachetul 2 (nepornit): mesajele din probă după ce face copilul (nu după calendar), cârligul „Câte din 5 grile știi tu?”
+  pentru părinte, plata Family direct de pe pagină, primul exercițiu pentru elevii veniți singuri.
 - [x] **„Demo Poșta Română”** (contul demonstrativ pentru prezentarea la Poșta, `d***a@etutor.ro`): decizia lui Alex 16.10 —
   **îl lasă să intre în pauză pe 21.10**. La o prezentare după 21.10: bifează „Gratuit permanent” din Administrare → Utilizatori.
 - [x] `5a20a49` **LIVE 15.10 ~20:30 UTC** (poziția contrară + revizie Codex): textul nu mai promite „Suma exactă” /
