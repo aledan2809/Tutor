@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Macheta — drumul probă → plată</title>
+<style>
+  :root {
+    --cream:#f7f1e8; --card:#fffdf8; --green:#0a5f42; --btn:#0d7a54; --brown:#8b4b23; --ink:#2f2f2f; --muted:#6b6b6b;
+    --line:#d9e6df; --wa:#1fa855; --new:#e0641b; --dec:#7048e8;
+    --serif: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#e9e4dc; font-family:var(--sans); color:var(--ink); }
+  header { max-width:1240px; margin:0 auto; padding:22px 20px 4px; }
+  header h1 { font-size:21px; margin:0 0 4px; }
+  header p { margin:0; color:var(--muted); font-size:14px; }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-size:13px; }
+  .legend span { display:inline-flex; align-items:center; gap:6px; }
+  .sw { width:14px; height:14px; border-radius:4px; display:inline-block; }
+  .flow { display:flex; gap:34px; flex-wrap:wrap; justify-content:center; padding:20px 16px 40px; max-width:2200px; margin:0 auto; }
+  .step { width:375px; display:flex; flex-direction:column; gap:10px; }
+  .step h2 { font-size:15px; margin:0; }
+  .step h2 small { display:block; font-weight:400; color:var(--muted); font-size:13px; margin-top:2px; }
+  .phone { width:375px; height:812px; border-radius:28px; overflow:hidden; background:var(--cream); position:relative;
+           box-shadow:0 0 0 10px #1d1d1f, 0 18px 40px rgba(0,0,0,.25); }
+  .scr { padding:12px 20px 0; height:100%; position:relative; }
+  .why { background:#fff; border-radius:12px; padding:10px 12px; font-size:13.5px; line-height:1.45; border:1px solid #ddd5c9; }
+  .why b { color:var(--ink); }
+  .st { display:inline-block; font-size:10.5px; font-weight:800; letter-spacing:.04em; color:#fff; border-radius:6px; padding:2px 7px; margin-right:4px; }
+  .st.ex { background:#868e96; } .st.nw { background:var(--new); } .st.dc { background:var(--dec); }
+
+  /* shared bits */
+  .top { display:flex; justify-content:space-between; align-items:center; }
+  .logo { font-weight:800; color:#2a59d6; font-size:21px; letter-spacing:-.5px; }
+  .logo sup { font-size:12px; } .logo sub { font-size:10px; vertical-align:baseline; }
+  .login { background:#1f5be8; color:#fff; border-radius:10px; padding:8px 12px; font-weight:600; font-size:14px; }
+  .pill { border:2px solid var(--green); border-radius:999px; padding:5px 11px; font-weight:800; font-size:11px; letter-spacing:.08em; color:var(--green); background:#eef4ee; }
+  .badge { background:var(--brown); color:#fff; border-radius:10px; padding:4px 11px; text-align:center; line-height:1.05; }
+  .badge b { font-family:var(--serif); font-size:17px; display:block; } .badge span { font-size:9px; font-weight:800; letter-spacing:.08em; }
+  .code { margin-top:8px; display:inline-flex; gap:7px; align-items:center; border:1.5px solid var(--line); background:#fff; border-radius:999px; padding:4px 11px 4px 5px; font-weight:700; font-size:12.5px; color:var(--green); }
+  .tick { width:18px; height:18px; border-radius:50%; background:var(--btn); color:#fff; display:grid; place-items:center; font-size:11px; }
+  h3.hl { font-family:var(--serif); color:var(--green); font-size:28px; line-height:1.08; margin:8px 0 5px; }
+  .what { font-size:14.5px; line-height:1.36; margin:0; }
+  .new { outline:2px dashed var(--new); outline-offset:3px; border-radius:8px; position:relative; }
+  .dec { outline:2px dashed var(--dec); outline-offset:3px; border-radius:8px; position:relative; }
+  .tag { position:absolute; right:6px; top:-12px; color:#fff; font-size:9.5px; font-weight:800; padding:2px 6px; border-radius:6px; letter-spacing:.04em; background:var(--new); }
+  .dec > .tag { background:var(--dec); }
+  .steps3 { margin-top:9px; display:grid; grid-template-columns:repeat(3,1fr); gap:5px; }
+  .s3 { background:#fff; border:1.5px solid var(--line); border-radius:10px; padding:5px 7px; font-size:11px; line-height:1.25; }
+  .s3 b { display:block; color:var(--green); font-size:12px; }
+  .ex-card { margin-top:9px; background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:8px 11px; position:relative; }
+  .ex-card .hd { display:flex; justify-content:space-between; font-size:11.5px; color:var(--muted); }
+  .ex-card .hd b { color:var(--ink); font-size:13px; }
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; margin-top:6px; }
+  .stat { background:#f3f8f5; border-radius:9px; padding:4px 7px; }
+  .stat .n { font-weight:800; font-size:15px; color:var(--green); } .stat .l { font-size:10px; color:var(--muted); }
+  .weak { margin-top:6px; font-size:12px; background:#fff4ec; border-radius:9px; padding:4px 8px; } .weak b { color:var(--brown); }
+  .exl { position:absolute; top:-8px; left:11px; background:var(--cream); padding:0 5px; font-size:9.5px; color:var(--muted); font-weight:700; letter-spacing:.04em; }
+  .price { margin-top:10px; border:2px solid var(--btn); border-radius:14px; background:var(--card); padding:7px 12px; }
+  .price .r { display:flex; justify-content:space-between; align-items:center; }
+  .price s { color:#9a8f86; font-family:var(--serif); font-size:13px; }
+  .price .big { font-family:var(--serif); font-weight:700; color:var(--green); font-size:24px; }
+  .price .big small { font-family:var(--sans); font-size:12px; color:var(--ink); font-weight:600; }
+  .vc { text-align:right; font-size:11px; color:var(--muted); }
+  .vc div { border:2px dashed var(--brown); color:var(--brown); border-radius:8px; padding:1px 7px; font-family:var(--serif); font-weight:700; font-size:14px; margin-top:1px; }
+  .early { margin-top:6px; padding-top:6px; border-top:1px dashed #cfd9d3; font-size:12.5px; color:var(--green); font-weight:700; }
+  .cta { margin-top:9px; background:var(--btn); color:#fff; border-radius:14px; padding:12px; text-align:center; font-weight:700; font-size:16px; }
+  .cta small { display:block; font-weight:500; font-size:12px; opacity:.9; margin-top:2px; }
+  .cta2 { margin-top:7px; border:1.5px solid #d8d2c8; background:#fffdf9; border-radius:14px; padding:10px; text-align:center; font-weight:600; font-size:14px; }
+  .link { margin-top:9px; text-align:center; font-size:13.5px; color:var(--muted); text-decoration:underline; }
+  .star { margin-top:3px; font-size:10.5px; color:var(--muted); }
+  .cookie { position:absolute; left:0; right:0; bottom:0; background:#1c2333; color:#eee; font-size:11.5px; padding:11px 12px; display:flex; align-items:center; gap:7px; }
+  .cookie .cb { margin-left:auto; border:1px solid #556; border-radius:9px; padding:6px 9px; font-weight:600; }
+  .cookie .cb + .cb { margin-left:0; } .cookie .blue { background:#1f5be8; border-color:#1f5be8; }
+
+  /* screen 2 */
+  .prog { display:flex; gap:5px; margin:14px 0 6px; } .prog i { flex:1; height:6px; border-radius:3px; background:#d9d2c6; } .prog i.on { background:var(--btn); }
+  .kicker { font-size:12.5px; color:var(--muted); font-weight:700; }
+  h3.t2 { font-family:var(--serif); color:var(--green); font-size:26px; line-height:1.12; margin:6px 0 8px; }
+  p.t { font-size:14.5px; line-height:1.45; margin:0 0 10px; }
+  .wa { background:var(--wa); color:#fff; border-radius:14px; padding:14px; text-align:center; font-weight:800; font-size:17px; margin-top:6px; }
+  .trialbar { margin-top:14px; background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:9px 11px; font-size:13px; line-height:1.4; }
+  .trialbar b { color:var(--green); }
+  .fake-field { background:#fff; border:1.5px solid #d8d2c8; border-radius:12px; padding:10px 12px; font-size:13.5px; color:var(--muted); margin-top:6px; }
+
+  /* screen 3: notifications */
+  .lock { text-align:center; color:#fff; padding-top:34px; }
+  .lock .time { font-size:64px; font-weight:300; letter-spacing:-2px; }
+  .lock .date { font-size:15px; opacity:.85; }
+  .notif { margin:12px 12px 0; background:rgba(255,255,255,.93); border-radius:18px; padding:10px 12px; font-size:13.5px; line-height:1.38; color:#222; position:relative; }
+  .notif .app { display:flex; justify-content:space-between; font-size:11.5px; color:#666; margin-bottom:3px; }
+  .notif .app b { color:#222; }
+  .notif .btns { display:flex; gap:6px; margin-top:7px; }
+  .notif .btns span { flex:1; text-align:center; border-radius:10px; padding:7px; font-weight:700; font-size:12.5px; background:#eef4f0; color:var(--green); }
+  .notif .btns span.p { background:var(--btn); color:#fff; }
+  .when { margin:16px 14px 0; color:#fff; font-size:12px; font-weight:800; letter-spacing:.05em; opacity:.85; }
+
+  /* screen 4: pause */
+  .pz { margin-top:14px; background:#fff; border-radius:16px; border:1.5px solid var(--line); padding:12px 13px; }
+  .pz h3 { font-family:var(--serif); color:var(--green); font-size:23px; margin:0 0 6px; line-height:1.15; }
+  .recap { display:grid; grid-template-columns:repeat(2,1fr); gap:6px; margin:8px 0; }
+  .recap div { background:#f3f8f5; border-radius:10px; padding:6px 8px; font-size:11px; color:var(--muted); }
+  .recap b { display:block; color:var(--green); font-size:17px; }
+  .blur { filter:blur(3.5px); }
+  .save { margin-top:10px; background:#f3efff; border-radius:14px; padding:10px 12px; font-size:13.5px; line-height:1.4; }
+  .save .b2 { margin-top:7px; text-align:center; border:2px solid var(--dec); color:var(--dec); border-radius:12px; padding:9px; font-weight:800; }
+
+  /* screen 5: cancel */
+  .q { margin-top:8px; display:flex; flex-direction:column; gap:6px; }
+  .q label { background:#fff; border:1.5px solid #d8d2c8; border-radius:12px; padding:9px 11px; font-size:14px; display:flex; gap:9px; align-items:center; }
+  .q label.sel { border-color:var(--btn); background:#f1f8f4; font-weight:700; }
+  .q label i { width:16px; height:16px; border-radius:50%; border:2px solid #aaa; flex:none; }
+  .q label.sel i { border-color:var(--btn); background:radial-gradient(var(--btn) 45%, transparent 50%); }
+  .offer { margin-top:10px; background:#fff; border:2px solid var(--btn); border-radius:14px; padding:10px 12px; font-size:13.5px; line-height:1.4; }
+  .offer b.h { display:block; font-family:var(--serif); color:var(--green); font-size:18px; margin-bottom:3px; }
+  .cont { margin-top:10px; text-align:center; font-size:14px; color:var(--ink); text-decoration:underline; font-weight:600; }
+
+  .notes { max-width:1100px; margin:0 auto; padding:0 20px 50px; font-size:15px; line-height:1.55; }
+  .notes h2 { font-size:18px; margin:18px 0 6px; }
+  .notes li { margin-bottom:5px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>eTutor.ro — drumul de la flyer la abonament, văzut ca „cine pleacă și de ce”</h1>
+  <p>Cinci momente în care o familie poate pleca. Pentru fiecare: ce vede omul și ce schimbăm. Exemplele de nume și cifre sunt inventate.</p>
+  <div class="legend">
+    <span><i class="sw" style="background:#868e96"></i>există azi</span>
+    <span><i class="sw" style="background:var(--new)"></i>nou, propus</span>
+    <span><i class="sw" style="background:var(--dec)"></i>nou, cere decizia ta</span>
+  </div>
+</header>
+
+<div class="flow">
+
+  <!-- 1 -->
+  <div class="step">
+    <h2>1 · Pagina pentru părinți<small>Pleacă aici: nu înțelege ce e; nu vede de ce să încerce acum</small></h2>
+    <div class="phone"><div class="scr">
+      <div class="top"><div class="logo"><sup>e</sup>TUTOR<sub>.ro</sub></div><div class="login">Autentificare</div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:9px">
+        <div class="pill">PENTRU PĂRINȚI</div>
+        <div class="badge"><b>7 ZILE</b><span>GRATUITE</span><br><span style="font-weight:400;letter-spacing:0">fără card</span></div>
+      </div>
+      <div class="code"><span class="tick">✓</span>Codul V126S de pe flyer e deja pus</div>
+      <h3 class="hl">Liniștea ta,<br>cât o cafea pe lună.</h3>
+      <p class="what new"><span class="tag">NOU</span>Teste și lecții de <b>matematică și română</b> pentru <b>clasa a VIII-a</b> (Evaluarea Națională) și <b>liceu</b> (BAC).</p>
+      <div class="steps3 new"><span class="tag">NOU</span>
+        <div class="s3"><b>1 · Contul tău</b>2 minute</div>
+        <div class="s3"><b>2 · Copilul</b>primește linkul pe WhatsApp</div>
+        <div class="s3"><b>3 · Seara</b>vezi ce a lucrat</div>
+      </div>
+      <div class="ex-card new"><span class="exl">EXEMPLU · CE VEZI TU</span><span class="tag">NOU</span>
+        <div class="hd"><b>Andrei · Matematică cl. VIII</b><span>azi, 19:40</span></div>
+        <div class="stats"><div class="stat"><div class="n">24 min</div><div class="l">azi</div></div><div class="stat"><div class="n">83%</div><div class="l">acuratețe</div></div><div class="stat"><div class="n">5 zile</div><div class="l">serie</div></div></div>
+        <div class="weak">Zonă slabă: <b>ecuații cu fracții</b></div>
+      </div>
+      <div class="price">
+        <div class="r"><div><s>33,20 lei</s><div class="big">24,90 lei<sup style="font-size:12px">*</sup> <small>/ lună</small></div></div><div class="vc">cu codul<div>V126S ✓</div></div></div>
+        <div class="early new"><span class="tag">NOU</span>Plătești în primele 7 zile? <span style="white-space:nowrap">23,24 lei/lună</span>, cât rămâi abonat (−30%).</div>
+      </div>
+      <div class="star">*Family: 1 părinte + 1 copil, o materie.</div>
+      <div class="cta">Încearcă 7 zile fără card →<small>Anulezi oricând. Fără card până la final.</small></div>
+      <div class="link new" style="outline-offset:1px">Plătesc acum: 23,24 lei/lună</div>
+    </div>
+    <div class="cookie">Folosim doar cookie-uri esențiale.<span class="cb">Respinge</span><span class="cb blue">Accept</span></div>
+    </div>
+    <div class="why"><span class="st nw">NOU</span><b>Ce e, în trei pași</b>: cine știe de la început că urmează „invitația copilului” trece mai ușor de pasul 2. <b>Prețul real</b>: azi pagina spune 24,90, dar cine plătește în primele 7 zile dă 23,24 (codul −25% și −30% nu se adună, se ia cel mai mare). Cea mai bună ofertă apare azi abia în ziua 6.</div>
+  </div>
+
+  <!-- 2 -->
+  <div class="step">
+    <h2>2 · Imediat după cont<small>Pleacă aici: copilul nu ajunge să lucreze (în 30 de zile: 3 conturi reale, doar un copil a lucrat)</small></h2>
+    <div class="phone"><div class="scr">
+      <div class="top"><div class="logo"><sup>e</sup>TUTOR<sub>.ro</sub></div><div style="font-size:13px;color:var(--muted)">Maria ▾</div></div>
+      <div class="prog new"><span class="tag">NOU</span><i class="on"></i><i class="on"></i><i></i></div>
+      <div class="kicker">PASUL 2 DIN 3</div>
+      <h3 class="t2">Trimite-i copilului linkul lui</h3>
+      <p class="t">Își face contul în două minute, de pe telefonul lui. Tu stabilești programul și materia.</p>
+      <div class="fake-field">Prenumele copilului: Andrei</div>
+      <div class="fake-field">Clasa: a VIII-a · Matematică</div>
+      <div class="wa">Trimite pe WhatsApp</div>
+      <div class="cta2">Copiază linkul</div>
+      <div class="link">Îl trimit mai târziu</div>
+      <div class="trialbar new"><span class="tag">NOU</span>Proba ta: <b>7 zile, până joi 23.10, 18:30</b>. Dacă plătești până atunci: <b>23,24 lei/lună</b>, cât rămâi abonat.</div>
+    </div></div>
+    <div class="why"><span class="st ex">EXISTĂ</span>după „Încearcă fără card” părintele ajunge pe „Familia mea”, cu invitația pe WhatsApp. <span class="st nw">NOU</span><b>Un singur lucru pe ecran</b> (pasul 2 din 3), cu numele și clasa copilului cerute aici, nu mai târziu. Data de final a probei, spusă din prima zi.</div>
+  </div>
+
+  <!-- 3 -->
+  <div class="step">
+    <h2>3 · În timpul probei<small>Pleacă aici: copilul n-a intrat; sau a intrat, dar părintele nu vede valoarea</small></h2>
+    <div class="phone" style="background:linear-gradient(160deg,#3a4d6b,#1f2a3d)"><div class="scr" style="padding:0">
+      <div class="lock"><div class="time">19:42</div><div class="date">vineri, 17 octombrie</div></div>
+      <div class="when">ZIUA 1 · DACĂ COPILUL N-A INTRAT ÎNCĂ</div>
+      <div class="notif new"><span class="tag">NOU</span>
+        <div class="app"><b>eTutor.ro</b><span>acum</span></div>
+        Andrei n-a deschis încă linkul. Vrei să i-l trimiți din nou? Durează 10 secunde.
+        <div class="btns"><span class="p">Retrimit pe WhatsApp</span><span>Mai târziu</span></div>
+      </div>
+      <div class="when">ZIUA 5 · DACĂ A LUCRAT</div>
+      <div class="notif new"><span class="tag">NOU</span>
+        <div class="app"><b>eTutor.ro</b><span>20:00</span></div>
+        <b>Săptămâna lui Andrei:</b> 4 zile, 63 de grile, 81% corecte. Greșește des la ecuații cu fracții.<br>
+        Plătești până joi, 18:30: 23,24 lei/lună, cât rămâi abonat.
+        <div class="btns"><span class="p">Păstrez −30%</span><span>Vezi raportul</span></div>
+      </div>
+      <div class="when">ZIUA 5 · DACĂ N-A LUCRAT DELOC</div>
+      <div class="notif new"><span class="tag">NOU</span>
+        <div class="app"><b>eTutor.ro</b><span>20:00</span></div>
+        Andrei n-a apucat să lucreze. Îi punem un program de 15 minute pe zi și îl anunțăm noi?
+        <div class="btns"><span class="p">Da, pune programul</span><span>Îl ajut eu</span></div>
+      </div>
+    </div></div>
+    <div class="why"><span class="st ex">EXISTĂ</span>mesaje după calendar: 3 zile, 2 zile (cu −30%), ultima zi, pauza. <span class="st nw">NOU</span><b>Mesaje după ce s-a întâmplat</b>, nu după zi: cine n-a legat copilul primește ajutor pentru asta; cine a lucrat primește dovada („săptămâna lui Andrei”) lângă ofertă; cine n-a lucrat primește un program, nu o reducere.</div>
+  </div>
+
+  <!-- 4 -->
+  <div class="step">
+    <h2>4 · Ziua 8: proba s-a terminat<small>Pleacă aici: nu-și amintește ce a primit; sau copilul n-a apucat să încerce</small></h2>
+    <div class="phone"><div class="scr">
+      <div class="top"><div class="logo"><sup>e</sup>TUTOR<sub>.ro</sub></div><div style="font-size:13px;color:var(--muted)">Maria ▾</div></div>
+      <div class="pz">
+        <h3>Contul e în pauză. Tot ce a lucrat Andrei e păstrat.</h3>
+        <div class="recap new"><span class="tag">NOU</span>
+          <div><b>4 zile</b>a lucrat</div><div><b>63</b>de grile</div><div><b>81%</b>corecte</div><div><b class="blur">fracții</b>zona slabă</div>
+        </div>
+        <p class="t" style="margin:4px 0 0;font-size:13.5px">Reactivezi și continuă de unde a rămas, cu raportul de seară.</p>
+        <div class="cta">Reactivez: 24,90 lei/lună<small>cu codul V126S · anulezi oricând</small></div>
+      </div>
+      <div class="save dec"><span class="tag">DECIZIE</span>
+        <b>Andrei n-a apucat să încerce?</b> Dacă în cele 7 zile n-a lucrat nici o zi, îți dăm încă 7 zile gratuite. O singură dată.
+        <div class="b2">Mai vreau 7 zile</div>
+      </div>
+    </div></div>
+    <div class="why"><span class="st ex">EXISTĂ</span>pauza cu detaliile încețoșate și cifrele reale ale copilului; copilul nu vede prețul. <span class="st nw">NOU</span><b>Rezumatul săptămânii</b> deasupra butonului. <span class="st dc">DECIZIE</span><b>Încă 7 zile doar pentru familiile în care copilul n-a lucrat deloc</b>: o reducere nu convinge pe cine n-a folosit produsul; o a doua șansă, da.</div>
+  </div>
+
+  <!-- 5 -->
+  <div class="step">
+    <h2>5 · După plată: anularea<small>Pleacă aici: vacanța, examenul dat, prețul, copilul nu-l folosește</small></h2>
+    <div class="phone"><div class="scr">
+      <div class="top"><div class="logo"><sup>e</sup>TUTOR<sub>.ro</sub></div><div style="font-size:13px;color:var(--muted)">Maria ▾</div></div>
+      <h3 class="t2" style="font-size:23px;margin-top:16px">Ne ajuți cu un singur răspuns?</h3>
+      <p class="t" style="font-size:13.5px">De ce oprești abonamentul? Anularea rămâne la un click, mai jos.</p>
+      <div class="q new"><span class="tag">NOU</span>
+        <label class="sel"><i></i>S-a terminat școala sau examenul</label>
+        <label><i></i>E prea scump</label>
+        <label><i></i>Copilul nu-l mai folosește</label>
+        <label><i></i>Folosim altceva</label>
+        <label><i></i>Alt motiv</label>
+      </div>
+      <div class="offer dec"><span class="tag">DECIZIE</span>
+        <b class="h">Pui pe pauză până în septembrie?</b>
+        Nu plătești nimic în vacanță. Tot ce a lucrat rămâne, iar −30% se păstrează când revine.
+        <div class="cta" style="margin-top:8px">Pun pe pauză</div>
+      </div>
+      <div class="cont">Nu, continui anularea →</div>
+    </div></div>
+    <div class="why"><span class="st ex">EXISTĂ</span>„Gestionează” deschide direct portalul Stripe; anularea e imediată, fără întrebare. <span class="st nw">NOU</span><b>O întrebare, o ofertă potrivită motivului</b>, iar „continui anularea” la vedere (legea cere anulare ușoară). <span class="st dc">DECIZIE</span>pauza de vară cere ca brokerul să poată opri un abonament pe o perioadă — azi nu poate.</div>
+  </div>
+
+</div>
+
+<div class="notes">
+  <h2>Ce spune churn-prevention, aplicat pe eTutor.ro</h2>
+  <ul>
+    <li><b>Banii vin din obicei, nu din înscriere.</b> Familia care plătește e cea în care copilul a lucrat câteva zile și părintele a văzut asta. În 30 de zile, fără conturile de test: 3 conturi (2 elevi și 1 părinte). Doar copilul părintelui a lucrat; cei 2 elevi veniți singuri n-au rezolvat nicio grilă și n-au legat niciun părinte. Pasul care pierde cel mai mult nu e plata, e „copilul ajunge în cont”.</li>
+    <li><b>Oferta potrivită motivului.</b> Cine n-a folosit produsul nu e salvat de o reducere; e salvat de ajutor (program, o a doua săptămână). Cine a folosit și ezită la preț e salvat de −30% cu termen. Cine pleacă vara e salvat de o pauză, nu de o reducere.</li>
+    <li><b>Arată-i omului propriile date.</b> „Săptămâna lui Andrei: 4 zile, 63 de grile” convinge mai mult decât orice frază de vânzare. Pauza de azi face deja asta parțial (cifre reale, detalii încețoșate).</li>
+    <li><b>Plata eșuată la reînnoire.</b> Azi: pauză pe loc la primul refuz (decizia din 13.10), iar Stripe reîncearcă până la 2 săptămâni. Practica generală: câteva zile de grație cu mesaje la ziua 0, 3 și 7 înainte de pauză, plus anunț înainte să expire cardul (etapa 9, lipsește). De rediscutat.</li>
+  </ul>
+  <h2>Ce nu se poate măsura încă</h2>
+  <p>Cu 1 părinte real în probă și 0 plăți, nicio cifră de mai sus nu e o rată. Ca să putem învăța de la primele familii, fiecare pas (cont → copil legat → prima grilă → 3 zile de lucru → plată) trebuie numărat; azi alarma zilnică numără contul, copilul legat și plata — lipsesc prima grilă și „3 zile de lucru”.</p>
+</div>
+</body>
+</html>
