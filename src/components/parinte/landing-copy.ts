@@ -58,6 +58,13 @@ export type LandingContext = {
   signedIn: boolean;
   /** The channel's own code was used on this account, so the page offers the other one (pickLandingCode). */
   codeSwapped?: boolean;
+  /**
+   * What checkout would charge this visitor for Family if they paid now, with the −30% of the free week
+   * (checkout-price.ts, the same functions as checkout). Null when that offer isn't open for them.
+   */
+  trialOfferMinor?: number | null;
+  /** Until when that price is open, when known (a signed-in account: its free week or win-back window). */
+  trialOfferUntil?: Date | null;
 };
 
 export type Lead = { lead: string; text: string };
@@ -189,7 +196,37 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
         : trialRule
   ).trim();
 
-  const ctaPay = mainPrice ? (ro ? `Începe cu ${mainPrice} lei/lună` : `Start with ${mainPrice} lei/month`) : ro ? "Începe cu Family" : "Start with Family";
+  // Paying during the free week costs less than the code alone (the larger discount wins, checkout-price.ts):
+  // the pay button and the top of the page say what checkout will actually charge (review 16.10.2026).
+  const baseMinor = offer ? offer.discountedMinor : ctx.familyNormalMinor;
+  const firstWeekMinor =
+    ctx.trialOfferMinor != null && baseMinor !== null && ctx.trialOfferMinor < baseMinor ? ctx.trialOfferMinor : null;
+  const firstWeekPrice = firstWeekMinor !== null ? price(firstWeekMinor, locale) : null;
+  const payNowPrice = firstWeekPrice ?? mainPrice;
+  const cheapestMinor = firstWeekMinor ?? baseMinor;
+  // „Sub 1 leu pe zi” only while it is true for a 30-day month.
+  const perDay = cheapestMinor !== null && cheapestMinor < 3000 ? (ro ? "sub 1 leu pe zi" : "under 1 leu a day") : null;
+  const planScope = ro ? "Family: 1 părinte, 1 copil, o materie." : "Family: 1 parent, 1 child, one subject.";
+  // A win-back window isn't the trial: say the date when it is known, „during the trial” otherwise.
+  const until = ctx.trialOfferUntil ? formatDate(ctx.trialOfferUntil, locale, "long") : null;
+  const payWhen = ro ? (until ? `până pe ${until}` : "cât ține proba") : until ? `by ${until}` : "during the trial";
+  const priceDetail = ro
+    ? firstWeekPrice
+      ? `${firstWeekPrice} lei pe lună dacă plătești ${payWhen}, cât rămâi abonat. După, ${offerPrice ? `${offerPrice} lei cu codul ${code}, în loc de ${normalPrice}` : `${normalPrice} lei`}. ${planScope}`
+      : offerPrice
+        ? `${offerPrice} lei pe lună cu codul ${code}, în loc de ${normalPrice}. ${planScope}`
+        : normalPrice
+          ? `${normalPrice} lei pe lună. ${planScope}`
+          : planScope
+    : firstWeekPrice
+      ? `${firstWeekPrice} lei a month if you pay ${payWhen}, for as long as you stay subscribed. After that, ${offerPrice ? `${offerPrice} lei with code ${code}, instead of ${normalPrice}` : `${normalPrice} lei`}. ${planScope}`
+      : offerPrice
+        ? `${offerPrice} lei a month with code ${code}, instead of ${normalPrice}. ${planScope}`
+        : normalPrice
+          ? `${normalPrice} lei a month. ${planScope}`
+          : planScope;
+
+  const ctaPay = payNowPrice ? (ro ? `Începe cu ${payNowPrice} lei/lună` : `Start with ${payNowPrice} lei/month`) : ro ? "Începe cu Family" : "Start with Family";
   // Without free days left there is nothing to try without a card. With them it is the first button at the
   // top and at the end of the page (Alex 14.10.2026, after the 05.10 audit: 8 of 12 parents left).
   // A signed-in account with days left continues its own week — not a new trial.
@@ -217,9 +254,47 @@ export function landingCopy(locale: Locale, ctx: LandingContext) {
             : flyer ? `The ${code} code from the flyer is already in` : `Online code ${code} applies by itself`
         : null,
       titleLines: ro ? ["Liniștea ta,", "cât o cafea pe lună."] : ["Peace of mind,", "for the price of a coffee."],
+      // What the child gets and what the parent sees, named (review 16.10.2026: neither the flyer nor the
+      // first screen said it was tests and lessons for school). Only subjects with public content.
       sub: ro
-        ? "Vezi azi ce a lucrat copilul tău și cum progresează, din telefon — nu doar ce-ți spune el."
-        : "See today what your child worked on and how they are doing, from your phone — not just what they tell you.",
+        ? "Teste și lecții de matematică și română pentru clasa a VIII-a și liceu, până la Evaluare și BAC. Vezi din telefon ce a lucrat copilul și unde greșește, fără să-l mai întrebi."
+        : "Practice tests and lessons in maths and Romanian for 8th grade and high school, up to the national exams. See on your phone what your child worked on and where they go wrong, without having to ask.",
+      // An example of the parent's page for a child (watcher): the same measures it shows — accuracy,
+      // streak, a session's score, a weak topic. Marked as an example; the name and numbers are made up.
+      screen: ro
+        ? {
+            note: "exemplu: ce vezi în contul tău",
+            child: "Andrei",
+            subject: "Matematică cl. VIII",
+            stats: [
+              { value: "81%", label: "acuratețe" },
+              { value: "5 zile", label: "serie" },
+              { value: "83%", label: "testul de azi" },
+            ],
+            weakLabel: "Zonă slabă:",
+            weak: "ecuații cu fracții",
+          }
+        : {
+            note: "example: what you see in your account",
+            child: "Andrei",
+            subject: "Maths, 8th grade",
+            stats: [
+              { value: "81%", label: "accuracy" },
+              { value: "5 days", label: "streak" },
+              { value: "83%", label: "today's test" },
+            ],
+            weakLabel: "Weak topic:",
+            weak: "equations with fractions",
+          },
+      perDay,
+      bigPrice: perDay ?? (payNowPrice ? (ro ? `${payNowPrice} lei / lună` : `${payNowPrice} lei / month`) : null),
+      priceDetail,
+      // What comes after the account, said before it (onboarding review): the child's link is step two.
+      after: ctx.signedIn
+        ? null
+        : ro
+          ? "Contul tău ia 2 minute. Apoi îi trimiți copilului linkul pe WhatsApp."
+          : "Your account takes 2 minutes. Then you send your child the link on WhatsApp.",
       oldPrice: offer ? `${normalPrice} lei` : null,
       price: mainPrice ? `${mainPrice} lei` : null,
       perMonth: ro ? "/ lună" : "/ month",

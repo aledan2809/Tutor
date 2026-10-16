@@ -56,19 +56,11 @@
 .heroShell { position: relative; }
 .hero { position: relative; background: var(--cream); color: var(--ink); overflow: hidden; }
 .heroHeader { position: absolute; top: 0; left: 0; right: 0; z-index: 5; }
-.heroPhoto { position: relative; height: 470px; }
-.heroImg { object-fit: cover; object-position: 46% 12%; }
-.heroPhoto::after {
-  content: ""; position: absolute; inset: 0;
-  background: linear-gradient(to bottom, rgba(248, 241, 228, 0) 46%, rgba(248, 241, 228, 0.78) 74%, var(--cream) 97%);
-}
 .pill {
   display: inline-block; padding: 6px 12px; border-radius: 999px; border: 1.5px solid var(--emerald);
   background: rgba(255, 253, 248, 0.75); color: var(--emerald-dark); font-size: 12px; font-weight: 800;
   letter-spacing: 0.07em; text-transform: uppercase;
 }
-.pillOver { position: absolute; z-index: 4; left: 20px; top: 84px; }
-.pillInline { display: none; }
 .trialBadge {
   position: absolute; z-index: 4; right: 18px; top: 80px; background: var(--terracotta-dark); color: #fdf9f0;
   border-radius: 10px; padding: 8px 12px 7px; text-align: center; box-shadow: 0 8px 20px rgba(36, 28, 20, 0.3);
@@ -78,7 +70,23 @@
 .trialBadge span { display: block; font-size: 10.5px; font-weight: 800; letter-spacing: 0.08em; margin-top: 3px; }
 .trialBadge small { display: block; font-size: 10.5px; opacity: 0.88; margin-top: 1px; }
 
-.heroSheet { position: relative; z-index: 3; margin-top: -128px; padding: 0 20px 34px; }
+.heroSheet { position: relative; z-index: 3; padding: 84px 20px 34px; }
+.heroSheet > .arrival { margin-left: 10px; }
+
+/* The parent's page for a child, as an example: the one thing on the first screen meant to stay in mind. */
+.screen {
+  margin: 14px 0 0; max-width: 420px; background: var(--cream-2); border: 1px solid var(--cream-line); border-radius: 18px;
+  padding: 12px 14px 12px; position: relative; box-shadow: 0 12px 28px rgba(10, 95, 66, 0.13);
+}
+.screenNote { position: absolute; top: -9px; right: 12px; background: var(--cream); padding: 0 6px; font-size: 11px; color: var(--ink-soft); }
+.screenHead { display: flex; align-items: baseline; gap: 8px; font-size: 13px; color: var(--ink-soft); }
+.screenHead b { color: var(--ink); font-size: 15px; }
+.screenStats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
+.screenStat { background: #eef5f0; border-radius: 10px; padding: 6px 8px; line-height: 1.15; }
+.screenStat b { display: block; font-size: 17px; font-weight: 800; color: var(--emerald-dark); }
+.screenStat span { font-size: 11.5px; color: var(--ink-soft); }
+.screenWeak { margin-top: 8px; display: inline-block; background: #fbefe6; border-radius: 9px; padding: 4px 9px; font-size: 13px; color: var(--ink-soft); }
+.screenWeak b { color: var(--terracotta-dark); }
 .arrival {
   display: inline-flex; align-items: center; gap: 8px; background: var(--cream-2); border: 1px solid rgba(13, 122, 84, 0.35);
   color: var(--emerald-dark); font-size: 13.5px; font-weight: 650; padding: 6px 12px 6px 7px; border-radius: 999px;
@@ -91,18 +99,9 @@
 }
 .heroSub { font-size: 16.5px; color: var(--ink-soft); max-width: 40ch; line-height: 1.45; }
 
-.priceCard {
-  display: flex; align-items: center; gap: 12px; margin-top: 16px; max-width: 470px; background: var(--cream-2);
-  border: 1.5px solid var(--emerald); border-radius: 16px; padding: 12px 14px; box-shadow: 0 10px 26px rgba(36, 28, 20, 0.09);
-}
-.cup { width: 38px; height: 38px; flex: none; }
-.prices { display: flex; flex-direction: column; line-height: 1.02; }
-.old { font-family: var(--serif); font-size: 15px; font-weight: 600; color: #9a8f7d; text-decoration: line-through; text-decoration-thickness: 1.5px; }
-.newPrice { font-family: var(--serif); font-weight: 800; font-size: 31px; color: var(--emerald-dark); white-space: nowrap; }
-.newPrice sup { font-size: 0.5em; vertical-align: super; line-height: 0; }
-.newPrice small { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px; font-weight: 650; color: var(--ink-soft); margin-left: 4px; }
-.codeBox { margin-left: auto; text-align: right; }
-.codeLabel { display: block; font-size: 12px; color: var(--ink-soft); }
+.priceCard { margin-top: 14px; max-width: 470px; border-top: 1px solid var(--cream-line); border-bottom: 1px solid var(--cream-line); padding: 10px 0; }
+.perDay { display: block; font-family: var(--serif); font-weight: 800; font-size: 32px; line-height: 1.08; color: var(--emerald-dark); }
+.priceDetail { margin-top: 3px; font-size: 13px; line-height: 1.45; color: var(--ink-soft); }
 .codeChip {
   display: inline-flex; align-items: center; gap: 6px; margin-top: 3px; font-family: var(--serif); font-weight: 800; font-size: 17px;
   letter-spacing: 0.05em; color: var(--terracotta-dark); border: 1.5px dashed var(--terracotta); border-radius: 8px; padding: 3px 8px; background: #fff8ee;
@@ -110,7 +109,16 @@
 .codeChip i { font-style: normal; font-size: 11px; color: #fff; background: var(--emerald); border-radius: 999px; width: 17px; height: 17px; display: inline-grid; place-items: center; letter-spacing: 0; }
 
 .ctaRow { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 14px; }
-.hero .ctaRow .btn, .hero .ctaRow .btnGhost, .final .ctaRow .btn, .final .ctaRow .btnGhost { width: 100%; }
+.hero .ctaRow .btn, .hero .ctaRow .btnGhost, .final .ctaRow .btn, .final .ctaRow .btnGhost, .hero .ctaRow .btnGoogle { width: 100%; }
+.btnGoogle {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; padding: 12px 20px;
+  border-radius: 14px; border: 1.5px solid rgba(36, 28, 20, 0.22); background: #fff; color: var(--ink); font-weight: 650; font-size: 15.5px;
+}
+.btnGoogle:hover { background: #faf7f0; }
+.btnGoogle:disabled { opacity: 0.6; }
+.after { margin-top: 8px; font-size: 13px; color: var(--ink-soft); line-height: 1.4; }
+.heroLinks { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 6px; }
+.textLink { display: inline-flex; align-items: center; min-height: 40px; font-size: 14px; font-weight: 650; color: var(--emerald-dark) !important; text-decoration: underline; text-underline-offset: 3px; }
 .fine { font-size: 12.5px; color: var(--ink-soft); max-width: 60ch; margin-top: 14px; line-height: 1.45; }
 .fineMore { font-size: 12.5px; color: var(--ink-soft); max-width: 60ch; margin-top: 4px; line-height: 1.45; }
 .fineMore summary { cursor: pointer; text-decoration: underline; text-underline-offset: 2px; display: inline-flex; min-height: 32px; align-items: center; }
@@ -120,12 +128,7 @@
 .scrollCue span { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 999px; border: 1.5px solid rgba(13, 122, 84, 0.4); }
 
 @media (max-width: 420px) {
-  .priceCard { gap: 9px; padding: 10px 11px; }
-  .cup { width: 30px; height: 30px; }
-  .old { font-size: 13.5px; }
-  .newPrice { font-size: 26px; }
-  .newPrice small { font-size: 12.5px; margin-left: 3px; }
-  .codeLabel { font-size: 11px; }
+  .perDay { font-size: 29px; }
   .codeChip { font-size: 14.5px; padding: 2px 6px; gap: 4px; letter-spacing: 0.02em; }
   .hero .btnGhost { min-height: 46px; }
 }
@@ -280,42 +283,32 @@
 /* ── Phone: the photo gives way so the first button sits in the first screen, above the cookie strip
    (390×664: it was at 636 px under a 470 px photo — True E2E 2026-10-05 §0). ── */
 @media (max-width: 639px) {
-  .heroPhoto { height: 230px; }
-  .heroImg { object-position: 50% 30%; }
-  .heroSheet { margin-top: -64px; }
-  .pillOver { top: 76px; }
-  .heroTitle { font-size: 28px; margin: 10px 0 8px; }
-  .heroSub { font-size: 15px; }
-  .priceCard { margin-top: 12px; padding: 10px 12px; }
-  .ctaRow { margin-top: 12px; }
+  .heroSheet { padding-top: 76px; }
+  /* The trial badge sits top-right: the code line wraps short of it instead of running under it. */
+  .heroSheet > .arrival { margin-left: 0; margin-top: 8px; max-width: calc(100% - 112px); }
+  .heroTitle { font-size: 28px; margin: 12px 0 6px; }
+  .heroSub { font-size: 14.5px; line-height: 1.4; }
+  .priceCard { margin-top: 10px; padding: 8px 0; }
+  .ctaRow { margin-top: 10px; }
   .hero .ctaRow .btnGhost { min-height: 46px; padding: 10px 16px; }
 }
 
 /* ── Tablet and desktop ── */
 @media (min-width: 640px) {
-  .hero .ctaRow .btn, .hero .ctaRow .btnGhost, .final .ctaRow .btn, .final .ctaRow .btnGhost { width: auto; }
+  .hero .ctaRow .btn, .hero .ctaRow .btnGhost, .final .ctaRow .btn, .final .ctaRow .btnGhost, .hero .ctaRow .btnGoogle { width: auto; }
 
   .offerGrid { grid-template-columns: 1.1fr 1fr; align-items: start; }
 }
 @media (min-width: 960px) {
   .hero { min-height: 700px; }
-  .heroPhoto { position: absolute; top: 0; right: 0; bottom: 0; width: 60%; height: auto; }
-  .heroImg { object-position: 50% 22%; }
-  .heroPhoto::after {
-    background:
-      linear-gradient(90deg, var(--cream) 0%, rgba(248, 241, 228, 0.75) 16%, rgba(248, 241, 228, 0) 42%),
-      linear-gradient(to bottom, rgba(248, 241, 228, 0) 66%, var(--cream) 100%);
-  }
-  .pillOver { display: none; }
-  .pillInline { display: inline-block; }
   .trialBadge { right: 56px; top: 128px; padding: 12px 16px 10px; }
   .trialBadge b { font-size: 26px; }
   .trialBadge span { font-size: 12px; }
   .trialBadge small { font-size: 12px; }
-  .heroSheet { margin: 0 auto; max-width: 1120px; padding: 128px 20px 64px; }
-  .heroSheet > * { max-width: 560px; }
-  .heroSheet > .heroTitle { max-width: 680px; }
-  .arrival { margin-left: 10px; }
+  .heroSheet { margin: 0 auto; max-width: 1120px; padding: 128px 20px 64px; display: grid; grid-template-columns: minmax(0, 560px) minmax(0, 420px); column-gap: 64px; align-items: start; }
+  .heroSheet > * { grid-column: 1; max-width: 560px; }
+  .heroSheet > .pill, .heroSheet > .arrival { justify-self: start; }
+  .heroSheet > .screen { grid-column: 2; grid-row: 1 / span 8; align-self: center; margin-top: 40px; width: 100%; }
   .heroSub { font-size: 19px; }
 
   .s { padding: 88px 0; }

@@ -12,33 +12,12 @@ import { useRouter } from "@/i18n/navigation";
 import { Brand } from "@/components/Brand";
 import { FREE_TRIAL_DAYS } from "@/lib/free-trial";
 import { normalizeVoucherCode, plausibleVoucherCode } from "@/lib/voucher-checkout";
+// Where a brand-new account goes once signed in — shared with the Google button (auth/google-done).
+import { nextPathAfterSignup } from "@/lib/signup-next-path";
+import { GoogleSignupButton } from "@/components/auth/google-signup-button";
 
 // Plans a parent buys for a child — a link carrying one of these starts on „Părinte".
 const PARENT_PLAN_KEYS = ["FAMILY", "FAMILY_DUO", "TRIO", "FAMILY_TRIO"];
-
-/**
- * Where a brand-new account goes once signed in. A 100% code already opened access → the
- * dashboard; the no-card path (?start=free) → add the child first; a chosen plan or a discount
- * code → the packages page with both filled in; otherwise the dashboard.
- */
-function nextPathAfterSignup(opts: {
-  plan: string | null;
-  voucherCode: string;
-  voucherApplied: boolean;
-  start: string | null;
-  returnTo?: string | null;
-  /** The code couldn't be checked yet (too many wrong codes from this network): the packages page checks it. */
-  voucherDeferred?: boolean;
-}): string {
-  // Came from a page that needs the account (a family invitation, a family code): back there.
-  if (opts.returnTo) return opts.returnTo;
-  if (opts.voucherApplied) return "/dashboard";
-  if (opts.start === "free" && !(opts.voucherDeferred && opts.voucherCode)) return "/dashboard/family";
-  const q = new URLSearchParams();
-  if (opts.plan) q.set("plan", opts.plan);
-  if (opts.voucherCode) q.set("voucher", opts.voucherCode);
-  return q.toString() ? `/dashboard/packages?${q.toString()}` : "/dashboard";
-}
 
 interface Domain {
   slug: string;
@@ -380,6 +359,23 @@ export default function RegisterPage() {
             ? ro ? " și vezi cum progresează copilul tău" : " and see how your child is progressing"
             : ro ? " și începe să înveți" : " and start learning"}
         </p>
+
+        {/* A parent on a phone: one button instead of name + email + password (signup review 16.10.2026).
+            Parents only — a learner's account asks for a date of birth (and, under 16, a parent's email). */}
+        {role === "PARENT" && !campaign && (
+          <div className="mb-4">
+            <GoogleSignupButton
+              locale={ro ? "ro" : "en"}
+              plan={plan}
+              voucher={voucherCode || null}
+              start={start}
+              returnTo={returnTo}
+              from="register"
+              className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg border border-gray-600 bg-white px-4 py-3 text-base font-semibold text-gray-900 hover:bg-gray-100"
+            />
+            <p className="mt-3 text-center text-xs text-gray-500">{ro ? "sau cu adresa de e-mail" : "or with your email"}</p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-3">
           {/* Ascuns pe linkurile de campanie (?exam=): acelea duc elevi la o materie

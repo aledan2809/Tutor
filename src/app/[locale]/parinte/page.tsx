@@ -21,6 +21,11 @@ import { FREE_TRIAL_DAYS, checkoutTrialDays } from "@/lib/free-trial";
 import { trialStartOf } from "@/lib/access";
 import { loadPauseStartsAt } from "@/lib/access-server";
 import { fmtPrice } from "@/lib/pricing";
+import { checkoutDiscount, subjectMonthlyMinor } from "@/lib/checkout-price";
+import { payerLifetimeOffer } from "@/lib/checkout-facts";
+import { loadConsentFacts } from "@/lib/parent-consent-server";
+import { mayShowPrices } from "@/lib/price-visibility";
+import { redirect } from "next/navigation";
 import {
   familyLandingOffer,
   flyerVoucherCode,
@@ -106,6 +111,12 @@ export default async function ParintePage({
 
   const session = await auth();
   const signedInUserId = session?.user?.id ?? null;
+  // A page of prices and offers: never for an account that may not be shown one (a child — UCPD Annex I
+  // point 28, price-visibility.ts). Such an account goes to its own dashboard (review 16.10.2026).
+  if (signedInUserId) {
+    const viewer = await loadConsentFacts(signedInUserId);
+    if (viewer && !mayShowPrices(viewer)) redirect(`/${lp}/dashboard`);
+  }
 
   const [vouchers, plans, account] = await Promise.all([
     prisma.voucher.findMany({
@@ -204,6 +215,24 @@ export default async function ParintePage({
     thirdSubjectPct: subjectDiscountPercent(3),
   };
 
+  // What paying now would cost: the free week's −30% is open to a new account (checkout counts the week
+  // from the account's creation) and to a signed-in one still in its week or win-back window — the same
+  // functions checkout uses, so the page never promises a price checkout won't charge.
+  const lifetimeOffer = signedInUserId ? await payerLifetimeOffer(signedInUserId, now) : null;
+  const firstWeekOpen = signedInUserId ? lifetimeOffer !== null : true;
+  const trialOfferMinor =
+    family && firstWeekOpen
+      ? subjectMonthlyMinor(
+          family.price,
+          1,
+          checkoutDiscount({
+            trialActive: true,
+            code: offer ? { percent: offer.percentOff, renews: offer.recurring } : null,
+            telegram: false,
+          }).pricesPercent,
+        )
+      : null;
+
   const copy = landingCopy(lp, {
     facts,
     offer,
@@ -215,6 +244,9 @@ export default async function ParintePage({
     codeFamilyOnly: voucherFor(channelCode)?.planKey === "FAMILY",
     signedIn,
     codeSwapped: swapped,
+    trialOfferMinor,
+    // A signed-in account knows when its offer ends (its free week, or the win-back window).
+    trialOfferUntil: lifetimeOffer?.endsAt ?? null,
   });
 
   const otherPlans: OtherPlanRow[] = OTHER_PLAN_KEYS.flatMap((key) => {
@@ -243,6 +275,7 @@ export default async function ParintePage({
       payHref={hrefs.pay}
       freeHref={hrefs.free}
       otherPlans={otherPlans}
+      google={signedIn ? null : { start: facts.freeTrialDays > 0 ? "free" : null }}
     />
   );
 }

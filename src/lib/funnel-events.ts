@@ -11,6 +11,7 @@ export type FunnelEvent =
   | "cta_try" // pressed a "try a quiz without an account" button
   | "cta_register" // pressed a "make an account" button
   | "cta_parinte_fara_card" // parents' page: "try without a card"
+  | "cta_google" // pressed "Continuă cu Google" to make a parent account
   | "register_done" // the signup form went through
   | "first_question"; // answered the first question of a quiz (demo or logged in)
 

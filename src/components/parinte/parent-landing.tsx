@@ -6,6 +6,7 @@ import type { LandingChannel } from "@/lib/parent-landing";
 import { chainStepTiming, type LandingFacts, type Locale, type landingCopy } from "./landing-copy";
 import { LandingStickyCta } from "./landing-sticky-cta";
 import { TrackedPlainLink } from "@/components/TrackedLink";
+import { GoogleSignupButton } from "@/components/auth/google-signup-button";
 import s from "./parent-landing.module.css";
 
 export type OtherPlanRow = { key: string; name: string; seats: string; price: string };
@@ -72,17 +73,6 @@ const TERMS_ICONS = [
   <svg key="clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>,
 ];
 
-function Cup() {
-  return (
-    <svg className={s.cup} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <rect x="6" y="16" width="22" height="18" rx="3" fill="#6b4226" />
-      <path d="M28 20 q8 0 8 6 q0 6 -8 6" fill="none" stroke="#6b4226" strokeWidth="3" />
-      <path d="M12 14 c-2 -4 2 -4 0 -8" fill="none" stroke="#b5652f" strokeWidth="2" strokeLinecap="round" />
-      <path d="M18 14 c-2 -4 2 -4 0 -8" fill="none" stroke="#b5652f" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 export function ParentLanding({
   locale,
   copy,
@@ -91,6 +81,7 @@ export function ParentLanding({
   payHref,
   freeHref,
   otherPlans,
+  google,
 }: {
   locale: Locale;
   copy: Copy;
@@ -100,6 +91,8 @@ export function ParentLanding({
   payHref: string;
   freeHref: string;
   otherPlans: OtherPlanRow[];
+  /** „Continuă cu Google” for a visitor without an account; null when signed in. */
+  google?: { start: "free" | null } | null;
 }) {
   const c = copy;
 
@@ -113,17 +106,6 @@ export function ParentLanding({
         <SiteHeader locale={locale} tone="light" />
       </div>
       <section className={s.hero} id={HERO_ID}>
-        <div className={s.heroPhoto} aria-hidden="true">
-          <Image
-            src="/images/parinte/mama-cafea.jpg"
-            alt=""
-            fill
-            priority
-            sizes="(min-width: 960px) 60vw, 100vw"
-            className={s.heroImg}
-          />
-        </div>
-        <span className={`${s.pill} ${s.pillOver}`}>{c.hero.pill}</span>
         {c.hero.badge && (
           <div className={s.trialBadge} aria-label={`${c.hero.badge.big} ${c.hero.badge.mid}, ${c.hero.badge.small}`}>
             <b>{c.hero.badge.big}</b>
@@ -133,13 +115,35 @@ export function ParentLanding({
         )}
 
         <div className={s.heroSheet}>
-          <span className={`${s.pill} ${s.pillInline}`}>{c.hero.pill}</span>
+          <span className={s.pill}>{c.hero.pill}</span>
           {c.hero.arrival && (
             <p className={s.arrival}>
               <span className={s.tick} aria-hidden="true">✓</span>
               {c.hero.arrival}
             </p>
           )}
+
+          {/* What the parent gets, before any price: their page for a child (review 16.10.2026 — the photo
+              of a woman with a coffee showed neither a child nor the app). An example, marked as one. */}
+          <figure className={s.screen}>
+            <figcaption className={s.screenNote}>{c.hero.screen.note}</figcaption>
+            <div className={s.screenHead}>
+              <b>{c.hero.screen.child}</b>
+              <span>{c.hero.screen.subject}</span>
+            </div>
+            <div className={s.screenStats}>
+              {c.hero.screen.stats.map((st) => (
+                <div key={st.label} className={s.screenStat}>
+                  <b>{st.value}</b>
+                  <span>{st.label}</span>
+                </div>
+              ))}
+            </div>
+            <p className={s.screenWeak}>
+              {c.hero.screen.weakLabel} <b>{c.hero.screen.weak}</b>
+            </p>
+          </figure>
+
           <h1 className={s.heroTitle}>
             {c.hero.titleLines[0]}
             <br />
@@ -147,46 +151,45 @@ export function ParentLanding({
           </h1>
           <p className={s.heroSub}>{c.hero.sub}</p>
 
-          {c.hero.price && (
+          {/* One big price, in everyday money; the exact amounts and what Family covers right under it. */}
+          {c.hero.bigPrice && (
             <div className={s.priceCard}>
-              <Cup />
-              <div className={s.prices}>
-                {c.hero.oldPrice && <span className={s.old}>{c.hero.oldPrice}</span>}
-                <span className={s.newPrice}>
-                  {c.hero.price}
-                  <sup>*</sup>
-                  <small>{c.hero.perMonth}</small>
-                </span>
-              </div>
-              {code && (
-                <div className={s.codeBox}>
-                  <span className={s.codeLabel}>{c.hero.codeLabel}</span>
-                  <span className={s.codeChip}>
-                    {code} <i aria-hidden="true">✓</i>
-                  </span>
-                </div>
-              )}
+              <span className={s.perDay}>{c.hero.bigPrice}</span>
+              <p className={s.priceDetail}>{c.hero.priceDetail}</p>
             </div>
           )}
 
           <div className={s.ctaRow}>
-            {/* The free week first when there is one (Alex 14.10.2026); paying straight away stays next to it. */}
+            {/* The free week first when there is one (Alex 14.10.2026); Google next to it, for a phone. */}
             {c.hero.ctaFree ? (
-              <>
-                <TrackedPlainLink className={s.btn} href={freeHref} event="cta_parinte_fara_card" data={{ from: "parinte_hero" }}>
-                  {c.hero.ctaFree} <span aria-hidden="true">→</span>
-                </TrackedPlainLink>
-                <TrackedPlainLink className={s.btnGhost} href={payHref} event="cta_register" data={{ from: "parinte_pay" }}>
-                  {c.hero.ctaPay}
-                </TrackedPlainLink>
-              </>
+              <TrackedPlainLink className={s.btn} href={freeHref} event="cta_parinte_fara_card" data={{ from: "parinte_hero" }}>
+                {c.hero.ctaFree}
+              </TrackedPlainLink>
             ) : (
               <TrackedPlainLink className={s.btn} href={payHref} event="cta_register" data={{ from: "parinte_pay" }}>
-                {c.hero.ctaPay} <span aria-hidden="true">→</span>
+                {c.hero.ctaPay}
               </TrackedPlainLink>
             )}
-            {/* The product before any account or price: the no-account demo (True E2E 2026-10-05, leak 2). */}
-            <TrackedPlainLink className={s.btnGhost} href={`/${locale}/try`} event="cta_try" data={{ from: "parinte" }}>
+            {google && (
+              <GoogleSignupButton
+                locale={locale}
+                plan="FAMILY"
+                voucher={code}
+                start={google.start}
+                from="parinte_hero"
+                className={s.btnGoogle}
+              />
+            )}
+          </div>
+          {c.hero.after && <p className={s.after}>{c.hero.after}</p>}
+          <div className={s.heroLinks}>
+            {c.hero.ctaFree && (
+              <TrackedPlainLink className={s.textLink} href={payHref} event="cta_register" data={{ from: "parinte_pay" }}>
+                {c.hero.ctaPay}
+              </TrackedPlainLink>
+            )}
+            {/* The product before any account: the no-account demo (True E2E 2026-10-05, leak 2). */}
+            <TrackedPlainLink className={s.textLink} href={`/${locale}/try`} event="cta_try" data={{ from: "parinte" }}>
               {c.hero.ctaTry}
             </TrackedPlainLink>
           </div>
@@ -194,7 +197,6 @@ export function ParentLanding({
             <span aria-hidden="true">✓</span>
             {c.hero.trialLine}
           </p>
-          <p className={s.fine}>{c.hero.fineShort}</p>
           {c.hero.fineRest && (
             <details className={s.fineMore}>
               <summary>{c.hero.fineMore}</summary>
